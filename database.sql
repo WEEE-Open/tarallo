@@ -5,10 +5,10 @@ SET time_zone = '+00:00';
 SET foreign_key_checks = 0;
 SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
-CREATE DATABASE `tarallo` /*!40100 DEFAULT CHARACTER SET latin1 */;
-USE `tarallo`;
-
 SET NAMES utf8mb4;
+
+CREATE DATABASE `tarallo` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
+USE `tarallo`;
 
 CREATE TABLE `Feature` (
   `FeatureID` bigint(20) unsigned NOT NULL,
@@ -46,15 +46,6 @@ CREATE TABLE `ItemPositionModification` (
   `ParentFrom` bigint(20) unsigned NOT NULL,
   `ParentTo` bigint(20) unsigned NOT NULL,
   PRIMARY KEY (`ModificationID`,`ParentFrom`,`ParentTo`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-CREATE TABLE `ItemSticker` (
-  `ItemID` bigint(20) unsigned NOT NULL,
-  `Type` int(11) NOT NULL,
-  `Color` int(11) DEFAULT NULL,
-  `Code` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `Returned` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
