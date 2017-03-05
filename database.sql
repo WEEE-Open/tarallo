@@ -91,6 +91,15 @@ CREATE TABLE `Modification` (
   CONSTRAINT `Modification_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `User` (`UserID`) ON DELETE NO ACTION ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `Tree` (
+  `AncestorID` bigint(20) unsigned NOT NULL,
+  `DescendantID` bigint(20) unsigned NOT NULL,
+  `Depth` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`AncestorID`,`DescendantID`),
+  CONSTRAINT `Tree_ibfk_1` FOREIGN KEY (`AncestorID`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT `Tree_ibfk_2` FOREIGN KEY (`DescendantID`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 CREATE TABLE `User` (
   `UserID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
