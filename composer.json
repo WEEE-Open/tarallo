@@ -3,6 +3,9 @@
   "license": "AGPL-3.0",
   "minimum-stability": "stable",
   "autoload": {
-    "psr-4": {"WEEEOpen\\TARALLO\\": "src/"}
+    "psr-4": {"WEEEOpen\\Tarallo\\": "src/"}
+  },
+  "require": {
+    "php": ">=5.4.0"
   }
 }
