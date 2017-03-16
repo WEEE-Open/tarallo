@@ -3,13 +3,13 @@
 namespace WEEEOpen\Tarallo;
 
 class Database {
-	
+
 	private function connect() {
-		
+
 	}
 
 	private function disconnect() {
-		
+
 	}
 
 	// Don't implement this:

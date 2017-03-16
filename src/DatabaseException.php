@@ -2,4 +2,5 @@
 
 namespace WEEEOpen\Tarallo;
 
-class DatabaseException extends \RuntimeException {}
+class DatabaseException extends \RuntimeException {
+}
