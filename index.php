@@ -11,4 +11,11 @@ if(!isset($_GET['path']) || $_GET['path'] === null) {
 	Response::sendFail('No query string');
 }
 
+try {
+	$query = (new Query())->fromString($_GET['path'], $_SERVER['REQUEST_METHOD']);
+} catch(\Exception $e) {
+	// TODO: better error messages
+	Response::sendFail('Error: ' . $e->getMessage());
+}
+
 //var_dump($_GET['path']);
