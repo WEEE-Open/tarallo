@@ -15,14 +15,11 @@ CREATE TABLE `Feature` (
 
 CREATE TABLE `Item` (
   `ItemID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `ItemCode` bigint(20) unsigned NOT NULL,
   `IsDefault` tinyint(1) NOT NULL,
   `Type` int(11) DEFAULT NULL,
-  `Brand` text COLLATE utf8mb4_unicode_ci,
-  `Model` text COLLATE utf8mb4_unicode_ci,
-  `Serial` text COLLATE utf8mb4_unicode_ci,
   `Status` int(11) DEFAULT NULL,
-  `Owner` text COLLATE utf8mb4_unicode_ci,
+  `Owner` text COLLATE utf8mb4_unicode_ci, -- TODO: move to another table?
+	`SuppliedBy` text COLLATE utf8mb4_unicode_ci, -- TODO: move to another table?
   `Borrowed` tinyint(1) DEFAULT NULL,
   `Notes` text COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`ItemID`),
