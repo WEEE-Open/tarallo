@@ -15,4 +15,8 @@ class QueryFieldLanguage extends QueryFieldSinglefield implements QueryField {
 		// TODO: change default?
 		return 'it-IT';
 	}
+
+	protected function nonDefaultToString() {
+		return '/Language/' . $this->getContent();
+	}
 }

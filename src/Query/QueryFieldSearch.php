@@ -15,7 +15,7 @@ class QueryFieldSearch extends QueryFieldMultifield implements QueryField {
 
 	public function parse($parameter) {
 		$pieces = explode("=", $parameter);
-		if(count($pieces) !== 2) {
+		if(count($pieces) !== 2 || strlen($pieces[0]) === 0 || strlen($pieces[1]) === 0) {
 			throw new \InvalidArgumentException($parameter . ' must be a key-value pair separated by an "="');
 		}
 		$this->add($pieces);
@@ -23,5 +23,13 @@ class QueryFieldSearch extends QueryFieldMultifield implements QueryField {
 
 	protected function getDefault() {
 		return [];
+	}
+
+	protected function nonDefaultToString() {
+		$result = '';
+		foreach($this->getContent() as $location) {
+			$result .= '/Search/' . $location;
+		}
+		return $result;
 	}
 }

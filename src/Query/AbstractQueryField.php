@@ -22,4 +22,14 @@ abstract class AbstractQueryField implements QueryField {
 			return false;
 		}
 	}
+
+	public function __toString() {
+		if($this->isDefault()) {
+			return '';
+		} else {
+			return $this->nonDefaultToString();
+		}
+	}
+
+	protected abstract function nonDefaultToString();
 }

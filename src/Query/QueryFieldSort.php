@@ -42,4 +42,12 @@ class QueryFieldSort extends QueryFieldSinglefield implements QueryField {
 	protected function getDefault() {
 		return [];
 	}
+
+	protected function nonDefaultToString() {
+		$result = [];
+		foreach($this->getContent() as $key => $order) {
+			$result[] = $order . $key;
+		}
+		return '/Sort/' . implode(',', $result);;
+	}
 }

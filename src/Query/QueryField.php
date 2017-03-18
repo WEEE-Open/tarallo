@@ -7,4 +7,5 @@ interface QueryField {
 	public function validate();
 	public function isDefault();
 	public function getContent();
+	public function __toString();
 }

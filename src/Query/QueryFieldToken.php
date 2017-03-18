@@ -14,4 +14,8 @@ class QueryFieldToken extends QueryFieldSinglefield implements QueryField {
 	protected function getDefault() {
 		return null;
 	}
+
+	protected function nonDefaultToString() {
+		return '/Token/' . $this->getContent();
+	}
 }

@@ -26,4 +26,8 @@ class QueryFieldDepth extends QueryFieldSinglefield implements QueryField {
 	protected function getDefault() {
 		return 0;
 	}
+
+	protected function nonDefaultToString() {
+		return '/Depth/' . $this->getContent();
+	}
 }
