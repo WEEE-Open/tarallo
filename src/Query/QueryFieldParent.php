@@ -2,15 +2,7 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
-class QueryFieldParent extends AbstractQueryField implements QueryField {
-	public function isKVP() {
-		return false;
-	}
-
-	public function allowMultipleFields() {
-		return false;
-	}
-
+class QueryFieldParent extends QueryFieldSinglefield implements QueryField {
 	public function validate() {
 		if($this->isDefault()) {
 			return true;
@@ -22,6 +14,7 @@ class QueryFieldParent extends AbstractQueryField implements QueryField {
 	}
 
 	public function parse($parameter) {
+		$this->stopIfAlreadyParsed();
 		if(!is_numeric($parameter)) {
 			throw new \InvalidArgumentException($parameter . ' must be a number');
 		}

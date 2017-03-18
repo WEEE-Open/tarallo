@@ -3,10 +3,6 @@ namespace WEEEOpen\Tarallo\Query;
 
 
 class QueryFieldSearch extends QueryFieldMultifield implements QueryField {
-	public function isKVP() {
-		return true;
-	}
-
 	public function validate() {
 		if($this->isDefault()) {
 			return true;
@@ -20,7 +16,7 @@ class QueryFieldSearch extends QueryFieldMultifield implements QueryField {
 	public function parse($parameter) {
 		$pieces = explode("=", $parameter);
 		if(count($pieces) !== 2) {
-			throw new \InvalidArgumentException($parameter . ' must a key-value pair separated by an "="');
+			throw new \InvalidArgumentException($parameter . ' must be a key-value pair separated by an "="');
 		}
 		$this->add($pieces);
 	}

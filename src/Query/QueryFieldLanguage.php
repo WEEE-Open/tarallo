@@ -1,20 +1,13 @@
 <?php
 namespace WEEEOpen\Tarallo\Query;
 
-class QueryFieldLanguage extends AbstractQueryField implements QueryField {
-	public function isKVP() {
-		return false;
-	}
-
-	public function allowMultipleFields() {
-		return false;
-	}
-
+class QueryFieldLanguage extends QueryFieldSinglefield implements QueryField {
 	public function validate() {
 		return true;
 	}
 
 	public function parse($parameter) {
+		$this->stopIfAlreadyParsed();
 		$this->content = $parameter;
 	}
 

@@ -3,10 +3,6 @@ namespace WEEEOpen\Tarallo\Query;
 
 
 class QueryFieldLocation extends QueryFieldMultifield implements QueryField {
-	public function isKVP() {
-		return false;
-	}
-
 	public function validate() {
 		if($this->isDefault()) {
 			return true;

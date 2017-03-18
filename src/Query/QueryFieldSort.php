@@ -2,11 +2,7 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
-class QueryFieldSort extends AbstractQueryField implements QueryField {
-	public function isKVP() {
-		return true;
-	}
-
+class QueryFieldSort extends QueryFieldSinglefield implements QueryField {
 	public function validate() {
 		if($this->isDefault()) {
 			return true;
@@ -18,6 +14,7 @@ class QueryFieldSort extends AbstractQueryField implements QueryField {
 	}
 
 	public function parse($parameter) {
+		$this->stopIfAlreadyParsed();
 		$pieces = explode(",", $parameter);
 		$keys = [];
 		$this->content = [];
@@ -40,10 +37,6 @@ class QueryFieldSort extends AbstractQueryField implements QueryField {
 			$keys[] = $key;
 			$this->content[] = ([$key => $order]);
 		}
-	}
-
-	public function allowMultipleFields() {
-		return false;
 	}
 
 	protected function getDefault() {
