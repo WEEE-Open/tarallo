@@ -16,7 +16,7 @@ abstract class AbstractQueryField implements QueryField {
 	}
 
 	public function isDefault() {
-		if($this->content === null) {
+		if($this->content === null || $this->content === $this->getDefault()) {
 			return true;
 		} else {
 			return false;

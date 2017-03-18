@@ -35,7 +35,7 @@ class QueryFieldSort extends QueryFieldSinglefield implements QueryField {
 			}
 
 			$keys[] = $key;
-			$this->content[] = ([$key => $order]);
+			$this->content[$key] = $order;
 		}
 	}
 
@@ -48,6 +48,6 @@ class QueryFieldSort extends QueryFieldSinglefield implements QueryField {
 		foreach($this->getContent() as $key => $order) {
 			$result[] = $order . $key;
 		}
-		return '/Sort/' . implode(',', $result);;
+		return '/Sort/' . implode(',', $result);
 	}
 }

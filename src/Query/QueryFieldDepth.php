@@ -21,6 +21,10 @@ class QueryFieldDepth extends QueryFieldSinglefield implements QueryField {
 		}
 
 		$this->content = (int) $parameter;
+
+		if($this->content < 0) {
+			throw new \InvalidArgumentException('Depth must be >= 0, ' . $parameter . ' given');
+		}
 	}
 
 	protected function getDefault() {

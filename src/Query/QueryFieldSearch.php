@@ -27,8 +27,8 @@ class QueryFieldSearch extends QueryFieldMultifield implements QueryField {
 
 	protected function nonDefaultToString() {
 		$result = '';
-		foreach($this->getContent() as $location) {
-			$result .= '/Search/' . $location;
+		foreach($this->getContent() as $kvp) {
+			$result .= '/Search/' . implode('=', $kvp);
 		}
 		return $result;
 	}
