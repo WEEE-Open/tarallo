@@ -57,7 +57,9 @@ class Query {
 	}
 
 	private function normalizeString($string) {
-		$string = substr($string, 1); // remove first slash
+		if(substr($string, 0, 1) === '/') {
+			$string = substr($string, 1); // remove first slash
+		}
 		if(substr($string, - 1) === '/') {
 			$string = substr($string, 0, strlen($string) - 1);
 		}
@@ -115,5 +117,21 @@ class Query {
 
 	private function parseEdit($parameter) {
 		// TODO: implement
+	}
+
+	public function __toString() {
+		if($this->method === 'GET') {
+			$result = '';
+			foreach($this->parseFieldsDouble as $field) {
+				$result .= (string) $field;
+			}
+			return $result;
+		} else if($this->method === 'POST') {
+			// TODO: actually implement
+			throw new \Exception('Not implemented');
+		} else {
+			// TODO: do something else?
+			return '';
+		}
 	}
 }
