@@ -1,31 +1,39 @@
 <?php
-namespace WEEEOpen\Tarallo;
+namespace WEEEOpen\Tarallo\Query;
 
 
 class Query {
+	const METHOD_GET = 'GET';
+	const METHOD_POST = 'POST';
+	const FIELD_LOCATION = 'Location';
+	const FIELD_SEARCH = 'Search';
+	const FIELD_SORT = 'Sort';
+	const FIELD_DEPTH = 'Depth';
+	const FIELD_PARENT = 'Parent';
+	const FIELD_LANGUAGE = 'Language';
+	const FIELD_TOKEN = 'Token';
+
 	private $built = false;
 	private $method;
-	private $parseFieldsDouble = [
-		'Location' => 'parseLocation',
-		'Search'   => 'parseSearch',
-		'Sort'     => 'parseSort',
-		'Depth'    => 'parseDepth',
-		'Parent'   => 'parseParent',
-		'Language' => 'parseLanguage',
-		'Token'    => 'parseToken',
-	];
-	private $parseFieldsSingle = [
-		'Login' => 'parseLogin',
-		'Edit'  => 'parseEdit',
-	];
+	/** @var $parseFieldsDouble QueryField[] */
+	private $parseFieldsDouble;
+	private $parseFieldsSingle;
 
-	private $location = null;
-	private $search = null;
-	private $sort = null;
-	private $depth = null;
-	private $parent = null;
-	private $language = null;
-	private $token = null;
+	function __construct() {
+		$this->parseFieldsDouble = [
+			self::FIELD_LOCATION => new QueryFieldLocation(),
+			self::FIELD_SEARCH   => new QueryFieldSearch(),
+			self::FIELD_SORT     => new QueryFieldSort(),
+			self::FIELD_DEPTH    => new QueryFieldDepth(),
+			self::FIELD_PARENT   => new QueryFieldParent(),
+			self::FIELD_LANGUAGE => new QueryFieldLanguage(),
+			self::FIELD_TOKEN    => new QueryFieldToken(),
+		];
+		$this->parseFieldsSingle = [
+			'Login' => 'parseLogin',
+			'Edit'  => 'parseEdit',
+		];
+	}
 
 	public function fromString($string, $method) {
 		if(!is_string($string) || $string === '') {
@@ -58,7 +66,7 @@ class Query {
 	}
 
 	private function setMethod($method) {
-		if($method === 'GET' || $method === 'POST') {
+		if($method === self::METHOD_GET || $method === self::METHOD_POST) {
 			$this->method = $method;
 		} else {
 			throw new \InvalidArgumentException('Unsupported method ' . $method);
@@ -70,13 +78,18 @@ class Query {
 		$c = count($pieces);
 		while($i < $c) {
 			if(isset($this->parseFieldsSingle[ $pieces[ $i ] ])) {
+				if($this->method !== self::METHOD_POST) {
+					throw new \InvalidArgumentException('Field ' . $pieces[ $i ] . ' not allowed for method ' . $this->method);
+				}
 				$fn = $this->getParseCallable($this->parseFieldsSingle[ $pieces[ $i ] ]);
 				call_user_func($fn);
 				$i ++;
 			} else if(isset($this->parseFieldsDouble[ $pieces[ $i ] ])) {
+				if($this->method !== self::METHOD_GET) {
+					throw new \InvalidArgumentException('Field ' . $pieces[ $i ] . ' not allowed for method ' . $this->method);
+				}
 				if($i + 1 < $c) {
-					$fn = $this->getParseCallable($this->parseFieldsDouble[ $pieces[ $i ] ]);
-					call_user_func($fn, $pieces[ $i + 1 ]);
+					$this->parseFieldsDouble[ $pieces[ $i ] ]->parse($pieces[ $i + 1 ]);
 					$i += 2;
 				} else {
 					throw new \InvalidArgumentException('Missing parameter for field ' . $pieces[ $i ]);
@@ -96,4 +109,11 @@ class Query {
 		return $fn;
 	}
 
+	private function parseLogin($parameter) {
+		// TODO: implement
+	}
+
+	private function parseEdit($parameter) {
+		// TODO: implement
+	}
 }
