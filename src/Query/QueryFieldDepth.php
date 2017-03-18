@@ -2,8 +2,12 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
-class QueryFieldLocation extends QueryFieldMultifield implements QueryField {
+class QueryFieldDepth extends AbstractQueryField implements QueryField {
 	public function isKVP() {
+		return false;
+	}
+
+	public function allowMultipleFields() {
 		return false;
 	}
 
@@ -18,10 +22,14 @@ class QueryFieldLocation extends QueryFieldMultifield implements QueryField {
 	}
 
 	public function parse($parameter) {
-		$this->add($parameter);
+		if(!is_numeric($parameter)) {
+			throw new \InvalidArgumentException($parameter . ' must be a number');
+		}
+
+		$this->content = (int) $parameter;
 	}
 
 	protected function getDefault() {
-		return [];
+		return 0;
 	}
 }
