@@ -43,4 +43,45 @@ class QueryTest extends TestCase {
 			['Location/test/Depth/2', '/Location/test/Depth/2'],
 		];
 	}
+
+	public function testInvalidDepthNaN() {
+		$this->expectException(\InvalidArgumentException::class);
+		(new Query())->fromString('/Location/test/Depth/foo', 'GET');
+	}
+
+	public function testInvalidDepthNegative() {
+		$this->expectException(\InvalidArgumentException::class);
+		(new Query())->fromString('/Location/test/Depth/-1', 'GET');
+	}
+
+	public function testInvalidDepthNoOtherFields() {
+		$this->expectException(\InvalidArgumentException::class);
+		(new Query())->fromString('/Depth/3', 'GET');
+	}
+
+	public function testDepthZeroDefault() {
+		$this->assertEquals((string) (new Query())->fromString('/Location/test/Depth/0', 'GET'), '/Location/test', 'Depth=0 is default');
+	}
+
+	/**
+	 * @dataProvider providerTestUnchangedValidNonDefaultStrings
+	 *
+	 * @param $string query string
+	 */
+	public function testUnchangedValidNonDefaultStrings($string) {
+		$this->assertEquals((string) (new Query())->fromString($string, 'GET'), $string);
+	}
+
+
+	public function providerTestUnchangedValidNonDefaultStrings() {
+		return [
+			['/Location/test'],
+			['/Location/test/Depth/3'],
+			['/Location/test/Language/fr-FR'],
+			['/Location/test/Parent/2'],
+			['/Location/test/Search/key=foo'],
+			['/Location/test/Sort/+key'],
+			['/Location/test/Token/foo'],
+		];
+	}
 }
