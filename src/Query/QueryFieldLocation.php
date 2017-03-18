@@ -2,7 +2,7 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
-class queryFieldLocation implements QueryField {
+class QueryFieldLocation implements QueryField {
 	private $set = false;
 	private $content = null;
 
@@ -10,11 +10,7 @@ class queryFieldLocation implements QueryField {
 		return true;
 	}
 
-	public function allowLists() {
-		return false;
-	}
-
-	public function allowKVP() {
+	public function isKVP() {
 		return false;
 	}
 
