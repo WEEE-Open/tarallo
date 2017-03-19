@@ -12,6 +12,7 @@ class QueryFieldDepthTest extends TestCase{
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldDepth
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
+	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testInvalidDepthNaN() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -25,6 +26,7 @@ class QueryFieldDepthTest extends TestCase{
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldDepth
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
+	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testInvalidDepthNegative() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -36,6 +38,7 @@ class QueryFieldDepthTest extends TestCase{
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldDepth
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
+	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @todo            Implement validation and remove "skipped"
 	 */
 	public function testInvalidDepthNoOtherFields() {
@@ -51,6 +54,7 @@ class QueryFieldDepthTest extends TestCase{
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldDepth
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
+	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testDepthZeroDefault() {
 		$this->assertEquals((string) (new GetQuery())->fromString('/Location/test/Depth/0', 'GET'), '/Location/test',

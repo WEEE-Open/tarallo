@@ -7,6 +7,7 @@ use WEEEOpen\Tarallo\Query\GetQuery;
 class QueryFieldParentTest extends TestCase{
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldLocation
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldParent
@@ -20,6 +21,7 @@ class QueryFieldParentTest extends TestCase{
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldLocation
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldParent
@@ -34,6 +36,7 @@ class QueryFieldParentTest extends TestCase{
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldParent
+	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
 	 * @todo            Implement validation and remove "skipped"
@@ -46,6 +49,7 @@ class QueryFieldParentTest extends TestCase{
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldLocation
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldParent
