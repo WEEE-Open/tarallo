@@ -3,35 +3,25 @@
 namespace WEEEOpen\Tarallo\Test\Query;
 
 use PHPUnit\Framework\TestCase;
-use WEEEOpen\Tarallo\Query\Query;
+use WEEEOpen\Tarallo\Query\GetQuery;
 
-class QueryTest extends TestCase {
+class GetQueryTest extends TestCase {
 	/**
-	 * @covers \WEEEOpen\Tarallo\Query\Query
+	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
 	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLocation
 	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 */
 	public function testBuildTwice() {
 		$this->expectException(\LogicException::class);
-		(new Query())->fromString('/Location/test', 'GET')->fromString('/Location/test', 'GET');
+		(new GetQuery())->fromString('/Location/test')->fromString('/Location/test');
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Query\Query
+	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
 	 */
 	public function testEmptyQueryString() {
 		$this->expectException(\InvalidArgumentException::class);
-		(new Query())->fromString('', 'GET');
-	}
-
-	/**
-	 * @covers \WEEEOpen\Tarallo\Query\Query
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldMultifield
-	 */
-	public function testInvalidMethod() {
-		$this->expectException(\InvalidArgumentException::class);
-		(new Query())->fromString('/Location/test', 'PATCH');
+		(new GetQuery())->fromString('');
 	}
 
 	/**
@@ -40,7 +30,7 @@ class QueryTest extends TestCase {
 	 * @param string $in query string
 	 * @param string $expected expected result from __toString()
 	 *
-	 * @covers       \WEEEOpen\Tarallo\Query\Query
+	 * @covers       \WEEEOpen\Tarallo\Query\GetQuery
 	 * @uses         \WEEEOpen\Tarallo\Query\QueryFieldLocation
 	 * @uses         \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @uses         \WEEEOpen\Tarallo\Query\QueryFieldDepth
@@ -48,7 +38,7 @@ class QueryTest extends TestCase {
 	 * @uses         \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
 	 */
 	public function testQueryStringNormalization($in, $expected) {
-		$this->assertEquals((string) (new Query())->fromString($in, 'GET'), $expected);
+		$this->assertEquals((string) (new GetQuery())->fromString($in), $expected);
 	}
 
 	public function providerTestQueryStringNormalization() {
@@ -67,7 +57,7 @@ class QueryTest extends TestCase {
 	/**
 	 * @dataProvider   providerTestUnchangedValidNonDefaultStrings
 	 *
-	 * @covers         \WEEEOpen\Tarallo\Query\Query
+	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldLocation
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldDepth
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldLanguage
@@ -79,10 +69,10 @@ class QueryTest extends TestCase {
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
 	 *
-	 * @param $string query string
+	 * @param $string GetQuery string
 	 */
 	public function testUnchangedValidNonDefaultStrings($string) {
-		$this->assertEquals((string) (new Query())->fromString($string, 'GET'), $string);
+		$this->assertEquals((string) (new GetQuery())->fromString($string), $string);
 	}
 
 
@@ -99,13 +89,13 @@ class QueryTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Query\Query
+	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldLocation
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 */
 	public function testMultipleFields() {
-		$this->assertEquals((string) (new Query())->fromString('/Location/foo/Location/bar', 'GET'),
+		$this->assertEquals((string) (new GetQuery())->fromString('/Location/foo/Location/bar'),
 			'/Location/foo/Location/bar');
 	}
 }

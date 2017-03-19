@@ -12,7 +12,7 @@ if(!isset($_GET['path']) || $_GET['path'] === null) {
 }
 
 try {
-	$query = (new Query\Query())->fromString($_GET['path'], $_SERVER['REQUEST_METHOD']);
+	$query = (new Query\GetQuery())->fromString($_GET['path'], $_SERVER['REQUEST_METHOD']);
 } catch(\Exception $e) {
 	// TODO: better error messages
 	Response::sendFail('Error: ' . $e->getMessage());
