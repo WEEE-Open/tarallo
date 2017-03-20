@@ -34,4 +34,12 @@ class PostQuery extends AbstractQuery {
 
 		return $this;
 	}
+
+	public function __toString() {
+		if($this->query instanceof QueryFieldPostJSON) {
+			return (string) $this->query;
+		} else {
+			return '{}';
+		}
+	}
 }

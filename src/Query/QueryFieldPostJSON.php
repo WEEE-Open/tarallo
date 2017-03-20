@@ -30,6 +30,10 @@ abstract class QueryFieldPostJSON implements QueryField {
 	}
 
 	public function __toString() {
+		// TODO: empty objects turn into empty arrays... use JSON_FORCE_OBJECT? Always? Only when field should be an object? Most of them should be arrays
+		if($this->isDefault()) {
+			return '{}';
+		}
 		$JSON = $this->getContent();
 		$string = json_encode($JSON);
 
