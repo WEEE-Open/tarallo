@@ -3,7 +3,7 @@ namespace WEEEOpen\Tarallo\Query;
 
 
 class QueryFieldEdit extends QueryFieldPostJSON implements QueryField {
-	public function parseContent() {
+	protected function parseContent() {
 		// TODO: Implement parseQueryContent() method.
 	}
 }
