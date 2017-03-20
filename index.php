@@ -7,15 +7,25 @@ http_response_code(500);
 
 require 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
-if(!isset($_GET['path']) || $_GET['path'] === null) {
+if(!isset($_REQUEST['path']) || $_REQUEST['path'] === null) {
 	Response::sendFail('No query string');
 }
 
-try {
-	$query = (new Query\GetQuery())->fromString($_GET['path'], $_SERVER['REQUEST_METHOD']);
-} catch(\Exception $e) {
-	// TODO: better error messages
-	Response::sendFail('Error: ' . $e->getMessage());
+if($_SERVER['REQUEST_METHOD'] === 'GET') {
+	try {
+		$query = (new Query\GetQuery())->fromString($_REQUEST['path']);
+	} catch(\Exception $e) {
+		// TODO: better error messages
+		Response::sendFail('Error: ' . $e->getMessage());
+	}
+} else if($_SERVER['REQUEST_METHOD'] === 'POST') {
+	try {
+		$query = (new Query\PostQuery())->fromString($_REQUEST['path'], file_get_contents('php://input'));
+		// TODO: if Login, start session
+	} catch(\Exception $e) {
+		// TODO: better error messages
+		Response::sendFail('Error: ' . $e->getMessage());
+	}
+} else {
+	Response::sendFail('Unsupported HTTP method: ' . $_SERVER['REQUEST_METHOD']);
 }
-
-//var_dump($_GET['path']);

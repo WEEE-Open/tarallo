@@ -6,9 +6,11 @@ abstract class AbstractQuery {
 	protected $built = false;
 	/** @var $parseFields QueryField[] */
 	protected $parseFields;
+	protected $user;
 
-	function __construct() {
+	function __construct($user = null) {
 		$this->parseFields = $this->getParseFields();
+		$this->user = $user;
 	}
 
 	abstract protected function getParseFields();
