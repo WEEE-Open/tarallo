@@ -3,17 +3,6 @@ namespace WEEEOpen\Tarallo\Query;
 
 
 class QueryFieldDepth extends QueryFieldSinglefield implements QueryField {
-
-	public function validate() {
-		if($this->isDefault()) {
-			return true;
-		}
-
-		$content = $this->getContent();
-		// TODO: implement
-		return true;
-	}
-
 	public function parse($parameter) {
 		$this->stopIfAlreadyParsed();
 		if(!is_numeric($parameter)) {

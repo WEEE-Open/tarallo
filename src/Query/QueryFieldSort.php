@@ -3,16 +3,6 @@ namespace WEEEOpen\Tarallo\Query;
 
 
 class QueryFieldSort extends QueryFieldSinglefield implements QueryField {
-	public function validate() {
-		if($this->isDefault()) {
-			return true;
-		}
-
-		$content = $this->getContent();
-		// TODO: implement
-		return true;
-	}
-
 	public function parse($parameter) {
 		$this->stopIfAlreadyParsed();
 		$pieces = explode(",", $parameter);
@@ -34,6 +24,7 @@ class QueryFieldSort extends QueryFieldSinglefield implements QueryField {
 				throw new \InvalidArgumentException('Sort parameter ' . $parameter . ' contains duplicate key: ' . $key);
 			}
 
+			// TODO: check that $key is a valid key
 			$keys[] = $key;
 			$this->content[$key] = $order;
 		}

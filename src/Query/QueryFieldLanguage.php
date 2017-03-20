@@ -2,12 +2,9 @@
 namespace WEEEOpen\Tarallo\Query;
 
 class QueryFieldLanguage extends QueryFieldSinglefield implements QueryField {
-	public function validate() {
-		return true;
-	}
-
 	public function parse($parameter) {
 		$this->stopIfAlreadyParsed();
+		// TODO: check that it is a valid language
 		$this->content = $parameter;
 	}
 

@@ -16,7 +16,7 @@ class QueryFieldParentTest extends TestCase{
 	 */
 	public function testInvalidParentNaN() {
 		$this->expectException(\InvalidArgumentException::class);
-		(new GetQuery())->fromString('/Location/test/Parent/foo', 'GET');
+		(new GetQuery())->fromString('/Location/test/Parent/foo');
 	}
 
 	/**
@@ -30,21 +30,7 @@ class QueryFieldParentTest extends TestCase{
 	 */
 	public function testInvalidParentNegative() {
 		$this->expectException(\InvalidArgumentException::class);
-		(new GetQuery())->fromString('/Location/test/Parent/-1', 'GET');
-	}
-
-	/**
-	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldParent
-	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
-	 * @todo            Implement validation and remove "skipped"
-	 */
-	public function testInvalidParentNoOtherFields() {
-		$this->expectException(\InvalidArgumentException::class);
-		(new GetQuery())->fromString('/Parent/3', 'GET');
-		$this->markTestSkipped('Validation to be implemented');
+		(new GetQuery())->fromString('/Location/test/Parent/-1');
 	}
 
 	/**
@@ -57,7 +43,7 @@ class QueryFieldParentTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
 	 */
 	public function testParentZeroDefault() {
-		$this->assertEquals((string) (new GetQuery())->fromString('/Location/test/Parent/0', 'GET'), '/Location/test',
+		$this->assertEquals((string) (new GetQuery())->fromString('/Location/test/Parent/0'), '/Location/test',
 			'Parent=0 is default, ignore it when casting to string');
 	}
 }

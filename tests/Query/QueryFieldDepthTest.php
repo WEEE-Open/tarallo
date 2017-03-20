@@ -16,7 +16,7 @@ class QueryFieldDepthTest extends TestCase{
 	 */
 	public function testInvalidDepthNaN() {
 		$this->expectException(\InvalidArgumentException::class);
-		(new GetQuery())->fromString('/Location/test/Depth/foo', 'GET');
+		(new GetQuery())->fromString('/Location/test/Depth/foo');
 	}
 
 	/**
@@ -30,22 +30,9 @@ class QueryFieldDepthTest extends TestCase{
 	 */
 	public function testInvalidDepthNegative() {
 		$this->expectException(\InvalidArgumentException::class);
-		(new GetQuery())->fromString('/Location/test/Depth/-1', 'GET');
+		(new GetQuery())->fromString('/Location/test/Depth/-1');
 	}
 
-	/**
-	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldDepth
-	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
-	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @todo            Implement validation and remove "skipped"
-	 */
-	public function testInvalidDepthNoOtherFields() {
-		$this->expectException(\InvalidArgumentException::class);
-		(new GetQuery())->fromString('/Depth/3', 'GET');
-		$this->markTestSkipped('Validation to be implemented');
-	}
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
@@ -57,7 +44,7 @@ class QueryFieldDepthTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testDepthZeroDefault() {
-		$this->assertEquals((string) (new GetQuery())->fromString('/Location/test/Depth/0', 'GET'), '/Location/test',
+		$this->assertEquals((string) (new GetQuery())->fromString('/Location/test/Depth/0'), '/Location/test',
 			'Depth=0 is default, ignore it when casting to string');
 	}
 }
