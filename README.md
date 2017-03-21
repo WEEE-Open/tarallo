@@ -6,6 +6,12 @@ Server in PHP e (My)SQL (anche se forse un NoSQL sarebbe stato più adatto) del 
 ## Database
 La struttura è in `database.sql`. Dopo una serie di false partenze, la scrittura di una spec non particolarmente formale e di due diagrammi entity-relationship, siamo pervenuti a questo.
 
+## Installazione
+
+WIP
+
+`composer install --no-dev -o` dovrebbe generare l'autoloader ottimizzato senza dipendenze di sviluppo (= PHPUnit).
+
 ### TODO
 - [x] Foreign key
 - [X] Qualcosa per rappresentare la struttura ad albero degli Item

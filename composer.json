@@ -2,6 +2,7 @@
   "type": "project",
   "license": "AGPL-3.0",
   "minimum-stability": "stable",
+  "optimize-autoloader": true,
   "autoload": {
     "psr-4": {
       "WEEEOpen\\Tarallo\\": "src/"
