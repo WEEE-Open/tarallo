@@ -33,15 +33,14 @@ CREATE TABLE `Item` (
 CREATE TABLE `ItemFeature` (
   `FeatureID` bigint(20) unsigned NOT NULL,
   `ItemID` bigint(20) unsigned NOT NULL,
-	`FeatureType` tinyint(1), -- 0 if using Value, 1 if using ValueText
   `Value` bigint(20) DEFAULT NULL,
 	`ValueText` text DEFAULT NULL,
   PRIMARY KEY (`FeatureID`,`ItemID`),
   KEY `ItemID` (`ItemID`),
   CONSTRAINT `ItemFeature_ibfk_1` FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `ItemFeature_ibfk_3` FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`) ON DELETE NO ACTION ON UPDATE CASCADE,
-	CHECK((`Value` IS NOT NULL AND `ValueText` IS NULL AND FeatureType = 0)
-  OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND FeatureType = 1))
+	CHECK((`Value` IS NOT NULL AND `ValueText` IS NULL)
+  OR (`Value` IS NULL AND `ValueText` IS NOT NULL))
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
