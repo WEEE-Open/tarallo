@@ -4,40 +4,67 @@ namespace WEEEOpen\Tarallo;
 
 class Session {
 	const COOKIE_NAME = 'tarallo';
+	const SESSION_DURATION = 21600; // 6 hours
+	const KEYSPACE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
+	const KEYSPACE_STRLEN = 64;
 
 	/**
 	 * Starts a new session for the user, replacing any older session.
 	 *
 	 * @param User $user the authenticated user
-	 *
-	 * @throws DatabaseException
+	 * @param Database $db
 	 */
-	public function start(User $user) {
-		$id = $this->newIdentifier();
-		$this->setContent($id);
-		// TODO: store $id in database or throw database exception
+	public static function start(User $user, Database $db) {
+		$id = self::newIdentifier();
+		self::setContent($id);
+		$db->setSessionFromUser($user->getUsername(), $this->newUniqueIdentifier($db), time() + self::SESSION_DURATION);
 	}
 
-	private function newIdentifier() {
-		// TODO: better random string
-		return mt_rand();
+	/**
+	 * Create a new session identifier and check that it's unique.
+	 * ...it will probably be, but check anyway.
+	 *
+	 * @param Database $db
+	 *
+	 * @return string
+	 */
+	private static function newUniqueIdentifier(Database $db) {
+		do {
+			$id = self::newIdentifier();
+		} while($db->getUserFromSession($id) !== null);
+
+		return $id;
 	}
 
-	private function setContent($newContent) {
+	/**
+	 * Create a new session identifier.
+	 *
+	 * @return string
+	 * @see newUniqueIdentifier
+	 */
+	private static function newIdentifier() {
+		$str = '';
+		for($i = 0; $i < 32; $i ++) {
+			$str .= self::KEYSPACE[ random_int(0, self::KEYSPACE_STRLEN - 1) ];
+		}
+
+		return $str;
+	}
+
+	private static function setContent($newContent) {
 		setcookie(self::COOKIE_NAME, $newContent);
 	}
 
 	/**
 	 * Checks if there's a valid session in place and to which user it corresponds
 	 *
-	 * @return User che user, or null if not found (expired/invalid session, no cookie, etc...)
-	 * @throws DatabaseException
+	 * @param Database $db
+	 *
+	 * @return User|null the user, or null if not found (expired/invalid session, no cookie, etc...)
 	 */
-	public function restore() {
+	public static function restore(Database $db) {
 		if(isset($_COOKIE[ self::COOKIE_NAME ])) {
-			// TODO: query database, return false if doesn't match
-			// $this->user = $user;
-			//return $user;
+			return $db->getUserFromSession($_COOKIE[ self::COOKIE_NAME ]);
 		}
 
 		return null;
@@ -46,11 +73,12 @@ class Session {
 	/**
 	 * Ends session, logs out the user
 	 *
-	 * @throws DatabaseException
+	 * @param User $user
+	 * @param Database $db
 	 */
-	public function close() {
+	public static function close(User $user, Database $db) {
 		// Delete cookie
 		setcookie(self::COOKIE_NAME, "", 1);
-		// TODO: delete session ID from database
+		$db->setSessionFromUser($user->getUsername(), null, null);
 	}
 }
