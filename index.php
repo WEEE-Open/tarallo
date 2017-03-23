@@ -6,6 +6,7 @@ namespace WEEEOpen\Tarallo;
 http_response_code(500);
 
 require 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+require 'db.php';
 
 if(!isset($_REQUEST['path']) || $_REQUEST['path'] === null) {
 	Response::sendFail('No query string');
@@ -29,3 +30,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
 } else {
 	Response::sendFail('Unsupported HTTP method: ' . $_SERVER['REQUEST_METHOD']);
 }
+
+assert(isset($query));
+
+Response::sendSuccess([(string) $query]);

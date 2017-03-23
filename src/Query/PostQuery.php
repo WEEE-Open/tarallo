@@ -5,6 +5,10 @@ namespace WEEEOpen\Tarallo\Query;
 class PostQuery extends AbstractQuery {
 	protected $query = null;
 
+	public function getType() {
+		return $this->query;
+	}
+
 	protected function getParseFields() {
 		return [
 			'Login'    => new QueryFieldLogin(),
