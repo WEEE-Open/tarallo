@@ -17,7 +17,7 @@ class Session {
 	public static function start(User $user, Database $db) {
 		$id = self::newIdentifier();
 		self::setContent($id);
-		$db->setSessionFromUser($user->getUsername(), $this->newUniqueIdentifier($db), time() + self::SESSION_DURATION);
+		$db->setSessionFromUser($user->getUsername(), self::newUniqueIdentifier($db), time() + self::SESSION_DURATION);
 	}
 
 	/**
