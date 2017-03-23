@@ -34,6 +34,7 @@ abstract class QueryFieldPostJSON implements QueryField {
 		if($this->isDefault()) {
 			return '{}';
 		}
+		// may not correspond to what parseContent() returns!
 		$JSON = $this->getContent();
 		$string = json_encode($JSON);
 

@@ -1,6 +1,7 @@
 <?php
 
 namespace WEEEOpen\Tarallo;
+use WEEEOpen\Tarallo\Query;
 
 // in case something goes wrong (reset to 200 when sending a JSON response)
 http_response_code(500);
@@ -33,4 +34,14 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 assert(isset($query));
 
-Response::sendSuccess([(string) $query]);
+$db = new Database();
+$user = Session::restore($db);
+
+if($query instanceof Query\PostQuery) {
+	// not really sold on this design, too much complexity hidden into a single function. But these objects ARE queries,
+	// it doesn't make much sense to extract everything and "parse" it again to convert in a SQL query somewhere else...
+	$data = $query->run($user, $db);
+	Response::sendSuccess((array) $data);
+} else {
+	Response::sendSuccess([(string) $query]);
+}

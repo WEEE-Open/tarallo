@@ -8,18 +8,21 @@ abstract class AbstractQuery {
 	protected $parseFields;
 	protected $user;
 
-	function __construct($user = null) {
+	function __construct() {
 		$this->parseFields = $this->getParseFields();
-		$this->user = $user;
 	}
 
 	abstract protected function getParseFields();
 
 	protected function setBuilt() {
-		if($this->built) {
+		if($this->isBuilt()) {
 			throw new \LogicException('Query object already built');
 		}
 		$this->built = true;
+	}
+
+	protected function isBuilt() {
+		return $this->built;
 	}
 
 
