@@ -18,7 +18,6 @@ class AbstractQueryTest extends TestCase{
 	 * @uses         \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @uses         \WEEEOpen\Tarallo\Query\QueryFieldDepth
 	 * @uses         \WEEEOpen\Tarallo\Query\AbstractQueryField
-	 * @uses         \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
 	 */
 	public function testQueryStringNormalization($in, $expected) {
 		$this->assertEquals((string) (new GetQuery())->fromString($in), $expected);

@@ -11,53 +11,57 @@ class GetQuery extends AbstractQuery {
 	const FIELD_LANGUAGE = 'Language';
 	const FIELD_TOKEN = 'Token';
 
-	protected function getParseFields() {
-		return [
-				self::FIELD_LOCATION => new QueryFieldLocation(),
-				self::FIELD_SEARCH   => new QueryFieldSearch(),
-				self::FIELD_SORT     => new QueryFieldSort(),
-				self::FIELD_DEPTH    => new QueryFieldDepth(),
-				self::FIELD_PARENT   => new QueryFieldParent(),
-				self::FIELD_LANGUAGE => new QueryFieldLanguage(),
-				self::FIELD_TOKEN    => new QueryFieldToken(),
-			];
-	}
-
-	public function fromString($string) {
-		if(!is_string($string) || $string === '') {
-			throw new \InvalidArgumentException('Query string must be a non-empty string');
+	protected function queryFieldsFactory($query, $parameter) {
+		switch($query) {
+			case self::FIELD_LOCATION:
+				return new QueryFieldLocation($parameter);
+			case self::FIELD_SEARCH:
+				return new QueryFieldSearch($parameter);
+			case self::FIELD_SORT:
+				return new QueryFieldSort($parameter);
+			case self::FIELD_DEPTH:
+				return new QueryFieldDepth($parameter);
+			case self::FIELD_PARENT:
+				return new QueryFieldParent($parameter);
+			case self::FIELD_LANGUAGE:
+				return new QueryFieldLanguage($parameter);
+			case self::FIELD_TOKEN:
+				return new QueryFieldToken($parameter);
+			default:
+				throw new \InvalidArgumentException('Unknown field ' . $query);
 		}
-
-		$this->setBuilt();
-
-		$pieces = explode('/', $this->normalizeString($string));
-		$this->parsePieces($pieces);
-
-		return $this;
 	}
 
-	private function parsePieces($pieces) {
+	protected function fromPieces($pieces, $requestBody) {
 		$i = 0;
 		$c = count($pieces);
+
 		while($i < $c) {
-			if(isset($this->parseFields[ $pieces[ $i ] ])) {
-				if($i + 1 < $c) {
-					$this->parseFields[ $pieces[ $i ] ]->parse($pieces[ $i + 1 ]);
-					$i += 2;
+			if($i + 1 < $c) {
+				$previous = $this->getQueryField($pieces[ $i ]);
+				if($previous === null) {
+					$this->addQueryField($pieces[ $i ],
+						$this->queryFieldsFactory($pieces[ $i ], $pieces[ $i + 1 ]));
 				} else {
-					throw new \InvalidArgumentException('Missing parameter for field ' . $pieces[ $i ]);
+					/**
+					 * @var $previous QueryField
+					 */
+					$previous->add($pieces[ $i + 1 ]);
 				}
+				$i += 2;
 			} else {
-				throw new \InvalidArgumentException('Unknown field ' . $pieces[ $i ]);
+				throw new \InvalidArgumentException('Missing parameter for field ' . $pieces[ $i ]);
 			}
 		}
 	}
 
 	public function __toString() {
 		$result = '';
-		foreach($this->parseFields as $field) {
+		$queries = $this->getAllQueryFields();
+		foreach($queries as $field) {
 			$result .= (string) $field;
 		}
+
 		return $result;
 	}
 }

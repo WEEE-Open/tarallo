@@ -2,9 +2,8 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
-class QueryFieldParent extends QueryFieldSinglefield implements QueryField {
-	public function parse($parameter) {
-		$this->stopIfAlreadyParsed();
+class QueryFieldParent extends AbstractQueryField implements QueryField {
+	public function __construct($parameter) {
 		if(!is_numeric($parameter)) {
 			throw new \InvalidArgumentException($parameter . ' must be a number');
 		}

@@ -9,7 +9,7 @@ abstract class QueryFieldMultifield extends AbstractQueryField implements QueryF
 		}
 	}
 
-	protected function add($something) {
+	public function add($something) {
 		$this->arrayInit();
 		$this->content[] = $something;
 	}

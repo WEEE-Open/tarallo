@@ -22,6 +22,6 @@ class QueryFieldLogin extends QueryFieldPostJSON implements QueryField {
 			throw new \InvalidArgumentException('Password cannot be empty');
 		}
 
-		// now what? cannot rename parse to __construct (or could be done, with a factory pattern...), could add another isParsed() and its variable but it seems like a kludge...
+
 	}
 }

@@ -2,9 +2,8 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
-class QueryFieldSort extends QueryFieldSinglefield implements QueryField {
-	public function parse($parameter) {
-		$this->stopIfAlreadyParsed();
+class QueryFieldSort extends AbstractQueryField implements QueryField {
+	public function __construct($parameter) {
 		$pieces = explode(",", $parameter);
 		$keys = [];
 		$this->content = [];

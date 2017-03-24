@@ -36,7 +36,7 @@ class GetQueryTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldDepth
-	 * @covers \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
+	 * @covers \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 */
 	public function testDuplicateField() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -74,7 +74,6 @@ class GetQueryTest extends TestCase {
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldToken
 	 * @covers         \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 *
 	 * @param $string GetQuery string

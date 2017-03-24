@@ -3,7 +3,7 @@ namespace WEEEOpen\Tarallo\Query;
 
 
 class QueryFieldLocation extends QueryFieldMultifield implements QueryField {
-	public function parse($parameter) {
+	public function __construct($parameter) {
 		$this->add($parameter);
 	}
 

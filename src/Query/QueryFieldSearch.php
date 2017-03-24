@@ -3,7 +3,7 @@ namespace WEEEOpen\Tarallo\Query;
 
 
 class QueryFieldSearch extends QueryFieldMultifield implements QueryField {
-	public function parse($parameter) {
+	public function __construct($parameter) {
 		$pieces = explode("=", $parameter);
 		if(count($pieces) !== 2 || strlen($pieces[0]) === 0 || strlen($pieces[1]) === 0) {
 			throw new \InvalidArgumentException($parameter . ' must be a key-value pair separated by an "="');

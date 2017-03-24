@@ -4,27 +4,57 @@ namespace WEEEOpen\Tarallo\Query;
 
 abstract class AbstractQuery {
 	protected $built = false;
-	/** @var $parseFields QueryField[] */
-	protected $parseFields;
-	protected $user;
+	private $queryFields = [];
 
-	function __construct() {
-		$this->parseFields = $this->getParseFields();
+	/**
+	 * @param $query string representing query type (Login, Location, etc...)
+	 * @param $parameter string parameters passed to QueryField constructor
+	 *
+	 * @return QueryField|null
+	 */
+	abstract protected function queryFieldsFactory($query, $parameter);
+
+	public final function fromString($string, $requestBody = null) {
+		if(!is_string($string) || $string === '') {
+			throw new \InvalidArgumentException('Query string must be a non-empty string');
+		}
+
+		$pieces = explode('/', $this->normalizeString($string));
+		$this->fromPieces($pieces, $requestBody);
+
+		$this->setBuilt();
+
+		return $this;
 	}
 
-	abstract protected function getParseFields();
+	abstract protected function fromPieces($pieces, $requestBody);
 
-	protected function setBuilt() {
+	protected final function setBuilt() {
 		if($this->isBuilt()) {
 			throw new \LogicException('Query object already built');
 		}
 		$this->built = true;
 	}
 
-	protected function isBuilt() {
+	protected final function isBuilt() {
 		return $this->built;
 	}
 
+	protected function addQueryField($name, QueryField $qf) {
+		$this->queryFields[$name] = $qf;
+	}
+
+	protected function getAllQueryFields() {
+		return $this->queryFields;
+	}
+
+	protected function getQueryField($name) {
+		if(isset($this->queryFields[$name])) {
+			return $this->queryFields[$name];
+		} else {
+			return null;
+		}
+	}
 
 	protected function normalizeString($string) {
 		if(substr($string, 0, 1) === '/') {

@@ -32,4 +32,8 @@ abstract class AbstractQueryField implements QueryField {
 	}
 
 	protected abstract function nonDefaultToString();
+
+	public function add($parameter) {
+		throw new \InvalidArgumentException('Invalid duplicate parameter in query string');
+	}
 }

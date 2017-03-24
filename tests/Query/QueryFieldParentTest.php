@@ -12,7 +12,6 @@ class QueryFieldParentTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldParent
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
 	 */
 	public function testInvalidParentNaN() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -26,7 +25,6 @@ class QueryFieldParentTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldParent
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
 	 */
 	public function testInvalidParentNegative() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -40,7 +38,6 @@ class QueryFieldParentTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldParent
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
 	 */
 	public function testParentZeroDefault() {
 		$this->assertEquals((string) (new GetQuery())->fromString('/Location/test/Parent/0'), '/Location/test',

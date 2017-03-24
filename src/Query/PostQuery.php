@@ -4,43 +4,42 @@ namespace WEEEOpen\Tarallo\Query;
 use WEEEOpen\Tarallo;
 
 class PostQuery extends AbstractQuery {
-	protected $query = null;
+	private $queryFields = [];
 
-	protected function getParseFields() {
-		return [
-			'Login'    => new QueryFieldLogin(),
-			'Edit'     => new QueryFieldEdit(),
-		];
+	protected function queryFieldsFactory($query, $parameter) {
+		switch($query) {
+			case 'Login':
+				return new QueryFieldLogin($parameter);
+			case 'Edit':
+				return new QueryFieldEdit($parameter);
+			default:
+				throw new \InvalidArgumentException('Unknown field ' . $query);
+		}
 	}
 
-	public function fromString($string, $requestBody) {
-		if(!is_string($string) || $string === '') {
-			throw new \InvalidArgumentException('Query string must be a non-empty string');
-		}
-
-		$this->setBuilt();
-
-		$pieces = explode('/', $this->normalizeString($string));
+	protected function fromPieces($pieces, $requestBody) {
 		if(count($pieces) > 1) {
 			throw new \InvalidArgumentException('POST queries only allow one field, ' . count($pieces) . ' given');
 		}
 		$field = $pieces[0];
 
-		if(isset($this->parseFields[ $field ])) {
-			$this->parseFields[ $field ]->parse($requestBody);
-			$this->query = $this->parseFields[ $field ];
-		} else {
-			throw new \InvalidArgumentException('Unknown field ' . $field);
-		}
+		$this->addQueryField($field, $this->queryFieldsFactory($field, $requestBody));
 
 		return $this;
 	}
 
+	protected function addQueryField($name, QueryField $qf) {
+		// limit to one...
+		$this->queryFields = [$name => $qf];
+	}
+
 	public function __toString() {
-		if($this->query instanceof QueryFieldPostJSON) {
-			return (string) $this->query;
-		} else {
+		$query = $this->getAllQueryFields();
+		if(empty($query)) {
 			return '{}';
+		} else {
+			list($content) = $query;
+			return (string) $content;
 		}
 	}
 
@@ -57,13 +56,13 @@ class PostQuery extends AbstractQuery {
 			throw new \LogicException('Trying to run an empty query');
 		}
 
-		if($this->query === null || !($this->query instanceof QueryField)) {
+		if($this->queryFields === null || !($this->queryFields instanceof QueryField)) {
 			throw new \LogicException('Trying to run a uninitialized query');
 		}
 
-		if($this->query instanceof QueryFieldLogin) {
+		if($this->queryFields instanceof QueryFieldLogin) {
 			return [];
-		} else if($this->query instanceof QueryFieldEdit) {
+		} else if($this->queryFields instanceof QueryFieldEdit) {
 			if($user === null) {
 				throw new \Exception('Authentication needed');
 			}

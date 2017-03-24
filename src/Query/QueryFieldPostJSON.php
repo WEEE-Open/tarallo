@@ -5,7 +5,7 @@ namespace WEEEOpen\Tarallo\Query;
 abstract class QueryFieldPostJSON implements QueryField {
 	private $queryContent = null;
 
-	public function parse($parameter) {
+	public function __construct($parameter) {
 		if(!is_string($parameter) || $parameter === '') {
 			throw new \InvalidArgumentException('POST requests must contain a body (in JSON format)');
 		}
@@ -27,6 +27,10 @@ abstract class QueryFieldPostJSON implements QueryField {
 		} else {
 			return false;
 		}
+	}
+
+	public function add($parameter) {
+		throw new \InvalidArgumentException('Invalid duplicate parameter in query string');
 	}
 
 	public function __toString() {

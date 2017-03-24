@@ -11,7 +11,6 @@ class QueryFieldDepthTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldDepth
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testInvalidDepthNaN() {
@@ -25,7 +24,6 @@ class QueryFieldDepthTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldDepth
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testInvalidDepthNegative() {
@@ -40,7 +38,6 @@ class QueryFieldDepthTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
 	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldDepth
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldSinglefield
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testDepthZeroDefault() {
