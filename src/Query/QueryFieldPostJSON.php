@@ -2,9 +2,7 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
-abstract class QueryFieldPostJSON implements QueryField {
-	private $queryContent = null;
-
+abstract class QueryFieldPostJSON extends AbstractQueryField implements QueryField {
 	public function __construct($parameter) {
 		if(!is_string($parameter) || $parameter === '') {
 			throw new \InvalidArgumentException('POST requests must contain a body (in JSON format)');
@@ -15,19 +13,10 @@ abstract class QueryFieldPostJSON implements QueryField {
 			throw new \InvalidArgumentException('Invalid JSON: ' . json_last_error_msg());
 		}
 
-		$this->setContent($array);
-		$this->parseContent();
+		$this->parseContent($array);
 	}
 
-	protected abstract function parseContent();
-
-	public function isDefault() {
-		if($this->queryContent === null || empty($this->queryContent)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
+	protected abstract function parseContent($array);
 
 	public function add($parameter) {
 		throw new \InvalidArgumentException('Invalid duplicate parameter in query string');
@@ -38,9 +27,8 @@ abstract class QueryFieldPostJSON implements QueryField {
 		if($this->isDefault()) {
 			return '{}';
 		}
-		// may not correspond to what parseContent() returns!
-		$JSON = $this->getContent();
-		$string = json_encode($JSON);
+
+		$string = json_encode($this);
 
 		if(json_last_error() !== JSON_ERROR_NONE) {
 			throw new \InvalidArgumentException('Failed converting query back to JSON: ' . json_last_error_msg());
@@ -51,19 +39,5 @@ abstract class QueryFieldPostJSON implements QueryField {
 		}
 
 		return $string;
-	}
-
-	public function getContent() {
-		if($this->isDefault()) {
-			return [];
-		} else {
-			return $this->queryContent;
-		}
-	}
-
-	private function setContent($array) {
-		if(is_array($array)) {
-			$this->queryContent = $array;
-		}
 	}
 }

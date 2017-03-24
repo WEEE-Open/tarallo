@@ -2,12 +2,11 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
-class QueryFieldLogin extends QueryFieldPostJSON implements QueryField {
+class QueryFieldLogin extends QueryFieldPostJSON implements QueryField, \JsonSerializable {
 	private $username = null;
 	private $password = null;
 
-	protected function parseContent() {
-		$content = $this->getContent();
+	protected function parseContent($content) {
 		if(!isset($content['username']) || !isset($content['password'])) {
 			throw new \InvalidArgumentException('Request body must contain "username" and "password"');
 		}
@@ -23,5 +22,9 @@ class QueryFieldLogin extends QueryFieldPostJSON implements QueryField {
 		}
 
 
+	}
+
+	function jsonSerialize() {
+		return ['username' => $this->username, 'password' => $this->password];
 	}
 }
