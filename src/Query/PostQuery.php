@@ -4,13 +4,15 @@ namespace WEEEOpen\Tarallo\Query;
 use WEEEOpen\Tarallo;
 
 class PostQuery extends AbstractQuery {
+	const FIELD_LOGIN = 'Login';
+	const FIELD_EDIT = 'Edit';
 	private $queryFields = [];
 
 	protected function queryFieldsFactory($query, $parameter) {
 		switch($query) {
-			case 'Login':
+			case self::FIELD_LOGIN:
 				return new QueryFieldLogin($parameter);
-			case 'Edit':
+			case self::FIELD_EDIT:
 				return new QueryFieldEdit($parameter);
 			default:
 				throw new \InvalidArgumentException('Unknown field ' . $query);
