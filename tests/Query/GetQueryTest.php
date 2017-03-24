@@ -45,6 +45,29 @@ class GetQueryTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLocation
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldMultifield
+	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
+	 */
+	public function testMissingParameter() {
+		$this->expectException(\InvalidArgumentException::class);
+		(new GetQuery())->fromString('/Location');
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLocation
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldMultifield
+	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldDepth
+	 */
+	public function testMissingParameterMismatch() {
+		$this->expectException(\InvalidArgumentException::class);
+		(new GetQuery())->fromString('/Location/Depth/3');
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
 	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testUnrecognizedField() {
