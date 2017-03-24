@@ -29,10 +29,6 @@ class QueryFieldSort extends AbstractQueryField implements QueryField {
 		}
 	}
 
-	protected function getDefault() {
-		return [];
-	}
-
 	protected function nonDefaultToString() {
 		$result = [];
 		foreach($this->getContent() as $key => $order) {

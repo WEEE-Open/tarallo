@@ -5,32 +5,19 @@ namespace WEEEOpen\Tarallo\Query;
 abstract class AbstractQueryField implements QueryField {
 	protected $content = null;
 
-	protected abstract function getDefault();
-
 	public function getContent() {
-		if($this->isDefault()) {
-			return $this->getDefault();
-		} else {
-			return $this->content;
-		}
-	}
-
-	public function isDefault() {
-		if($this->content === null || $this->content === $this->getDefault()) {
-			return true;
-		} else {
-			return false;
-		}
+		return $this->content;
 	}
 
 	public function __toString() {
-		if($this->isDefault()) {
-			return '';
-		} else {
-			return $this->nonDefaultToString();
-		}
+		return $this->nonDefaultToString();
 	}
 
+	/**
+	 * Called by __toString(), exists only for backward (and forwmard, maybe?) compatibility
+	 *
+	 * @return string
+	 */
 	protected abstract function nonDefaultToString();
 
 	public function add($parameter) {

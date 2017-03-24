@@ -12,10 +12,6 @@ class QueryFieldSearch extends QueryFieldMultifield implements QueryField {
 		$this->add($pieces);
 	}
 
-	protected function getDefault() {
-		return [];
-	}
-
 	protected function nonDefaultToString() {
 		$result = '';
 		foreach($this->getContent() as $kvp) {

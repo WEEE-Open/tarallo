@@ -7,10 +7,6 @@ class QueryFieldLocation extends QueryFieldMultifield implements QueryField {
 		$this->add($parameter);
 	}
 
-	protected function getDefault() {
-		return [];
-	}
-
 	protected function nonDefaultToString() {
 		$result = '';
 		foreach($this->getContent() as $location) {

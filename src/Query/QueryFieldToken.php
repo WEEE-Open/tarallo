@@ -6,10 +6,6 @@ class QueryFieldToken extends AbstractQueryField implements QueryField {
 		$this->content = $parameter;
 	}
 
-	protected function getDefault() {
-		return null;
-	}
-
 	protected function nonDefaultToString() {
 		return '/Token/' . $this->getContent();
 	}

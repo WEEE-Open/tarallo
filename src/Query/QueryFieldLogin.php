@@ -27,4 +27,8 @@ class QueryFieldLogin extends QueryFieldPostJSON implements QueryField, \JsonSer
 	function jsonSerialize() {
 		return ['username' => $this->username, 'password' => $this->password];
 	}
+
+	protected function nonDefaultToString() {
+		return json_encode($this);
+	}
 }

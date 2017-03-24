@@ -7,11 +7,6 @@ class QueryFieldLanguage extends AbstractQueryField implements QueryField {
 		$this->content = $parameter;
 	}
 
-	protected function getDefault() {
-		// TODO: change default?
-		return 'it-IT';
-	}
-
 	protected function nonDefaultToString() {
 		return '/Language/' . $this->getContent();
 	}
