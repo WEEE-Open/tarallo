@@ -6,7 +6,7 @@ use WEEEOpen\Tarallo\Database;
 
 abstract class AbstractQuery {
 	protected $built = false;
-	private $queryFields = [];
+	protected $queryFields = [];
 
 	/**
 	 * @param $query string representing query type (Login, Location, etc...)

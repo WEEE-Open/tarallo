@@ -6,7 +6,6 @@ use WEEEOpen\Tarallo;
 class PostQuery extends AbstractQuery {
 	const FIELD_LOGIN = 'Login';
 	const FIELD_EDIT = 'Edit';
-	private $queryFields = [];
 
 	protected function queryFieldsFactory($query, $parameter) {
 		switch($query) {
@@ -32,7 +31,10 @@ class PostQuery extends AbstractQuery {
 
 	protected function addQueryField($name, Field\QueryField $qf) {
 		// limit to one...
-		$this->queryFields = [$name => $qf];
+		if(count($this->getAllQueryFields()) > 0) {
+			throw new \LogicException('Trying to submit multiple queries in a single POST request');
+		}
+		parent::addQueryField($name, $qf);
 	}
 
 	public function __toString() {
@@ -58,13 +60,15 @@ class PostQuery extends AbstractQuery {
 			throw new \LogicException('Cannot run a query without building it first');
 		}
 
-		if(!$this->isBuilt()) {
+		$fields = $this->getAllQueryFields();
+		if(empty($fields)) {
 			throw new \LogicException('Trying to run an empty query');
 		}
+		$query = reset($fields);
 
-		if($this->queryFields instanceof Field\Login) {
-			return [];
-		} else if($this->queryFields instanceof Field\Edit) {
+		if($query instanceof Field\Login) {
+			$query->getContent();
+		} else if($query instanceof Field\Edit) {
 			if($user === null) {
 				throw new \Exception('Authentication needed');
 			}
