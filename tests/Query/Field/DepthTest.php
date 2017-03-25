@@ -4,13 +4,13 @@ namespace WEEEOpen\Tarallo\Test\Query;
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Query\GetQuery;
 
-class QueryFieldDepthTest extends TestCase{
+class DepthTest extends TestCase{
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Depth
-	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testInvalidDepthNaN() {
@@ -23,7 +23,7 @@ class QueryFieldDepthTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Depth
-	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testInvalidDepthNegative() {

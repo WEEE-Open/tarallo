@@ -4,14 +4,14 @@ namespace WEEEOpen\Tarallo\Test\Query;
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Query\GetQuery;
 
-class QueryFieldParentTest extends TestCase{
+class ParentTest extends TestCase{
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
-	 * @covers         \WEEEOpen\Tarallo\Query\Field\Parent
-	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\ParentField
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 */
 	public function testInvalidParentNaN() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -23,8 +23,8 @@ class QueryFieldParentTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
-	 * @covers         \WEEEOpen\Tarallo\Query\Field\Parent
-	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\ParentField
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 */
 	public function testInvalidParentNegative() {
 		$this->expectException(\InvalidArgumentException::class);

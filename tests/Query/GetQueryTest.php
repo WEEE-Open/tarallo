@@ -94,7 +94,7 @@ class GetQueryTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\Depth
-	 * @covers \WEEEOpen\Tarallo\Query\AbstractQueryField
+	 * @covers \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 */
 	public function testDuplicateField() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -149,11 +149,11 @@ class GetQueryTest extends TestCase {
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Location
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Depth
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Language
-	 * @covers         \WEEEOpen\Tarallo\Query\Field\Parent
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\ParentField
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Search
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Sort
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Token
-	 * @covers         \WEEEOpen\Tarallo\Query\AbstractQueryField
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 *
@@ -180,7 +180,7 @@ class GetQueryTest extends TestCase {
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
-	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testMultipleFields() {
