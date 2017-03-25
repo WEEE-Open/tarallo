@@ -8,9 +8,9 @@ class QueryFieldParentTest extends TestCase{
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldParent
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Parent
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 */
 	public function testInvalidParentNaN() {
@@ -21,9 +21,9 @@ class QueryFieldParentTest extends TestCase{
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldParent
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Parent
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 */
 	public function testInvalidParentNegative() {

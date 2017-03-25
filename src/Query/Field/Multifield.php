@@ -1,8 +1,8 @@
 <?php
-namespace WEEEOpen\Tarallo\Query;
+namespace WEEEOpen\Tarallo\Query\Field;
 
 
-abstract class QueryFieldMultifield extends AbstractQueryField implements QueryField {
+abstract class Multifield extends AbstractQueryField implements QueryField {
 	protected function arrayInit() {
 		if($this->content === null) {
 			$this->content = [];

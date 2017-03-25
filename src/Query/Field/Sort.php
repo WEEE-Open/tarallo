@@ -1,8 +1,8 @@
 <?php
-namespace WEEEOpen\Tarallo\Query;
+namespace WEEEOpen\Tarallo\Query\Field;
 
 
-class QueryFieldSort extends AbstractQueryField implements QueryField {
+class Sort extends AbstractQueryField implements QueryField {
 	public function __construct($parameter) {
 		$pieces = explode(",", $parameter);
 		$keys = [];

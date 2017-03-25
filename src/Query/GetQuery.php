@@ -16,19 +16,19 @@ class GetQuery extends AbstractQuery {
 	protected function queryFieldsFactory($query, $parameter) {
 		switch($query) {
 			case self::FIELD_LOCATION:
-				return new QueryFieldLocation($parameter);
+				return new Field\Location($parameter);
 			case self::FIELD_SEARCH:
-				return new QueryFieldSearch($parameter);
+				return new Field\Search($parameter);
 			case self::FIELD_SORT:
-				return new QueryFieldSort($parameter);
+				return new Field\Sort($parameter);
 			case self::FIELD_DEPTH:
-				return new QueryFieldDepth($parameter);
+				return new Field\Depth($parameter);
 			case self::FIELD_PARENT:
-				return new QueryFieldParent($parameter);
+				return new Field\ParentField($parameter);
 			case self::FIELD_LANGUAGE:
-				return new QueryFieldLanguage($parameter);
+				return new Field\Language($parameter);
 			case self::FIELD_TOKEN:
-				return new QueryFieldToken($parameter);
+				return new Field\Token($parameter);
 			default:
 				throw new \InvalidArgumentException('Unknown field ' . $query);
 		}
@@ -46,7 +46,7 @@ class GetQuery extends AbstractQuery {
 						$this->queryFieldsFactory($pieces[ $i ], $pieces[ $i + 1 ]));
 				} else {
 					/**
-					 * @var $previous QueryField
+					 * @var $previous Field\QueryField
 					 */
 					$previous->add($pieces[ $i + 1 ]);
 				}

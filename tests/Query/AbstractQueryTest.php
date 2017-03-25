@@ -14,9 +14,9 @@ class AbstractQueryTest extends TestCase{
 	 *
 	 * @covers       \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses         \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @uses         \WEEEOpen\Tarallo\Query\QueryFieldMultifield
-	 * @uses         \WEEEOpen\Tarallo\Query\QueryFieldDepth
+	 * @uses         \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses         \WEEEOpen\Tarallo\Query\Field\Multifield
+	 * @uses         \WEEEOpen\Tarallo\Query\Field\Depth
 	 * @uses         \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 */
 	public function testQueryStringNormalization($in, $expected) {

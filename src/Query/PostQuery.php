@@ -11,9 +11,9 @@ class PostQuery extends AbstractQuery {
 	protected function queryFieldsFactory($query, $parameter) {
 		switch($query) {
 			case self::FIELD_LOGIN:
-				return new QueryFieldLogin($parameter);
+				return new Field\Login($parameter);
 			case self::FIELD_EDIT:
-				return new QueryFieldEdit($parameter);
+				return new Field\Edit($parameter);
 			default:
 				throw new \InvalidArgumentException('Unknown field ' . $query);
 		}
@@ -30,7 +30,7 @@ class PostQuery extends AbstractQuery {
 		return $this;
 	}
 
-	protected function addQueryField($name, QueryField $qf) {
+	protected function addQueryField($name, Field\QueryField $qf) {
 		// limit to one...
 		$this->queryFields = [$name => $qf];
 	}
@@ -62,9 +62,9 @@ class PostQuery extends AbstractQuery {
 			throw new \LogicException('Trying to run an empty query');
 		}
 
-		if($this->queryFields instanceof QueryFieldLogin) {
+		if($this->queryFields instanceof Field\Login) {
 			return [];
-		} else if($this->queryFields instanceof QueryFieldEdit) {
+		} else if($this->queryFields instanceof Field\Edit) {
 			if($user === null) {
 				throw new \Exception('Authentication needed');
 			}

@@ -3,7 +3,6 @@ namespace WEEEOpen\Tarallo\Query;
 
 
 use WEEEOpen\Tarallo\Database;
-use WEEEOpen\Tarallo\User;
 
 abstract class AbstractQuery {
 	protected $built = false;
@@ -13,7 +12,7 @@ abstract class AbstractQuery {
 	 * @param $query string representing query type (Login, Location, etc...)
 	 * @param $parameter string parameters passed to QueryField constructor
 	 *
-	 * @return QueryField|null
+	 * @return Field\QueryField|null
 	 */
 	abstract protected function queryFieldsFactory($query, $parameter);
 
@@ -43,7 +42,7 @@ abstract class AbstractQuery {
 		return $this->built;
 	}
 
-	protected function addQueryField($name, QueryField $qf) {
+	protected function addQueryField($name, Field\QueryField $qf) {
 		$this->queryFields[$name] = $qf;
 	}
 

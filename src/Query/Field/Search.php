@@ -1,8 +1,8 @@
 <?php
-namespace WEEEOpen\Tarallo\Query;
+namespace WEEEOpen\Tarallo\Query\Field;
 
 
-class QueryFieldSearch extends QueryFieldMultifield implements QueryField {
+class Search extends Multifield implements QueryField {
 	public function __construct($parameter) {
 		$pieces = explode("=", $parameter);
 		if(count($pieces) !== 2 || strlen($pieces[0]) === 0 || strlen($pieces[1]) === 0) {

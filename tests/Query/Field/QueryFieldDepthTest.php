@@ -7,9 +7,9 @@ use WEEEOpen\Tarallo\Query\GetQuery;
 class QueryFieldDepthTest extends TestCase{
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldDepth
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Depth
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
@@ -20,9 +20,9 @@ class QueryFieldDepthTest extends TestCase{
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldDepth
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Depth
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */

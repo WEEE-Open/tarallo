@@ -7,7 +7,7 @@ use WEEEOpen\Tarallo\Query\GetQuery;
 class QueryFieldSortTest extends TestCase{
 	/**
 	 * @uses           \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSort
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Sort
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
@@ -18,7 +18,7 @@ class QueryFieldSortTest extends TestCase{
 
 	/**
 	 * @uses           \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSort
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Sort
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
@@ -29,7 +29,7 @@ class QueryFieldSortTest extends TestCase{
 
 	/**
 	 * @uses           \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSort
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Sort
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @depends        testInvalidSortNoKey
@@ -41,7 +41,7 @@ class QueryFieldSortTest extends TestCase{
 
 	/**
 	 * @uses           \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSort
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Sort
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @depends        testInvalidSortNoOrder
@@ -53,7 +53,7 @@ class QueryFieldSortTest extends TestCase{
 
 	/**
 	 * @uses           \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSort
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Sort
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @depends        testInvalidSortNoKey
@@ -65,7 +65,7 @@ class QueryFieldSortTest extends TestCase{
 
 	/**
 	 * @uses           \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSort
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Sort
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @depends        testInvalidSortNoOrder
@@ -77,7 +77,7 @@ class QueryFieldSortTest extends TestCase{
 
 	/**
 	 * @uses           \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSort
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Sort
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
@@ -87,7 +87,7 @@ class QueryFieldSortTest extends TestCase{
 
 	/**
 	 * @uses           \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSort
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Sort
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @depends        testSortValidSingle
@@ -98,7 +98,7 @@ class QueryFieldSortTest extends TestCase{
 
 	/**
 	 * @uses           \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSort
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Sort
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @depends        testSortValidSingle
@@ -110,7 +110,7 @@ class QueryFieldSortTest extends TestCase{
 
 	/**
 	 * @uses           \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSort
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Sort
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @depends        testSortInvalidDuplicateKey

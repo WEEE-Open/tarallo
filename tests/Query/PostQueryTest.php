@@ -45,7 +45,7 @@ class PostQueryTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses   \WEEEOpen\Tarallo\User
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLogin
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Login
 	 */
 	public function testRunEmptyQuery() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -58,8 +58,8 @@ class PostQueryTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses   \WEEEOpen\Tarallo\User
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLogin
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Login
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\PostJSON
 	 */
 	public function testRunEmptyQueryBody() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -72,8 +72,8 @@ class PostQueryTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses   \WEEEOpen\Tarallo\User
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLogin
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Login
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\PostJSON
 	 */
 	public function testRunNullQuery() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -86,8 +86,8 @@ class PostQueryTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses   \WEEEOpen\Tarallo\User
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLogin
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Login
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\PostJSON
 	 */
 	public function testRunNullBody() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -99,8 +99,8 @@ class PostQueryTest extends TestCase {
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldEdit
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Edit
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\PostJSON
 	 */
 	public function testEmptyJSONIsValid() {
 		$this->assertEquals((string) (new PostQuery())->fromString('/Edit', '{}'), '{}');
@@ -109,8 +109,8 @@ class PostQueryTest extends TestCase {
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldEdit
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Edit
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\PostJSON
 	 * @uses   \WEEEOpen\Tarallo\User
 	 */
 	public function testNullDatabaseError() {
@@ -120,8 +120,8 @@ class PostQueryTest extends TestCase {
 
 	/**
 	 * @covers  \WEEEOpen\Tarallo\Query\PostQuery
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldEdit
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\PostJSON
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\Edit
 	 * @covers  \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @depends testEmptyJSONIsValid
 	 */
@@ -132,8 +132,8 @@ class PostQueryTest extends TestCase {
 
 	/**
 	 * @covers  \WEEEOpen\Tarallo\Query\PostQuery
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldEdit
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\PostJSON
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\Edit
 	 * @covers  \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @depends testEmptyJSONIsValid
 	 */
@@ -144,8 +144,8 @@ class PostQueryTest extends TestCase {
 
 	/**
 	 * @covers  \WEEEOpen\Tarallo\Query\PostQuery
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldEdit
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\PostJSON
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\Edit
 	 * @covers  \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testToStringWithoutQuery() {
@@ -154,9 +154,9 @@ class PostQueryTest extends TestCase {
 
 	/**
 	 * @covers  \WEEEOpen\Tarallo\Query\PostQuery
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldEdit
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldLogin
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\PostJSON
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\Edit
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\Login
 	 * @covers  \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @depends testEmptyJSONIsValid
 	 */
@@ -177,8 +177,8 @@ class PostQueryTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldEdit
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\PostJSON
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Edit
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testEmptyPOSTBody() {
@@ -188,8 +188,8 @@ class PostQueryTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldEdit
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\PostJSON
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Edit
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testNullPOSTBody() {
@@ -199,8 +199,8 @@ class PostQueryTest extends TestCase {
 
 	/**
 	 * @covers  \WEEEOpen\Tarallo\Query\PostQuery
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldEdit
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\PostJSON
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\Edit
 	 * @covers  \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @depends testEmptyJSONIsValid
 	 */
@@ -211,8 +211,8 @@ class PostQueryTest extends TestCase {
 
 	/**
 	 * @covers  \WEEEOpen\Tarallo\Query\PostQuery
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
-	 * @uses    \WEEEOpen\Tarallo\Query\QueryFieldEdit
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\PostJSON
+	 * @uses    \WEEEOpen\Tarallo\Query\Field\Edit
 	 * @covers  \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testEmptyQueryStringAndBody() {

@@ -1,8 +1,8 @@
 <?php
-namespace WEEEOpen\Tarallo\Query;
+namespace WEEEOpen\Tarallo\Query\Field;
 
 
-abstract class QueryFieldPostJSON extends AbstractQueryField implements QueryField {
+abstract class PostJSON extends AbstractQueryField implements QueryField {
 	public function __construct($parameter) {
 		if(!is_string($parameter) || $parameter === '') {
 			throw new \InvalidArgumentException('POST requests must contain a body (in JSON format)');

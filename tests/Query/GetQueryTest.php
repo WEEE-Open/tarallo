@@ -67,9 +67,9 @@ class GetQueryTest extends TestCase {
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldMultifield
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Multifield
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\PostJSON
 	 * @uses   \WEEEOpen\Tarallo\User
 	 */
 	public function testNullDatabaseError() {
@@ -79,8 +79,8 @@ class GetQueryTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldMultifield
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testBuildTwice() {
@@ -90,10 +90,10 @@ class GetQueryTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldMultifield
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldDepth
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Depth
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 */
 	public function testDuplicateField() {
@@ -103,8 +103,8 @@ class GetQueryTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldMultifield
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testMissingParameter() {
@@ -114,10 +114,10 @@ class GetQueryTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldMultifield
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldDepth
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Depth
 	 */
 	public function testMissingParameterMismatch() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -146,15 +146,15 @@ class GetQueryTest extends TestCase {
 	 * @dataProvider   providerTestUnchangedValidNonDefaultStrings
 	 *
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldDepth
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldLanguage
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldParent
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSearch
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSort
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldToken
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Location
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Depth
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Language
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Parent
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Search
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Sort
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Token
 	 * @covers         \WEEEOpen\Tarallo\Query\AbstractQueryField
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 *
 	 * @param $string GetQuery string
@@ -178,8 +178,8 @@ class GetQueryTest extends TestCase {
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldMultifield
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldLocation
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Multifield
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */

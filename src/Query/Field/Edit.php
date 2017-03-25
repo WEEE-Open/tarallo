@@ -1,8 +1,8 @@
 <?php
-namespace WEEEOpen\Tarallo\Query;
+namespace WEEEOpen\Tarallo\Query\Field;
 
 
-class QueryFieldEdit extends QueryFieldPostJSON implements QueryField {
+class Edit extends PostJSON implements QueryField {
 	protected function parseContent($array) {
 		// TODO: Implement parseQueryContent() method.
 	}

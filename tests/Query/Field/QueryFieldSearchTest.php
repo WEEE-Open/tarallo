@@ -7,7 +7,7 @@ use WEEEOpen\Tarallo\Query\GetQuery;
 class QueryFieldSearchTest extends TestCase{
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSearch
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Search
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
@@ -18,7 +18,7 @@ class QueryFieldSearchTest extends TestCase{
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSearch
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Search
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
@@ -29,10 +29,10 @@ class QueryFieldSearchTest extends TestCase{
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldSearch
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Search
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 */
 	public function testSearchValid() {
 		$this->assertEquals((new GetQuery())->fromString('/Search/foo=bar'), '/Search/foo=bar');

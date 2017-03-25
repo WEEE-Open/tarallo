@@ -1,8 +1,8 @@
 <?php
-namespace WEEEOpen\Tarallo\Query;
+namespace WEEEOpen\Tarallo\Query\Field;
 
 
-class QueryFieldLogin extends QueryFieldPostJSON implements QueryField, \JsonSerializable {
+class Login extends PostJSON implements QueryField, \JsonSerializable {
 	private $username = null;
 	private $password = null;
 

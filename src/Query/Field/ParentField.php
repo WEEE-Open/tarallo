@@ -1,8 +1,8 @@
 <?php
-namespace WEEEOpen\Tarallo\Query;
+namespace WEEEOpen\Tarallo\Query\Field;
 
 
-class QueryFieldDepth extends AbstractQueryField implements QueryField {
+class ParentField extends AbstractQueryField implements QueryField {
 	public function __construct($parameter) {
 		if(!is_numeric($parameter)) {
 			throw new \InvalidArgumentException($parameter . ' must be a number');
@@ -16,6 +16,6 @@ class QueryFieldDepth extends AbstractQueryField implements QueryField {
 	}
 
 	protected function nonDefaultToString() {
-		return '/Depth/' . $this->getContent();
+		return '/Parent/' . $this->getContent();
 	}
 }
