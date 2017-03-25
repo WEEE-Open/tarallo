@@ -7,7 +7,8 @@ class Edit extends PostJSON implements QueryField {
 		// TODO: Implement parseQueryContent() method.
 	}
 
-	protected function nonDefaultToString() {
-		// TODO: Implement nonDefaultToString() method.
+	public function __toString() {
+		// TODO: Implement __toString() method.
+		return '{}';
 	}
 }

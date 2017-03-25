@@ -7,7 +7,7 @@ class Location extends Multifield implements QueryField {
 		$this->add($parameter);
 	}
 
-	protected function nonDefaultToString() {
+	public function __toString() {
 		$result = '';
 		foreach($this->getContent() as $location) {
 			$result .= '/Location/' . $location;

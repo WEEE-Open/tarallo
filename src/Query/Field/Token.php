@@ -6,7 +6,7 @@ class Token extends AbstractQueryField implements QueryField {
 		$this->content = $parameter;
 	}
 
-	protected function nonDefaultToString() {
+	public function __toString() {
 		return '/Token/' . $this->getContent();
 	}
 }

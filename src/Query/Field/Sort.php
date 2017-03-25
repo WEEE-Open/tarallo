@@ -29,7 +29,7 @@ class Sort extends AbstractQueryField implements QueryField {
 		}
 	}
 
-	protected function nonDefaultToString() {
+	public function __toString() {
 		$result = [];
 		foreach($this->getContent() as $key => $order) {
 			$result[] = $order . $key;

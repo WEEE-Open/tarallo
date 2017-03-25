@@ -15,7 +15,7 @@ class Depth extends AbstractQueryField implements QueryField {
 		}
 	}
 
-	protected function nonDefaultToString() {
+	public function __toString() {
 		return '/Depth/' . $this->getContent();
 	}
 }

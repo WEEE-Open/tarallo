@@ -28,7 +28,7 @@ class Login extends PostJSON implements QueryField, \JsonSerializable {
 		return ['username' => $this->username, 'password' => $this->password];
 	}
 
-	protected function nonDefaultToString() {
+	public function __toString() {
 		return json_encode($this);
 	}
 }

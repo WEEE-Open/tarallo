@@ -15,7 +15,7 @@ class ParentField extends AbstractQueryField implements QueryField {
 		}
 	}
 
-	protected function nonDefaultToString() {
+	public function __toString() {
 		return '/Parent/' . $this->getContent();
 	}
 }

@@ -21,23 +21,4 @@ abstract class PostJSON extends AbstractQueryField implements QueryField {
 	public function add($parameter) {
 		throw new \InvalidArgumentException('Invalid duplicate parameter in query string');
 	}
-
-	public function __toString() {
-		// TODO: empty objects turn into empty arrays... use JSON_FORCE_OBJECT? Always? Only when field should be an object? Most of them should be arrays
-		if($this->isDefault()) {
-			return '{}';
-		}
-
-		$string = json_encode($this);
-
-		if(json_last_error() !== JSON_ERROR_NONE) {
-			throw new \InvalidArgumentException('Failed converting query back to JSON: ' . json_last_error_msg());
-		}
-
-		if(!is_string($string)) {
-			throw new \InvalidArgumentException('Failed converting query back to JSON: unknown error (this should never happen, HOPEFULLY)');
-		}
-
-		return $string;
-	}
 }

@@ -12,7 +12,7 @@ class Search extends Multifield implements QueryField {
 		$this->add($pieces);
 	}
 
-	protected function nonDefaultToString() {
+	public function __toString() {
 		$result = '';
 		foreach($this->getContent() as $kvp) {
 			$result .= '/Search/' . implode('=', $kvp);

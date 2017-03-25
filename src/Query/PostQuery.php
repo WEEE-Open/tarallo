@@ -42,7 +42,7 @@ class PostQuery extends AbstractQuery {
 		if(empty($query)) {
 			return '{}';
 		} else {
-			list($content) = $query;
+			$content = array_pop($query);
 			return (string) $content;
 		}
 	}
