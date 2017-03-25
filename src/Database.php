@@ -52,4 +52,8 @@ class Database {
 		$s->bindValue(':n', $username);
 		$s->execute();
 	}
+
+	public function getUserFromLogin($username, $password) {
+		// TODO: implement, use password_verify().
+	}
 }

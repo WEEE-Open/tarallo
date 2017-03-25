@@ -67,7 +67,8 @@ class PostQuery extends AbstractQuery {
 		$query = reset($fields);
 
 		if($query instanceof Field\Login) {
-			$query->getContent();
+			$login = $query->getContent();
+			$database->getUserFromLogin($login['username'], $login['password']);
 		} else if($query instanceof Field\Edit) {
 			if($user === null) {
 				throw new \Exception('Authentication needed');
