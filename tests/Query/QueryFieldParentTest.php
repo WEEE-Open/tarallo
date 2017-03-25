@@ -31,16 +31,8 @@ class QueryFieldParentTest extends TestCase{
 		(new GetQuery())->fromString('/Location/test/Parent/-1');
 	}
 
-	/**
-	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldLocation
-	 * @uses           \WEEEOpen\Tarallo\Query\QueryFieldMultifield
-	 * @covers         \WEEEOpen\Tarallo\Query\QueryFieldParent
-	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQueryField
-	 */
-	public function testParentZeroDefault() {
-		$this->assertEquals((string) (new GetQuery())->fromString('/Location/test/Parent/0'), '/Location/test',
-			'Parent=0 is default, ignore it when casting to string');
-	}
+	//public function testParentZeroDefault() {
+	//	$this->assertEquals((string) (new GetQuery())->fromString('/Location/test/Parent/0'), '/Location/test',
+	//		'Parent=0 is default, ignore it when casting to string');
+	//}
 }

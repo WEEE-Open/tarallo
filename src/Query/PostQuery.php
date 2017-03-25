@@ -58,10 +58,6 @@ class PostQuery extends AbstractQuery {
 			throw new \LogicException('Trying to run an empty query');
 		}
 
-		if($this->queryFields === null || !($this->queryFields instanceof QueryField)) {
-			throw new \LogicException('Trying to run a uninitialized query');
-		}
-
 		if($this->queryFields instanceof QueryFieldLogin) {
 			return [];
 		} else if($this->queryFields instanceof QueryFieldEdit) {
