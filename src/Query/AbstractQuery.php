@@ -2,6 +2,9 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
+use WEEEOpen\Tarallo\Database;
+use WEEEOpen\Tarallo\User;
+
 abstract class AbstractQuery {
 	protected $built = false;
 	private $queryFields = [];
@@ -66,4 +69,6 @@ abstract class AbstractQuery {
 
 		return $string;
 	}
+
+	abstract public function run($user, Database $db);
 }

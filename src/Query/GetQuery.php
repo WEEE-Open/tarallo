@@ -2,6 +2,8 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
+use WEEEOpen\Tarallo\Database;
+
 class GetQuery extends AbstractQuery {
 	const FIELD_LOCATION = 'Location';
 	const FIELD_SEARCH = 'Search';
@@ -63,5 +65,12 @@ class GetQuery extends AbstractQuery {
 		}
 
 		return $result;
+	}
+
+	public function run($user, Database $db) {
+		if(!$this->isBuilt()) {
+			throw new \LogicException('Cannot run a query without building it first');
+		}
+		// TODO: Implement run() method.
 	}
 }

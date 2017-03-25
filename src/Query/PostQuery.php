@@ -55,6 +55,10 @@ class PostQuery extends AbstractQuery {
 	 */
 	public function run($user, Tarallo\Database $database) {
 		if(!$this->isBuilt()) {
+			throw new \LogicException('Cannot run a query without building it first');
+		}
+
+		if(!$this->isBuilt()) {
 			throw new \LogicException('Trying to run an empty query');
 		}
 

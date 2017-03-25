@@ -4,6 +4,7 @@ namespace WEEEOpen\Tarallo\Test\Query;
 
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Query\PostQuery;
+use WEEEOpen\Tarallo;
 
 /*
  * Why are there tests covering classes other than PostQuery?
@@ -20,6 +21,81 @@ use WEEEOpen\Tarallo\Query\PostQuery;
  */
 
 class PostQueryTest extends TestCase {
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
+	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
+	 */
+	public function testEmptyCast() {
+		$this->assertEquals((string) (new PostQuery()), '{}');
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
+	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses   \WEEEOpen\Tarallo\User
+	 */
+	public function testRunWithoutBuilding() {
+		$this->expectException(\LogicException::class);
+		$db = $this->createMock(Tarallo\Database::class);
+		(new PostQuery())->run(new Tarallo\User('example', 'example'), $db);
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
+	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses   \WEEEOpen\Tarallo\User
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLogin
+	 */
+	public function testRunEmptyQuery() {
+		$this->expectException(\InvalidArgumentException::class);
+		$db = $this->createMock(Tarallo\Database::class);
+		$query = (new PostQuery())->fromString('', '{}');
+		$query->run(new Tarallo\User('example', 'example'), $db);
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
+	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses   \WEEEOpen\Tarallo\User
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLogin
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
+	 */
+	public function testRunEmptyQueryBody() {
+		$this->expectException(\InvalidArgumentException::class);
+		$db = $this->createMock(Tarallo\Database::class);
+		$query = (new PostQuery())->fromString('/Login', '');
+		$query->run(new Tarallo\User('example', 'example'), $db);
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
+	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses   \WEEEOpen\Tarallo\User
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLogin
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
+	 */
+	public function testRunNullQuery() {
+		$this->expectException(\InvalidArgumentException::class);
+		$db = $this->createMock(Tarallo\Database::class);
+		$query = (new PostQuery())->fromString(null, '{}');
+		$query->run(new Tarallo\User('example', 'example'), $db);
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
+	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses   \WEEEOpen\Tarallo\User
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldLogin
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
+	 */
+	public function testRunNullBody() {
+		$this->expectException(\InvalidArgumentException::class);
+		$db = $this->createMock(Tarallo\Database::class);
+		$query = (new PostQuery())->fromString('/Login', null);
+		$query->run(new Tarallo\User('example', 'example'), $db);
+	}
+
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
@@ -28,6 +104,18 @@ class PostQueryTest extends TestCase {
 	 */
 	public function testEmptyJSONIsValid() {
 		$this->assertEquals((string) (new PostQuery())->fromString('/Edit', '{}'), '{}');
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Query\PostQuery
+	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldEdit
+	 * @uses   \WEEEOpen\Tarallo\Query\QueryFieldPostJSON
+	 * @uses   \WEEEOpen\Tarallo\User
+	 */
+	public function testNullDatabaseError() {
+		$this->expectException(\TypeError::class);
+		(new PostQuery())->fromString('/Edit', '{}')->run(new Tarallo\User('example', 'example'), null);
 	}
 
 	/**
