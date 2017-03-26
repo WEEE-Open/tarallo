@@ -2,6 +2,7 @@
 namespace WEEEOpen\Tarallo\Query;
 
 use WEEEOpen\Tarallo;
+use WEEEOpen\Tarallo\InvalidParameterException;
 
 class PostQuery extends AbstractQuery {
 	const FIELD_LOGIN = 'Login';
@@ -14,13 +15,13 @@ class PostQuery extends AbstractQuery {
 			case self::FIELD_EDIT:
 				return new Field\Edit($parameter);
 			default:
-				throw new \InvalidArgumentException('Unknown field ' . $query);
+				throw new InvalidParameterException('Unknown field ' . $query);
 		}
 	}
 
 	protected function fromPieces($pieces, $requestBody) {
 		if(count($pieces) > 1) {
-			throw new \InvalidArgumentException('POST queries only allow one field, ' . count($pieces) . ' given');
+			throw new InvalidParameterException('POST queries only allow one field, ' . count($pieces) . ' given');
 		}
 		$field = $pieces[0];
 
@@ -70,7 +71,7 @@ class PostQuery extends AbstractQuery {
 			$login = $query->getContent();
 			$newUser = $database->getUserFromLogin($login['username'], $login['password']);
 			if($newUser === null) {
-				throw new \InvalidArgumentException('Wrong username or password');
+				throw new InvalidParameterException('Wrong username or password');
 			}
 			Tarallo\Session::start($newUser, $database);
 			return [];

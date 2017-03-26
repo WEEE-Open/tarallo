@@ -1,21 +1,22 @@
 <?php
 namespace WEEEOpen\Tarallo\Query\Field;
 
+use WEEEOpen\Tarallo\InvalidParameterException;
 
 class Login extends PostJSON implements QueryField, \JsonSerializable {
 	protected function parseContent($content) {
 		if(!isset($content['username']) || !isset($content['password'])) {
-			throw new \InvalidArgumentException('Request body must contain "username" and "password"');
+			throw new InvalidParameterException('Request body must contain "username" and "password"');
 		}
 
 		$this->content['username'] = (string) $content['username'];
 		$this->content['password'] = (string) $content['password'];
 
 		if($this->content['username'] === '') {
-			throw new \InvalidArgumentException('Username cannot be empty');
+			throw new InvalidParameterException('Username cannot be empty');
 		}
 		if($this->content['password'] === '') {
-			throw new \InvalidArgumentException('Password cannot be empty');
+			throw new InvalidParameterException('Password cannot be empty');
 		}
 	}
 

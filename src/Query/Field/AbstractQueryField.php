@@ -1,6 +1,7 @@
 <?php
 namespace WEEEOpen\Tarallo\Query\Field;
 
+use WEEEOpen\Tarallo\InvalidParameterException;
 
 abstract class AbstractQueryField implements QueryField {
 	protected $content = null;
@@ -10,6 +11,6 @@ abstract class AbstractQueryField implements QueryField {
 	}
 
 	public function add($parameter) {
-		throw new \InvalidArgumentException('Invalid duplicate parameter in query string');
+		throw new InvalidParameterException('Invalid duplicate parameter in query string');
 	}
 }

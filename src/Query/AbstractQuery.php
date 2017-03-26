@@ -3,6 +3,7 @@ namespace WEEEOpen\Tarallo\Query;
 
 
 use WEEEOpen\Tarallo\Database;
+use WEEEOpen\Tarallo\InvalidParameterException;
 
 abstract class AbstractQuery {
 	protected $built = false;
@@ -18,7 +19,7 @@ abstract class AbstractQuery {
 
 	public final function fromString($string, $requestBody = null) {
 		if(!is_string($string) || $string === '') {
-			throw new \InvalidArgumentException('Query string must be a non-empty string');
+			throw new InvalidParameterException('Query string must be a non-empty string');
 		}
 
 		$pieces = explode('/', $this->normalizeString($string));

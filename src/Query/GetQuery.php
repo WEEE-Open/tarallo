@@ -3,6 +3,7 @@ namespace WEEEOpen\Tarallo\Query;
 
 
 use WEEEOpen\Tarallo\Database;
+use WEEEOpen\Tarallo\InvalidParameterException;
 
 class GetQuery extends AbstractQuery {
 	const FIELD_LOCATION = 'Location';
@@ -30,7 +31,7 @@ class GetQuery extends AbstractQuery {
 			case self::FIELD_TOKEN:
 				return new Field\Token($parameter);
 			default:
-				throw new \InvalidArgumentException('Unknown field ' . $query);
+				throw new InvalidParameterException('Unknown field ' . $query);
 		}
 	}
 
@@ -52,7 +53,7 @@ class GetQuery extends AbstractQuery {
 				}
 				$i += 2;
 			} else {
-				throw new \InvalidArgumentException('Missing parameter for field ' . $pieces[ $i ]);
+				throw new InvalidParameterException('Missing parameter for field ' . $pieces[ $i ]);
 			}
 		}
 	}
