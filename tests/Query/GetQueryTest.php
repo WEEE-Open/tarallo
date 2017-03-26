@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\Test\Query;
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Query\GetQuery;
 use WEEEOpen\Tarallo;
+use WEEEOpen\Tarallo\InvalidParameterException;
 
 /*
  * Why are there tests covering classes other than GetQuery?
@@ -46,7 +47,7 @@ class GetQueryTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\User
 	 */
 	public function testRunEmptyQuery() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		$db = $this->createMock(Tarallo\Database::class);
 		$query = (new GetQuery())->fromString('');
 		$query->run(new Tarallo\User('example', 'example'), $db);
@@ -58,7 +59,7 @@ class GetQueryTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\User
 	 */
 	public function testRunNullQuery() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		$db = $this->createMock(Tarallo\Database::class);
 		$query = (new GetQuery())->fromString(null);
 		$query->run(new Tarallo\User('example', 'example'), $db);
@@ -97,7 +98,7 @@ class GetQueryTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 */
 	public function testDuplicateField() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Depth/2/Depth/6');
 	}
 
@@ -108,7 +109,7 @@ class GetQueryTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testMissingParameter() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Location');
 	}
 
@@ -120,7 +121,7 @@ class GetQueryTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\Depth
 	 */
 	public function testMissingParameterMismatch() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Location/Depth/3');
 	}
 
@@ -129,7 +130,7 @@ class GetQueryTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testUnrecognizedField() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/NotAField/test');
 	}
 
@@ -138,7 +139,7 @@ class GetQueryTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testEmptyQueryString() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('');
 	}
 

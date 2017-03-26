@@ -2,6 +2,7 @@
 namespace WEEEOpen\Tarallo\Test\Query;
 
 use PHPUnit\Framework\TestCase;
+use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Query\GetQuery;
 
 class SortTest extends TestCase{
@@ -12,7 +13,7 @@ class SortTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testInvalidSortNoKey() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Sort/+');
 	}
 
@@ -23,7 +24,7 @@ class SortTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testInvalidSortNoOrder() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Sort/key');
 	}
 
@@ -35,7 +36,7 @@ class SortTest extends TestCase{
 	 * @depends        testInvalidSortNoKey
 	 */
 	public function testInvalidSortNoKeyDouble() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Sort/+key,foo');
 	}
 
@@ -47,7 +48,7 @@ class SortTest extends TestCase{
 	 * @depends        testInvalidSortNoOrder
 	 */
 	public function testInvalidSortNoOrderDouble() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Sort/+key,+');
 	}
 
@@ -59,7 +60,7 @@ class SortTest extends TestCase{
 	 * @depends        testInvalidSortNoKey
 	 */
 	public function testInvalidSortNoKeyDoubleReverse() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Sort/foo,+key');
 	}
 
@@ -71,7 +72,7 @@ class SortTest extends TestCase{
 	 * @depends        testInvalidSortNoOrder
 	 */
 	public function testInvalidSortNoOrderDoubleReverse() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Sort/+,+key');
 	}
 
@@ -104,7 +105,7 @@ class SortTest extends TestCase{
 	 * @depends        testSortValidSingle
 	 */
 	public function testSortInvalidDuplicateKey() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Sort/+foo,-foo');
 	}
 
@@ -116,7 +117,7 @@ class SortTest extends TestCase{
 	 * @depends        testSortInvalidDuplicateKey
 	 */
 	public function testSortInvalidDuplicateKeyAlternative() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Sort/+foo,+foo');
 	}
 }

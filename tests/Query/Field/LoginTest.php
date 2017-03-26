@@ -2,6 +2,7 @@
 namespace WEEEOpen\Tarallo\Test\Query;
 
 use PHPUnit\Framework\TestCase;
+use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Query\PostQuery;
 
 
@@ -14,7 +15,7 @@ class LoginTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\PostJSON
 	 */
 	public function testInvalidLoginNoContent() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new PostQuery())->fromString('/Login', '');
 	}
 }

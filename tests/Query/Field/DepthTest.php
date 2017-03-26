@@ -2,6 +2,7 @@
 namespace WEEEOpen\Tarallo\Test\Query;
 
 use PHPUnit\Framework\TestCase;
+use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Query\GetQuery;
 
 class DepthTest extends TestCase{
@@ -14,7 +15,7 @@ class DepthTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testInvalidDepthNaN() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Location/test/Depth/foo');
 	}
 
@@ -27,7 +28,7 @@ class DepthTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testInvalidDepthNegative() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Location/test/Depth/-1');
 	}
 

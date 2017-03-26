@@ -2,6 +2,7 @@
 namespace WEEEOpen\Tarallo\Test\Query;
 
 use PHPUnit\Framework\TestCase;
+use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Query\GetQuery;
 
 class SearchTest extends TestCase{
@@ -12,7 +13,7 @@ class SearchTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testInvalidSearchNoKey() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Search/key=');
 	}
 
@@ -23,7 +24,7 @@ class SearchTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testInvalidSearchNoValue() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Search/=value');
 	}
 

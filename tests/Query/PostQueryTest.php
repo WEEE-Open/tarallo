@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\Test\Query;
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Query\PostQuery;
 use WEEEOpen\Tarallo;
+use WEEEOpen\Tarallo\InvalidParameterException;
 
 /*
  * Why are there tests covering classes other than PostQuery?
@@ -48,7 +49,7 @@ class PostQueryTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\Login
 	 */
 	public function testRunEmptyQuery() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		$db = $this->createMock(Tarallo\Database::class);
 		$query = (new PostQuery())->fromString('', '{}');
 		$query->run(new Tarallo\User('example', 'example'), $db);
@@ -62,7 +63,7 @@ class PostQueryTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\PostJSON
 	 */
 	public function testRunEmptyQueryBody() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		$db = $this->createMock(Tarallo\Database::class);
 		$query = (new PostQuery())->fromString('/Login', '');
 		$query->run(new Tarallo\User('example', 'example'), $db);
@@ -76,7 +77,7 @@ class PostQueryTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\PostJSON
 	 */
 	public function testRunNullQuery() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		$db = $this->createMock(Tarallo\Database::class);
 		$query = (new PostQuery())->fromString(null, '{}');
 		$query->run(new Tarallo\User('example', 'example'), $db);
@@ -90,7 +91,7 @@ class PostQueryTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\PostJSON
 	 */
 	public function testRunNullBody() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		$db = $this->createMock(Tarallo\Database::class);
 		$query = (new PostQuery())->fromString('/Login', null);
 		$query->run(new Tarallo\User('example', 'example'), $db);
@@ -138,7 +139,7 @@ class PostQueryTest extends TestCase {
 	 * @depends testEmptyJSONIsValid
 	 */
 	public function testDuplicateField() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new PostQuery())->fromString('/Edit/Edit', '{}');
 	}
 
@@ -161,7 +162,7 @@ class PostQueryTest extends TestCase {
 	 * @depends testEmptyJSONIsValid
 	 */
 	public function testMoreThanOneField() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new PostQuery())->fromString('/Edit/Login', '{}');
 	}
 
@@ -171,7 +172,7 @@ class PostQueryTest extends TestCase {
 	 * @depends testEmptyJSONIsValid
 	 */
 	public function testUnrecognizedField() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new PostQuery())->fromString('/NotAField', '{}');
 	}
 
@@ -182,7 +183,7 @@ class PostQueryTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testEmptyPOSTBody() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new PostQuery())->fromString('/Edit', '');
 	}
 
@@ -193,7 +194,7 @@ class PostQueryTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testNullPOSTBody() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new PostQuery())->fromString('/Edit', null);
 	}
 
@@ -205,7 +206,7 @@ class PostQueryTest extends TestCase {
 	 * @depends testEmptyJSONIsValid
 	 */
 	public function testEmptyQueryStringValidBody() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new PostQuery())->fromString('', '{}');
 	}
 
@@ -216,7 +217,7 @@ class PostQueryTest extends TestCase {
 	 * @covers  \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testEmptyQueryStringAndBody() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new PostQuery())->fromString('', '');
 	}
 }

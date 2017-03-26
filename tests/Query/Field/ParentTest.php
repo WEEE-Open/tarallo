@@ -2,6 +2,7 @@
 namespace WEEEOpen\Tarallo\Test\Query;
 
 use PHPUnit\Framework\TestCase;
+use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Query\GetQuery;
 
 class ParentTest extends TestCase{
@@ -14,7 +15,7 @@ class ParentTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 */
 	public function testInvalidParentNaN() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Location/test/Parent/foo');
 	}
 
@@ -27,7 +28,7 @@ class ParentTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 */
 	public function testInvalidParentNegative() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidParameterException::class);
 		(new GetQuery())->fromString('/Location/test/Parent/-1');
 	}
 
