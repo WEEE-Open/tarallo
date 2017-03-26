@@ -52,7 +52,7 @@ class PostQuery extends AbstractQuery {
 	 * @param Tarallo\Database $database
 	 *
 	 * @return array data for the response
-	 * @throws \LogicException if the query hasn't been built or an unknown field is encountered (which shouldn't happen here)
+	 * @throws \Exception because some stuff isn't implemented (yet)
 	 * @todo return a Response object?
 	 */
 	public function run($user, Tarallo\Database $database) {
@@ -68,7 +68,12 @@ class PostQuery extends AbstractQuery {
 
 		if($query instanceof Field\Login) {
 			$login = $query->getContent();
-			$database->getUserFromLogin($login['username'], $login['password']);
+			$newUser = $database->getUserFromLogin($login['username'], $login['password']);
+			if($newUser === null) {
+				throw new \InvalidArgumentException('Wrong username or password');
+			}
+			Tarallo\Session::start($newUser, $database);
+			return [];
 		} else if($query instanceof Field\Edit) {
 			if($user === null) {
 				throw new \Exception('Authentication needed');

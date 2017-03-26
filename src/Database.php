@@ -41,7 +41,7 @@ class Database {
 			return null;
 		} else {
 			$user = $s->fetch();
-			return new User($user['Name'], $user['Password']);
+			return new User($user['Name']);
 		}
 	}
 
@@ -53,7 +53,32 @@ class Database {
 		$s->execute();
 	}
 
+	/**
+	 * Log in a user, via username and password. Doesn't start any session!
+	 *
+	 * @param $username string username
+	 * @param $password string plaintext password
+	 *
+	 * @return null|User User if found and password is valid, null otherwise
+	 */
 	public function getUserFromLogin($username, $password) {
-		// TODO: implement, use password_verify().
+		$s = $this->getPDO()->prepare('SELECT Password FROM `User` WHERE `Name` = ?');
+		$s->execute([$username]);
+		if($s->rowCount() > 1) {
+			throw new \LogicException('Duplicate username in database (should never happen due to primary key)');
+		} else if($s->rowCount() === 0) {
+			return null;
+		} else {
+			$user = $s->fetch();
+			try {
+				return new User($user['Name'], $password, $user['Password']);
+			} catch(\InvalidArgumentException $e) {
+				if($e->getCode() === 72) {
+					return null;
+				} else {
+					throw $e;
+				}
+			}
+		}
 	}
 }
