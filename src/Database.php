@@ -32,16 +32,15 @@ class Database {
 	}
 
 	public function getUserFromSession($session) {
-		// TODO: check that session isn't expired
-		$s = $this->getPDO()->prepare('SELECT Name, Password FROM `User` WHERE `Session` = ?');
-		$s->execute([$session]);
+		$s = $this->getPDO()->prepare('SELECT Name, Password FROM `User` WHERE `Session` = ? AND `SessionExpiry` > ?');
+		$s->execute([$session, time()]);
 		if($s->rowCount() > 1) {
 			throw new \LogicException('Duplicate session session identifier in database');
 		} else if($s->rowCount() === 0) {
 			return null;
 		} else {
 			$user = $s->fetch();
-			return new User($user['Name']);
+			return new User($user['Name'], null, $user['password']);
 		}
 	}
 
@@ -51,6 +50,7 @@ class Database {
 		$s->bindValue(':se', $expiry);
 		$s->bindValue(':n', $username);
 		$s->execute();
+		$this->getPDO()->commit();
 	}
 
 	/**
