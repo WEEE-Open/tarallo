@@ -45,12 +45,14 @@ class Database {
 	}
 
 	public function setSessionFromUser($username, $session, $expiry) {
+		$pdo = $this->getPDO();
+		$pdo->beginTransaction();
 		$s = $this->getPDO()->prepare('UPDATE `User` SET `Session` = :s, SessionExpiry = :se WHERE `Name` = :n');
 		$s->bindValue(':s', $session);
 		$s->bindValue(':se', $expiry);
 		$s->bindValue(':n', $username);
 		$s->execute();
-		$this->getPDO()->commit();
+		$pdo->commit();
 	}
 
 	/**
@@ -71,7 +73,7 @@ class Database {
 		} else {
 			$user = $s->fetch();
 			try {
-				return new User($user['Name'], $password, $user['Password']);
+				return new User($username, $password, $user['Password']);
 			} catch(\InvalidArgumentException $e) {
 				if($e->getCode() === 72) {
 					return null;

@@ -25,7 +25,7 @@ class User {
 			throw new InvalidParameterException('Password must be null or a non-empty string');
 		}
 
-		if($password != null && strlen($password) === 0) {
+		if($password != null && strlen($hash) === 0) {
 			throw new InvalidParameterException('Hash must be null or a non-empty string');
 		}
 

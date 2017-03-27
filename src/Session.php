@@ -15,9 +15,9 @@ class Session {
 	 * @param Database $db
 	 */
 	public static function start(User $user, Database $db) {
-		$id = self::newIdentifier();
+		$id = self::newUniqueIdentifier($db);
 		self::setContent($id);
-		$db->setSessionFromUser($user->getUsername(), self::newUniqueIdentifier($db), time() + self::SESSION_DURATION);
+		$db->setSessionFromUser($user->getUsername(), $id, time() + self::SESSION_DURATION);
 	}
 
 	/**
