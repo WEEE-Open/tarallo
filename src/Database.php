@@ -65,7 +65,7 @@ class Database {
 		$s = $this->getPDO()->prepare('SELECT Password FROM `User` WHERE `Name` = ?');
 		$s->execute([$username]);
 		if($s->rowCount() > 1) {
-			throw new \LogicException('Duplicate username in database (should never happen due to primary key)');
+			throw new \LogicException('Duplicate username in database (should never happen altough MySQL doesn\'t allow TEXT fields to be UNIQUE, since that would be too easy and suitable for the current millennium)');
 		} else if($s->rowCount() === 0) {
 			return null;
 		} else {

@@ -3,7 +3,7 @@ SET time_zone = '+00:00';
 SET foreign_key_checks = 0;
 SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
--- DROP DATABASE `tarallo`;
+DROP DATABASE `tarallo`;
 CREATE DATABASE `tarallo` DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 USE `tarallo`;
 
@@ -105,13 +105,15 @@ CREATE TABLE `Tree` (
 
 CREATE TABLE `User` (
   `UserID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `Name` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Name` varchar(190) COLLATE utf8mb4_unicode_ci NOT NULL, -- 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
   `Password` text COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Session` char(32) COLLATE utf8mb4_unicode_ci,
 	`SessionExpiry` bigint(20),
 	CHECK((`Session` IS NOT NULL AND `SessionExpiry` IS NOT NULL)
 			OR (`Session` IS NULL AND `SessionExpiry` IS NULL)),
 	PRIMARY KEY (`UserID`),
-	UNIQUE KEY `Session` (`Session`)
+	UNIQUE KEY (`Session`),
+	UNIQUE KEY (`Name`),
+	INDEX (`Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
