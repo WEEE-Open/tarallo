@@ -76,12 +76,7 @@ class User {
 		return $this->hash;
 	}
 
-//	private function getHash() {
-//		if($this->hash === null) {
-//			password_hash($this->password, PASSWORD_DEFAULT);
-//		}
-//
-//		return $this->hash;
-//	}
-
+	public function __toString() {
+		return $this->username;
+	}
 }

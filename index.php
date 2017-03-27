@@ -52,5 +52,5 @@ if($query instanceof Query\PostQuery) {
 		Response::sendError('Error: ' . $e->getMessage());
 	}
 } else {
-	Response::sendSuccess([(string) $query]);
+	Response::sendSuccess(["query" => (string) $query, "user" => (string) $user]);
 }
