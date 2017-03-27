@@ -70,14 +70,14 @@ CREATE TABLE `ItemModification` (
 
 
 CREATE TABLE `ItemStatus` (
-  `StatusID` int(11) NOT NULL,
+  `StatusID` int(11) NOT NULL AUTO_INCREMENT,
   `StatusText` text NOT NULL,
   PRIMARY KEY (`StatusID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 CREATE TABLE `ItemType` (
-  `TypeID` int(11) NOT NULL,
+  `TypeID` int(11) NOT NULL AUTO_INCREMENT,
   `TypeText` text NOT NULL,
   PRIMARY KEY (`TypeID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
