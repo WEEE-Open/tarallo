@@ -4,21 +4,7 @@ namespace WEEEOpen\Tarallo\Query;
 use WEEEOpen\Tarallo;
 use WEEEOpen\Tarallo\InvalidParameterException;
 
-class PostQuery extends AbstractQuery {
-	const FIELD_LOGIN = 'Login';
-	const FIELD_EDIT = 'Edit';
-
-	protected function queryFieldsFactory($query, $parameter) {
-		switch($query) {
-			case self::FIELD_LOGIN:
-				return new Field\Login($parameter);
-			case self::FIELD_EDIT:
-				return new Field\Edit($parameter);
-			default:
-				throw new InvalidParameterException('Unknown field ' . $query);
-		}
-	}
-
+class LoginQuery extends AbstractQuery {
 	protected function fromPieces($pieces, $requestBody) {
 		if(count($pieces) > 1) {
 			throw new InvalidParameterException('POST queries only allow one field, ' . count($pieces) . ' given');
@@ -29,6 +15,11 @@ class PostQuery extends AbstractQuery {
 
 		return $this;
 	}
+
+    public function fromString($string)
+    {
+        // TODO: Implement fromString() method.
+    }
 
 	protected function addQueryField($name, Field\QueryField $qf) {
 		// limit to one...

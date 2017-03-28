@@ -13,6 +13,7 @@ if(!isset($_REQUEST['path']) || $_REQUEST['path'] === null) {
 	Response::sendFail('No query string');
 }
 
+// TODO: move this huge block of code somewhere else (factory pattern?)
 if($_SERVER['REQUEST_METHOD'] === 'GET') {
 	try {
 		$query = (new Query\GetQuery())->fromString($_REQUEST['path']);
@@ -21,13 +22,27 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
 		Response::sendFail('Error: ' . $e->getMessage());
 	}
 } else if($_SERVER['REQUEST_METHOD'] === 'POST') {
-	try {
-		$query = (new Query\PostQuery())->fromString($_REQUEST['path'], file_get_contents('php://input'));
-		// TODO: if Login, start session
-	} catch(\Exception $e) {
-		// TODO: better error messages
-		Response::sendFail('Error: ' . $e->getMessage());
-	}
+    $postJSON = file_get_contents('php://input');
+    if($_REQUEST['path'] === null || $_REQUEST['path'] === '') {
+        Response::sendFail('Missing JSON body in POST request');
+    } else if($_REQUEST['path'] === '/Edit') {
+        // TODO: more robust handling of "path"
+        try {
+            $query = (new Query\EditQuery())->fromString($postJSON);
+        } catch(\Exception $e) {
+            // TODO: better error messages
+            Response::sendFail('Error: ' . $e->getMessage());
+        }
+    } else if($_REQUEST['path'] === '/Login') {
+        try {
+            $query = (new Query\LoginQuery())->fromString($postJSON);
+        } catch(\Exception $e) {
+            // TODO: better error messages
+            Response::sendFail('Error: ' . $e->getMessage());
+        }
+    } else {
+        Response::sendFail('Unknown post request type: ' . $_REQUEST['path']);
+    }
 } else {
 	Response::sendFail('Unsupported HTTP method: ' . $_SERVER['REQUEST_METHOD']);
 }

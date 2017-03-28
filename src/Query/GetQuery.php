@@ -14,6 +14,14 @@ class GetQuery extends AbstractQuery {
 	const FIELD_LANGUAGE = 'Language';
 	const FIELD_TOKEN = 'Token';
 
+    private $queryFields = [];
+
+    /**
+     * @param $query string representing query type (Login, Location, etc...)
+     * @param $parameter string parameters passed to QueryField constructor
+     * @return null|Field\QueryField
+     * @throws InvalidParameterException for unknown parameters
+     */
 	protected function queryFieldsFactory($query, $parameter) {
 		switch($query) {
 			case self::FIELD_LOCATION:
@@ -35,7 +43,7 @@ class GetQuery extends AbstractQuery {
 		}
 	}
 
-	protected function fromPieces($pieces, $requestBody) {
+	protected function fromPieces($pieces) {
 		$i = 0;
 		$c = count($pieces);
 
@@ -57,6 +65,47 @@ class GetQuery extends AbstractQuery {
 			}
 		}
 	}
+
+
+    protected function addQueryField($name, Field\QueryField $qf) {
+        $this->queryFields[$name] = $qf;
+    }
+
+    protected function getAllQueryFields() {
+        return $this->queryFields;
+    }
+
+    protected function getQueryField($name) {
+        if(isset($this->queryFields[$name])) {
+            return $this->queryFields[$name];
+        } else {
+            return null;
+        }
+    }
+
+    protected function normalizeString($string) {
+        if(substr($string, 0, 1) === '/') {
+            $string = substr($string, 1); // remove first slash
+        }
+        if(substr($string, - 1) === '/') {
+            $string = substr($string, 0, strlen($string) - 1);
+        }
+
+        return $string;
+    }
+
+    public final function fromString($string) {
+        if(!is_string($string) || $string === '') {
+            throw new InvalidParameterException('Query string must be a non-empty string');
+        }
+
+        $pieces = explode('/', $this->normalizeString($string));
+        $this->fromPieces($pieces);
+
+        $this->setBuilt();
+
+        return $this;
+    }
 
 	public function __toString() {
 		$result = '';
