@@ -26,14 +26,10 @@ class LoginQuery extends PostJSONQuery implements \JsonSerializable {
 
     function jsonSerialize() {
         if($this->isBuilt()) {
-            return [];
+            return ['username' => $this->username, 'password' => $this->password];
         } else {
             throw new \LogicException('Cannot serialize query without building it first');
         }
-    }
-
-    public function __toString() {
-        return json_encode($this);
     }
 
 	/**

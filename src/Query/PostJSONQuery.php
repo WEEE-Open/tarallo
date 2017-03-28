@@ -3,7 +3,7 @@ namespace WEEEOpen\Tarallo\Query;
 
 use WEEEOpen\Tarallo\InvalidParameterException;
 
-abstract class PostJSONQuery extends AbstractQuery  {
+abstract class PostJSONQuery extends AbstractQuery implements \JsonSerializable {
 	public function fromString($parameter) {
 		if(!is_string($parameter) || $parameter === '') {
 			throw new InvalidParameterException('POST requests must contain a body (in JSON format)');
@@ -17,7 +17,15 @@ abstract class PostJSONQuery extends AbstractQuery  {
 		$this->parseContent($array);
 
         $this->setBuilt();
+
+        return $this;
 	}
 
 	protected abstract function parseContent($array);
+
+    public function __toString() {
+        return json_encode($this);
+    }
+
+    abstract function jsonSerialize();
 }

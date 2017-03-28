@@ -58,7 +58,10 @@ try {
 	assert(isset($user)); // pointless, sendError exit()s, this just stops the IDE from throwing warnings at me
 }
 
-if($query instanceof Query\PostQuery) {
+// WHY IS PHPSTORM COMPLAINING THAT $query MAY BE UNDEFINED?
+// THERE'S AN ASSERTION 10 LINES ABOVE HERE!
+// and asserting it's not null doesn't solve anything.
+if($query instanceof Query\AbstractQuery) {
 	// not really sold on this design, too much complexity hidden into a single function. But these objects ARE queries,
 	// it doesn't make much sense to extract everything and "parse" it again to convert it to a SQL query somewhere else...
 	try {
