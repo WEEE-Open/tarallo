@@ -29,6 +29,7 @@ if($_SERVER['REQUEST_METHOD'] === 'GET') {
         // TODO: more robust handling of "path"
         try {
             $query = (new Query\EditQuery())->fromString($postJSON);
+            // TODO: throw new \Exception('Authentication needed'); somewhere in there
         } catch(\Exception $e) {
             // TODO: better error messages
             Response::sendFail('Error: ' . $e->getMessage());

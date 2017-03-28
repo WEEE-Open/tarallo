@@ -4,40 +4,37 @@ namespace WEEEOpen\Tarallo\Query;
 use WEEEOpen\Tarallo;
 use WEEEOpen\Tarallo\InvalidParameterException;
 
-class LoginQuery extends AbstractQuery {
-	protected function fromPieces($pieces, $requestBody) {
-		if(count($pieces) > 1) {
-			throw new InvalidParameterException('POST queries only allow one field, ' . count($pieces) . ' given');
-		}
-		$field = $pieces[0];
+class LoginQuery extends PostJSONQuery implements \JsonSerializable {
+    private $username;
+    private $password;
 
-		$this->addQueryField($field, $this->queryFieldsFactory($field, $requestBody));
+    protected function parseContent($content) {
+        if(!isset($content['username']) || !isset($content['password'])) {
+            throw new InvalidParameterException('Request body must contain "username" and "password"');
+        }
 
-		return $this;
-	}
+        $this->username = (string) $content['username'];
+        $this->password = (string) $content['password'];
 
-    public function fromString($string)
-    {
-        // TODO: Implement fromString() method.
+        if($this->username === '') {
+            throw new InvalidParameterException('Username cannot be empty');
+        }
+        if($this->password === '') {
+            throw new InvalidParameterException('Password cannot be empty');
+        }
     }
 
-	protected function addQueryField($name, Field\QueryField $qf) {
-		// limit to one...
-		if(count($this->getAllQueryFields()) > 0) {
-			throw new \LogicException('Trying to submit multiple queries in a single POST request');
-		}
-		parent::addQueryField($name, $qf);
-	}
+    function jsonSerialize() {
+        if($this->isBuilt()) {
+            return [];
+        } else {
+            throw new \LogicException('Cannot serialize query without building it first');
+        }
+    }
 
-	public function __toString() {
-		$query = $this->getAllQueryFields();
-		if(empty($query)) {
-			return '{}';
-		} else {
-			$content = array_pop($query);
-			return (string) $content;
-		}
-	}
+    public function __toString() {
+        return json_encode($this);
+    }
 
 	/**
 	 * @param Tarallo\User|null $user current user ("recovered" from session)
@@ -52,29 +49,12 @@ class LoginQuery extends AbstractQuery {
 			throw new \LogicException('Cannot run a query without building it first');
 		}
 
-		$fields = $this->getAllQueryFields();
-		if(empty($fields)) {
-			throw new \LogicException('Trying to run an empty query');
-		}
-		$query = reset($fields);
-
-		if($query instanceof Field\Login) {
-			$login = $query->getContent();
-			$newUser = $database->getUserFromLogin($login['username'], $login['password']);
-			if($newUser === null) {
-				throw new InvalidParameterException('Wrong username or password');
-			}
-			Tarallo\Session::start($newUser, $database);
-			return [];
-		} else if($query instanceof Field\Edit) {
-			if($user === null) {
-				throw new \Exception('Authentication needed');
-			}
-			throw new \Exception('Not implemented (yet)');
-		} else {
-			throw new \LogicException('Cannot convert object of class ' . get_class($user) . ' to database query (should never happen)');
-		}
-
-		//return [];
+        $newUser = $database->getUserFromLogin($this->username, $this->password);
+        if($newUser === null) {
+            throw new InvalidParameterException('Wrong username or password');
+        } else {
+            Tarallo\Session::start($newUser, $database);
+            return [];
+        }
 	}
 }

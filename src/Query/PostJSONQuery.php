@@ -1,10 +1,10 @@
 <?php
-namespace WEEEOpen\Tarallo\Query\Field;
+namespace WEEEOpen\Tarallo\Query;
 
 use WEEEOpen\Tarallo\InvalidParameterException;
 
-abstract class PostJSON extends AbstractQueryField implements QueryField {
-	public function __construct($parameter) {
+abstract class PostJSONQuery extends AbstractQuery  {
+	public function fromString($parameter) {
 		if(!is_string($parameter) || $parameter === '') {
 			throw new InvalidParameterException('POST requests must contain a body (in JSON format)');
 		}
@@ -15,11 +15,9 @@ abstract class PostJSON extends AbstractQueryField implements QueryField {
 		}
 
 		$this->parseContent($array);
+
+        $this->setBuilt();
 	}
 
 	protected abstract function parseContent($array);
-
-	public function add($parameter) {
-		throw new InvalidParameterException('Invalid duplicate parameter in query string');
-	}
 }
