@@ -86,7 +86,7 @@ class Database {
 
 	private function depthPrepare($depth) {
         if(is_int($depth)) {
-            return 'WHERE `Depth` <= '.$depth;
+            return 'WHERE `Depth` <= :depth';
         } else {
             return 'WHERE `Depth` IS NOT NULL';
         }
@@ -136,6 +136,14 @@ class Database {
         }
     }
 
+    private function tokenPrepare($token) {
+        if(is_string($token) && $token !== null) {
+            return 'Token = :token'
+        } else {
+            return '';
+        }
+    }
+
     private static function isArrayAndFull($something) {
         if(is_array($something) && !empty($something)) {
             return true;
@@ -144,8 +152,30 @@ class Database {
         }
     }
 
-    private static function whereAnd() {
+    private static function implodeOptionalWhereAnd() {
         $args = func_get_args();
+        $where = self::implodeAnd($args);
+        if($where === '') {
+            return '';
+        } else {
+            return 'WHERE ' . $where;
+        }
+    }
+
+    private static function implodeOptionalAnd() {
+        $args = func_get_args();
+        return self::implodeAnd($args);
+    }
+
+    /**
+     * Join non-empty string arguments via " AND " to add in a WHERE clause.
+     *
+     * @see implodeOptionalAnd
+     * @see implodeOptionalWhereAnd
+     * @param $args string[]
+     * @return string empty string or WHERE clauses separated by AND (no WHERE itself)
+     */
+    private static function implodeAnd($args) {
         $stuff = [];
         foreach($args as $arg) {
             if(is_string($arg) && strlen($arg) > 0) {
@@ -156,13 +186,18 @@ class Database {
         if($c === 0) {
             return '';
         }
-        return 'WHERE ' . implode(' AND ', $stuff);
+        return implode(' AND ', $stuff);
     }
 
-	public function getItem($locations, $searches, $depth, $sortsAscending, $sortsDescending) {
-        $searchWhere = $this->searchPrepare($searches);
+    public function getItem($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token) {
+        $items = $this->getItemItself($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token);
+        // TODO: get features
+    }
+
+	public function getItemItself($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token) {
         $sortOrder = $this->sortPrepare($sortsAscending, $sortsDescending); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
-        $innerWhere = $this->whereAnd($this->depthPrepare($depth), $this->locationPrepare($locations));
+        $innerWhere = $this->implodeOptionalWhereAnd($this->depthPrepare($depth), $this->locationPrepare($locations));
+        $outerWhere = $this->implodeOptionalAnd($this->searchPrepare($searches), $this->tokenPrepare($token));
 
         /** @noinspection SqlResolve */
         $s = $this->getPDO()->prepare('
@@ -173,9 +208,13 @@ class Database {
             FROM Item
             '. $innerWhere .'
         )
-        '. $searchWhere . $sortOrder . ';
+        '. $outerWhere . $sortOrder . ';
 
 ');
         $s->execute();
-    }
+        if($s->rowCount() === 0) {
+            return [];
+        } else {
+            return $s->fetchAll();
+        }
 }
