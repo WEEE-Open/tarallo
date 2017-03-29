@@ -83,4 +83,99 @@ class Database {
 			}
 		}
 	}
+
+	private function depthPrepare($depth) {
+        if(is_int($depth)) {
+            return 'WHERE `Depth` <= '.$depth;
+        } else {
+            return 'WHERE `Depth` IS NOT NULL';
+        }
+    }
+
+	private function locationPrepare($locations) {
+        if(self::isArrayAndFull($locations)) {
+            $locationWhere = 'AND `Name` IN (';
+            foreach($locations as $k => $loc) {
+                $locationWhere .= ':location'.$k.', ';
+            }
+            return rtrim($locationWhere, ', ').')';
+        } else {
+            return '';
+        }
+    }
+
+
+    private function searchPrepare($searches) {
+        if(self::isArrayAndFull($searches)) {
+            $where = 'AND (';
+            foreach($searches as $k => $loc) {
+                $where .= '`Name` LIKE :search'.$k.' OR '; // TODO: %
+            }
+            return substr($where, 0, strlen($where)-4).')'; // remove last " OR "
+        } else {
+            return '';
+        }
+    }
+
+    private function sortPrepare($sortsAscending, $sortsDescending) {
+        if(self::isArrayAndFull($sortsAscending) || self::isArrayAndFull($sortsDescending)) {
+            $order = 'ORDER BY ';
+            if(self::isArrayAndFull($sortsAscending)) {
+                foreach($sortsAscending as $key) {
+                    $order .= $key . ' ASC, '; // TODO: comma?
+                }
+            }
+            if(self::isArrayAndFull($sortsAscending)) {
+                foreach($sortsAscending as $key) {
+                    $order .= $key . ' DESC, ';
+                }
+            }
+            return $order;
+        } else {
+            return '';
+        }
+    }
+
+    private static function isArrayAndFull($something) {
+        if(is_array($something) && !empty($something)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private static function whereAnd() {
+        $args = func_get_args();
+        $stuff = [];
+        foreach($args as $arg) {
+            if(is_string($arg) && strlen($arg) > 0) {
+                $stuff[] = $arg;
+            }
+        }
+        $c = count($stuff);
+        if($c === 0) {
+            return '';
+        }
+        return 'WHERE ' . implode(' AND ', $stuff);
+    }
+
+	public function getItem($locations, $searches, $depth, $sortsAscending, $sortsDescending) {
+        $searchWhere = $this->searchPrepare($searches);
+        $sortOrder = $this->sortPrepare($sortsAscending, $sortsDescending); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
+        $innerWhere = $this->whereAnd($this->depthPrepare($depth), $this->locationPrepare($locations));
+
+        /** @noinspection SqlResolve */
+        $s = $this->getPDO()->prepare('
+        SELECT `Name`, `Type`, `Status`, `Owner`, `SuppliedBy`, `Borrowed`, `Notes`
+        FROM Item, Tree
+        WHERE AncestorID = (
+            SELECT ItemID
+            FROM Item
+            '. $innerWhere .'
+        )
+        '. $searchWhere . $sortOrder . ';
+
+');
+        $s->execute();
+    }
 }
