@@ -32,7 +32,7 @@ class Database {
 	}
 
 	public function getUserFromSession($session) {
-		$s = $this->getPDO()->prepare('SELECT Name, Password FROM `User` WHERE `Session` = ? AND `SessionExpiry` > ?');
+		$s = $this->getPDO()->prepare('SELECT Name, Password FROM `User` WHERE `Session` = ? AND `SessionExpiry` > ? AND `Enabled` > 0');
 		$s->execute([$session, time()]);
 		if($s->rowCount() > 1) {
 			throw new \LogicException('Duplicate session session identifier in database');
@@ -47,7 +47,7 @@ class Database {
 	public function setSessionFromUser($username, $session, $expiry) {
 		$pdo = $this->getPDO();
 		$pdo->beginTransaction();
-		$s = $this->getPDO()->prepare('UPDATE `User` SET `Session` = :s, SessionExpiry = :se WHERE `Name` = :n');
+		$s = $this->getPDO()->prepare('UPDATE `User` SET `Session` = :s, SessionExpiry = :se WHERE `Name` = :n AND `Enabled` > 0');
 		$s->bindValue(':s', $session);
 		$s->bindValue(':se', $expiry);
 		$s->bindValue(':n', $username);
@@ -64,7 +64,7 @@ class Database {
 	 * @return null|User User if found and password is valid, null otherwise
 	 */
 	public function getUserFromLogin($username, $password) {
-		$s = $this->getPDO()->prepare('SELECT Password FROM `User` WHERE `Name` = ?');
+		$s = $this->getPDO()->prepare('SELECT Password FROM `User` WHERE `Name` = ? AND `Enabled` > 0');
 		$s->execute([$username]);
 		if($s->rowCount() > 1) {
 			throw new \LogicException('Duplicate username in database (should never happen altough MySQL doesn\'t allow TEXT fields to be UNIQUE, since that would be too easy and suitable for the current millennium)');
