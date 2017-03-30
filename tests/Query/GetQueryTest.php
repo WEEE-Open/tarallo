@@ -70,7 +70,7 @@ class GetQueryTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\Location
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\Multifield
-	 * @uses   \WEEEOpen\Tarallo\Query\Field\PostJSON
+	 * @uses   \WEEEOpen\Tarallo\Query\PostJSONQuery
 	 * @uses   \WEEEOpen\Tarallo\User
 	 */
 	public function testNullDatabaseError() {
