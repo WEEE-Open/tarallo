@@ -108,6 +108,9 @@ class Database {
     private function searchPrepare($searches) {
 		// TODO: this need more thought, searches are for Feature(s)
         if(self::isArrayAndFull($searches)) {
+        	//'SELECT ItemID
+			//FROM Item, Feature
+			//WHERE FeatureID '
             $where = 'AND (';
             foreach($searches as $k => $loc) {
                 $where .= '`Name` LIKE :search'.$k.' OR '; // TODO: %
@@ -197,8 +200,8 @@ class Database {
 
 	public function getItemItself($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token) {
 		$sortOrder  = $this->sortPrepare($sortsAscending, $sortsDescending); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
-		$innerWhere = $this->implodeOptionalWhereAnd($this->depthPrepare($depth), $this->locationPrepare($locations), $this->searchPrepare($searches));
-		$outerWhere = $this->implodeOptionalAnd($this->tokenPrepare($token));
+		$innerWhere = $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->searchPrepare($searches));
+		$outerWhere = $this->implodeOptionalAnd($this->depthPrepare($depth), $this->tokenPrepare($token));
 
 		// TODO: this will probably blow up in a spectacular way.
 		/** @noinspection SqlResolve */
