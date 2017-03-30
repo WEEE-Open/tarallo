@@ -106,6 +106,7 @@ class Database {
 
 
     private function searchPrepare($searches) {
+		// TODO: this need more thought, searches are for Feature(s)
         if(self::isArrayAndFull($searches)) {
             $where = 'AND (';
             foreach($searches as $k => $loc) {
@@ -138,7 +139,7 @@ class Database {
 
     private function tokenPrepare($token) {
         if(is_string($token) && $token !== null) {
-            return 'Token = :token'
+            return 'Token = :token';
         } else {
             return '';
         }
@@ -195,26 +196,28 @@ class Database {
     }
 
 	public function getItemItself($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token) {
-        $sortOrder = $this->sortPrepare($sortsAscending, $sortsDescending); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
-        $innerWhere = $this->implodeOptionalWhereAnd($this->depthPrepare($depth), $this->locationPrepare($locations));
-        $outerWhere = $this->implodeOptionalAnd($this->searchPrepare($searches), $this->tokenPrepare($token));
+		$sortOrder  = $this->sortPrepare($sortsAscending, $sortsDescending); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
+		$innerWhere = $this->implodeOptionalWhereAnd($this->depthPrepare($depth), $this->locationPrepare($locations), $this->searchPrepare($searches));
+		$outerWhere = $this->implodeOptionalAnd($this->tokenPrepare($token));
 
-        /** @noinspection SqlResolve */
-        $s = $this->getPDO()->prepare('
+		// TODO: this will probably blow up in a spectacular way.
+		/** @noinspection SqlResolve */
+		$s = $this->getPDO()->prepare('
         SELECT `Name`, `Type`, `Status`, `Owner`, `SuppliedBy`, `Borrowed`, `Notes`
         FROM Item, Tree
-        WHERE AncestorID = (
+        WHERE AncestorID IN (
             SELECT ItemID
             FROM Item
-            '. $innerWhere .'
+            ' . $innerWhere . '
         )
-        '. $outerWhere . $sortOrder . ';
+        ' . $outerWhere . $sortOrder . ';
 
-');
-        $s->execute();
-        if($s->rowCount() === 0) {
-            return [];
-        } else {
-            return $s->fetchAll();
-        }
+		');
+		$s->execute();
+		if($s->rowCount() === 0) {
+			return [];
+		} else {
+			return $s->fetchAll();
+		}
+	}
 }
