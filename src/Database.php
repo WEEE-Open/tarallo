@@ -92,12 +92,17 @@ class Database {
         }
     }
 
+    private function multipleIn($prefix, $array) {
+        $in = 'IN (';
+        foreach($array as $k => $v) {
+            $in .= $prefix . $k . ', ';
+        }
+        return substr($in, 0, strlen($in) - 2) . ')'; //remove last ', '
+    }
+
 	private function locationPrepare($locations) {
         if(self::isArrayAndFull($locations)) {
-            $locationWhere = 'AND `Name` IN (';
-            foreach($locations as $k => $loc) {
-                $locationWhere .= ':location'.$k.', ';
-            }
+            $locationWhere = 'AND `Name` ' . $this->multipleIn(':location', $locations);
             return rtrim($locationWhere, ', ').')';
         } else {
             return '';
@@ -193,24 +198,27 @@ class Database {
 
     public function getItem($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token) {
         $items = $this->getItemItself($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token);
-        // TODO: get features
+        $itemIDs = []; // TODO: implement
+        if(!empty($itemIDs)) {
+            $features = $this->getFeatures($itemIDs, $items);
+        }
     }
 
-	public function getItemItself($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token) {
+	private function getItemItself($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token) {
 		$sortOrder  = $this->sortPrepare($sortsAscending, $sortsDescending); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
 		$whereLocationToken = $this->implodeOptionalAnd($this->locationPrepare($locations), $this->tokenPrepare($token));
 		$searchWhere = $this->implodeOptionalAndAnd($this->searchPrepare($searches));
         $parentWhere = $this->implodeOptionalAnd(''); // TODO: implement, "WHERE Depth = 0" by default, use = to find only the needed roots (descendants are selected via /Depth)
-        $depthWhere  = $this->implodeOptionalAnd($this->depthPrepare($depth));
+        $depthDefaultWhere  = $this->implodeOptionalAnd($this->depthPrepare($depth), 'isDefault = 0');
 
-		// TODO: this will probably blow up in a spectacular way.
-        // search items by features, filter by location and token, tree lookup using these items as descendants
+		// This will probably blow up in a spectacular way.
+        // Search items by features, filter by location and token, tree lookup using these items as descendants
         // (for /Parent), tree lookup using new root items as roots (find all descendants), filter by depth,
         // join with items, SELECT.
         // TODO: somehow sort the result set (not the innermost query, Parent returns other items...).
 		/** @noinspection SqlResolve */
 		$s = $this->getPDO()->prepare('
-        SELECT `ItemID`, `ParentID`, `Depth`, `Notes` -- and whatever else is needed
+        SELECT `ItemID`, `ParentID`, `Depth`, `Notes` -- and whatever else is needed (TODO: Code)
         FROM Tree, Item
         WHERE Tree.ItemID = Item.ItemID
         AND AncestorID IN (
@@ -228,7 +236,7 @@ class Database {
                     ' . $searchWhere . '
                 )
             ) AND ' . $parentWhere . ';
-        ) ' . $depthWhere . '
+        ) ' . $depthDefaultWhere . '
         
 
 		');
@@ -236,7 +244,21 @@ class Database {
 		if($s->rowCount() === 0) {
 			return [];
 		} else {
-			return $s->fetchAll();
+			return $s->fetchAll(); // TODO: return Item objects
 		}
 	}
+
+	private function getFeatures($itemIDs, &$items) {
+        $inItemID = $this->multipleIn(':item', $itemIDs);
+        $s = $this->getPDO()->prepare('
+            SELECT FeatureID, ItemID, FeatureName AS Name, `Value`, ValueText
+            FROM Feature, ItemFeature
+            WHERE ItemFeature.FeatureID = Feature.FeatureID
+            AND ItemID ' . $inItemID . ';
+		');
+        $s->execute();
+        if($s->rowCount() === 0) {
+            // TODO: do stuff with $items
+        }
+    }
 }
