@@ -14,7 +14,7 @@ if(!isset($_REQUEST['path']) || $_REQUEST['path'] === null) {
 }
 
 try {
-	$query = Query\AbstractQuery::factory();
+	$query = Query\AbstractQuery::factory($_SERVER['REQUEST_METHOD'], $_REQUEST['path'], file_get_contents('php://input'));
 } catch(InvalidParameterException $e) {
 	Response::sendFail($e->getMessage());
 } catch(\Exception $e) {

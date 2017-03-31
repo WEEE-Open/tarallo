@@ -23,24 +23,23 @@ abstract class AbstractQuery {
 
 	abstract public function run($user, Database $db);
 
-	public static final function factory() {
-		if($_SERVER['REQUEST_METHOD'] === 'GET') {
-			return (new GetQuery())->fromString($_REQUEST['path']);
-		} else if($_SERVER['REQUEST_METHOD'] === 'POST') {
-			$postJSON = file_get_contents('php://input');
-			if($_REQUEST['path'] === null || $_REQUEST['path'] === '') {
+	public static final function factory($method, $path, $postJSON) {
+		if($method === 'GET') {
+			return (new GetQuery())->fromString($path);
+		} else if($method === 'POST') {
+			if($path === null || $path === '') {
 				throw new InvalidParameterException('Missing JSON body in POST request');
-			} else if($_REQUEST['path'] === '/Edit') {
+			} else if($path === '/Edit') {
 				// TODO: more robust handling of "path"
 				return (new EditQuery())->fromString($postJSON);
 				// TODO: throw new \Exception('Authentication needed'); somewhere in there
-			} else if($_REQUEST['path'] === '/Login') {
+			} else if($path === '/Login') {
 				return (new LoginQuery())->fromString($postJSON);
 			} else {
-				throw new InvalidParameterException('Unknown post request type: ' . $_REQUEST['path']);
+				throw new InvalidParameterException('Unknown post request type: ' . $path);
 			}
 		} else {
-			throw new InvalidParameterException('Unsupported HTTP method: ' . $_SERVER['REQUEST_METHOD']);
+			throw new InvalidParameterException('Unsupported HTTP method: ' . $method);
 		}
 	}
 }
