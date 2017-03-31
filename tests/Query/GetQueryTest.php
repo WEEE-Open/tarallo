@@ -26,19 +26,18 @@ class GetQueryTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
-	public function testEmptyCast() {
-		$this->assertEquals((string) (new GetQuery()), '');
+	public function testBuildEmptyQuery() {
+		$this->expectException(InvalidParameterException::class);
+		new GetQuery('');
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses   \WEEEOpen\Tarallo\User
 	 */
-	public function testRunWithoutBuilding() {
-		$this->expectException(\LogicException::class);
-		$db = $this->createMock(Tarallo\Database::class);
-		(new GetQuery())->run(new Tarallo\User('example', 'example'), $db);
+	public function testBuildNullQuery() {
+		$this->expectException(InvalidParameterException::class);
+		new GetQuery(null);
 	}
 
 	/**
@@ -49,7 +48,7 @@ class GetQueryTest extends TestCase {
 	public function testRunEmptyQuery() {
 		$this->expectException(InvalidParameterException::class);
 		$db = $this->createMock(Tarallo\Database::class);
-		$query = (new GetQuery())->fromString('');
+		$query = new GetQuery('');
 		$query->run(new Tarallo\User('example', 'example'), $db);
 	}
 
@@ -61,7 +60,7 @@ class GetQueryTest extends TestCase {
 	public function testRunNullQuery() {
 		$this->expectException(InvalidParameterException::class);
 		$db = $this->createMock(Tarallo\Database::class);
-		$query = (new GetQuery())->fromString(null);
+		$query = new GetQuery(null);
 		$query->run(new Tarallo\User('example', 'example'), $db);
 	}
 
@@ -75,18 +74,7 @@ class GetQueryTest extends TestCase {
 	 */
 	public function testNullDatabaseError() {
 		$this->expectException(\TypeError::class);
-		(new GetQuery())->fromString('/Location/foo')->run(new Tarallo\User('example', 'example'), null);
-	}
-
-	/**
-	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\Field\Location
-	 * @uses   \WEEEOpen\Tarallo\Query\Field\Multifield
-	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
-	 */
-	public function testBuildTwice() {
-		$this->expectException(\LogicException::class);
-		(new GetQuery())->fromString('/Location/test')->fromString('/Location/test');
+		(new GetQuery('/Location/foo'))->run(new Tarallo\User('example', 'example'), null);
 	}
 
 	/**
@@ -99,7 +87,7 @@ class GetQueryTest extends TestCase {
 	 */
 	public function testDuplicateField() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Depth/2/Depth/6');
+		new GetQuery('/Depth/2/Depth/6');
 	}
 
 	/**
@@ -110,7 +98,7 @@ class GetQueryTest extends TestCase {
 	 */
 	public function testMissingParameter() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Location');
+		new GetQuery('/Location');
 	}
 
 	/**
@@ -122,7 +110,7 @@ class GetQueryTest extends TestCase {
 	 */
 	public function testMissingParameterMismatch() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Location/Depth/3');
+		new GetQuery('/Location/Depth/3');
 	}
 
 	/**
@@ -131,7 +119,7 @@ class GetQueryTest extends TestCase {
 	 */
 	public function testUnrecognizedField() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/NotAField/test');
+		new GetQuery('/NotAField/test');
 	}
 
 	/**
@@ -140,7 +128,7 @@ class GetQueryTest extends TestCase {
 	 */
 	public function testEmptyQueryString() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('');
+		new GetQuery('');
 	}
 
 	/**
@@ -161,7 +149,7 @@ class GetQueryTest extends TestCase {
 	 * @param $string GetQuery string
 	 */
 	public function testUnchangedValidNonDefaultStrings($string) {
-		$this->assertEquals((string) (new GetQuery())->fromString($string), $string);
+		$this->assertEquals((string) new GetQuery($string), $string);
 	}
 
 
@@ -185,7 +173,6 @@ class GetQueryTest extends TestCase {
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testMultipleFields() {
-		$this->assertEquals((string) (new GetQuery())->fromString('/Location/foo/Location/bar'),
-			'/Location/foo/Location/bar');
+		$this->assertEquals((string) new GetQuery('/Location/foo/Location/bar'), '/Location/foo/Location/bar');
 	}
 }

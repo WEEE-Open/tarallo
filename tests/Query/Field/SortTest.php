@@ -14,7 +14,7 @@ class SortTest extends TestCase{
 	 */
 	public function testInvalidSortNoKey() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Sort/+');
+		new GetQuery('/Sort/+');
 	}
 
 	/**
@@ -25,7 +25,7 @@ class SortTest extends TestCase{
 	 */
 	public function testInvalidSortNoOrder() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Sort/key');
+		new GetQuery('/Sort/key');
 	}
 
 	/**
@@ -37,7 +37,7 @@ class SortTest extends TestCase{
 	 */
 	public function testInvalidSortNoKeyDouble() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Sort/+key,foo');
+		new GetQuery('/Sort/+key,foo');
 	}
 
 	/**
@@ -49,7 +49,7 @@ class SortTest extends TestCase{
 	 */
 	public function testInvalidSortNoOrderDouble() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Sort/+key,+');
+		new GetQuery('/Sort/+key,+');
 	}
 
 	/**
@@ -61,7 +61,7 @@ class SortTest extends TestCase{
 	 */
 	public function testInvalidSortNoKeyDoubleReverse() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Sort/foo,+key');
+		new GetQuery('/Sort/foo,+key');
 	}
 
 	/**
@@ -73,7 +73,7 @@ class SortTest extends TestCase{
 	 */
 	public function testInvalidSortNoOrderDoubleReverse() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Sort/+,+key');
+		new GetQuery('/Sort/+,+key');
 	}
 
 	/**
@@ -83,7 +83,7 @@ class SortTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testSortValidSingle() {
-		$this->assertEquals((new GetQuery())->fromString('/Sort/+foo'), '/Sort/+foo');
+		$this->assertEquals(new GetQuery('/Sort/+foo'), '/Sort/+foo');
 	}
 
 	/**
@@ -94,7 +94,7 @@ class SortTest extends TestCase{
 	 * @depends        testSortValidSingle
 	 */
 	public function testSortValidDouble() {
-		$this->assertEquals((new GetQuery())->fromString('/Sort/+foo,-bar'), '/Sort/+foo,-bar');
+		$this->assertEquals(new GetQuery('/Sort/+foo,-bar'), '/Sort/+foo,-bar');
 	}
 
 	/**
@@ -106,7 +106,7 @@ class SortTest extends TestCase{
 	 */
 	public function testSortInvalidDuplicateKey() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Sort/+foo,-foo');
+		new GetQuery('/Sort/+foo,-foo');
 	}
 
 	/**
@@ -118,6 +118,6 @@ class SortTest extends TestCase{
 	 */
 	public function testSortInvalidDuplicateKeyAlternative() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Sort/+foo,+foo');
+		new GetQuery('/Sort/+foo,+foo');
 	}
 }

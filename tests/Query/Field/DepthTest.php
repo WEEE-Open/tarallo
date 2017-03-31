@@ -16,7 +16,7 @@ class DepthTest extends TestCase{
 	 */
 	public function testInvalidDepthNaN() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Location/test/Depth/foo');
+		new GetQuery('/Location/test/Depth/foo');
 	}
 
 	/**
@@ -29,12 +29,6 @@ class DepthTest extends TestCase{
 	 */
 	public function testInvalidDepthNegative() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Location/test/Depth/-1');
+		new GetQuery('/Location/test/Depth/-1');
 	}
-
-
-	//public function testDepthZeroDefault() {
-	//	$this->assertEquals((string) (new GetQuery())->fromString('/Location/test/Depth/0'), '/Location/test',
-	//		'Depth=0 is default, ignore it when casting to string');
-	//}
 }

@@ -14,7 +14,7 @@ class SearchTest extends TestCase{
 	 */
 	public function testInvalidSearchNoKey() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Search/key=');
+		new GetQuery('/Search/key=');
 	}
 
 	/**
@@ -25,7 +25,7 @@ class SearchTest extends TestCase{
 	 */
 	public function testInvalidSearchNoValue() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Search/=value');
+		new GetQuery('/Search/=value');
 	}
 
 	/**
@@ -36,6 +36,6 @@ class SearchTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 */
 	public function testSearchValid() {
-		$this->assertEquals((new GetQuery())->fromString('/Search/foo=bar'), '/Search/foo=bar');
+		$this->assertEquals(new GetQuery('/Search/foo=bar'), '/Search/foo=bar');
 	}
 }

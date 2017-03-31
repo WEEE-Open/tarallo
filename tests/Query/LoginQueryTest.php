@@ -16,7 +16,7 @@ class LoginQueryTest extends TestCase{
 	 */
 	public function testInvalidLoginNull() {
 		$this->expectException(InvalidParameterException::class);
-		(new LoginQuery())->fromString(null);
+		new LoginQuery(null);
 	}
 
 	/**
@@ -28,6 +28,6 @@ class LoginQueryTest extends TestCase{
 	 */
 	public function testInvalidLoginEmptyString() {
 		$this->expectException(InvalidParameterException::class);
-		(new LoginQuery())->fromString('');
+		new LoginQuery('');
 	}
 }

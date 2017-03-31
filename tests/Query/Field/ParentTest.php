@@ -16,7 +16,7 @@ class ParentTest extends TestCase{
 	 */
 	public function testInvalidParentNaN() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Location/test/Parent/foo');
+		new GetQuery('/Location/test/Parent/foo');
 	}
 
 	/**
@@ -29,11 +29,6 @@ class ParentTest extends TestCase{
 	 */
 	public function testInvalidParentNegative() {
 		$this->expectException(InvalidParameterException::class);
-		(new GetQuery())->fromString('/Location/test/Parent/-1');
+		new GetQuery('/Location/test/Parent/-1');
 	}
-
-	//public function testParentZeroDefault() {
-	//	$this->assertEquals((string) (new GetQuery())->fromString('/Location/test/Parent/0'), '/Location/test',
-	//		'Parent=0 is default, ignore it when casting to string');
-	//}
 }

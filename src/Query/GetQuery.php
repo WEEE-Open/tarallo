@@ -94,15 +94,13 @@ class GetQuery extends AbstractQuery {
         return $string;
     }
 
-    public final function fromString($string) {
+    public final function __construct($string) {
         if(!is_string($string) || $string === '') {
             throw new InvalidParameterException('Query string must be a non-empty string');
         }
 
         $pieces = explode('/', $this->normalizeString($string));
         $this->fromPieces($pieces);
-
-        $this->setBuilt();
 
         return $this;
     }
@@ -118,9 +116,6 @@ class GetQuery extends AbstractQuery {
 	}
 
 	public function run($user, Database $db) {
-		if(!$this->isBuilt()) {
-			throw new \LogicException('Cannot run a query without building it first');
-		}
 		// TODO: Implement run() method.
 	}
 }

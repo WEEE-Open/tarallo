@@ -25,11 +25,7 @@ class LoginQuery extends PostJSONQuery implements \JsonSerializable {
     }
 
     function jsonSerialize() {
-        if($this->isBuilt()) {
-            return ['username' => $this->username, 'password' => $this->password];
-        } else {
-            throw new \LogicException('Cannot serialize query without building it first');
-        }
+	    return ['username' => $this->username, 'password' => $this->password];
     }
 
 	/**
@@ -41,10 +37,6 @@ class LoginQuery extends PostJSONQuery implements \JsonSerializable {
 	 * @todo return a Response object?
 	 */
 	public function run($user, Tarallo\Database $database) {
-		if(!$this->isBuilt()) {
-			throw new \LogicException('Cannot run a query without building it first');
-		}
-
         $newUser = $database->getUserFromLogin($this->username, $this->password);
         if($newUser === null) {
             throw new InvalidParameterException('Wrong username or password');

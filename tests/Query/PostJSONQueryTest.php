@@ -32,7 +32,7 @@ class PostJSONQueryTest extends TestCase {
 	 */
 	public function testNullDatabaseError() {
 		$this->expectException(\TypeError::class);
-		(new LoginQuery())->fromString('{"username": "test", "password": "test"}')->run(new Tarallo\User('example', 'example'), null);
+		(new LoginQuery('{"username": "test", "password": "test"}'))->run(new Tarallo\User('example', 'example'), null);
 	}
 
 	/**
