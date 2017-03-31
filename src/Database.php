@@ -107,13 +107,11 @@ class Database {
 
     private function searchPrepare($searches) {
 		// TODO: this need more thought, searches are for Feature(s)
+        // TODO: search numeric values too!
         if(self::isArrayAndFull($searches)) {
-        	//'SELECT ItemID
-			//FROM Item, Feature
-			//WHERE FeatureID '
-            $where = 'AND (';
+            $where = '(';
             foreach($searches as $k => $loc) {
-                $where .= '`Name` LIKE :search'.$k.' OR '; // TODO: %
+                $where .= '(`FeatureName` = :searchname'.$k.' AND ValueText LIKE :searchkey'.$k.' OR '; // TODO: %
             }
             return substr($where, 0, strlen($where)-4).')'; // remove last " OR "
         } else {
@@ -156,13 +154,13 @@ class Database {
         }
     }
 
-    private static function implodeOptionalWhereAnd() {
+    private static function implodeOptionalAndAnd() {
         $args = func_get_args();
         $where = self::implodeAnd($args);
         if($where === '') {
             return '';
         } else {
-            return 'WHERE ' . $where;
+            return ' AND ' . $where;
         }
     }
 
@@ -200,20 +198,38 @@ class Database {
 
 	public function getItemItself($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token) {
 		$sortOrder  = $this->sortPrepare($sortsAscending, $sortsDescending); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
-		$innerWhere = $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->searchPrepare($searches));
-		$outerWhere = $this->implodeOptionalAnd($this->depthPrepare($depth), $this->tokenPrepare($token));
+		$whereLocationToken = $this->implodeOptionalAnd($this->locationPrepare($locations), $this->tokenPrepare($token));
+		$searchWhere = $this->implodeOptionalAndAnd($this->searchPrepare($searches));
+        $parentWhere = $this->implodeOptionalAnd(''); // TODO: implement, "WHERE Depth = 0" by default, use = to find only the needed roots (descendants are selected via /Depth)
+        $depthWhere  = $this->implodeOptionalAnd($this->depthPrepare($depth));
 
 		// TODO: this will probably blow up in a spectacular way.
+        // search items by features, filter by location and token, tree lookup using these items as descendants
+        // (for /Parent), tree lookup using new root items as roots (find all descendants), filter by depth,
+        // join with items, SELECT.
+        // TODO: somehow sort the result set (not the innermost query, Parent returns other items...).
 		/** @noinspection SqlResolve */
 		$s = $this->getPDO()->prepare('
-        SELECT `Name`, `Type`, `Status`, `Owner`, `SuppliedBy`, `Borrowed`, `Notes`
-        FROM Item, Tree
-        WHERE AncestorID IN (
-            SELECT ItemID
-            FROM Item
-            ' . $innerWhere . '
-        )
-        ' . $outerWhere . $sortOrder . ';
+        SELECT `ItemID`, `ParentID`, `Depth`, `Notes` -- and whatever else is needed
+        FROM Tree, Item
+        WHERE Tree.ItemID = Item.ItemID
+        AND AncestorID IN (
+            SELECT `ItemID`
+            FROM Tree
+            WHERE DescendantID IN ( 
+                SELECT `ItemID`
+                FROM Item
+                WHERE
+                ' . $whereLocationToken . '
+                AND ItemID IN (
+                    SELECT `ItemID`
+                    FROM ItemFeature, Feature
+                    WHERE Feature.FeatureID = ItemFeature.FeatureID
+                    ' . $searchWhere . '
+                )
+            ) AND ' . $parentWhere . ';
+        ) ' . $depthWhere . '
+        
 
 		');
 		$s->execute();
