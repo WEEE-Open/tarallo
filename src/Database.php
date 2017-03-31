@@ -200,7 +200,7 @@ class Database {
         $items = $this->getItemItself($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token);
         $itemIDs = []; // TODO: implement
         if(!empty($itemIDs)) {
-            $features = $this->getFeatures($itemIDs, $items);
+            $this->getFeatures($itemIDs, $items);
         }
     }
 
@@ -216,7 +216,6 @@ class Database {
         // (for /Parent), tree lookup using new root items as roots (find all descendants), filter by depth,
         // join with items, SELECT.
         // TODO: somehow sort the result set (not the innermost query, Parent returns other items...).
-		/** @noinspection SqlResolve */
 		$s = $this->getPDO()->prepare('
         SELECT `ItemID`, `ParentID`, `Depth`, `Notes` -- and whatever else is needed (TODO: Code)
         FROM Tree, Item
