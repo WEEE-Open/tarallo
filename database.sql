@@ -106,7 +106,7 @@ CREATE TABLE `User` (
   `Password` text COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Session` char(32) COLLATE utf8mb4_unicode_ci,
 	`SessionExpiry` bigint(20),
-	`Enabled` unsigned tinyint(1) NOT NULL DEFAULT 0,
+	`Enabled` tinyint(1) unsigned NOT NULL DEFAULT 0,
 	CHECK((`Session` IS NOT NULL AND `SessionExpiry` IS NOT NULL)
 			OR (`Session` IS NULL AND `SessionExpiry` IS NULL)),
 	PRIMARY KEY (`UserID`),
