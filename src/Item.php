@@ -58,6 +58,7 @@ class Item implements \JsonSerializable {
 
 	public function addChild(Item $item) {
 		$this->content = $item;
+		return $this;
 	}
 
 	function jsonSerialize() {
@@ -66,5 +67,14 @@ class Item implements \JsonSerializable {
 			'features' => $this->features,
 			'content' => $this->content,
 		];
+	}
+
+	public function toString() {
+		if(isset($this->content['type'])) {
+			$type = $this->content['type'];
+			return $this->code . " ($type)";
+		} else {
+			return $this->code;
+		}
 	}
 }
