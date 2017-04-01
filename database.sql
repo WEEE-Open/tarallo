@@ -18,13 +18,8 @@ CREATE TABLE `Item` (
   `ItemID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `Code` text COLLATE utf8mb4_unicode_ci,
   `IsDefault` tinyint(1) NOT NULL,
-  `Type` int(11) DEFAULT NULL, -- Type and Status are here instead of Features to allow indexes and foreign key constraints, since these will be the most commonly searched parameters
-  `Status` int(11) DEFAULT NULL,
-  PRIMARY KEY (`ItemID`),
-  KEY `Status` (`Status`),
-  KEY `Type` (`Type`),
-  CONSTRAINT `Item_ibfk_1` FOREIGN KEY (`Status`) REFERENCES `ItemStatus` (`StatusID`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT `Item_ibfk_2` FOREIGN KEY (`Type`) REFERENCES `ItemType` (`TypeID`) ON DELETE NO ACTION ON UPDATE CASCADE
+  -- Type and Status were removed (they will become features), to simplify implementation of the /Search thinghamajig
+  PRIMARY KEY (`ItemID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 

@@ -212,9 +212,9 @@ class Database {
         // join with items, SELECT.
         // TODO: somehow sort the result set (not the innermost query, Parent returns other items...).
 		$s = $this->getPDO()->prepare('
-        SELECT `ItemID`, `ParentID`, `Depth`, `Notes` -- and whatever else is needed (TODO: Code)
+        SELECT `ItemID`, `Code`, `AncestorID`, `Depth`, `Notes` -- and whatever else is needed
         FROM Tree, Item
-        WHERE Tree.ItemID = Item.ItemID
+        WHERE Tree.AncestorID = Item.ItemID
         AND AncestorID IN (
             SELECT `ItemID`
             FROM Tree
@@ -245,10 +245,10 @@ class Database {
 	private function getFeatures($itemIDs, &$items) {
         $inItemID = $this->multipleIn(':item', $itemIDs);
         $s = $this->getPDO()->prepare('
-            SELECT FeatureID, ItemID, FeatureName AS Name, `Value`, ValueText
+            SELECT ItemID, FeatureName, `Value`, ValueText
             FROM Feature, ItemFeature
             WHERE ItemFeature.FeatureID = Feature.FeatureID
-            AND ItemID ' . $inItemID . ';
+            AND ItemID ' . $inItemID . '
 		');
         $s->execute();
         if($s->rowCount() === 0) {
