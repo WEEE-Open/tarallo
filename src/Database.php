@@ -124,17 +124,12 @@ class Database {
         }
     }
 
-    private function sortPrepare($sortsAscending, $sortsDescending) {
-        if(self::isArrayAndFull($sortsAscending) || self::isArrayAndFull($sortsDescending)) {
+    private function sortPrepare($sorts) {
+        if(self::isArrayAndFull($sorts)) {
             $order = 'ORDER BY ';
-            if(self::isArrayAndFull($sortsAscending)) {
-                foreach($sortsAscending as $key) {
-                    $order .= $key . ' ASC, '; // TODO: comma?
-                }
-            }
-            if(self::isArrayAndFull($sortsAscending)) {
-                foreach($sortsAscending as $key) {
-                    $order .= $key . ' DESC, ';
+            if(self::isArrayAndFull($sorts)) {
+                foreach($sorts as $key => $ascdesc) {
+                    $order .= $key . ' ' . $ascdesc . ', ';
                 }
             }
             return $order;
@@ -204,8 +199,8 @@ class Database {
         }
     }
 
-	private function getItemItself($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token) {
-		$sortOrder  = $this->sortPrepare($sortsAscending, $sortsDescending); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
+	private function getItemItself($locations, $searches, $depth, $sorts, $token) {
+		$sortOrder  = $this->sortPrepare($sorts); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
 		$whereLocationToken = $this->implodeOptionalAnd($this->locationPrepare($locations), $this->tokenPrepare($token));
 		$searchWhere = $this->implodeOptionalAndAnd($this->searchPrepare($searches));
         $parentWhere = $this->implodeOptionalAnd(''); // TODO: implement, "WHERE Depth = 0" by default, use = to find only the needed roots (descendants are selected via /Depth)

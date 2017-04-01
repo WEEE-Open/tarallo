@@ -16,13 +16,10 @@ CREATE TABLE `Feature` (
 
 CREATE TABLE `Item` (
   `ItemID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `Code` text COLLATE utf8mb4_unicode_ci,
   `IsDefault` tinyint(1) NOT NULL,
-  `Type` int(11) DEFAULT NULL,
+  `Type` int(11) DEFAULT NULL, -- Type and Status are here instead of Features to allow indexes and foreign key constraints, since these will be the most commonly searched parameters
   `Status` int(11) DEFAULT NULL,
-  `Owner` text COLLATE utf8mb4_unicode_ci, -- TODO: move to another table?
-	`SuppliedBy` text COLLATE utf8mb4_unicode_ci, -- TODO: move to another table?
-  `Borrowed` tinyint(1) DEFAULT NULL,
-  `Notes` text COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`ItemID`),
   KEY `Status` (`Status`),
   KEY `Type` (`Type`),
