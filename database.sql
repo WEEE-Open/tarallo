@@ -10,6 +10,7 @@ USE `tarallo`;
 CREATE TABLE `Feature` (
   `FeatureID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `FeatureName` text NOT NULL,
+  `FeatureType` int NOT NULL, -- 0 = text, 1 = number, 2 = "enum"
   PRIMARY KEY (`FeatureID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -23,28 +24,33 @@ CREATE TABLE `Item` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
+CREATE TABLE `FeatureValue` (
+  `FeatureID` bigint(20) unsigned NOT NULL,
+  `ValueEnum` bigint(20) unsigned NOT NULL,
+  `ValueText` text NOT NULL,
+  PRIMARY KEY (`FeatureID`, `ValueEnum`),
+  CONSTRAINT `FK_FeatureID` FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`) ON DELETE NO ACTION ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 CREATE TABLE `ItemFeature` (
   `FeatureID` bigint(20) unsigned NOT NULL,
   `ItemID` bigint(20) unsigned NOT NULL,
-  `Value` bigint(20) DEFAULT NULL,
+  `Value` bigint(20) unsigned DEFAULT NULL,
+  `ValueEnum` bigint(20) unsigned DEFAULT NULL,
 	`ValueText` text DEFAULT NULL,
   PRIMARY KEY (`FeatureID`,`ItemID`),
   KEY `ItemID` (`ItemID`),
   KEY `Value` (`Value`),
+  KEY `ValueEnum` (`ValueEnum`),
+  -- this doesn't work, for no reason at all
+  -- CONSTRAINT `FK_FeatureEnum_FeatureValue` FOREIGN KEY (`ValueEnum`) REFERENCES `FeatureValue` (`ValueEnum`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT `ItemFeature_ibfk_1` FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `ItemFeature_ibfk_2` FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`) ON DELETE NO ACTION ON UPDATE CASCADE,
 	CHECK((`Value` IS NOT NULL AND `ValueText` IS NULL)
   OR (`Value` IS NULL AND `ValueText` IS NOT NULL))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-CREATE TABLE `FeatureValue` (
-  `FeatureID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `Value` bigint(20) unsigned,
-  `ValueText` text,
-  CHECK ((`Value` IS NULL AND `ValueText` IS NULL) OR (`Value` IS NOT NULL AND `ValueText` IS NOT NULL)),
-  PRIMARY KEY (`FeatureID`, `Value`),
-  CONSTRAINT `FK_FEATURE_ID` FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`) ON DELETE NO ACTION ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `ItemLocationModification` (
   `ModificationID` bigint(20) unsigned NOT NULL,
