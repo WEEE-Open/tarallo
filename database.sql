@@ -9,8 +9,9 @@ USE `tarallo`;
 
 CREATE TABLE `Feature` (
   `FeatureID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `FeatureName` text NOT NULL,
+  `FeatureName` varchar(190) COLLATE utf8mb4_unicode_ci NOT NULL,
   `FeatureType` int NOT NULL, -- 0 = text, 1 = number, 2 = "enum"
+  INDEX (`FeatureName`),
   PRIMARY KEY (`FeatureID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -47,8 +48,9 @@ CREATE TABLE `ItemFeature` (
   -- CONSTRAINT `FK_FeatureEnum_FeatureValue` FOREIGN KEY (`ValueEnum`) REFERENCES `FeatureValue` (`ValueEnum`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT `ItemFeature_ibfk_1` FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `ItemFeature_ibfk_2` FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`) ON DELETE NO ACTION ON UPDATE CASCADE,
-	CHECK((`Value` IS NOT NULL AND `ValueText` IS NULL)
-  OR (`Value` IS NULL AND `ValueText` IS NOT NULL))
+	CHECK((`Value` IS NOT NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL)
+  OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND `ValueEnum` IS NULL)
+  OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NOT NULL))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 

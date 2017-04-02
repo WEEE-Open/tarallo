@@ -272,19 +272,43 @@ class Database {
 	    try {
 		    $itemQuery = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
 		    $itemQuery->bindValue(':d', $default, \PDO::PARAM_INT);
-		    $featureNumber = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`, ValueText) VALUES (:f, :i, :v, NULL)');
-		    $featureText   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`, ValueText) VALUES (:f, :i, NULL,:vt)');
+		    $featureNumber = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`)     VALUES (:feature, :item, :val)');
+		    $featureText   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueText`) VALUES (:feature, :item, :val)');
+		    $featureEnum   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) VALUES (:feature, :item, :val)');
 		    // string = found, convert to this numeric value
 		    // null = no conversion, should be a numeric value
 		    // no result = it's a text value
-		    $getNumber = $pdo->prepare('SELECT `Value` FROM FeatureValue WHERE FeatureID = ? AND (`ValueText` = ?) OR (`ValueText` IS NULL)');
 		    foreach($items as $item) {
 				$id = $this->addItem($itemQuery, $item);
 				/** @var Item $item */
-				$featureNumber->bindValue(':i', $id);
+				$featureNumber->bindValue(':item', $id);
+				$featureText->bindValue(':item', $id);
+				$featureEnum->bindValue(':item', $id);
 				$features = $item->getFeatures();
-				foreach($item->getFeatures() as $feature => $value) {
+				foreach($features as $feature => $value) {
+					$featureType = $this->getFeatureTypeFromName($feature);
+					switch($featureType) {
+						// was really tempted to use variable variables here...
+						case self::FEATURE_TEXT:
+							// TODO :$featureText->bindValue(':feature', ???);
+							$featureText->bindValue(':value', $value);
+							$featureText->execute();
+							break;
+						case self::FEATURE_NUMBER:
+							// TODO :$featureText->bindValue(':feature', ???);
+							$featureNumber->bindValue(':value', $value);
+							$featureNumber->execute();
+							break;
+						case self::FEATURE_ENUM:
+							// TODO :$featureText->bindValue(':feature', ???);
+							$featureEnum->bindValue(':value', $this->getFeatureValueEnumFromName($feature, $value));
+							$featureEnum->execute();
+							break;
+						default:
+							throw new \LogicException('Unknown feature type ' . $featureType . ' returned by getFeatureTypeFromName (should never happen unless a cosmic ray flips a bit somewhere)');
+					}
 
+					// TODO: newModification, setItemModified
 				}
 		    }
 		    $pdo->commit();
@@ -298,8 +322,9 @@ class Database {
 	 * Insert a single item into the database, return its id. Basically just add a row to Item, no features are added.
 	 * Must be called while in transaction.
 	 *
-	 * @param \PDOStatement $itemQuery "INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)", bind something to :d before calling.
+	 * @param \PDOStatement $itemQuery the query used by addItem, with :d already bound
 	 * @param Item $item the item to be inserted
+	 * @see addItems
 	 *
 	 * @return int ItemID. 0 may also mean "error", BECAUSE PDO.
 	 */
@@ -316,4 +341,49 @@ class Database {
 	    $itemQuery->execute();
 	    return (int) $pdo->lastInsertId();
     }
+
+	private $featureTypeStatement = null;
+    const FEATURE_TEXT = 0;
+    const FEATURE_NUMBER = 1;
+    const FEATURE_ENUM = 2;
+
+    public function getFeatureTypeFromName($featureName) {
+    	$pdo = $this->getPDO();
+		if($this->featureTypeStatement === null) {
+			$this->featureTypeStatement = $pdo->prepare('SELECT `FeatureType` FROM FeatureValue, Feature WHERE Feature.FeatureID = FeatureValue.FeatureID AND Feature.FeatureName = ? LIMIT 1');
+		}
+		$this->featureTypeStatement->bindValue(1, $featureName);
+		$this->featureTypeStatement->execute();
+	    if($this->featureTypeStatement->rowCount() === 0) {
+		    throw new InvalidParameterException('Unknown feature name ' . $featureName);
+	    }
+	    switch((int) $this->featureTypeStatement->fetch(\PDO::FETCH_NUM)[0]) {
+		    case 0:
+		    	return self::FEATURE_TEXT;
+		    case 1:
+		    	return self::FEATURE_NUMBER;
+		    case 2:
+			    return self::FEATURE_ENUM;
+		    default:
+			    throw new \LogicException('Unknown feature type for ' . $featureName . ' found in database');
+	    }
+    }
+
+	private $featureEnumNameStatement = null;
+
+    public function getFeatureValueEnumFromName($featureName, $featureValueText) {
+	    $pdo = $this->getPDO();
+	    if($this->featureEnumNameStatement === null) {
+		    $this->featureEnumNameStatement = $pdo->prepare('SELECT `ValueEnum` FROM FeatureValue, Feature WHERE Feature.FeatureID = FeatureValue.FeatureID AND Feature.FeatureName = :n AND FeatureValue.ValueText = :valuetext AND Feature.FeatureType = :type LIMIT 1');
+	    }
+	    $this->featureEnumNameStatement->bindValue(':n', $featureName);
+	    $this->featureEnumNameStatement->bindValue(':valuetext', $featureValueText);
+	    $this->featureEnumNameStatement->bindValue(':type', self::FEATURE_ENUM);
+	    $this->featureEnumNameStatement->execute();
+	    if($this->featureEnumNameStatement->rowCount() === 0) {
+		    throw new InvalidParameterException('Invalid value ' . $featureValueText . ' for feature ' . $featureName);
+	    }
+	    $result = $this->featureEnumNameStatement->fetch();
+	    return $result['ValueEnum'];
+	}
 }
