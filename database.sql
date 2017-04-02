@@ -35,9 +35,16 @@ CREATE TABLE `ItemFeature` (
   CONSTRAINT `ItemFeature_ibfk_2` FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`) ON DELETE NO ACTION ON UPDATE CASCADE,
 	CHECK((`Value` IS NOT NULL AND `ValueText` IS NULL)
   OR (`Value` IS NULL AND `ValueText` IS NOT NULL))
-
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `FeatureValue` (
+  `FeatureID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `Value` bigint(20) unsigned,
+  `ValueText` text,
+  CHECK ((`Value` IS NULL AND `ValueText` IS NULL) OR (`Value` IS NOT NULL AND `ValueText` IS NOT NULL)),
+  PRIMARY KEY (`FeatureID`, `Value`),
+  CONSTRAINT `FK_FEATURE_ID` FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`) ON DELETE NO ACTION ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `ItemLocationModification` (
   `ModificationID` bigint(20) unsigned NOT NULL,
