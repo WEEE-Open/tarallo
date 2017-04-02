@@ -272,12 +272,10 @@ class Database {
 	    try {
 		    $itemQuery = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
 		    $itemQuery->bindValue(':d', $default, \PDO::PARAM_INT);
-		    $featureNumber = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`)     VALUES (:feature, :item, :val)');
-		    $featureText   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueText`) VALUES (:feature, :item, :val)');
-		    $featureEnum   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) VALUES (:feature, :item, :val)');
-		    // string = found, convert to this numeric value
-		    // null = no conversion, should be a numeric value
-		    // no result = it's a text value
+		    // not very nice, but the alternative was another query in a separate function (even slower) or returning FeatureID from getFeatureTypeFromName, which didn't make any sense, or returning a Feature object which I may do in future and increases complexity for almost no benefit
+		    $featureNumber = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`)     SELECT FeatureName, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+		    $featureText   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueText`) SELECT FeatureName, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+		    $featureEnum   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) SELECT FeatureName, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
 		    foreach($items as $item) {
 				$id = $this->addItem($itemQuery, $item);
 				/** @var Item $item */
@@ -290,17 +288,17 @@ class Database {
 					switch($featureType) {
 						// was really tempted to use variable variables here...
 						case self::FEATURE_TEXT:
-							// TODO :$featureText->bindValue(':feature', ???);
+							$featureText->bindValue(':feature', $feature);
 							$featureText->bindValue(':value', $value);
 							$featureText->execute();
 							break;
 						case self::FEATURE_NUMBER:
-							// TODO :$featureText->bindValue(':feature', ???);
+							$featureText->bindValue(':feature', $feature);
 							$featureNumber->bindValue(':value', $value);
 							$featureNumber->execute();
 							break;
 						case self::FEATURE_ENUM:
-							// TODO :$featureText->bindValue(':feature', ???);
+							$featureText->bindValue(':feature', $feature);
 							$featureEnum->bindValue(':value', $this->getFeatureValueEnumFromName($feature, $value));
 							$featureEnum->execute();
 							break;
