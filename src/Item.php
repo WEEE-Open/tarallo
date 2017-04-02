@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo;
 class Item implements \JsonSerializable {
 	private $code;
 	private $features = [];
+	private $featuresDefault = [];
 	private $content = [];
 
 	function __construct($code) {
@@ -12,6 +13,10 @@ class Item implements \JsonSerializable {
 			throw new \LogicException('Item code must be a string');
 		}
 		$this->code = $code;
+	}
+
+	public function getCode() {
+		return $this->code;
 	}
 
 	private static function featureNameIsValid($name) {
@@ -54,6 +59,10 @@ class Item implements \JsonSerializable {
 			$this->addFeature($name, $value);
 		}
 		return $this;
+	}
+
+	public function getFeatures() {
+		return $this->features;
 	}
 
 	public function addChild(Item $item) {

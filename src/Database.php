@@ -191,8 +191,8 @@ class Database {
         return implode(' AND ', $stuff);
     }
 
-    public function getItem($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token) {
-        $items = $this->getItemItself($locations, $searches, $depth, $sortsAscending, $sortsDescending, $token);
+    public function getItem($locations, $searches, $depth, $sorts, $token) {
+        $items = $this->getItemItself($locations, $searches, $depth, $sorts, $token);
         $itemIDs = []; // TODO: implement
         if(!empty($itemIDs)) {
             $this->getFeatures($itemIDs, $items);
@@ -212,7 +212,7 @@ class Database {
         // join with items, SELECT.
         // TODO: somehow sort the result set (not the innermost query, Parent returns other items...).
 		$s = $this->getPDO()->prepare('
-        SELECT `ItemID`, `Code`, `AncestorID`, `Depth`, `Notes` -- and whatever else is needed
+        SELECT `ItemID`, `Code`, `AncestorID`, `Depth`
         FROM Tree, Item
         WHERE Tree.AncestorID = Item.ItemID
         AND AncestorID IN (
@@ -254,5 +254,66 @@ class Database {
         if($s->rowCount() === 0) {
             // TODO: do stuff with $items
         }
+    }
+
+    public function addItems($items, $default = false) {
+    	if($items instanceof Item) {
+    		$items = [$items];
+	    } else if(!is_array($items)) {
+		    throw new \InvalidArgumentException('Items must be passed as an array or a single Item');
+	    }
+
+	    if(empty($items)) {
+    		return;
+	    }
+
+	    $pdo = $this->getPDO();
+	    $pdo->beginTransaction();
+	    try {
+		    $itemQuery = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
+		    $itemQuery->bindValue(':d', $default, \PDO::PARAM_INT);
+		    $featureNumber = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`, ValueText) VALUES (:f, :i, :v, NULL)');
+		    $featureText   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`, ValueText) VALUES (:f, :i, NULL,:vt)');
+		    // string = found, convert to this numeric value
+		    // null = no conversion, should be a numeric value
+		    // no result = it's a text value
+		    $getNumber = $pdo->prepare('SELECT `Value` FROM FeatureValue WHERE FeatureID = ? AND (`ValueText` = ?) OR (`ValueText` IS NULL)');
+		    foreach($items as $item) {
+				$id = $this->addItem($itemQuery, $item);
+				/** @var Item $item */
+				$featureNumber->bindValue(':i', $id);
+				$features = $item->getFeatures();
+				foreach($item->getFeatures() as $feature => $value) {
+
+				}
+		    }
+		    $pdo->commit();
+	    } catch(\Exception $e) {
+	    	$pdo->rollBack();
+	    	throw $e;
+	    }
+    }
+
+	/**
+	 * Insert a single item into the database, return its id. Basically just add a row to Item, no features are added.
+	 * Must be called while in transaction.
+	 *
+	 * @param \PDOStatement $itemQuery "INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)", bind something to :d before calling.
+	 * @param Item $item the item to be inserted
+	 *
+	 * @return int ItemID. 0 may also mean "error", BECAUSE PDO.
+	 */
+    private function addItem(\PDOStatement $itemQuery, Item $item) {
+	    if(!($item instanceof Item)) {
+		    throw new \InvalidArgumentException('Items must be objects of Item class, ' . gettype($item) . ' given'); // will say "object" if it's another object which is kinda useless, whatever
+	    }
+
+	    $pdo = $this->getPDO();
+	    if(!$pdo->inTransaction()) {
+	    	throw new \LogicException('addItem called outside of transaction');
+	    }
+	    $itemQuery->bindValue(':c', $item->getCode(), \PDO::PARAM_STR);
+	    $itemQuery->execute();
+	    return (int) $pdo->lastInsertId();
     }
 }
