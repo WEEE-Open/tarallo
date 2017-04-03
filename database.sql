@@ -18,8 +18,9 @@ CREATE TABLE `Feature` (
 
 CREATE TABLE `Item` (
   `ItemID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `Code` text COLLATE utf8mb4_unicode_ci,
+  `Code` varchar(190) COLLATE utf8mb4_unicode_ci NOT NULL,
   `IsDefault` tinyint(1) NOT NULL,
+  UNIQUE KEY `Code` (`Code`),
   -- Type and Status were removed (they will become features), to simplify implementation of the /Search thinghamajig
   PRIMARY KEY (`ItemID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -2,26 +2,26 @@ User:
   -
     UserID: 1
     Name: asd
-    Password: $2y$10$a7T2CXCIXVQJmAgENfZYLuXTGOp2HCoId93qQ097wJui4yTArnba2
+    Password: "$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6"
     Enabled: 1
   -
     UserID: 2
     Name: not-enabled
-    Password: $2y$10$a7T2CXCIXVQJmAgENfZYLuXTGOp2HCoId93qQ097wJui4yTArnba2
+    Password: "$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6"
     Enabled: 0
     Session: this-really-is-a-session-1234567
     SessionExpiry: 9223372036854775807
   -
     UserID: 3
     Name: asd-expired
-    Password: $2y$10$a7T2CXCIXVQJmAgENfZYLuXTGOp2HCoId93qQ097wJui4yTArnba2
+    Password: "$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6"
     Enabled: 1
     Session: this-really-is-a-session-7654321
     SessionExpiry: 1337
   -
     UserID: 4
     Name: asd-valid
-    Password: $2y$10$a7T2CXCIXVQJmAgENfZYLuXTGOp2HCoId93qQ097wJui4yTArnba2
+    Password: "$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6"
     Enabled: 1
     Session: this-really-is-a-valid-session-1
     SessionExpiry: 9223372036854775807
@@ -50,11 +50,11 @@ Feature:
   -
     FeatureID: 6
     FeatureName: type
-    FeatureType: 3
+    FeatureType: 2
   -
     FeatureID: 7
     FeatureName: working
-    FeatureType: 3
+    FeatureType: 2
   -
     FeatureID: 8
     FeatureName: capacity-byte
@@ -74,15 +74,15 @@ Feature:
   -
     FeatureID: 12
     FeatureName: has-gpu
-    FeatureType: 3
+    FeatureType: 2
   -
     FeatureID: 13
     FeatureName: color
-    FeatureType: 3
+    FeatureType: 2
   -
     FeatureID: 14
     FeatureName: motherboard-form-factor
-    FeatureType: 3
+    FeatureType: 2
 
 FeatureValue:
   -
@@ -229,3 +229,4 @@ FeatureValue:
     FeatureID: 14
     ValueEnum: 4
     ValueText: proprietary
+Item:
