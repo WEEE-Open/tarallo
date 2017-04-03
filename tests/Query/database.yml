@@ -230,3 +230,5 @@ FeatureValue:
     ValueEnum: 4
     ValueText: proprietary
 Item:
+
+ItemFeature:
