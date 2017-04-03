@@ -6,6 +6,15 @@ use WEEEOpen\Tarallo\Query;
 // in case something goes wrong (reset to 200 when sending a JSON response)
 http_response_code(500);
 
+// straight from the manual: https://secure.php.net/manual/en/class.errorexception.php
+//set_error_handler(function($severity, $message, $file, $line) {
+//	if (!(error_reporting() & $severity)) {
+//		// This error code is not included in error_reporting
+//		return;
+//	}
+//	throw new \ErrorException($message, 0, $severity, $file, $line);
+//});
+
 require 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 require 'db.php';
 

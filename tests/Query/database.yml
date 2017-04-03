@@ -1,0 +1,231 @@
+User:
+  -
+    UserID: 1
+    Name: asd
+    Password: $2y$10$a7T2CXCIXVQJmAgENfZYLuXTGOp2HCoId93qQ097wJui4yTArnba2
+    Enabled: 1
+  -
+    UserID: 2
+    Name: not-enabled
+    Password: $2y$10$a7T2CXCIXVQJmAgENfZYLuXTGOp2HCoId93qQ097wJui4yTArnba2
+    Enabled: 0
+    Session: this-really-is-a-session-1234567
+    SessionExpiry: 9223372036854775807
+  -
+    UserID: 3
+    Name: asd-expired
+    Password: $2y$10$a7T2CXCIXVQJmAgENfZYLuXTGOp2HCoId93qQ097wJui4yTArnba2
+    Enabled: 1
+    Session: this-really-is-a-session-7654321
+    SessionExpiry: 1337
+  -
+    UserID: 4
+    Name: asd-valid
+    Password: $2y$10$a7T2CXCIXVQJmAgENfZYLuXTGOp2HCoId93qQ097wJui4yTArnba2
+    Enabled: 1
+    Session: this-really-is-a-valid-session-1
+    SessionExpiry: 9223372036854775807
+
+Feature:
+  -
+    FeatureID: 1
+    FeatureName: brand
+    FeatureType: 0
+  -
+    FeatureID: 2
+    FeatureName: model
+    FeatureType: 0
+  -
+    FeatureID: 3
+    FeatureName: owner
+    FeatureType: 0
+  -
+    FeatureID: 4
+    FeatureName: sn
+    FeatureType: 0
+  -
+    FeatureID: 5
+    FeatureName: mac
+    FeatureType: 0
+  -
+    FeatureID: 6
+    FeatureName: type
+    FeatureType: 3
+  -
+    FeatureID: 7
+    FeatureName: working
+    FeatureType: 3
+  -
+    FeatureID: 8
+    FeatureName: capacity-byte
+    FeatureType: 1
+  -
+    FeatureID: 9
+    FeatureName: frequency-hz
+    FeatureType: 1
+  -
+    FeatureID: 10
+    FeatureName: diameter-mm
+    FeatureType: 1
+  -
+    FeatureID: 11
+    FeatureName: diagonal-inch
+    FeatureType: 1
+  -
+    FeatureID: 12
+    FeatureName: has-gpu
+    FeatureType: 3
+  -
+    FeatureID: 13
+    FeatureName: color
+    FeatureType: 3
+  -
+    FeatureID: 14
+    FeatureName: motherboard-form-factor
+    FeatureType: 3
+
+FeatureValue:
+  -
+    FeatureID: 6
+    ValueEnum: 0
+    ValueText: location
+  -
+    FeatureID: 6
+    ValueEnum: 1
+    ValueText: case
+  -
+    FeatureID: 6
+    ValueEnum: 2
+    ValueText: motherboard
+  -
+    FeatureID: 6
+    ValueEnum: 3
+    ValueText: cpu
+  -
+    FeatureID: 6
+    ValueEnum: 4
+    ValueText: gpu
+  -
+    FeatureID: 6
+    ValueEnum: 5
+    ValueText: ram
+  -
+    FeatureID: 6
+    ValueEnum: 6
+    ValueText: hdd
+  -
+    FeatureID: 6
+    ValueEnum: 7
+    ValueText: odd
+  -
+    FeatureID: 6
+    ValueEnum: 8
+    ValueText: psu
+  -
+    FeatureID: 6
+    ValueEnum: 9
+    ValueText: audio-card
+  -
+    FeatureID: 6
+    ValueEnum: 10
+    ValueText: network-card
+  -
+    FeatureID: 6
+    ValueEnum: 11
+    ValueText: monitor
+  -
+    FeatureID: 6
+    ValueEnum: 12
+    ValueText: mouse
+  -
+    FeatureID: 6
+    ValueEnum: 13
+    ValueText: keyboard
+  -
+    FeatureID: 6
+    ValueEnum: 14
+    ValueText: inventory-sticker-polito
+  -
+    FeatureID: 6
+    ValueEnum: 15
+    ValueText: inventory-sticker-polito-old
+  -
+    FeatureID: 6
+    ValueEnum: 16
+    ValueText: inventory-sticker-disat
+  -
+    FeatureID: 6
+    ValueEnum: 17
+    ValueText: windows-sticker
+  -
+    FeatureID: 7
+    ValueEnum: 0
+    ValueText: no
+  -
+    FeatureID: 7
+    ValueEnum: 1
+    ValueText: yes
+  -
+    FeatureID: 7
+    ValueEnum: 2
+    ValueText: cant-tell
+  -
+    FeatureID: 12
+    ValueEnum: 0
+    ValueText: no
+  -
+    FeatureID: 12
+    ValueEnum: 1
+    ValueText: yes
+  -
+    FeatureID: 13
+    ValueEnum: 0
+    ValueText: black
+  -
+    FeatureID: 13
+    ValueEnum: 1
+    ValueText: white
+  -
+    FeatureID: 13
+    ValueEnum: 2
+    ValueText: green
+  -
+    FeatureID: 13
+    ValueEnum: 3
+    ValueText: yellow
+  -
+    FeatureID: 13
+    ValueEnum: 4
+    ValueText: red
+  -
+    FeatureID: 13
+    ValueEnum: 5
+    ValueText: blue
+  -
+    FeatureID: 13
+    ValueEnum: 6
+    ValueText: grey
+  -
+    FeatureID: 13
+    ValueEnum: 7
+    ValueText: sip-brown
+  -
+    FeatureID: 14
+    ValueEnum: 0
+    ValueText: atx
+  -
+    FeatureID: 14
+    ValueEnum: 1
+    ValueText: miniatx
+  -
+    FeatureID: 14
+    ValueEnum: 2
+    ValueText: microatx
+  -
+    FeatureID: 14
+    ValueEnum: 3
+    ValueText: miniitx
+  -
+    FeatureID: 14
+    ValueEnum: 4
+    ValueText: proprietary
