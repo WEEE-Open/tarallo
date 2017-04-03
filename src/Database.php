@@ -40,7 +40,7 @@ class Database {
 			return null;
 		} else {
 			$user = $s->fetch();
-			return new User($user['Name'], null, $user['password']);
+			return new User($user['Name'], null, $user['Password']);
 		}
 	}
 
@@ -272,9 +272,9 @@ class Database {
 	    $itemQuery = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
 	    $itemQuery->bindValue(':d', $default, \PDO::PARAM_INT);
 	    // not very nice, but the alternative was another query in a separate function (even slower) or returning FeatureID from getFeatureTypeFromName, which didn't make any sense, or returning a Feature object which I may do in future and increases complexity for almost no benefit
-	    $featureNumber = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`)     SELECT FeatureName, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
-	    $featureText   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueText`) SELECT FeatureName, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
-	    $featureEnum   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) SELECT FeatureName, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+	    $featureNumber = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`)     SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+	    $featureText   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueText`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+	    $featureEnum   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
 	    foreach($items as $item) {
 			$id = $this->addItem($itemQuery, $item);
 			/** @var Item $item */
@@ -288,17 +288,17 @@ class Database {
 					// was really tempted to use variable variables here...
 					case self::FEATURE_TEXT:
 						$featureText->bindValue(':feature', $feature);
-						$featureText->bindValue(':value', $value);
+						$featureText->bindValue(':val', $value);
 						$featureText->execute();
 						break;
 					case self::FEATURE_NUMBER:
-						$featureText->bindValue(':feature', $feature);
-						$featureNumber->bindValue(':value', $value);
+						$featureNumber->bindValue(':feature', $feature);
+						$featureNumber->bindValue(':val', $value);
 						$featureNumber->execute();
 						break;
 					case self::FEATURE_ENUM:
-						$featureText->bindValue(':feature', $feature);
-						$featureEnum->bindValue(':value', $this->getFeatureValueEnumFromName($feature, $value));
+						$featureEnum->bindValue(':feature', $feature);
+						$featureEnum->bindValue(':val', $this->getFeatureValueEnumFromName($feature, $value));
 						$featureEnum->execute();
 						break;
 					default:
@@ -343,7 +343,7 @@ class Database {
     public function getFeatureTypeFromName($featureName) {
     	$pdo = $this->getPDO();
 		if($this->featureTypeStatement === null) {
-			$this->featureTypeStatement = $pdo->prepare('SELECT `FeatureType` FROM FeatureValue, Feature WHERE Feature.FeatureID = FeatureValue.FeatureID AND Feature.FeatureName = ? LIMIT 1');
+			$this->featureTypeStatement = $pdo->prepare('SELECT `FeatureType` FROM Feature WHERE FeatureName = ? LIMIT 1');
 		}
 		$this->featureTypeStatement->bindValue(1, $featureName);
 		$this->featureTypeStatement->execute();
