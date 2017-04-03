@@ -268,52 +268,47 @@ class Database {
 	    }
 
 	    $pdo = $this->getPDO();
-	    $pdo->beginTransaction();
-	    try {
-		    $itemQuery = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
-		    $itemQuery->bindValue(':d', $default, \PDO::PARAM_INT);
-		    // not very nice, but the alternative was another query in a separate function (even slower) or returning FeatureID from getFeatureTypeFromName, which didn't make any sense, or returning a Feature object which I may do in future and increases complexity for almost no benefit
-		    $featureNumber = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`)     SELECT FeatureName, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
-		    $featureText   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueText`) SELECT FeatureName, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
-		    $featureEnum   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) SELECT FeatureName, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
-		    foreach($items as $item) {
-				$id = $this->addItem($itemQuery, $item);
-				/** @var Item $item */
-				$featureNumber->bindValue(':item', $id);
-				$featureText->bindValue(':item', $id);
-				$featureEnum->bindValue(':item', $id);
-				$features = $item->getFeatures();
-				foreach($features as $feature => $value) {
-					$featureType = $this->getFeatureTypeFromName($feature);
-					switch($featureType) {
-						// was really tempted to use variable variables here...
-						case self::FEATURE_TEXT:
-							$featureText->bindValue(':feature', $feature);
-							$featureText->bindValue(':value', $value);
-							$featureText->execute();
-							break;
-						case self::FEATURE_NUMBER:
-							$featureText->bindValue(':feature', $feature);
-							$featureNumber->bindValue(':value', $value);
-							$featureNumber->execute();
-							break;
-						case self::FEATURE_ENUM:
-							$featureText->bindValue(':feature', $feature);
-							$featureEnum->bindValue(':value', $this->getFeatureValueEnumFromName($feature, $value));
-							$featureEnum->execute();
-							break;
-						default:
-							throw new \LogicException('Unknown feature type ' . $featureType . ' returned by getFeatureTypeFromName (should never happen unless a cosmic ray flips a bit somewhere)');
-					}
 
-					// TODO: newModification, setItemModified
+	    $itemQuery = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
+	    $itemQuery->bindValue(':d', $default, \PDO::PARAM_INT);
+	    // not very nice, but the alternative was another query in a separate function (even slower) or returning FeatureID from getFeatureTypeFromName, which didn't make any sense, or returning a Feature object which I may do in future and increases complexity for almost no benefit
+	    $featureNumber = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`)     SELECT FeatureName, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+	    $featureText   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueText`) SELECT FeatureName, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+	    $featureEnum   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) SELECT FeatureName, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+	    foreach($items as $item) {
+			$id = $this->addItem($itemQuery, $item);
+			/** @var Item $item */
+			$featureNumber->bindValue(':item', $id);
+			$featureText->bindValue(':item', $id);
+			$featureEnum->bindValue(':item', $id);
+			$features = $item->getFeatures();
+			foreach($features as $feature => $value) {
+				$featureType = $this->getFeatureTypeFromName($feature);
+				switch($featureType) {
+					// was really tempted to use variable variables here...
+					case self::FEATURE_TEXT:
+						$featureText->bindValue(':feature', $feature);
+						$featureText->bindValue(':value', $value);
+						$featureText->execute();
+						break;
+					case self::FEATURE_NUMBER:
+						$featureText->bindValue(':feature', $feature);
+						$featureNumber->bindValue(':value', $value);
+						$featureNumber->execute();
+						break;
+					case self::FEATURE_ENUM:
+						$featureText->bindValue(':feature', $feature);
+						$featureEnum->bindValue(':value', $this->getFeatureValueEnumFromName($feature, $value));
+						$featureEnum->execute();
+						break;
+					default:
+						throw new \LogicException('Unknown feature type ' . $featureType . ' returned by getFeatureTypeFromName (should never happen unless a cosmic ray flips a bit somewhere)');
 				}
-		    }
-		    $pdo->commit();
-	    } catch(\Exception $e) {
-	    	$pdo->rollBack();
-	    	throw $e;
+			}
+			$this->setItemModified($id);
 	    }
+
+	    return;
     }
 
 	/**
@@ -383,5 +378,53 @@ class Database {
 	    }
 	    $result = $this->featureEnumNameStatement->fetch();
 	    return $result['ValueEnum'];
+	}
+
+	private function getNewModificationId(User $user, $notes) {
+    	$pdo = $this->getPDO();
+		$stuff = $pdo->prepare('INSERT INTO Modification (UserID, `Date`, Notes) SELECT `User`.UserID, :dat, :notes FROM `User` WHERE `User`.Name = :username');
+		$stuff->bindValue(':username', $user->getUsername());
+		$stuff->bindValue(':dat', time());
+		$stuff->bindValue(':notes', $notes);
+		$stuff->execute();
+		return $pdo->lastInsertId();
+	}
+
+	private $currentModificationId = null;
+
+	public function modifcationBegin(User $user, $notes = null) {
+		// TODO: check user?
+    	$pdo = $this->getPDO();
+    	if($pdo->inTransaction()) {
+		    throw new \LogicException('Trying to start nested transactions in modificationBegin');
+	    }
+	    $pdo->beginTransaction();
+    	$this->currentModificationId = $this->getNewModificationId($user, $notes);
+	}
+
+	public function modificationCommit() {
+		$this->getPDO()->commit();
+		$this->currentModificationId = null;
+	}
+
+	public function modificationRollback() {
+		$this->getPDO()->rollBack();
+		$this->currentModificationId = null;
+	}
+
+	private function getModificationId() {
+		if(!$this->getPDO()->inTransaction()) {
+			throw new \LogicException('Trying to read modification ID without an active transaction');
+		}
+		if($this->currentModificationId === null) {
+			throw new \LogicException('Transaction started but no modification ID set (= something went horribly wrong)');
+		}
+		return $this->currentModificationId;
+	}
+
+	private function setItemModified($itemID) {
+		$pdo = $this->getPDO();
+		$stuff = $pdo->prepare('INSERT INTO ItemModification (ModificationID, ItemID) VALUES (?, ?)');
+		$stuff->execute([$this->getModificationId(), $itemID]);
 	}
 }
