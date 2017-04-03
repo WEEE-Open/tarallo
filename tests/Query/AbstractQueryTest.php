@@ -20,7 +20,7 @@ class AbstractQueryTest extends TestCase{
 	 * @uses         \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 */
 	public function testQueryStringNormalization($in, $expected) {
-		$this->assertEquals((string) new GetQuery($in), $expected);
+		$this->assertEquals($expected, (string) new GetQuery($in));
 	}
 
 	public function providerTestQueryStringNormalization() {

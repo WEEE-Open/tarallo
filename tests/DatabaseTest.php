@@ -20,7 +20,7 @@ class DatabaseTest extends TestCase {
 	public function getDataSet() {
 		$this->getConnection();
 		return new PHPUnit\DbUnit\DataSet\YamlDataSet(
-			dirname(__FILE__) . "/database.yml"
+			dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "database.yml"
 		);
 	}
 
@@ -28,21 +28,21 @@ class DatabaseTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Database
 	 */
 	public function testGetUserInvalidSession() {
-		$this->assertEquals($this->getDb()->getUserFromSession('foo'), null);
+		$this->assertEquals(null, $this->getDb()->getUserFromSession('foo'));
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Database
 	 */
 	public function testGetUserAccountDisabled() {
-		$this->assertEquals($this->getDb()->getUserFromSession('this-really-is-a-session-1234567'), null);
+		$this->assertEquals(null, $this->getDb()->getUserFromSession('this-really-is-a-session-1234567'));
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Database
 	 */
 	public function testGetUserAccountExpiredSession() {
-		$this->assertEquals($this->getDb()->getUserFromSession('this-really-is-a-session-7654321'), null);
+		$this->assertEquals(null, $this->getDb()->getUserFromSession('this-really-is-a-session-7654321'));
 	}
 
 	/**
@@ -50,7 +50,7 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\User
 	 */
 	public function testGetUserAccountValidSession() {
-		$this->assertEquals((string) $this->getDb()->getUserFromSession('this-really-is-a-valid-session-1'), 'asd-valid');
+		$this->assertEquals('asd-valid', (string) $this->getDb()->getUserFromSession('this-really-is-a-valid-session-1'));
 	}
 
 	/**
@@ -58,14 +58,14 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\User
 	 */
 	public function testGetUserFromLoginValid() {
-		$this->assertEquals((string) $this->getDb()->getUserFromLogin('asd', 'asd'), 'asd');
+		$this->assertEquals('asd', (string) $this->getDb()->getUserFromLogin('asd', 'asd'));
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Database
 	 */
 	public function testGetUserFromLoginDisabledAccount() {
-		$this->assertEquals((string) $this->getDb()->getUserFromLogin('asd-disabled', 'asd'), null);
+		$this->assertEquals(null, (string) $this->getDb()->getUserFromLogin('asd-disabled', 'asd'));
 	}
 
 	/**
@@ -73,7 +73,7 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\User
 	 */
 	public function testGetUserFromLoginWrongPassword() {
-		$this->assertEquals((string) $this->getDb()->getUserFromLogin('asd', 'wrong'), null);
+		$this->assertEquals(null, (string) $this->getDb()->getUserFromLogin('asd', 'wrong'));
 	}
 
 	/**

@@ -83,7 +83,7 @@ class SortTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testSortValidSingle() {
-		$this->assertEquals(new GetQuery('/Sort/+foo'), '/Sort/+foo');
+		$this->assertEquals('/Sort/+foo', new GetQuery('/Sort/+foo'));
 	}
 
 	/**
@@ -94,7 +94,7 @@ class SortTest extends TestCase{
 	 * @depends        testSortValidSingle
 	 */
 	public function testSortValidDouble() {
-		$this->assertEquals(new GetQuery('/Sort/+foo,-bar'), '/Sort/+foo,-bar');
+		$this->assertEquals('/Sort/+foo,-bar', new GetQuery('/Sort/+foo,-bar'));
 	}
 
 	/**

@@ -149,7 +149,7 @@ class GetQueryTest extends TestCase {
 	 * @param $string GetQuery string
 	 */
 	public function testUnchangedValidNonDefaultStrings($string) {
-		$this->assertEquals((string) new GetQuery($string), $string);
+		$this->assertEquals($string, (string) new GetQuery($string));
 	}
 
 
@@ -173,6 +173,6 @@ class GetQueryTest extends TestCase {
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testMultipleFields() {
-		$this->assertEquals((string) new GetQuery('/Location/foo/Location/bar'), '/Location/foo/Location/bar');
+		$this->assertEquals('/Location/foo/Location/bar', (string) new GetQuery('/Location/foo/Location/bar'));
 	}
 }

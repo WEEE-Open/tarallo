@@ -36,6 +36,6 @@ class SearchTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 */
 	public function testSearchValid() {
-		$this->assertEquals(new GetQuery('/Search/foo=bar'), '/Search/foo=bar');
+		$this->assertEquals('/Search/foo=bar', new GetQuery('/Search/foo=bar'));
 	}
 }

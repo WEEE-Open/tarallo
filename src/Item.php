@@ -9,8 +9,10 @@ class Item implements \JsonSerializable {
 	private $content = [];
 
 	function __construct($code) {
-		if(!is_string($code)) {
-			throw new \LogicException('Item code must be a string');
+		if(is_int($code)) {
+			$code = (string) $code;
+		} else if(!is_string($code) || $code === '') {
+			throw new InvalidParameterException('Item code must be a non-empty string or integer');
 		}
 		$this->code = $code;
 	}
@@ -78,7 +80,7 @@ class Item implements \JsonSerializable {
 		];
 	}
 
-	public function toString() {
+	public function __toString() {
 		if(isset($this->content['type'])) {
 			$type = $this->content['type'];
 			return $this->code . " ($type)";
