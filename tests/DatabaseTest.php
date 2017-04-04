@@ -9,6 +9,12 @@ class DatabaseTest extends TestCase {
 
 	private $db = null;
 
+    protected function setUp() {
+        if(!extension_loaded('pdo_mysql')) {
+            $this->markTestSkipped('The PDO MySQL extension is not available.');
+        }
+    }
+
 	private function getPdo() {
 		return new PDO('mysql:dbname=tarallo_test;host=10.13.37.6;charset=utf8mb4', 'root', 'root');
 	}
@@ -75,6 +81,18 @@ class DatabaseTest extends TestCase {
 	public function testGetUserFromLoginWrongPassword() {
 		$this->assertEquals(null, (string) $this->getDb()->getUserFromLogin('asd', 'wrong'));
 	}
+
+    /**
+     * @covers \WEEEOpen\Tarallo\Database
+     * @uses   \WEEEOpen\Tarallo\User
+     */
+    public function testUserLoginLogout() {
+        $this->assertEquals(null, $this->getDb()->getUserFromSession('session-started-in-test-12345678'));
+        $this->getDb()->setSessionFromUser('asd', 'session-started-in-test-12345678', 9223372036854775807);
+        $this->assertEquals('asd', (string) $this->getDb()->getUserFromSession('session-started-in-test-12345678'));
+        $this->getDb()->setSessionFromUser('asd', null, null);
+        $this->assertEquals(null, $this->getDb()->getUserFromSession('session-started-in-test-12345678'));
+    }
 
 	/**
 	 * Database tests are really slow and this code is a bit complex to say the least, testing everything
