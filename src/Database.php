@@ -256,7 +256,18 @@ class Database {
         }
     }
 
-    public function addItems($items, $default = false) {
+    public function addItems($items, $parent = null, $default = false) { // TODO: somehow find parent (pass code from JSON request?)
+	    $pdo = $this->getPDO();
+	    // TODO: split these into other functions
+	    $featureNumber = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`)     SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+	    $featureText   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueText`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+	    $featureEnum   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+	    $itemQuery = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
+
+	    $this->addItemsInternal($items, $itemQuery, $featureNumber, $featureText, $featureEnum, $parent, $default);
+    }
+
+    public function addItemsInternal($items, \PDOStatement $itemQuery, \PDOStatement $featureNumber, \PDOStatement $featureText, \PDOStatement $featureEnum, $parent = null, $default = false) {
     	if($items instanceof Item) {
     		$items = [$items];
 	    } else if(!is_array($items)) {
@@ -268,13 +279,10 @@ class Database {
 	    }
 
 	    $pdo = $this->getPDO();
+    	// TODO: recursively insert other elements... this is getting unmanageable, just implement the DAO pattern.
 
-	    $itemQuery = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
 	    $itemQuery->bindValue(':d', $default, \PDO::PARAM_INT);
 	    // not very nice, but the alternative was another query in a separate function (even slower) or returning FeatureID from getFeatureTypeFromName, which didn't make any sense, or returning a Feature object which I may do in future and increases complexity for almost no benefit
-	    $featureNumber = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`)     SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
-	    $featureText   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueText`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
-	    $featureEnum   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
 	    foreach($items as $item) {
 			$id = $this->addItem($itemQuery, $item);
 			/** @var Item $item */
