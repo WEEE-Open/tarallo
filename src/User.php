@@ -21,11 +21,11 @@ class User {
 			throw new InvalidParameterException('Username must be a non-empty string');
 		}
 
-		if($password != null && strlen($password) === 0) {
+		if($this->nullOrNonEmptyString($password)) {
 			throw new InvalidParameterException('Password must be null or a non-empty string');
 		}
 
-		if($hash != null && strlen($hash) === 0) {
+		if($this->nullOrNonEmptyString($hash)) {
 			throw new InvalidParameterException('Hash must be null or a non-empty string');
 		}
 
@@ -37,7 +37,7 @@ class User {
 
 		$this->username = $username;
 		$this->password = $password;
-		$this->password = $hash;
+		$this->hash = $hash;
 	}
 
 	private static function password_verify($password, $hash) {
@@ -79,4 +79,17 @@ class User {
 	public function __toString() {
 		return $this->username;
 	}
+
+    private function nullOrNonEmptyString($string) {
+        if($string === null) {
+            return true;
+        }
+        if(!is_string($string)) {
+            return false;
+        }
+        if($string === '') {
+            return false;
+        }
+        return true;
+    }
 }
