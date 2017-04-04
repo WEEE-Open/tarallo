@@ -21,11 +21,11 @@ class User {
 			throw new InvalidParameterException('Username must be a non-empty string');
 		}
 
-		if($this->nullOrNonEmptyString($password)) {
+		if(!$this->nullOrNonEmptyString($password)) {
 			throw new InvalidParameterException('Password must be null or a non-empty string');
 		}
 
-		if($this->nullOrNonEmptyString($hash)) {
+		if(!$this->nullOrNonEmptyString($hash)) {
 			throw new InvalidParameterException('Hash must be null or a non-empty string');
 		}
 
