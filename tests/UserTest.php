@@ -11,8 +11,19 @@ class UserTest extends TestCase {
         $user = new User('asd', null, null);
         $this->assertEquals('asd', (string) $user);
         $this->assertEquals('asd', $user->getUsername());
+        return $user;
     }
 
+	/**
+	 * @covers  \WEEEOpen\Tarallo\User
+	 * @depends testValidUserNullPasswordAndHash
+	 *
+	 * @param User $user "new User('asd', null, null);".
+	 */
+    public function testReadHashNotAvailable($user) {
+    	$this->expectException(LogicException::class);
+    	$user->getHash();
+    }
 
     /**
      * @covers \WEEEOpen\Tarallo\User
@@ -58,6 +69,14 @@ class UserTest extends TestCase {
         $this->expectException(InvalidParameterException::class);
         new User('asd', ['foo' => 'bar'], null);
     }
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\User
+	 */
+	public function testEmptyHash() {
+		$this->expectException(InvalidParameterException::class);
+		new User('asd', null, '');
+	}
 
     /**
      * @covers \WEEEOpen\Tarallo\User
