@@ -13,7 +13,7 @@ abstract class DAO extends Database {
         return $this->database->getPDO();
     }
 
-    protected function multipleIn($prefix, $array) {
+    protected static function multipleIn($prefix, $array) {
         $in = 'IN (';
         foreach($array as $k => $v) {
             $in .= $prefix . $k . ', ';

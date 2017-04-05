@@ -108,8 +108,14 @@ final class ItemDAO extends DAO {
         $items = $this->getItemItself($locations, $searches, $depth, $sorts, $token);
         $itemIDs = []; // TODO: implement
         if(!empty($itemIDs)) {
-            $this->database->featureDAO()->getFeatures($itemIDs, $items);
+            $features = $this->database->featureDAO()->getFeatures($itemIDs);
+            foreach($features as $k => $feat) {
+                foreach($feat as $f => $val) {
+                    $items[$k]->addFeature($f, $val);
+                }
+            }
         }
+        return $items;
     }
 
     private function getItemItself($locations, $searches, $depth, $sorts, $token) {
