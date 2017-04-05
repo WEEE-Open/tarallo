@@ -7,6 +7,7 @@ class Database {
     private $pdo = null;
     private $userDAO = null;
     private $itemDAO = null;
+    private $featureDAO = null;
 
     protected function getPDO() {
         if($this->pdo === null) {
@@ -52,6 +53,13 @@ class Database {
             $this->itemDAO = new ItemDAO($this);
         }
         return $this->itemDAO;
+    }
+
+    public function featureDAO() {
+        if($this->featureDAO === null) {
+            $this->featureDAO = new FeatureDAO($this);
+        }
+        return $this->featureDAO;
     }
 
     private $currentModificationId = null;

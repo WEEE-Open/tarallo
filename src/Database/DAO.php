@@ -12,4 +12,12 @@ abstract class DAO extends Database {
     protected function getPDO() {
         return $this->database->getPDO();
     }
+
+    protected function multipleIn($prefix, $array) {
+        $in = 'IN (';
+        foreach($array as $k => $v) {
+            $in .= $prefix . $k . ', ';
+        }
+        return substr($in, 0, strlen($in) - 2) . ')'; //remove last ', '
+    }
 }

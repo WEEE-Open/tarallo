@@ -13,14 +13,6 @@ final class ItemDAO extends DAO {
         }
     }
 
-    private function multipleIn($prefix, $array) {
-        $in = 'IN (';
-        foreach($array as $k => $v) {
-            $in .= $prefix . $k . ', ';
-        }
-        return substr($in, 0, strlen($in) - 2) . ')'; //remove last ', '
-    }
-
     private function locationPrepare($locations) {
         if(self::isArrayAndFull($locations)) {
             $locationWhere = 'AND `Name` ' . $this->multipleIn(':location', $locations);
@@ -116,7 +108,7 @@ final class ItemDAO extends DAO {
         $items = $this->getItemItself($locations, $searches, $depth, $sorts, $token);
         $itemIDs = []; // TODO: implement
         if(!empty($itemIDs)) {
-            $this->getFeatures($itemIDs, $items);
+            $this->database->featureDAO()->getFeatures($itemIDs, $items);
         }
     }
 
@@ -163,20 +155,6 @@ final class ItemDAO extends DAO {
         }
     }
 
-    private function getFeatures($itemIDs, &$items) {
-        $inItemID = $this->multipleIn(':item', $itemIDs);
-        $s = $this->getPDO()->prepare('
-            SELECT ItemID, FeatureName, `Value`, ValueText
-            FROM Feature, ItemFeature
-            WHERE ItemFeature.FeatureID = Feature.FeatureID
-            AND ItemID ' . $inItemID . '
-		');
-        $s->execute();
-        if($s->rowCount() === 0) {
-            // TODO: do stuff with $items
-        }
-    }
-
     public function addItems($items, $parent = null, $default = false) { // TODO: somehow find parent (pass code from JSON request?)
         $pdo = $this->getPDO();
         // TODO: split these into other functions
@@ -212,7 +190,8 @@ final class ItemDAO extends DAO {
             $featureEnum->bindValue(':item', $id);
             $features = $item->getFeatures();
             foreach($features as $feature => $value) {
-                $featureType = $this->getFeatureTypeFromName($feature);
+                // TODO: move to a function in FeatureDAO
+                $featureType = $this->featureDAO()->getFeatureTypeFromName($feature);
                 switch($featureType) {
                     // was really tempted to use variable variables here...
                     case self::FEATURE_TEXT:
@@ -227,7 +206,7 @@ final class ItemDAO extends DAO {
                         break;
                     case self::FEATURE_ENUM:
                         $featureEnum->bindValue(':feature', $feature);
-                        $featureEnum->bindValue(':val', $this->getFeatureValueEnumFromName($feature, $value));
+                        $featureEnum->bindValue(':val', $this->featureDAO()->getFeatureValueEnumFromName($feature, $value));
                         $featureEnum->execute();
                         break;
                     default:
@@ -262,51 +241,6 @@ final class ItemDAO extends DAO {
         $itemQuery->bindValue(':c', $item->getCode(), \PDO::PARAM_STR);
         $itemQuery->execute();
         return (int) $pdo->lastInsertId();
-    }
-
-    private $featureTypeStatement = null;
-    const FEATURE_TEXT = 0;
-    const FEATURE_NUMBER = 1;
-    const FEATURE_ENUM = 2;
-
-    public function getFeatureTypeFromName($featureName) {
-        $pdo = $this->getPDO();
-        if($this->featureTypeStatement === null) {
-            $this->featureTypeStatement = $pdo->prepare('SELECT `FeatureType` FROM Feature WHERE FeatureName = ? LIMIT 1');
-        }
-        $this->featureTypeStatement->bindValue(1, $featureName);
-        $this->featureTypeStatement->execute();
-        if($this->featureTypeStatement->rowCount() === 0) {
-            throw new InvalidParameterException('Unknown feature name ' . $featureName);
-        }
-        switch((int) $this->featureTypeStatement->fetch(\PDO::FETCH_NUM)[0]) {
-            case 0:
-                return self::FEATURE_TEXT;
-            case 1:
-                return self::FEATURE_NUMBER;
-            case 2:
-                return self::FEATURE_ENUM;
-            default:
-                throw new \LogicException('Unknown feature type for ' . $featureName . ' found in database');
-        }
-    }
-
-    private $featureEnumNameStatement = null;
-
-    public function getFeatureValueEnumFromName($featureName, $featureValueText) {
-        $pdo = $this->getPDO();
-        if($this->featureEnumNameStatement === null) {
-            $this->featureEnumNameStatement = $pdo->prepare('SELECT `ValueEnum` FROM FeatureValue, Feature WHERE Feature.FeatureID = FeatureValue.FeatureID AND Feature.FeatureName = :n AND FeatureValue.ValueText = :valuetext AND Feature.FeatureType = :type LIMIT 1');
-        }
-        $this->featureEnumNameStatement->bindValue(':n', $featureName);
-        $this->featureEnumNameStatement->bindValue(':valuetext', $featureValueText);
-        $this->featureEnumNameStatement->bindValue(':type', self::FEATURE_ENUM);
-        $this->featureEnumNameStatement->execute();
-        if($this->featureEnumNameStatement->rowCount() === 0) {
-            throw new InvalidParameterException('Invalid value ' . $featureValueText . ' for feature ' . $featureName);
-        }
-        $result = $this->featureEnumNameStatement->fetch();
-        return $result['ValueEnum'];
     }
 
     private function setItemModified($itemID) {
