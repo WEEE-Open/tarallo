@@ -84,7 +84,6 @@ class Database {
         $this->currentModificationId = null;
     }
 
-
     private function getNewModificationId(\WEEEOpen\Tarallo\User $user, $notes) {
         // TODO: decouple Database from User by passing string instead of User?
         $pdo = $this->getPDO();
