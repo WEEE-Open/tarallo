@@ -1,7 +1,10 @@
 <?php
+
+namespace WEEEOpen\Tarallo\Test\Database;
+
 use PHPUnit\Framework\TestCase;
 use PHPUnit\DbUnit\TestCaseTrait;
-use WEEEOpen\Tarallo\Database;
+use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Item;
 
 class DatabaseTest extends TestCase {
@@ -16,7 +19,7 @@ class DatabaseTest extends TestCase {
     }
 
 	private function getPdo() {
-		return new PDO('mysql:dbname=tarallo_test;host=10.13.37.6;charset=utf8mb4', 'root', 'root');
+		return new \PDO('mysql:dbname=tarallo_test;host=10.13.37.6;charset=utf8mb4', 'root', 'root');
 	}
 
 	public function getConnection() {
@@ -34,21 +37,21 @@ class DatabaseTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Database
 	 */
 	public function testGetUserInvalidSession() {
-		$this->assertEquals(null, $this->getDb()->getUserFromSession('foo'));
+		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('foo'));
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Database
 	 */
 	public function testGetUserAccountDisabled() {
-		$this->assertEquals(null, $this->getDb()->getUserFromSession('this-really-is-a-session-1234567'));
+		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('this-really-is-a-session-1234567'));
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Database
 	 */
 	public function testGetUserAccountExpiredSession() {
-		$this->assertEquals(null, $this->getDb()->getUserFromSession('this-really-is-a-session-7654321'));
+		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('this-really-is-a-session-7654321'));
 	}
 
 	/**
@@ -56,7 +59,7 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\User
 	 */
 	public function testGetUserAccountValidSession() {
-		$this->assertEquals('asd-valid', (string) $this->getDb()->getUserFromSession('this-really-is-a-valid-session-1'));
+		$this->assertEquals('asd-valid', (string) $this->getDb()->userDAO()->getUserFromSession('this-really-is-a-valid-session-1'));
 	}
 
 	/**
@@ -64,14 +67,14 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\User
 	 */
 	public function testGetUserFromLoginValid() {
-		$this->assertEquals('asd', (string) $this->getDb()->getUserFromLogin('asd', 'asd'));
+		$this->assertEquals('asd', (string) $this->getDb()->userDAO()->getUserFromLogin('asd', 'asd'));
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Database
 	 */
 	public function testGetUserFromLoginDisabledAccount() {
-		$this->assertEquals(null, (string) $this->getDb()->getUserFromLogin('asd-disabled', 'asd'));
+		$this->assertEquals(null, (string) $this->getDb()->userDAO()->getUserFromLogin('asd-disabled', 'asd'));
 	}
 
 	/**
@@ -79,7 +82,7 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\User
 	 */
 	public function testGetUserFromLoginWrongPassword() {
-		$this->assertEquals(null, (string) $this->getDb()->getUserFromLogin('asd', 'wrong'));
+		$this->assertEquals(null, (string) $this->getDb()->userDAO()->getUserFromLogin('asd', 'wrong'));
 	}
 
     /**
@@ -87,11 +90,11 @@ class DatabaseTest extends TestCase {
      * @uses   \WEEEOpen\Tarallo\User
      */
     public function testUserLoginLogout() {
-        $this->assertEquals(null, $this->getDb()->getUserFromSession('session-started-in-test-12345678'));
-        $this->getDb()->setSessionFromUser('asd', 'session-started-in-test-12345678', 9223372036854775807);
-        $this->assertEquals('asd', (string) $this->getDb()->getUserFromSession('session-started-in-test-12345678'));
-        $this->getDb()->setSessionFromUser('asd', null, null);
-        $this->assertEquals(null, $this->getDb()->getUserFromSession('session-started-in-test-12345678'));
+        $this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
+        $this->getDb()->userDAO()->setSessionFromUser('asd', 'session-started-in-test-12345678', 9223372036854775807);
+        $this->assertEquals('asd', (string) $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
+        $this->getDb()->userDAO()->setSessionFromUser('asd', null, null);
+        $this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
     }
 
 	/**
@@ -111,7 +114,7 @@ class DatabaseTest extends TestCase {
 		$discone2 = (new Item('SATAna-2'))->addFeature('capacity', 666)->addFeature('brand', 'SATAn Storage Corporation Inc.')->addFeature('model', 'Discone da 666 byte')->addFeature('type', 'hdd');
 		$case->addChild($discone1);
 		$case->addChild($discone2);
-		$db->addItems($case);
+		$db->itemDAO()->addItems($case);
 		$db->modificationCommit();
 
 		$itemTableRightNow = new PHPUnit\DbUnit\DataSet\QueryTable('Item.Code', 'SELECT Code, IsDefault FROM Item', $this->getConnection());
@@ -127,7 +130,7 @@ class DatabaseTest extends TestCase {
 	private function getDb() {
 		if($this->db === null) {
 			$db   = new Database();
-			$dbr  = new ReflectionObject($db);
+			$dbr  = new \ReflectionObject($db);
 			$prop = $dbr->getProperty('pdo');
 			$prop->setAccessible(true);
 			$prop->setValue($db, $this->getPdo());

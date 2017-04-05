@@ -2,7 +2,7 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
-use WEEEOpen\Tarallo\Database;
+use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\InvalidParameterException;
 
 abstract class AbstractQuery {

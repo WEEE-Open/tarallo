@@ -1,6 +1,7 @@
 <?php
 
 namespace WEEEOpen\Tarallo;
+use WEEEOpen\Tarallo\Database\Database;
 
 class Session {
 	const COOKIE_NAME = 'tarallo';
@@ -17,7 +18,7 @@ class Session {
 	public static function start(User $user, Database $db) {
 		$id = self::newUniqueIdentifier($db);
 		self::setContent($id);
-		$db->setSessionFromUser($user->getUsername(), $id, time() + self::SESSION_DURATION);
+		$db->userDAO()->setSessionFromUser($user->getUsername(), $id, time() + self::SESSION_DURATION);
 	}
 
 	/**
@@ -31,7 +32,7 @@ class Session {
 	private static function newUniqueIdentifier(Database $db) {
 		do {
 			$id = self::newIdentifier();
-		} while($db->getUserFromSession($id) !== null);
+		} while($db->userDAO()->getUserFromSession($id) !== null);
 
 		return $id;
 	}
@@ -64,7 +65,7 @@ class Session {
 	 */
 	public static function restore(Database $db) {
 		if(isset($_COOKIE[ self::COOKIE_NAME ])) {
-			return $db->getUserFromSession($_COOKIE[ self::COOKIE_NAME ]);
+			return $db->userDAO()->getUserFromSession($_COOKIE[ self::COOKIE_NAME ]);
 		}
 
 		return null;
@@ -79,6 +80,6 @@ class Session {
 	public static function close(User $user, Database $db) {
 		// Delete cookie
 		setcookie(self::COOKIE_NAME, "", 1);
-		$db->setSessionFromUser($user->getUsername(), null, null);
+		$db->userDAO()->setSessionFromUser($user->getUsername(), null, null);
 	}
 }

@@ -2,6 +2,7 @@
 namespace WEEEOpen\Tarallo\Query;
 
 use WEEEOpen\Tarallo;
+use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\InvalidParameterException;
 
 class LoginQuery extends PostJSONQuery implements \JsonSerializable {
@@ -30,14 +31,14 @@ class LoginQuery extends PostJSONQuery implements \JsonSerializable {
 
 	/**
 	 * @param Tarallo\User|null $user current user ("recovered" from session)
-	 * @param Tarallo\Database $database
+	 * @param Tarallo\Database\Database $database
 	 *
 	 * @return array data for the response
 	 * @throws \Exception because some stuff isn't implemented (yet)
 	 * @todo return a Response object?
 	 */
-	public function run($user, Tarallo\Database $database) {
-        $newUser = $database->getUserFromLogin($this->username, $this->password);
+	public function run($user, Database $database) {
+        $newUser = $database->userDAO()->getUserFromLogin($this->username, $this->password);
         if($newUser === null) {
             throw new InvalidParameterException('Wrong username or password');
         } else {

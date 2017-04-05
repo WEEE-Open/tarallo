@@ -3,7 +3,7 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
-use WEEEOpen\Tarallo\Database;
+use WEEEOpen\Tarallo\Database\Database;
 
 class EditQuery extends PostJSONQuery implements \JsonSerializable {
     // getting an abstract class for fields out of GetQUery would be nice, but there's the diamond problem...

@@ -47,7 +47,7 @@ class GetQueryTest extends TestCase {
 	 */
 	public function testRunEmptyQuery() {
 		$this->expectException(InvalidParameterException::class);
-		$db = $this->createMock(Tarallo\Database::class);
+		$db = $this->createMock(Tarallo\Database\Database::class);
 		$query = new GetQuery('');
 		$query->run(new Tarallo\User('example', 'example'), $db);
 	}
@@ -59,7 +59,7 @@ class GetQueryTest extends TestCase {
 	 */
 	public function testRunNullQuery() {
 		$this->expectException(InvalidParameterException::class);
-		$db = $this->createMock(Tarallo\Database::class);
+		$db = $this->createMock(Tarallo\Database\Database::class);
 		$query = new GetQuery(null);
 		$query->run(new Tarallo\User('example', 'example'), $db);
 	}

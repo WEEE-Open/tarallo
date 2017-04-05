@@ -2,6 +2,7 @@
 
 namespace WEEEOpen\Tarallo;
 use WEEEOpen\Tarallo\Query;
+use WEEEOpen\Tarallo\Database\Database;
 
 // in case something goes wrong (reset to 200 when sending a JSON response)
 http_response_code(500);

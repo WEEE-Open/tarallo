@@ -49,7 +49,7 @@ class Database {
 
     public function itemDAO() {
         if($this->itemDAO === null) {
-            $this->itemrDAO = new ItemDAO($this);
+            $this->itemDAO = new ItemDAO($this);
         }
         return $this->itemDAO;
     }
