@@ -130,7 +130,7 @@ class FeatureDAO extends DAO {
 		$this->featureEnumStatement->bindValue(':item', $itemId);
 
 		foreach($features as $feature => $value) {
-			$featureType = $this->featureDAO()->getFeatureTypeFromName($feature);
+			$featureType = $this->database->featureDAO()->getFeatureTypeFromName($feature);
 			switch($featureType) {
 				// was really tempted to use variable variables here...
 				case self::FEATURE_TEXT:
@@ -145,7 +145,7 @@ class FeatureDAO extends DAO {
 					break;
 				case self::FEATURE_ENUM:
 					$this->featureEnumStatement->bindValue(':feature', $feature);
-					$this->featureEnumStatement->bindValue(':val', $this->featureDAO()->getFeatureValueEnumFromName($feature, $value));
+					$this->featureEnumStatement->bindValue(':val', $this->database->featureDAO()->getFeatureValueEnumFromName($feature, $value));
 					$this->featureEnumStatement->execute();
 					break;
 				default:

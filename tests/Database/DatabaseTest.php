@@ -35,60 +35,76 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database
+	 * @covers \WEEEOpen\Tarallo\Database\Database
+	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
+	 * @uses  \WEEEOpen\Tarallo\Database\DAO
 	 */
 	public function testGetUserInvalidSession() {
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('foo'));
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database
+	 * @covers \WEEEOpen\Tarallo\Database\Database
+	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 */
 	public function testGetUserAccountDisabled() {
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('this-really-is-a-session-1234567'));
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database
+	 * @covers \WEEEOpen\Tarallo\Database\Database
+	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 */
 	public function testGetUserAccountExpiredSession() {
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('this-really-is-a-session-7654321'));
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database
+	 * @covers \WEEEOpen\Tarallo\Database\Database
 	 * @uses   \WEEEOpen\Tarallo\User
+	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 */
 	public function testGetUserAccountValidSession() {
 		$this->assertEquals('asd-valid', (string) $this->getDb()->userDAO()->getUserFromSession('this-really-is-a-valid-session-1'));
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database
+	 * @covers \WEEEOpen\Tarallo\Database\Database
 	 * @uses   \WEEEOpen\Tarallo\User
+	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 */
 	public function testGetUserFromLoginValid() {
 		$this->assertEquals('asd', (string) $this->getDb()->userDAO()->getUserFromLogin('asd', 'asd'));
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database
+	 * @covers \WEEEOpen\Tarallo\Database\Database
+	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 */
 	public function testGetUserFromLoginDisabledAccount() {
 		$this->assertEquals(null, (string) $this->getDb()->userDAO()->getUserFromLogin('asd-disabled', 'asd'));
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database
+	 * @covers \WEEEOpen\Tarallo\Database\Database
 	 * @uses   \WEEEOpen\Tarallo\User
+	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 */
 	public function testGetUserFromLoginWrongPassword() {
 		$this->assertEquals(null, (string) $this->getDb()->userDAO()->getUserFromLogin('asd', 'wrong'));
 	}
 
     /**
-     * @covers \WEEEOpen\Tarallo\Database
+     * @covers \WEEEOpen\Tarallo\Database\Database
      * @uses   \WEEEOpen\Tarallo\User
+     * @covers \WEEEOpen\Tarallo\Database\UserDAO
+     * @uses   \WEEEOpen\Tarallo\Database\DAO
      */
     public function testUserLoginLogout() {
         $this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
@@ -102,9 +118,12 @@ class DatabaseTest extends TestCase {
 	 * Database tests are really slow and this code is a bit complex to say the least, testing everything
 	 * in a sensible manner will be difficult. But some tests are better than no tests at all, right?
 	 *
-	 * @covers \WEEEOpen\Tarallo\Database
+	 * @covers \WEEEOpen\Tarallo\Database\Database
 	 * @uses   \WEEEOpen\Tarallo\User
 	 * @uses   \WEEEOpen\Tarallo\Item
+	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 */
 	public function testAddingSomeItems() {
 		$db = $this->getDb();

@@ -9,7 +9,7 @@ class Database {
     private $itemDAO = null;
     private $featureDAO = null;
 
-    protected function getPDO() {
+    public function getPDO() {
         if($this->pdo === null) {
             $this->connect(DB_USERNAME, DB_PASSWORD, DB_DSN);
         }
@@ -95,7 +95,7 @@ class Database {
         return $pdo->lastInsertId();
     }
 
-    protected function getModificationId() {
+    public function getModificationId() {
         if(!$this->getPDO()->inTransaction()) {
             throw new \LogicException('Trying to read modification ID without an active transaction');
         }

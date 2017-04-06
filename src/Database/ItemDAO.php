@@ -227,7 +227,7 @@ final class ItemDAO extends DAO {
     private function setItemModified($itemID) {
         $pdo = $this->getPDO();
         $stuff = $pdo->prepare('INSERT INTO ItemModification (ModificationID, ItemID) VALUES (?, ?)');
-        $stuff->execute([$this->getModificationId(), $itemID]);
+        $stuff->execute([$this->database->getModificationId(), $itemID]);
     }
 
 

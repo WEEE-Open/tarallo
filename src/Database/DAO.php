@@ -2,10 +2,10 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
-abstract class DAO extends Database {
+abstract class DAO {
     protected $database;
 
-    protected function __construct(Database $db) {
+    public function __construct(Database $db) {
         $this->database = $db;
     }
 
