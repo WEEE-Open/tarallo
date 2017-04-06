@@ -8,8 +8,15 @@ class Database {
     private $userDAO = null;
     private $itemDAO = null;
     private $featureDAO = null;
+	private $callback;
 
-    public function getPDO() {
+	public function __construct() {
+		$this->callback = function() {
+			return $this->getPDO();
+		};
+	}
+
+	private function getPDO() {
         if($this->pdo === null) {
             $this->connect(DB_USERNAME, DB_PASSWORD, DB_DSN);
         }
@@ -34,6 +41,7 @@ class Database {
         $this->pdo = null;
         $this->userDAO = null;
         $this->itemDAO = null;
+        $this->featureDAO = null;
     }
 
     public function __destruct() {
@@ -43,21 +51,21 @@ class Database {
 
     public function userDAO() {
         if($this->userDAO === null) {
-            $this->userDAO = new UserDAO($this);
+            $this->userDAO = new UserDAO($this, $this->callback);
         }
         return $this->userDAO;
     }
 
     public function itemDAO() {
         if($this->itemDAO === null) {
-            $this->itemDAO = new ItemDAO($this);
+            $this->itemDAO = new ItemDAO($this, $this->callback);
         }
         return $this->itemDAO;
     }
 
     public function featureDAO() {
         if($this->featureDAO === null) {
-            $this->featureDAO = new FeatureDAO($this);
+            $this->featureDAO = new FeatureDAO($this, $this->callback);
         }
         return $this->featureDAO;
     }

@@ -4,13 +4,15 @@ namespace WEEEOpen\Tarallo\Database;
 
 abstract class DAO {
     protected $database;
+    private $callback;
 
-    public function __construct(Database $db) {
+    public function __construct(Database $db, $callback) {
         $this->database = $db;
+        $this->callback = $callback;
     }
 
     protected function getPDO() {
-        return $this->database->getPDO();
+        return call_user_func($this->callback);
     }
 
     protected static function multipleIn($prefix, $array) {
