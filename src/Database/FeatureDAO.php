@@ -8,7 +8,6 @@ class FeatureDAO extends DAO {
 
     public function getFeatures($items) {
         if(!is_array($items)) {
-            // TODO: use Item? But that's leaking the database through the abstraction...
             throw new \InvalidArgumentException('$items must be an array of item IDs');
         }
 
@@ -54,9 +53,8 @@ class FeatureDAO extends DAO {
      * @param $featureName
      * @return int
      * @throws InvalidParameterException
-     * @deprecated use join and COALESCE instead?
      */
-    public function getFeatureTypeFromName($featureName) {
+    private function getFeatureTypeFromName($featureName) {
         $pdo = $this->getPDO();
         if($this->featureTypeStatement === null) {
             $this->featureTypeStatement = $pdo->prepare('SELECT `FeatureType` FROM Feature WHERE FeatureName = ? LIMIT 1');
@@ -95,4 +93,64 @@ class FeatureDAO extends DAO {
         $result = $this->featureEnumNameStatement->fetch();
         return $result['ValueEnum'];
     }
+
+    private $featureNumberStatement = null;
+    private $featureTextStatement = null;
+    private $featureEnumStatement = null;
+
+	public function addFeatures($itemId, $features) {
+		static $featureNumberStatement = null;
+
+    	if(!is_numeric($itemId) || !($itemId > 0)) {
+    		throw new \InvalidArgumentException('Item ID must be a positive integer (or string representing a positive integer)');
+	    }
+
+	    if(!is_array($features)) {
+		    throw new \InvalidArgumentException('Features must be passed as an array');
+	    }
+
+	    if(empty($features)) {
+    		return;
+	    }
+
+	    $pdo = $this->getPDO();
+
+    	if($this->featureNumberStatement === null) {
+		    $this->featureNumberStatement = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`)   SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+	    }
+	    if($this->featureTextStatement === null) {
+		    $this->featureTextStatement = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueText`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+	    }
+	    if($this->featureEnumStatement === null) {
+		    $this->featureEnumStatement = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+	    }
+
+		$this->featureNumberStatement->bindValue(':item', $itemId);
+		$this->featureTextStatement->bindValue(':item', $itemId);
+		$this->featureEnumStatement->bindValue(':item', $itemId);
+
+		foreach($features as $feature => $value) {
+			$featureType = $this->featureDAO()->getFeatureTypeFromName($feature);
+			switch($featureType) {
+				// was really tempted to use variable variables here...
+				case self::FEATURE_TEXT:
+					$this->featureTextStatement->bindValue(':feature', $feature);
+					$this->featureTextStatement->bindValue(':val', $value);
+					$this->featureTextStatement->execute();
+					break;
+				case self::FEATURE_NUMBER:
+					$this->featureNumberStatement->bindValue(':feature', $feature);
+					$this->featureNumberStatement->bindValue(':val', $value);
+					$this->featureNumberStatement->execute();
+					break;
+				case self::FEATURE_ENUM:
+					$this->featureEnumStatement->bindValue(':feature', $feature);
+					$this->featureEnumStatement->bindValue(':val', $this->featureDAO()->getFeatureValueEnumFromName($feature, $value));
+					$this->featureEnumStatement->execute();
+					break;
+				default:
+					throw new \LogicException('Unknown feature type ' . $featureType . ' returned by getFeatureTypeFromName (should never happen unless a cosmic ray flips a bit somewhere)');
+			}
+		}
+	}
 }

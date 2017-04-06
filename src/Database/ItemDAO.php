@@ -164,15 +164,11 @@ final class ItemDAO extends DAO {
     public function addItems($items, $parent = null, $default = false) { // TODO: somehow find parent (pass code from JSON request?)
         $pdo = $this->getPDO();
         // TODO: split these into other functions
-        $featureNumber = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`)     SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
-        $featureText   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueText`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
-        $featureEnum   = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
-        $itemQuery = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
 
-        $this->addItemsInternal($items, $itemQuery, $featureNumber, $featureText, $featureEnum, $parent, $default);
+        $this->addItemsInternal($items, $parent, $default);
     }
 
-    public function addItemsInternal($items, \PDOStatement $itemQuery, \PDOStatement $featureNumber, \PDOStatement $featureText, \PDOStatement $featureEnum, $parent = null, $default = false) {
+    public function addItemsInternal($items, $parent = null, $default = false) {
         if($items instanceof Item) {
             $items = [$items];
         } else if(!is_array($items)) {
@@ -184,58 +180,31 @@ final class ItemDAO extends DAO {
         }
 
         $pdo = $this->getPDO();
-        // TODO: recursively insert other elements... this is getting unmanageable, just implement the Database pattern.
+        // TODO: recursively insert other elements...
 
-        $itemQuery->bindValue(':d', $default, \PDO::PARAM_INT);
-        // not very nice, but the alternative was another query in a separate function (even slower) or returning FeatureID from getFeatureTypeFromName, which didn't make any sense, or returning a Feature object which I may do in future and increases complexity for almost no benefit
         foreach($items as $item) {
-            $id = $this->addItem($itemQuery, $item);
+            $id = $this->addItem($item, $default);
             /** @var Item $item */
-            $featureNumber->bindValue(':item', $id);
-            $featureText->bindValue(':item', $id);
-            $featureEnum->bindValue(':item', $id);
-            $features = $item->getFeatures();
-            foreach($features as $feature => $value) {
-                // TODO: move to a function in FeatureDAO
-                $featureType = $this->featureDAO()->getFeatureTypeFromName($feature);
-                switch($featureType) {
-                    // was really tempted to use variable variables here...
-                    case self::FEATURE_TEXT:
-                        $featureText->bindValue(':feature', $feature);
-                        $featureText->bindValue(':val', $value);
-                        $featureText->execute();
-                        break;
-                    case self::FEATURE_NUMBER:
-                        $featureNumber->bindValue(':feature', $feature);
-                        $featureNumber->bindValue(':val', $value);
-                        $featureNumber->execute();
-                        break;
-                    case self::FEATURE_ENUM:
-                        $featureEnum->bindValue(':feature', $feature);
-                        $featureEnum->bindValue(':val', $this->featureDAO()->getFeatureValueEnumFromName($feature, $value));
-                        $featureEnum->execute();
-                        break;
-                    default:
-                        throw new \LogicException('Unknown feature type ' . $featureType . ' returned by getFeatureTypeFromName (should never happen unless a cosmic ray flips a bit somewhere)');
-                }
-            }
+	        $this->database->featureDAO()->addFeatures($id, $item->getFeatures());
             $this->setItemModified($id);
         }
 
         return;
     }
 
+    private $addItemStatement = null;
+
     /**
      * Insert a single item into the database, return its id. Basically just add a row to Item, no features are added.
      * Must be called while in transaction.
      *
-     * @param \PDOStatement $itemQuery the query used by addItem, with :d already bound
+     * @param bool $default
      * @param Item $item the item to be inserted
      * @see addItems
      *
      * @return int ItemID. 0 may also mean "error", BECAUSE PDO.
      */
-    private function addItem(\PDOStatement $itemQuery, Item $item) {
+    private function addItem(Item $item, $default = false) {
         if(!($item instanceof Item)) {
             throw new \InvalidArgumentException('Items must be objects of Item class, ' . gettype($item) . ' given'); // will say "object" if it's another object which is kinda useless, whatever
         }
@@ -244,8 +213,14 @@ final class ItemDAO extends DAO {
         if(!$pdo->inTransaction()) {
             throw new \LogicException('addItem called outside of transaction');
         }
-        $itemQuery->bindValue(':c', $item->getCode(), \PDO::PARAM_STR);
-        $itemQuery->execute();
+
+        if($this->addItemStatement === null) {
+	        $this->addItemStatement = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
+        }
+
+	    $this->addItemStatement->bindValue(':c', $item->getCode(), \PDO::PARAM_STR);
+	    $this->addItemStatement->bindValue(':d', $default, \PDO::PARAM_INT);
+	    $this->addItemStatement->execute();
         return (int) $pdo->lastInsertId();
     }
 

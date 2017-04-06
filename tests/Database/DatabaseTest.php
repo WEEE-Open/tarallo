@@ -2,6 +2,7 @@
 
 namespace WEEEOpen\Tarallo\Test\Database;
 
+use PHPUnit\DbUnit\DataSet\YamlDataSet;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\DbUnit\TestCaseTrait;
 use WEEEOpen\Tarallo\Database\Database;
@@ -28,7 +29,7 @@ class DatabaseTest extends TestCase {
 
 	public function getDataSet() {
 		$this->getConnection();
-		return new PHPUnit\DbUnit\DataSet\YamlDataSet(
+		return new YamlDataSet(
 			dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "database.yml"
 		);
 	}
@@ -117,7 +118,7 @@ class DatabaseTest extends TestCase {
 		$db->itemDAO()->addItems($case);
 		$db->modificationCommit();
 
-		$itemTableRightNow = new PHPUnit\DbUnit\DataSet\QueryTable('Item.Code', 'SELECT Code, IsDefault FROM Item', $this->getConnection());
+		$itemTableRightNow = new \PHPUnit\DbUnit\DataSet\QueryTable('Item.Code', 'SELECT Code, IsDefault FROM Item', $this->getConnection());
 		$this->assertTableContains(['Code' => 'PC-42', 'IsDefault' => '0'], $itemTableRightNow);
 		// TODO: enable when working
 		//$this->assertTableContains(['Code' => 'SATAna-1', 'IsDefault' => 0], $itemTableRightNow);
