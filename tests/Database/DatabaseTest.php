@@ -13,11 +13,14 @@ class DatabaseTest extends TestCase {
 
 	private $db = null;
 
-    protected function setUp() {
-        if(!extension_loaded('pdo_mysql')) {
-            $this->markTestSkipped('The PDO MySQL extension is not available.');
-        }
-    }
+	// this cannot be done, PLAIN AND SIMPLE. Even though it comes straight from an example inside documentation.
+	// setUp() comes from a trait, so there's no way to override it AND call it. parent::setUp() calls a pointless empty function.
+	// Excellent documentation, very clear, would rate it 10/10.
+    //protected function setUp() {
+    //    if(!extension_loaded('pdo_mysql')) {
+    //        $this->markTestSkipped('The PDO MySQL extension is not available.');
+    //    }
+    //}
 
 	private function getPdo() {
 		return new \PDO('mysql:dbname=tarallo_test;host=10.13.37.6;charset=utf8mb4', 'root', 'root');
@@ -28,7 +31,6 @@ class DatabaseTest extends TestCase {
 	}
 
 	public function getDataSet() {
-		$this->getConnection();
 		return new YamlDataSet(
 			dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "database.yml"
 		);
@@ -130,18 +132,18 @@ class DatabaseTest extends TestCase {
 		$db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
 		/** @var $case Item */ // PHPStorm suddenly doesn't recognize chained methods. Only the last one of every chain, specifically.
 		$case = (new Item('PC-42'))->addFeature('brand', 'TI')->addFeature('model', 'GreyPC-\'98')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx');
-		$discone1 = (new Item('SATAna-1'))->addFeature('capacity', 666)->addFeature('brand', 'SATAn Storage Corporation Inc.')->addFeature('model', 'Discone da 666 byte')->addFeature('type', 'hdd');
-		$discone2 = (new Item('SATAna-2'))->addFeature('capacity', 666)->addFeature('brand', 'SATAn Storage Corporation Inc.')->addFeature('model', 'Discone da 666 byte')->addFeature('type', 'hdd');
+		$discone1 = (new Item('SATAna-1'))->addFeature('capacity-byte', 666)->addFeature('brand', 'SATAn Storage Corporation Inc.')->addFeature('model', 'Discone da 666 byte')->addFeature('type', 'hdd');
+		$discone2 = (new Item('SATAna-2'))->addFeature('capacity-byte', 666)->addFeature('brand', 'SATAn Storage Corporation Inc.')->addFeature('model', 'Discone da 666 byte')->addFeature('type', 'hdd');
 		$case->addChild($discone1);
 		$case->addChild($discone2);
 		$db->itemDAO()->addItems($case);
 		$db->modificationCommit();
 
+		// TODO: checking database rows adds too much coupling between code and database tables, maybe getting the Item would be better?
 		$itemTableRightNow = new \PHPUnit\DbUnit\DataSet\QueryTable('Item.Code', 'SELECT Code, IsDefault FROM Item', $this->getConnection());
 		$this->assertTableContains(['Code' => 'PC-42', 'IsDefault' => '0'], $itemTableRightNow);
-		// TODO: enable when working
-		//$this->assertTableContains(['Code' => 'SATAna-1', 'IsDefault' => 0], $itemTableRightNow);
-		//$this->assertTableContains(['Code' => 'SATAna-2', 'IsDefault' => 0], $itemTableRightNow);
+		$this->assertTableContains(['Code' => 'SATAna-1', 'IsDefault' => 0], $itemTableRightNow);
+		$this->assertTableContains(['Code' => 'SATAna-2', 'IsDefault' => 0], $itemTableRightNow);
 	}
 
 	/**

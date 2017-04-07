@@ -1,6 +1,7 @@
 <?php
 
 namespace WEEEOpen\Tarallo\Database;
+use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\Query\SearchTriplet;
 
@@ -172,7 +173,7 @@ final class ItemDAO extends DAO {
         }
     }
 
-    public function addItems($items, $parent = null, $default = false) { // TODO: somehow find parent (pass code from JSON request?)
+    public function addItems($items, ItemIncomplete $parent = null, $default = false) { // TODO: somehow find parent (pass code from JSON request?)
         if($items instanceof Item) {
             $items = [$items];
         } else if(!is_array($items)) {
@@ -183,11 +184,12 @@ final class ItemDAO extends DAO {
             return;
         }
 
+        if($parent instanceof ItemIncomplete) {
+        	$parent = $this->getItemId($parent);
+        }
+
         foreach($items as $item) {
-            $id = $this->addItem($item, $parent, $default);
-            /** @var Item $item */
-	        $this->database->featureDAO()->addFeatures($id, $item->getFeatures());
-            $this->setItemModified($id);
+            $this->addItem($item, $parent, $default);
         }
 
         return;
@@ -195,16 +197,18 @@ final class ItemDAO extends DAO {
 
     private $addItemStatement = null;
 
-    /**
-     * Insert a single item into the database, return its id. Basically just add a row to Item, no features are added.
-     * Must be called while in transaction.
-     *
-     * @param bool $default
-     * @param Item $item the item to be inserted
-     * @see addItems
-     *
-     * @return int ItemID. 0 may also mean "error", BECAUSE PDO.
-     */
+	/**
+	 * Insert a single item into the database, return its id. Basically just add a row to Item, no features are added.
+	 * Must be called while in transaction.
+	 *
+	 * @param Item $item the item to be inserted
+	 * @param string|int $parent ItemID of parent item
+	 * @param bool $default
+	 *
+	 * @return int ItemID. 0 may also mean "error", BECAUSE PDO.
+	 * @see addItems
+	 *
+	 */
     private function addItem(Item $item, $parent, $default = false) {
         if(!($item instanceof Item)) {
             throw new \InvalidArgumentException('Items must be objects of Item class, ' . gettype($item) . ' given'); // will say "object" if it's another object which is kinda useless, whatever
@@ -215,9 +219,6 @@ final class ItemDAO extends DAO {
             throw new \LogicException('addItem called outside of transaction');
         }
 
-        // TODO: add sub-items
-	    // TODO: add to Tree
-
         if($this->addItemStatement === null) {
 	        $this->addItemStatement = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
         }
@@ -225,14 +226,84 @@ final class ItemDAO extends DAO {
 	    $this->addItemStatement->bindValue(':c', $item->getCode(), \PDO::PARAM_STR);
 	    $this->addItemStatement->bindValue(':d', $default, \PDO::PARAM_INT);
 	    $this->addItemStatement->execute();
-        return (int) $pdo->lastInsertId();
+        $id = (int) $pdo->lastInsertId();
+
+	    /** @var Item $item */
+	    $this->database->featureDAO()->addFeatures($id, $item->getFeatures());
+
+	    $this->setItemModified($id);
+
+	    $this->addToTree($id, $parent);
+
+	    $childItems = $item->getChildren();
+	    foreach($childItems as $childItem) {
+	    	// yay recursion!
+	    	$this->addItem($childItem, $item, $default);
+	    }
+
+	    return $id;
     }
+
+    private $itemModifiedStatement = null;
 
     private function setItemModified($itemID) {
         $pdo = $this->getPDO();
-        $stuff = $pdo->prepare('INSERT INTO ItemModification (ModificationID, ItemID) VALUES (?, ?)');
-        $stuff->execute([$this->database->getModificationId(), $itemID]);
+        if($this->itemModifiedStatement === null) {
+	        $this->itemModifiedStatement = $pdo->prepare('INSERT INTO ItemModification (ModificationID, ItemID) VALUES (?, ?)');
+        }
+	    $this->itemModifiedStatement->execute([$this->database->getModificationId(), $itemID]);
     }
 
+	private function addToTree($idChild, $idParent = null) {
+    	if(!is_int($idChild) || $idChild < 0) {
+		    throw new \InvalidArgumentException('Descendant ID must be a positive integer, ' . $idChild . ' given');
+	    }
 
+    	if($idParent === null) {
+    		$idParent = $idChild;
+	    } else if(!is_int($idParent) || $idParent < 0) {
+		    throw new \InvalidArgumentException('Parent ID must be a positive integer, ' . $idParent . ' given');
+	    }
+
+    	$this->addToTreeOnlyItself($idChild);
+    	$this->setParentInTree($idParent, $idChild);
+    }
+
+	private $addToTreeOnlyItselfStatement = null;
+
+	private function addToTreeOnlyItself($id) {
+		if($this->addToTreeOnlyItselfStatement === null) {
+			$this->addToTreeOnlyItselfStatement = $this->getPDO()->prepare('INSERT INTO Tree (AncestorID, DescendantID, Depth) VALUES (?, ?, 0)');
+		}
+		$this->addToTreeOnlyItselfStatement->execute([$id, $id]);
+	}
+
+	private $setParentInTreeStatement = null;
+
+	private function setParentInTree($idParent, $idChild) {
+    	$pdo = $this->getPDO();
+    	if($this->setParentInTreeStatement === null) {
+		    $this->setParentInTreeStatement = $pdo->prepare('
+			INSERT INTO Tree (AncestorID, DescendantID, Depth)
+			SELECT a.AncestorID, b.DescendantID, a.Depth+b.Depth+1
+            FROM Tree a, Tree b
+			WHERE a.DescendantID=? AND b.AncestorID=?');
+	    }
+	    $this->setParentInTreeStatement->execute([$idParent, $idChild]);
+	}
+
+	private $getItemIdStatement = null;
+
+	private function getItemId(IncompleteItem $item) {
+		if($this->getItemIdStatement === null) {
+			$this->getItemIdStatement = $this->getPDO()->prepare('SELECT ItemID FROM Item WHERE `Code` = ? LIMIT 1');
+		}
+
+		$this->getItemIdStatement->execute([$item->getCode()]);
+		if($this->getItemIdStatement->rowCount() === 0) {
+			throw new InvalidParameterException('Unknown item ' . $item->getCode());
+		} else {
+			return $this->getItemIdStatement->fetch()['ItemID'];
+		}
+	}
 }

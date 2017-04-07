@@ -2,24 +2,10 @@
 namespace WEEEOpen\Tarallo;
 
 
-class Item implements \JsonSerializable {
-	private $code;
+class Item extends ItemIncomplete implements \JsonSerializable {
 	private $features = [];
 	private $featuresDefault = [];
 	private $content = [];
-
-	function __construct($code) {
-		if(is_int($code)) {
-			$code = (string) $code;
-		} else if(!is_string($code) || $code === '') {
-			throw new InvalidParameterException('Item code must be a non-empty string or integer');
-		}
-		$this->code = $code;
-	}
-
-	public function getCode() {
-		return $this->code;
-	}
 
 	private static function featureNameIsValid($name) {
 		if(is_string($name)) {
@@ -68,13 +54,17 @@ class Item implements \JsonSerializable {
 	}
 
 	public function addChild(Item $item) {
-		$this->content = $item;
+		$this->content[] = $item;
 		return $this;
+	}
+
+	public function getChildren() {
+		return $this->content;
 	}
 
 	function jsonSerialize() {
 		return [
-			'code' => $this->code,
+			'code' => parent::getCode(),
 			'features' => $this->features,
 			'content' => $this->content,
 		];
@@ -83,9 +73,9 @@ class Item implements \JsonSerializable {
 	public function __toString() {
 		if(isset($this->content['type'])) {
 			$type = $this->content['type'];
-			return $this->code . " ($type)";
+			return parent::getCode() . " ($type)";
 		} else {
-			return $this->code;
+			return parent::getCode();
 		}
 	}
 }
