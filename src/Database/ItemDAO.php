@@ -250,32 +250,21 @@ final class ItemDAO extends DAO {
         if($this->itemModifiedStatement === null) {
 	        $this->itemModifiedStatement = $pdo->prepare('INSERT INTO ItemModification (ModificationID, ItemID) SELECT ?, ItemID FROM Item WHERE Item.Code = ?');
         }
-	    $this->itemModifiedStatement->execute([$this->database->getModificationId(), $item->getCode()]);
+	    $this->itemModifiedStatement->execute([$this->database->getModificationId(), $this->getItemId($item)]);
     }
 
 	private function addToTree(ItemIncomplete $child, ItemIncomplete $parent = null) {
-
     	if($parent === null) {
     		$parent = $child;
 	    }
 
-    	$this->addToTreeOnlyItself($child);
     	$this->setParentInTree($parent, $child);
     }
 
-	private $addToTreeOnlyItselfStatement = null;
-	private function addToTreeOnlyItself($id) {
-		if($this->addToTreeOnlyItselfStatement === null) {
-			$this->addToTreeOnlyItselfStatement = $this->getPDO()->prepare('INSERT INTO Tree (AncestorID, DescendantID, Depth) VALUES (?, ?, 0)');
-		}
-		$this->addToTreeOnlyItselfStatement->execute([$id, $id]);
-	}
-
 	private $setParentInTreeStatement = null;
 	/**
-	 * addEdge, basically. Use addToTreeOnlyItself() first. Or use addToTree() and that's it.
+	 * addEdge, basically. It's better to use addToTree(), which in turn calls this function.
 	 *
-	 * @see addToTreeOnlyItself
 	 * @see addToTree
 	 * @param ItemIncomplete $parent
 	 * @param ItemIncomplete $child
@@ -284,12 +273,18 @@ final class ItemDAO extends DAO {
     	$pdo = $this->getPDO();
     	if($this->setParentInTreeStatement === null) {
 		    $this->setParentInTreeStatement = $pdo->prepare('
-			INSERT INTO Tree (AncestorID, DescendantID, Depth)
-			SELECT ltree.AncestorID, rtree.DescendantID, ltree.Depth+rtree.Depth+1
-            FROM Tree ltree, Tree rtree
-			WHERE ltree.DescendantID = ? AND rtree.AncestorID = ?');
+			INSERT INTO Tree(AncestorID, DescendantID, Depth)
+			SELECT AncestorID, :new1, Depth+1
+			FROM Tree
+			WHERE DescendantID = :parent
+			UNION
+			SELECT :new2, :new3, 0;');
 	    }
-	    $this->setParentInTreeStatement->execute([$this->getItemId($parent), $this->getItemId($child)]);
+		$this->setParentInTreeStatement->bindValue(':parent', $this->getItemId($parent), \PDO::PARAM_INT);
+		$this->setParentInTreeStatement->bindValue(':new1', $this->getItemId($child), \PDO::PARAM_INT);
+		$this->setParentInTreeStatement->bindValue(':new2', $this->getItemId($child), \PDO::PARAM_INT);
+		$this->setParentInTreeStatement->bindValue(':new3', $this->getItemId($child), \PDO::PARAM_INT);
+		$this->setParentInTreeStatement->execute();
 	}
 
 	private $getItemIdStatement = null;
@@ -309,7 +304,7 @@ final class ItemDAO extends DAO {
 		if($this->getItemIdStatement->rowCount() === 0) {
 			throw new InvalidParameterException('Unknown item ' . $item->getCode());
 		} else {
-			$id = $this->getItemIdStatement->fetch(\PDO::FETCH_NUM)[0];
+			$id = (int) $this->getItemIdStatement->fetch(\PDO::FETCH_NUM)[0];
 			$this->getItemIdStatement->closeCursor();
 			$this->getItemIdCache[$code] = $id;
 			return $id;
