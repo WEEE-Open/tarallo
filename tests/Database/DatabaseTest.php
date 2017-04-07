@@ -23,7 +23,13 @@ class DatabaseTest extends TestCase {
     //}
 
 	private function getPdo() {
-		return new \PDO('mysql:dbname=tarallo_test;host=10.13.37.6;charset=utf8mb4', 'root', 'root');
+		return new \PDO('mysql:dbname=tarallo_test;host=10.13.37.6;charset=utf8mb4', 'root', 'root', [
+			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+			\PDO::ATTR_CASE => \PDO::CASE_NATURAL,
+			\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+			// \PDO::ATTR_AUTOCOMMIT => false, // PHPUnit crashes and burns with autocommits disabled and, for some unfathomable reason, two SEPARATE, DISTINCT, UNIQUE PDO object will forcefully share the same connection to MySQL (apparently?), so there's no way to have a connection with autocommits and another one without.
+			\PDO::ATTR_EMULATE_PREPARES => false,
+		]);
 	}
 
 	public function getConnection() {
@@ -150,20 +156,12 @@ class DatabaseTest extends TestCase {
 	 * @return Database
 	 */
 	private function getDb() {
-		// I'm baffled that this works, and creating a new PDO object hangs the entire program forever.
-		// this is beyond absurd, it's well into the realm of imagination or insanity.
 		if($this->db === null) {
-			$db = new Database('root', 'root', 'mysql:dbname=tarallo_test;host=10.13.37.6', [
-				\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-				\PDO::ATTR_CASE => \PDO::CASE_NATURAL,
-				\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-				\PDO::ATTR_AUTOCOMMIT => false,
-				\PDO::ATTR_EMULATE_PREPARES => false,
-			]);
-			$dbr  = new \ReflectionObject($db);
-			$prop = $dbr->getProperty('pdo');
-			$prop->setAccessible(true);
-			$prop->setValue($db, $this->getPdo());
+			$db = new Database('root', 'root', 'mysql:dbname=tarallo_test;host=mysql.local');
+			//$dbr  = new \ReflectionObject($db);
+			//$prop = $dbr->getProperty('pdo');
+			//$prop->setAccessible(true);
+			//$prop->setValue($db, $this->getPdo());
 			$this->db = $db;
 		}
 		return $this->db;

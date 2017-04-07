@@ -35,7 +35,7 @@ class Database {
                 \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
                 \PDO::ATTR_CASE => \PDO::CASE_NATURAL,
                 \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-                \PDO::ATTR_AUTOCOMMIT => false,
+                //\PDO::ATTR_AUTOCOMMIT => false, // disabled BECAUSE PHPUNIT. Or some weird bug/feature in mysqlnd or PDO, which has never been encountered by anyone before (according to Google)
                 \PDO::ATTR_EMULATE_PREPARES => false,
             ]);
         } catch (\PDOException $e) {
