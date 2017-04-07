@@ -2,7 +2,7 @@
 
 namespace WEEEOpen\Tarallo\Database;
 use WEEEOpen\Tarallo\Item;
-use WEEEOpen\Tarallo\InvalidParameterException;
+use WEEEOpen\Tarallo\Query\SearchTriplet;
 
 final class ItemDAO extends DAO {
     private function depthPrepare($depth) {
@@ -17,21 +17,6 @@ final class ItemDAO extends DAO {
         if(self::isArrayAndFull($locations)) {
             $locationWhere = 'AND `Name` ' . $this->multipleIn(':location', $locations);
             return rtrim($locationWhere, ', ').')';
-        } else {
-            return '';
-        }
-    }
-
-
-    private function searchPrepare($searches) {
-        // TODO: this need more thought, searches are for Feature(s)
-        // TODO: search numeric values too!
-        if(self::isArrayAndFull($searches)) {
-            $where = '(';
-            foreach($searches as $k => $loc) {
-                $where .= '(`FeatureName` = :searchname'.$k.' AND ValueText LIKE :searchkey'.$k.' OR '; // TODO: %
-            }
-            return substr($where, 0, strlen($where)-4).')'; // remove last " OR "
         } else {
             return '';
         }
@@ -59,12 +44,20 @@ final class ItemDAO extends DAO {
         }
     }
 
-    private static function isArrayAndFull($something) {
-        if(is_array($something) && !empty($something)) {
-            return true;
-        } else {
-            return false;
-        }
+	/**
+	 * @param $searches array of SearchTriplet
+	 * @return string piece of query string
+	 * @see FeatureDAO::getWhereStringFromSearches
+	 */
+	private function searchPrepare($searches) {
+		if(!is_array($searches)) {
+			throw new \InvalidArgumentException('Search parameters must be passed as an array');
+		}
+		if(empty($searches)) {
+			return '';
+		}
+
+		return $this->database->featureDAO()->getWhereStringFromSearches($searches);
     }
 
     private static function implodeOptionalAndAnd() {
@@ -119,11 +112,24 @@ final class ItemDAO extends DAO {
     }
 
     private function getItemItself($locations, $searches, $depth, $sorts, $token) {
-        $sortOrder  = $this->sortPrepare($sorts); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
-        $whereLocationToken = $this->implodeOptionalAnd($this->locationPrepare($locations), $this->tokenPrepare($token));
-        $searchWhere = $this->implodeOptionalAndAnd($this->searchPrepare($searches));
-        $parentWhere = $this->implodeOptionalAnd(''); // TODO: implement, "WHERE Depth = 0" by default, use = to find only the needed roots (descendants are selected via /Depth)
-        $depthDefaultWhere  = $this->implodeOptionalAnd($this->depthPrepare($depth), 'isDefault = 0');
+        if(self::isArrayAndFull($searches)) {
+	        $searchSubquery = '
+	        ItemID IN (
+                    SELECT ItemID
+		            FROM Feature, ItemFeature
+		            LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
+		            WHERE ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
+		            AND (' . $this->searchPrepare($searches) . ')
+		        )
+	        ';
+        } else {
+	        $searchSubquery = '';
+        }
+
+	    //$sortOrder  = $this->sortPrepare($sorts); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
+	    $parentWhere = $this->implodeOptionalAnd(''); // TODO: implement, "WHERE Depth = 0" by default, use = to find only the needed roots (descendants are selected via /Depth)
+	    $depthDefaultWhere  = $this->implodeOptionalAnd($this->depthPrepare($depth), 'isDefault = 0');
+	    $whereLocationTokenSearch = $this->implodeOptionalAnd($this->locationPrepare($locations), $this->tokenPrepare($token), $searchSubquery);
 
         // This will probably blow up in a spectacular way.
         // Search items by features, filter by location and token, tree lookup using these items as descendants
@@ -141,18 +147,23 @@ final class ItemDAO extends DAO {
                 SELECT `ItemID`
                 FROM Item
                 WHERE
-                ' . $whereLocationToken . '
-                AND ItemID IN (
-                    SELECT `ItemID`
-                    FROM ItemFeature, Feature
-                    WHERE Feature.FeatureID = ItemFeature.FeatureID
-                    ' . $searchWhere . '
-                )
+                ' . $whereLocationTokenSearch . '
             ) AND ' . $parentWhere . ';
         ) ' . $depthDefaultWhere . '
-        
-
 		');
+
+        $s->bindValue(':token', $token);
+
+        foreach($locations as $numericKey => $location) {
+	        $s->bindValue(':location' . $numericKey, $location);
+        }
+
+        foreach($searches as $numericKey => $triplet) {
+        	/** @var SearchTriplet $triplet */
+        	$s->bindValue(':searchname' . $numericKey, $triplet->getKey());
+        	$s->bindValue(':searchvalue' . $numericKey, $triplet->getValue());
+        }
+
         $s->execute();
         if($s->rowCount() === 0) {
             return [];
@@ -162,13 +173,6 @@ final class ItemDAO extends DAO {
     }
 
     public function addItems($items, $parent = null, $default = false) { // TODO: somehow find parent (pass code from JSON request?)
-        $pdo = $this->getPDO();
-        // TODO: split these into other functions
-
-        $this->addItemsInternal($items, $parent, $default);
-    }
-
-    public function addItemsInternal($items, $parent = null, $default = false) {
         if($items instanceof Item) {
             $items = [$items];
         } else if(!is_array($items)) {
@@ -179,11 +183,8 @@ final class ItemDAO extends DAO {
             return;
         }
 
-        $pdo = $this->getPDO();
-        // TODO: recursively insert other elements...
-
         foreach($items as $item) {
-            $id = $this->addItem($item, $default);
+            $id = $this->addItem($item, $parent, $default);
             /** @var Item $item */
 	        $this->database->featureDAO()->addFeatures($id, $item->getFeatures());
             $this->setItemModified($id);
@@ -204,7 +205,7 @@ final class ItemDAO extends DAO {
      *
      * @return int ItemID. 0 may also mean "error", BECAUSE PDO.
      */
-    private function addItem(Item $item, $default = false) {
+    private function addItem(Item $item, $parent, $default = false) {
         if(!($item instanceof Item)) {
             throw new \InvalidArgumentException('Items must be objects of Item class, ' . gettype($item) . ' given'); // will say "object" if it's another object which is kinda useless, whatever
         }

@@ -38,4 +38,15 @@ class SearchTest extends TestCase{
 	public function testSearchValid() {
 		$this->assertEquals('/Search/foo=bar', new GetQuery('/Search/foo=bar'));
 	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Search
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
+	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
+	 */
+	public function testSearchValidDouble() {
+		$this->assertEquals('/Search/foo=bar/Search/other=stuff', new GetQuery('/Search/foo=bar/Search/other=stuff'));
+	}
 }

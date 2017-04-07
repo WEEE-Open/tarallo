@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\Database;
 
 use WEEEOpen\Tarallo\InvalidParameterException;
+use WEEEOpen\Tarallo\Query\SearchTriplet;
 
 class FeatureDAO extends DAO {
 
@@ -16,11 +17,11 @@ class FeatureDAO extends DAO {
         }
 
         $inItemID = $this->multipleIn(':item', $items);
-        $s = $this->getPDO()->prepare('
-            SELECT ItemID, FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `Value`
-            FROM Feature, ItemFeature, FeatureValue
+        $s = $this->getPDO()->prepare('SELECT ItemID, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `Value`
+            FROM Feature, ItemFeature
+            LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
             WHERE ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
-            AND ItemID ' . $inItemID . '
+            AND ItemID IN (' . $inItemID . ');
 		');
 
         foreach($items as $arrayID => $itemID) {
@@ -74,6 +75,38 @@ class FeatureDAO extends DAO {
             default:
                 throw new \LogicException('Unknown feature type for ' . $featureName . ' found in database');
         }
+    }
+
+	/**
+	 * Build some dynamic SQL queries, or rather pieces of queries, because that's how we roll.
+	 * Bind search key to ":searchname . $key" and value to ":searchvalue . $key". Where $key is the numeric index of the $searches array.
+	 *
+	 * @param SearchTriplet[] $searches non-empty array of SearchTriplet
+	 * @return string sequence of WHERE statements(?) (no "WHERE" keyword itself)
+	 */
+	public function getWhereStringFromSearches($searches) {
+		$where = '';
+
+		foreach($searches as $numericKey => $triplet) {
+			if(!($triplet instanceof SearchTriplet)) {
+				if(is_object($triplet)) {
+					throw new \InvalidArgumentException('Search parameters must be instances of SearchTriplet, ' . get_class($triplet) . ' given');
+				} else {
+					throw new \InvalidArgumentException('Search parameters must be instances of SearchTriplet, ' . gettype($triplet) . ' given');
+				}
+			}
+		}
+
+		foreach($searches as $numericKey => $triplet) {
+			if($this->database->featureDAO()->getFeatureTypeFromName($triplet->getKey()) === self::FEATURE_NUMBER) {
+				$where .= '(Feature.Name = :searchname' . $numericKey . ' AND Value ' . $searches[$numericKey]->getCompare() . ' :searchvalue' . $numericKey . ') OR ';
+			} else {
+				$where .= '(Feature.Name = :searchname' . $numericKey . ' AND COALESCE(ItemFeature.ValueText, FeatureValue.ValueText) LIKE :searchvalue' . $numericKey . ') OR ';
+			}
+		}
+		$where = substr(0, strlen($where) - 4); // remove last OR
+
+		return $where;
     }
 
     private $featureEnumNameStatement = null;
