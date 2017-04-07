@@ -35,6 +35,7 @@ class DatabaseTest extends TestCase {
 	}
 
 	public function getDataSet() {
+		//$this->getConnection();
 		return new YamlDataSet(
 			dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "database.yml"
 		);
@@ -158,5 +159,6 @@ class DatabaseTest extends TestCase {
 			$this->db = new Database('root', 'root', $this->getDsn());
 		}
 		return $this->db;
+			//$this->db = new Database('root', 'root', $this->getDsn());
 	}
 }
