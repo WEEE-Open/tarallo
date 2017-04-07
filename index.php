@@ -34,7 +34,7 @@ try {
 assert(isset($query));
 
 try {
-	$db   = new Database();
+	$db   = new Database(DB_USERNAME, DB_PASSWORD, DB_DSN);
 	$user = Session::restore($db);
 } catch(\Exception $e) {
 	Response::sendError('Error: ' . $e->getMessage());

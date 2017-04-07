@@ -22,8 +22,12 @@ class DatabaseTest extends TestCase {
     //    }
     //}
 
+	private function getDsn() {
+		return 'mysql:dbname=tarallo_test;host=10.13.37.6;charset=utf8mb4';
+	}
+
 	private function getPdo() {
-		return new \PDO('mysql:dbname=tarallo_test;host=10.13.37.6;charset=utf8mb4', 'root', 'root');
+		return new \PDO($this->getDsn(), 'root', 'root');
 	}
 
 	public function getConnection() {
@@ -151,12 +155,7 @@ class DatabaseTest extends TestCase {
 	 */
 	private function getDb() {
 		if($this->db === null) {
-			$db   = new Database();
-			$dbr  = new \ReflectionObject($db);
-			$prop = $dbr->getProperty('pdo');
-			$prop->setAccessible(true);
-			$prop->setValue($db, $this->getPdo());
-			$this->db = $db;
+			$this->db = new Database('root', 'root', $this->getDsn());
 		}
 		return $this->db;
 	}

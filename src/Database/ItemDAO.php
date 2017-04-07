@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\Database;
 use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\Query\SearchTriplet;
 
 final class ItemDAO extends DAO {
@@ -169,7 +170,9 @@ final class ItemDAO extends DAO {
         if($s->rowCount() === 0) {
             return [];
         } else {
-            return $s->fetchAll(); // TODO: return Item objects
+        	$all = $s->fetchAll();
+        	$s->closeCursor();
+            return $all; // TODO: return Item objects
         }
     }
 
@@ -202,14 +205,13 @@ final class ItemDAO extends DAO {
 	 * Must be called while in transaction.
 	 *
 	 * @param Item $item the item to be inserted
-	 * @param string|int $parent ItemID of parent item
+	 * @param ItemIncomplete $parent parent item
 	 * @param bool $default
 	 *
-	 * @return int ItemID. 0 may also mean "error", BECAUSE PDO.
 	 * @see addItems
 	 *
 	 */
-    private function addItem(Item $item, $parent, $default = false) {
+    private function addItem(Item $item, ItemIncomplete $parent = null, $default = false) {
         if(!($item instanceof Item)) {
             throw new \InvalidArgumentException('Items must be objects of Item class, ' . gettype($item) . ' given'); // will say "object" if it's another object which is kinda useless, whatever
         }
@@ -226,51 +228,42 @@ final class ItemDAO extends DAO {
 	    $this->addItemStatement->bindValue(':c', $item->getCode(), \PDO::PARAM_STR);
 	    $this->addItemStatement->bindValue(':d', $default, \PDO::PARAM_INT);
 	    $this->addItemStatement->execute();
-        $id = (int) $pdo->lastInsertId();
 
 	    /** @var Item $item */
-	    $this->database->featureDAO()->addFeatures($id, $item->getFeatures());
+	    $this->database->featureDAO()->addFeatures($item);
 
-	    $this->setItemModified($id);
+	    $this->setItemModified($item);
 
-	    $this->addToTree($id, $parent);
+	    $this->addToTree($item, $parent);
 
 	    $childItems = $item->getChildren();
 	    foreach($childItems as $childItem) {
 	    	// yay recursion!
 	    	$this->addItem($childItem, $item, $default);
 	    }
-
-	    return $id;
     }
 
     private $itemModifiedStatement = null;
 
-    private function setItemModified($itemID) {
+    private function setItemModified(ItemIncomplete $item) {
         $pdo = $this->getPDO();
         if($this->itemModifiedStatement === null) {
-	        $this->itemModifiedStatement = $pdo->prepare('INSERT INTO ItemModification (ModificationID, ItemID) VALUES (?, ?)');
+	        $this->itemModifiedStatement = $pdo->prepare('INSERT INTO ItemModification (ModificationID, ItemID) SELECT ?, ItemID FROM Item WHERE Item.Code = ?');
         }
-	    $this->itemModifiedStatement->execute([$this->database->getModificationId(), $itemID]);
+	    $this->itemModifiedStatement->execute([$this->database->getModificationId(), $item->getCode()]);
     }
 
-	private function addToTree($idChild, $idParent = null) {
-    	if(!is_int($idChild) || $idChild < 0) {
-		    throw new \InvalidArgumentException('Descendant ID must be a positive integer, ' . $idChild . ' given');
+	private function addToTree(ItemIncomplete $child, ItemIncomplete $parent = null) {
+
+    	if($parent === null) {
+    		$parent = $child;
 	    }
 
-    	if($idParent === null) {
-    		$idParent = $idChild;
-	    } else if(!is_int($idParent) || $idParent < 0) {
-		    throw new \InvalidArgumentException('Parent ID must be a positive integer, ' . $idParent . ' given');
-	    }
-
-    	$this->addToTreeOnlyItself($idChild);
-    	$this->setParentInTree($idParent, $idChild);
+    	$this->addToTreeOnlyItself($child);
+    	$this->setParentInTree($parent, $child);
     }
 
 	private $addToTreeOnlyItselfStatement = null;
-
 	private function addToTreeOnlyItself($id) {
 		if($this->addToTreeOnlyItselfStatement === null) {
 			$this->addToTreeOnlyItselfStatement = $this->getPDO()->prepare('INSERT INTO Tree (AncestorID, DescendantID, Depth) VALUES (?, ?, 0)');
@@ -279,31 +272,47 @@ final class ItemDAO extends DAO {
 	}
 
 	private $setParentInTreeStatement = null;
-
-	private function setParentInTree($idParent, $idChild) {
+	/**
+	 * addEdge, basically. Use addToTreeOnlyItself() first. Or use addToTree() and that's it.
+	 *
+	 * @see addToTreeOnlyItself
+	 * @see addToTree
+	 * @param ItemIncomplete $parent
+	 * @param ItemIncomplete $child
+	 */
+	private function setParentInTree(ItemIncomplete $parent, ItemIncomplete $child) {
     	$pdo = $this->getPDO();
     	if($this->setParentInTreeStatement === null) {
 		    $this->setParentInTreeStatement = $pdo->prepare('
 			INSERT INTO Tree (AncestorID, DescendantID, Depth)
-			SELECT a.AncestorID, b.DescendantID, a.Depth+b.Depth+1
-            FROM Tree a, Tree b
-			WHERE a.DescendantID=? AND b.AncestorID=?');
+			SELECT ltree.AncestorID, rtree.DescendantID, ltree.Depth+rtree.Depth+1
+            FROM Tree ltree, Tree rtree
+			WHERE ltree.DescendantID = ? AND rtree.AncestorID = ?');
 	    }
-	    $this->setParentInTreeStatement->execute([$idParent, $idChild]);
+	    $this->setParentInTreeStatement->execute([$this->getItemId($parent), $this->getItemId($child)]);
 	}
 
 	private $getItemIdStatement = null;
+	private $getItemIdCache = [];
+	public function getItemId(ItemIncomplete $item) {
+		$code = $item->getCode();
+		if(isset($this->getItemIdCache[$code])) {
+			// let's just HOPE this thing doesn't blow up catastrophically.
+			return $this->getItemIdCache[$code];
+		}
 
-	private function getItemId(IncompleteItem $item) {
 		if($this->getItemIdStatement === null) {
 			$this->getItemIdStatement = $this->getPDO()->prepare('SELECT ItemID FROM Item WHERE `Code` = ? LIMIT 1');
 		}
 
-		$this->getItemIdStatement->execute([$item->getCode()]);
+		$this->getItemIdStatement->execute([$code]);
 		if($this->getItemIdStatement->rowCount() === 0) {
 			throw new InvalidParameterException('Unknown item ' . $item->getCode());
 		} else {
-			return $this->getItemIdStatement->fetch()['ItemID'];
+			$id = $this->getItemIdStatement->fetch(\PDO::FETCH_NUM)[0];
+			$this->getItemIdStatement->closeCursor();
+			$this->getItemIdCache[$code] = $id;
+			return $id;
 		}
 	}
 }

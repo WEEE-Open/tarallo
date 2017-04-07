@@ -8,9 +8,15 @@ class Database {
     private $userDAO = null;
     private $itemDAO = null;
     private $featureDAO = null;
+    private $username;
+    private $password;
+    private $dsn;
 	private $callback;
 
-	public function __construct() {
+	public function __construct($user, $pass, $dsn) {
+		$this->username = $user;
+		$this->password = $pass;
+		$this->dsn = $dsn;
 		$this->callback = function() {
 			return $this->getPDO();
 		};
@@ -18,7 +24,7 @@ class Database {
 
 	private function getPDO() {
         if($this->pdo === null) {
-            $this->connect(DB_USERNAME, DB_PASSWORD, DB_DSN);
+            $this->connect($this->username, $this->password, $this->dsn);
         }
         return $this->pdo;
     }

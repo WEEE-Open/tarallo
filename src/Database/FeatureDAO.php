@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\Database;
 
 use WEEEOpen\Tarallo\InvalidParameterException;
+use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\Query\SearchTriplet;
 
 class FeatureDAO extends DAO {
@@ -35,6 +36,7 @@ class FeatureDAO extends DAO {
         $result = [];
         if($s->rowCount() === 0) {
             $all = $s->fetchAll();
+	        $s->closeCursor();
             foreach($items as $k => $v) {
                 $result[$k] = [];
             }
@@ -65,7 +67,9 @@ class FeatureDAO extends DAO {
         if($this->featureTypeStatement->rowCount() === 0) {
             throw new InvalidParameterException('Unknown feature name ' . $featureName);
         }
-        switch((int) $this->featureTypeStatement->fetch(\PDO::FETCH_NUM)[0]) {
+        $type = (int) $this->featureTypeStatement->fetch(\PDO::FETCH_NUM)[0];
+	    $this->featureTypeStatement->closeCursor();
+        switch($type) {
             case 0:
                 return self::FEATURE_TEXT;
             case 1:
@@ -123,24 +127,19 @@ class FeatureDAO extends DAO {
         if($this->featureEnumNameStatement->rowCount() === 0) {
             throw new InvalidParameterException('Invalid value ' . $featureValueText . ' for feature ' . $featureName);
         }
-        $result = $this->featureEnumNameStatement->fetch();
-        return $result['ValueEnum'];
+        $result = $this->featureEnumNameStatement->fetch(\PDO::FETCH_NUM);
+	    $this->featureEnumNameStatement->closeCursor();
+        return $result[0];
     }
 
     private $featureNumberStatement = null;
     private $featureTextStatement = null;
     private $featureEnumStatement = null;
 
-	public function addFeatures($itemId, $features) {
+	public function addFeatures(Item $item) {
 		static $featureNumberStatement = null;
 
-    	if(!is_numeric($itemId) || !($itemId > 0)) {
-    		throw new \InvalidArgumentException('Item ID must be a positive integer (or string representing a positive integer)');
-	    }
-
-	    if(!is_array($features)) {
-		    throw new \InvalidArgumentException('Features must be passed as an array');
-	    }
+		$features = $item->getFeatures();
 
 	    if(empty($features)) {
     		return;
@@ -158,6 +157,7 @@ class FeatureDAO extends DAO {
 		    $this->featureEnumStatement = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
 	    }
 
+	    $itemId = $this->database->itemDAO()->getItemId($item);
 		$this->featureNumberStatement->bindValue(':item', $itemId);
 		$this->featureTextStatement->bindValue(':item', $itemId);
 		$this->featureEnumStatement->bindValue(':item', $itemId);

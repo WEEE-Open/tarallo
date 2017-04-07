@@ -14,6 +14,7 @@ final class UserDAO extends DAO {
             return null;
         } else {
             $user = $s->fetch();
+            $s->closeCursor();
             return new User($user['Name'], null, $user['Password']);
         }
     }
@@ -46,6 +47,7 @@ final class UserDAO extends DAO {
             return null;
         } else {
             $user = $s->fetch();
+            $s->closeCursor();
             try {
                 return new User($username, $password, $user['Password']);
             } catch(\InvalidArgumentException $e) {
