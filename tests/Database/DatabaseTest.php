@@ -22,12 +22,8 @@ class DatabaseTest extends TestCase {
     //    }
     //}
 
-	private function getDsn() {
-		return 'mysql:dbname=tarallo_test;host=10.13.37.6;charset=utf8mb4';
-	}
-
 	private function getPdo() {
-		return new \PDO($this->getDsn(), 'root', 'root');
+		return new \PDO('mysql:dbname=tarallo_test;host=10.13.37.6;charset=utf8mb4', 'root', 'root');
 	}
 
 	public function getConnection() {
@@ -35,7 +31,6 @@ class DatabaseTest extends TestCase {
 	}
 
 	public function getDataSet() {
-		//$this->getConnection();
 		return new YamlDataSet(
 			dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "database.yml"
 		);
@@ -155,10 +150,22 @@ class DatabaseTest extends TestCase {
 	 * @return Database
 	 */
 	private function getDb() {
+		// I'm baffled that this works, and creating a new PDO object hangs the entire program forever.
+		// this is beyond absurd, it's well into the realm of imagination or insanity.
 		if($this->db === null) {
-			$this->db = new Database('root', 'root', $this->getDsn());
+			$db = new Database('root', 'root', 'mysql:dbname=tarallo_test;host=10.13.37.6', [
+				\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+				\PDO::ATTR_CASE => \PDO::CASE_NATURAL,
+				\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+				\PDO::ATTR_AUTOCOMMIT => false,
+				\PDO::ATTR_EMULATE_PREPARES => false,
+			]);
+			$dbr  = new \ReflectionObject($db);
+			$prop = $dbr->getProperty('pdo');
+			$prop->setAccessible(true);
+			$prop->setValue($db, $this->getPdo());
+			$this->db = $db;
 		}
 		return $this->db;
-			//$this->db = new Database('root', 'root', $this->getDsn());
 	}
 }
