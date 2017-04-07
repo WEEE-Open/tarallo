@@ -215,6 +215,9 @@ final class ItemDAO extends DAO {
             throw new \LogicException('addItem called outside of transaction');
         }
 
+        // TODO: add sub-items
+	    // TODO: add to Tree
+
         if($this->addItemStatement === null) {
 	        $this->addItemStatement = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
         }
