@@ -8,6 +8,7 @@ class ItemTest extends TestCase {
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Item
+	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
 	 */
 	public function testItemValidCodeString() {
 		$pc77 = new Item('PC-77');
@@ -17,6 +18,7 @@ class ItemTest extends TestCase {
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Item
+	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
 	 */
 	public function testItemValidCodeInt() {
 		$quarantadue = new Item(42);
@@ -26,6 +28,7 @@ class ItemTest extends TestCase {
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Item
+	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
 	 */
 	public function testItemNullCode() {
 		$this->expectException(InvalidParameterException::class);
@@ -34,6 +37,7 @@ class ItemTest extends TestCase {
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Item
+	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
 	 */
 	public function testItemEmptyCode() {
 		$this->expectException(InvalidParameterException::class);

@@ -11,6 +11,7 @@ class SearchTest extends TestCase{
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Search
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\SearchTriplet
 	 */
 	public function testInvalidSearchNoKey() {
 		$this->expectException(InvalidParameterException::class);
@@ -22,6 +23,7 @@ class SearchTest extends TestCase{
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Search
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\SearchTriplet
 	 */
 	public function testInvalidSearchNoValue() {
 		$this->expectException(InvalidParameterException::class);
@@ -33,6 +35,7 @@ class SearchTest extends TestCase{
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Search
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\SearchTriplet
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 */
 	public function testSearchValid() {
@@ -44,6 +47,7 @@ class SearchTest extends TestCase{
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Search
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\SearchTriplet
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 */
 	public function testSearchValidDouble() {

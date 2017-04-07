@@ -145,6 +145,7 @@ class GetQueryTest extends TestCase {
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\SearchTriplet
 	 *
 	 * @param $string GetQuery string
 	 */

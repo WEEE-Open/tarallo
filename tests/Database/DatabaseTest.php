@@ -129,6 +129,7 @@ class DatabaseTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Database\Database
 	 * @uses   \WEEEOpen\Tarallo\User
 	 * @uses   \WEEEOpen\Tarallo\Item
+	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
 	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
 	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
 	 * @uses   \WEEEOpen\Tarallo\Database\DAO
