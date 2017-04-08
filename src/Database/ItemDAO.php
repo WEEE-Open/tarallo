@@ -135,7 +135,7 @@ final class ItemDAO extends DAO {
                 ' . $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->tokenPrepare($token), $searchSubquery) . '
             ) AND `Depth` = :parent
         ) AND Tree.`Depth` <= :depth AND isDefault = 0
-        ORDER BY `Depth` ASC;
+        ORDER BY IFNULL(directParents.`Depth`, 0) ASC;
 		';
         $s = $this->getPDO()->prepare($megaquery);
 
@@ -167,10 +167,24 @@ final class ItemDAO extends DAO {
         } else {
         	$items = [];
         	$itemIDs = [];
+        	$itemsTree = []; // array of root Item
 			while (($row = $s->fetch(\PDO::FETCH_ASSOC)) !== false) {
 				$itemIDs[$row['ItemID']] = $row['ItemID'];
-				$items[$row['ItemID']] = new Item($row['Code']);
+				$thisItem = new Item($row['Code']);
+				$items[$row['ItemID']] = $thisItem;
+				if($row['DirectParent'] === null) {
+					$itemsTree[] = $thisItem;
+				} else {
+					if(isset($items[$row['DirectParent']])) {
+						// this also updates $itemsTree since objects are always passed by reference
+						/** @var Item[] $itemIDs */
+						$items[$row['DirectParent']]->addChild($thisItem);
+					} else {
+						throw new \LogicException('Missing parent for item ' . (string) $thisItem . ', possibly incosistent Tree table state');
+					}
+				}
 			}
+			// TODO: determine why no features are added
 			$features = $this->database->featureDAO()->getFeatures($itemIDs);
 			foreach($features as $id => $feat) {
 				/** @var Item[] $items */
@@ -178,7 +192,7 @@ final class ItemDAO extends DAO {
 			}
         	// TODO: place sub-items where needed
         	$s->closeCursor();
-            return $items;
+            return $itemsTree;
         }
     }
 
