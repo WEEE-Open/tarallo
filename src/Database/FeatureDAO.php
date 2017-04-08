@@ -26,7 +26,7 @@ class FeatureDAO extends DAO {
 		');
 
         foreach($items as $arrayID => $itemID) {
-            if(!is_int($itemID) || !is_string($itemID)) {
+            if(!is_int($itemID) && !is_string($itemID)) {
                 throw new \InvalidArgumentException('Item IDs must be integers or strings, ' . gettype($itemID) . ' given');
             }
             $s->bindParam(':item' . $arrayID, $itemID);
