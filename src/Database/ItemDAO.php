@@ -122,10 +122,11 @@ final class ItemDAO extends DAO {
         // TODO: somehow sort the result set (not the innermost query, Parent returns other items...).
 	    //$sortOrder = $this->sortPrepare($sorts); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
 	    $megaquery = '
-        SELECT `ItemID`, `Code`, `AncestorID`, `Depth`
+        SELECT `ItemID`, `Code`, Tree.`AncestorID` AS `AncestorID`, Tree.`Depth` AS `Depth`, directParents.AncestorID AS DirectParent
         FROM Tree, Item
+        LEFT JOIN (SELECT * FROM Tree WHERE `Depth` = 1) directParents ON directParents.`DescendantID` = `ItemID`
         WHERE Tree.DescendantID = Item.ItemID
-        AND AncestorID IN (
+        AND Tree.AncestorID IN (
             SELECT `AncestorID`
             FROM Tree
             WHERE DescendantID IN ( 
@@ -133,7 +134,7 @@ final class ItemDAO extends DAO {
                 FROM Item
                 ' . $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->tokenPrepare($token), $searchSubquery) . '
             ) AND `Depth` = :parent
-        ) AND `Depth` <= :depth AND isDefault = 0
+        ) AND Tree.`Depth` <= :depth AND isDefault = 0
         ORDER BY `Depth` ASC;
 		';
         $s = $this->getPDO()->prepare($megaquery);
