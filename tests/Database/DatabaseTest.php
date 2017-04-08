@@ -151,6 +151,9 @@ class DatabaseTest extends TestCase {
 		$this->assertTableContains(['Code' => 'PC-42', 'IsDefault' => '0'], $itemTableRightNow);
 		$this->assertTableContains(['Code' => 'SATAna-1', 'IsDefault' => 0], $itemTableRightNow);
 		$this->assertTableContains(['Code' => 'SATAna-2', 'IsDefault' => 0], $itemTableRightNow);
+
+		$items = $db->itemDAO()->getItem(['PC-42'], null, null, null, null, null);
+		$this->assertContainsOnly(Item::class, $items);
 	}
 
 	/**

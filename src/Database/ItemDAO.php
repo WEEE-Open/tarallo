@@ -7,18 +7,26 @@ use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\Query\SearchTriplet;
 
 final class ItemDAO extends DAO {
-    private function depthPrepare($depth) {
-        if(is_int($depth)) {
-            return 'WHERE `Depth` <= :depth';
+    private function depthSanitize($depth) {
+        if(is_numeric($depth)) {
+            return (int) $depth;
         } else {
-            return 'WHERE `Depth` IS NOT NULL';
+            return 10;
         }
     }
 
+	private function parentSanitize($parent) {
+    	if(is_numeric($parent)) {
+    		return (int) $parent;
+	    } else {
+			return 0;
+		}
+	}
+
     private function locationPrepare($locations) {
         if(self::isArrayAndFull($locations)) {
-            $locationWhere = 'AND `Name` ' . $this->multipleIn(':location', $locations);
-            return rtrim($locationWhere, ', ').')';
+            $locationWhere = '`Code` IN (' . $this->multipleIn(':location', $locations);
+            return $locationWhere . ')';
         } else {
             return '';
         }
@@ -62,25 +70,19 @@ final class ItemDAO extends DAO {
 		return $this->database->featureDAO()->getWhereStringFromSearches($searches);
     }
 
-    private static function implodeOptionalAndAnd() {
+    private static function implodeOptionalWhereAnd() {
         $args = func_get_args();
         $where = self::implodeAnd($args);
         if($where === '') {
             return '';
         } else {
-            return ' AND ' . $where;
+            return ' WHERE ' . $where;
         }
-    }
-
-    private static function implodeOptionalAnd() {
-        $args = func_get_args();
-        return self::implodeAnd($args);
     }
 
     /**
      * Join non-empty string arguments via " AND " to add in a WHERE clause.
      *
-     * @see implodeOptionalAnd
      * @see implodeOptionalWhereAnd
      * @param $args string[]
      * @return string empty string or WHERE clauses separated by AND (no WHERE itself)
@@ -99,24 +101,10 @@ final class ItemDAO extends DAO {
         return implode(' AND ', $stuff);
     }
 
-    public function getItem($locations, $searches, $depth, $sorts, $token) {
-        $items = $this->getItemItself($locations, $searches, $depth, $sorts, $token);
-        $itemIDs = []; // TODO: implement
-        if(!empty($itemIDs)) {
-            $features = $this->database->featureDAO()->getFeatures($itemIDs);
-            foreach($features as $k => $feat) {
-                foreach($feat as $f => $val) {
-                    $items[$k]->addFeature($f, $val);
-                }
-            }
-        }
-        return $items;
-    }
-
-    private function getItemItself($locations, $searches, $depth, $sorts, $token) {
+    public function getItem($locations, $searches, $depth, $parent, $sorts, $token) {
         if(self::isArrayAndFull($searches)) {
 	        $searchSubquery = '
-	        ItemID IN (
+	            ItemID IN (
                     SELECT ItemID
 		            FROM Feature, ItemFeature
 		            LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
@@ -128,51 +116,68 @@ final class ItemDAO extends DAO {
 	        $searchSubquery = '';
         }
 
-	    //$sortOrder  = $this->sortPrepare($sorts); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
-	    $parentWhere = $this->implodeOptionalAnd(''); // TODO: implement, "WHERE Depth = 0" by default, use = to find only the needed roots (descendants are selected via /Depth)
-	    $depthDefaultWhere  = $this->implodeOptionalAnd($this->depthPrepare($depth), 'isDefault = 0');
-	    $whereLocationTokenSearch = $this->implodeOptionalAnd($this->locationPrepare($locations), $this->tokenPrepare($token), $searchSubquery);
-
-        // This will probably blow up in a spectacular way.
         // Search items by features, filter by location and token, tree lookup using these items as descendants
         // (for /Parent), tree lookup using new root items as roots (find all descendants), filter by depth,
         // join with items, SELECT.
         // TODO: somehow sort the result set (not the innermost query, Parent returns other items...).
-        $s = $this->getPDO()->prepare('
+	    //$sortOrder = $this->sortPrepare($sorts); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
+	    $megaquery = '
         SELECT `ItemID`, `Code`, `AncestorID`, `Depth`
         FROM Tree, Item
-        WHERE Tree.AncestorID = Item.ItemID
+        WHERE Tree.DescendantID = Item.ItemID
         AND AncestorID IN (
-            SELECT `ItemID`
+            SELECT `AncestorID`
             FROM Tree
             WHERE DescendantID IN ( 
                 SELECT `ItemID`
                 FROM Item
-                WHERE
-                ' . $whereLocationTokenSearch . '
-            ) AND ' . $parentWhere . ';
-        ) ' . $depthDefaultWhere . '
-		');
+                ' . $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->tokenPrepare($token), $searchSubquery) . '
+            ) AND `Depth` = :parent
+        ) AND `Depth` <= :depth AND isDefault = 0
+        ORDER BY `Depth` ASC;
+		';
+        $s = $this->getPDO()->prepare($megaquery);
 
-        $s->bindValue(':token', $token);
 
-        foreach($locations as $numericKey => $location) {
-	        $s->bindValue(':location' . $numericKey, $location);
+        $s->bindValue(':parent', $this->parentSanitize($parent), \PDO::PARAM_INT);
+        $s->bindValue(':depth', $this->depthSanitize($depth), \PDO::PARAM_INT);
+
+        if($token != null) {
+	        $s->bindValue(':token', $token, \PDO::PARAM_STR);
         }
 
-        foreach($searches as $numericKey => $triplet) {
-        	/** @var SearchTriplet $triplet */
-        	$s->bindValue(':searchname' . $numericKey, $triplet->getKey());
-        	$s->bindValue(':searchvalue' . $numericKey, $triplet->getValue());
+        if(self::isArrayAndFull($locations)) {
+	        foreach($locations as $numericKey => $location) {
+		        $s->bindValue(':location' . $numericKey, $location);
+	        }
         }
+
+	    if(self::isArrayAndFull($searches)) {
+		    foreach($searches as $numericKey => $triplet) {
+			    /** @var SearchTriplet $triplet */
+			    $s->bindValue(':searchname' . $numericKey, $triplet->getKey());
+			    $s->bindValue(':searchvalue' . $numericKey, $triplet->getValue());
+		    }
+	    }
 
         $s->execute();
         if($s->rowCount() === 0) {
             return [];
         } else {
-        	$all = $s->fetchAll();
+        	$items = [];
+        	$itemIDs = [];
+			while (($row = $s->fetch(\PDO::FETCH_ASSOC)) !== false) {
+				$itemIDs[$row['ItemID']] = $row['ItemID'];
+				$items[$row['ItemID']] = new Item($row['Code']);
+			}
+			$features = $this->database->featureDAO()->getFeatures($itemIDs);
+			foreach($features as $id => $feat) {
+				/** @var Item[] $items */
+				$items[$id]->addMultipleFeatures($features);
+			}
+        	// TODO: place sub-items where needed
         	$s->closeCursor();
-            return $all; // TODO: return Item objects
+            return $items;
         }
     }
 
