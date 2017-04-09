@@ -8,9 +8,16 @@ use WEEEOpen\Tarallo\Query\SearchTriplet;
 
 class FeatureDAO extends DAO {
 
-    public function getFeatures($items) {
+	/**
+	 * Add features to Items passed as a parameter.
+	 *
+	 * @param $items array of Item. Keys must be ItemIDs and they're used for prepared statement parameter names, so don't place unsanitized user input there!
+	 *
+	 * @return array
+	 */
+    public function setFeatures($items) {
         if(!is_array($items)) {
-            throw new \InvalidArgumentException('$items must be an array of item IDs');
+            throw new \InvalidArgumentException('$items must be an array of Item');
         }
 
         if(empty($items)) {
@@ -18,33 +25,28 @@ class FeatureDAO extends DAO {
         }
 
         $inItemID = $this->multipleIn(':item', $items);
-        $s = $this->getPDO()->prepare('SELECT ItemID, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `Value`
+        $s = $this->getPDO()->prepare('SELECT ItemID, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `FeatureValue`
             FROM Feature, ItemFeature
             LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
             WHERE ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
             AND ItemID IN (' . $inItemID . ');
 		');
 
-        foreach($items as $arrayID => $itemID) {
-            if(!is_int($itemID) && !is_string($itemID)) {
-                throw new \InvalidArgumentException('Item IDs must be integers or strings, ' . gettype($itemID) . ' given');
+        foreach($items as $itemID => $item) {
+            if(!is_int($itemID) && !is_numeric($itemID)) {
+                throw new \InvalidArgumentException('Item IDs must be integers or numeric strings, ' . gettype($itemID) . ' given');
             }
-            $s->bindParam(':item' . $arrayID, $itemID);
+            $s->bindValue(':item' . $itemID, $itemID);
         }
         $s->execute();
-        $reverseItems = array_flip($items);
-        $result = [];
-        if($s->rowCount() === 0) {
-            $all = $s->fetchAll();
+        if($s->rowCount() > 0) {
+	        foreach ($s as $row) {
+	        	/** @var Item[] $items */
+	        	$items[$row['ItemID']]->addFeature($row['FeatureName'], $row['FeatureValue']);
+	        }
 	        $s->closeCursor();
-            foreach($items as $k => $v) {
-                $result[$k] = [];
-            }
-            foreach($all as $row) {
-                $result[$reverseItems[$row['ItemID']]][$row['FeatureName']] = $row['FeatureValue'];
-            }
         }
-        return $result;
+        return $items;
     }
 
     private $featureTypeStatement = null;

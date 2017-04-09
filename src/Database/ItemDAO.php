@@ -32,20 +32,6 @@ final class ItemDAO extends DAO {
         }
     }
 
-    private function sortPrepare($sorts) {
-        if(self::isArrayAndFull($sorts)) {
-            $order = 'ORDER BY ';
-            if(self::isArrayAndFull($sorts)) {
-                foreach($sorts as $key => $ascdesc) {
-                    $order .= $key . ' ' . $ascdesc . ', ';
-                }
-            }
-            return $order;
-        } else {
-            return '';
-        }
-    }
-
     private function tokenPrepare($token) {
         if(is_string($token) && $token !== null) {
             return 'Token = :token';
@@ -164,33 +150,26 @@ final class ItemDAO extends DAO {
             return [];
         } else {
         	$items = [];
-        	$itemIDs = [];
-        	$itemsTree = []; // array of root Item
+        	$itemsTreeRoots = []; // array of root Item
 			while (($row = $s->fetch(\PDO::FETCH_ASSOC)) !== false) {
-				$itemIDs[$row['ItemID']] = $row['ItemID'];
 				$thisItem = new Item($row['Code']);
 				$items[$row['ItemID']] = $thisItem;
 				if($row['DirectParent'] === null) {
-					$itemsTree[] = $thisItem;
+					$itemsTreeRoots[] = $thisItem;
 				} else {
 					if(isset($items[$row['DirectParent']])) {
-						// this also updates $itemsTree since objects are always passed by reference
-						/** @var Item[] $itemIDs */
+						// this also updates $itemsTreeRoots since objects are always passed by reference
+						/** @var Item[] $items */
 						$items[$row['DirectParent']]->addChild($thisItem);
 					} else {
 						throw new \LogicException('Missing parent for item ' . (string) $thisItem . ', possibly incosistent Tree table state');
 					}
 				}
 			}
-			// TODO: determine why no features are added
-			$features = $this->database->featureDAO()->getFeatures($itemIDs);
-			foreach($features as $id => $feat) {
-				/** @var Item[] $items */
-				$items[$id]->addMultipleFeatures($features);
-			}
-        	// TODO: place sub-items where needed
-        	$s->closeCursor();
-            return $itemsTree;
+	        $s->closeCursor();
+			$this->database->featureDAO()->setFeatures($items);
+			$this->sortItems($itemsTreeRoots, $sorts);
+            return $itemsTreeRoots;
         }
     }
 
@@ -327,5 +306,51 @@ final class ItemDAO extends DAO {
 			$this->getItemIdCache[$code] = $id;
 			return $id;
 		}
+	}
+
+	/**
+	 * @param Item[] $items
+	 * @param string[] $sorts
+	 */
+	private function sortItems(&$items, $sorts = null) {
+		if(count($items) < 2) {
+			return;
+		}
+ 		$sortBy = [];
+		if($sorts !== null) {
+			foreach($sorts as $string) {
+				if(!is_string($sorts)) {
+					throw new \InvalidArgumentException('Sort conditions must be strings, ' . gettype($sorts) . ' given');
+				}
+				if(strlen($string) > 1) {
+					if($string[0] === '+' || $string[0] === '-') {
+						$sortBy[ substr($string, 1) ] = $string[0];
+					}
+				}
+			}
+		}
+
+		usort($items, function ($a, $b) use ($sortBy) {
+			if(!($a instanceof Item) || !($b instanceof Item)) {
+				throw new \InvalidArgumentException('Items must be Item objects');
+			}
+			if(!empty($sortBy)) {
+				$featuresA = $a->getFeatures();
+				$featuresB = $b->getFeatures();
+				foreach($sortBy as $feature => $order) {
+					if(isset($featuresA[$feature]) && isset($featuresB[$feature])) {
+						if($order === '+') {
+							$result = strnatcmp($featuresA[ $feature ], $featuresB[ $feature ]);
+						} else {
+							$result = strnatcmp($featuresB[ $feature ], $featuresA[ $feature ]);
+						}
+						if($result !== 0) {
+							return $result;
+						}
+					}
+				}
+			}
+			return strnatcmp($a->getCode(), $b->getCode());
+		});
 	}
 }
