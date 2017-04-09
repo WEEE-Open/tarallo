@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\DbUnit\TestCaseTrait;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\Query\SearchTriplet;
 
 class DatabaseTest extends TestCase {
 	use TestCaseTrait;
@@ -146,7 +147,6 @@ class DatabaseTest extends TestCase {
 		$db->itemDAO()->addItems($case);
 		$db->modificationCommit();
 
-		$db = $this->getDb();
 		$items = $db->itemDAO()->getItem(['PC-42'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'Only one root Item');
@@ -161,6 +161,23 @@ class DatabaseTest extends TestCase {
 			$this->assertTrue($case->getChildren()[0]->getFeatures() == $child->getFeatures(), 'Sub-Item ' . (string) $child . ' has same features as before'); // this works because the two items are identical except for the code...
 			$this->assertTrue(empty($child->getChildren()), 'No children of child Item ' . (string) $child);
 		}
+	}
+
+	public function testItemSearchSorting() {
+		$db = $this->getDb();
+		$pc[] = (new Item('PC-55'))->addFeature('brand', 'TI')->addFeature('model', 'GreyPC-\'98')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx');
+		$pc[] = (new Item('PC-20'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
+		$pc[] = (new Item('PC-21'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'grey')->addFeature('working', 'yes');
+		$pc[] = (new Item('PC-22'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
+		$pc[] = (new Item('SCHIFOMACCHINA'))->addFeature('brand', 'eMac')->addFeature('model', 'EZ1600')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white'); // based on a real PC we have in our laboratory.
+		$db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+		$db->itemDAO()->addItems($pc);
+		$db->modificationCommit();
+
+		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'case')], null, null, ['-motherboard-form-factor', '+color'], null);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(5, count($items), 'There should be 5 items');
+		// TODO: more testing
 	}
 
 	/**

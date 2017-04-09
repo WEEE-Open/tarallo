@@ -319,8 +319,8 @@ final class ItemDAO extends DAO {
  		$sortBy = [];
 		if($sorts !== null) {
 			foreach($sorts as $string) {
-				if(!is_string($sorts)) {
-					throw new \InvalidArgumentException('Sort conditions must be strings, ' . gettype($sorts) . ' given');
+				if(!is_string($string)) {
+					throw new \InvalidArgumentException('Sort conditions must be strings, ' . gettype($string) . ' given');
 				}
 				if(strlen($string) > 1) {
 					if($string[0] === '+' || $string[0] === '-') {

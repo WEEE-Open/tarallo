@@ -105,12 +105,12 @@ class FeatureDAO extends DAO {
 
 		foreach($searches as $numericKey => $triplet) {
 			if($this->database->featureDAO()->getFeatureTypeFromName($triplet->getKey()) === self::FEATURE_NUMBER) {
-				$where .= '(Feature.Name = :searchname' . $numericKey . ' AND Value ' . $searches[$numericKey]->getCompare() . ' :searchvalue' . $numericKey . ') OR ';
+				$where .= '(Feature.FeatureName = :searchname' . $numericKey . ' AND Value ' . $searches[$numericKey]->getCompare() . ' :searchvalue' . $numericKey . ') OR ';
 			} else {
-				$where .= '(Feature.Name = :searchname' . $numericKey . ' AND COALESCE(ItemFeature.ValueText, FeatureValue.ValueText) LIKE :searchvalue' . $numericKey . ') OR ';
+				$where .= '(Feature.FeatureName = :searchname' . $numericKey . ' AND COALESCE(ItemFeature.ValueText, FeatureValue.ValueText) LIKE :searchvalue' . $numericKey . ') OR ';
 			}
 		}
-		$where = substr(0, strlen($where) - 4); // remove last OR
+		$where = substr($where, 0, strlen($where) - 4); // remove last OR
 
 		return $where;
     }
