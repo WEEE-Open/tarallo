@@ -83,6 +83,10 @@ Feature:
     FeatureID: 14
     FeatureName: motherboard-form-factor
     FeatureType: 2
+  -
+    FeatureID: 15
+    FeatureName: notes
+    FeatureType: 0
 
 FeatureValue:
   -

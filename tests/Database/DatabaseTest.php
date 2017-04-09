@@ -163,13 +163,25 @@ class DatabaseTest extends TestCase {
 		}
 	}
 
+	/**
+	 * @covers \WEEEOpen\Tarallo\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\User
+	 * @uses   \WEEEOpen\Tarallo\Item
+	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
+	 * @depends testAddingAndRetrievingSomeItems
+	 */
 	public function testItemSearchSorting() {
 		$db = $this->getDb();
-		$pc[] = (new Item('PC-55'))->addFeature('brand', 'TI')->addFeature('model', 'GreyPC-\'98')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx');
-		$pc[] = (new Item('PC-20'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
-		$pc[] = (new Item('PC-21'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'grey')->addFeature('working', 'yes');
-		$pc[] = (new Item('PC-22'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
-		$pc[] = (new Item('SCHIFOMACCHINA'))->addFeature('brand', 'eMac')->addFeature('model', 'EZ1600')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white'); // based on a real PC we have in our laboratory.
+		$pc['PC-55'] = (new Item('PC-55'))->addFeature('brand', 'TI')->addFeature('model', 'GreyPC-\'98')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx');
+		$pc['PC-20'] = (new Item('PC-20'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
+		$pc['PC-21'] = (new Item('PC-21'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'grey')->addFeature('working', 'yes');
+		$pc['PC-22'] = (new Item('PC-22'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
+		$pc['SCHIFOMACCHINA'] = (new Item('SCHIFOMACCHINA'))->addFeature('brand', 'eMac')->addFeature('model', 'EZ1600')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white'); // based on a real PC we have in our laboratory.
+
 		$db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
 		$db->itemDAO()->addItems($pc);
 		$db->modificationCommit();
@@ -177,7 +189,83 @@ class DatabaseTest extends TestCase {
 		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'case')], null, null, ['-motherboard-form-factor', '+color'], null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(5, count($items), 'There should be 5 items');
-		// TODO: more testing
+		/** @var Item[] $items */
+		foreach(['PC-20', 'PC-22', 'PC-21', 'SCHIFOMACCHINA', 'PC-55'] as $pos => $code) {
+			$this->assertEquals($code, $items[$pos]->getCode(), 'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
+			$this->assertEquals($pc[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
+		}
+
+		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'case')], null, null, null, null);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(5, count($items), 'There should be 5 items');
+		// no sorting options => sort by code
+		foreach(['PC-20', 'PC-21', 'PC-22', 'PC-55', 'SCHIFOMACCHINA'] as $pos => $code) {
+			$this->assertEquals($code, $items[$pos]->getCode(), 'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
+			$this->assertEquals($pc[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
+		}
+
+		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('color', '=', 'white')], null, null, null, null);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(1, count($items), 'There should be only one item');
+		$this->assertEquals(reset($items), $pc['SCHIFOMACCHINA'], 'Only SCHIFOMACCHINA should be returned'); // excellent piece of hardware, by the way. 2 minutes from power on to POST OK.
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\User
+	 * @uses   \WEEEOpen\Tarallo\Item
+	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
+	 * @depends testAddingAndRetrievingSomeItems
+	 */
+	public function testItemSearchFiltering() {
+		$cpu['INTEL-1'] = (new Item('INTEL-1'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Core 2.0 Trio')->addFeature('frequency-hz',    1400000000);
+		$cpu['INTEL-2'] = (new Item('INTEL-2'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Core 3.0 Quadrio')->addFeature('frequency-hz', 2000000000);
+		$cpu['INTEL-3'] = (new Item('INTEL-3'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Atomic 5L0W-NE55')->addFeature('frequency-hz', 42);
+		$cpu['INTEL-4'] = (new Item('INTEL-4'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Centrino DellaNonna')->addFeature('frequency-hz', 1000000000);
+		$cpu['AMD-42']  = (new Item('AMD-42') )->addFeature('type', 'cpu')->addFeature('brand', 'Advanced Magnificent Processors')->addFeature('model', 'A4-200g')->addFeature('notes', 'A4, 200 g/cm², come la carta.')->addFeature('frequency-hz', 1900000000);
+		$cpu['AMD-737'] = (new Item('AMD-737'))->addFeature('type', 'cpu')->addFeature('brand', 'Advanced Magnificent Processors')->addFeature('model', '737-800')->addFeature('frequency-hz', 3700000000);
+		$db = $this->getDb();
+
+		$db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+		$db->itemDAO()->addItems($cpu);
+		$db->modificationCommit();
+
+		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'cpu')], null, null, null, null);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(6, count($items), 'There should be 6 items');
+		/** @var Item[] $items */
+		foreach(['AMD-42', 'AMD-737', 'INTEL-1', 'INTEL-2', 'INTEL-3', 'INTEL-4'] as $pos => $code) {
+			$this->assertEquals($code, $items[$pos]->getCode(), 'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
+			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
+		}
+
+		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'cpu')], null, null, ['-frequency-hz'], null);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(6, count($items), 'There should be 6 items');
+		foreach(['AMD-737', 'INTEL-2', 'AMD-42', 'INTEL-1', 'INTEL-4', 'INTEL-3'] as $pos => $code) {
+			$this->assertEquals($code, $items[$pos]->getCode(), 'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
+			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
+		}
+
+		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('brand', '=', 'Intel')], null, null, null, null);
+		$this->assertEquals(0, count($items), 'No items returned without wildcard');
+
+		$itemsGeq = $db->itemDAO()->getItem(null, [new SearchTriplet('brand', '>', 'Intel%')], null, null, null, null);
+		$this->assertContainsOnly(Item::class, $itemsGeq);
+		$this->assertEquals(4, count($itemsGeq), 'There should be 4 items when using > (query should contain LIKE regardless)');
+
+		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('brand', '=', 'Intel%')], null, null, null, null);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(4, count($items), 'There should be 4 items when using = (in this case query should use LIKE)');
+		$this->assertEquals($items, $itemsGeq, 'Same result set in same order when using >, < or = on a field that uses LIKE');
+		foreach(['INTEL-1', 'INTEL-2', 'INTEL-3', 'INTEL-4'] as $pos => $code) {
+			$this->assertEquals($code, $items[$pos]->getCode(), 'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
+			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
+		}
 	}
 
 	/**
