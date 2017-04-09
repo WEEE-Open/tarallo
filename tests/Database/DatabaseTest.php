@@ -134,7 +134,7 @@ class DatabaseTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
 	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 */
-	public function testAddingSomeItems() {
+	public function testAddingAndRetrievingSomeItems() {
 		$db = $this->getDb();
 		$db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
 		/** @var $case Item */ // PHPStorm suddenly doesn't recognize chained methods. Only the last one of every chain, specifically.
@@ -146,14 +146,21 @@ class DatabaseTest extends TestCase {
 		$db->itemDAO()->addItems($case);
 		$db->modificationCommit();
 
-		// TODO: checking database rows adds too much coupling between code and database tables, maybe getting the Item would be better?
-		$itemTableRightNow = new \PHPUnit\DbUnit\DataSet\QueryTable('Item.Code', 'SELECT Code, IsDefault FROM Item', $this->getConnection());
-		$this->assertTableContains(['Code' => 'PC-42', 'IsDefault' => '0'], $itemTableRightNow);
-		$this->assertTableContains(['Code' => 'SATAna-1', 'IsDefault' => 0], $itemTableRightNow);
-		$this->assertTableContains(['Code' => 'SATAna-2', 'IsDefault' => 0], $itemTableRightNow);
-
+		$db = $this->getDb();
 		$items = $db->itemDAO()->getItem(['PC-42'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(1, count($items), 'Only one root Item');
+		/** @var Item $newCase */
+		$newCase = reset($items); // get the only Item
+		$this->assertEquals(2, count($newCase->getChildren()), 'Two child Item');
+		$this->assertContainsOnly(Item::class, $newCase->getChildren(), null, 'Only Items are contained in an Item');
+		foreach($newCase->getChildren() as $child) {
+			/** @var Item $child */
+			$this->assertTrue($child->getCode() === 'SATAna-1' || $child->getCode() === 'SATAna-2', 'Sub-Item is one of the two expected items, ' . (string) $child);
+			/** @noinspection PhpUndefinedMethodInspection */
+			$this->assertTrue($case->getChildren()[0]->getFeatures() == $child->getFeatures(), 'Sub-Item ' . (string) $child . ' has same features as before'); // this works because the two items are identical except for the code...
+			$this->assertTrue(empty($child->getChildren()), 'No children of child Item ' . (string) $child);
+		}
 	}
 
 	/**
