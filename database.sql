@@ -31,7 +31,7 @@ CREATE TABLE `FeatureValue` (
   `ValueEnum` bigint(20) unsigned NOT NULL,
   `ValueText` text NOT NULL,
   PRIMARY KEY (`FeatureID`, `ValueEnum`),
-  CONSTRAINT `FK_FeatureID` FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`) ON DELETE NO ACTION ON UPDATE CASCADE
+  CONSTRAINT FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`) ON DELETE NO ACTION ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -47,8 +47,8 @@ CREATE TABLE `ItemFeature` (
   KEY `ValueEnum` (`ValueEnum`),
   -- this doesn't work, for no reason at all
   -- CONSTRAINT `FK_FeatureEnum_FeatureValue` FOREIGN KEY (`ValueEnum`) REFERENCES `FeatureValue` (`ValueEnum`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT `ItemFeature_ibfk_1` FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `ItemFeature_ibfk_2` FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`) ON DELETE NO ACTION ON UPDATE CASCADE,
 	CHECK((`Value` IS NOT NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL)
   OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND `ValueEnum` IS NULL)
   OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NOT NULL))
@@ -60,11 +60,11 @@ CREATE TABLE `ItemLocationModification` (
   `ParentFrom` bigint(20) unsigned NOT NULL,
   `ParentTo` bigint(20) unsigned NOT NULL,
   PRIMARY KEY (`ModificationID`,`ParentFrom`,`ParentTo`),
-  KEY `ParentFrom` (`ParentFrom`),
-  KEY `ParentTo` (`ParentTo`),
-  CONSTRAINT `FK_ModificationID` FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT `FK_ParentFrom_ItemID` FOREIGN KEY (`ParentFrom`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT `FK_ParentTo_ItemID` FOREIGN KEY (`ParentTo`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE
+  KEY (`ParentFrom`),
+  KEY (`ParentTo`),
+  CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT FOREIGN KEY (`ParentFrom`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT FOREIGN KEY (`ParentTo`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
@@ -72,9 +72,9 @@ CREATE TABLE `ItemModification` (
   `ModificationID` bigint(20) unsigned NOT NULL,
   `ItemID` bigint(20) unsigned NOT NULL,
   PRIMARY KEY (`ModificationID`,`ItemID`),
-  KEY `ItemID` (`ItemID`),
-  CONSTRAINT `ItemModification_ibfk_1` FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT `ItemModification_ibfk_3` FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE
+  KEY (`ItemID`),
+  CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `Modification` (
@@ -83,17 +83,17 @@ CREATE TABLE `Modification` (
   `Date` bigint(20) unsigned NOT NULL,
   `Notes` text COLLATE utf8mb4_unicode_ci,
   PRIMARY KEY (`ModificationID`),
-  KEY `UserID` (`UserID`),
-  CONSTRAINT `Modification_ibfk_1` FOREIGN KEY (`UserID`) REFERENCES `User` (`UserID`) ON DELETE NO ACTION ON UPDATE CASCADE
+  KEY (`UserID`),
+  CONSTRAINT FOREIGN KEY (`UserID`) REFERENCES `User` (`UserID`) ON DELETE NO ACTION ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `Tree` (
   `AncestorID` bigint(20) unsigned NOT NULL,
   `DescendantID` bigint(20) unsigned NOT NULL,
-  `Depth` int(10) unsigned NOT NULL,
+  `Depth` int(10) unsigned NOT NULL, -- This may need an index
   PRIMARY KEY (`AncestorID`,`DescendantID`),
-  CONSTRAINT `Tree_ibfk_1` FOREIGN KEY (`AncestorID`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT `Tree_ibfk_2` FOREIGN KEY (`DescendantID`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE
+  CONSTRAINT FOREIGN KEY (`AncestorID`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE,
+  CONSTRAINT FOREIGN KEY (`DescendantID`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 

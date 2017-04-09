@@ -119,8 +119,6 @@ final class ItemDAO extends DAO {
         // Search items by features, filter by location and token, tree lookup using these items as descendants
         // (for /Parent), tree lookup using new root items as roots (find all descendants), filter by depth,
         // join with items, SELECT.
-        // TODO: somehow sort the result set (not the innermost query, Parent returns other items...).
-	    //$sortOrder = $this->sortPrepare($sorts); // $arrayOfSortKeysAndOrder wasn't a very good name, either...
 	    $megaquery = '
         SELECT `ItemID`, `Code`, Tree.`AncestorID` AS `AncestorID`, Tree.`Depth` AS `Depth`, directParents.AncestorID AS DirectParent
         FROM Tree, Item
