@@ -24,28 +24,58 @@ class FeatureDAO extends DAO {
             return [];
         }
 
+        /*
+         * This seems a good query to fetch default and non-default features:
+         *
+         * SELECT Item2.ItemID, Item2.ItemFor, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `FeatureValue`
+		 * FROM (SELECT ItemID, ItemID AS ItemFor FROM Item UNION ALL SELECT `Default` AS ItemID, ItemID AS ItemFor FROM Item WHERE `Default` IS NOT NULL)  Item2
+		 * JOIN ItemFeature ON  Item2.ItemID = ItemFeature.ItemID
+		 * JOIN Feature ON ItemFeature.FeatureID = Feature.FeatureID
+		 * LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
+		 * WHERE (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
+		 * AND Item2.ItemID IN (1, 2, 3);
+         *
+         * However, the subquery gives the correct and expected result, but the main query loses FOR UNFATHOMABLE REASONS the second half of the UNIONed data.
+         * So we're doing two queries. That UNION probably killed performance, too, so it's acceptable anyway.
+         */
+
         $inItemID = $this->multipleIn(':item', $items);
-        $s = $this->getPDO()->prepare('SELECT ItemID, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `FeatureValue`
+        $featureStatement = $this->getPDO()->prepare('SELECT ItemID, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `FeatureValue`
             FROM Feature, ItemFeature
             LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
             WHERE ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
             AND ItemID IN (' . $inItemID . ');
 		');
 
+	    $defaultFeatureStatement = $this->getPDO()->prepare('SELECT `Default` AS ItemID, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `FeatureValue`
+			FROM Item, Feature, ItemFeature
+			LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
+			WHERE (Item.ItemID = ItemFeature.ItemID AND Item.`Default` IS NOT NULL) AND ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
+			AND Item.ItemID IN (' . $inItemID . ');
+		');
+
         foreach($items as $itemID => $item) {
             if(!is_int($itemID) && !is_numeric($itemID)) {
                 throw new \InvalidArgumentException('Item IDs must be integers or numeric strings, ' . gettype($itemID) . ' given');
             }
-            $s->bindValue(':item' . $itemID, $itemID);
+            $featureStatement->bindValue(':item' . $itemID, $itemID);
+            $defaultFeatureStatement->bindValue(':item' . $itemID, $itemID);
         }
-        $s->execute();
-        if($s->rowCount() > 0) {
-	        foreach ($s as $row) {
+        $featureStatement->execute();
+        if($featureStatement->rowCount() > 0) {
+	        foreach ($featureStatement as $row) {
 	        	/** @var Item[] $items */
 	        	$items[$row['ItemID']]->addFeature($row['FeatureName'], $row['FeatureValue']);
 	        }
-	        $s->closeCursor();
+	        $featureStatement->closeCursor();
         }
+	    $defaultFeatureStatement->execute();
+	    if($featureStatement->rowCount() > 0) {
+		    foreach ($featureStatement as $row) {
+			    $items[$row['ItemID']]->addFeatureDefault($row['FeatureName'], $row['FeatureValue']);
+		    }
+		    $featureStatement->closeCursor();
+	    }
         return $items;
     }
 

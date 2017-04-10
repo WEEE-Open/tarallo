@@ -25,6 +25,12 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	}
 
 	public function addFeature($name, $value) {
+		$this->checkFeature($name, $value);
+		$this->features[$name] = $value;
+		return $this;
+	}
+
+	private function checkFeature($name, $value) {
 		if(!self::featureNameIsValid($name)) {
 			throw new \InvalidArgumentException('Feature name must be a string, ' . gettype($name) . ' given');
 		}
@@ -34,9 +40,6 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		if(isset($this->features[$name])) {
 			throw new InvalidParameterException('Feature ' . $name . ' already inserted into item ' . (string) $this);
 		}
-
-		$this->features[$name] = $value;
-		return $this;
 	}
 
 	public function addMultipleFeatures($features) {
@@ -77,5 +80,11 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		} else {
 			return parent::getCode();
 		}
+	}
+
+	public function addFeatureDefault($name, $value) {
+		$this->checkFeature($name, $value);
+		$this->featuresDefault[$name] = $value;
+		return $this;
 	}
 }
