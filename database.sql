@@ -20,7 +20,8 @@ CREATE TABLE `Item` (
   `ItemID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `Code` varchar(190) COLLATE utf8mb4_unicode_ci NOT NULL,
   `IsDefault` tinyint(1) NOT NULL,
-  UNIQUE KEY `Code` (`Code`),
+  UNIQUE KEY (`Code`),
+  INDEX (`Code`),
   -- Type and Status were removed (they will become features), to simplify implementation of the /Search thinghamajig
   PRIMARY KEY (`ItemID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
