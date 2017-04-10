@@ -47,10 +47,10 @@ class FeatureDAO extends DAO {
             AND ItemID IN (' . $inItemID . ');
 		');
 
-	    $defaultFeatureStatement = $this->getPDO()->prepare('SELECT `Default` AS ItemID, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `FeatureValue`
+	    $defaultFeatureStatement = $this->getPDO()->prepare('SELECT ItemID, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `FeatureValue`
 			FROM Item, Feature, ItemFeature
 			LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
-			WHERE (Item.ItemID = ItemFeature.ItemID AND Item.`Default` IS NOT NULL) AND ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
+			WHERE (Item.`Default` = ItemFeature.ItemID AND Item.`Default` IS NOT NULL AND Item.isDefault = 1) AND ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
 			AND Item.ItemID IN (' . $inItemID . ');
 		');
 
