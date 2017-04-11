@@ -8,6 +8,7 @@ class Database {
     private $userDAO = null;
     private $itemDAO = null;
     private $featureDAO = null;
+    private $treeDAO = null;
     private $username;
     private $password;
     private $dsn;
@@ -74,6 +75,13 @@ class Database {
             $this->featureDAO = new FeatureDAO($this, $this->callback);
         }
         return $this->featureDAO;
+    }
+
+    public function treeDAO() {
+        if($this->treeDAO === null) {
+            $this->treeDAO = new FeatureDAO($this, $this->callback);
+        }
+        return $this->treeDAO;
     }
 
     private $currentModificationId = null;
