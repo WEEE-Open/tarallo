@@ -269,6 +269,57 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
+	 * @covers \WEEEOpen\Tarallo\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\User
+	 * @uses   \WEEEOpen\Tarallo\Item
+	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
+	 * @depends testAddingAndRetrievingSomeItems
+	 */
+	public function testTreeMove() {
+		// These items should be added in database.yml, but that just increases the amount of data to import for each test
+		// and I find more readable this than a YAML file full of numbers.
+		$chernobyl = (new Item('CHERNOBYL'))->addFeature('type', 'location');
+		$tavolone = (new Item('TAVOLONE'))->addFeature('type', 'location');
+		$chernobyl->addChild($tavolone)->addChild((new Item('Armadio L'))->addFeature('type', 'location'))->addChild((new Item('Armadio R'))->addFeature('type', 'location'));
+		$tavolone->addChild(
+					(new Item('SCHIFOMACCHINA'))->addFeature('brand', 'eMac')->addFeature('model', 'EZ1600')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white'));
+		$ti = (new Item('PC-TI'))->addFeature('brand', 'TI')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white')
+					->addChild(
+						(new Item('RAM-22'))->addFeature('type', 'ram')->addFeature('capacity-byte', 32)
+					)
+					->addChild(
+						(new Item('RAM-23'))->addFeature('type', 'ram')->addFeature('capacity-byte', 32)
+					)
+					->addChild(
+						(new Item('PC-TI-MOBO'))->addFeature('type', 'motherboard')->addFeature('color', 'green')
+					)
+					->addChild(
+						(new Item('PC-TI-CPU'))->addFeature('type', 'cpu')->addFeature('color', 'green')->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Atomic 5L0W-NE55')->addFeature('frequency-hz', 42)
+					);
+		$tavolone->addChild(
+					(new Item('ROSETTA'))->addFeature('brand', 'pH')->addFeature('model', 'ReliaPro MLG555')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx')->addFeature('color', 'grey'))
+					->addChild(
+						(new Item('RAM-3342'))->addFeature('type', 'ram')->addFeature('capacity-byte', 1073741824)
+					)
+					->addChild(
+						(new Item('RAM-2452'))->addFeature('type', 'ram')->addFeature('capacity-byte', 1073741824)
+					);
+
+		$chernobylPre = $chernobyl;
+		$chernobylPost = clone $chernobyl;
+
+		// Move TI from TAVOLONE to Zona blu.
+		$tavolone->addChild($ti);
+		$chernobylPost->addChild((new Item('Zona blu'))->addFeature('type', 'location')->addChild($ti));
+
+		// TODO: actually move, compare result fetched from database
+	}
+
+	/**
 	 * @return Database
 	 */
 	private function getDb() {

@@ -87,4 +87,17 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		$this->featuresDefault[$name] = $value;
 		return $this;
 	}
+
+
+	public function __clone() {
+		foreach(get_object_vars($this) as $prop => &$array) {
+			if(is_array($array)) {
+				foreach($array as &$value) {
+					if(is_object($value)) {
+						$value = clone $value;
+					}
+				}
+			}
+		}
+	}
 }
