@@ -298,7 +298,7 @@ class DatabaseTest extends TestCase {
 						(new Item('PC-TI-MOBO'))->addFeature('type', 'motherboard')->addFeature('color', 'green')
 					)
 					->addChild(
-						(new Item('PC-TI-CPU'))->addFeature('type', 'cpu')->addFeature('color', 'green')->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Atomic 5L0W-NE55')->addFeature('frequency-hz', 42)
+						(new Item('PC-TI-CPU'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Atomic 5L0W-NE55')->addFeature('frequency-hz', 42)
 					);
 		$tavolone->addChild(
 					(new Item('ROSETTA'))->addFeature('brand', 'pH')->addFeature('model', 'ReliaPro MLG555')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx')->addFeature('color', 'grey'))

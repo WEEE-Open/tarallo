@@ -63,7 +63,7 @@ final class TreeDAO extends DAO {
             $this->setParentStatement = $pdo->prepare('INSERT INTO Tree (AncestorID, DescendantID, Depth)
 			SELECT ltree.AncestorID, rtree.DescendantID, ltree.Depth+rtree.Depth+1
 			FROM Tree ltree, Tree rtree 
-			WHERE ltree.DescendantID = :new AND rtree.AncestorID = :parent;');
+			WHERE ltree.DescendantID = :parent AND rtree.AncestorID = :new;');
         }
         $itemDAO = $this->database->itemDAO();
         $parentID = $itemDAO->getItemId($parent);
