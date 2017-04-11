@@ -231,7 +231,7 @@ final class ItemDAO extends DAO {
 
 	    $this->setItemModified($item);
 
-	    $this->addToTree($item, $parent);
+	    $this->database->treeDAO()->addToTree($item, $parent);
 
 	    $childItems = $item->getChildren();
 	    foreach($childItems as $childItem) {
@@ -249,40 +249,6 @@ final class ItemDAO extends DAO {
         }
 	    $this->itemModifiedStatement->execute([$this->database->getModificationId(), $this->getItemId($item)]);
     }
-
-	private function addToTree(ItemIncomplete $child, ItemIncomplete $parent = null) {
-    	if($parent === null) {
-    		$parent = $child;
-	    }
-
-    	$this->setParentInTree($parent, $child);
-    }
-
-	private $setParentInTreeStatement = null;
-	/**
-	 * addEdge, basically. It's better to use addToTree(), which in turn calls this function.
-	 *
-	 * @see addToTree
-	 * @param ItemIncomplete $parent
-	 * @param ItemIncomplete $child
-	 */
-	private function setParentInTree(ItemIncomplete $parent, ItemIncomplete $child) {
-    	$pdo = $this->getPDO();
-    	if($this->setParentInTreeStatement === null) {
-		    $this->setParentInTreeStatement = $pdo->prepare('
-			INSERT INTO Tree(AncestorID, DescendantID, Depth)
-			SELECT AncestorID, :new1, Depth+1
-			FROM Tree
-			WHERE DescendantID = :parent
-			UNION
-			SELECT :new2, :new3, 0;');
-	    }
-		$this->setParentInTreeStatement->bindValue(':parent', $this->getItemId($parent), \PDO::PARAM_INT);
-		$this->setParentInTreeStatement->bindValue(':new1', $this->getItemId($child), \PDO::PARAM_INT);
-		$this->setParentInTreeStatement->bindValue(':new2', $this->getItemId($child), \PDO::PARAM_INT);
-		$this->setParentInTreeStatement->bindValue(':new3', $this->getItemId($child), \PDO::PARAM_INT);
-		$this->setParentInTreeStatement->execute();
-	}
 
 	private $getItemIdStatement = null;
 	private $getItemIdCache = [];
