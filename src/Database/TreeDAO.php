@@ -26,6 +26,7 @@ final class TreeDAO extends DAO {
     private function addInTree(ItemIncomplete $parent, ItemIncomplete $child) {
         $pdo = $this->getPDO();
         if ($this->setParentInTreeStatement === null) {
+            // TODO: replace this with the standard join query (https://www.percona.com/blog/2011/02/14/moving-subtrees-in-closure-table/)
             $this->setParentInTreeStatement = $pdo->prepare('
 			INSERT INTO Tree(AncestorID, DescendantID, Depth)
 			SELECT AncestorID, :new1, Depth+1
@@ -53,6 +54,7 @@ final class TreeDAO extends DAO {
      */
     private function setItemAsRoot(ItemIncomplete $item) {
         if($this->extractFromTreeStatement === null) {
+            // TODO: this won't work without a million JOINs for no reason, BECAUSE MYSQL.
             $this->extractFromTreeStatement = $this->getPDO()->prepare('DELETE * FROM Tree
             WHERE (AncestorID IN (SELECT AncestorID FROM Tree WHERE DescendantID = ?)
               AND DescendantID IN (SELECT DescendantID FROM Tree WHERE AncestorID = ?) 
