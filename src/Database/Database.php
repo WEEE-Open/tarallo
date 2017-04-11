@@ -79,7 +79,7 @@ class Database {
 
     public function treeDAO() {
         if($this->treeDAO === null) {
-            $this->treeDAO = new FeatureDAO($this, $this->callback);
+            $this->treeDAO = new TreeDAO($this, $this->callback);
         }
         return $this->treeDAO;
     }
