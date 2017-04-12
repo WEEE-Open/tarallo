@@ -15,7 +15,7 @@ WIP
 ### TODO
 - [x] Foreign key
 - [X] Qualcosa per rappresentare la struttura ad albero degli Item
-	- [ ] ...e gli Item rimossi (metterli nell'Item radice "cestino"? Rimuoverli dalla tabella Tree?)
+	- [X] ...e gli Item rimossi (metterli nell'Item radice "cestino"? Rimuoverli dalla tabella Tree?)
 - [X] Gestire proprietà duplicate con valori diversi (= non si mettono e basta)
 - [x] Trovare una soluzione più degna per tenere traccia di che stanno facendo gli adesivi col numero di inventario e col seriale di Windows (è necessario tenerne traccia perché dobbiamo staccarli e restituirli prima di dare via i computer)
 - [ ] Scrivere il codice.

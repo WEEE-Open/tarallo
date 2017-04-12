@@ -163,6 +163,59 @@ class DatabaseTest extends TestCase {
 		}
 	}
 
+
+    /**
+     * Database tests are really slow and this code is a bit complex to say the least, testing everything
+     * in a sensible manner will be difficult. But some tests are better than no tests at all, right?
+     *
+     * @covers \WEEEOpen\Tarallo\Database\Database
+     * @uses   \WEEEOpen\Tarallo\User
+     * @uses   \WEEEOpen\Tarallo\Item
+     * @uses   \WEEEOpen\Tarallo\ItemIncomplete
+     * @covers \WEEEOpen\Tarallo\Database\ItemDAO
+     * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
+     * @uses   \WEEEOpen\Tarallo\Database\DAO
+     */
+    public function testSubtreeRemoval()
+    {
+        $db = $this->getDb();
+        $db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+        /** @var $case Item */
+        $lab = (new Item('CHERNOBYL'));
+        $case = (new Item('PC-42'));
+        $discone1 = (new Item('HDD-1'));
+        $discone2 = (new Item('HDD-2'));
+        $case->addChild($discone1);
+        $case->addChild($discone2);
+        $lab->addChild($case);
+        $db->itemDAO()->addItems($lab);
+        $db->modificationCommit();
+
+        $items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
+        $this->assertContainsOnly(Item::class, $items);
+        $this->assertEquals(1, count($items), 'Only one root Item');
+        $this->assertEquals($lab, reset($item), 'Lab is unchanged');
+
+        $db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+        $db->treeDAO()->removeFromTree($case);
+        $db->modificationCommit();
+
+        $items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
+        $this->assertContainsOnly(Item::class, $items);
+        $this->assertEquals(1, count($items), 'Still only one root Item');
+        $this->assertEquals(0, count(reset($item)->getChildren()), 'Lab is empty');
+
+        $items = $db->itemDAO()->getItem(['PC-42'], null, null, null, null, null);
+        $this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
+
+        $items = $db->itemDAO()->getItem(['HDD-1'], null, null, null, null, null);
+        $this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
+
+        $items = $db->itemDAO()->getItem(['HDD-2'], null, null, null, null, null);
+        $this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
+
+    }
+
 	/**
 	 * @covers \WEEEOpen\Tarallo\Database\Database
 	 * @uses   \WEEEOpen\Tarallo\User

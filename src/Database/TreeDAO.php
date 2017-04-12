@@ -31,6 +31,19 @@ final class TreeDAO extends DAO {
 	    }
     }
 
+    private $removeFromTreeStatement = null;
+    public function removeFromTree(ItemIncomplete $item) {
+        if($this->removeFromTreeStatement === null) {
+            $this->removeFromTreeStatement = $this->getPDO()->prepare('DELETE * FROM Tree
+            WHERE DescendantID IN (
+            SELECT DescendantID
+            FROM Tree
+            WHERE AncestorID = ?);');
+        }
+
+        $this->removeFromTreeStatement->execute([$this->database->itemDAO()->getItemId($item)]);
+    }
+
     private $addItemAsRootStatement = null;
 	/**
 	 * Add an Item to Tree, considering it a root. Basically adds a row like (Item, Item, Depth = 0).
@@ -89,7 +102,7 @@ final class TreeDAO extends DAO {
         if($this->extractFromTreeStatement === null) {
             // straight from Bill Karwin's post (https://www.percona.com/blog/2011/02/14/moving-subtrees-in-closure-table/)
 	        // other solutions exist, but they don't work in MySQL BECAUSE MYSQL, THAT'S WHY.
-            $this->extractFromTreeStatement = $this->getPDO()->prepare('SELECT * FROM Tree AS a
+            $this->extractFromTreeStatement = $this->getPDO()->prepare('DELETE * FROM Tree AS a
 			JOIN Tree AS d ON a.DescendantID = d.DescendantID
 			LEFT JOIN Tree AS x
 			ON x.AncestorID = d.AncestorID AND x.DescendantID = a.AncestorID
