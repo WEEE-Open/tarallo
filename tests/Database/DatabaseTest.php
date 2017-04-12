@@ -194,7 +194,7 @@ class DatabaseTest extends TestCase {
         $items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
         $this->assertContainsOnly(Item::class, $items);
         $this->assertEquals(1, count($items), 'Only one root Item');
-        $this->assertEquals($lab, reset($item), 'Lab is unchanged');
+        $this->assertEquals($lab, reset($items), 'Lab is unchanged');
 
         $db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
         $db->treeDAO()->removeFromTree($case);
@@ -203,7 +203,7 @@ class DatabaseTest extends TestCase {
         $items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
         $this->assertContainsOnly(Item::class, $items);
         $this->assertEquals(1, count($items), 'Still only one root Item');
-        $this->assertEquals(0, count(reset($item)->getChildren()), 'Lab is empty');
+        $this->assertEquals(0, count(reset($items)->getChildren()), 'Lab is empty');
 
         $items = $db->itemDAO()->getItem(['PC-42'], null, null, null, null, null);
         $this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');

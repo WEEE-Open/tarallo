@@ -34,11 +34,19 @@ final class TreeDAO extends DAO {
     private $removeFromTreeStatement = null;
     public function removeFromTree(ItemIncomplete $item) {
         if($this->removeFromTreeStatement === null) {
-            $this->removeFromTreeStatement = $this->getPDO()->prepare('DELETE * FROM Tree
-            WHERE DescendantID IN (
-            SELECT DescendantID
-            FROM Tree
-            WHERE AncestorID = ?);');
+	        /* This is readable but doesn't work in MySQL:
+	         *
+	         * DELETE * FROM Tree
+	         * WHERE DescendantID IN (
+	         * SELECT DescendantID
+	         * FROM Tree
+	         * WHERE AncestorID = ?)
+	         *
+	         * This is incomprehensible (I can only HOPE it does the same job) but works in MySQL:
+	         */
+            $this->removeFromTreeStatement = $this->getPDO()->prepare('DELETE Tree.* FROM Tree, Tree AS Pointless
+            WHERE Tree.DescendantID=Pointless.DescendantID
+            AND Pointless.AncestorID = ?;');
         }
 
         $this->removeFromTreeStatement->execute([$this->database->itemDAO()->getItemId($item)]);
