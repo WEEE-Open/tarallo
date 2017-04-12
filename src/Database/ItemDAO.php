@@ -91,13 +91,12 @@ final class ItemDAO extends DAO {
         if(self::isArrayAndFull($searches)) {
 	        $searchSubquery = '
 	            ItemID IN (
-                    SELECT ItemID
-		            FROM Feature, ItemFeature
+                    SELECT Item.ItemID
+		            FROM Item, Feature, ItemFeature
 		            LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
-		            WHERE ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
+		            WHERE (Item.ItemID = ItemFeature.ItemID OR Item.`Default` = ItemFeature.ItemID) AND ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL) AND IsDefault = 0
 		            AND (' . $this->searchPrepare($searches) . ')
-		        )
-	        ';
+	        )';
         } else {
 	        $searchSubquery = '';
         }
