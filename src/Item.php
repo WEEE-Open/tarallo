@@ -6,6 +6,14 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	private $features = [];
 	private $featuresDefault = [];
 	private $content = [];
+	private $defaultCode = null;
+
+	public function __construct($code, $defaultCode = null) {
+		parent::__construct($code);
+		if($defaultCode !== null) {
+			$this->defaultCode = $this->sanitizeCode($defaultCode);
+		}
+	}
 
 	private static function featureNameIsValid($name) {
 		if(is_string($name)) {
@@ -25,19 +33,28 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	}
 
 	public function addFeature($name, $value) {
-		$this->checkFeature($name, $value);
-		$this->features[$name] = $value;
+		$this->addFeatureInternal($name, $value, $this->features);
 		return $this;
 	}
 
-	private function checkFeature($name, $value) {
+	public function addFeatureDefault($name, $value) {
+		$this->addFeatureInternal($name, $value, $this->featuresDefault);
+		return $this;
+	}
+
+	private function addFeatureInternal($name, $value, &$array) {
+		$this->checkFeature($name, $value, $array);
+		$array[$name] = $value;
+	}
+
+	private function checkFeature($name, $value, $array) {
 		if(!self::featureNameIsValid($name)) {
 			throw new \InvalidArgumentException('Feature name must be a string, ' . gettype($name) . ' given');
 		}
 		if(!self::featureValueIsValid($value)) {
 			throw new \InvalidArgumentException('Feature value must be a string or positive integer, ' . gettype($name) . ' given');
 		}
-		if(isset($this->features[$name])) {
+		if(isset($array[$name])) {
 			throw new InvalidParameterException('Feature ' . $name . ' already inserted into item ' . (string) $this);
 		}
 	}
@@ -56,6 +73,14 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		return $this->features;
 	}
 
+	public function getFeaturesDefault() {
+		return $this->featuresDefault;
+	}
+
+	public function getDefaultCode() {
+		return $this->defaultCode;
+	}
+
 	public function addChild(Item $item) {
 		$this->content[] = $item;
 		return $this;
@@ -65,29 +90,35 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		return $this->content;
 	}
 
-	function jsonSerialize() {
-		return [
-			'code' => parent::getCode(),
-			'features' => $this->features,
-			'content' => $this->content,
+	public function jsonSerialize() {
+		$array = [
+			'code' => parent::getCode()
 		];
+		if(!empty($this->features)) {
+			$array['features'] = $this->features;
+		}
+		if(!empty($this->content)) {
+			$array['content'] = $this->content;
+		}
+		if(!empty($this->featuresDefault)) {
+			$array['features_default'] = $this->featuresDefault;
+		}
+		if($this->defaultCode !== null) {
+			$array['default'] = $this->defaultCode;
+		}
+
+		return $array;
 	}
 
 	public function __toString() {
-		if(isset($this->content['type'])) {
-			$type = $this->content['type'];
-			return parent::getCode() . " ($type)";
+		if(isset($this->features['type'])) {
+			return parent::getCode() . ' (' . $this->features['type'] . ')';
+		} else if(isset($this->featuresDefault['type'])) {
+			return parent::getCode() . ' (' . $this->featuresDefault['type'] . ')';
 		} else {
 			return parent::getCode();
 		}
 	}
-
-	public function addFeatureDefault($name, $value) {
-		$this->checkFeature($name, $value);
-		$this->featuresDefault[$name] = $value;
-		return $this;
-	}
-
 
 	public function __clone() {
 		foreach(get_object_vars($this) as $prop => &$array) {
