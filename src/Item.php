@@ -6,7 +6,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	private $features = [];
 	private $featuresDefault = [];
 	private $content = [];
-	private $defaultCode = null;
+	protected $defaultCode = null;
 
 	public function __construct($code, $defaultCode = null) {
 		parent::__construct($code);
@@ -23,7 +23,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		}
 	}
 
-	private static function featureValueIsValid($value) {
+	protected static function featureValueIsValid($value) {
 		// values are all unsigned ints in the database
 		if(is_string($value) || (is_int($value) && $value >= 0)) {
 			return true;
