@@ -32,11 +32,23 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		}
 	}
 
+	/**
+	 * @param string $name
+	 * @param string|int $value
+	 *
+	 * @return Item $this
+	 */
 	public function addFeature($name, $value) {
 		$this->addFeatureInternal($name, $value, $this->features);
 		return $this;
 	}
 
+	/**
+	 * @param string $name
+	 * @param string|int $value
+	 *
+	 * @return Item $this
+	 */
 	public function addFeatureDefault($name, $value) {
 		$this->addFeatureInternal($name, $value, $this->featuresDefault);
 		return $this;
@@ -59,6 +71,11 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		}
 	}
 
+	/**
+	 * @param array $features
+	 *
+	 * @return Item $this
+	 */
 	public function addMultipleFeatures($features) {
 		if(!is_array($features)) {
 			throw new \InvalidArgumentException('Features must be passed as an array');
@@ -69,23 +86,40 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		return $this;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getFeatures() {
 		return $this->features;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getFeaturesDefault() {
 		return $this->featuresDefault;
 	}
 
+	/**
+	 * @return null|string
+	 */
 	public function getDefaultCode() {
 		return $this->defaultCode;
 	}
 
+	/**
+	 * @param Item $item
+	 *
+	 * @return Item $this
+	 */
 	public function addChild(Item $item) {
 		$this->content[] = $item;
 		return $this;
 	}
 
+	/**
+	 * @return Item[]
+	 */
 	public function getChildren() {
 		return $this->content;
 	}
@@ -117,18 +151,6 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 			return parent::getCode() . ' (' . $this->featuresDefault['type'] . ')';
 		} else {
 			return parent::getCode();
-		}
-	}
-
-	public function __clone() {
-		foreach(get_object_vars($this) as $prop => &$array) {
-			if(is_array($array)) {
-				foreach($array as &$value) {
-					if(is_object($value)) {
-						$value = clone $value;
-					}
-				}
-			}
 		}
 	}
 }
