@@ -8,6 +8,7 @@ use PHPUnit\DbUnit\TestCaseTrait;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\Query\SearchTriplet;
+use WEEEOpen\Tarallo\User;
 
 class DatabaseTest extends TestCase {
 	use TestCaseTrait;
@@ -138,7 +139,7 @@ class DatabaseTest extends TestCase {
 	 */
 	public function testAddingAndRetrievingSomeItems() {
 		$db = $this->getDb();
-		$db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+		$db->modifcationBegin(new User('asd', 'asd'));
 		/** @var $case Item */ // PHPStorm suddenly doesn't recognize chained methods. Only the last one of every chain, specifically.
 		$case = (new Item('PC-42'))->addFeature('brand', 'TI')->addFeature('model', 'GreyPC-\'98')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx');
 		$discone1 = (new Item('SATAna-1'))->addFeature('capacity-byte', 666)->addFeature('brand', 'SATAn Storage Corporation Inc.')->addFeature('model', 'Discone da 666 byte')->addFeature('type', 'hdd');
@@ -181,7 +182,7 @@ class DatabaseTest extends TestCase {
     public function testSubtreeRemoval()
     {
         $db = $this->getDb();
-        $db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+        $db->modifcationBegin(new User('asd', 'asd'));
         /** @var $case Item */
         $lab = (new Item('CHERNOBYL'));
         $case = (new Item('PC-42'));
@@ -195,10 +196,14 @@ class DatabaseTest extends TestCase {
 
         $items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
         $this->assertContainsOnly(Item::class, $items);
+        /** @var Item[] $items */
         $this->assertEquals(1, count($items), 'Only one root Item');
-        $this->assertTrue($lab == reset($items), 'Lab is unchanged (==)'); // this assertion sometimes fails randomyl for no reason at all. Especially without a debugger attached.
+        /** @var Item $caseContent */
+        $case = $items[0]->getChildren()[0];
+        $this->assertEquals('PC-42', $case->getCode(), 'PC-42 is still there');
+        $this->assertTrue($this->itemCompare($lab, $items[0]), 'Lab should be unchanged');
 
-        $db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+        $db->modifcationBegin(new User('asd', 'asd'));
         $db->treeDAO()->removeFromTree($case);
         $db->modificationCommit();
 
@@ -238,7 +243,7 @@ class DatabaseTest extends TestCase {
 		$pc['PC-22'] = (new Item('PC-22'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
 		$pc['SCHIFOMACCHINA'] = (new Item('SCHIFOMACCHINA'))->addFeature('brand', 'eMac')->addFeature('model', 'EZ1600')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white'); // based on a real PC we have in our laboratory.
 
-		$db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+		$db->modifcationBegin(new User('asd', 'asd'));
 		$db->itemDAO()->addItems($pc);
 		$db->modificationCommit();
 
@@ -287,7 +292,7 @@ class DatabaseTest extends TestCase {
 		$cpu['AMD-737'] = (new Item('AMD-737'))->addFeature('type', 'cpu')->addFeature('brand', 'Advanced Magnificent Processors')->addFeature('model', '737-800')->addFeature('frequency-hz', 3700000000);
 		$db = $this->getDb();
 
-		$db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+		$db->modifcationBegin(new User('asd', 'asd'));
 		$db->itemDAO()->addItems($cpu);
 		$db->modificationCommit();
 
@@ -360,19 +365,19 @@ class DatabaseTest extends TestCase {
 						(new Item('PC-TI-CPU'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Atomic 5L0W-NE55')->addFeature('frequency-hz', 42)
 					);
 		$tavolone->addChild(
-					(new Item('ROSETTA'))->addFeature('brand', 'pH')->addFeature('model', 'ReliaPro MLG555')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx')->addFeature('color', 'grey'))
+					(new Item('ROSETTA'))->addFeature('brand', 'pH')->addFeature('model', 'ReliaPro MLG555')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx')->addFeature('color', 'grey')
 					->addChild(
 						(new Item('RAM-3342'))->addFeature('type', 'ram')->addFeature('capacity-byte', 1073741824)
 					)
 					->addChild(
 						(new Item('RAM-2452'))->addFeature('type', 'ram')->addFeature('capacity-byte', 1073741824)
-					);
+					));
 		$chernobyl->addChild($zb = (new Item('Zona blu'))->addFeature('type', 'location'));
 		$tavolone->addChild($ti);
 
 		$db = $this->getDb();
 
-		$db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+		$db->modifcationBegin(new User('asd', 'asd'));
 		$db->itemDAO()->addItems($chernobyl);
 		$db->modificationCommit();
 
@@ -381,7 +386,7 @@ class DatabaseTest extends TestCase {
 		$this->assertEquals(1, count($items), 'Only one root Item');
 
 		// Move TI from TAVOLONE to Zona blu.
-		$db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+		$db->modifcationBegin(new User('asd', 'asd'));
 		$db->treeDAO()->moveItem($ti, $zb);
 		$db->modificationCommit();
 
@@ -391,8 +396,9 @@ class DatabaseTest extends TestCase {
 		$chernobylPost = reset($items);
 		$zonaBluPost = null;
 		$tavolonePost = null;
-		$this->assertContainsOnly(Item::class, $chernobylPost->getChildren());
-		foreach($chernobylPost->getChildren() as $item) {
+		$this->assertContainsOnly(Item::class, $itemz = $chernobylPost->getChildren());
+		/** @var Item[] $itemz */
+		foreach($itemz as $item) {
 			if($item->getCode() === 'Zona blu') {
 				$zonaBluPost = $item;
 			} else if($item->getCode() === 'TAVOLONE') {
@@ -401,6 +407,8 @@ class DatabaseTest extends TestCase {
 		}
 		$this->assertInstanceOf(Item::class, $zonaBluPost, 'Zona blu should still exist');
 		$this->assertInstanceOf(Item::class, $tavolonePost, 'TAVOLONE should still exist');
+		/** @var Item $zonaBluPost */
+		/** @var Item $tavolonePost */
 		$tiShouldBeHere = null;
 		$tiShouldNotBeHere = null;
 		foreach($zonaBluPost->getChildren() as $item) {
@@ -415,7 +423,7 @@ class DatabaseTest extends TestCase {
 		}
 		$this->assertInstanceOf(Item::class, $tiShouldBeHere, 'PC-TI should have moved to Zona blu');
 		$this->assertEquals(null, $tiShouldNotBeHere, 'TAVOLONE should not contain PC-TI');
-		$this->assertTrue($ti->getChildren() == $tiShouldBeHere->getChildren(), 'PC-TI should have the same content');
+		$this->assertTrue($this->itemCompare($ti, $tiShouldBeHere), 'PC-TI should have the same content');
 	}
 
 	/**
@@ -431,5 +439,42 @@ class DatabaseTest extends TestCase {
 			$this->db = $db;
 		}
 		return $this->db;
+	}
+
+	private static function itemCompare(Item $a, Item $b) {
+		if($a->getCode() !== $b->getCode()) {
+			return false;
+		}
+		if($a->getDefaultCode() !== $b->getDefaultCode()) {
+			return false;
+		}
+		if(count($a->getFeatures()) !== count($b->getFeatures())) {
+			return false;
+		}
+		if(!empty(array_diff_assoc($a->getFeatures(), $b->getFeatures()))) {
+			return false;
+		}
+		if(count($a->getFeaturesDefault()) !== count($b->getFeaturesDefault())) {
+			return false;
+		}
+		if(!empty(array_diff_assoc($a->getFeaturesDefault(), $b->getFeaturesDefault()))) {
+			return false;
+		}
+		if(count($a->getChildren()) !== count($b->getChildren())) {
+			return false;
+		}
+		/** @var Item[] $bContent */
+		$bContent = $b->getChildren();
+		foreach($a->getChildren() as $item) {
+			$code = $item->getCode();
+			foreach($bContent as $item2) {
+				if($code === $item2->getCode()) {
+					if(!static::itemCompare($item, $item2)) {
+						return false;
+					}
+				}
+			}
+		}
+		return true;
 	}
 }
