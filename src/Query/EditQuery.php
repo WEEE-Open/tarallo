@@ -8,11 +8,13 @@ use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemDefault;
 use WEEEOpen\Tarallo\ItemIncomplete;
+use WEEEOpen\Tarallo\ItemUpdate;
 
 class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	private $newItems = [];
 	private $updateItems = [];
 	private $deleteItems = [];
+	private $notes = null;
 
     protected function parseContent($array) {
         foreach($array as $op => $itemsArray) {
@@ -33,7 +35,21 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			        }
 		        	break;
 		        case 'update':
+			        foreach($itemsArray as $itemCode => $itemPieces) {
+			        	if($itemPieces === null) {
+			        		$this->deleteItems[$itemCode] = $itemPieces;
+				        } else if(is_array($itemPieces)) {
+					        $this->updateItems[$itemCode] = $this->buildItemUpdate($itemCode, $itemPieces);
+				        } else {
+					        throw new InvalidParameterException($itemCode . ' should be null or object/array, ' . gettype($itemPieces) . ' given');
+				        }
+			        }
 		        	break;
+		        case 'notes':
+		        	if($itemsArray !== null) {
+				        $this->notes = (string) $itemsArray;
+			        }
+			        break;
 		        default:
 		        	throw new InvalidParameterException('Unknown action ' . $op);
 	        }
@@ -110,6 +126,41 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			}
 		}
 		return [$parent, $item];
+	}
+
+	private function buildItemUpdate($itemCode, $itemPieces) {
+		$item = new ItemUpdate($itemCode);
+		foreach($itemPieces as $key => $value) {
+			switch($key) {
+				case 'is_default':
+					$item->setIsDefault($value);
+					break;
+				case 'default':
+					$item->setDefaultCode($value);
+					break;
+				case 'parent':
+					$item->setParent(new ItemIncomplete($value));
+					break;
+				case 'features':
+					if($this->isArrayIgnoreNull($key, $value)) {
+						foreach($value as $featureName => $featureValue) {
+							$item->addFeature($featureName, $featureValue);
+						}
+					} else {
+						$item->setFeaturesChanged();
+					}
+					break;
+				case 'features_default':
+					throw new InvalidParameterException('Cannot set default features explicitly, they are read-only');
+				case 'content':
+					throw new InvalidParameterException('No nested Items allowed in "update", use "parent" to move items');
+					break;
+				default:
+					throw new InvalidParameterException('Unknown field ' . $key);
+					break;
+			}
+		}
+		return $item;
 	}
 
 	private static function isDefaultItem($pieces) {
