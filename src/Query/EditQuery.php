@@ -31,13 +31,14 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		        case 'create':
 		        	foreach($itemsArray as $itemCode => $itemPieces) {
 		        		$pair = $this->buildItem($itemCode, $itemPieces);
+		        		// TODO: parent = null gets cast to empty string, do something! (store "path" into Item, implement getParent and getPath?)
 		        		$this->newItems[$pair[0]][] = $pair[1]; // parent => item
 			        }
 		        	break;
 		        case 'update':
 			        foreach($itemsArray as $itemCode => $itemPieces) {
 			        	if($itemPieces === null) {
-			        		$this->deleteItems[$itemCode] = $itemPieces;
+			        		$this->deleteItems[] = $itemCode;
 				        } else if(is_array($itemPieces)) {
 					        $this->updateItems[$itemCode] = $this->buildItemUpdate($itemCode, $itemPieces);
 				        } else {
@@ -61,9 +62,32 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
         // TODO: Implement run() method.
     }
 
-    function jsonSerialize()
-    {
-        // TODO: Implement jsonSerialize() method.
+    function jsonSerialize() {
+        $result = [];
+        if(!empty($this->newItems)) {
+        	foreach($this->newItems as $parent => $items) {
+        		foreach($items as $item) {
+        			/** @var Item $item */
+			        $serialItemzed = $item->jsonSerialize();
+			        if($parent !== null && $parent !== '') {
+				        $serialItemzed['parent'] = $parent;
+			        }
+			        $result['create'][$item->getCode()] = $serialItemzed;
+		        }
+	        }
+        }
+	    if(!empty($this->updateItems)) {
+		    $result['update'] = $this->updateItems;
+	    }
+	    if(!empty($this->deleteItems)) {
+        	foreach($this->deleteItems as $item) {
+		        $result['update'][$item] = null;
+	        }
+	    }
+	    if($this->notes !== null) {
+        	$result['notes'] = $this->notes;
+	    }
+	    return $result;
     }
 
 	private function buildItem($itemCode, $itemPieces, $outer = true) {

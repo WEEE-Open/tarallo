@@ -125,9 +125,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	}
 
 	public function jsonSerialize() {
-		$array = [
-			'code' => parent::getCode()
-		];
+		$array = [];
 		if(!empty($this->features)) {
 			$array['features'] = $this->features;
 		}

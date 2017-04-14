@@ -84,4 +84,21 @@ class ItemUpdate extends Item implements \JsonSerializable {
 	public function setFeaturesChanged() {
 		$this->featuresChanged = true;
 	}
+
+	public function jsonSerialize() {
+		$array = [];
+		if(!empty($this->featuresChanged)) {
+			$array['features'] = $this->getFeatures();
+		}
+		if($this->defaultCodeChanged) {
+			$array['default'] = $this->defaultCode;
+		}
+		if($this->isDefaultChanged) {
+			$array['is_default'] = $this->isDefault;
+		}
+		if($this->parentChanged) {
+			$array['parent'] = $this->parent;
+		}
+		return $array;
+	}
 }
