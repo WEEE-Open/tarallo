@@ -133,6 +133,7 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
 	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
 	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
 	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 */
 	public function testAddingAndRetrievingSomeItems() {
@@ -174,6 +175,7 @@ class DatabaseTest extends TestCase {
      * @uses   \WEEEOpen\Tarallo\ItemIncomplete
      * @covers \WEEEOpen\Tarallo\Database\ItemDAO
      * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
+     * @covers \WEEEOpen\Tarallo\Database\TreeDAO
      * @uses   \WEEEOpen\Tarallo\Database\DAO
      */
     public function testSubtreeRemoval()
@@ -194,7 +196,7 @@ class DatabaseTest extends TestCase {
         $items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
         $this->assertContainsOnly(Item::class, $items);
         $this->assertEquals(1, count($items), 'Only one root Item');
-        $this->assertEquals($lab, reset($items), 'Lab is unchanged');
+        $this->assertTrue($lab == reset($items), 'Lab is unchanged (==)'); // this assertion sometimes fails randomyl for no reason at all. Especially without a debugger attached.
 
         $db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
         $db->treeDAO()->removeFromTree($case);
@@ -223,6 +225,7 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
 	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
 	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
 	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
 	 * @depends testAddingAndRetrievingSomeItems
@@ -270,6 +273,7 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
 	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
 	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
 	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
 	 * @depends testAddingAndRetrievingSomeItems
@@ -328,9 +332,11 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
 	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
 	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
 	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
 	 * @depends testAddingAndRetrievingSomeItems
+	 * @depends testSubtreeRemoval
 	 */
 	public function testTreeMove() {
 		// These items should be added in database.yml, but that just increases the amount of data to import for each test
@@ -361,15 +367,55 @@ class DatabaseTest extends TestCase {
 					->addChild(
 						(new Item('RAM-2452'))->addFeature('type', 'ram')->addFeature('capacity-byte', 1073741824)
 					);
+		$chernobyl->addChild($zb = (new Item('Zona blu'))->addFeature('type', 'location'));
+		$tavolone->addChild($ti);
 
-		$chernobylPre = $chernobyl;
-		$chernobylPost = clone $chernobyl;
+		$db = $this->getDb();
+
+		$db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+		$db->itemDAO()->addItems($chernobyl);
+		$db->modificationCommit();
+
+		$items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(1, count($items), 'Only one root Item');
 
 		// Move TI from TAVOLONE to Zona blu.
-		$tavolone->addChild($ti);
-		$chernobylPost->addChild((new Item('Zona blu'))->addFeature('type', 'location')->addChild($ti));
+		$db->modifcationBegin(new \WEEEOpen\Tarallo\User('asd', 'asd'));
+		$db->treeDAO()->moveItem($ti, $zb);
+		$db->modificationCommit();
 
-		// TODO: actually move, compare result fetched from database
+		$items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(1, count($items), 'Only one root Item');
+		$chernobylPost = reset($items);
+		$zonaBluPost = null;
+		$tavolonePost = null;
+		$this->assertContainsOnly(Item::class, $chernobylPost->getChildren());
+		foreach($chernobylPost->getChildren() as $item) {
+			if($item->getCode() === 'Zona blu') {
+				$zonaBluPost = $item;
+			} else if($item->getCode() === 'TAVOLONE') {
+				$tavolonePost = $item;
+			}
+		}
+		$this->assertInstanceOf(Item::class, $zonaBluPost, 'Zona blu should still exist');
+		$this->assertInstanceOf(Item::class, $tavolonePost, 'TAVOLONE should still exist');
+		$tiShouldBeHere = null;
+		$tiShouldNotBeHere = null;
+		foreach($zonaBluPost->getChildren() as $item) {
+			if($item->getCode() === 'PC-TI') {
+				$tiShouldBeHere = $item;
+			}
+		}
+		foreach($tavolonePost->getChildren() as $item) {
+			if($item->getCode() === 'PC-TI') {
+				$tiShouldNotBeHere = $item;
+			}
+		}
+		$this->assertInstanceOf(Item::class, $tiShouldBeHere, 'PC-TI should have moved to Zona blu');
+		$this->assertEquals(null, $tiShouldNotBeHere, 'TAVOLONE should not contain PC-TI');
+		$this->assertTrue($ti->getChildren() == $tiShouldBeHere->getChildren(), 'PC-TI should have the same content');
 	}
 
 	/**

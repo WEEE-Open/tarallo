@@ -105,7 +105,7 @@ final class ItemDAO extends DAO {
         // (for /Parent), tree lookup using new root items as roots (find all descendants), filter by depth,
         // join with items, SELECT.
 	    $megaquery = '
-        SELECT `ItemID`, `Code`, Tree.`AncestorID` AS `AncestorID`, Tree.`Depth` AS `Depth`, directParents.AncestorID AS DirectParent
+        SELECT `ItemID`, `Code`, directParents.AncestorID AS DirectParent
         FROM Tree, Item
         LEFT JOIN (SELECT * FROM Tree WHERE `Depth` = 1) directParents ON directParents.`DescendantID` = `ItemID`
         WHERE Tree.DescendantID = Item.ItemID
@@ -118,7 +118,7 @@ final class ItemDAO extends DAO {
                 ' . $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->tokenPrepare($token), $searchSubquery) . '
             ) AND `Depth` = :parent
         ) AND Tree.`Depth` <= :depth AND isDefault = 0
-        ORDER BY IFNULL(directParents.`Depth`, 0) ASC;
+        ORDER BY IFNULL(Tree.`Depth`, 0) ASC;
 		';
         $s = $this->getPDO()->prepare($megaquery);
 
