@@ -54,6 +54,10 @@ class ItemUpdate extends Item implements \JsonSerializable {
 		throw new \LogicException('Cannot add default features to ItemUpdate as they will be ignored');
 	}
 
+	public function addContent(Item $item) {
+		throw new \LogicException('Cannot add Items inside ItemUpdate objects, use setParent() to move items instead');
+	}
+
 	public function getParent() {
 		return $this->parent;
 	}

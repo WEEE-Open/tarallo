@@ -15,7 +15,7 @@ class ItemTest extends TestCase {
 		$this->assertEquals('PC-77', (string) $pc77);
 		$this->assertEquals('PC-77', $pc77->getCode());
 		$this->assertEmpty($pc77->getFeatures());
-		$this->assertEmpty($pc77->getChildren());
+		$this->assertEmpty($pc77->getContent());
 	}
 
 	/**
@@ -161,8 +161,8 @@ class ItemTest extends TestCase {
 		$item = new Item('TEST');
 		$child = (new Item('foo'))->addMultipleFeatures(['capacity-byte' => 9001, 'color' => 'white', 'foo' => 'bar']);
 
-		$item->addChild($child);
-		$this->assertContains($child, $item->getChildren());
+		$item->addContent($child);
+		$this->assertContains($child, $item->getContent());
 	}
 
 	/**
@@ -174,8 +174,8 @@ class ItemTest extends TestCase {
 		$child = (new Item('foo'))->addMultipleFeatures(['capacity-byte' => 9001, 'color' => 'white', 'foo' => 'bar']);
 		$child2 = (new Item('bar'))->addMultipleFeatures(['capacity-byte' => 999, 'color' => 'grey']);
 
-		$item->addChild($child)->addChild($child2);
-		$this->assertContains($child, $item->getChildren());
-		$this->assertContains($child2, $item->getChildren());
+		$item->addContent($child)->addContent($child2);
+		$this->assertContains($child, $item->getContent());
+		$this->assertContains($child2, $item->getContent());
 	}
 }

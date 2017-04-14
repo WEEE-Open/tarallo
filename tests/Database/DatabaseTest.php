@@ -144,8 +144,8 @@ class DatabaseTest extends TestCase {
 		$case = (new Item('PC-42'))->addFeature('brand', 'TI')->addFeature('model', 'GreyPC-\'98')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx');
 		$discone1 = (new Item('SATAna-1'))->addFeature('capacity-byte', 666)->addFeature('brand', 'SATAn Storage Corporation Inc.')->addFeature('model', 'Discone da 666 byte')->addFeature('type', 'hdd');
 		$discone2 = (new Item('SATAna-2'))->addFeature('capacity-byte', 666)->addFeature('brand', 'SATAn Storage Corporation Inc.')->addFeature('model', 'Discone da 666 byte')->addFeature('type', 'hdd');
-		$case->addChild($discone1);
-		$case->addChild($discone2);
+		$case->addContent($discone1);
+		$case->addContent($discone2);
 		$db->itemDAO()->addItems($case);
 		$db->modificationCommit();
 
@@ -154,14 +154,14 @@ class DatabaseTest extends TestCase {
 		$this->assertEquals(1, count($items), 'Only one root Item');
 		/** @var Item $newCase */
 		$newCase = reset($items); // get the only Item
-		$this->assertEquals(2, count($newCase->getChildren()), 'Two child Item');
-		$this->assertContainsOnly(Item::class, $newCase->getChildren(), null, 'Only Items are contained in an Item');
-		foreach($newCase->getChildren() as $child) {
+		$this->assertEquals(2, count($newCase->getContent()), 'Two child Item');
+		$this->assertContainsOnly(Item::class, $newCase->getContent(), null, 'Only Items are contained in an Item');
+		foreach($newCase->getContent() as $child) {
 			/** @var Item $child */
 			$this->assertTrue($child->getCode() === 'SATAna-1' || $child->getCode() === 'SATAna-2', 'Sub-Item is one of the two expected items, ' . (string) $child);
 			/** @noinspection PhpUndefinedMethodInspection */
-			$this->assertTrue($case->getChildren()[0]->getFeatures() == $child->getFeatures(), 'Sub-Item ' . (string) $child . ' has same features as before'); // this works because the two items are identical except for the code...
-			$this->assertTrue(empty($child->getChildren()), 'No children of child Item ' . (string) $child);
+			$this->assertTrue($case->getContent()[0]->getFeatures() == $child->getFeatures(), 'Sub-Item ' . (string) $child . ' has same features as before'); // this works because the two items are identical except for the code...
+			$this->assertTrue(empty($child->getContent()), 'No children of child Item ' . (string) $child);
 		}
 	}
 
@@ -188,9 +188,9 @@ class DatabaseTest extends TestCase {
         $case = (new Item('PC-42'));
         $discone1 = (new Item('HDD-1'));
         $discone2 = (new Item('HDD-2'));
-        $case->addChild($discone1);
-        $case->addChild($discone2);
-        $lab->addChild($case);
+        $case->addContent($discone1);
+        $case->addContent($discone2);
+        $lab->addContent($case);
         $db->itemDAO()->addItems($lab);
         $db->modificationCommit();
 
@@ -199,7 +199,7 @@ class DatabaseTest extends TestCase {
         /** @var Item[] $items */
         $this->assertEquals(1, count($items), 'Only one root Item');
         /** @var Item $caseContent */
-        $case = $items[0]->getChildren()[0];
+        $case = $items[0]->getContent()[0];
         $this->assertEquals('PC-42', $case->getCode(), 'PC-42 is still there');
         $this->assertTrue($this->itemCompare($lab, $items[0]), 'Lab should be unchanged');
 
@@ -210,7 +210,7 @@ class DatabaseTest extends TestCase {
         $items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
         $this->assertContainsOnly(Item::class, $items);
         $this->assertEquals(1, count($items), 'Still only one root Item');
-        $this->assertEquals(0, count(reset($items)->getChildren()), 'Lab is empty');
+        $this->assertEquals(0, count($items[0]->getContent()), 'Lab is empty');
 
         $items = $db->itemDAO()->getItem(['PC-42'], null, null, null, null, null);
         $this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
@@ -348,32 +348,32 @@ class DatabaseTest extends TestCase {
 		// and I find more readable this than a YAML file full of numbers.
 		$chernobyl = (new Item('CHERNOBYL'))->addFeature('type', 'location');
 		$tavolone = (new Item('TAVOLONE'))->addFeature('type', 'location');
-		$chernobyl->addChild($tavolone)->addChild((new Item('Armadio L'))->addFeature('type', 'location'))->addChild((new Item('Armadio R'))->addFeature('type', 'location'));
-		$tavolone->addChild(
+		$chernobyl->addContent($tavolone)->addContent((new Item('Armadio L'))->addFeature('type', 'location'))->addContent((new Item('Armadio R'))->addFeature('type', 'location'));
+		$tavolone->addContent(
 					(new Item('SCHIFOMACCHINA'))->addFeature('brand', 'eMac')->addFeature('model', 'EZ1600')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white'));
 		$ti = (new Item('PC-TI'))->addFeature('brand', 'TI')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white')
-					->addChild(
+					->addContent(
 						(new Item('RAM-22'))->addFeature('type', 'ram')->addFeature('capacity-byte', 32)
 					)
-					->addChild(
+					->addContent(
 						(new Item('RAM-23'))->addFeature('type', 'ram')->addFeature('capacity-byte', 32)
 					)
-					->addChild(
+					->addContent(
 						(new Item('PC-TI-MOBO'))->addFeature('type', 'motherboard')->addFeature('color', 'green')
 					)
-					->addChild(
+					->addContent(
 						(new Item('PC-TI-CPU'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Atomic 5L0W-NE55')->addFeature('frequency-hz', 42)
 					);
-		$tavolone->addChild(
+		$tavolone->addContent(
 					(new Item('ROSETTA'))->addFeature('brand', 'pH')->addFeature('model', 'ReliaPro MLG555')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx')->addFeature('color', 'grey')
-					->addChild(
+					->addContent(
 						(new Item('RAM-3342'))->addFeature('type', 'ram')->addFeature('capacity-byte', 1073741824)
 					)
-					->addChild(
+					->addContent(
 						(new Item('RAM-2452'))->addFeature('type', 'ram')->addFeature('capacity-byte', 1073741824)
 					));
-		$chernobyl->addChild($zb = (new Item('Zona blu'))->addFeature('type', 'location'));
-		$tavolone->addChild($ti);
+		$chernobyl->addContent($zb = (new Item('Zona blu'))->addFeature('type', 'location'));
+		$tavolone->addContent($ti);
 
 		$db = $this->getDb();
 
@@ -393,10 +393,11 @@ class DatabaseTest extends TestCase {
 		$items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'Only one root Item');
-		$chernobylPost = reset($items);
+		/** @var Item $chernobylPost */
+		$chernobylPost = $items[0];
 		$zonaBluPost = null;
 		$tavolonePost = null;
-		$this->assertContainsOnly(Item::class, $itemz = $chernobylPost->getChildren());
+		$this->assertContainsOnly(Item::class, $itemz = $chernobylPost->getContent());
 		/** @var Item[] $itemz */
 		foreach($itemz as $item) {
 			if($item->getCode() === 'Zona blu') {
@@ -411,12 +412,12 @@ class DatabaseTest extends TestCase {
 		/** @var Item $tavolonePost */
 		$tiShouldBeHere = null;
 		$tiShouldNotBeHere = null;
-		foreach($zonaBluPost->getChildren() as $item) {
+		foreach($zonaBluPost->getContent() as $item) {
 			if($item->getCode() === 'PC-TI') {
 				$tiShouldBeHere = $item;
 			}
 		}
-		foreach($tavolonePost->getChildren() as $item) {
+		foreach($tavolonePost->getContent() as $item) {
 			if($item->getCode() === 'PC-TI') {
 				$tiShouldNotBeHere = $item;
 			}
@@ -460,12 +461,12 @@ class DatabaseTest extends TestCase {
 		if(!empty(array_diff_assoc($a->getFeaturesDefault(), $b->getFeaturesDefault()))) {
 			return false;
 		}
-		if(count($a->getChildren()) !== count($b->getChildren())) {
+		if(count($a->getContent()) !== count($b->getContent())) {
 			return false;
 		}
 		/** @var Item[] $bContent */
-		$bContent = $b->getChildren();
-		foreach($a->getChildren() as $item) {
+		$bContent = $b->getContent();
+		foreach($a->getContent() as $item) {
 			$code = $item->getCode();
 			foreach($bContent as $item2) {
 				if($code === $item2->getCode()) {

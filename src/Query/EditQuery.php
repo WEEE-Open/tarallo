@@ -115,7 +115,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 							foreach($value as $featureName => $featureValue) {
 								// yay recursion!
 								$pair = $this->buildItem($featureName, $featureValue, false);
-								$item->addChild($pair[1]);
+								$item->addContent($pair[1]);
 							}
 						}
 						break;

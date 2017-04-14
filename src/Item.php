@@ -112,7 +112,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 *
 	 * @return Item $this
 	 */
-	public function addChild(Item $item) {
+	public function addContent(Item $item) {
 		$this->content[] = $item;
 		return $this;
 	}
@@ -120,7 +120,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	/**
 	 * @return Item[]
 	 */
-	public function getChildren() {
+	public function getContent() {
 		return $this->content;
 	}
 

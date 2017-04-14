@@ -159,7 +159,7 @@ final class ItemDAO extends DAO {
 					if(isset($items[$row['DirectParent']])) {
 						// this also updates $itemsTreeRoots since objects are always passed by reference
 						/** @var Item[] $items */
-						$items[$row['DirectParent']]->addChild($thisItem);
+						$items[$row['DirectParent']]->addContent($thisItem);
 					} else {
 						throw new \LogicException('Missing parent for item ' . (string) $thisItem . ', possibly incosistent Tree table state');
 					}
@@ -232,7 +232,7 @@ final class ItemDAO extends DAO {
 
 	    $this->database->treeDAO()->addToTree($item, $parent);
 
-	    $childItems = $item->getChildren();
+	    $childItems = $item->getContent();
 	    foreach($childItems as $childItem) {
 	    	// yay recursion!
 	    	$this->addItem($childItem, $item, $default);
