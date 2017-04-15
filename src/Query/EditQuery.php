@@ -24,11 +24,11 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	        if($itemsArray === null) {
         		continue;
 	        }
-	        if(!is_array($itemsArray)) {
-		        throw new InvalidParameterException('Action parameters should be objects or null, ' . gettype($op) . ' given');
-	        }
         	switch($op) {
 		        case 'create':
+			        if(!is_array($itemsArray)) {
+				        throw new InvalidParameterException('"create" parameters should be objects or null, ' . gettype($op) . ' given');
+			        }
 		        	foreach($itemsArray as $itemCode => $itemPieces) {
 		        		$pair = $this->buildItem($itemCode, $itemPieces);
 		        		// TODO: parent = null gets cast to empty string, do something! (store "path" into Item, implement getParent and getPath?)
@@ -36,6 +36,9 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			        }
 		        	break;
 		        case 'update':
+			        if(!is_array($itemsArray)) {
+				        throw new InvalidParameterException('"update" parameters should be objects or null, ' . gettype($op) . ' given');
+			        }
 			        foreach($itemsArray as $itemCode => $itemPieces) {
 			        	if($itemPieces === null) {
 			        		$this->deleteItems[] = $itemCode;
