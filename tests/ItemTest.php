@@ -22,6 +22,33 @@ class ItemTest extends TestCase {
 	 * @covers         \WEEEOpen\Tarallo\Item
 	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
 	 */
+	public function testItemValidParent() {
+		$pc77 = new Item('HDD-238947283', 'HDD-ASD');
+		$this->assertEquals('HDD-238947283', $pc77->getCode());
+		$this->assertEquals('HDD-ASD', $pc77->getDefaultCode(), 'Parent should be set');
+
+		$pc77 = new Item('HDD-238947283');
+		$this->assertEquals('HDD-238947283', $pc77->getCode());
+		$this->assertEquals(null, $pc77->getDefaultCode(), 'No parent should mean "null"');
+
+		$pc77 = new Item('HDD-238947283', null);
+		$this->assertEquals('HDD-238947283', $pc77->getCode());
+		$this->assertEquals(null, $pc77->getDefaultCode(), 'Explicitly setting parent to null should be allowed');
+	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\Item
+	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
+	 */
+	public function testItemInvalidParentEmptyString() {
+		$this->expectException(InvalidParameterException::class);
+		new Item('HDD-238947283', '');
+	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\Item
+	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
+	 */
 	public function testItemValidCodeInt() {
 		$quarantadue = new Item(42);
 		$this->assertEquals('42', (string) $quarantadue);
@@ -55,6 +82,46 @@ class ItemTest extends TestCase {
 		$item->addFeature('capacity-byte', 9001);
 		$this->assertArrayHasKey('capacity-byte', $item->getFeatures());
 		$this->assertEquals(9001, $item->getFeatures()['capacity-byte']);
+	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\Item
+	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
+	 */
+	public function testItemFeatureDefault() {
+		$item = new Item('TEST');
+		$item->addFeatureDefault('type', 'hdd');
+		$this->assertArrayHasKey('type', $item->getFeaturesDefault());
+		$this->assertEquals('hdd', $item->getFeaturesDefault()['type']);
+	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\Item
+	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
+	 */
+	public function testItemFeatureDefaultOverride() {
+		$item = new Item('TEST');
+		$item->addFeatureDefault('capacity-byte', 9000000000);
+		$item->addFeature('capacity-byte', 8999999999);
+		$this->assertArrayHasKey('capacity-byte', $item->getFeatures());
+		$this->assertEquals(8999999999, $item->getFeatures()['capacity-byte']);
+		$this->assertArrayHasKey('capacity-byte', $item->getFeaturesDefault());
+		$this->assertEquals(9000000000, $item->getFeaturesDefault()['capacity-byte']);
+	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\Item
+	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
+	 */
+	public function testItemToString() {
+		$item = new Item('TEST');
+		$this->assertEquals('TEST', (string) $item);
+		$item->addFeature('type', 'hdd');
+		$this->assertEquals('TEST (hdd)', (string) $item);
+
+		$item = new Item('TEST2');
+		$item->addFeatureDefault('type', 'hdd');
+		$this->assertEquals('TEST2 (hdd)', (string) $item);
 	}
 
 	/**
