@@ -228,8 +228,6 @@ final class ItemDAO extends DAO {
 	    /** @var Item $item */
 	    $this->database->featureDAO()->addFeatures($item);
 
-	    $this->setItemModified($item);
-
 	    $this->database->treeDAO()->addToTree($item, $parent);
 
 	    $childItems = $item->getContent();
@@ -237,16 +235,6 @@ final class ItemDAO extends DAO {
 	    	// yay recursion!
 	    	$this->addItem($childItem, $item, $default);
 	    }
-    }
-
-    private $itemModifiedStatement = null;
-
-    private function setItemModified(ItemIncomplete $item) {
-        $pdo = $this->getPDO();
-        if($this->itemModifiedStatement === null) {
-	        $this->itemModifiedStatement = $pdo->prepare('INSERT INTO ItemModification (ModificationID, ItemID) SELECT ?, ItemID FROM Item WHERE Item.Code = ?');
-        }
-	    $this->itemModifiedStatement->execute([$this->database->getModificationId(), $this->getItemId($item)]);
     }
 
 	private $getItemIdStatement = null;

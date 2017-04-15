@@ -136,10 +136,11 @@ class DatabaseTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
 	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
 	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
 	 */
 	public function testAddingAndRetrievingSomeItems() {
 		$db = $this->getDb();
-		$db->modifcationBegin(new User('asd', 'asd'));
+		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
 		/** @var $case Item */ // PHPStorm suddenly doesn't recognize chained methods. Only the last one of every chain, specifically.
 		$case = (new Item('PC-42'))->addFeature('brand', 'TI')->addFeature('model', 'GreyPC-\'98')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx');
 		$discone1 = (new Item('SATAna-1'))->addFeature('capacity-byte', 666)->addFeature('brand', 'SATAn Storage Corporation Inc.')->addFeature('model', 'Discone da 666 byte')->addFeature('type', 'hdd');
@@ -147,7 +148,7 @@ class DatabaseTest extends TestCase {
 		$case->addContent($discone1);
 		$case->addContent($discone2);
 		$db->itemDAO()->addItems($case);
-		$db->modificationCommit();
+		$db->modificationDAO()->modificationCommit();
 
 		$items = $db->itemDAO()->getItem(['PC-42'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
@@ -178,11 +179,12 @@ class DatabaseTest extends TestCase {
      * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
      * @covers \WEEEOpen\Tarallo\Database\TreeDAO
      * @uses   \WEEEOpen\Tarallo\Database\DAO
+     * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
      */
     public function testSubtreeRemoval()
     {
         $db = $this->getDb();
-        $db->modifcationBegin(new User('asd', 'asd'));
+        $db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
         /** @var $case Item */
         $lab = (new Item('CHERNOBYL'));
         $case = (new Item('PC-42'));
@@ -192,7 +194,7 @@ class DatabaseTest extends TestCase {
         $case->addContent($discone2);
         $lab->addContent($case);
         $db->itemDAO()->addItems($lab);
-        $db->modificationCommit();
+        $db->modificationDAO()->modificationCommit();
 
         $items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
         $this->assertContainsOnly(Item::class, $items);
@@ -203,9 +205,9 @@ class DatabaseTest extends TestCase {
         $this->assertEquals('PC-42', $case->getCode(), 'PC-42 is still there');
         $this->assertTrue($this->itemCompare($lab, $items[0]), 'Lab should be unchanged');
 
-        $db->modifcationBegin(new User('asd', 'asd'));
+        $db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
         $db->treeDAO()->removeFromTree($case);
-        $db->modificationCommit();
+        $db->modificationDAO()->modificationCommit();
 
         $items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
         $this->assertContainsOnly(Item::class, $items);
@@ -232,6 +234,7 @@ class DatabaseTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
 	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
 	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
 	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
 	 * @depends testAddingAndRetrievingSomeItems
 	 */
@@ -243,9 +246,9 @@ class DatabaseTest extends TestCase {
 		$pc['PC-22'] = (new Item('PC-22'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
 		$pc['SCHIFOMACCHINA'] = (new Item('SCHIFOMACCHINA'))->addFeature('brand', 'eMac')->addFeature('model', 'EZ1600')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white'); // based on a real PC we have in our laboratory.
 
-		$db->modifcationBegin(new User('asd', 'asd'));
+		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
 		$db->itemDAO()->addItems($pc);
-		$db->modificationCommit();
+		$db->modificationDAO()->modificationCommit();
 
 		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'case')], null, null, ['-motherboard-form-factor', '+color'], null);
 		$this->assertContainsOnly(Item::class, $items);
@@ -280,6 +283,7 @@ class DatabaseTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
 	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
 	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
 	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
 	 * @depends testAddingAndRetrievingSomeItems
 	 */
@@ -292,9 +296,9 @@ class DatabaseTest extends TestCase {
 		$cpu['AMD-737'] = (new Item('AMD-737'))->addFeature('type', 'cpu')->addFeature('brand', 'Advanced Magnificent Processors')->addFeature('model', '737-800')->addFeature('frequency-hz', 3700000000);
 		$db = $this->getDb();
 
-		$db->modifcationBegin(new User('asd', 'asd'));
+		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
 		$db->itemDAO()->addItems($cpu);
-		$db->modificationCommit();
+		$db->modificationDAO()->modificationCommit();
 
 		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'cpu')], null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
@@ -339,6 +343,7 @@ class DatabaseTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
 	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
 	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
 	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
 	 * @depends testAddingAndRetrievingSomeItems
 	 * @depends testSubtreeRemoval
@@ -377,18 +382,18 @@ class DatabaseTest extends TestCase {
 
 		$db = $this->getDb();
 
-		$db->modifcationBegin(new User('asd', 'asd'));
+		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
 		$db->itemDAO()->addItems($chernobyl);
-		$db->modificationCommit();
+		$db->modificationDAO()->modificationCommit();
 
 		$items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'Only one root Item');
 
 		// Move TI from TAVOLONE to Zona blu.
-		$db->modifcationBegin(new User('asd', 'asd'));
+		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
 		$db->treeDAO()->moveItem($ti, $zb);
-		$db->modificationCommit();
+		$db->modificationDAO()->modificationCommit();
 
 		$items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);

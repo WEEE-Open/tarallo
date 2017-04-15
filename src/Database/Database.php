@@ -9,6 +9,7 @@ class Database {
     private $itemDAO = null;
     private $featureDAO = null;
     private $treeDAO = null;
+    private $modificationDAO = null;
     private $username;
     private $password;
     private $dsn;
@@ -77,6 +78,13 @@ class Database {
         return $this->featureDAO;
     }
 
+	public function modificationDAO() {
+		if($this->modificationDAO === null) {
+			$this->modificationDAO = new ModificationDAO($this, $this->callback);
+		}
+		return $this->modificationDAO;
+	}
+
     public function treeDAO() {
         if($this->treeDAO === null) {
             $this->treeDAO = new TreeDAO($this, $this->callback);
@@ -84,46 +92,4 @@ class Database {
         return $this->treeDAO;
     }
 
-    private $currentModificationId = null;
-
-    public function modifcationBegin(\WEEEOpen\Tarallo\User $user, $notes = null) {
-        // TODO: check user?
-        $pdo = $this->getPDO();
-        if($pdo->inTransaction()) {
-            throw new \LogicException('Trying to start nested transactions in modificationBegin');
-        }
-        $pdo->beginTransaction();
-        $this->currentModificationId = $this->getNewModificationId($user, $notes);
-    }
-
-    public function modificationCommit() {
-        $this->getPDO()->commit();
-        $this->currentModificationId = null;
-    }
-
-    public function modificationRollback() {
-        $this->getPDO()->rollBack();
-        $this->currentModificationId = null;
-    }
-
-    private function getNewModificationId(\WEEEOpen\Tarallo\User $user, $notes) {
-        // TODO: decouple Database from User by passing string instead of User?
-        $pdo = $this->getPDO();
-        $stuff = $pdo->prepare('INSERT INTO Modification (UserID, `Date`, Notes) SELECT `User`.UserID, :dat, :notes FROM `User` WHERE `User`.Name = :username');
-        $stuff->bindValue(':username', $user->getUsername());
-        $stuff->bindValue(':dat', time());
-        $stuff->bindValue(':notes', $notes);
-        $stuff->execute();
-        return $pdo->lastInsertId();
-    }
-
-    public function getModificationId() {
-        if(!$this->getPDO()->inTransaction()) {
-            throw new \LogicException('Trying to read modification ID without an active transaction');
-        }
-        if($this->currentModificationId === null) {
-            throw new \LogicException('Transaction started but no modification ID set (= something went horribly wrong)');
-        }
-        return $this->currentModificationId;
-    }
 }
