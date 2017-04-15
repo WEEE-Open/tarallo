@@ -15,5 +15,6 @@ class ItemDefault extends Item implements \JsonSerializable {
 	function jsonSerialize() {
 		$array = parent::jsonSerialize();
 		$array['is_default'] = true;
+		return $array;
 	}
 }

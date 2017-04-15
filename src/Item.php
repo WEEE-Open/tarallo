@@ -11,7 +11,11 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	public function __construct($code, $defaultCode = null) {
 		parent::__construct($code);
 		if($defaultCode !== null) {
-			$this->defaultCode = $this->sanitizeCode($defaultCode);
+			try {
+				$this->defaultCode = $this->sanitizeCode($defaultCode);
+			} catch(InvalidParameterException $e) {
+				throw new InvalidParameterException('Failed setting parent Item: ' . $e->getMessage());
+			}
 		}
 	}
 
