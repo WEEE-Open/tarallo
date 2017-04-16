@@ -250,7 +250,7 @@ class DatabaseTest extends TestCase {
 		$db->itemDAO()->addItems($pc);
 		$db->modificationDAO()->modificationCommit();
 
-		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'case')], null, null, ['-motherboard-form-factor', '+color'], null);
+		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'case')], null, null, ['motherboard-form-factor' => '-', 'color' => '+'], null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(5, count($items), 'There should be 5 items');
 		/** @var Item[] $items */
@@ -309,7 +309,7 @@ class DatabaseTest extends TestCase {
 			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 
-		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'cpu')], null, null, ['-frequency-hz'], null);
+		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'cpu')], null, null, ['frequency-hz' => '-'], null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(6, count($items), 'There should be 6 items');
 		foreach(['AMD-737', 'INTEL-2', 'AMD-42', 'INTEL-1', 'INTEL-4', 'INTEL-3'] as $pos => $code) {

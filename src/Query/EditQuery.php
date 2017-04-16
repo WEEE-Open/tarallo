@@ -83,6 +83,8 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
         	$db->modificationDAO()->modificationRollback();
         	throw $e;
         }
+
+        // TODO: return newly inserted items?
     }
 
     function jsonSerialize() {

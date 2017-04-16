@@ -120,8 +120,9 @@ final class ItemDAO extends DAO {
             ) AND `Depth` = :parent
         ) AND Tree.`Depth` <= :depth AND isDefault = 0
         ORDER BY IFNULL(Tree.`Depth`, 0) ASC;
-		';
+		'; // IFNULL is useless but the intent should be clearer.
         $s = $this->getPDO()->prepare($megaquery);
+        // TODO: add a LIMIT clause for pagination
 
 
         $s->bindValue(':parent', $this->parentSanitize($parent), \PDO::PARAM_INT);
@@ -173,7 +174,7 @@ final class ItemDAO extends DAO {
         }
     }
 
-    public function addItems($items, ItemIncomplete $parent = null) { // TODO: somehow find parent (pass code from JSON request?)
+    public function addItems($items, ItemIncomplete $parent = null) {
         if($items instanceof Item) {
             $items = [$items];
         } else if(!is_array($items)) {
@@ -269,25 +270,14 @@ final class ItemDAO extends DAO {
 	}
 
 	/**
-	 * @param Item[] $items
-	 * @param string[] $sorts
+	 * Exactly what it says on the tin.
+	 *
+	 * @param Item[] $items Items to be sorted
+	 * @param string[] $sortBy key (feature name) => order (+ or -), as provided by Query\Field\Search
 	 */
-	private function sortItems(&$items, $sorts = null) {
-		if(count($items) < 2) {
+	private function sortItems(&$items, $sortBy = null) {
+		if(count($items) <= 1) {
 			return;
-		}
- 		$sortBy = [];
-		if($sorts !== null) {
-			foreach($sorts as $string) {
-				if(!is_string($string)) {
-					throw new \InvalidArgumentException('Sort conditions must be strings, ' . gettype($string) . ' given');
-				}
-				if(strlen($string) > 1) {
-					if($string[0] === '+' || $string[0] === '-') {
-						$sortBy[ substr($string, 1) ] = $string[0];
-					}
-				}
-			}
 		}
 
 		usort($items, function ($a, $b) use ($sortBy) {
