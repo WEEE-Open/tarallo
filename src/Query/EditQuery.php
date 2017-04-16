@@ -3,15 +3,18 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
+use PHPUnit\DbUnit\Operation\Exception;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemDefault;
 use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\ItemUpdate;
+use WEEEOpen\Tarallo\User;
 
 class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	private $newItems = [];
+	private $newItemsNoParent = [];
 	private $updateItems = [];
 	private $deleteItems = [];
 	private $notes = null;
@@ -31,7 +34,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			        }
 		        	foreach($itemsArray as $itemCode => $itemPieces) {
 		        		$pair = $this->buildItem($itemCode, $itemPieces);
-		        		// TODO: parent = null gets cast to empty string, do something! (store "path" into Item, implement getParent and getPath?)
+		        		// null is cast to empty string: whatever,
 		        		$this->newItems[$pair[0]][] = $pair[1]; // parent => item
 			        }
 		        	break;
@@ -60,9 +63,26 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
         }
     }
 
-    public function run($user, Database $db)
-    {
-        // TODO: Implement run() method.
+    public function run($user, Database $db) {
+        if(!($user instanceof User)) {
+	        throw new InvalidParameterException('Not logged in');
+        }
+        $db->modificationDAO()->modifcationBegin($user);
+        try {
+	        $db->itemDAO()->addItems($this->newItemsNoParent, null);
+        	foreach($this->newItems as $parent => $items) {
+		        $db->itemDAO()->addItems($items, new ItemIncomplete($parent));
+	        }
+
+	        // TODO: update items
+
+	        foreach($this->deleteItems as $item) {
+		        $db->treeDAO()->removeFromTree($item);
+	        }
+        } catch(Exception $e) {
+        	$db->modificationDAO()->modificationRollback();
+        	throw $e;
+        }
     }
 
     function jsonSerialize() {
@@ -77,6 +97,11 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			        }
 			        $result['create'][$item->getCode()] = $serialItemzed;
 		        }
+	        }
+        }
+        if(!empty($this->newItemsNoParent)) {
+        	foreach($this->newItemsNoParent as $item) {
+		        $result['create'][ $item->getCode() ] = $item->jsonSerialize();
 	        }
         }
 	    if(!empty($this->updateItems)) {
@@ -116,13 +141,15 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 						break; // purely for decoration
 					case 'parent':
 						if($outer) {
-							if(is_string($parent) || is_int($parent)) {
-								$parent = $value;
-							} else {
-								throw new InvalidParameterException('"parent" must be a string or integer, ' . gettype($parent) . ' given');
+							if($parent !== null) {
+								try {
+									$parent = ItemIncomplete::sanitizeCode($parent);
+								} catch(InvalidParameterException $e) {
+									throw new InvalidParameterException('Invalid "parent": ' . $e->getMessage());
+								}
 							}
 						} else {
-							throw new InvalidParameterException('Inner items cannot set their parent item explicitly');
+							throw new InvalidParameterException('Inner items cannot set their parent item explicitly (parent = ' . $parent . ')');
 						}
 						break;
 					case 'features':
