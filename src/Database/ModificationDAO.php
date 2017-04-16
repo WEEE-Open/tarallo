@@ -19,12 +19,19 @@ final class ModificationDAO extends DAO {
 		if($this->itemModifiedStatement === null) {
 			$this->itemModifiedStatement = $pdo->prepare('INSERT INTO ItemLocationModification (ModificationID, ItemID, ParentFrom, ParentTo) VALUES (?, ?, ?, ?)');
 		}
-		$this->itemModifiedStatement->execute([
-			$this->getModificationId(),
-			$itemID,
-			$from,
-			$to,
-			]);
+		$this->itemModifiedStatement->bindValue(1, $this->getModificationId(), \PDO::PARAM_INT);
+		$this->itemModifiedStatement->bindValue(2, $itemID, \PDO::PARAM_INT);
+		if($from === null) {
+			$this->itemModifiedStatement->bindValue(3, null, \PDO::PARAM_NULL);
+		} else {
+			$this->itemModifiedStatement->bindValue(3, $from, \PDO::PARAM_INT);
+		}
+		if($to === null) {
+			$this->itemModifiedStatement->bindValue(4, null, \PDO::PARAM_NULL);
+		} else {
+			$this->itemModifiedStatement->bindValue(4, $to, \PDO::PARAM_INT);
+		}
+		$this->itemModifiedStatement->execute();
 	}
 
 	private function itemToIdOrNull($item) {
