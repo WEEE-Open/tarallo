@@ -13,7 +13,7 @@ final class UserDAO extends DAO {
         } else if($s->rowCount() === 0) {
             return null;
         } else {
-            $user = $s->fetch();
+            $user = $s->fetch(\PDO::FETCH_ASSOC);
             $s->closeCursor();
             return new User($user['Name'], null, $user['Password']);
         }
@@ -46,7 +46,7 @@ final class UserDAO extends DAO {
         } else if($s->rowCount() === 0) {
             return null;
         } else {
-            $user = $s->fetch();
+            $user = $s->fetch(\PDO::FETCH_ASSOC);
             $s->closeCursor();
             try {
                 return new User($username, $password, $user['Password']);
