@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\Database;
 use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\ItemDefault;
 use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\Query\SearchTriplet;
 
@@ -172,7 +173,7 @@ final class ItemDAO extends DAO {
         }
     }
 
-    public function addItems($items, ItemIncomplete $parent = null, $default = false) { // TODO: somehow find parent (pass code from JSON request?)
+    public function addItems($items, ItemIncomplete $parent = null) { // TODO: somehow find parent (pass code from JSON request?)
         if($items instanceof Item) {
             $items = [$items];
         } else if(!is_array($items)) {
@@ -188,7 +189,7 @@ final class ItemDAO extends DAO {
         }
 
         foreach($items as $item) {
-            $this->addItem($item, $parent, $default);
+            $this->addItem($item, $parent);
         }
 
         return;
@@ -202,15 +203,16 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param Item $item the item to be inserted
 	 * @param ItemIncomplete $parent parent item
-	 * @param bool $default
 	 *
 	 * @see addItems
 	 *
 	 */
-    private function addItem(Item $item, ItemIncomplete $parent = null, $default = false) {
+    private function addItem(Item $item, ItemIncomplete $parent = null) {
         if(!($item instanceof Item)) {
             throw new \InvalidArgumentException('Items must be objects of Item class, ' . gettype($item) . ' given'); // will say "object" if it's another object which is kinda useless, whatever
         }
+
+	    $isDefault = $item instanceof ItemDefault ? true : false;
 
         $pdo = $this->getPDO();
         if(!$pdo->inTransaction()) {
@@ -218,22 +220,27 @@ final class ItemDAO extends DAO {
         }
 
         if($this->addItemStatement === null) {
-	        $this->addItemStatement = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault) VALUES (:c, :d)');
+	        $this->addItemStatement = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault, `Default`) VALUES (:c, :isd, :def)');
         }
 
 	    $this->addItemStatement->bindValue(':c', $item->getCode(), \PDO::PARAM_STR);
-	    $this->addItemStatement->bindValue(':d', $default, \PDO::PARAM_INT);
+	    $this->addItemStatement->bindValue(':isd', $isDefault, \PDO::PARAM_INT);
+	    if($isDefault || ($default = $item->getDefaultCode()) === null) {
+		    $this->addItemStatement->bindValue(':def', null, \PDO::PARAM_NULL);
+	    } else {
+		    $this->addItemStatement->bindValue(':def', $default, \PDO::PARAM_STR);
+	    }
 	    $this->addItemStatement->execute();
 
 	    /** @var Item $item */
 	    $this->database->featureDAO()->addFeatures($item);
-
+	    $this->database->modificationDAO()->setItemModified($item);
 	    $this->database->treeDAO()->addToTree($item, $parent);
 
 	    $childItems = $item->getContent();
 	    foreach($childItems as $childItem) {
 	    	// yay recursion!
-	    	$this->addItem($childItem, $item, $default);
+	    	$this->addItem($childItem, $item);
 	    }
     }
 

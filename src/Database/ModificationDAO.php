@@ -6,30 +6,24 @@ use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\User;
 
-// TODO: call these methods somewhere
+
 final class ModificationDAO extends DAO {
 	private $currentModificationId = null;
 
-	public function setItemMoved(ItemIncomplete $item, $from, $to) {
-		$from = $this->itemToIdOrNull($from);
+	public function setItemMoved(ItemIncomplete $item, $to) {
 		$to = $this->itemToIdOrNull($to);
 		$itemID = $this->database->itemDAO()->getItemId($item);
 
 		$pdo = $this->getPDO();
 		if($this->itemModifiedStatement === null) {
-			$this->itemModifiedStatement = $pdo->prepare('INSERT INTO ItemLocationModification (ModificationID, ItemID, ParentFrom, ParentTo) VALUES (?, ?, ?, ?)');
+			$this->itemModifiedStatement = $pdo->prepare('INSERT INTO ItemLocationModification (ModificationID, ItemID, ParentTo) VALUES (?, ?, ?)');
 		}
 		$this->itemModifiedStatement->bindValue(1, $this->getModificationId(), \PDO::PARAM_INT);
 		$this->itemModifiedStatement->bindValue(2, $itemID, \PDO::PARAM_INT);
-		if($from === null) {
+		if($to === null) {
 			$this->itemModifiedStatement->bindValue(3, null, \PDO::PARAM_NULL);
 		} else {
-			$this->itemModifiedStatement->bindValue(3, $from, \PDO::PARAM_INT);
-		}
-		if($to === null) {
-			$this->itemModifiedStatement->bindValue(4, null, \PDO::PARAM_NULL);
-		} else {
-			$this->itemModifiedStatement->bindValue(4, $to, \PDO::PARAM_INT);
+			$this->itemModifiedStatement->bindValue(3, $to, \PDO::PARAM_INT);
 		}
 		$this->itemModifiedStatement->execute();
 	}

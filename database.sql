@@ -61,14 +61,12 @@ CREATE TABLE `ItemFeature` (
 CREATE TABLE `ItemLocationModification` (
   `ModificationID` bigint(20) unsigned NOT NULL,
   `ItemID` bigint(20) unsigned NOT NULL,
-  `ParentFrom` bigint(20) unsigned NOT NULL, -- if inserting an item also adds a row here, this column is useless. But it makes querying easier, so...
+  -- parentFrom is useless if adding an item also creates a new row here: first row is the original parent...
   `ParentTo` bigint(20) unsigned NOT NULL,
-  PRIMARY KEY (`ModificationID`,`ParentFrom`,`ParentTo`),
-  KEY (`ParentFrom`),
+  PRIMARY KEY (`ModificationID`,`ParentTo`),
   KEY (`ParentTo`),
   CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE,
-  CONSTRAINT FOREIGN KEY (`ParentFrom`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT FOREIGN KEY (`ParentTo`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
