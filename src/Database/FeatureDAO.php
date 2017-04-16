@@ -6,7 +6,7 @@ use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\Query\SearchTriplet;
 
-class FeatureDAO extends DAO {
+final class FeatureDAO extends DAO {
 
 	/**
 	 * Add features to Items passed as a parameter.
