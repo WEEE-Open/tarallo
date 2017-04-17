@@ -74,7 +74,9 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		        $db->itemDAO()->addItems($items, new ItemIncomplete($parent));
 	        }
 
-	        // TODO: update items
+	        if($this->updateItems !== null) {
+		        $db->itemDAO()->updateItems($this->updateItems);
+	        }
 
 	        foreach($this->deleteItems as $item) {
 		        $db->treeDAO()->removeFromTree($item);

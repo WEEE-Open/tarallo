@@ -5,6 +5,7 @@ use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemDefault;
 use WEEEOpen\Tarallo\ItemIncomplete;
+use WEEEOpen\Tarallo\ItemUpdate;
 use WEEEOpen\Tarallo\Query\SearchTriplet;
 
 final class ItemDAO extends DAO {
@@ -302,5 +303,38 @@ final class ItemDAO extends DAO {
 			}
 			return strnatcmp($a->getCode(), $b->getCode());
 		});
+	}
+
+	public function updateItems($items) {
+		if($items instanceof ItemUpdate) {
+			$items = [$items];
+		} else if(!is_array($items)) {
+			throw new \InvalidArgumentException('Items to be updated must be passed as an array or a single ItemUpdated, ' . gettype($items) . ' given');
+		}
+
+		if(empty($items)) {
+			return;
+		}
+
+		$updateDefaultCode = [];
+		$updateIsDefault = [];
+		foreach($items as $item) {
+			if(!($item instanceof ItemUpdate)) {
+				throw new \InvalidArgumentException('Items to be updated must be ItemUpdate objects');
+			}
+			/** @var ItemUpdate $item */
+			$id = $this->getItemId($item);
+			if($item->getDefaultCodeChanged()) {
+				// TODO: implement
+			}
+			if($item->getIsDefaultChanged()) {
+				// TODO: implement
+			}
+			if($item->getParentChanged()) {
+				$this->database->treeDAO()->moveItem($item, $item->getParent());
+			}
+			$this->database->modificationDAO()->setItemModified($item);
+		}
+		$this->database->featureDAO()->updateDeleteFeatures($items);
 	}
 }

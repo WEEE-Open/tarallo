@@ -40,6 +40,10 @@ class ItemUpdate extends Item implements \JsonSerializable {
 		return $this;
 	}
 
+	public function getIsDefault() {
+		return $this->isDefault;
+	}
+
 	protected static function featureValueIsValid($value) {
 		if(parent::featureValueIsValid($value)) {
 			return true;

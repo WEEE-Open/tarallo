@@ -4,6 +4,8 @@ namespace WEEEOpen\Tarallo\Database;
 
 use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\ItemIncomplete;
+use WEEEOpen\Tarallo\ItemUpdate;
 use WEEEOpen\Tarallo\Query\SearchTriplet;
 
 final class FeatureDAO extends DAO {
@@ -11,18 +13,16 @@ final class FeatureDAO extends DAO {
 	/**
 	 * Add features to Items passed as a parameter.
 	 *
-	 * @param $items array of Item. Keys must be ItemIDs and they're used for prepared statement parameter names, so don't place unsanitized user input there!
+	 * @param $items array of Item.
 	 *
 	 * @return array
 	 */
-    public function setFeatures($items) {
-        if(!is_array($items)) {
-            throw new \InvalidArgumentException('$items must be an array of Item');
-        }
-
+    public function setFeatures(array $items) {
         if(empty($items)) {
             return $items;
         }
+
+        $items = $this->itemsArrayToIDAndItemArray($items);
 
         /*
          * This seems a good query to fetch default and non-default features:
@@ -55,11 +55,8 @@ final class FeatureDAO extends DAO {
 		');
 
         foreach($items as $itemID => $item) {
-            if(!is_int($itemID) && !is_numeric($itemID)) {
-                throw new \InvalidArgumentException('Item IDs must be integers or numeric strings, ' . gettype($itemID) . ' given');
-            }
-            $featureStatement->bindValue(':item' . $itemID, $itemID);
-            $defaultFeatureStatement->bindValue(':item' . $itemID, $itemID);
+            $featureStatement->bindValue(':item' . $itemID, $itemID, \PDO::PARAM_STR);
+            $defaultFeatureStatement->bindValue(':item' . $itemID, $itemID, \PDO::PARAM_STR);
         }
         $featureStatement->execute();
         if($featureStatement->rowCount() > 0) {
@@ -77,6 +74,15 @@ final class FeatureDAO extends DAO {
 		    $featureStatement->closeCursor();
 	    }
         return $items;
+    }
+
+	private function itemsArrayToIDAndItemArray(array $items) {
+		$newItems = [];
+		$dao = $this->database->itemDAO();
+		foreach($items as $item) {
+			$newItems[$dao->getItemId($item)] = $items;
+		}
+		return $newItems;
     }
 
     private $featureTypeStatement = null;
@@ -164,13 +170,40 @@ final class FeatureDAO extends DAO {
         return $result[0];
     }
 
+    private $deleteFeatureStatement = null;
+	private function deleteFeature(ItemIncomplete $item, $featureName) {
+		// TODO: this method may turn out SLIGHTLY too slow, since it's a single prepared statement executed a million times in a loop somewhere outside this method.
+		$pdo = $this->getPDO();
+		if($this->deleteFeatureStatement === null) {
+			$this->deleteFeatureStatement = $pdo->prepare('DELETE ItemFeature.* FROM ItemFeature JOIN Feature ON ItemFeature.FeatureID = Feature.FeatureID WHERE ItemFeature.ItemID = :id AND Feature.FeatureName = :feat');
+		}
+		$this->deleteFeatureStatement->bindValue(':id', $this->database->itemDAO()->getItemId($item), \PDO::PARAM_STR);
+		$this->deleteFeatureStatement->bindValue(':feat', $featureName, \PDO::PARAM_STR);
+		$this->deleteFeatureStatement->execute();
+    }
+
+	public function updateDeleteFeatures(ItemUpdate $item) {
+		$features = $item->getFeatures();
+
+		if(empty($features)) {
+			return;
+		}
+
+		$newItem = new Item($item->getCode());
+		foreach($features as $feature => $value) {
+			$this->deleteFeature($item, $feature);
+			if($value !== null) {
+				$newItem->addFeature($feature, $value);
+			}
+		}
+		$this->addFeatures($newItem);
+	}
+
     private $featureNumberStatement = null;
     private $featureTextStatement = null;
     private $featureEnumStatement = null;
 
 	public function addFeatures(Item $item) {
-		static $featureNumberStatement = null;
-
 		$features = $item->getFeatures();
 
 	    if(empty($features)) {
