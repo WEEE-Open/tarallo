@@ -67,7 +67,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
         if(!($user instanceof User)) {
 	        throw new InvalidParameterException('Not logged in');
         }
-        $db->modificationDAO()->modifcationBegin($user);
+        $db->modificationDAO()->modifcationBegin($user, $this->notes);
         try {
 	        $db->itemDAO()->addItems($this->newItemsNoParent, null);
         	foreach($this->newItems as $parent => $items) {
