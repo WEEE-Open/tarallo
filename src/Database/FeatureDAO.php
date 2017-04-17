@@ -80,7 +80,7 @@ final class FeatureDAO extends DAO {
 		$newItems = [];
 		$dao = $this->database->itemDAO();
 		foreach($items as $item) {
-			$newItems[$dao->getItemId($item)] = $items;
+			$newItems[$dao->getItemId($item)] = $item;
 		}
 		return $newItems;
     }
