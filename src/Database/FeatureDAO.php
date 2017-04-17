@@ -55,8 +55,8 @@ final class FeatureDAO extends DAO {
 		');
 
         foreach($items as $itemID => $item) {
-            $featureStatement->bindValue(':item' . $itemID, $itemID, \PDO::PARAM_STR);
-            $defaultFeatureStatement->bindValue(':item' . $itemID, $itemID, \PDO::PARAM_STR);
+            $featureStatement->bindValue(':item' . $itemID, $itemID, \PDO::PARAM_INT);
+            $defaultFeatureStatement->bindValue(':item' . $itemID, $itemID, \PDO::PARAM_INT);
         }
         $featureStatement->execute();
         if($featureStatement->rowCount() > 0) {
@@ -177,7 +177,7 @@ final class FeatureDAO extends DAO {
 		if($this->deleteFeatureStatement === null) {
 			$this->deleteFeatureStatement = $pdo->prepare('DELETE ItemFeature.* FROM ItemFeature JOIN Feature ON ItemFeature.FeatureID = Feature.FeatureID WHERE ItemFeature.ItemID = :id AND Feature.FeatureName = :feat');
 		}
-		$this->deleteFeatureStatement->bindValue(':id', $this->database->itemDAO()->getItemId($item), \PDO::PARAM_STR);
+		$this->deleteFeatureStatement->bindValue(':id', $this->database->itemDAO()->getItemId($item), \PDO::PARAM_INT);
 		$this->deleteFeatureStatement->bindValue(':feat', $featureName, \PDO::PARAM_STR);
 		$this->deleteFeatureStatement->execute();
     }
@@ -223,9 +223,9 @@ final class FeatureDAO extends DAO {
 	    }
 
 	    $itemId = $this->database->itemDAO()->getItemId($item);
-		$this->featureNumberStatement->bindValue(':item', $itemId);
-		$this->featureTextStatement->bindValue(':item', $itemId);
-		$this->featureEnumStatement->bindValue(':item', $itemId);
+		$this->featureNumberStatement->bindValue(':item', $itemId, \PDO::PARAM_INT);
+		$this->featureTextStatement->bindValue(':item', $itemId, \PDO::PARAM_INT);
+		$this->featureEnumStatement->bindValue(':item', $itemId, \PDO::PARAM_INT);
 
 		foreach($features as $feature => $value) {
 			$featureType = $this->database->featureDAO()->getFeatureTypeFromName($feature);

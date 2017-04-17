@@ -316,19 +316,13 @@ final class ItemDAO extends DAO {
 			return;
 		}
 
-		$updateDefaultCode = [];
-		$updateIsDefault = [];
 		foreach($items as $item) {
 			if(!($item instanceof ItemUpdate)) {
 				throw new \InvalidArgumentException('Items to be updated must be ItemUpdate objects');
 			}
 			/** @var ItemUpdate $item */
-			$id = $this->getItemId($item);
-			if($item->getDefaultCodeChanged()) {
-				// TODO: implement
-			}
-			if($item->getIsDefaultChanged()) {
-				// TODO: implement
+			if($item->getDefaultCodeChanged() || $item->getIsDefaultChanged()) {
+				$this->setItemDefaults($item);
 			}
 			if($item->getParentChanged()) {
 				$this->database->treeDAO()->moveItem($item, $item->getParent());
@@ -336,5 +330,36 @@ final class ItemDAO extends DAO {
 			$this->database->modificationDAO()->setItemModified($item);
 		}
 		$this->database->featureDAO()->updateDeleteFeatures($items);
+	}
+
+	private $setItemDefaultsStatementSelect = null;
+	private $setItemDefaultsStatementUpdate = null;
+	private function setItemDefaults(ItemUpdate $item) {
+		$db = $this->getPDO();
+
+		if(!$item->getDefaultCodeChanged() || !$item->getIsDefaultChanged()) {
+			if($this->setItemDefaultsStatementSelect === null) {
+				$this->setItemDefaultsStatementSelect = $db->prepare('SELECT `Default`, IsDefault FROM Item WHERE ItemID = ? LIMIT 1');
+			}
+
+			$this->setItemDefaultsStatementSelect->bindValue(1, $this->getItemId($item), \PDO::PARAM_STR);
+			$this->setItemDefaultsStatementSelect->execute();
+			$result = $this->setItemDefaultsStatementSelect->fetch(\PDO::FETCH_ASSOC);
+			$this->setItemDefaultsStatementSelect->closeCursor();
+
+			$isDefault = $item->getIsDefaultChanged() ? (int) $item->getIsDefault() : (int) $result['IsDefault'];
+			$defaultId = $item->getDefaultCodeChanged() ? $this->getItemId(new ItemIncomplete($item->getDefaultCode())) : (int) $result['Default'];
+		} else {
+			$isDefault = (int) $item->getIsDefault();
+			$defaultId = $this->getItemId(new ItemIncomplete($item->getDefaultCode()));
+		}
+
+		if($this->setItemDefaultsStatementUpdate === null) {
+			$this->setItemDefaultsStatementUpdate = $db->prepare('UPDATE Item SET IsDefault = ? AND `Default` = ? WHERE ItemID = ? LIMIT 1');
+		}
+		$this->setItemDefaultsStatementUpdate->bindValue(1, $isDefault, \PDO::PARAM_INT);
+		$this->setItemDefaultsStatementUpdate->bindValue(2, $defaultId, \PDO::PARAM_INT);
+		$this->setItemDefaultsStatementUpdate->bindValue(3, $this->getItemId($item), \PDO::PARAM_INT);
+		$this->setItemDefaultsStatementUpdate->execute();
 	}
 }
