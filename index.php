@@ -7,6 +7,12 @@ use WEEEOpen\Tarallo\Database\Database;
 // in case something goes wrong (reset to 200 when sending a JSON response)
 http_response_code(500);
 
+// TODO: remove this. Maybe. Maybe not.
+header("Access-Control-Allow-Origin: http://127.0.0.1:8080");
+header("Access-Control-Allow-Credentials: true");
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+
 // straight from the manual: https://secure.php.net/manual/en/class.errorexception.php
 //set_error_handler(function($severity, $message, $file, $line) {
 //	if (!(error_reporting() & $severity)) {
@@ -21,6 +27,10 @@ require 'db.php';
 
 if(!isset($_REQUEST['path']) || $_REQUEST['path'] === null) {
 	Response::sendFail('No query string');
+}
+
+if($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+
 }
 
 try {
