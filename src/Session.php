@@ -65,7 +65,11 @@ class Session {
 	 */
 	public static function restore(Database $db) {
 		if(isset($_COOKIE[ self::COOKIE_NAME ])) {
-			return $db->userDAO()->getUserFromSession($_COOKIE[ self::COOKIE_NAME ]);
+			$user = $db->userDAO()->getUserFromSession($_COOKIE[ self::COOKIE_NAME ]);
+			if($user instanceof User) {
+				$db->userDAO()->setSessionFromUser($user->getUsername(), $_COOKIE[ self::COOKIE_NAME ], time() + self::SESSION_DURATION);
+			}
+			return $user;
 		}
 
 		return null;
