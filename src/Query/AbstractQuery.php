@@ -24,6 +24,8 @@ abstract class AbstractQuery {
 				// TODO: throw new \Exception('Authentication needed'); somewhere in there
 			} else if($path === '/Login') {
 				return new LoginQuery($postJSON);
+			} else if($path === '/Refresh') {
+				return new RefreshQuery($postJSON);
 			} else {
 				throw new InvalidParameterException('Unknown post request type: ' . $path);
 			}
