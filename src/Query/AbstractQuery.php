@@ -12,7 +12,11 @@ abstract class AbstractQuery {
 
 	public static final function factory($method, $path, $postJSON) {
 		if($method === 'GET') {
-			return new GetQuery($path);
+			if($path === '/Features') {
+				return new FeatureListQuery('');
+			} else {
+				return new GetQuery($path);
+			}
 		} else if($method === 'POST') {
 			if($path === null || $path === '') {
 				throw new InvalidParameterException('Missing JSON body in POST request');
