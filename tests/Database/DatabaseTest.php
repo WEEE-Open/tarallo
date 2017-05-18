@@ -125,6 +125,17 @@ class DatabaseTest extends TestCase {
     }
 
 	/**
+	 * @uses   \WEEEOpen\Tarallo\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
+	 */
+    public function testFeatureList() {
+	    $features = $this->getDb()->featureDAO()->getFeatureList();
+	    $this->assertTrue(count($features) > 0, 'There should be some features');
+	    $this->assertContainsOnly("string", $features, 'Feature names should be only strings');
+    }
+
+	/**
 	 * Database tests are really slow and this code is a bit complex to say the least, testing everything
 	 * in a sensible manner will be difficult. But some tests are better than no tests at all, right?
 	 *
@@ -137,6 +148,7 @@ class DatabaseTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
 	 * @uses   \WEEEOpen\Tarallo\Database\DAO
 	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
+	 * @depends testFeatureList
 	 */
 	public function testAddingAndRetrievingSomeItems() {
 		$db = $this->getDb();
@@ -237,6 +249,7 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
 	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
 	 * @depends testAddingAndRetrievingSomeItems
+	 * @depends testFeatureList
 	 */
 	public function testItemSearchSorting() {
 		$db = $this->getDb();
@@ -286,6 +299,7 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
 	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
 	 * @depends testAddingAndRetrievingSomeItems
+	 * @depends testFeatureList
 	 */
 	public function testItemSearchFiltering() {
 		$cpu['INTEL-1'] = (new Item('INTEL-1'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Core 2.0 Trio')->addFeature('frequency-hz',    1400000000);
@@ -347,6 +361,7 @@ class DatabaseTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
 	 * @depends testAddingAndRetrievingSomeItems
 	 * @depends testSubtreeRemoval
+	 * @depends testFeatureList
 	 */
 	public function testTreeMove() {
 		// These items should be added in database.yml, but that just increases the amount of data to import for each test

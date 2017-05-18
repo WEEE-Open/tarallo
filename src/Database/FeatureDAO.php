@@ -251,4 +251,21 @@ final class FeatureDAO extends DAO {
 			}
 		}
 	}
+
+	private $getFeatureListStatement = null;
+
+	public function getFeatureList() {
+		if($this->getFeatureListStatement === null) {
+			$this->getFeatureListStatement = $this->getPDO()->prepare('SELECT FeatureName FROM Feature');
+		}
+		$this->getFeatureListStatement->execute();
+		if($this->getFeatureListStatement->rowCount() > 0) {
+			$result = [];
+			while(($row = $this->getFeatureListStatement->fetch(\PDO::FETCH_ASSOC)) !== false) {
+				$result[] = $row['FeatureName'];
+			}
+			return $result;
+		}
+		return [];
+	}
 }
