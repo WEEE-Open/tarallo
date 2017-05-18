@@ -6,8 +6,6 @@ use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\InvalidParameterException;
 
 abstract class AbstractQuery {
-	protected $built = false;
-
 	abstract public function __construct($string);
 
 	abstract public function run($user, Database $db);
