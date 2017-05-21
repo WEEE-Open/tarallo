@@ -22,7 +22,7 @@ class RefreshQuery extends PostJSONQuery implements \JsonSerializable {
 	 */
 	public function run($user, Database $database) {
 		if($user === null) {
-			throw new InvalidParameterException('Session expired');
+			return ['username' => null];
 		} else {
 			return ['username' => $user->getUsername()];
 		}
