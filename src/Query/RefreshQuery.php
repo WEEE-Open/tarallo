@@ -5,13 +5,8 @@ use WEEEOpen\Tarallo;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\InvalidParameterException;
 
-class RefreshQuery extends PostJSONQuery implements \JsonSerializable {
-    protected function parseContent($content) {
-    }
-
-    function jsonSerialize() {
-	    return [];
-    }
+class RefreshQuery extends AbstractQuery {
+	public function __construct($string) {}
 
 	/**
 	 * @param Tarallo\User|null $user current user ("recovered" from session)
