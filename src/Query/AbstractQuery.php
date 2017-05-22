@@ -16,12 +16,12 @@ abstract class AbstractQuery {
 				return new FeatureListQuery('');
 			} else if($path === '/Session') {
 				return new RefreshQuery('');
-			} else {
+			} else if($path === '/Logout') { // TODO: this should be a POST request, really...
 				return new GetQuery($path);
 			}
 		} else if($method === 'POST') {
 			if($path === null || $path === '') {
-				throw new InvalidParameterException('Missing JSON body in POST request');
+				throw new InvalidParameterException('Missing JSON body in POST request'); // TODO: this is the wrong message
 			} else if($path === '/Edit') {
 				// TODO: more robust handling of "path"
 				return new EditQuery($postJSON);
