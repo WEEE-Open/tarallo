@@ -8,8 +8,13 @@ use WEEEOpen\Tarallo\InvalidParameterException;
 class LoginQuery extends PostJSONQuery implements \JsonSerializable {
     private $username;
     private $password;
+    private $login = true;
 
     protected function parseContent($content) {
+    	if($content['username'] === null && $content['password'] === null) {
+    		$this->login = false;
+	    }
+
         if(!isset($content['username']) || !isset($content['password'])) {
             throw new InvalidParameterException('Request body must contain "username" and "password"');
         }
@@ -38,12 +43,19 @@ class LoginQuery extends PostJSONQuery implements \JsonSerializable {
 	 * @todo return a Response object?
 	 */
 	public function run($user, Database $database) {
-        $newUser = $database->userDAO()->getUserFromLogin($this->username, $this->password);
-        if($newUser === null) {
-            throw new InvalidParameterException('Wrong username or password');
-        } else {
-            Tarallo\Session::start($newUser, $database);
-            return [];
-        }
+		if($this->login) {
+			$newUser = $database->userDAO()->getUserFromLogin($this->username, $this->password);
+			if($newUser === null) {
+				throw new InvalidParameterException('Wrong username or password');
+			} else {
+				Tarallo\Session::start($newUser, $database);
+				return [];
+			}
+		} else {
+			if($user instanceof Tarallo\User) {
+				Tarallo\Session::close($user, $database);
+			}
+			return [];
+		}
 	}
 }

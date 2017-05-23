@@ -16,8 +16,6 @@ abstract class AbstractQuery {
 				return new FeatureListQuery('');
 			} else if($path === '/Session') {
 				return new RefreshQuery('');
-			} else if($path === '/Logout') { // TODO: this should be a POST request, really...
-				return new GetQuery($path);
 			}
 		} else if($method === 'POST') {
 			if($path === null || $path === '') {
@@ -25,7 +23,7 @@ abstract class AbstractQuery {
 			} else if($path === '/Edit') {
 				// TODO: more robust handling of "path"
 				return new EditQuery($postJSON);
-			} else if($path === '/Login') {
+			} else if($path === '/Session') {
 				return new LoginQuery($postJSON);
 			} else {
 				throw new InvalidParameterException('Unknown post request type: ' . $path);
