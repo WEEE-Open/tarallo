@@ -13,6 +13,7 @@ class LoginQuery extends PostJSONQuery implements \JsonSerializable {
     protected function parseContent($content) {
     	if($content['username'] === null && $content['password'] === null) {
     		$this->login = false;
+    		return;
 	    }
 
         if(!isset($content['username']) || !isset($content['password'])) {
