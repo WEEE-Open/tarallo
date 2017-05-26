@@ -64,5 +64,5 @@ if($query instanceof Query\AbstractQuery) {
 		Response::sendError('Error: ' . $e->getMessage());
 	}
 } else {
-	Response::sendSuccess(["query" => (string) $query, "user" => (string) $user]);
+	Response::sendError("Failed to parse query (error that should never happen)");
 }

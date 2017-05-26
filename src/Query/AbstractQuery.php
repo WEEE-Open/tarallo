@@ -16,6 +16,8 @@ abstract class AbstractQuery {
 				return new FeatureListQuery('');
 			} else if($path === '/Session') {
 				return new RefreshQuery('');
+			} else {
+				return new GetQuery($path);
 			}
 		} else if($method === 'POST') {
 			if($path === null || $path === '') {
