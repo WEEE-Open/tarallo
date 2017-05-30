@@ -18,6 +18,17 @@ abstract class DAO {
         return call_user_func($this->callback);
     }
 
+	/**
+	 * Generate the IN part of an SQL query.
+	 * The part that goes between "WHERE x IN (" and ")", more specifically.
+	 * Array keys are appended to the prefix without further sanitization, so don't pass unchecked user input here!
+	 *
+	 * @param string $prefix Any prefix, possibly beginning with ":" to use in PDO
+	 * @param array $array array of values that will be inserted/selected from database. This is used to count the
+	 * query parameters(?) and keys are appended to the prefix.
+	 *
+	 * @return string|bool resulting string, or a random "false" if substr somehow fails.
+	 */
     protected static function multipleIn($prefix, $array) {
     	$in = '';
         foreach($array as $k => $v) {
@@ -26,6 +37,14 @@ abstract class DAO {
         return substr($in, 0, strlen($in) - 2); //remove last ', '
     }
 
+	/**
+	 * Is it an array and does it contain anything?
+	 * Exactly what it says on the tin.
+	 *
+	 * @param $something
+	 *
+	 * @return bool
+	 */
 	protected static function isArrayAndFull($something) {
 		if(is_array($something) && !empty($something)) {
 			return true;
