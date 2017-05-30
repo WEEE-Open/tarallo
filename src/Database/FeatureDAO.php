@@ -13,16 +13,12 @@ final class FeatureDAO extends DAO {
 	/**
 	 * Add features to Items passed as a parameter.
 	 *
-	 * @param $items array of Item.
-	 *
-	 * @return array
+	 * @param $items array map from item code to Item.
 	 */
     public function setFeatures(array $items) {
         if(empty($items)) {
-            return $items;
+            return;
         }
-
-        $items = $this->itemsArrayToIDAndItemArray($items);
 
         /*
          * This seems a good query to fetch default and non-default features:
@@ -73,16 +69,6 @@ final class FeatureDAO extends DAO {
 		    }
 		    $featureStatement->closeCursor();
 	    }
-        return $items;
-    }
-
-	private function itemsArrayToIDAndItemArray(array $items) {
-		$newItems = [];
-		$dao = $this->database->itemDAO();
-		foreach($items as $item) {
-			$newItems[$dao->getItemId($item)] = $item;
-		}
-		return $newItems;
     }
 
     private $featureTypeStatement = null;
