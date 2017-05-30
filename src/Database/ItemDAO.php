@@ -169,7 +169,10 @@ final class ItemDAO extends DAO {
 				}
 			}
 	        $s->closeCursor();
-			$this->database->featureDAO()->setFeatures($items);
+			// TODO: use a function to build the ID->Item map before calling these functions, to remove random side effects
+	        // TODO: do this only for root items
+			$items = $this->database->featureDAO()->setFeatures($items);
+	        $this->database->itemDAO()->setLocations($items);
 			$this->sortItems($itemsTreeRoots, $sorts);
             return $itemsTreeRoots;
         }
@@ -361,5 +364,32 @@ final class ItemDAO extends DAO {
 		$this->setItemDefaultsStatementUpdate->bindValue(2, $defaultId, \PDO::PARAM_INT);
 		$this->setItemDefaultsStatementUpdate->bindValue(3, $this->getItemId($item), \PDO::PARAM_INT);
 		$this->setItemDefaultsStatementUpdate->execute();
+	}
+
+	/**
+	 * Add location array to items
+	 *
+	 * @param Item[] $items - map from ID to Item
+	 */
+	private function setLocations($items) {
+		$inItemID = DAO::multipleIn('loc', array_keys($items));
+		$getLocationsStatement = $this->getPDO()->prepare('SELECT Tree.DescendantID AS ItemID, Item.Code AS Ancestor, Tree.Depth AS Depth
+			FROM Item, Tree
+			WHERE Tree.AncestorID = Item.ItemID AND Tree.DescendantID IN (' . $inItemID . ') AND Tree.Depth <> 0
+			ORDER BY Tree.Depth ASC;
+		'); // TODO: sorting is mostly useless
+
+		foreach($items as $itemID => $item) {
+			$getLocationsStatement->bindValue(':loc' . $itemID, $itemID, \PDO::PARAM_INT);
+		}
+		$getLocationsStatement->execute();
+
+		if($getLocationsStatement->rowCount() > 0) {
+			foreach($getLocationsStatement as $row) {
+				/** @var Item[] $items */
+				$items[$row['ItemID']]->addAncestor((int) $row['Depth'], $row['Ancestor']);
+			}
+			$getLocationsStatement->closeCursor();
+		}
 	}
 }

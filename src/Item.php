@@ -6,6 +6,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	private $features = [];
 	private $featuresDefault = [];
 	private $content = [];
+	private $location = [];
 	protected $defaultCode = null;
 
 	public function __construct($code, $defaultCode = null) {
@@ -45,6 +46,21 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	public function addFeature($name, $value) {
 		$this->addFeatureInternal($name, $value, $this->features);
 		return $this;
+	}
+
+	/**
+	 * Add ancestor to location.
+	 *
+	 * @param int $distance 1 for direct parent, etc...
+	 * @param string $code ancestor code
+	 */
+	public function addAncestor($distance, $code) {
+		$distance = (int) $distance;
+		if($distance <= 1) {
+			throw new \InvalidArgumentException('Ancestor distance too small (' . $distance .')');
+		}
+
+		$this->location[$distance] = $code;
 	}
 
 	/**
@@ -141,6 +157,9 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		}
 		if($this->defaultCode !== null) {
 			$array['default'] = $this->defaultCode;
+		}
+		if(!empty($this->location)) {
+			$array['location'] = $this->location;
 		}
 
 		return $array;
