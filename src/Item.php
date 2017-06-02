@@ -56,11 +56,11 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 */
 	public function addAncestor($distance, $code) {
 		$distance = (int) $distance;
-		if($distance <= 1) {
-			throw new \InvalidArgumentException('Ancestor distance too small (' . $distance .')');
+		if($distance < 1) {
+			throw new \InvalidArgumentException('Ancestor distance too small: ' . $code .' is at distance ' . $distance . ' from its descendant' . $this->getCode());
 		}
 
-		$this->location[$distance] = $code;
+		$this->location[--$distance] = $code;
 	}
 
 	/**
@@ -159,7 +159,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 			$array['default'] = $this->defaultCode;
 		}
 		if(!empty($this->location)) {
-			$array['location'] = $this->location;
+			$array['location'] = array_reverse($this->location);
 		}
 
 		return $array;
