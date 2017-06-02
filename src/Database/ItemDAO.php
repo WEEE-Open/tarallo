@@ -159,27 +159,23 @@ final class ItemDAO extends DAO {
             return [];
         } else {
 	        /** @var Item[] map from item ID to Item object (all items) */
-        	$items = [];
+			$items = [];
 	        /** @var Item[] map from item ID to Item object (root items only) */
 	        $itemsRoots = [];
 	        /** @var Item[] plain array of tree roots (return this one) */
-        	$itemsTreeRoots = [];
-			while (($row = $s->fetch(\PDO::FETCH_ASSOC)) !== false) {
-				$thisItem = new Item($row['Code']);
-				$items[$row['ItemID']] = $thisItem;
-				if($row['DirectParent'] === null) {
-					$itemsTreeRoots[] = $thisItem;
-					$itemsRoots[$row['ItemID']] = $thisItem;
-				} else {
-					if(isset($items[$row['DirectParent']])) {
-						// this also updates $itemsTreeRoots since objects are always passed by reference
-						/** @var Item[] $items */
-						$items[$row['DirectParent']]->addContent($thisItem);
-					} else {
-						throw new \LogicException('Missing parent for item ' . (string) $thisItem . ', possibly incosistent Tree table state');
-					}
-				}
-			}
+	        $itemsTreeRoots = [];
+	        while(($row = $s->fetch(\PDO::FETCH_ASSOC)) !== false) {
+		        $thisItem = new Item($row['Code']);
+		        $items[$row['ItemID']] = $thisItem;
+		        // tree root and selected items don't have a parent, in this result set...
+		        if($row['DirectParent'] === null || !isset($items[$row['DirectParent']])) {
+			        $itemsTreeRoots[] = $thisItem;
+			        $itemsRoots[$row['ItemID']] = $thisItem;
+		        } else {
+			        /** @var Item[] $items */
+			        $items[$row['DirectParent']]->addContent($thisItem);
+		        }
+	        }
 	        $s->closeCursor();
 	        // object are always passed by reference: update an Item in any array, every other gets updated too
 			$this->database->featureDAO()->setFeatures($items);
