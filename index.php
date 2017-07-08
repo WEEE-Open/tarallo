@@ -8,7 +8,7 @@ use WEEEOpen\Tarallo\Database\Database;
 http_response_code(500);
 
 // TODO: remove this. Maybe. Maybe not.
-header("Access-Control-Allow-Origin: http://127.0.0.1:8080");
+header("Access-Control-Allow-Origin: http://tarallo.local:8080");
 header("Access-Control-Allow-Credentials: true");
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
