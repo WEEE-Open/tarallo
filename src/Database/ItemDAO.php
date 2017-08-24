@@ -196,10 +196,6 @@ final class ItemDAO extends DAO {
             return;
         }
 
-        if($parent instanceof ItemIncomplete) {
-        	$parent = $this->getItemId($parent);
-        }
-
         foreach($items as $item) {
             $this->addItem($item, $parent);
         }
