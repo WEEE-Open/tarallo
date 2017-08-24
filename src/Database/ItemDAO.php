@@ -110,6 +110,11 @@ final class ItemDAO extends DAO {
 	        $searchSubquery = '';
         }
 
+        // sanitization
+        if(self::isArrayAndFull($locations)) {
+        	$locations = array_values($locations);
+        }
+
         // Search items by features, filter by location and token, tree lookup using these items as descendants
         // (for /Parent), tree lookup using new root items as roots (find all descendants), filter by depth,
         // join with items, SELECT.
@@ -124,7 +129,7 @@ final class ItemDAO extends DAO {
             WHERE DescendantID IN ( 
                 SELECT `ItemID`
                 FROM Item
-                ' . $this->implodeOptionalWhereAnd($this->locationPrepare(array_values($locations)), $this->tokenPrepare($token), $searchSubquery) . '
+                ' . $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->tokenPrepare($token), $searchSubquery) . '
             ) AND `Depth` = :parent
         ) AND Tree.`Depth` <= :depth AND isDefault = 0
         ORDER BY IFNULL(Tree.`Depth`, 0) ASC;

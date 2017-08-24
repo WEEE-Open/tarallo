@@ -58,6 +58,7 @@ if($query instanceof Query\AbstractQuery) {
 	// not really sold on this design, too much complexity hidden into a single function. But these objects ARE queries,
 	// it doesn't make much sense to extract everything and "parse" it again to convert it to a SQL query somewhere else...
 	try {
+		/** @var $query Query\AbstractQuery */
 		$data = $query->run($user, $db);
 		Response::sendSuccess((array) $data);
 	} catch(\Exception $e) {
