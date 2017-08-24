@@ -86,16 +86,16 @@ class EditQueryTest extends TestCase{
 	 */
 	public function testCreateSimpleItem() {
 		$out = json_decode( json_encode(new EditQuery('{"create":{"PC-72":{}}}')),true);
-		$this->assertEquals(['create' => ['PC-72' => []]], $out);
+		$this->assertEquals(['create' => [['code' => 'PC-72']]], $out);
 
 		$out = json_decode( json_encode(new EditQuery('{"create":{"PC-72":{"is_default":false}}}')),true);
-		$this->assertEquals(['create' => ['PC-72' => []]], $out);
+		$this->assertEquals(['create' => [['code' => 'PC-72']]], $out);
 
 		$out = json_decode( json_encode(new EditQuery('{"create":{"PC-72":{"is_default":true}}}')),true);
-		$this->assertEquals(['create' => ['PC-72' => ['is_default' => true]]], $out);
+		$this->assertEquals(['create' => [['code' => 'PC-72', 'is_default' => true]]], $out);
 
 		$out = json_decode( json_encode(new EditQuery('{"create":{"PC-72":{"is_default":false,"default":"ASD"}}}')),true);
-		$this->assertEquals(['create' => ['PC-72' => ['default' => 'ASD']]], $out);
+		$this->assertEquals(['create' => [['code' => 'PC-72', 'default' => 'ASD']]], $out);
 	}
 
 	/**
@@ -109,11 +109,11 @@ class EditQueryTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\ItemUpdate
 	 */
 	public function testCreateSimpleItemWithNotes() {
-		$out = json_decode(json_encode(new EditQuery('{"create":{"PC-72":{}},"notes":"Created PC-72"}')), true);
-		$this->assertEquals(['create' => ['PC-72' => []], 'notes' => 'Created PC-72'], $out);
+		$out = json_decode(json_encode(new EditQuery('{"create":{"PC-72":{}},"notes":"Created PC-72, ya its gud"}')), true);
+		$this->assertEquals(['create' => [['code' => 'PC-72']], 'notes' => 'Created PC-72, ya its gud'], $out);
 
 		$out = json_decode(json_encode(new EditQuery('{"create":{"PC-72":{}},"notes":null}')), true);
-		$this->assertEquals(['create' => ['PC-72' => []]], $out);
+		$this->assertEquals(['create' => [['code' => 'PC-72']]], $out);
 	}
 
 	/**
@@ -128,7 +128,7 @@ class EditQueryTest extends TestCase{
 	 */
 	public function testNullAction() {
 		$out = json_decode(json_encode(new EditQuery('{"create":{"PC-72":{}},"update":null}')), true);
-		$this->assertEquals(['create' => ['PC-72' => []]], $out);
+		$this->assertEquals(['create' => [['code' => 'PC-72']]], $out);
 	}
 
 	/**

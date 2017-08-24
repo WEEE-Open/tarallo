@@ -99,13 +99,13 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			        if($parent !== null && $parent !== '') {
 				        $serialItemzed['parent'] = $parent;
 			        }
-			        $result['create'][$item->getCode()] = $serialItemzed;
+			        $result['create'][] = $serialItemzed;
 		        }
 	        }
         }
         if(!empty($this->newItemsNoParent)) {
         	foreach($this->newItemsNoParent as $item) {
-		        $result['create'][ $item->getCode() ] = $item->jsonSerialize();
+		        $result['create'][] = $item->jsonSerialize();
 	        }
         }
 	    if(!empty($this->updateItems)) {

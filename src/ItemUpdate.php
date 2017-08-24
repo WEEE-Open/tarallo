@@ -91,6 +91,7 @@ class ItemUpdate extends Item implements \JsonSerializable {
 
 	public function jsonSerialize() {
 		$array = [];
+		$array['code'] = $this->getCode();
 		if(!empty($this->featuresChanged)) {
 			$array['features'] = $this->getFeatures();
 		}

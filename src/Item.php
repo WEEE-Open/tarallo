@@ -146,7 +146,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 
 	public function jsonSerialize() {
 		$array = [];
-		//$array = ['code' => $this->getCode()];
+		$array['code'] = $this->getCode();
 		if(!empty($this->features)) {
 			$array['features'] = $this->features;
 		}

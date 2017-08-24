@@ -288,6 +288,106 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
+	 * @uses   \WEEEOpen\Tarallo\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\User
+	 * @uses   \WEEEOpen\Tarallo\Item
+	 * @covers \WEEEOpen\Tarallo\Item::jsonSerialize()
+	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Database\ItemDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\TreeDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
+	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
+	 * @depends testAddingAndRetrievingSomeItems
+	 * @depends testFeatureList
+	 * @depends testItemSearchSorting
+	 */
+	public function testItemSearchSerialization() {
+		$db = $this->getDb();
+		$pc['PC-55'] = (new Item('PC-55'))->addFeature('brand', 'TI')->addFeature('model', 'GreyPC-\'98')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx');
+		$pc['PC-20'] = (new Item('PC-20'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
+		$pc['PC-21'] = (new Item('PC-21'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'grey')->addFeature('working', 'yes');
+		$pc['PC-22'] = (new Item('PC-22'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
+		$pc['SCHIFOMACCHINA'] = (new Item('SCHIFOMACCHINA'))->addFeature('brand', 'eMac')->addFeature('model', 'EZ1600')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white'); // based on a real PC we have in our laboratory.
+
+		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$db->itemDAO()->addItems($pc);
+		$db->modificationDAO()->modificationCommit();
+		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'case')], null, null, ['motherboard-form-factor' => '-', 'color' => '+'], null);
+		$expected = array ( // this ugly code courtesy of var_export
+			0 =>
+				array (
+					'code' => 'PC-20',
+					'features' =>
+						array (
+							'brand' => 'Dill',
+							'color' => 'black',
+							'model' => 'DI-360',
+							'motherboard-form-factor' => 'proprietary',
+							'type' => 'case',
+							'working' => 'yes',
+						),
+				),
+			1 =>
+				array (
+					'code' => 'PC-22',
+					'features' =>
+						array (
+							'brand' => 'Dill',
+							'color' => 'black',
+							'model' => 'DI-360',
+							'motherboard-form-factor' => 'proprietary',
+							'type' => 'case',
+							'working' => 'yes',
+						),
+				),
+			2 =>
+				array (
+					'code' => 'PC-21',
+					'features' =>
+						array (
+							'brand' => 'Dill',
+							'color' => 'grey',
+							'model' => 'DI-360',
+							'motherboard-form-factor' => 'proprietary',
+							'type' => 'case',
+							'working' => 'yes',
+						),
+				),
+			3 =>
+				array (
+					'code' => 'SCHIFOMACCHINA',
+					'features' =>
+						array (
+							'brand' => 'eMac',
+							'color' => 'white',
+							'model' => 'EZ1600',
+							'motherboard-form-factor' => 'miniitx',
+							'type' => 'case',
+						),
+				),
+			4 =>
+				array (
+					'code' => 'PC-55',
+					'features' =>
+						array (
+							'brand' => 'TI',
+							'model' => 'GreyPC-\'98',
+							'motherboard-form-factor' => 'atx',
+							'type' => 'case',
+						),
+				),
+		);
+		$array = [];
+		foreach($items as $item) {
+			/** @var $item Item */
+			$array[] = $item->jsonSerialize();
+		}
+		$this->assertEquals($expected, $array, 'Selected items should encode to some meaningful JSON representation');
+	}
+
+	/**
 	 * @covers \WEEEOpen\Tarallo\Database\Database
 	 * @uses   \WEEEOpen\Tarallo\User
 	 * @uses   \WEEEOpen\Tarallo\Item
