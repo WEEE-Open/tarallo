@@ -29,40 +29,26 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	        }
         	switch($op) {
 		        case 'create':
+		        case 'update':
 			        if(!is_array($itemsArray)) {
-				        throw new InvalidParameterException('"create" parameters should be objects or null, ' . gettype($op) . ' given');
+				        throw new InvalidParameterException('"'.$op.'" value should be array or null, ' . gettype($op) . ' given');
 			        }
 			        $i = 1;
 		        	foreach($itemsArray as $itemPieces) {
 		        		try {
 		        			if($op === 'create') {
+		        				// TODO: can parent be moved into item, instead of doing weird things with pairs?
 						        $pair = $this->buildItem($itemPieces);
+						        // null is cast to empty string: whatever,
+						        $this->newItems[$pair[0]][] = $pair[1]; // parent => item
 					        } else {
-						        $this->updateItems[$itemCode] = $this->buildItemUpdate($itemPieces);
+						        $newItem = $this->buildItemUpdate($itemPieces);
+						        $this->updateItems[$newItem->getCode()] = $newItem;
 					        }
 				        } catch(\Exception $e) {
 		        			throw new InvalidParameterException('Error reading item ' . $i . ' for "' . $op . '": ' . $e->getMessage());
 				        }
-		        		// null is cast to empty string: whatever,
-		        		$this->newItems[$pair[0]][] = $pair[1]; // parent => item
-				        $i++
-			        }
-		        	break;
-		        case 'update':
-			        if(!is_array($itemsArray)) {
-				        throw new InvalidParameterException('"update" parameters should be objects or null, ' . gettype($op) . ' given');
-			        }
-			        foreach($itemsArray as $itemPieces) {
-				        try {
-					        $itemCode = self::codePeek( $itemPieces );
-				        } catch(\InvalidArgumentException $e) {
-
-				        }
-			        	if(is_array($itemPieces)) {
-
-				        } else {
-					        throw new InvalidParameterException($itemCode . ' should be null or object/array, ' . gettype($itemPieces) . ' given');
-				        }
+				        $i++;
 			        }
 		        	break;
 		        case 'delete':
@@ -161,8 +147,20 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	    return $result;
     }
 
+	/**
+	 * Build an Item from various parameters supplied in an array
+	 *
+	 * @param $itemPieces array - random stuff that makes up an item
+	 * @param bool $outer - set to false. Default is false. Used internally.
+	 *
+	 * @return array
+	 * @throws InvalidParameterException
+	 */
 	private function buildItem($itemPieces, $outer = true) {
     	$parent = null;
+    	if(!is_array($itemPieces)) {
+    		throw new InvalidParameterException('Items should be objects, ' . gettype($itemPieces) . ' given';
+	    }
 		$itemCode = self::codePeek($itemPieces);
 		if($this->isDefaultItem($itemPieces)) {
 			if(isset($itemPieces['default'])) {
