@@ -32,26 +32,47 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			        if(!is_array($itemsArray)) {
 				        throw new InvalidParameterException('"create" parameters should be objects or null, ' . gettype($op) . ' given');
 			        }
-		        	foreach($itemsArray as $itemCode => $itemPieces) {
-		        		$pair = $this->buildItem($itemCode, $itemPieces);
+			        $i = 1;
+		        	foreach($itemsArray as $itemPieces) {
+		        		try {
+		        			if($op === 'create') {
+						        $pair = $this->buildItem($itemPieces);
+					        } else {
+						        $this->updateItems[$itemCode] = $this->buildItemUpdate($itemPieces);
+					        }
+				        } catch(\Exception $e) {
+		        			throw new InvalidParameterException('Error reading item ' . $i . ' for "' . $op . '": ' . $e->getMessage());
+				        }
 		        		// null is cast to empty string: whatever,
 		        		$this->newItems[$pair[0]][] = $pair[1]; // parent => item
+				        $i++
 			        }
 		        	break;
 		        case 'update':
 			        if(!is_array($itemsArray)) {
 				        throw new InvalidParameterException('"update" parameters should be objects or null, ' . gettype($op) . ' given');
 			        }
-			        foreach($itemsArray as $itemCode => $itemPieces) {
-			        	if($itemPieces === null) {
-			        		$this->deleteItems[] = $itemCode;
-				        } else if(is_array($itemPieces)) {
-					        $this->updateItems[$itemCode] = $this->buildItemUpdate($itemCode, $itemPieces);
+			        foreach($itemsArray as $itemPieces) {
+				        try {
+					        $itemCode = self::codePeek( $itemPieces );
+				        } catch(\InvalidArgumentException $e) {
+
+				        }
+			        	if(is_array($itemPieces)) {
+
 				        } else {
 					        throw new InvalidParameterException($itemCode . ' should be null or object/array, ' . gettype($itemPieces) . ' given');
 				        }
 			        }
 		        	break;
+		        case 'delete':
+			        if(!is_array($itemsArray)) {
+				        throw new InvalidParameterException('"delete" parameters should be objects or null, ' . gettype($op) . ' given');
+			        }
+			        foreach($itemsArray as $itemCode) {
+				        $this->deleteItems[] = $itemCode;
+			        }
+			        break;
 		        case 'notes':
 		        	if($itemsArray !== null) {
 				        $this->notes = (string) $itemsArray;
@@ -61,6 +82,24 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		        	throw new InvalidParameterException('Unknown action ' . $op);
 	        }
         }
+    }
+
+	/**
+	 * Find unique code in new/edited items and return it.
+	 *
+	 * @param array $array - array of random stuff belonging to an item (content, location, is_default, and so on)
+	 * @return string
+	 */
+    private static function codePeek($array) {
+    	if(isset($array['code'])) {
+    		if(is_string($array['code']) || is_integer($array['code'])) {
+    			return $array['code'];
+		    } else {
+			    throw new \InvalidArgumentException('Expected string or int, got ' . gettype($array['code']));
+		    }
+	    } else {
+    		throw new \InvalidArgumentException('Missing "code" parameter');
+	    }
     }
 
     public function run($user, Database $db) {
@@ -122,8 +161,9 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	    return $result;
     }
 
-	private function buildItem($itemCode, $itemPieces, $outer = true) {
+	private function buildItem($itemPieces, $outer = true) {
     	$parent = null;
+		$itemCode = self::codePeek($itemPieces);
 		if($this->isDefaultItem($itemPieces)) {
 			if(isset($itemPieces['default'])) {
 				throw new InvalidParameterException('Default items cannot point to other default items ("is_default": true and "default": "' . $itemPieces['default'] . '")');
@@ -136,13 +176,19 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 				$item = new Item($itemCode);
 			}
 		}
-		if($this->isArrayIgnoreNull($itemCode, $itemPieces)) {
+		if($this->isArrayIgnoreNull(null, $itemPieces)) {
 			foreach($itemPieces as $key => $value) {
 				switch($key) {
 					case 'is_default':
 					case 'default':
 						continue;
 						break; // purely for decoration
+					case 'code':
+						if($item->getCode() === (string) $value) {
+							continue;
+						} else {
+							throw new \LogicException('Code "' . $item->getCode() . '"" changed to "' . $value . '"');
+						}
 					case 'parent':
 						if($outer) {
 							if($parent !== null) {
@@ -170,9 +216,9 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 							if($item instanceof ItemDefault) {
 								throw new InvalidParameterException('Default items cannot contain other items, found ' . $key . ' inside ' . $item);
 							}
-							foreach($value as $featureName => $featureValue) {
+							foreach($value as $featureValue) {
 								// yay recursion!
-								$pair = $this->buildItem($featureName, $featureValue, false);
+								$pair = $this->buildItem($featureValue, false);
 								$item->addContent($pair[1]);
 							}
 						}
@@ -231,6 +277,17 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		return false;
 	}
 
+	/**
+	 * Is it an array? True
+	 * Is it null? False
+	 * Is it anything else? Throw an exception
+	 *
+	 * @param $key mixed|null some identifier, used only for the exception
+	 * @param $value mixed value to be checked
+	 *
+	 * @return bool true if array, false if null
+	 * @throws InvalidParameterException
+	 */
 	private static function isArrayIgnoreNull($key, $value) {
 		if($value === null) {
 			return false;
@@ -238,6 +295,10 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		if(is_array($value)) {
 			return true;
 		}
-		throw new InvalidParameterException('"' . $key . '" should be an object or null, ' . gettype($value) . ' given');
+		if($key === null) {
+			throw new InvalidParameterException('Should be an object or null, ' . gettype( $value ) . ' given');
+		} else {
+			throw new InvalidParameterException($key . ' should be an object or null, ' . gettype( $value ) . ' given');
+		}
 	}
 }
