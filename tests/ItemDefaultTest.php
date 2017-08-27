@@ -57,4 +57,24 @@ class ItemDefaultTest extends TestCase {
 		$this->expectException(LogicException::class);
 		(new ItemDefault('TEST'))->addFeatureDefault('capacity-byte', 9002);
 	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\ItemDefault
+	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
+	 * @uses           \WEEEOpen\Tarallo\Item
+	 */
+	public function testAddAncestor() {
+		$this->expectException(LogicException::class);
+		(new ItemDefault('TEST'))->addAncestor(1, "STUFF");
+	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\ItemDefault
+	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
+	 * @uses           \WEEEOpen\Tarallo\Item
+	 */
+	public function testGetAncestor() {
+		$item = new ItemDefault('TEST');
+		$this->assertEquals(null, $item->getAncestor(1), 'ItemDefault should have null ancestors (for compatibility with Item)');
+	}
 }
