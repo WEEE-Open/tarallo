@@ -154,7 +154,6 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	 * @throws InvalidParameterException
 	 */
 	private function buildItem($itemPieces, $outer = true) {
-    	$parent = null;
     	if(!is_array($itemPieces)) {
     		throw new InvalidParameterException('Items should be objects, ' . gettype($itemPieces) . ' given');
 	    }
@@ -179,22 +178,20 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 						continue;
 						break; // purely for decoration
 					case 'code':
-						if($item->getCode() === (string) $value) {
+						if($item->getCode() === Item::sanitizeCode($value)) {
 							continue;
 						} else {
-							throw new \LogicException('Code "' . $item->getCode() . '"" changed to "' . $value . '"');
+							throw new \LogicException('Code "' . $item->getCode() . '"" changed to "' . Item::sanitizeCode($value) . '"');
 						}
 					case 'parent':
 						if($outer) {
-							if($parent !== null) {
-								try {
-									$item->addAncestor(1, $parent);
-								} catch(InvalidParameterException $e) {
-									throw new InvalidParameterException('Invalid parent "' . $parent . '": ' . $e->getMessage());
-								}
+							try {
+								$item->addAncestor(1, $value);
+							} catch(InvalidParameterException $e) {
+								throw new InvalidParameterException('Invalid parent "' . $value . '": ' . $e->getMessage());
 							}
 						} else {
-							throw new InvalidParameterException('Inner items cannot set their parent item explicitly (parent = ' . $parent . ')');
+							throw new InvalidParameterException('Inner items cannot set their parent item explicitly (parent = ' . $value . ')');
 						}
 						break;
 					case 'features':
@@ -227,7 +224,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		return $item;
 	}
 
-	private function buildItemUpdate($itemCode, $itemPieces) {
+	private function buildItemUpdate($itemPieces) {
 		$item = new ItemUpdate($itemCode);
 		foreach($itemPieces as $key => $value) {
 			switch($key) {
