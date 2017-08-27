@@ -2,8 +2,6 @@
 
 namespace WEEEOpen\Tarallo\Query;
 
-
-use PHPUnit\DbUnit\Operation\Exception;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Item;
@@ -37,10 +35,9 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		        	foreach($itemsArray as $itemPieces) {
 		        		try {
 		        			if($op === 'create') {
-		        				// TODO: can parent be moved into item, instead of doing weird things with pairs?
-						        $pair = $this->buildItem($itemPieces);
-						        // null is cast to empty string: whatever,
-						        $this->newItems[$pair[0]][] = $pair[1]; // parent => item
+						        $newItem = $this->buildItem($itemPieces);
+						        // null is cast to empty string, whatever
+						        $this->newItems[$newItem->getParentCode()][] = $newItem;
 					        } else {
 						        $newItem = $this->buildItemUpdate($itemPieces);
 						        $this->updateItems[$newItem->getCode()] = $newItem;
@@ -106,7 +103,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	        foreach($this->deleteItems as $item) {
 		        $db->treeDAO()->removeFromTree($item);
 	        }
-        } catch(Exception $e) {
+        } catch(\Exception $e) {
         	$db->modificationDAO()->modificationRollback();
         	throw $e;
         }
@@ -153,13 +150,13 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	 * @param $itemPieces array - random stuff that makes up an item
 	 * @param bool $outer - set to false. Default is false. Used internally.
 	 *
-	 * @return array
+	 * @return Item
 	 * @throws InvalidParameterException
 	 */
 	private function buildItem($itemPieces, $outer = true) {
     	$parent = null;
     	if(!is_array($itemPieces)) {
-    		throw new InvalidParameterException('Items should be objects, ' . gettype($itemPieces) . ' given';
+    		throw new InvalidParameterException('Items should be objects, ' . gettype($itemPieces) . ' given');
 	    }
 		$itemCode = self::codePeek($itemPieces);
 		if($this->isDefaultItem($itemPieces)) {
@@ -191,9 +188,9 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 						if($outer) {
 							if($parent !== null) {
 								try {
-									$parent = ItemIncomplete::sanitizeCode($parent);
+									$item->addAncestor(1, $parent);
 								} catch(InvalidParameterException $e) {
-									throw new InvalidParameterException('Invalid "parent": ' . $e->getMessage());
+									throw new InvalidParameterException('Invalid parent "' . $parent . '": ' . $e->getMessage());
 								}
 							}
 						} else {
@@ -216,8 +213,8 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 							}
 							foreach($value as $featureValue) {
 								// yay recursion!
-								$pair = $this->buildItem($featureValue, false);
-								$item->addContent($pair[1]);
+								$innerItem = $this->buildItem($featureValue, false);
+								$item->addContent($innerItem);
 							}
 						}
 						break;
@@ -227,7 +224,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 				}
 			}
 		}
-		return [$parent, $item];
+		return $item;
 	}
 
 	private function buildItemUpdate($itemCode, $itemPieces) {
