@@ -37,7 +37,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		        			if($op === 'create') {
 						        $newItem = $this->buildItem($itemPieces);
 						        // null is cast to empty string, whatever
-						        $this->newItems[$newItem->getParentCode()][] = $newItem;
+						        $this->newItems[$newItem->getAncestor(1)->getCode()][] = $newItem; // parent => item
 					        } else {
 						        $newItem = $this->buildItemUpdate($itemPieces);
 						        $this->updateItems[$newItem->getCode()] = $newItem;
@@ -65,24 +65,6 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		        	throw new InvalidParameterException('Unknown action ' . $op);
 	        }
         }
-    }
-
-	/**
-	 * Find unique code in new/edited items and return it.
-	 *
-	 * @param array $array - array of random stuff belonging to an item (content, location, is_default, and so on)
-	 * @return string
-	 */
-    private static function codePeek($array) {
-    	if(isset($array['code'])) {
-    		if(is_string($array['code']) || is_integer($array['code'])) {
-    			return $array['code'];
-		    } else {
-			    throw new \InvalidArgumentException('Expected string or int, got ' . gettype($array['code']));
-		    }
-	    } else {
-    		throw new \InvalidArgumentException('Missing "code" parameter');
-	    }
     }
 
     public function run($user, Database $db) {
@@ -158,7 +140,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
     		throw new InvalidParameterException('Items should be objects, ' . gettype($itemPieces) . ' given');
 	    }
 		$itemCode = self::codePeek($itemPieces);
-		if($this->isDefaultItem($itemPieces)) {
+		if($this->isDefaultItemPeek($itemPieces)) {
 			if(isset($itemPieces['default'])) {
 				throw new InvalidParameterException('Default items cannot point to other default items ("is_default": true and "default": "' . $itemPieces['default'] . '")');
 			}
@@ -225,6 +207,10 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	}
 
 	private function buildItemUpdate($itemPieces) {
+		if(!is_array($itemPieces)) {
+			throw new InvalidParameterException('Items should be objects, ' . gettype($itemPieces) . ' given');
+		}
+		$itemCode = self::codePeek($itemPieces);
 		$item = new ItemUpdate($itemCode);
 		foreach($itemPieces as $key => $value) {
 			switch($key) {
@@ -259,7 +245,13 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		return $item;
 	}
 
-	private static function isDefaultItem($pieces) {
+	/**
+	 * Checks if is_default === true, basically.
+	 *
+	 * @param $pieces - array of random stuff belonging to an item (content, location, is_default, and so on)
+	 * @return bool is it a default item?
+	 */
+	private static function isDefaultItemPeek($pieces) {
     	if(!is_array($pieces)) {
     		return false;
 	    }
@@ -267,6 +259,24 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Find unique code in new/edited items and return it.
+	 *
+	 * @param array $pieces - array of random stuff belonging to an item (content, location, is_default, and so on)
+	 * @return string
+	 */
+	private static function codePeek($pieces) {
+		if(isset($pieces['code'])) {
+			if(is_string($pieces['code']) || is_integer($pieces['code'])) {
+				return $pieces['code'];
+			} else {
+				throw new \InvalidArgumentException('Expected string or int, got ' . gettype($pieces['code']));
+			}
+		} else {
+			throw new \InvalidArgumentException('Missing "code" parameter');
+		}
 	}
 
 	/**

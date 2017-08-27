@@ -59,21 +59,28 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	public function addAncestor($distance, $code) {
 		$distance = (int) $distance;
 		if($distance < 1) {
-			throw new \InvalidArgumentException('Ancestor distance too small: ' . $code .' is at distance ' . $distance . ' from its descendant' . $this->getCode());
+			throw new \InvalidArgumentException('Ancestor distance too small: ' . $code .' is at distance ' . $distance . ' from its descendant ' . $this->getCode());
 		}
 
-		$this->location[--$distance] = self::sanitizeCode($code);
+		$this->location[--$distance] = new ItemIncomplete($code);
 	}
 
 	/**
-	 * Get immediate parent of an item from its "location", if set.
+	 * Get ancestor of an item from its "location", if set.
 	 * Null if not set.
 	 *
-	 * @return string|null parent code
+	 * @param int $distance 1 for direct parent, 2 for parent's parent, etc... 0 or less is invalid.
+	 * @throws \InvalidArgumentException if distance is less than 1
+	 * @return ItemIncomplete|null parent code
 	 */
-	public function getParentCode() {
-		if(isset($this->location[0])) {
-			return $this->location[0];
+	public function getAncestor($distance) {
+		if($distance < 1) {
+			throw new \InvalidArgumentException('Ancestor distance ' . $distance . ' too small in ' . $this->getCode());
+		}
+		$distance--;
+
+		if(isset($this->location[$distance])) {
+			return $this->location[$distance];
 		} else {
 			return null;
 		}
