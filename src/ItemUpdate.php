@@ -62,10 +62,17 @@ class ItemUpdate extends Item implements \JsonSerializable {
 		throw new \LogicException('Cannot add Items inside ItemUpdate objects, use setParent() to move items instead');
 	}
 
+	/**
+	 * @return ItemIncomplete|null
+	 */
 	public function getParent() {
 		return $this->parent;
 	}
 
+	/**
+	 * @param ItemIncomplete|null $parent
+	 * @return ItemUpdate $this
+	 */
 	public function setParent($parent) {
 		if($parent instanceof ItemIncomplete || $parent === null) {
 			$this->parent = $parent;
@@ -76,6 +83,9 @@ class ItemUpdate extends Item implements \JsonSerializable {
 		return $this;
 	}
 
+	/**
+	 * @return bool
+	 */
 	public function getParentChanged() {
 		return $this->parentChanged;
 	}
