@@ -12,11 +12,6 @@ use WEEEOpen\Tarallo\User;
 
 class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	private $newItems = [];
-	/**
-	 * What is this even for?
-	 * @var array
-	 * @deprecated
-	 */
 	private $newItemsNoParent = [];
 	private $updateItems = [];
 	private $deleteItems = [];
@@ -43,9 +38,11 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		        			if($op === 'create') {
 						        $newItem = $this->buildItem($itemPieces);
 						        $parent = $newItem->getAncestor(1);
-						        $parentCode = $parent instanceof ItemIncomplete ? $parent->getCode() : null;
-						        // null is cast to empty string, whatever
-						        $this->newItems[$parentCode][] = $newItem;
+						        if($parent === null) {
+							        $this->newItemsNoParent[] = $newItem;
+						        } else {
+							        $this->newItems[$parent->getCode()][] = $newItem;
+						        }
 					        } else {
 						        $newItem = $this->buildItemUpdate($itemPieces);
 						        $this->updateItems[$newItem->getCode()] = $newItem;
@@ -101,8 +98,20 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
         // TODO: return newly inserted items?
     }
 
+	/**
+	 * JSON serialize query back to its original form.
+	 * Note that "create" items are reordered due to internal implementation: ones without parents come first.
+	 *
+	 * @return array
+	 */
     function jsonSerialize() {
         $result = [];
+	    if(!empty($this->newItemsNoParent)) {
+		    foreach($this->newItemsNoParent as $item) {
+		    	// TODO: is calling jsonSerializable explicitly really needed?
+			    $result['create'][] = $item->jsonSerialize();
+		    }
+	    }
         if(!empty($this->newItems)) {
         	foreach($this->newItems as $parent => $items) {
         		foreach($items as $item) {
@@ -113,12 +122,6 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			        }
 			        $result['create'][] = $serialItemzed;
 		        }
-	        }
-        }
-        if(!empty($this->newItemsNoParent)) {
-        	// TODO: remove?
-        	foreach($this->newItemsNoParent as $item) {
-		        $result['create'][] = $item->jsonSerialize();
 	        }
         }
 	    if(!empty($this->updateItems)) {
@@ -223,6 +226,12 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		$item = new ItemUpdate($itemCode);
 		foreach($itemPieces as $key => $value) {
 			switch($key) {
+				case 'code':
+					if($item->getCode() === ItemUpdate::sanitizeCode($value)) {
+						continue;
+					} else {
+						throw new \LogicException('Code "' . $item->getCode() . '"" changed to "' . Item::sanitizeCode($value) . '"');
+					}
 				case 'is_default':
 					$item->setIsDefault($value);
 					break;
