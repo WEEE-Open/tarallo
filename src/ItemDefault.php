@@ -2,7 +2,13 @@
 
 namespace WEEEOpen\Tarallo;
 
-
+/**
+ * Class ItemDefault
+ * Default items. They're simply Item objects, with some properties missing (e.g. no ancestors, no default code).
+ * is_default is always set to true in JSON serialization
+ *
+ * @package WEEEOpen\Tarallo
+ */
 class ItemDefault extends Item implements \JsonSerializable {
 	public function __construct($code) {
 		parent::__construct($code, null);

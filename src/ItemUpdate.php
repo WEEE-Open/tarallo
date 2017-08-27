@@ -2,7 +2,12 @@
 
 namespace WEEEOpen\Tarallo;
 
-
+/**
+ * Class ItemUpdate
+ * "Patches" for items. Completely different from Item, even though extends Item.
+ *
+ * @package WEEEOpen\Tarallo
+ */
 class ItemUpdate extends Item implements \JsonSerializable {
 	private $isDefault = false;
 	private $parent = null;
@@ -54,12 +59,20 @@ class ItemUpdate extends Item implements \JsonSerializable {
 		}
 	}
 
-	public function addFeatureDefault($name, $value) {
+	public final function addFeatureDefault($name, $value) {
 		throw new \LogicException('Cannot add default features to ItemUpdate as they will be ignored');
 	}
 
-	public function addContent(Item $item) {
+	public final function addContent(Item $item) {
 		throw new \LogicException('Cannot add Items inside ItemUpdate objects, use setParent() to move items instead');
+	}
+
+	public final function addAncestor($distance, $code) {
+		throw new \LogicException('Cannot edit full ancestor sequence for item updates, use setParent instead');
+	}
+
+	public final function getAncestor($distance) {
+		throw new \LogicException('Cannot edit full ancestor sequence for item updates, use getParent instead');
 	}
 
 	/**

@@ -1,7 +1,12 @@
 <?php
 namespace WEEEOpen\Tarallo;
 
-
+/**
+ * Class ItemIncomplete
+ * An item code and that's it. Sanitizes codes, serializes to a string.
+ *
+ * @package WEEEOpen\Tarallo
+ */
 class ItemIncomplete implements \JsonSerializable {
 	private $code;
 

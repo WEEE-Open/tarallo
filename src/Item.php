@@ -1,7 +1,13 @@
 <?php
 namespace WEEEOpen\Tarallo;
 
-
+/**
+ * Class Item
+ * Regular items.
+ * Note that is_default is always set to false in JSON serialization, use ItemDefault to represent default items instead
+ *
+ * @package WEEEOpen\Tarallo
+ */
 class Item extends ItemIncomplete implements \JsonSerializable {
 	private $features = [];
 	private $featuresDefault = [];
