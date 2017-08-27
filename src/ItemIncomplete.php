@@ -2,7 +2,7 @@
 namespace WEEEOpen\Tarallo;
 
 
-class ItemIncomplete {
+class ItemIncomplete implements \JsonSerializable {
 	private $code;
 
 	function __construct($code) {
@@ -27,5 +27,9 @@ class ItemIncomplete {
 
 	public function getCode() {
 		return $this->code;
+	}
+
+	public function jsonSerialize() {
+		return $this->getCode();
 	}
 }
