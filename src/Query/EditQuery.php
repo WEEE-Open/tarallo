@@ -12,6 +12,11 @@ use WEEEOpen\Tarallo\User;
 
 class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	private $newItems = [];
+	/**
+	 * What is this even for?
+	 * @var array
+	 * @deprecated
+	 */
 	private $newItemsNoParent = [];
 	private $updateItems = [];
 	private $deleteItems = [];
@@ -20,7 +25,8 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
     protected function parseContent($array) {
         foreach($array as $op => $itemsArray) {
         	if(!is_string($op)) {
-		        throw new InvalidParameterException('Action identifiers should be strings, ' . gettype($op) . ' given');
+        		// that would come from invalid JSON...
+		        throw new \InvalidArgumentException('Action identifiers should be strings, ' . gettype($op) . ' given');
 	        }
 	        if($itemsArray === null) {
         		continue;
@@ -36,8 +42,10 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		        		try {
 		        			if($op === 'create') {
 						        $newItem = $this->buildItem($itemPieces);
+						        $parent = $newItem->getAncestor(1);
+						        $parentCode = $parent instanceof ItemIncomplete ? $parent->getCode() : null;
 						        // null is cast to empty string, whatever
-						        $this->newItems[$newItem->getAncestor(1)->getCode()][] = $newItem; // parent => item
+						        $this->newItems[$parentCode][] = $newItem;
 					        } else {
 						        $newItem = $this->buildItemUpdate($itemPieces);
 						        $this->updateItems[$newItem->getCode()] = $newItem;
@@ -108,6 +116,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	        }
         }
         if(!empty($this->newItemsNoParent)) {
+        	// TODO: remove?
         	foreach($this->newItemsNoParent as $item) {
 		        $result['create'][] = $item->jsonSerialize();
 	        }
@@ -117,7 +126,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	    }
 	    if(!empty($this->deleteItems)) {
         	foreach($this->deleteItems as $item) {
-		        $result['update'][$item] = null;
+		        $result['delete'][] = $item;
 	        }
 	    }
 	    if($this->notes !== null) {
@@ -132,7 +141,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	 * @param $itemPieces array - random stuff that makes up an item
 	 * @param bool $outer - set to false. Default is false. Used internally.
 	 *
-	 * @return Item
+	 * @return Item|ItemDefault
 	 * @throws InvalidParameterException
 	 */
 	private function buildItem($itemPieces, $outer = true) {

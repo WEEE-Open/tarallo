@@ -85,16 +85,16 @@ class EditQueryTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\ItemUpdate
 	 */
 	public function testCreateSimpleItem() {
-		$out = json_decode( json_encode(new EditQuery('{"create":{"PC-72":{}}}')),true);
+		$out = json_decode( json_encode(new EditQuery('{"create":[{"code":"PC-72"}]}')),true);
 		$this->assertEquals(['create' => [['code' => 'PC-72']]], $out);
 
-		$out = json_decode( json_encode(new EditQuery('{"create":{"PC-72":{"is_default":false}}}')),true);
+		$out = json_decode( json_encode(new EditQuery('{"create":[{"code":"PC-72", "is_default":false}]}')),true);
 		$this->assertEquals(['create' => [['code' => 'PC-72']]], $out);
 
-		$out = json_decode( json_encode(new EditQuery('{"create":{"PC-72":{"is_default":true}}}')),true);
+		$out = json_decode( json_encode(new EditQuery('{"create":[{"code":"PC-72", "is_default":true}]}')),true);
 		$this->assertEquals(['create' => [['code' => 'PC-72', 'is_default' => true]]], $out);
 
-		$out = json_decode( json_encode(new EditQuery('{"create":{"PC-72":{"is_default":false,"default":"ASD"}}}')),true);
+		$out = json_decode( json_encode(new EditQuery('{"create":[{"code":"PC-72", "is_default":false,"default":"ASD"}]}')),true);
 		$this->assertEquals(['create' => [['code' => 'PC-72', 'default' => 'ASD']]], $out);
 	}
 
@@ -108,11 +108,29 @@ class EditQueryTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
 	 * @uses           \WEEEOpen\Tarallo\ItemUpdate
 	 */
+	public function testDeleteItem() {
+		$out = json_decode(json_encode(new EditQuery('{"delete":["PC-12"]}')),true);
+		$this->assertEquals(['delete' => ['PC-12']], $out);
+
+		$out = json_decode( json_encode(new EditQuery('{"delete":["PC-12", "PC-13", "PC-3000"]}')),true);
+		$this->assertEquals(['delete' => ['PC-12', 'PC-13', 'PC-3000']], $out);
+	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\Query\PostJSONQuery
+	 * @covers         \WEEEOpen\Tarallo\Query\EditQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\PostJSONQuery
+	 * @uses           \WEEEOpen\Tarallo\Item
+	 * @uses           \WEEEOpen\Tarallo\ItemDefault
+	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
+	 * @uses           \WEEEOpen\Tarallo\ItemUpdate
+	 */
 	public function testCreateSimpleItemWithNotes() {
-		$out = json_decode(json_encode(new EditQuery('{"create":{"PC-72":{}},"notes":"Created PC-72, ya its gud"}')), true);
+		$out = json_decode(json_encode(new EditQuery('{"create":[{"code":"PC-72"}],"notes":"Created PC-72, ya its gud"}')), true);
 		$this->assertEquals(['create' => [['code' => 'PC-72']], 'notes' => 'Created PC-72, ya its gud'], $out);
 
-		$out = json_decode(json_encode(new EditQuery('{"create":{"PC-72":{}},"notes":null}')), true);
+		$out = json_decode(json_encode(new EditQuery('{"create":[{"code":"PC-72"}],"notes":null}')), true);
 		$this->assertEquals(['create' => [['code' => 'PC-72']]], $out);
 	}
 
@@ -127,7 +145,7 @@ class EditQueryTest extends TestCase{
 	 * @uses           \WEEEOpen\Tarallo\ItemUpdate
 	 */
 	public function testNullAction() {
-		$out = json_decode(json_encode(new EditQuery('{"create":{"PC-72":{}},"update":null}')), true);
+		$out = json_decode(json_encode(new EditQuery('{"create":[{"code":"PC-72"}],"update":null}')), true);
 		$this->assertEquals(['create' => [['code' => 'PC-72']]], $out);
 	}
 
@@ -144,6 +162,36 @@ class EditQueryTest extends TestCase{
 	 */
 	public function testCreateInvalidItemDefaultAndIsDefault() {
 		$this->expectException(InvalidParameterException::class);
-		new EditQuery('{"create":{"PC-72":{"is_default":true,"default":"ASD"}}}');
+		new EditQuery('{"create":[{"code":"PC-72","is_default":true,"default":"ASD"}]}');
+	}
+
+	/**
+	 * @uses           \WEEEOpen\Tarallo\Query\PostJSONQuery
+	 * @covers         \WEEEOpen\Tarallo\Query\EditQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\PostJSONQuery
+	 * @uses           \WEEEOpen\Tarallo\Item
+	 * @uses           \WEEEOpen\Tarallo\ItemDefault
+	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
+	 * @uses           \WEEEOpen\Tarallo\ItemUpdate
+	 */
+	public function testInvalidAction() {
+		$this->expectException(InvalidParameterException::class);
+		new EditQuery('{"fai_cose":[{"code":"PC-72"}]}');
+	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\Query\PostJSONQuery
+	 * @covers         \WEEEOpen\Tarallo\Query\EditQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
+	 * @uses           \WEEEOpen\Tarallo\Query\PostJSONQuery
+	 * @uses           \WEEEOpen\Tarallo\Item
+	 * @uses           \WEEEOpen\Tarallo\ItemDefault
+	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
+	 * @uses           \WEEEOpen\Tarallo\ItemUpdate
+	 */
+	public function testInvalidActionType() {
+		$this->expectException(InvalidParameterException::class);
+		new EditQuery('{42:[{"code":"PC-72"}]}');
 	}
 }
