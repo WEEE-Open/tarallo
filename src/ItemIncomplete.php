@@ -37,4 +37,8 @@ class ItemIncomplete implements \JsonSerializable {
 	public function jsonSerialize() {
 		return $this->getCode();
 	}
+
+	public function __toString() {
+		return $this->getCode();
+	}
 }
