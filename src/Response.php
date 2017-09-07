@@ -5,14 +5,13 @@ use JSend\JSendResponse;
 
 class Response {
 	public static function sendSuccess($data = null) {
-		http_response_code(200);
 		$response = new JSendResponse(JSendResponse::SUCCESS, $data);
+		http_response_code(200);
 		$response->respond();
 		exit(0);
 	}
 
 	public static function sendFail($message = null, $fields = null) {
-		http_response_code(200);
 		$data = [];
 
 		if(is_string($message)) {
@@ -28,13 +27,14 @@ class Response {
 		}
 
 		$response = new JSendResponse(JSendResponse::FAIL, $data);
+		http_response_code(200);
 		$response->respond();
 		exit(0);
 	}
 
 	public static function sendError($message, $code = null) {
-		http_response_code(200);
 		$response = new JSendResponse(JSendResponse::ERROR, null, $message, $code);
+		http_response_code(200);
 		$response->respond();
 		exit(1);
 	}
