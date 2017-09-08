@@ -18,9 +18,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	private $notes = null;
 
     protected function parseContent($array) {
-    	$anything = false;
         foreach($array as $op => $itemsArray) {
-        	$anything = true;
         	if(!is_string($op)) {
         		// that would come from invalid JSON...
 		        throw new \InvalidArgumentException('Action identifiers should be strings, ' . gettype($op) . ' given');
@@ -72,7 +70,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		        	throw new InvalidParameterException('Unknown action ' . $op);
 	        }
         }
-        if(!$anything) {
+        if(count($this->newItems) === 0 && count($this->newItemsNoParent) === 0 && count($this->updateItems) === 0 && count($this->deleteItems) === 0) {
         	throw new InvalidParameterException('Nothing was requested and nothing was done');
         }
     }
