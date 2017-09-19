@@ -10,22 +10,48 @@ use WEEEOpen\Tarallo\User;
 final class ModificationDAO extends DAO {
 	private $currentModificationId = null;
 
+	/**
+	 * Mark that an Item was moved. Or deleted.
+	 *
+	 * @param ItemIncomplete $item - item that has been moved
+	 * @param int|null $to - new parent ID, or null if deleted
+	 *
+	 * @throws InvalidParameterException
+	 */
 	public function setItemMoved(ItemIncomplete $item, $to) {
 		$to = $this->itemToIdOrNull($to);
+		if($to === null) {
+			$this->setItemMovedDeleted($item);
+		} else {
+			$this->setItemMovedTo($item, $to);
+		}
+	}
+
+	private $itemLocationModifiedStatement = null;
+
+	private function setItemMovedTo(ItemIncomplete $item, $to) {
 		$itemID = $this->database->itemDAO()->getItemId($item);
 
-		$pdo = $this->getPDO();
-		if($this->itemModifiedStatement === null) {
-			$this->itemModifiedStatement = $pdo->prepare('INSERT INTO ItemLocationModification (ModificationID, ItemID, ParentTo) VALUES (?, ?, ?)');
+		if($this->itemLocationModifiedStatement === null) {
+			$this->itemLocationModifiedStatement = $this->getPDO()->prepare('INSERT INTO ItemLocationModification (ModificationID, ItemID, ParentTo) VALUES (?, ?, ?)');
 		}
-		$this->itemModifiedStatement->bindValue(1, $this->getModificationId(), \PDO::PARAM_INT);
-		$this->itemModifiedStatement->bindValue(2, $itemID, \PDO::PARAM_INT);
-		if($to === null) {
-			$this->itemModifiedStatement->bindValue(3, null, \PDO::PARAM_NULL);
-		} else {
-			$this->itemModifiedStatement->bindValue(3, $to, \PDO::PARAM_INT);
+		$this->itemLocationModifiedStatement->bindValue(1, $this->getModificationId(), \PDO::PARAM_INT);
+		$this->itemLocationModifiedStatement->bindValue(2, $itemID, \PDO::PARAM_INT);
+		$this->itemLocationModifiedStatement->bindValue(3, $to, \PDO::PARAM_INT);
+		$this->itemLocationModifiedStatement->execute();
+	}
+
+	private $itemDeletedStatement = null;
+
+	private function setItemMovedDeleted(ItemIncomplete $item) {
+		$itemID = $this->database->itemDAO()->getItemId($item);
+
+		if($this->itemDeletedStatement === null) {
+			$this->itemDeletedStatement = $this->getPDO()->prepare('INSERT INTO ItemModificationDelete (ModificationID, ItemID) VALUES (?, ?)');
 		}
-		$this->itemModifiedStatement->execute();
+		$this->itemDeletedStatement->bindValue(1, $this->getModificationId(), \PDO::PARAM_INT);
+		$this->itemDeletedStatement->bindValue(2, $itemID, \PDO::PARAM_INT);
+		$this->itemDeletedStatement->execute();
 	}
 
 	private function itemToIdOrNull($item) {
