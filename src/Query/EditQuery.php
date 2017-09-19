@@ -58,7 +58,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 				        throw new InvalidParameterException('"delete" parameters should be objects or null, ' . gettype($op) . ' given');
 			        }
 			        foreach($itemsArray as $itemCode) {
-				        $this->deleteItems[] = $itemCode;
+				        $this->deleteItems[] = new ItemIncomplete($itemCode);
 			        }
 			        break;
 		        case 'notes':
