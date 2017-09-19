@@ -62,7 +62,7 @@ CREATE TABLE `ItemLocationModification` (
   `ModificationID` bigint(20) unsigned NOT NULL,
   `ItemID` bigint(20) unsigned NOT NULL,
   -- parentFrom is useless if adding an item also creates a new row here: first row is the original parent...
-  `ParentTo` bigint(20) unsigned NOT NULL,
+  `ParentTo` bigint(20) unsigned, -- TODO: this becomes "NOT NULL default 0" despite thousands of people ragingly saying on the internet that int fields should be NULLable. I guess the foreign key has something to do with this. Look into this.
   PRIMARY KEY (`ModificationID`,`ParentTo`),
   KEY (`ParentTo`),
   CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`) ON DELETE NO ACTION ON UPDATE CASCADE,
@@ -114,4 +114,3 @@ CREATE TABLE `User` (
 	UNIQUE KEY (`Name`),
 	INDEX (`Name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
