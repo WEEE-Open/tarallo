@@ -63,7 +63,7 @@ CREATE TABLE `ItemLocationModification` (
   `ItemID` bigint(20) unsigned NOT NULL,
   -- parentFrom is useless if adding an item also creates a new row here: first row is the original parent...
   `ParentTo` bigint(20) unsigned NOT NULL,
-  PRIMARY KEY (`ModificationID`,`ParentTo`),
+  PRIMARY KEY (`ModificationID`,`ItemID`),
   KEY (`ParentTo`),
   CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`) ON DELETE NO ACTION ON UPDATE CASCADE,
   CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE,
