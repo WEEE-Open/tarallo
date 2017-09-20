@@ -14,12 +14,11 @@ final class ModificationDAO extends DAO {
 	 * Mark that an Item was moved. Or deleted.
 	 *
 	 * @param ItemIncomplete $item - item that has been moved
-	 * @param int|null $to - new parent ID, or null if deleted
+	 * @param ItemIncomplete|null $to - new parent, or null if deleted
 	 *
 	 * @throws InvalidParameterException
 	 */
-	public function setItemMoved(ItemIncomplete $item, $to) {
-		$to = $this->itemToIdOrNull($to);
+	public function setItemMoved(ItemIncomplete $item, ItemIncomplete $to = null) {
 		if($to === null) {
 			$this->setItemMovedDeleted($item);
 		} else {
@@ -29,15 +28,16 @@ final class ModificationDAO extends DAO {
 
 	private $itemLocationModifiedStatement = null;
 
-	private function setItemMovedTo(ItemIncomplete $item, $to) {
+	private function setItemMovedTo(ItemIncomplete $item, ItemIncomplete $to) {
 		$itemID = $this->database->itemDAO()->getItemId($item);
+		$parentID = $this->database->itemDAO()->getItemId($to);
 
 		if($this->itemLocationModifiedStatement === null) {
 			$this->itemLocationModifiedStatement = $this->getPDO()->prepare('INSERT INTO ItemLocationModification (ModificationID, ItemID, ParentTo) VALUES (?, ?, ?)');
 		}
 		$this->itemLocationModifiedStatement->bindValue(1, $this->getModificationId(), \PDO::PARAM_INT);
 		$this->itemLocationModifiedStatement->bindValue(2, $itemID, \PDO::PARAM_INT);
-		$this->itemLocationModifiedStatement->bindValue(3, $to, \PDO::PARAM_INT);
+		$this->itemLocationModifiedStatement->bindValue(3, $parentID, \PDO::PARAM_INT);
 		$this->itemLocationModifiedStatement->execute();
 	}
 
@@ -52,18 +52,6 @@ final class ModificationDAO extends DAO {
 		$this->itemDeletedStatement->bindValue(1, $this->getModificationId(), \PDO::PARAM_INT);
 		$this->itemDeletedStatement->bindValue(2, $itemID, \PDO::PARAM_INT);
 		$this->itemDeletedStatement->execute();
-	}
-
-	private function itemToIdOrNull($item) {
-		if($item === null) {
-			return null;
-		}
-
-		if($item instanceof ItemIncomplete) {
-			return $this->database->itemDAO()->getItemId($item);
-		}
-
-		throw new InvalidParameterException('itemToIdOrNull() expects ItemIncomplete or null, ' . gettype($item) . ' given');
 	}
 
 	private $itemModifiedStatement = null;
