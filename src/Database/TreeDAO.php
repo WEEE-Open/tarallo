@@ -10,6 +10,8 @@ final class TreeDAO extends DAO {
 	 *
 	 * @param ItemIncomplete $child new Item
 	 * @param ItemIncomplete|null $parent some existing Item as parent, NULL if it has no parent (root Item)
+	 *
+	 * @throws \WEEEOpen\Tarallo\InvalidParameterException
 	 */
     public function addToTree(ItemIncomplete $child, ItemIncomplete $parent = null) {
         $this->addItemAsRoot($child);
@@ -24,6 +26,8 @@ final class TreeDAO extends DAO {
 	 *
 	 * @param ItemIncomplete $item Item to move
 	 * @param ItemIncomplete|null $newParent some existing Item as parent, NULL if parent should be removed (turn into root Item)
+	 *
+	 * @throws \WEEEOpen\Tarallo\InvalidParameterException
 	 */
     public function moveItem(ItemIncomplete $item, ItemIncomplete $newParent = null) {
     	$this->splitSubtree($item);
@@ -61,6 +65,8 @@ final class TreeDAO extends DAO {
 	 * Items outside Tree are ignored by almost every query, so this is the most important step to bring an item into existence.
 	 *
 	 * @param ItemIncomplete $item
+	 *
+	 * @throws \WEEEOpen\Tarallo\InvalidParameterException
 	 */
 	private function addItemAsRoot(ItemIncomplete $item) {
 		$pdo = $this->getPDO();
@@ -79,6 +85,8 @@ final class TreeDAO extends DAO {
      *
      * @param ItemIncomplete $parent
      * @param ItemIncomplete $child
+     *
+     * @throws \WEEEOpen\Tarallo\InvalidParameterException
      */
     private function setParent(ItemIncomplete $parent, ItemIncomplete $child) {
 	    $pdo = $this->getPDO();
@@ -108,6 +116,8 @@ final class TreeDAO extends DAO {
      * Turn an Item into a root, preserving its subtree
      *
      * @param ItemIncomplete $item the item
+     *
+     * @throws \WEEEOpen\Tarallo\InvalidParameterException
      */
     private function splitSubtree(ItemIncomplete $item) {
         if($this->extractFromTreeStatement === null) {

@@ -217,8 +217,8 @@ final class ItemDAO extends DAO {
 	 * @param Item $item the item to be inserted
 	 * @param ItemIncomplete $parent parent item
 	 *
+	 * @throws InvalidParameterException
 	 * @see addItems
-	 *
 	 */
     private function addItem(Item $item, ItemIncomplete $parent = null) {
         if(!($item instanceof Item)) {
@@ -378,6 +378,7 @@ final class ItemDAO extends DAO {
 	 * Add location array to items
 	 *
 	 * @param Item[] $items - array that maps item IDs to Item objects (tree roots only)
+	 * @throws InvalidParameterException
 	 */
 	private function setLocations($items) {
 		$inItemID = DAO::multipleIn(':loc', $items);
