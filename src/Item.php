@@ -55,6 +55,19 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	}
 
 	/**
+	 * @param string $name
+	 *
+	 * @return Item $this
+	 */
+	public function deleteFeature($name) {
+		if(!self::featureNameIsValid($name)) {
+			throw new \InvalidArgumentException('Feature name must be a string, ' . gettype($name) . ' given');
+		}
+		unset($this->features[$name]);
+		return $this;
+	}
+
+	/**
 	 * Add ancestor to location.
 	 *
 	 * @param int $distance 1 for direct parent, etc...
@@ -113,7 +126,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 			throw new \InvalidArgumentException('Feature name must be a string, ' . gettype($name) . ' given');
 		}
 		if(!self::featureValueIsValid($value)) {
-			throw new \InvalidArgumentException('Feature value must be a string or positive integer, ' . gettype($name) . ' given');
+			throw new \InvalidArgumentException('Feature value must be a string or positive integer, ' . gettype($value) . ' given');
 		}
 		if(isset($array[$name])) {
 			throw new InvalidParameterException('Feature ' . $name . ' already inserted into item ' . (string) $this);

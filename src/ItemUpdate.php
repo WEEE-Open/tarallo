@@ -105,7 +105,11 @@ class ItemUpdate extends Item implements \JsonSerializable {
 
 	public function addFeature($name, $value) {
 		$this->featuresChanged = true;
-		return parent::addFeature($name, $value);
+		if($value === null) {
+			return $this->deleteFeature($name);
+		} else {
+			return parent::addFeature($name, $value);
+		}
 	}
 
 	public function setFeaturesChanged() {
