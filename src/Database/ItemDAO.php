@@ -338,9 +338,9 @@ final class ItemDAO extends DAO {
 			if($item->getParentChanged()) {
 				$this->database->treeDAO()->moveItem($item, $item->getParent());
 			}
+			$this->database->featureDAO()->updateDeleteFeatures($item);
 			$this->database->modificationDAO()->setItemModified($item);
 		}
-		$this->database->featureDAO()->updateDeleteFeatures($items);
 	}
 
 	private $setItemDefaultsStatementSelect = null;
