@@ -9,9 +9,9 @@ namespace WEEEOpen\Tarallo;
  * @package WEEEOpen\Tarallo
  */
 class Item extends ItemIncomplete implements \JsonSerializable {
-	private $features = [];
+	protected $features = [];
 	private $featuresDefault = [];
-	private $content = [];
+	protected $content = [];
 	private $location = [];
 	protected $defaultCode = null;
 
@@ -60,10 +60,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 * @return Item $this
 	 */
 	public function deleteFeature($name) {
-		if(!self::featureNameIsValid($name)) {
-			throw new \InvalidArgumentException('Feature name must be a string, ' . gettype($name) . ' given');
-		}
-		unset($this->features[$name]);
+		$this->deleteFeatureInternal($name, $this->features);
 		return $this;
 	}
 
@@ -119,6 +116,13 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	private function addFeatureInternal($name, $value, &$array) {
 		$this->checkFeature($name, $value, $array);
 		$array[$name] = $value;
+	}
+
+	private function deleteFeatureInternal($name, &$array) {
+		if(!self::featureNameIsValid($name)) {
+			throw new \InvalidArgumentException('Feature name must be a string, ' . gettype($name) . ' given');
+		}
+		unset($array[$name]);
 	}
 
 	private function checkFeature($name, $value, $array) {
