@@ -175,28 +175,36 @@ final class ItemDAO extends DAO {
         } else {
 	        /** @var Item[] map from item ID to Item object (all items) */
 			$items = [];
-	        /** @var Item[] map from item ID to Item object (root items only) */
-	        $itemsRoots = [];
-	        /** @var Item[] plain array of tree roots (return this one) */
-	        $itemsTreeRoots = [];
+	        /** @var Item[] map from item ID to Item objects that require a location being set */
+	        $needLocation = [];
+	        /** @var Item[] plain array of results (return this one) */
+	        $results = [];
 	        while(($row = $s->fetch(\PDO::FETCH_ASSOC)) !== false) {
-		        $thisItem = new Item($row['Code']);
-		        $items[$row['ItemID']] = $thisItem;
-		        // tree root and selected items don't have a parent, in this result set...
-		        if($row['DirectParent'] === null || !isset($items[$row['DirectParent']])) {
-			        $itemsTreeRoots[] = $thisItem;
-			        $itemsRoots[$row['ItemID']] = $thisItem;
+	        	if(isset($items[$row['ItemID']])) {
+			        $thisItem = $items[$row['ItemID']];
 		        } else {
-			        /** @var Item[] $items */
-			        $items[$row['DirectParent']]->addContent($thisItem);
+			        $thisItem = new Item($row['Code']);
+			        $items[$row['ItemID']] = $thisItem;
+		        }
+		        if($row['Depth'] === 0) {
+			        $results[] = $thisItem;
+		        	if(isset($row['Parent']) && $row['Parent'] !== null) {
+				        $needLocation[$row['ItemID']] = $thisItem;
+			        }
+		        } else {
+			        if(isset($items[$row['Parent']])) {
+				        $items[$row['Parent']]->addContent($thisItem);
+			        } else {
+				        throw new \LogicException('Cannot find parent ' . $row['Parent'] . ' for Item ' . $thisItem->getCode() . ' (' . $row['ItemID'] . ')');
+			        }
 		        }
 	        }
 	        $s->closeCursor();
 	        // object are always passed by reference: update an Item in any array, every other gets updated too
 			$this->database->featureDAO()->setFeatures($items);
-	        $this->database->itemDAO()->setLocations($itemsRoots);
-			$this->sortItems($itemsTreeRoots, $sorts);
-            return $itemsTreeRoots;
+	        $this->database->itemDAO()->setLocations($needLocation);
+			$this->sortItems($results, $sorts);
+            return $results;
         }
     }
 
@@ -302,6 +310,10 @@ final class ItemDAO extends DAO {
 			return;
 		}
 
+		if(empty($sortBy)) {
+			return;
+		}
+
 		usort($items, function ($a, $b) use ($sortBy) {
 			if(!($a instanceof Item) || !($b instanceof Item)) {
 				throw new \InvalidArgumentException('Items must be Item objects');
@@ -394,9 +406,8 @@ final class ItemDAO extends DAO {
 		$inItemID = DAO::multipleIn(':loc', $items);
 		$getLocationsStatement = $this->getPDO()->prepare('SELECT Tree.DescendantID AS ItemID, Item.Code AS Ancestor, Tree.Depth AS Depth
 			FROM Item, Tree
-			WHERE Tree.AncestorID = Item.ItemID AND Tree.DescendantID IN (' . $inItemID . ') AND Tree.Depth <> 0
-			ORDER BY Tree.Depth ASC;
-		'); // TODO: sorting is mostly useless, remove?
+			WHERE Tree.AncestorID = Item.ItemID AND Tree.DescendantID IN (' . $inItemID . ') AND Tree.Depth <> 0;
+		');
 
 		foreach($items as $itemID => $item) {
 			$getLocationsStatement->bindValue(':loc' . $itemID, $itemID, \PDO::PARAM_INT);
