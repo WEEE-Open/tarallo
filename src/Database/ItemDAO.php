@@ -31,6 +31,7 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param array $locations
 	 * @return string
+	 * @todo: shouldn't this search items INSIDE a location, instead of the location itself?
 	 */
     private function locationPrepare($locations) {
         if(self::isArrayAndFull($locations)) {
@@ -116,22 +117,27 @@ final class ItemDAO extends DAO {
         }
 
         // Search items by features, filter by location and token, tree lookup using these items as descendants
-        // (for /Parent), tree lookup using new root items as roots (find all descendants), filter by depth,
-        // join with items, SELECT.
+        // (for /Parent), tree lookup using new root items as roots (find all descendants) and join with Item,
+	    // filter by depth, SELECT.
 	    $megaquery = '
-        SELECT `ItemID`, `Code`, directParents.AncestorID AS DirectParent
-        FROM Tree, Item
-        LEFT JOIN (SELECT * FROM Tree WHERE `Depth` = 1) directParents ON directParents.`DescendantID` = `ItemID`
-        WHERE Tree.DescendantID = Item.ItemID
+        SELECT DescendantItem.`ItemID`, DescendantItem.`Code`, Parents.`AncestorID` as Parent, Parents.`Depth` AS debuggamelo, Tree.`Depth`
+        FROM Tree
+        JOIN Item AS AncestorItem ON Tree.AncestorID = AncestorItem.ItemID
+        JOIN Item AS DescendantItem ON Tree.DescendantID = DescendantItem.ItemID
+        JOIN Tree AS Parents ON DescendantItem.ItemID = Parents.DescendantID
+        WHERE Parents.`Depth` = 1
+        AND Tree.`Depth` <= :depth
+        AND AncestorItem.isDefault = 0
         AND Tree.AncestorID IN (
             SELECT `AncestorID`
             FROM Tree
-            WHERE DescendantID IN ( 
+            WHERE `Depth` = :parent
+            AND DescendantID IN ( 
                 SELECT `ItemID`
                 FROM Item
                 ' . $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->tokenPrepare($token), $searchSubquery) . '
-            ) AND `Depth` = :parent
-        ) AND Tree.`Depth` <= :depth AND isDefault = 0
+            )
+        )
         ORDER BY IFNULL(Tree.`Depth`, 0) ASC;
 		'; // IFNULL is useless but the intent should be clearer.
         $s = $this->getPDO()->prepare($megaquery);
