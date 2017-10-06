@@ -119,15 +119,18 @@ final class ItemDAO extends DAO {
         // Search items by features, filter by location and token, tree lookup using these items as descendants
         // (for /Parent), tree lookup using new root items as roots (find all descendants) and join with Item,
 	    // filter by depth, SELECT.
+	    // The MAX(IF()) bit doesn't make any sense, but it works. It should just be an IF, and at the end of
+	    // the query there should be "GROUP BY ... MAX(Parent)" according to everyone on the internet, but that
+	    // didn't work for unfathomable reasons.
 	    $megaquery = '
-        SELECT DescendantItem.`ItemID`, DescendantItem.`Code`, Parents.`AncestorID` as Parent, Parents.`Depth` AS debuggamelo, Tree.`Depth`
+        SELECT DescendantItem.`ItemID`, DescendantItem.`Code`, Tree.`Depth`,
+        MAX(IF(Parents.`Depth`=1, Parents.`AncestorID`, NULL)) AS Parent
         FROM Tree
         JOIN Item AS AncestorItem ON Tree.AncestorID = AncestorItem.ItemID
         JOIN Item AS DescendantItem ON Tree.DescendantID = DescendantItem.ItemID
         JOIN Tree AS Parents ON DescendantItem.ItemID = Parents.DescendantID
-        WHERE Parents.`Depth` = 1
+        WHERE AncestorItem.isDefault = 0
         AND Tree.`Depth` <= :depth
-        AND AncestorItem.isDefault = 0
         AND Tree.AncestorID IN (
             SELECT `AncestorID`
             FROM Tree
@@ -138,7 +141,8 @@ final class ItemDAO extends DAO {
                 ' . $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->tokenPrepare($token), $searchSubquery) . '
             )
         )
-        ORDER BY IFNULL(Tree.`Depth`, 0) ASC;
+        GROUP BY DescendantItem.`ItemID`, DescendantItem.`Code`, Tree.`Depth`
+        ORDER BY IFNULL(Tree.`Depth`, 0) ASC
 		'; // IFNULL is useless but the intent should be clearer.
         $s = $this->getPDO()->prepare($megaquery);
         // TODO: add a LIMIT clause for pagination
