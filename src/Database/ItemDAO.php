@@ -422,4 +422,63 @@ final class ItemDAO extends DAO {
 			$getLocationsStatement->closeCursor();
 		}
 	}
+
+	private $getNextCodeStatement = null;
+	private $CodesTableLocked = false;
+
+	/**
+	 * Get next available code with specified prefix
+	 * @param string $prefix
+	 *
+	 * @return string next available code, prefix included
+	 * @throws \Exception if Codes table cannot be locked. Locking it avoids generating the same code twice in different transactions. Codes table is used only when creating new items, so its performance isn't really that critical. Lock should be released on commit/rollback.
+	 */
+	private function getNextCode($prefix = '') {
+		if(!$this->CodesTableLocked) {
+			$lock = $this->getPDO()->prepare("LOCK TABLE Codes WRITE");
+			$this->CodesTableLocked = $lock->execute();
+			if(!$this->CodesTableLocked) {
+				throw new \Exception('Cannot lock Codes table');
+			}
+		}
+
+		if($this->getNextCodeStatement === null) {
+			$this->getNextCodeStatement = $this->getPDO()->prepare('SELECT `Integer` FROM Codes WHERE Prefix = ?');
+		}
+
+		// skips items with manually-assigned codes
+		do {
+			$this->getNextCodeStatement->bindValue(1, $prefix);
+			$this->getNextCodeStatement->execute();
+			$nextInteger = $this->getNextCodeStatement->fetchAll(\PDO::FETCH_ASSOC);
+			$this->getNextCodeStatement->closeCursor();
+			$nextInteger++;
+			$exists = $this->checkIfItemExists($prefix . $nextInteger);
+		} while($exists);
+
+		// TODO: update Codes
+
+		return $prefix . $nextInteger;
+	}
+
+	private $checkIfItemExistsStatement = null;
+
+	/**
+	 * Check if an item with a specified code already exists.
+	 *
+	 * @param string $code
+	 *
+	 * @return bool true if it exists, false otherwise
+	 */
+	private function checkIfItemExists($code) {
+		if($this->checkIfItemExistsStatement === null) {
+			$this->checkIfItemExistsStatement = $this->getPDO()->prepare('SELECT COUNT(*) AS c FROM Item WHERE `Code` = ?');
+		}
+
+		$this->checkIfItemExistsStatement->bindValue(1, $code, \PDO::PARAM_STR);
+		$this->checkIfItemExistsStatement->execute();
+		$result = $this->checkIfItemExistsStatement->fetchAll(\PDO::FETCH_ASSOC);
+		$this->checkIfItemExistsStatement->closeCursor();
+		return $result['c'] > 0;
+	}
 }
