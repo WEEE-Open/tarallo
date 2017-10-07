@@ -54,20 +54,28 @@ final class FeatureDAO extends DAO {
             $featureStatement->bindValue(':item' . $itemID, $itemID, \PDO::PARAM_INT);
             $defaultFeatureStatement->bindValue(':item' . $itemID, $itemID, \PDO::PARAM_INT);
         }
+
         $featureStatement->execute();
-        if($featureStatement->rowCount() > 0) {
-	        foreach ($featureStatement as $row) {
-	        	/** @var Item[] $items */
-	        	$items[$row['ItemID']]->addFeature($row['FeatureName'], $row['FeatureValue']);
+        try {
+	        if($featureStatement->rowCount() > 0) {
+		        foreach($featureStatement as $row) {
+			        /** @var Item[] $items */
+			        $items[ $row['ItemID'] ]->addFeature($row['FeatureName'], $row['FeatureValue']);
+		        }
 	        }
+        } finally {
 	        $featureStatement->closeCursor();
         }
+
 	    $defaultFeatureStatement->execute();
-	    if($featureStatement->rowCount() > 0) {
-		    foreach ($featureStatement as $row) {
-			    $items[$row['ItemID']]->addFeatureDefault($row['FeatureName'], $row['FeatureValue']);
+	    try {
+		    if($defaultFeatureStatement->rowCount() > 0) {
+			    foreach($defaultFeatureStatement as $row) {
+				    $items[ $row['ItemID'] ]->addFeatureDefault($row['FeatureName'], $row['FeatureValue']);
+			    }
 		    }
-		    $featureStatement->closeCursor();
+	    } finally {
+		    $defaultFeatureStatement->closeCursor();
 	    }
     }
 
@@ -88,12 +96,17 @@ final class FeatureDAO extends DAO {
         }
         $this->featureTypeStatement->bindValue(1, $featureName);
         $this->featureTypeStatement->execute();
-        if($this->featureTypeStatement->rowCount() === 0) {
-            throw new InvalidParameterException('Unknown feature name ' . $featureName);
+        try {
+	        if($this->featureTypeStatement->rowCount() === 0) {
+		        throw new InvalidParameterException('Unknown feature name ' . $featureName);
+	        }
+	        $type = (int) $this->featureTypeStatement->fetch(\PDO::FETCH_NUM)[0];
+        } finally {
+	        $this->featureTypeStatement->closeCursor();
         }
-        $type = (int) $this->featureTypeStatement->fetch(\PDO::FETCH_NUM)[0];
-	    $this->featureTypeStatement->closeCursor();
-        switch($type) {
+
+	    /** @noinspection PhpUndefinedVariableInspection without the try-block PHPStorm didn't complain, but apparently looks like a catch-block to it */
+	    switch($type) {
             case 0:
                 return self::FEATURE_TEXT;
             case 1:
@@ -110,7 +123,10 @@ final class FeatureDAO extends DAO {
 	 * Bind search key to ":searchname . $key" and value to ":searchvalue . $key". Where $key is the numeric index of the $searches array.
 	 *
 	 * @param SearchTriplet[] $searches non-empty array of SearchTriplet
+	 *
 	 * @return string sequence of WHERE statements(?) (no "WHERE" keyword itself)
+	 * @throws InvalidParameterException
+	 * @throws \InvalidArgumentException - wrong parameters
 	 */
 	public function getWhereStringFromSearches($searches) {
 		$where = '';
@@ -148,12 +164,18 @@ final class FeatureDAO extends DAO {
         $this->featureEnumNameStatement->bindValue(':valuetext', $featureValueText);
         $this->featureEnumNameStatement->bindValue(':type', self::FEATURE_ENUM);
         $this->featureEnumNameStatement->execute();
-        if($this->featureEnumNameStatement->rowCount() === 0) {
-            throw new InvalidParameterException('Invalid value ' . $featureValueText . ' for feature ' . $featureName);
+        try {
+	        if($this->featureEnumNameStatement->rowCount() === 0) {
+		        $this->featureEnumNameStatement->closeCursor();
+		        throw new InvalidParameterException('Invalid value ' . $featureValueText . ' for feature ' . $featureName);
+	        }
+           $result = $this->featureEnumNameStatement->fetch(\PDO::FETCH_NUM);
+        } finally {
+	        $this->featureEnumNameStatement->closeCursor();
         }
-        $result = $this->featureEnumNameStatement->fetch(\PDO::FETCH_NUM);
-	    $this->featureEnumNameStatement->closeCursor();
-        return $result[0];
+
+	    /** @noinspection PhpUndefinedVariableInspection */
+	    return $result[0];
     }
 
     private $deleteFeatureStatement = null;
@@ -250,8 +272,10 @@ final class FeatureDAO extends DAO {
 			while(($row = $this->getFeatureListStatement->fetch(\PDO::FETCH_ASSOC)) !== false) {
 				$result[] = $row['FeatureName'];
 			}
+			$this->getFeatureListStatement->closeCursor();
 			return $result;
 		}
+		$this->getFeatureListStatement->closeCursor();
 		return [];
 	}
 }

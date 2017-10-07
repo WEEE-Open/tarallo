@@ -171,6 +171,7 @@ final class ItemDAO extends DAO {
 
         $s->execute();
         if($s->rowCount() === 0) {
+        	$s->closeCursor();
             return [];
         } else {
 	        /** @var Item[] map from item ID to Item object (all items) */
@@ -290,13 +291,15 @@ final class ItemDAO extends DAO {
 
 		$this->getItemIdStatement->execute([$code]);
 		if($this->getItemIdStatement->rowCount() === 0) {
+			$this->getItemIdStatement->closeCursor();
 			throw new InvalidParameterException('Unknown item ' . $item->getCode());
 		} else {
 			$id = (int) $this->getItemIdStatement->fetch(\PDO::FETCH_NUM)[0];
 			$this->getItemIdStatement->closeCursor();
 			$this->getItemIdCache[$code] = $id;
-			return $id;
 		}
+
+		return $id;
 	}
 
 	/**
@@ -419,11 +422,14 @@ final class ItemDAO extends DAO {
 		}
 		$getLocationsStatement->execute();
 
-		if($getLocationsStatement->rowCount() > 0) {
-			foreach($getLocationsStatement as $row) {
-				/** @var Item[] $items */
-				$items[$row['ItemID']]->addAncestor((int) $row['Depth'], $row['Ancestor']);
+		try {
+			if($getLocationsStatement->rowCount() > 0) {
+				foreach($getLocationsStatement as $row) {
+					/** @var Item[] $items */
+					$items[ $row['ItemID'] ]->addAncestor((int) $row['Depth'], $row['Ancestor']);
+				}
 			}
+		} finally {
 			$getLocationsStatement->closeCursor();
 		}
 	}
@@ -528,9 +534,10 @@ final class ItemDAO extends DAO {
 		$this->getNextCodeStatement->execute();
 		if($this->getNextCodeStatement->rowCount() > 0) {
 			$result = $this->getNextCodeStatement->fetchAll(\PDO::FETCH_ASSOC);
-			$integer = (int) $result['Integer'];
 			$this->getNextCodeStatement->closeCursor();
+			$integer = (int) $result['Integer'];
 		} else {
+			$this->getNextCodeStatement->closeCursor();
 			throw new \InvalidArgumentException('No counter found in database for code prefix "' . $prefix . '"');
 		}
 

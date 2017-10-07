@@ -9,8 +9,10 @@ final class UserDAO extends DAO {
         $s = $this->getPDO()->prepare('SELECT `Name`, `Password` FROM `User` WHERE `Session` = ? AND `SessionExpiry` > ? AND `Enabled` > 0');
         $s->execute([$session, time()]);
         if($s->rowCount() > 1) {
+        	$s->closeCursor();
             throw new \LogicException('Duplicate session session identifier in database');
         } else if($s->rowCount() === 0) {
+	        $s->closeCursor();
             return null;
         } else {
             $user = $s->fetch(\PDO::FETCH_ASSOC);
@@ -42,8 +44,10 @@ final class UserDAO extends DAO {
         $s = $this->getPDO()->prepare('SELECT Password FROM `User` WHERE `Name` = ? AND `Enabled` > 0');
         $s->execute([$username]);
         if($s->rowCount() > 1) {
+	        $s->closeCursor();
             throw new \LogicException('Duplicate username in database (should never happen altough MySQL doesn\'t allow TEXT fields to be UNIQUE, since that would be too easy and suitable for the current millennium)');
         } else if($s->rowCount() === 0) {
+	        $s->closeCursor();
             return null;
         } else {
             $user = $s->fetch(\PDO::FETCH_ASSOC);
