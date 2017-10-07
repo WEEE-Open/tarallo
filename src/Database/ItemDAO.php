@@ -498,7 +498,8 @@ final class ItemDAO extends DAO {
 
 		$codes = [];
 
-		$this->beginNextCodeTransaction();
+		// TODO: determine why every conceivable SELECT query can happily run, while LOCK TABLE fails because of buffered results (that don't actually exist)
+		//$this->beginNextCodeTransaction();
 
 		foreach($forWhat as $key => $prefix) {
 			if($prefix === null) {
@@ -509,7 +510,7 @@ final class ItemDAO extends DAO {
 			$codes[$key] = $this->getNextCode($prefix);
 		}
 
-		$this->endNextCodeTransaction();
+		//$this->endNextCodeTransaction();
 
 		return $codes;
 	}
@@ -533,7 +534,7 @@ final class ItemDAO extends DAO {
 		$this->getNextCodeStatement->bindValue(1, $prefix, \PDO::PARAM_STR);
 		$this->getNextCodeStatement->execute();
 		if($this->getNextCodeStatement->rowCount() > 0) {
-			$result = $this->getNextCodeStatement->fetchAll(\PDO::FETCH_ASSOC);
+			$result = $this->getNextCodeStatement->fetchAll(\PDO::FETCH_ASSOC)[0];
 			$this->getNextCodeStatement->closeCursor();
 			$integer = (int) $result['Integer'];
 		} else {
@@ -575,7 +576,7 @@ final class ItemDAO extends DAO {
 
 		$this->checkIfItemExistsStatement->bindValue(1, $code, \PDO::PARAM_STR);
 		$this->checkIfItemExistsStatement->execute();
-		$result = $this->checkIfItemExistsStatement->fetchAll(\PDO::FETCH_ASSOC);
+		$result = $this->checkIfItemExistsStatement->fetchAll(\PDO::FETCH_ASSOC)[0];
 		$this->checkIfItemExistsStatement->closeCursor();
 		return ((int) $result['c']) > 0;
 	}

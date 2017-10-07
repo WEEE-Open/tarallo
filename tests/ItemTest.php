@@ -133,8 +133,9 @@ class ItemTest extends TestCase {
 	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
 	 */
 	public function testItemNullCode() {
-		$this->expectException(InvalidParameterException::class);
-		new Item(null);
+		$it = new Item(null);
+		$this->expectException(\LogicException::class);
+		$it->getCode();
 	}
 
 	/**

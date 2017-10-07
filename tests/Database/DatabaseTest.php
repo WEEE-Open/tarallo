@@ -178,6 +178,18 @@ class DatabaseTest extends TestCase {
 		}
 	}
 
+	/**
+	 * @uses   \WEEEOpen\Tarallo\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\User
+	 * @uses   \WEEEOpen\Tarallo\Item
+	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\TreeDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
+	 * @depends testAddingAndRetrievingSomeItems
+	 */
 	public function testGettingPrefixes() {
 		$db = $this->getDb();
 
@@ -185,10 +197,22 @@ class DatabaseTest extends TestCase {
 		$this->assertEquals(2, count($codes));
 		$this->assertArrayHasKey(0, $codes);
 		$this->assertArrayHasKey('asd', $codes);
-		$this->assertEquals('M10', $codes[0]);
-		$this->assertEquals('T75', $codes['asd']);
+		$this->assertEquals('M11', $codes[0]);
+		$this->assertEquals('T76', $codes['asd']);
 	}
 
+	/**
+	 * @uses   \WEEEOpen\Tarallo\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\User
+	 * @uses   \WEEEOpen\Tarallo\Item
+	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\TreeDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
+	 * @depends testGettingPrefixes
+	 */
 	public function testGettingPrefixesSkippingDuplicates() {
 		$db = $this->getDb();
 
@@ -196,6 +220,7 @@ class DatabaseTest extends TestCase {
 		for($i = 74; $i < 77; $i++) {
 			$db->itemDAO()->addItems((new Item('T'.$i))->addFeature('type', 'keyboard'));
 		}
+		$db->modificationDAO()->modificationCommit();
 
 		$codes = $db->itemDAO()->getNextCodes([0 => 'T']);
 		$this->assertEquals(1, count($codes));
