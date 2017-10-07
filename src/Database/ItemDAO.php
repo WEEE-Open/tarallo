@@ -428,11 +428,24 @@ final class ItemDAO extends DAO {
 	private $lockTablesStatement  = null;
 
 	/**
-	 * Get next available code with specified prefix
+	 * Get next available code with specified prefix.
+	 *
+	 * This also locks Codes table:  Locking it avoids generating the same code twice in different transactions.
+	 * Codes table is used only when creating new items, so its performance isn't really that critical.
+	 * However (My)SQL doesn't have a way to lock writes but allow reads froma a table, a table can be READ locked
+	 * (= "allow me to read") or WRITE locked (= "allow me to write, don't allow anybody else to read), so Item has to
+	 * be locked too. WIRTE locked. This would completely nuke performance, so it isn't done.
+	 * Because of this, transactions may fail randomly if someone else is simultaneously adding items with manually-set
+	 * codes that collide with generated ones.
+	 *
+	 * Lock are released on commit/rollback, or when session ends anyway.
+	 *
+	 * Call this function after beginning a modification (= transaction), since BEGIN TRANSACTION releases all locks!
+	 *
 	 * @param string $prefix
 	 *
 	 * @return string next available code, prefix included
-	 * @throws \Exception if Codes table cannot be locked. Locking it avoids generating the same code twice in different transactions. Codes table is used only when creating new items, so its performance isn't really that critical. Lock should be released on commit/rollback.
+	 * @throws \Exception if Codes table cannot be locked.
 	 */
 	private function getNextCode($prefix = '') {
 		if($this->lockTablesStatement === null) {
