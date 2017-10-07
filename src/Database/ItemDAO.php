@@ -520,9 +520,6 @@ final class ItemDAO extends DAO {
 	/**
 	 * Get next available code with specified prefix.
 	 *
-	 * Call this function after beginNextCodeTransaction, and call endNextCodeTransaction after
-	 * getting all the codes
-	 *
 	 * @param string $prefix
 	 *
 	 * @return string next available code, prefix included

@@ -142,6 +142,16 @@ class ItemTest extends TestCase {
 	 * @covers         \WEEEOpen\Tarallo\Item
 	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
 	 */
+	public function testItemSetCode() {
+		$it = new Item(null);
+		$it->setCode('PC-22');
+		$this->assertEquals('PC-22', $it->getCode());
+	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\Item
+	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
+	 */
 	public function testItemEmptyCode() {
 		$this->expectException(InvalidParameterException::class);
 		new Item('');
@@ -154,6 +164,22 @@ class ItemTest extends TestCase {
 	public function testItemFeature() {
 		$item = new Item('TEST');
 		$item->addFeature('capacity-byte', 9001);
+		$this->assertArrayHasKey('capacity-byte', $item->getFeatures());
+		$this->assertEquals(9001, $item->getFeatures()['capacity-byte']);
+	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\Item
+	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
+	 * @depends        testItemFeature
+	 */
+	public function testItemDeleteFeature() {
+		$item = new Item('TEST');
+		$item->addFeature('capacity-byte', 9001);
+		$item->addFeature('color', 'yellow');
+		$item->deleteFeature('color');
+
+		$this->assertArrayNotHasKey('color', $item->getFeatures());
 		$this->assertArrayHasKey('capacity-byte', $item->getFeatures());
 		$this->assertEquals(9001, $item->getFeatures()['capacity-byte']);
 	}
@@ -181,6 +207,9 @@ class ItemTest extends TestCase {
 		$this->assertEquals(8999999999, $item->getFeatures()['capacity-byte']);
 		$this->assertArrayHasKey('capacity-byte', $item->getFeaturesDefault());
 		$this->assertEquals(9000000000, $item->getFeaturesDefault()['capacity-byte']);
+		$this->assertEquals(1, count($item->getCombinedFeatures()), 'Overriding features shouldn\'t duplicate them');
+		$this->assertArrayHasKey('capacity-byte', $item->getCombinedFeatures());
+		$this->assertEquals(8999999999, $item->getCombinedFeatures()['capacity-byte']);
 	}
 
 	/**

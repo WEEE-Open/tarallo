@@ -175,6 +175,12 @@ class DatabaseTest extends TestCase {
 			/** @noinspection PhpUndefinedMethodInspection */
 			$this->assertTrue($case->getContent()[0]->getFeatures() == $child->getFeatures(), 'Sub-Item ' . (string) $child . ' has same features as before'); // this works because the two items are identical except for the code...
 			$this->assertTrue(empty($child->getContent()), 'No children of child Item ' . (string) $child);
+			$features = $child->getFeatures();
+			$this->assertEquals(4, count($features), 'Items should still have all their features and none more');
+			$this->assertArrayHasKey('capacity-byte', $features);
+			$this->assertEquals(666, $features['capacity-byte']);
+			$this->assertArrayHasKey('brand', $features);
+			$this->assertEquals('SATAn Storage Corporation Inc.', $features['brand']);
 		}
 	}
 
@@ -243,8 +249,7 @@ class DatabaseTest extends TestCase {
      * @uses   \WEEEOpen\Tarallo\Database\DAO
      * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
      */
-    public function testSubtreeRemoval()
-    {
+    public function testSubtreeRemoval() {
         $db = $this->getDb();
         $db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
         /** @var $case Item */
@@ -335,6 +340,45 @@ class DatabaseTest extends TestCase {
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'There should be only one item');
 		$this->assertEquals(reset($items), $pc['SCHIFOMACCHINA'], 'Only SCHIFOMACCHINA should be returned'); // excellent piece of hardware, by the way. 2 minutes from power on to POST OK.
+	}
+
+	/**
+	 * @uses   \WEEEOpen\Tarallo\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\User
+	 * @uses   \WEEEOpen\Tarallo\Item
+	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\TreeDAO
+	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
+	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
+	 * @depends testAddingAndRetrievingSomeItems
+	 * @depends testItemSearchSorting
+	 */
+	public function testGettingItemsWithLocation() {
+		$db = $this->getDb();
+		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$case     = (new Item('PC-42'))->addFeature('brand', 'TI');
+		$discone1 = (new Item('SATAna-1'))->addFeature('brand', 'SATAn Storage Corporation Inc.');
+		$discone2 = (new Item('SATAna-2'))->addFeature('brand', 'SATAn Storage Corporation Inc.');
+		$case->addContent($discone1);
+		$case->addContent($discone2);
+		$db->itemDAO()->addItems($case);
+		$db->modificationDAO()->modificationCommit();
+
+		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('brand', '=', 'SATAn Storage Corporation Inc.')], null, null, null, null);
+		$this->assertEquals(2, count($items));
+		$this->assertInstanceOf(Item::class, $items[0]);
+		$this->assertInstanceOf(Item::class, $items[1]);
+		/** @noinspection PhpUndefinedMethodInspection */
+		$this->assertEquals('PC-42', $items[0]->getAncestor(1));
+		/** @noinspection PhpUndefinedMethodInspection */
+		$this->assertEquals(null, $items[0]->getAncestor(2));
+		/** @noinspection PhpUndefinedMethodInspection */
+		$this->assertEquals('PC-42', $items[1]->getAncestor(1));
+		/** @noinspection PhpUndefinedMethodInspection */
+		$this->assertEquals(null, $items[1]->getAncestor(2));
 	}
 
 	/**

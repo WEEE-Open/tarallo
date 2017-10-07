@@ -77,4 +77,14 @@ class ItemDefaultTest extends TestCase {
 		$item = new ItemDefault('TEST');
 		$this->assertEquals(null, $item->getAncestor(1), 'ItemDefault should have null ancestors (for compatibility with Item)');
 	}
+
+	/**
+	 * @covers         \WEEEOpen\Tarallo\ItemDefault
+	 * @uses           \WEEEOpen\Tarallo\ItemIncomplete
+	 * @uses           \WEEEOpen\Tarallo\Item
+	 */
+	public function testItemNullCode() {
+		$this->expectException(\InvalidArgumentException::class);
+		$it = new ItemDefault(null);
+	}
 }
