@@ -318,7 +318,7 @@ class DatabaseTest extends TestCase {
 		$this->assertEquals(5, count($items), 'There should be 5 items');
 		/** @var Item[] $items */
 		foreach(['PC-20', 'PC-22', 'PC-21', 'SCHIFOMACCHINA', 'PC-55'] as $pos => $code) {
-			$this->assertEquals($code, $items[$pos]->getCode(), 'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
+			$this->assertEquals($code, $items[$pos]->getCode(), 'Item in position ' . $pos . ' should be ' . $code . ' (it\'s ' . $items[$pos]->getCode() . ')');
 			$this->assertEquals($pc[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 

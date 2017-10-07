@@ -313,9 +313,11 @@ final class ItemDAO extends DAO {
 			return;
 		}
 
-		if(empty($sortBy)) {
-			return;
-		}
+		// Don't:
+		//if(empty($sortBy)) {
+		//	return;
+		//}
+		// items are always sorted by code. Doing it in PHP instead of SQL is probably faster, since only root items are sorted
 
 		usort($items, function ($a, $b) use ($sortBy) {
 			if(!($a instanceof Item) || !($b instanceof Item)) {
