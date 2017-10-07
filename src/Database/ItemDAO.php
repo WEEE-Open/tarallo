@@ -423,39 +423,99 @@ final class ItemDAO extends DAO {
 		}
 	}
 
+	public function getCodes() {
+
+	}
+
 	private $getNextCodeStatement = null;
 	private $setNextCodeStatement = null;
 	private $lockTablesStatement  = null;
 
 	/**
-	 * Get next available code with specified prefix.
+	 * Locks Codes table and begins a transaction.
+	 * Locking it avoids generating the same code twice.
 	 *
-	 * This also locks Codes table:  Locking it avoids generating the same code twice in different transactions.
 	 * Codes table is used only when creating new items, so its performance isn't really that critical.
-	 * However (My)SQL doesn't have a way to lock writes but allow reads froma a table, a table can be READ locked
+	 * However (My)SQL doesn't have a way to lock writes but allow reads from a table, a table can be READ locked
 	 * (= "allow me to read") or WRITE locked (= "allow me to write, don't allow anybody else to read), so Item has to
 	 * be locked too. WIRTE locked. This would completely nuke performance, so it isn't done.
-	 * Because of this, transactions may fail randomly if someone else is simultaneously adding items with manually-set
+	 * Because of this, adding items may fail randomly if someone else is simultaneously adding items with manually-set
 	 * codes that collide with generated ones.
 	 *
-	 * Lock are released on commit/rollback, or when session ends anyway.
-	 *
-	 * Call this function after beginning a modification (= transaction), since BEGIN TRANSACTION releases all locks!
-	 *
-	 * @param string $prefix
-	 *
-	 * @return string next available code, prefix included
 	 * @throws \Exception if Codes table cannot be locked.
 	 */
-	private function getNextCode($prefix = '') {
+	private function beginNextCodeTransaction() {
+		$this->getPDO()->beginTransaction();
 		if($this->lockTablesStatement === null) {
 			$this->lockTablesStatement = $this->getPDO()->prepare("LOCK TABLE Codes WRITE");
 		}
 		$locked = $this->lockTablesStatement->execute();
+		$this->lockTablesStatement->closeCursor();
 		if(!$locked) {
 			throw new \Exception('Cannot generate code (cannot lock Codes table)');
 		}
+	}
 
+	/**
+	 * Commit stuff, but don't unlock tables, that will be done by the next BEGIN TRANSACTION
+	 *
+	 * @throws \Exception if transaction cannot be committed
+	 */
+	private function endNextCodeTransaction() {
+		$committed = $this->getPDO()->commit();
+		if(!$committed) {
+			throw new \Exception('Failed updating code counters (transaction not committed)');
+		}
+	}
+
+	/**
+	 * Get automatically-generated codes, given a prefix.
+	 * Null or empty string means "no prefix".
+	 *
+	 * @param $forWhat array - List of prefixes
+	 *
+	 * @return array - same array as input, but with each prefix replaced by its generated code
+	 * @throws \Exception if codes cannot be generated (unlockable Codes table, cannot commit, etc...)
+	 */
+	public function getNextCodes($forWhat) {
+		if(!is_array($forWhat)) {
+			throw new \InvalidArgumentException('Expecting an array of prefixes, ' . gettype($forWhat) . ' given');
+		}
+		if(empty($forWhat)) {
+			return [];
+		}
+
+		$codes = [];
+
+		$this->beginNextCodeTransaction();
+
+		foreach($forWhat as $key => $prefix) {
+			if($prefix === null) {
+				$prefix = '';
+			} else if(!is_string($prefix)) {
+				throw new \InvalidArgumentException('Prefix must be a string, ' . gettype($prefix) . ' given');
+			}
+			$codes[$key] = $this->getNextCode($prefix);
+		}
+
+		$this->endNextCodeTransaction();
+
+		return $codes;
+	}
+
+	/**
+	 * Get next available code with specified prefix.
+	 *
+	 * Call this function after beginNextCodeTransaction, and call endNextCodeTransaction after
+	 * getting all the codes
+	 *
+	 * @param string $prefix
+	 *
+	 * @return string next available code, prefix included
+	 * @see beginNextCodeTransaction
+	 * @see endNextCodeTransaction
+	 */
+	private function getNextCode($prefix = '') {
 		if($this->getNextCodeStatement === null) {
 			$this->getNextCodeStatement = $this->getPDO()->prepare('SELECT `Integer` FROM Codes WHERE Prefix = ?');
 		}

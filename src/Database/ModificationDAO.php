@@ -74,25 +74,13 @@ final class ModificationDAO extends DAO {
 		$this->currentModificationId = $this->getNewModificationId($user, $notes);
 	}
 
-	private $unlockTablesStatement = null;
-
-	private function unlockTables() {
-		if($this->unlockTablesStatement === null) {
-			$this->unlockTablesStatement = $this->getPDO()->prepare('UNLOCK TABLES');
-		}
-		$this->unlockTablesStatement->execute();
-		$this->unlockTablesStatement->closeCursor();
-	}
-
 	public function modificationCommit() {
 		$this->getPDO()->commit();
-		$this->unlockTables();
 		$this->currentModificationId = null;
 	}
 
 	public function modificationRollback() {
 		$this->getPDO()->rollBack();
-		$this->unlockTables();
 		$this->currentModificationId = null;
 	}
 
