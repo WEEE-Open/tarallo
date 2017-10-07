@@ -400,9 +400,14 @@ final class ItemDAO extends DAO {
 	 * Add location array to items
 	 *
 	 * @param Item[] $items - array that maps item IDs to Item objects (tree roots only)
-	 * @throws InvalidParameterException
+	 *
+	 * @throws InvalidParameterException - I don't even know anymore
 	 */
 	private function setLocations($items) {
+		if(empty($items)) {
+			return;
+		}
+
 		$inItemID = DAO::multipleIn(':loc', $items);
 		$getLocationsStatement = $this->getPDO()->prepare('SELECT Tree.DescendantID AS ItemID, Item.Code AS Ancestor, Tree.Depth AS Depth
 			FROM Item, Tree
