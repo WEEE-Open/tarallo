@@ -178,6 +178,31 @@ class DatabaseTest extends TestCase {
 		}
 	}
 
+	public function testGettingPrefixes() {
+		$db = $this->getDb();
+
+		$codes = $db->itemDAO()->getNextCodes([0 => 'M', 'asd' => 'T']);
+		$this->assertEquals(2, count($codes));
+		$this->assertArrayHasKey(0, $codes);
+		$this->assertArrayHasKey('asd', $codes);
+		$this->assertEquals('M10', $codes[0]);
+		$this->assertEquals('T75', $codes['asd']);
+	}
+
+	public function testGettingPrefixesSkippingDuplicates() {
+		$db = $this->getDb();
+
+		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		for($i = 74; $i < 77; $i++) {
+			$db->itemDAO()->addItems((new Item('T'.$i))->addFeature('type', 'keyboard'));
+		}
+
+		$codes = $db->itemDAO()->getNextCodes([0 => 'T']);
+		$this->assertEquals(1, count($codes));
+		$this->assertArrayHasKey(0, $codes);
+		$this->assertEquals('T77', $codes[0]);
+	}
+
 
     /**
      * Database tests are really slow and this code is a bit complex to say the least, testing everything
