@@ -16,7 +16,11 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	protected $defaultCode = null;
 
 	public function __construct($code, $defaultCode = null) {
-		parent::__construct($code);
+		if($code === null) {
+			$this->code = null;
+		} else {
+			parent::__construct($code);
+		}
 		if($defaultCode !== null) {
 			try {
 				$this->defaultCode = $this->sanitizeCode($defaultCode);
@@ -24,6 +28,20 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 				throw new InvalidParameterException('Failed setting parent Item: ' . $e->getMessage());
 			}
 		}
+	}
+
+	public function setCode($code) {
+		if($this->code !== null) {
+			throw new \LogicException('Cannot change code for item ' . $this->getCode() . ' since it\'s already set');
+		}
+		parent::__construct($code);
+	}
+
+	public function getCode() {
+		if($this->code === null) {
+			throw new \LogicException('Trying to read code from an Item without code');
+		}
+		return parent::getCode();
 	}
 
 	private static function featureNameIsValid($name) {
@@ -164,6 +182,16 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 */
 	public function getFeaturesDefault() {
 		return $this->featuresDefault;
+	}
+
+	/**
+	 * Get features and default features, all in one.
+	 * Some features may override default features.
+	 *
+	 * @return array
+	 */
+	public function getCombinedFeatures() {
+		return array_merge($this->getFeaturesDefault(), $this->getFeatures());
 	}
 
 	/**

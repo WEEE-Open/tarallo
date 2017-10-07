@@ -11,6 +11,9 @@ namespace WEEEOpen\Tarallo;
  */
 class ItemDefault extends Item implements \JsonSerializable {
 	public function __construct($code) {
+		if($code === null) {
+			throw new \InvalidArgumentException('Cannot create a default item (ItemDefault) without a code');
+		}
 		parent::__construct($code, null);
 	}
 

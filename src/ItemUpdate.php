@@ -18,6 +18,9 @@ class ItemUpdate extends Item implements \JsonSerializable {
 	private $featuresChanged = false;
 
 	public function __construct($code) {
+		if($code === null) {
+			throw new \InvalidArgumentException('Cannot create an ItemUpdate without a code');
+		}
 		parent::__construct($code, null);
 	}
 

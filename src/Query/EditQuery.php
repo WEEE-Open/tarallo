@@ -15,6 +15,8 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	private $newItemsNoParent = [];
 	private $updateItems = [];
 	private $deleteItems = [];
+	private $itemsWithoutCodes = [];
+	private $prefixes = [];
 	private $notes = null;
 
     protected function parseContent($array) {
@@ -36,7 +38,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		        	foreach($itemsArray as $itemPieces) {
 		        		try {
 		        			if($op === 'create') {
-						        $newItem = $this->buildItem($itemPieces);
+						        $newItem = $this->buildItem($itemPieces, $this->itemsWithoutCodes);
 						        $parent = $newItem->getAncestor(1);
 						        if($parent === null) {
 							        $this->newItemsNoParent[] = $newItem;
@@ -73,12 +75,23 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
         if(count($this->newItems) === 0 && count($this->newItemsNoParent) === 0 && count($this->updateItems) === 0 && count($this->deleteItems) === 0) {
         	throw new InvalidParameterException('Nothing was requested and nothing was done');
         }
+        $this->prefixes = $this->guessPrefixes($this->itemsWithoutCodes);
     }
 
     public function run($user, Database $db) {
         if(!($user instanceof User)) {
 	        throw new InvalidParameterException('Not logged in');
         }
+
+        $codes = $db->itemDAO()->getNextCodes($this->prefixes);
+        if(count($codes) !== count($this->itemsWithoutCodes)) {
+	        throw new \LogicException('Generated ' . count($codes) . ' but needed ' . count($this->itemsWithoutCodes) . ' of them (this shouldn\'t happen)');
+        }
+        foreach($this->itemsWithoutCodes as $key => $item) {
+        	/** @var Item $item */
+        	$item->setCode($codes[$key]);
+        }
+
         $db->modificationDAO()->modifcationBegin($user, $this->notes);
         try {
 	        $db->itemDAO()->addItems($this->newItemsNoParent, null);
@@ -146,13 +159,14 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	/**
 	 * Build an Item from various parameters supplied in an array
 	 *
-	 * @param $itemPieces array - random stuff that makes up an item
-	 * @param bool $outer - set to false. Default is false. Used internally.
+	 * @param array $itemPieces - random stuff that makes up an item
+	 * @param array $itemsWithoutCodes - store here items that need their code generated
+	 * @param bool $outer - set to true. Default is true. Used internally.
 	 *
 	 * @return Item|ItemDefault
 	 * @throws InvalidParameterException
 	 */
-	private function buildItem($itemPieces, $outer = true) {
+	private function buildItem($itemPieces, &$itemsWithoutCodes, $outer = true) {
     	if(!is_array($itemPieces)) {
     		throw new InvalidParameterException('Items should be objects, ' . gettype($itemPieces) . ' given');
 	    }
@@ -161,12 +175,20 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			if(isset($itemPieces['default'])) {
 				throw new InvalidParameterException('Default items cannot point to other default items ("is_default": true and "default": "' . $itemPieces['default'] . '")');
 			}
-			$item = new ItemDefault($itemCode);
+			if($itemCode === null) {
+				throw new InvalidParameterException('No code provided for default item');
+			} else {
+				$item = new ItemDefault($itemCode);
+			}
 		} else {
 			if(isset($itemPieces['default'])) {
 				$item = new Item($itemCode, $itemPieces['default']);
 			} else {
 				$item = new Item($itemCode);
+			}
+
+			if($itemCode === null) {
+				$itemsWithoutCodes[] = $item;
 			}
 		}
 		if($this->isArrayIgnoreNull(null, $itemPieces)) {
@@ -209,7 +231,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 							}
 							foreach($value as $featureValue) {
 								// yay recursion!
-								$innerItem = $this->buildItem($featureValue, false);
+								$innerItem = $this->buildItem($featureValue, $itemsWithoutCodes, false);
 								$item->addContent($innerItem);
 							}
 						}
@@ -298,7 +320,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 				throw new \InvalidArgumentException('Expected string or int, got ' . gettype($pieces['code']));
 			}
 		} else {
-			throw new \InvalidArgumentException('Missing "code" parameter');
+			return null;
 		}
 	}
 
@@ -325,5 +347,20 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		} else {
 			throw new InvalidParameterException($key . ' should be an object or null, ' . gettype( $value ) . ' given');
 		}
+	}
+
+	/**
+	 * Get a prefix for items without codes.
+	 *
+	 * @param Item[] $itemsWithoutCodes
+	 *
+	 * @return string[] prefixes (same keys as input array)
+	 */
+	private function guessPrefixes($itemsWithoutCodes) {
+		$prefixes = [];
+		foreach($itemsWithoutCodes as $key => $item) {
+			$prefixes[$key] = \ItemPrefixer::get($item);
+		}
+		return $prefixes;
 	}
 }

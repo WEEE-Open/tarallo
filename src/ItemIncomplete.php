@@ -8,7 +8,7 @@ namespace WEEEOpen\Tarallo;
  * @package WEEEOpen\Tarallo
  */
 class ItemIncomplete implements \JsonSerializable {
-	private $code;
+	protected $code;
 
 	function __construct($code) {
 		$this->code = $this->sanitizeCode($code);
