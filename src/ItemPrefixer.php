@@ -1,6 +1,6 @@
 <?php
 
-use WEEEOpen\Tarallo\Item;
+namespace WEEEOpen\Tarallo;
 
 // TODO: use some sort of configuration file, or something that can be set by the user, instead of hardcoding every value
 class ItemPrefixer {

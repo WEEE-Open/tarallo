@@ -9,6 +9,7 @@ use WEEEOpen\Tarallo\ItemDefault;
 use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\ItemUpdate;
 use WEEEOpen\Tarallo\User;
+use WEEEOpen\Tarallo\ItemPrefixer;
 
 class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	private $newItems = [];
@@ -359,7 +360,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	private function guessPrefixes($itemsWithoutCodes) {
 		$prefixes = [];
 		foreach($itemsWithoutCodes as $key => $item) {
-			$prefixes[$key] = \ItemPrefixer::get($item);
+			$prefixes[$key] = ItemPrefixer::get($item);
 		}
 		return $prefixes;
 	}
