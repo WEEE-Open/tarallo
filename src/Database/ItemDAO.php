@@ -424,7 +424,8 @@ final class ItemDAO extends DAO {
 	}
 
 	private $getNextCodeStatement = null;
-	private $CodesTableLocked = false;
+	private $setNextCodeStatement = null;
+	private $lockTablesStatement  = null;
 
 	/**
 	 * Get next available code with specified prefix
@@ -434,31 +435,43 @@ final class ItemDAO extends DAO {
 	 * @throws \Exception if Codes table cannot be locked. Locking it avoids generating the same code twice in different transactions. Codes table is used only when creating new items, so its performance isn't really that critical. Lock should be released on commit/rollback.
 	 */
 	private function getNextCode($prefix = '') {
-		if(!$this->CodesTableLocked) {
-			$lock = $this->getPDO()->prepare("LOCK TABLE Codes WRITE");
-			$this->CodesTableLocked = $lock->execute();
-			if(!$this->CodesTableLocked) {
-				throw new \Exception('Cannot lock Codes table');
-			}
+		if($this->lockTablesStatement === null) {
+			$this->lockTablesStatement = $this->getPDO()->prepare("LOCK TABLE Codes WRITE");
+		}
+		$locked = $this->lockTablesStatement->execute();
+		if(!$locked) {
+			throw new \Exception('Cannot generate code (cannot lock Codes table)');
 		}
 
 		if($this->getNextCodeStatement === null) {
 			$this->getNextCodeStatement = $this->getPDO()->prepare('SELECT `Integer` FROM Codes WHERE Prefix = ?');
 		}
-
-		// skips items with manually-assigned codes
-		do {
-			$this->getNextCodeStatement->bindValue(1, $prefix);
-			$this->getNextCodeStatement->execute();
-			$nextInteger = $this->getNextCodeStatement->fetchAll(\PDO::FETCH_ASSOC);
+		$this->getNextCodeStatement->bindValue(1, $prefix, \PDO::PARAM_STR);
+		$this->getNextCodeStatement->execute();
+		if($this->getNextCodeStatement->rowCount() > 0) {
+			$result = $this->getNextCodeStatement->fetchAll(\PDO::FETCH_ASSOC);
+			$integer = (int) $result['Integer'];
 			$this->getNextCodeStatement->closeCursor();
-			$nextInteger++;
-			$exists = $this->checkIfItemExists($prefix . $nextInteger);
+		} else {
+			throw new \InvalidArgumentException('No counter found in database for code prefix "' . $prefix . '"');
+		}
+
+		// Integer should be last used one, so increment it before checking if it's available.
+		// Checking is necessary since there could be items with manually-assigned codes.
+		do {
+			$integer++;
+			$exists = $this->checkIfItemExists($prefix . $integer);
 		} while($exists);
 
-		// TODO: update Codes
+		if($this->setNextCodeStatement === null) {
+			$this->setNextCodeStatement = $this->getPDO()->prepare('UPDATE Codes SET `Integer` = ? WHERE Prefix = ?');
+		}
+		// Integer is now taken, save it into Codes, next time it will be incremented before checking if it's available
+		$this->setNextCodeStatement->bindValue(1, $integer, \PDO::PARAM_INT);
+		$this->setNextCodeStatement->bindValue(2, $prefix, \PDO::PARAM_STR);
+		$this->setNextCodeStatement->execute();
 
-		return $prefix . $nextInteger;
+		return $prefix . $integer;
 	}
 
 	private $checkIfItemExistsStatement = null;
@@ -479,6 +492,6 @@ final class ItemDAO extends DAO {
 		$this->checkIfItemExistsStatement->execute();
 		$result = $this->checkIfItemExistsStatement->fetchAll(\PDO::FETCH_ASSOC);
 		$this->checkIfItemExistsStatement->closeCursor();
-		return $result['c'] > 0;
+		return ((int) $result['c']) > 0;
 	}
 }

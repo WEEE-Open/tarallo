@@ -107,6 +107,12 @@ CREATE TABLE `Tree` (
   CONSTRAINT FOREIGN KEY (`DescendantID`) REFERENCES `Item` (`ItemID`) ON DELETE NO ACTION ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `Codes` (
+  `Prefix` varchar(20) NOT NULL,
+  `Integer` bigint(20) unsigned NOT NULL DEFAULT 1,
+  `ValueText` text NOT NULL,
+  PRIMARY KEY (`Prefix`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `User` (
   `UserID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,

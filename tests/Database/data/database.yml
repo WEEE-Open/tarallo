@@ -246,3 +246,14 @@ ItemModification:
 ItemLocationModification:
 
 ItemModificationDelete:
+
+Codes:
+  -
+    Prefix: M
+    Integer: 10
+  -
+    Prefix: T
+    Integer: 75
+  -
+    Prefix:
+    Integer: 60
