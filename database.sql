@@ -110,7 +110,6 @@ CREATE TABLE `Tree` (
 CREATE TABLE `Codes` (
   `Prefix` varchar(20) NOT NULL,
   `Integer` bigint(20) unsigned NOT NULL DEFAULT 1,
-  `ValueText` text NOT NULL,
   PRIMARY KEY (`Prefix`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
