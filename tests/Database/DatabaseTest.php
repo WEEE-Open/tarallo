@@ -25,7 +25,7 @@ class DatabaseTest extends TestCase {
     //}
 
 	private function getPdo() {
-		return new \PDO('mysql:dbname=tarallo_test;host=10.13.37.6;charset=utf8mb4', 'root', 'root', [
+		return new \PDO('mysql:dbname=tarallo_test;host=127.0.0.1;charset=utf8mb4', 'root', 'root', [
 			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
 			\PDO::ATTR_CASE => \PDO::CASE_NATURAL,
 			\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
