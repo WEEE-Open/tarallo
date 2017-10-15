@@ -234,6 +234,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 			$array['default'] = $this->defaultCode;
 		}
 		if(!empty($this->location)) {
+			ksort($this->location);
 			$array['location'] = array_reverse($this->location);
 		}
 
