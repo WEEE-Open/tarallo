@@ -53,7 +53,8 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(45, 'usb-ports-n', 1),
 	(46, 'vga-ports-n', 1),
 	(47, 'windows-serial-number', 0),
-	(48, 'windows-serial-version', 0);
+	(48, 'windows-serial-version', 0),
+	(49, 'soldered-in-place', 1);
 -- TODO: SCSI ports
 
 TRUNCATE `FeatureValue`;
@@ -104,8 +105,41 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(14, 5, 'btx'),
 	(14, 6, 'flexatx'),
 	(22, 0, 'other'),
-	(22, 1, 'other-old'),
-	(22, 2, ''), -- TODO: cpu sockets
+	(22, 1, 'other-slot'),
+	(22, 2, 'other-socket'),
+	(22, 3, 'other-dip'),
+	(22, 370, 'socket370'),
+	(22, 462, 'socket462a'), -- A aka 462
+	(22, 423, 'socket423'),
+	(22, 478, 'socket478'),
+	(22, 603, 'socket603'),
+	(22, 754, 'socket754'),
+	(22, 940, 'socket940'),
+	(22, 939, 'socket939'),
+	(22, 775, 'lga775'), -- LGA775 aka socket T
+	(22, 771, 'lga771'), -- LGA775 aka socket J
+	(22, 10, 'am1'),
+	(22, 11, 'am2'),
+	(22, 12, 'am2plus'),
+	(22, 13, 'am3'),
+	(22, 14, 'am3plus'),
+	(22, 15, 'am4'),
+	(22, 16, 'fm1'),
+	(22, 17, 'fm2'),
+	(22, 18, 'fm2plus'),
+	(22, 1366, 'lga1366'), -- LGA775 aka socket B
+	(22, 1156, 'lga1156'), -- H
+	(22, 19, 'g34'),
+	(22, 20, 'c32'),
+	(22, 1248, 'lga1248'),
+	(22, 1567, 'lga1567'),
+	(22, 1155, 'lga1155'),
+	(22, 2011, 'lga2011'), -- R
+	(22, 1150, 'lga1150'),
+	(22, 21, 'g3'),
+	(22, 1151, 'lga1151'),
+	(22, 3647, 'lga3647'),
+	(22, 2066, 'lga2066'),
 	(28, 0, '5.25'),
 	(28, 1, '3.5'),
 	(28, 2, '2.5'),
@@ -135,8 +169,9 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(42, 1, 'ddr2'),
 	(42, 2, 'ddr3'),
 	(42, 3, 'ddr4'),
-	(42, 10, ''); -- TODO: LP, SODIMM, etc...
-
+	(42, 10, ''), -- TODO: LP, SODIMM, etc...
+	(49, 0, 'no'),
+	(49, 1, 'yes');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
