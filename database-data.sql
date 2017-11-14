@@ -54,6 +54,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(46, 'vga-ports-n', 1),
 	(47, 'windows-serial-number', 0),
 	(48, 'windows-serial-version', 0);
+-- TODO: SCSI ports
 
 TRUNCATE `FeatureValue`;
 INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
@@ -74,6 +75,7 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(6, 14, 'switch'),
 	(6, 15, 'hub'),
 	(6, 16, 'modem-router'),
+	(6, 17, 'fdd'),
 	(7, 0, 'no'),
 	(7, 1, 'yes'),
 	(7, 2, 'maybe'),
@@ -100,8 +102,40 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(14, 3, 'miniitx'),
 	(14, 4, 'proprietary'),
 	(14, 5, 'btx'),
-	(14, 6, 'flexatx');
-	-- (, , ''),
+	(14, 6, 'flexatx'),
+	(22, 0, 'other'),
+	(22, 1, 'other-old'),
+	(22, 2, ''), -- TODO: cpu sockets
+	(28, 0, '5.25'),
+	(28, 1, '3.5'),
+	(28, 2, '2.5'),
+	(28, 3, '2.5slim'), -- TODO: does this exist?
+	(28, 4, 'm2'),
+	(31, 0, 'cd-r'),
+	(31, 1, 'cd-rw'),
+	(31, 2, 'dvd-r'),
+	(31, 3, 'dvd-rw'),
+	(31, 4, 'bd-r'),
+	(31, 5, 'bd-rw'),
+	(32, 0, '4pin'),
+	(32, 1, '6pin'),
+	(32, 2, '8pin'),
+	(35, 0, 'other'),
+	(35, 1, 'other-barrell'),
+	(35, 2, ''), -- TODO: every barrel connector size in existence
+	(40, 0, 'other'),
+	(40, 1, 'at'),
+	(40, 2, 'atx'),
+	(40, 3, 'atx-p4'),
+	(40, 4, 'atx-p4-extended'),
+	(40, 5, 'atx-p4-4pin'),
+	(40, 6, 'atx-p4-8pin'),
+	(40, 7, 'atx-p4-8pin'),
+	(42, 0, 'ddr'),
+	(42, 1, 'ddr2'),
+	(42, 2, 'ddr3'),
+	(42, 3, 'ddr4'),
+	(42, 10, ''); -- TODO: LP, SODIMM, etc...
 
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
