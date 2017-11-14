@@ -18,7 +18,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(9, 'frequency-hertz', 1),
 	(10, 'diameter-mm', 1),
 	(11, 'diagonal-inch', 1),
-	(12, 'has-gpu', 2), -- TODO: decide if this makes sens
+	(12, 'has-gpu', 2), -- TODO: decide if this makes sense
 	(13, 'color', 2),
 	(14, 'motherboard-form-factor', 2),
 	(15, 'notes', 0),
@@ -54,7 +54,11 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(46, 'vga-ports-n', 1),
 	(47, 'windows-serial-number', 0),
 	(48, 'windows-serial-version', 0),
-	(49, 'soldered-in-place', 1);
+	(49, 'soldered-in-place', 1),
+	(50, 'power-idle-pfc', 0),
+	(51, 'firewire-ports-n', 1),
+	(52, 'serial-ports-n', 1),
+	(53, 'parallel-ports-n', 1);
 -- TODO: SCSI ports
 
 TRUNCATE `FeatureValue`;
@@ -77,6 +81,11 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(6, 15, 'hub'),
 	(6, 16, 'modem-router'),
 	(6, 17, 'fdd'),
+	(6, 18, 'ports-bracket'),
+	(6, 19, 'other-card'),
+	(6, 20, 'heatsink'),
+	(6, 21, 'fan'),
+	(6, 22, 'fan-controller'),
 	(7, 0, 'no'),
 	(7, 1, 'yes'),
 	(7, 2, 'maybe'),
@@ -97,6 +106,7 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(13, 12, 'orange'),
 	(13, 13, 'violet'),
 	(13, 14, 'sip-brown'),
+	(13, 15, 'lightblue'),
 	(14, 0, 'atx'),
 	(14, 1, 'miniatx'),
 	(14, 2, 'microatx'),
