@@ -58,7 +58,8 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(50, 'power-idle-pfc', 0),
 	(51, 'firewire-ports-n', 1),
 	(52, 'serial-ports-n', 1),
-	(53, 'parallel-ports-n', 1);
+	(53, 'parallel-ports-n', 1),
+	(54, 'ram-form-factor', 2);
 -- TODO: SCSI ports
 
 TRUNCATE `FeatureValue`;
@@ -118,15 +119,19 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(22, 1, 'other-slot'),
 	(22, 2, 'other-socket'),
 	(22, 3, 'other-dip'),
+	(22, 4, 'g1'),	
+	(22, 5, 'g2'),
+	(22, 7, 'socket7'),
+	(22, 8, 'm'),	
 	(22, 370, 'socket370'),
 	(22, 462, 'socket462a'), -- A aka 462
 	(22, 423, 'socket423'),
-	(22, 478, 'socket478'),
+	(22, 478, 'socket478'), -- 478 aka mPGA478B
 	(22, 603, 'socket603'),
 	(22, 754, 'socket754'),
 	(22, 940, 'socket940'),
 	(22, 939, 'socket939'),
-	(22, 775, 'lga775'), -- LGA775 aka socket T
+	(22, 775, 'lga775'), -- LGA775 aka socket T aka socket775
 	(22, 771, 'lga771'), -- LGA775 aka socket J
 	(22, 10, 'am1'),
 	(22, 11, 'am2'),
@@ -138,16 +143,16 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(22, 17, 'fm2'),
 	(22, 18, 'fm2plus'),
 	(22, 1366, 'lga1366'), -- LGA775 aka socket B
-	(22, 1156, 'lga1156'), -- H
+	(22, 1156, 'lga1156'), -- aka H1
 	(22, 19, 'g34'),
 	(22, 20, 'c32'),
 	(22, 1248, 'lga1248'),
 	(22, 1567, 'lga1567'),
-	(22, 1155, 'lga1155'),
+	(22, 1155, 'lga1155'), -- aka H2
 	(22, 2011, 'lga2011'), -- R
-	(22, 1150, 'lga1150'),
-	(22, 21, 'g3'),
-	(22, 1151, 'lga1151'),
+	(22, 1150, 'lga1150'), -- aka H3
+	(22, 21, 'g3'), -- aka rPGA988A
+	(22, 1151, 'lga1151'), -- aka H4
 	(22, 3647, 'lga3647'),
 	(22, 2066, 'lga2066'),
 	(28, 0, '5.25'),
@@ -175,13 +180,19 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(40, 5, 'atx-p4-4pin'),
 	(40, 6, 'atx-p4-8pin'),
 	(40, 7, 'atx-p4-8pin'),
-	(42, 0, 'ddr'),
-	(42, 1, 'ddr2'),
-	(42, 2, 'ddr3'),
-	(42, 3, 'ddr4'),
-	(42, 10, ''), -- TODO: LP, SODIMM, etc...
+	(42, 0, 'pc66'),	
+	(42, 1, 'pc100'),
+	(42, 2, 'pc133'),
+	(42, 3, 'ddr'),
+	(42, 4, 'ddr2'),
+	(42, 5, 'ddr3'),
+	(42, 6, 'ddr4'),
 	(49, 0, 'no'),
-	(49, 1, 'yes');
+	(49, 1, 'yes'),
+	(54, 0, 'dimm'),
+	(54, 1, 'so-dimm'),
+	(54, 2, 'minidimm'),
+	(54, 3, 'microdimm');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
