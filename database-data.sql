@@ -54,7 +54,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(46, 'vga-ports-n', 1),
 	(47, 'windows-serial-number', 0),
 	(48, 'windows-serial-version', 0),
-	(49, 'soldered-in-place', 1),
+	(49, 'soldered-in-place', 2),
 	(50, 'power-idle-pfc', 0),
 	(51, 'firewire-ports-n', 1),
 	(52, 'serial-ports-n', 1),
