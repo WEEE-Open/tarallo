@@ -59,7 +59,8 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(52, 'serial-ports-n', 1),
 	(53, 'parallel-ports-n', 1),
 	(54, 'ram-form-factor', 2),
-	(55, 'weight-g', 1);
+	(55, 'weight-g', 1),
+	(56, 'spin-rate-rpm', 1);
 -- TODO: SCSI ports
 
 TRUNCATE `FeatureValue`;
