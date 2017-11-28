@@ -58,7 +58,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(51, 'firewire-ports-n', 1),
 	(52, 'serial-ports-n', 1),
 	(53, 'parallel-ports-n', 1),
-	(54, 'ram-form-factor', 2);
+	(54, 'ram-form-factor', 2),
 	(55, 'weight-g', 1);
 -- TODO: SCSI ports
 
