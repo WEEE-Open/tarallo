@@ -24,7 +24,6 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(15, 'notes', 0),
 	(16, 'agp-sockets-n', 1),
 	(17, 'arrival-batch', 0),
-	(18, 'capacity-byte', 1),
 	(19, 'capacity-decibyte', 1),
 	(20, 'cib', 0),
 	(21, 'core-n', 1),
