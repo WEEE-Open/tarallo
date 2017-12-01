@@ -6,7 +6,10 @@ use WEEEOpen\Tarallo\Query\SearchTriplet;
 
 class Search extends Multifield implements QueryField {
 	public function __construct($parameter) {
-		$this->add($parameter);
+		$pieces = explode(',', $parameter);
+		foreach($pieces as $piece) {
+			$this->add($piece);
+		}
 	}
 
 	public function add($parameter) {
