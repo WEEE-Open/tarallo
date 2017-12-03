@@ -17,14 +17,6 @@ final class ItemDAO extends DAO {
         }
     }
 
-	private function parentSanitize($parent) {
-    	if(is_numeric($parent)) {
-    		return (int) $parent;
-	    } else {
-			return 0;
-		}
-	}
-
 	/**
 	 * Prepare location part of query. Due to the use of multipleIn, sanitize array keys before passing them in
 	 * (e.g. use array_values).
@@ -51,6 +43,9 @@ final class ItemDAO extends DAO {
     }
 
 	/**
+	 * Get the ABNORME search subquery.
+	 * Bind :searchkey0, :searchkey1, ... to keys and :searchvalue0, :searchvalue1, ... to values.
+	 *
 	 * @param $searches array of SearchTriplet
 	 * @return string piece of query string
 	 * @see FeatureDAO::getWhereStringFromSearches
@@ -63,7 +58,27 @@ final class ItemDAO extends DAO {
 			return '';
 		}
 
-		return $this->database->featureDAO()->getWhereStringFromSearches($searches);
+		$subquery = '';
+		$wheres = $this->database->featureDAO()->getWhereStringFromSearches($searches);
+		if(count($wheres) <= 0) {
+			throw new \LogicException('getWhereStringFromSearches() did not return anything, but there were ' . count($searches) . ' search parameters');
+		}
+		foreach($wheres as $where) {
+			$subquery .= 'AND (' . $where . ') ';
+		}
+
+		$query = '
+	            ItemID IN (
+                    SELECT Item.ItemID
+		            FROM Item, Feature, ItemFeature
+		            LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
+		            WHERE (Item.ItemID = ItemFeature.ItemID OR Item.`Default` = ItemFeature.ItemID) AND ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL) AND IsDefault = 0
+		            ' . $subquery . '
+		            GROUP BY ItemID
+		            HAVING(COUNT(*) = '.count($wheres).')
+	        )';
+
+		return $query;
     }
 
     private static function implodeOptionalWhereAnd() {
@@ -72,7 +87,7 @@ final class ItemDAO extends DAO {
         if($where === '') {
             return '';
         } else {
-            return ' WHERE ' . $where;
+            return 'WHERE ' . $where;
         }
     }
 
@@ -99,14 +114,7 @@ final class ItemDAO extends DAO {
 
     public function getItem($locations, $searches, $depth, $parent, $sorts, $token) {
         if(self::isArrayAndFull($searches)) {
-	        $searchSubquery = '
-	            ItemID IN (
-                    SELECT Item.ItemID
-		            FROM Item, Feature, ItemFeature
-		            LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
-		            WHERE (Item.ItemID = ItemFeature.ItemID OR Item.`Default` = ItemFeature.ItemID) AND ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL) AND IsDefault = 0
-		            AND (' . $this->searchPrepare($searches) . ')
-	        )';
+	        $searchSubquery = $this->searchPrepare($searches);
         } else {
 	        $searchSubquery = '';
         }
@@ -116,9 +124,8 @@ final class ItemDAO extends DAO {
         	$locations = array_values($locations);
         }
 
-        // Search items by features, filter by location and token, tree lookup using these items as descendants
-        // (for /Parent), tree lookup using new root items as roots (find all descendants) and join with Item,
-	    // filter by depth, SELECT.
+        // Search items by features, filter by location and token, tree lookup using found items as roots
+	    // (find all descendants) and join with Item, filter by depth, SELECT.
 	    // The MAX(IF()) bit doesn't make any sense, but it works. It should just be an IF, and at the end of
 	    // the query there should be "GROUP BY ... MAX(Parent)" according to everyone on the internet, but that
 	    // didn't work for unfathomable reasons.
@@ -132,14 +139,9 @@ final class ItemDAO extends DAO {
         WHERE AncestorItem.isDefault = 0
         AND Tree.`Depth` <= :depth
         AND Tree.AncestorID IN (
-            SELECT `AncestorID`
-            FROM Tree
-            WHERE `Depth` = :parent
-            AND DescendantID IN ( 
-                SELECT `ItemID`
-                FROM Item
-                ' . $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->tokenPrepare($token), $searchSubquery) . '
-            )
+            SELECT `ItemID`
+            FROM Item
+            ' . $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->tokenPrepare($token), $searchSubquery) . '
         )
         GROUP BY DescendantItem.`ItemID`, DescendantItem.`Code`, Tree.`Depth`
         ORDER BY IFNULL(Tree.`Depth`, 0) ASC
@@ -147,8 +149,6 @@ final class ItemDAO extends DAO {
         $s = $this->getPDO()->prepare($megaquery);
         // TODO: add a LIMIT clause for pagination
 
-
-        $s->bindValue(':parent', $this->parentSanitize($parent), \PDO::PARAM_INT);
         $s->bindValue(':depth', $this->depthSanitize($depth), \PDO::PARAM_INT);
 
         if($token != null) {

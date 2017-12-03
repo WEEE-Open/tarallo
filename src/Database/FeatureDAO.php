@@ -120,18 +120,21 @@ final class FeatureDAO extends DAO {
 
 	/**
 	 * Build some dynamic SQL queries, or rather pieces of queries, because that's how we roll.
-	 * Bind search key to ":searchname . $key" and value to ":searchvalue . $key". Where $key is the numeric index of the $searches array.
+	 * Bind search key to ":searchname . $key" and value to ":searchvalue . $key". Where $key is a key in the $searches array.
 	 *
 	 * @param SearchTriplet[] $searches non-empty array of SearchTriplet
 	 *
-	 * @return string sequence of WHERE statements(?) (no "WHERE" keyword itself)
+	 * @return string[] array of WHERE statements(?) (no "WHERE" keyword itself)
 	 * @throws InvalidParameterException
 	 * @throws \InvalidArgumentException - wrong parameters
 	 */
 	public function getWhereStringFromSearches($searches) {
-		$where = '';
+		$where = [];
 
-		foreach($searches as $numericKey => $triplet) {
+		foreach($searches as $key => $triplet) {
+			if(!is_integer($key)) {
+				throw new \LogicException('Keys should be numeric, ' . $key . ' isn\'t');
+			}
 			if(!($triplet instanceof SearchTriplet)) {
 				if(is_object($triplet)) {
 					throw new \InvalidArgumentException('Search parameters must be instances of SearchTriplet, ' . get_class($triplet) . ' given');
@@ -141,14 +144,13 @@ final class FeatureDAO extends DAO {
 			}
 		}
 
-		foreach($searches as $numericKey => $triplet) {
+		foreach($searches as $key => $triplet) {
 			if($this->database->featureDAO()->getFeatureTypeFromName($triplet->getKey()) === self::FEATURE_NUMBER) {
-				$where .= '(Feature.FeatureName = :searchname' . $numericKey . ' AND Value ' . $searches[$numericKey]->getCompare() . ' :searchvalue' . $numericKey . ') OR ';
+				$where[] = 'Feature.FeatureName = :searchname' . $key . ' AND Value ' . $searches[$key]->getCompare() . ' :searchvalue' . $key;
 			} else {
-				$where .= '(Feature.FeatureName = :searchname' . $numericKey . ' AND COALESCE(ItemFeature.ValueText, FeatureValue.ValueText) LIKE :searchvalue' . $numericKey . ') OR ';
+				$where[] = 'Feature.FeatureName = :searchname' . $key . ' AND COALESCE(ItemFeature.ValueText, FeatureValue.ValueText) LIKE :searchvalue' . $key;
 			}
 		}
-		$where = substr($where, 0, strlen($where) - 4); // remove last OR
 
 		return $where;
     }
