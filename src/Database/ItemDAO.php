@@ -51,6 +51,25 @@ final class ItemDAO extends DAO {
 	 * @see FeatureDAO::getWhereStringFromSearches
 	 */
 	private function searchPrepare($searches) {
+
+		// A promising alternative THAT DOESN'T WORK FOR ANY APPARENT REASON (returns a second row that doesn't even match the EXISTS clause)
+//SELECT *
+//FROM Item
+//NATURAL JOIN ItemFeature
+//LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
+//WHERE (Item.ItemID = ItemFeature.ItemID OR Item.`Default` = ItemFeature.ItemID)
+//AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
+//AND IsDefault = 0
+//AND EXISTS(
+//SELECT *
+//FROM Item AS InnerItem
+//NATURAL JOIN ItemFeature
+//LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
+//WHERE ItemFeature.ValueText LIKE 'asd'
+//                         AND InnerItem.ItemID = Item.ItemID
+//LIMIT 1
+//);
+
 		if(!is_array($searches)) {
 			throw new \InvalidArgumentException('Search parameters must be passed as an array');
 		}
