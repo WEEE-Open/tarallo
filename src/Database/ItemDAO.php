@@ -19,19 +19,16 @@ final class ItemDAO extends DAO {
 	}
 
 	/**
-	 * Prepare location part of query. Due to the use of multipleIn, sanitize array keys before passing them in
-	 * (e.g. use array_values).
+	 * Prepare "code" part of query.
 	 *
-	 * @param array $locations
+	 * @param array $codes
 	 *
 	 * @return string
-	 * @todo: shouldn't this search items INSIDE a location, instead of the location itself?
 	 */
-	private function locationPrepare($locations) {
-		if(self::isArrayAndFull($locations)) {
-			$locationWhere = '`Code` IN (' . $this->multipleIn(':location', $locations);
-
-			return $locationWhere . ')';
+	private function codePrepare($codes) {
+		if(self::isArrayAndFull($codes)) {
+			$codeWhere = '`Code` IN (' . $this->multipleIn(':code', $codes);
+			return $codeWhere . ')';
 		} else {
 			return '';
 		}
@@ -101,6 +98,11 @@ final class ItemDAO extends DAO {
 		return $query;
 	}
 
+	/**
+	 * Place strings here, place a WHERE in front and AND between them.
+	 *
+	 * @return string result or empty string if supplied strings where empty, too
+	 */
 	private static function implodeOptionalWhereAnd() {
 		$args = func_get_args();
 		$where = self::implodeAnd($args);
@@ -118,7 +120,7 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param $args string[]
 	 *
-	 * @return string empty string or WHERE clauses separated by AND (no WHERE itself)
+	 * @return string string separated by AND, or empty string if supplied strings where empty
 	 */
 	private static function implodeAnd($args) {
 		$stuff = [];
@@ -135,7 +137,21 @@ final class ItemDAO extends DAO {
 		return implode(' AND ', $stuff);
 	}
 
-	public function getItem($locations, $searches, $depth, $parent, $sorts, $token) {
+	/**
+	 * Go get those items!
+	 *
+	 * @param $codes string[]|null Directly select those items (and filter with other parameters)
+	 * @param $searches SearchTriplet[]|null Search by feature values
+	 * @param $depth integer|null Max depth in returned tree
+	 * @param $parent SearchTriplet[]|null Search by feature values in parent items
+	 * @param $sorts string[]|null key (feature name) => order (+ or -)
+	 * @param $token string|null token. Must match for every root item, so it only makes sense for "$code and nothing else" searches
+	 * @param $locations string[]|null Item codes, only their descendants will be searched.
+	 *
+	 * @return Item[]
+	 * @TODO actually implement $parent and $location
+	 */
+	public function getItem($codes = null, $searches = null, $depth = null, $parent = null, $sorts = null, $token = null, $locations = null) {
 		if(self::isArrayAndFull($searches)) {
 			$searchSubquery = $this->searchPrepare($searches);
 		} else {
@@ -143,8 +159,8 @@ final class ItemDAO extends DAO {
 		}
 
 		// sanitization
-		if(self::isArrayAndFull($locations)) {
-			$locations = array_values($locations);
+		if(self::isArrayAndFull($codes)) {
+			$codes = array_values($codes);
 		}
 
 		// Search items by features, filter by location and token, tree lookup using found items as roots
@@ -164,7 +180,7 @@ final class ItemDAO extends DAO {
         AND Tree.AncestorID IN (
             SELECT `ItemID`
             FROM Item
-            ' . $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->tokenPrepare($token),
+            ' . $this->implodeOptionalWhereAnd($this->codePrepare($codes), $this->tokenPrepare($token),
 				$searchSubquery) . '
         )
         GROUP BY DescendantItem.`ItemID`, DescendantItem.`Code`, Tree.`Depth`
@@ -179,9 +195,9 @@ final class ItemDAO extends DAO {
 			$s->bindValue(':token', $token, \PDO::PARAM_STR);
 		}
 
-		if(self::isArrayAndFull($locations)) {
-			foreach($locations as $numericKey => $location) {
-				$s->bindValue(':location' . $numericKey, $location);
+		if(self::isArrayAndFull($codes)) {
+			foreach($codes as $numericKey => $code) {
+				$s->bindValue(':code' . $numericKey, $code);
 			}
 		}
 

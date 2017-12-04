@@ -14,7 +14,7 @@ class AbstractQueryTest extends TestCase{
 	 *
 	 * @covers       \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses         \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses         \WEEEOpen\Tarallo\Query\Field\Code
 	 * @uses         \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses         \WEEEOpen\Tarallo\Query\Field\Depth
 	 * @uses         \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
@@ -25,14 +25,14 @@ class AbstractQueryTest extends TestCase{
 
 	public function providerTestQueryStringNormalization() {
 		return [
-			['Location/test/', '/Location/test'],
-			['/Location/test/', '/Location/test'],
-			['/Location/test', '/Location/test'],
-			['Location/test', '/Location/test'],
-			['Location/test/Depth/2/', '/Location/test/Depth/2'],
-			['/Location/test/Depth/2/', '/Location/test/Depth/2'],
-			['/Location/test/Depth/2', '/Location/test/Depth/2'],
-			['Location/test/Depth/2', '/Location/test/Depth/2'],
+			['Code/test/', '/Code/test'],
+			['/Code/test/', '/Code/test'],
+			['/Code/test', '/Code/test'],
+			['Code/test', '/Code/test'],
+			['Code/test/Depth/2/', '/Code/test/Depth/2'],
+			['/Code/test/Depth/2/', '/Code/test/Depth/2'],
+			['/Code/test/Depth/2', '/Code/test/Depth/2'],
+			['Code/test/Depth/2', '/Code/test/Depth/2'],
 		];
 	}
 }

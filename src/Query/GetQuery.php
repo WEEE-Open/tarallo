@@ -7,7 +7,7 @@ use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\InvalidParameterException;
 
 class GetQuery extends AbstractQuery {
-	const FIELD_LOCATION = 'Location';
+	const FIELD_CODE = 'Code';
 	const FIELD_SEARCH = 'Search';
 	const FIELD_SORT = 'Sort';
 	const FIELD_DEPTH = 'Depth';
@@ -18,7 +18,7 @@ class GetQuery extends AbstractQuery {
 	private $queryFields = [];
 
 	/**
-	 * @param $query string representing query type (Login, Location, etc...)
+	 * @param $query string representing search fields (Search, Sort, Parent, etc...)
 	 * @param $parameter string parameters passed to QueryField constructor
 	 *
 	 * @return null|Field\QueryField
@@ -26,8 +26,8 @@ class GetQuery extends AbstractQuery {
 	 */
 	protected function queryFieldsFactory($query, $parameter) {
 		switch($query) {
-			case self::FIELD_LOCATION:
-				return new Field\Location($parameter);
+			case self::FIELD_CODE:
+				return new Field\Code($parameter);
 			case self::FIELD_SEARCH:
 				return new Field\Search($parameter);
 			case self::FIELD_SORT:
@@ -123,7 +123,7 @@ class GetQuery extends AbstractQuery {
 		}
 		/** @var Field\QueryField[] $qf */
 		$qf = $this->queryFields; // this is only needed because PHPStorm doesn't understand "$this->queryFields" in PHPDoc comments.
-		$location = isset($qf[self::FIELD_LOCATION]) ? $qf[self::FIELD_LOCATION]->getContent() : null;
+		$location = isset($qf[self::FIELD_CODE]) ? $qf[self::FIELD_CODE]->getContent() : null;
 		$search = isset($qf[self::FIELD_SEARCH]) ? $qf[self::FIELD_SEARCH]->getContent() : null;
 		$depth = isset($qf[self::FIELD_DEPTH]) ? $qf[self::FIELD_DEPTH]->getContent() : null;
 		$parent = isset($qf[self::FIELD_PARENT]) ? $qf[self::FIELD_PARENT]->getContent() : null;

@@ -9,26 +9,26 @@ class ParentTest extends TestCase{
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Code
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\ParentField
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 */
 	public function testInvalidParentNaN() {
 		$this->expectException(InvalidParameterException::class);
-		new GetQuery('/Location/test/Parent/foo');
+		new GetQuery('/Code/test/Parent/foo');
 	}
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Code
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\ParentField
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 */
 	public function testInvalidParentNegative() {
 		$this->expectException(InvalidParameterException::class);
-		new GetQuery('/Location/test/Parent/-1');
+		new GetQuery('/Code/test/Parent/-1');
 	}
 }

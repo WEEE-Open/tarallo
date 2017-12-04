@@ -67,19 +67,19 @@ class GetQueryTest extends TestCase {
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
 	 * @covers \WEEEOpen\Tarallo\Query\AbstractQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Code
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses   \WEEEOpen\Tarallo\Query\PostJSONQuery
 	 * @uses   \WEEEOpen\Tarallo\User
 	 */
 	public function testNullDatabaseError() {
 		$this->expectException(\TypeError::class);
-		(new GetQuery('/Location/foo'))->run(new Tarallo\User('example', 'example'), null);
+		(new GetQuery('/Code/foo'))->run(new Tarallo\User('example', 'example'), null);
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Code
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\Depth
@@ -92,25 +92,25 @@ class GetQueryTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Code
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testMissingParameter() {
 		$this->expectException(InvalidParameterException::class);
-		new GetQuery('/Location');
+		new GetQuery('/Code');
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses   \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses   \WEEEOpen\Tarallo\Query\Field\Code
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @uses   \WEEEOpen\Tarallo\Query\AbstractQuery
 	 * @uses   \WEEEOpen\Tarallo\Query\Field\Depth
 	 */
 	public function testMissingParameterMismatch() {
 		$this->expectException(InvalidParameterException::class);
-		new GetQuery('/Location/Depth/3');
+		new GetQuery('/Code/Depth/3');
 	}
 
 	/**
@@ -135,7 +135,7 @@ class GetQueryTest extends TestCase {
 	 * @dataProvider   providerTestUnchangedValidNonDefaultStrings
 	 *
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @covers         \WEEEOpen\Tarallo\Query\Field\Location
+	 * @covers         \WEEEOpen\Tarallo\Query\Field\Code
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Depth
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Language
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\ParentField
@@ -156,24 +156,24 @@ class GetQueryTest extends TestCase {
 
 	public function providerTestUnchangedValidNonDefaultStrings() {
 		return [
-			['/Location/test'],
-			['/Location/test/Depth/3'],
-			['/Location/test/Language/fr-FR'],
-			['/Location/test/Parent/2'],
-			['/Location/test/Search/key=foo'],
-			['/Location/test/Sort/+key'],
-			['/Location/test/Token/foo'],
+			['/Code/test'],
+			['/Code/test/Depth/3'],
+			['/Code/test/Language/fr-FR'],
+			['/Code/test/Parent/2'],
+			['/Code/test/Search/key=foo'],
+			['/Code/test/Sort/+key'],
+			['/Code/test/Token/foo'],
 		];
 	}
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Multifield
-	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Code
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
 	 * @uses           \WEEEOpen\Tarallo\Query\AbstractQuery
 	 */
 	public function testMultipleFields() {
-		$this->assertEquals('/Location/foo/Location/bar', (string) new GetQuery('/Location/foo/Location/bar'));
+		$this->assertEquals('/Code/foo/Code/bar', (string) new GetQuery('/Code/foo/Code/bar'));
 	}
 }

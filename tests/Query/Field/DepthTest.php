@@ -8,7 +8,7 @@ use WEEEOpen\Tarallo\Query\GetQuery;
 class DepthTest extends TestCase{
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Code
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Depth
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
@@ -16,12 +16,12 @@ class DepthTest extends TestCase{
 	 */
 	public function testInvalidDepthNaN() {
 		$this->expectException(InvalidParameterException::class);
-		new GetQuery('/Location/test/Depth/foo');
+		new GetQuery('/Code/test/Depth/foo');
 	}
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Query\GetQuery
-	 * @uses           \WEEEOpen\Tarallo\Query\Field\Location
+	 * @uses           \WEEEOpen\Tarallo\Query\Field\Code
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\Multifield
 	 * @covers         \WEEEOpen\Tarallo\Query\Field\Depth
 	 * @uses           \WEEEOpen\Tarallo\Query\Field\AbstractQueryField
@@ -29,6 +29,6 @@ class DepthTest extends TestCase{
 	 */
 	public function testInvalidDepthNegative() {
 		$this->expectException(InvalidParameterException::class);
-		new GetQuery('/Location/test/Depth/-1');
+		new GetQuery('/Code/test/Depth/-1');
 	}
 }
