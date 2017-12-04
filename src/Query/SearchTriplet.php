@@ -24,9 +24,9 @@ class SearchTriplet {
 			throw new InvalidParameterException('"' . $compare . '" is not a valid comparison operator (allowed: =, >, <)');
 		}
 
-		$this->key     = $key;
+		$this->key = $key;
 		$this->compare = $compare;
-		$this->value   = $value;
+		$this->value = $value;
 	}
 
 	public static function getSeparators() {

@@ -102,9 +102,9 @@ final class TreeDAO extends DAO {
 			FROM Tree ltree, Tree rtree 
 			WHERE ltree.DescendantID = :parent AND rtree.AncestorID = :new;');
 		}
-		$itemDAO  = $this->database->itemDAO();
+		$itemDAO = $this->database->itemDAO();
 		$parentID = $itemDAO->getItemId($parent);
-		$childID  = $itemDAO->getItemId($child);
+		$childID = $itemDAO->getItemId($child);
 
 		if($parentID === $childID) {
 			// Adding an item into itself works. It doesn't add a row with Depth=0, it places an item into itself and creates new useless paths, which doesn't make any sense.

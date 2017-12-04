@@ -38,7 +38,7 @@ class User {
 
 		$this->username = $username;
 		$this->password = $password;
-		$this->hash     = $hash;
+		$this->hash = $hash;
 	}
 
 	private static function password_verify($password, $hash) {

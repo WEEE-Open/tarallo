@@ -108,7 +108,7 @@ class GetQuery extends AbstractQuery {
 	}
 
 	public function __toString() {
-		$result  = '';
+		$result = '';
 		$queries = $this->getAllQueryFields();
 		foreach($queries as $field) {
 			$result .= (string) $field;
@@ -122,13 +122,13 @@ class GetQuery extends AbstractQuery {
 			throw new InvalidParameterException('Not logged in and no token provided');
 		}
 		/** @var Field\QueryField[] $qf */
-		$qf       = $this->queryFields; // this is only needed because PHPStorm doesn't understand "$this->queryFields" in PHPDoc comments.
+		$qf = $this->queryFields; // this is only needed because PHPStorm doesn't understand "$this->queryFields" in PHPDoc comments.
 		$location = isset($qf[self::FIELD_LOCATION]) ? $qf[self::FIELD_LOCATION]->getContent() : null;
-		$search   = isset($qf[self::FIELD_SEARCH]) ? $qf[self::FIELD_SEARCH]->getContent() : null;
-		$depth    = isset($qf[self::FIELD_DEPTH]) ? $qf[self::FIELD_DEPTH]->getContent() : null;
-		$parent   = isset($qf[self::FIELD_PARENT]) ? $qf[self::FIELD_PARENT]->getContent() : null;
-		$sort     = isset($qf[self::FIELD_SORT]) ? $qf[self::FIELD_SORT]->getContent() : null;
-		$token    = isset($qf[self::FIELD_TOKEN]) ? $qf[self::FIELD_TOKEN]->getContent() : null;
+		$search = isset($qf[self::FIELD_SEARCH]) ? $qf[self::FIELD_SEARCH]->getContent() : null;
+		$depth = isset($qf[self::FIELD_DEPTH]) ? $qf[self::FIELD_DEPTH]->getContent() : null;
+		$parent = isset($qf[self::FIELD_PARENT]) ? $qf[self::FIELD_PARENT]->getContent() : null;
+		$sort = isset($qf[self::FIELD_SORT]) ? $qf[self::FIELD_SORT]->getContent() : null;
+		$token = isset($qf[self::FIELD_TOKEN]) ? $qf[self::FIELD_TOKEN]->getContent() : null;
 
 		// TODO: return... what? Some array? JSON? Response object?
 		return ['items' => $db->itemDAO()->getItem($location, $search, $depth, $parent, $sort, $token)];

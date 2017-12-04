@@ -44,7 +44,7 @@ class ItemUpdate extends Item implements \JsonSerializable {
 	}
 
 	public function setIsDefault($is) {
-		$this->isDefault        = (bool) $is;
+		$this->isDefault = (bool) $is;
 		$this->isDefaultChanged = true;
 
 		return $this;
@@ -129,7 +129,7 @@ class ItemUpdate extends Item implements \JsonSerializable {
 	}
 
 	public function jsonSerialize() {
-		$array         = [];
+		$array = [];
 		$array['code'] = $this->getCode();
 		if(!empty($this->featuresChanged)) {
 			$array['features'] = $this->getFeatures();

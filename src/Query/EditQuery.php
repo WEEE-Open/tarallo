@@ -40,14 +40,14 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 						try {
 							if($op === 'create') {
 								$newItem = $this->buildItem($itemPieces, $this->itemsWithoutCodes);
-								$parent  = $newItem->getAncestor(1);
+								$parent = $newItem->getAncestor(1);
 								if($parent === null) {
 									$this->newItemsNoParent[] = $newItem;
 								} else {
 									$this->newItems[$parent->getCode()][] = $newItem;
 								}
 							} else {
-								$newItem                                = $this->buildItemUpdate($itemPieces);
+								$newItem = $this->buildItemUpdate($itemPieces);
 								$this->updateItems[$newItem->getCode()] = $newItem;
 							}
 						} catch(\Exception $e) {
@@ -253,7 +253,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			throw new InvalidParameterException('Items should be objects, ' . gettype($itemPieces) . ' given');
 		}
 		$itemCode = self::codePeek($itemPieces);
-		$item     = new ItemUpdate($itemCode);
+		$item = new ItemUpdate($itemCode);
 		foreach($itemPieces as $key => $value) {
 			switch($key) {
 				case 'code':

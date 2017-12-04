@@ -6,8 +6,8 @@ use WEEEOpen\Tarallo\InvalidParameterException;
 
 class Sort extends AbstractQueryField implements QueryField {
 	public function __construct($parameter) {
-		$pieces        = explode(",", $parameter);
-		$keys          = [];
+		$pieces = explode(",", $parameter);
+		$keys = [];
 		$this->content = [];
 
 		foreach($pieces as $piece) {
@@ -15,7 +15,7 @@ class Sort extends AbstractQueryField implements QueryField {
 				throw new InvalidParameterException($piece . ' (contained in ' . $parameter . ') should be at least 2 characters long (+ or - for sort order & a key)');
 			}
 			$order = substr($piece, 0, 1);
-			$key   = substr($piece, 1);
+			$key = substr($piece, 1);
 
 			if($order !== '+' && $order !== '-') {
 				throw new InvalidParameterException('Sort order "' . $order . '" (contained in ' . $piece . ') must be + or -');
@@ -26,7 +26,7 @@ class Sort extends AbstractQueryField implements QueryField {
 			}
 
 			// TODO: check that $key is a valid key
-			$keys[]              = $key;
+			$keys[] = $key;
 			$this->content[$key] = $order;
 		}
 	}

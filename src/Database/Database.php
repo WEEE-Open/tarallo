@@ -18,7 +18,7 @@ class Database {
 	public function __construct($user, $pass, $dsn) {
 		$this->username = $user;
 		$this->password = $pass;
-		$this->dsn      = $dsn;
+		$this->dsn = $dsn;
 		$this->callback = function() {
 			return $this->getPDO();
 		};
@@ -47,9 +47,9 @@ class Database {
 	}
 
 	public function disconnect() {
-		$this->pdo        = null;
-		$this->userDAO    = null;
-		$this->itemDAO    = null;
+		$this->pdo = null;
+		$this->userDAO = null;
+		$this->itemDAO = null;
 		$this->featureDAO = null;
 	}
 

@@ -29,7 +29,7 @@ final class ModificationDAO extends DAO {
 	private $itemLocationModifiedStatement = null;
 
 	private function setItemMovedTo(ItemIncomplete $item, ItemIncomplete $to) {
-		$itemID   = $this->database->itemDAO()->getItemId($item);
+		$itemID = $this->database->itemDAO()->getItemId($item);
 		$parentID = $this->database->itemDAO()->getItemId($to);
 
 		if($this->itemLocationModifiedStatement === null) {
@@ -89,7 +89,7 @@ final class ModificationDAO extends DAO {
 
 	private function getNewModificationId(User $user, $notes) {
 		// TODO: decouple ModificationDAO from User by passing string instead of User?
-		$pdo   = $this->getPDO();
+		$pdo = $this->getPDO();
 		$stuff = $pdo->prepare('INSERT INTO Modification (UserID, `Date`, Notes) SELECT `User`.UserID, :dat, :notes FROM `User` WHERE `User`.Name = :username');
 		$stuff->bindValue(':username', $user->getUsername());
 		$stuff->bindValue(':dat', time());

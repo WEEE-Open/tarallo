@@ -63,7 +63,7 @@ final class ItemDAO extends DAO {
 		}
 
 		$subquery = '';
-		$wheres   = $this->database->featureDAO()->getWhereStringFromSearches($searches);
+		$wheres = $this->database->featureDAO()->getWhereStringFromSearches($searches);
 		if(count($wheres) <= 0) {
 			throw new \LogicException('getWhereStringFromSearches() did not return anything, but there were ' . count($searches) . ' search parameters');
 		}
@@ -73,14 +73,14 @@ final class ItemDAO extends DAO {
 			$wheresdefault[$k] = str_replace(':searchvalue', ':searchvaluedefault', $wheresdefault[$k]);
 		}
 		foreach($wheres as $k => $where) {
-//			$subquery .= '
-//			AND (
-//				ItemID IN (SELECT ItemID ' . $where . ')
-//				OR (
-//					Default IS NOT NULL
-//					AND Default IN (SELECT ItemID ' . $where . ')
-//				)
-//			)';
+			//			$subquery .= '
+			//			AND (
+			//				ItemID IN (SELECT ItemID ' . $where . ')
+			//				OR (
+			//					Default IS NOT NULL
+			//					AND Default IN (SELECT ItemID ' . $where . ')
+			//				)
+			//			)';
 			$subquery .= '
 			AND (
 				ItemID IN (SELECT Item.ItemID ' . $where . ')
@@ -102,7 +102,7 @@ final class ItemDAO extends DAO {
 	}
 
 	private static function implodeOptionalWhereAnd() {
-		$args  = func_get_args();
+		$args = func_get_args();
 		$where = self::implodeAnd($args);
 		if($where === '') {
 			return '';
@@ -170,7 +170,7 @@ final class ItemDAO extends DAO {
         GROUP BY DescendantItem.`ItemID`, DescendantItem.`Code`, Tree.`Depth`
         ORDER BY IFNULL(Tree.`Depth`, 0) ASC
 		'; // IFNULL is useless but the intent should be clearer.
-		$s         = $this->getPDO()->prepare($megaquery);
+		$s = $this->getPDO()->prepare($megaquery);
 		// TODO: add a LIMIT clause for pagination
 
 		$s->bindValue(':depth', $this->depthSanitize($depth), \PDO::PARAM_INT);
@@ -188,7 +188,7 @@ final class ItemDAO extends DAO {
 		if(self::isArrayAndFull($searches)) {
 			foreach($searches as $numericKey => $triplet) {
 				/** @var SearchTriplet $triplet */
-				$key   = $triplet->getKey();
+				$key = $triplet->getKey();
 				$value = $triplet->getValue();
 				$s->bindValue(':searchname' . $numericKey, $key);
 				$s->bindValue(':searchnamedefault' . $numericKey, $key);
@@ -213,7 +213,7 @@ final class ItemDAO extends DAO {
 				if(isset($items[$row['ItemID']])) {
 					$thisItem = $items[$row['ItemID']];
 				} else {
-					$thisItem              = new Item($row['Code']);
+					$thisItem = new Item($row['Code']);
 					$items[$row['ItemID']] = $thisItem;
 				}
 				if($row['Depth'] === 0) {
@@ -446,7 +446,7 @@ final class ItemDAO extends DAO {
 			return;
 		}
 
-		$inItemID              = DAO::multipleIn(':loc', $items);
+		$inItemID = DAO::multipleIn(':loc', $items);
 		$getLocationsStatement = $this->getPDO()->prepare('SELECT Tree.DescendantID AS ItemID, Item.Code AS Ancestor, Tree.Depth AS Depth
 			FROM Item, Tree
 			WHERE Tree.AncestorID = Item.ItemID AND Tree.DescendantID IN (' . $inItemID . ') AND Tree.Depth <> 0;

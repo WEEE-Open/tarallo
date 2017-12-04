@@ -35,7 +35,7 @@ final class FeatureDAO extends DAO {
 		 * So we're doing two queries. That UNION probably killed performance, too, so it's acceptable anyway.
 		 */
 
-		$inItemID         = $this->multipleIn(':item', $items);
+		$inItemID = $this->multipleIn(':item', $items);
 		$featureStatement = $this->getPDO()->prepare('SELECT ItemID, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `FeatureValue`
             FROM Feature, ItemFeature
             LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID

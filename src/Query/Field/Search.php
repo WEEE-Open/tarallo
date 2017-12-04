@@ -20,7 +20,7 @@ class Search extends Multifield implements QueryField {
 	private function toTriplet($parameter) {
 		$parameter = (string) $parameter;
 		$separator = SearchTriplet::getSeparators();
-		$i         = 0;
+		$i = 0;
 		do {
 			$pieces = explode($separator[$i], $parameter);
 			if(count($pieces) === 2 && strlen($pieces[0]) > 0 && strlen($pieces[1]) > 0) {
