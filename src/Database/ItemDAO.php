@@ -51,25 +51,6 @@ final class ItemDAO extends DAO {
 	 * @see FeatureDAO::getWhereStringFromSearches
 	 */
 	private function searchPrepare($searches) {
-
-		// A promising alternative THAT DOESN'T WORK FOR ANY APPARENT REASON (returns a second row that doesn't even match the EXISTS clause)
-//SELECT *
-//FROM Item
-//NATURAL JOIN ItemFeature
-//LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
-//WHERE (Item.ItemID = ItemFeature.ItemID OR Item.`Default` = ItemFeature.ItemID)
-//AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
-//AND IsDefault = 0
-//AND EXISTS(
-//SELECT *
-//FROM Item AS InnerItem
-//NATURAL JOIN ItemFeature
-//LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
-//WHERE ItemFeature.ValueText LIKE 'asd'
-//                         AND InnerItem.ItemID = Item.ItemID
-//LIMIT 1
-//);
-
 		if(!is_array($searches)) {
 			throw new \InvalidArgumentException('Search parameters must be passed as an array');
 		}
@@ -82,20 +63,36 @@ final class ItemDAO extends DAO {
 		if(count($wheres) <= 0) {
 			throw new \LogicException('getWhereStringFromSearches() did not return anything, but there were ' . count($searches) . ' search parameters');
 		}
-		foreach($wheres as $where) {
-			$subquery .= 'AND (' . $where . ') ';
+		$wheresdefault = $wheres;
+		foreach($wheresdefault as $k => $where) {
+			$wheresdefault[$k] = str_replace(':searchname', ':searchnamedefault', $wheresdefault[$k]);
+			$wheresdefault[$k] = str_replace(':searchvalue', ':searchvaluedefault', $wheresdefault[$k]);
+		}
+		foreach($wheres as $k => $where) {
+//			$subquery .= '
+//			AND (
+//				ItemID IN (SELECT ItemID ' . $where . ')
+//				OR (
+//					Default IS NOT NULL
+//					AND Default IN (SELECT ItemID ' . $where . ')
+//				)
+//			)';
+			$subquery .= '
+			AND (
+				ItemID IN (SELECT Item.ItemID ' . $where . ')
+				OR
+				Item.`Default` IN (SELECT Item.ItemID ' . $wheresdefault[$k] . ')
+			)';
 		}
 
 		$query = '
-	            ItemID IN (
-                    SELECT Item.ItemID
-		            FROM Item, Feature, ItemFeature
-		            LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
-		            WHERE (Item.ItemID = ItemFeature.ItemID OR Item.`Default` = ItemFeature.ItemID) AND ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL) AND IsDefault = 0
-		            ' . $subquery . '
-		            GROUP BY ItemID
-		            HAVING(COUNT(*) = '.count($wheres).')
-	        )';
+		ItemID IN (
+			SELECT ItemID
+			FROM Item
+			WHERE IsDefault = 0
+			' . $subquery . '
+		)
+		';
 
 		return $query;
     }
@@ -183,8 +180,12 @@ final class ItemDAO extends DAO {
 	    if(self::isArrayAndFull($searches)) {
 		    foreach($searches as $numericKey => $triplet) {
 			    /** @var SearchTriplet $triplet */
-			    $s->bindValue(':searchname' . $numericKey, $triplet->getKey());
-			    $s->bindValue(':searchvalue' . $numericKey, $triplet->getValue());
+			    $key = $triplet->getKey();
+			    $value = $triplet->getValue();
+			    $s->bindValue(':searchname' . $numericKey, $key);
+			    $s->bindValue(':searchnamedefault' . $numericKey, $key);
+			    $s->bindValue(':searchvalue' . $numericKey, $value);
+			    $s->bindValue(':searchvaluedefault' . $numericKey, $value);
 		    }
 	    }
 

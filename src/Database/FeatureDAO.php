@@ -120,6 +120,8 @@ final class FeatureDAO extends DAO {
 
 	/**
 	 * Build some dynamic SQL queries, or rather pieces of queries, because that's how we roll.
+	 * They are actually missing the SELECT part, so add it. Count on Item, ItemFeature and Feature being present
+	 * and correctly joined, other tables may or may not be there.
 	 * Bind search key to ":searchname . $key" and value to ":searchvalue . $key". Where $key is a key in the $searches array.
 	 *
 	 * @param SearchTriplet[] $searches non-empty array of SearchTriplet
@@ -129,7 +131,7 @@ final class FeatureDAO extends DAO {
 	 * @throws \InvalidArgumentException - wrong parameters
 	 */
 	public function getWhereStringFromSearches($searches) {
-		$where = [];
+		$queries = [];
 
 		foreach($searches as $key => $triplet) {
 			if(!is_integer($key)) {
@@ -145,14 +147,40 @@ final class FeatureDAO extends DAO {
 		}
 
 		foreach($searches as $key => $triplet) {
-			if($this->database->featureDAO()->getFeatureTypeFromName($triplet->getKey()) === self::FEATURE_NUMBER) {
-				$where[] = 'Feature.FeatureName = :searchname' . $key . ' AND Value ' . $searches[$key]->getCompare() . ' :searchvalue' . $key;
-			} else {
-				$where[] = 'Feature.FeatureName = :searchname' . $key . ' AND COALESCE(ItemFeature.ValueText, FeatureValue.ValueText) LIKE :searchvalue' . $key;
+			switch($this->database->featureDAO()->getFeatureTypeFromName($triplet->getKey())) {
+				case self::FEATURE_NUMBER:
+					$queries[] = '
+					FROM Item
+					NATURAL JOIN ItemFeature
+					NATURAL JOIN Feature
+					WHERE Feature.FeatureName = :searchname' . $key . '
+					AND Feature.FeatureType = ' . self::FEATURE_NUMBER . '
+					AND ItemFeature.Value ' . $searches[$key]->getCompare() . ' :searchvalue' . $key;
+					break;
+				case self::FEATURE_ENUM:
+					$queries[] = '
+					FROM Item
+					JOIN ItemFeature ON Item.ItemID = ItemFeature.ItemID
+					JOIN Feature ON ItemFeature.FeatureID = Feature.FeatureID
+					JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
+					WHERE ItemFeature.ValueEnum = FeatureValue.ValueEnum
+					AND Feature.FeatureName = :searchname' . $key . '
+					AND Feature.FeatureType = ' . self::FEATURE_ENUM . '
+					AND FeatureValue.ValueText = :searchvalue' . $key;
+					break;
+				default:
+				case self::FEATURE_TEXT:
+					$queries[] = '
+					FROM Item
+					NATURAL JOIN ItemFeature
+					NATURAL JOIN Feature
+					WHERE Feature.FeatureName = :searchname' . $key . '
+					AND Feature.FeatureType = ' . self::FEATURE_TEXT . '
+					AND ItemFeature.ValueText LIKE :searchvalue' . $key;
 			}
 		}
 
-		return $where;
+		return $queries;
     }
 
     private $featureEnumNameStatement = null;
