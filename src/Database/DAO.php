@@ -21,7 +21,6 @@ abstract class DAO {
 	/**
 	 * Generate the IN part of an SQL query.
 	 * The part that goes between "WHERE x IN (" and ")", more specifically.
-	 * Array keys are appended to the prefix without further sanitization, so don't pass unchecked user input here!
 	 *
 	 * @param string $prefix Any prefix, possibly beginning with ":" to use in PDO
 	 * @param array $array array of values that will be inserted/selected from database. This is used to count the
@@ -32,6 +31,9 @@ abstract class DAO {
 	protected static function multipleIn($prefix, $array) {
 		$in = '';
 		foreach($array as $k => $v) {
+			if(!is_integer($k)) {
+				throw new \InvalidArgumentException('Keys should be integers, ' . $k . ' isn\'t');
+			}
 			$in .= $prefix . $k . ', ';
 		}
 

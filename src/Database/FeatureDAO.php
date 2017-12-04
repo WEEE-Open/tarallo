@@ -137,7 +137,7 @@ final class FeatureDAO extends DAO {
 
 		foreach($searches as $key => $triplet) {
 			if(!is_integer($key)) {
-				throw new \LogicException('Keys should be numeric, ' . $key . ' isn\'t');
+				throw new \InvalidArgumentException('Keys should be integers, ' . $key . ' isn\'t');
 			}
 			if(!($triplet instanceof SearchTriplet)) {
 				if(is_object($triplet)) {
