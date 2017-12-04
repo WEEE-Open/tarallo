@@ -151,13 +151,17 @@ final class FeatureDAO extends DAO {
 		foreach($searches as $key => $triplet) {
 			switch($this->database->featureDAO()->getFeatureTypeFromName($triplet->getKey())) {
 				case self::FEATURE_NUMBER:
+					$compare = $searches[$key]->getCompare();
+					if($compare === '>' || $compare === '<') {
+						$compare .= '='; // greater than OR EQUAL, and the like
+					}
 					$queries[] = '
 					FROM Item
 					NATURAL JOIN ItemFeature
 					NATURAL JOIN Feature
 					WHERE Feature.FeatureName = :searchname' . $key . '
 					AND Feature.FeatureType = ' . self::FEATURE_NUMBER . '
-					AND ItemFeature.Value ' . $searches[$key]->getCompare() . ' :searchvalue' . $key;
+					AND ItemFeature.Value ' . $compare . ' :searchvalue' . $key;
 					break;
 				case self::FEATURE_ENUM:
 					$queries[] = '

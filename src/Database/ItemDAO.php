@@ -52,11 +52,8 @@ final class ItemDAO extends DAO {
 	 * @see FeatureDAO::getWhereStringFromSearches
 	 */
 	private function searchPrepare($searches) {
-		if(!is_array($searches)) {
-			throw new \InvalidArgumentException('Search parameters must be passed as an array');
-		}
-		if(empty($searches)) {
-			return '';
+		if(!self::isArrayAndFull($searches)) {
+			throw new \InvalidArgumentException('Search parameters must be passed as a non-empty array');
 		}
 
 		$subquery = '';
