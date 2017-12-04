@@ -1,6 +1,7 @@
 <?php
 
 namespace WEEEOpen\Tarallo;
+
 use JSend\JSendResponse;
 
 class Response {
@@ -23,7 +24,9 @@ class Response {
 	 * Send fail. When there are missing or invalid parameters in request or similar errors.
 	 *
 	 * @param string|null $message - This shouldn't exist, but... a message, same as Error message.
-	 * @param string[]|null $fields - Associative array, from a field/key/hash/whatever that was present in the request, to a string containg an explanation of what's wrong there
+	 * @param string[]|null $fields - Associative array, from a field/key/hash/whatever that was present in the
+	 *     request, to a string containg an explanation of what's wrong there
+	 *
 	 * @see sendError - for errors on the server part
 	 */
 	public static function sendFail($message = null, $fields = null) {
@@ -52,6 +55,7 @@ class Response {
 	 *
 	 * @param string $message - Error message
 	 * @param null|int $code - Error code
+	 *
 	 * @see sendFail - for errors on the user part
 	 */
 	public static function sendError($message, $code = null) {

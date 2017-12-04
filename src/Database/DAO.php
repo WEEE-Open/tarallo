@@ -3,20 +3,20 @@
 namespace WEEEOpen\Tarallo\Database;
 
 abstract class DAO {
-    protected $database;
-    private $callback;
+	protected $database;
+	private $callback;
 
-    public function __construct(Database $db, $callback) {
-        $this->database = $db;
-        $this->callback = $callback;
-    }
+	public function __construct(Database $db, $callback) {
+		$this->database = $db;
+		$this->callback = $callback;
+	}
 
 	/**
 	 * @return \PDO the PDO instance from Database
 	 */
-    protected function getPDO() {
-        return call_user_func($this->callback);
-    }
+	protected function getPDO() {
+		return call_user_func($this->callback);
+	}
 
 	/**
 	 * Generate the IN part of an SQL query.
@@ -29,13 +29,14 @@ abstract class DAO {
 	 *
 	 * @return string|bool resulting string, or a random "false" if substr somehow fails.
 	 */
-    protected static function multipleIn($prefix, $array) {
-    	$in = '';
-        foreach($array as $k => $v) {
-            $in .= $prefix . $k . ', ';
-        }
-        return substr($in, 0, strlen($in) - 2); //remove last ', '
-    }
+	protected static function multipleIn($prefix, $array) {
+		$in = '';
+		foreach($array as $k => $v) {
+			$in .= $prefix . $k . ', ';
+		}
+
+		return substr($in, 0, strlen($in) - 2); //remove last ', '
+	}
 
 	/**
 	 * Is it an array and does it contain anything?

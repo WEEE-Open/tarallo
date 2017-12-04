@@ -1,4 +1,5 @@
 <?php
+
 namespace WEEEOpen\Tarallo\Query;
 
 
@@ -14,14 +15,15 @@ class GetQuery extends AbstractQuery {
 	const FIELD_LANGUAGE = 'Language';
 	const FIELD_TOKEN = 'Token';
 
-    private $queryFields = [];
+	private $queryFields = [];
 
-    /**
-     * @param $query string representing query type (Login, Location, etc...)
-     * @param $parameter string parameters passed to QueryField constructor
-     * @return null|Field\QueryField
-     * @throws InvalidParameterException for unknown parameters
-     */
+	/**
+	 * @param $query string representing query type (Login, Location, etc...)
+	 * @param $parameter string parameters passed to QueryField constructor
+	 *
+	 * @return null|Field\QueryField
+	 * @throws InvalidParameterException for unknown parameters
+	 */
 	protected function queryFieldsFactory($query, $parameter) {
 		switch($query) {
 			case self::FIELD_LOCATION:
@@ -49,64 +51,64 @@ class GetQuery extends AbstractQuery {
 
 		while($i < $c) {
 			if($i + 1 < $c) {
-				$previous = $this->getQueryField($pieces[ $i ]);
+				$previous = $this->getQueryField($pieces[$i]);
 				if($previous === null) {
-					$this->addQueryField($pieces[ $i ],
-						$this->queryFieldsFactory($pieces[ $i ], $pieces[ $i + 1 ]));
+					$this->addQueryField($pieces[$i],
+						$this->queryFieldsFactory($pieces[$i], $pieces[$i + 1]));
 				} else {
 					/**
 					 * @var $previous Field\QueryField
 					 */
-					$previous->add($pieces[ $i + 1 ]);
+					$previous->add($pieces[$i + 1]);
 				}
 				$i += 2;
 			} else {
-				throw new InvalidParameterException('Missing parameter for field ' . $pieces[ $i ]);
+				throw new InvalidParameterException('Missing parameter for field ' . $pieces[$i]);
 			}
 		}
 	}
 
 
-    protected function addQueryField($name, Field\QueryField $qf) {
-        $this->queryFields[$name] = $qf;
-    }
+	protected function addQueryField($name, Field\QueryField $qf) {
+		$this->queryFields[$name] = $qf;
+	}
 
-    protected function getAllQueryFields() {
-        return $this->queryFields;
-    }
+	protected function getAllQueryFields() {
+		return $this->queryFields;
+	}
 
-    protected function getQueryField($name) {
-        if(isset($this->queryFields[$name])) {
-            return $this->queryFields[$name];
-        } else {
-            return null;
-        }
-    }
+	protected function getQueryField($name) {
+		if(isset($this->queryFields[$name])) {
+			return $this->queryFields[$name];
+		} else {
+			return null;
+		}
+	}
 
-    protected function normalizeString($string) {
-        if(substr($string, 0, 1) === '/') {
-            $string = substr($string, 1); // remove first slash
-        }
-        if(substr($string, - 1) === '/') {
-            $string = substr($string, 0, strlen($string) - 1);
-        }
+	protected function normalizeString($string) {
+		if(substr($string, 0, 1) === '/') {
+			$string = substr($string, 1); // remove first slash
+		}
+		if(substr($string, - 1) === '/') {
+			$string = substr($string, 0, strlen($string) - 1);
+		}
 
-        return $string;
-    }
+		return $string;
+	}
 
-    public final function __construct($string) {
-        if(!is_string($string) || $string === '') {
-            throw new InvalidParameterException('Query string must be a non-empty string');
-        }
+	public final function __construct($string) {
+		if(!is_string($string) || $string === '') {
+			throw new InvalidParameterException('Query string must be a non-empty string');
+		}
 
-        $pieces = explode('/', $this->normalizeString($string));
-        $this->fromPieces($pieces);
+		$pieces = explode('/', $this->normalizeString($string));
+		$this->fromPieces($pieces);
 
-        return $this;
-    }
+		return $this;
+	}
 
 	public function __toString() {
-		$result = '';
+		$result  = '';
 		$queries = $this->getAllQueryFields();
 		foreach($queries as $field) {
 			$result .= (string) $field;
@@ -120,13 +122,13 @@ class GetQuery extends AbstractQuery {
 			throw new InvalidParameterException('Not logged in and no token provided');
 		}
 		/** @var Field\QueryField[] $qf */
-		$qf = $this->queryFields; // this is only needed because PHPStorm doesn't understand "$this->queryFields" in PHPDoc comments.
+		$qf       = $this->queryFields; // this is only needed because PHPStorm doesn't understand "$this->queryFields" in PHPDoc comments.
 		$location = isset($qf[self::FIELD_LOCATION]) ? $qf[self::FIELD_LOCATION]->getContent() : null;
-		$search = isset($qf[self::FIELD_SEARCH]) ? $qf[self::FIELD_SEARCH]->getContent() : null;
-		$depth = isset($qf[self::FIELD_DEPTH]) ? $qf[self::FIELD_DEPTH]->getContent() : null;
-		$parent = isset($qf[self::FIELD_PARENT]) ? $qf[self::FIELD_PARENT]->getContent() : null;
-		$sort = isset($qf[self::FIELD_SORT]) ? $qf[self::FIELD_SORT]->getContent() : null;
-		$token = isset($qf[self::FIELD_TOKEN]) ? $qf[self::FIELD_TOKEN]->getContent() : null;
+		$search   = isset($qf[self::FIELD_SEARCH]) ? $qf[self::FIELD_SEARCH]->getContent() : null;
+		$depth    = isset($qf[self::FIELD_DEPTH]) ? $qf[self::FIELD_DEPTH]->getContent() : null;
+		$parent   = isset($qf[self::FIELD_PARENT]) ? $qf[self::FIELD_PARENT]->getContent() : null;
+		$sort     = isset($qf[self::FIELD_SORT]) ? $qf[self::FIELD_SORT]->getContent() : null;
+		$token    = isset($qf[self::FIELD_TOKEN]) ? $qf[self::FIELD_TOKEN]->getContent() : null;
 
 		// TODO: return... what? Some array? JSON? Response object?
 		return ['items' => $db->itemDAO()->getItem($location, $search, $depth, $parent, $sort, $token)];

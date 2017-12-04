@@ -1,4 +1,5 @@
 <?php
+
 namespace WEEEOpen\Tarallo\Query;
 
 use WEEEOpen\Tarallo;
@@ -6,34 +7,35 @@ use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\InvalidParameterException;
 
 class LoginQuery extends PostJSONQuery implements \JsonSerializable {
-    private $username;
-    private $password;
-    private $login = true;
+	private $username;
+	private $password;
+	private $login = true;
 
-    protected function parseContent($content) {
-    	if($content['username'] === null && $content['password'] === null) {
-    		$this->login = false;
-    		return;
-	    }
+	protected function parseContent($content) {
+		if($content['username'] === null && $content['password'] === null) {
+			$this->login = false;
 
-        if(!isset($content['username']) || !isset($content['password'])) {
-            throw new InvalidParameterException('Request body must contain "username" and "password"');
-        }
+			return;
+		}
 
-        $this->username = (string) $content['username'];
-        $this->password = (string) $content['password'];
+		if(!isset($content['username']) || !isset($content['password'])) {
+			throw new InvalidParameterException('Request body must contain "username" and "password"');
+		}
 
-        if($this->username === '') {
-            throw new InvalidParameterException('Username cannot be empty');
-        }
-        if($this->password === '') {
-            throw new InvalidParameterException('Password cannot be empty');
-        }
-    }
+		$this->username = (string) $content['username'];
+		$this->password = (string) $content['password'];
 
-    function jsonSerialize() {
-	    return ['username' => $this->username, 'password' => $this->password];
-    }
+		if($this->username === '') {
+			throw new InvalidParameterException('Username cannot be empty');
+		}
+		if($this->password === '') {
+			throw new InvalidParameterException('Password cannot be empty');
+		}
+	}
+
+	function jsonSerialize() {
+		return ['username' => $this->username, 'password' => $this->password];
+	}
 
 	/**
 	 * @param Tarallo\User|null $user current user ("recovered" from session)
@@ -50,12 +52,14 @@ class LoginQuery extends PostJSONQuery implements \JsonSerializable {
 				throw new InvalidParameterException('Wrong username or password');
 			} else {
 				Tarallo\Session::start($newUser, $database);
+
 				return [];
 			}
 		} else {
 			if($user instanceof Tarallo\User) {
 				Tarallo\Session::close($user, $database);
 			}
+
 			return [];
 		}
 	}

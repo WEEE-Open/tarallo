@@ -1,4 +1,5 @@
 <?php
+
 namespace WEEEOpen\Tarallo\Query;
 
 

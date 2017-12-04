@@ -1,4 +1,5 @@
 <?php
+
 namespace WEEEOpen\Tarallo;
 
 /**
@@ -41,6 +42,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		if($this->code === null) {
 			throw new \LogicException('Trying to read code from an Item without code');
 		}
+
 		return parent::getCode();
 	}
 
@@ -69,6 +71,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 */
 	public function addFeature($name, $value) {
 		$this->addFeatureInternal($name, $value, $this->features);
+
 		return $this;
 	}
 
@@ -79,6 +82,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 */
 	public function deleteFeature($name) {
 		$this->deleteFeatureInternal($name, $this->features);
+
 		return $this;
 	}
 
@@ -87,16 +91,17 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 *
 	 * @param int $distance 1 for direct parent, etc...
 	 * @param string $code ancestor code
+	 *
 	 * @throws InvalidParameterException if code is invalid
 	 * @throws \InvalidArgumentException if distance is less than 1
 	 */
 	public function addAncestor($distance, $code) {
 		$distance = (int) $distance;
 		if($distance < 1) {
-			throw new \InvalidArgumentException('Ancestor distance too small: ' . $code .' is at distance ' . $distance . ' from its descendant ' . $this->getCode());
+			throw new \InvalidArgumentException('Ancestor distance too small: ' . $code . ' is at distance ' . $distance . ' from its descendant ' . $this->getCode());
 		}
 
-		$this->location[--$distance] = new ItemIncomplete($code);
+		$this->location[-- $distance] = new ItemIncomplete($code);
 	}
 
 	/**
@@ -104,6 +109,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 * Null if not set.
 	 *
 	 * @param int $distance 1 for direct parent, 2 for parent's parent, etc... 0 or less is invalid.
+	 *
 	 * @throws \InvalidArgumentException if distance is less than 1
 	 * @return ItemIncomplete|null parent code
 	 */
@@ -111,7 +117,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		if($distance < 1) {
 			throw new \InvalidArgumentException('Ancestor distance ' . $distance . ' too small in ' . $this->getCode());
 		}
-		$distance--;
+		$distance --;
 
 		if(isset($this->location[$distance])) {
 			return $this->location[$distance];
@@ -128,6 +134,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 */
 	public function addFeatureDefault($name, $value) {
 		$this->addFeatureInternal($name, $value, $this->featuresDefault);
+
 		return $this;
 	}
 
@@ -167,6 +174,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		foreach($features as $name => $value) {
 			$this->addFeature($name, $value);
 		}
+
 		return $this;
 	}
 
@@ -208,6 +216,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 */
 	public function addContent(Item $item) {
 		$this->content[] = $item;
+
 		return $this;
 	}
 
@@ -219,7 +228,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	}
 
 	public function jsonSerialize() {
-		$array = [];
+		$array         = [];
 		$array['code'] = $this->getCode();
 		if(!empty($this->features)) {
 			$array['features'] = $this->features;

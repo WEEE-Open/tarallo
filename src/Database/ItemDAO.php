@@ -1,6 +1,7 @@
 <?php
 
 namespace WEEEOpen\Tarallo\Database;
+
 use WEEEOpen\Tarallo\InvalidParameterException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemDefault;
@@ -9,44 +10,47 @@ use WEEEOpen\Tarallo\ItemUpdate;
 use WEEEOpen\Tarallo\Query\SearchTriplet;
 
 final class ItemDAO extends DAO {
-    private function depthSanitize($depth) {
-        if(is_numeric($depth)) {
-            return (int) $depth;
-        } else {
-            return 10;
-        }
-    }
+	private function depthSanitize($depth) {
+		if(is_numeric($depth)) {
+			return (int) $depth;
+		} else {
+			return 10;
+		}
+	}
 
 	/**
 	 * Prepare location part of query. Due to the use of multipleIn, sanitize array keys before passing them in
 	 * (e.g. use array_values).
 	 *
 	 * @param array $locations
+	 *
 	 * @return string
 	 * @todo: shouldn't this search items INSIDE a location, instead of the location itself?
 	 */
-    private function locationPrepare($locations) {
-        if(self::isArrayAndFull($locations)) {
-            $locationWhere = '`Code` IN (' . $this->multipleIn(':location', $locations);
-            return $locationWhere . ')';
-        } else {
-            return '';
-        }
-    }
+	private function locationPrepare($locations) {
+		if(self::isArrayAndFull($locations)) {
+			$locationWhere = '`Code` IN (' . $this->multipleIn(':location', $locations);
 
-    private function tokenPrepare($token) {
-        if(is_string($token) && $token !== null) {
-            return 'Token = :token';
-        } else {
-            return '';
-        }
-    }
+			return $locationWhere . ')';
+		} else {
+			return '';
+		}
+	}
+
+	private function tokenPrepare($token) {
+		if(is_string($token) && $token !== null) {
+			return 'Token = :token';
+		} else {
+			return '';
+		}
+	}
 
 	/**
 	 * Get the ABNORME search subquery.
 	 * Bind :searchkey0, :searchkey1, ... to keys and :searchvalue0, :searchvalue1, ... to values.
 	 *
 	 * @param $searches array of SearchTriplet
+	 *
 	 * @return string piece of query string
 	 * @see FeatureDAO::getWhereStringFromSearches
 	 */
@@ -59,7 +63,7 @@ final class ItemDAO extends DAO {
 		}
 
 		$subquery = '';
-		$wheres = $this->database->featureDAO()->getWhereStringFromSearches($searches);
+		$wheres   = $this->database->featureDAO()->getWhereStringFromSearches($searches);
 		if(count($wheres) <= 0) {
 			throw new \LogicException('getWhereStringFromSearches() did not return anything, but there were ' . count($searches) . ' search parameters');
 		}
@@ -95,57 +99,60 @@ final class ItemDAO extends DAO {
 		';
 
 		return $query;
-    }
+	}
 
-    private static function implodeOptionalWhereAnd() {
-        $args = func_get_args();
-        $where = self::implodeAnd($args);
-        if($where === '') {
-            return '';
-        } else {
-            return 'WHERE ' . $where;
-        }
-    }
+	private static function implodeOptionalWhereAnd() {
+		$args  = func_get_args();
+		$where = self::implodeAnd($args);
+		if($where === '') {
+			return '';
+		} else {
+			return 'WHERE ' . $where;
+		}
+	}
 
-    /**
-     * Join non-empty string arguments via " AND " to add in a WHERE clause.
-     *
-     * @see implodeOptionalWhereAnd
-     * @param $args string[]
-     * @return string empty string or WHERE clauses separated by AND (no WHERE itself)
-     */
-    private static function implodeAnd($args) {
-        $stuff = [];
-        foreach($args as $arg) {
-            if(is_string($arg) && strlen($arg) > 0) {
-                $stuff[] = $arg;
-            }
-        }
-        $c = count($stuff);
-        if($c === 0) {
-            return '';
-        }
-        return implode(' AND ', $stuff);
-    }
+	/**
+	 * Join non-empty string arguments via " AND " to add in a WHERE clause.
+	 *
+	 * @see implodeOptionalWhereAnd
+	 *
+	 * @param $args string[]
+	 *
+	 * @return string empty string or WHERE clauses separated by AND (no WHERE itself)
+	 */
+	private static function implodeAnd($args) {
+		$stuff = [];
+		foreach($args as $arg) {
+			if(is_string($arg) && strlen($arg) > 0) {
+				$stuff[] = $arg;
+			}
+		}
+		$c = count($stuff);
+		if($c === 0) {
+			return '';
+		}
 
-    public function getItem($locations, $searches, $depth, $parent, $sorts, $token) {
-        if(self::isArrayAndFull($searches)) {
-	        $searchSubquery = $this->searchPrepare($searches);
-        } else {
-	        $searchSubquery = '';
-        }
+		return implode(' AND ', $stuff);
+	}
 
-        // sanitization
-        if(self::isArrayAndFull($locations)) {
-        	$locations = array_values($locations);
-        }
+	public function getItem($locations, $searches, $depth, $parent, $sorts, $token) {
+		if(self::isArrayAndFull($searches)) {
+			$searchSubquery = $this->searchPrepare($searches);
+		} else {
+			$searchSubquery = '';
+		}
 
-        // Search items by features, filter by location and token, tree lookup using found items as roots
-	    // (find all descendants) and join with Item, filter by depth, SELECT.
-	    // The MAX(IF()) bit doesn't make any sense, but it works. It should just be an IF, and at the end of
-	    // the query there should be "GROUP BY ... MAX(Parent)" according to everyone on the internet, but that
-	    // didn't work for unfathomable reasons.
-	    $megaquery = '
+		// sanitization
+		if(self::isArrayAndFull($locations)) {
+			$locations = array_values($locations);
+		}
+
+		// Search items by features, filter by location and token, tree lookup using found items as roots
+		// (find all descendants) and join with Item, filter by depth, SELECT.
+		// The MAX(IF()) bit doesn't make any sense, but it works. It should just be an IF, and at the end of
+		// the query there should be "GROUP BY ... MAX(Parent)" according to everyone on the internet, but that
+		// didn't work for unfathomable reasons.
+		$megaquery = '
         SELECT DescendantItem.`ItemID`, DescendantItem.`Code`, Tree.`Depth`,
         MAX(IF(Parents.`Depth`=1, Parents.`AncestorID`, NULL)) AS Parent
         FROM Tree
@@ -157,97 +164,100 @@ final class ItemDAO extends DAO {
         AND Tree.AncestorID IN (
             SELECT `ItemID`
             FROM Item
-            ' . $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->tokenPrepare($token), $searchSubquery) . '
+            ' . $this->implodeOptionalWhereAnd($this->locationPrepare($locations), $this->tokenPrepare($token),
+				$searchSubquery) . '
         )
         GROUP BY DescendantItem.`ItemID`, DescendantItem.`Code`, Tree.`Depth`
         ORDER BY IFNULL(Tree.`Depth`, 0) ASC
 		'; // IFNULL is useless but the intent should be clearer.
-        $s = $this->getPDO()->prepare($megaquery);
-        // TODO: add a LIMIT clause for pagination
+		$s         = $this->getPDO()->prepare($megaquery);
+		// TODO: add a LIMIT clause for pagination
 
-        $s->bindValue(':depth', $this->depthSanitize($depth), \PDO::PARAM_INT);
+		$s->bindValue(':depth', $this->depthSanitize($depth), \PDO::PARAM_INT);
 
-        if($token != null) {
-	        $s->bindValue(':token', $token, \PDO::PARAM_STR);
-        }
+		if($token != null) {
+			$s->bindValue(':token', $token, \PDO::PARAM_STR);
+		}
 
-        if(self::isArrayAndFull($locations)) {
-	        foreach($locations as $numericKey => $location) {
-		        $s->bindValue(':location' . $numericKey, $location);
-	        }
-        }
+		if(self::isArrayAndFull($locations)) {
+			foreach($locations as $numericKey => $location) {
+				$s->bindValue(':location' . $numericKey, $location);
+			}
+		}
 
-	    if(self::isArrayAndFull($searches)) {
-		    foreach($searches as $numericKey => $triplet) {
-			    /** @var SearchTriplet $triplet */
-			    $key = $triplet->getKey();
-			    $value = $triplet->getValue();
-			    $s->bindValue(':searchname' . $numericKey, $key);
-			    $s->bindValue(':searchnamedefault' . $numericKey, $key);
-			    $s->bindValue(':searchvalue' . $numericKey, $value);
-			    $s->bindValue(':searchvaluedefault' . $numericKey, $value);
-		    }
-	    }
+		if(self::isArrayAndFull($searches)) {
+			foreach($searches as $numericKey => $triplet) {
+				/** @var SearchTriplet $triplet */
+				$key   = $triplet->getKey();
+				$value = $triplet->getValue();
+				$s->bindValue(':searchname' . $numericKey, $key);
+				$s->bindValue(':searchnamedefault' . $numericKey, $key);
+				$s->bindValue(':searchvalue' . $numericKey, $value);
+				$s->bindValue(':searchvaluedefault' . $numericKey, $value);
+			}
+		}
 
-        $s->execute();
-        if($s->rowCount() === 0) {
-        	$s->closeCursor();
-            return [];
-        } else {
-	        /** @var Item[] map from item ID to Item object (all items) */
+		$s->execute();
+		if($s->rowCount() === 0) {
+			$s->closeCursor();
+
+			return [];
+		} else {
+			/** @var Item[] map from item ID to Item object (all items) */
 			$items = [];
-	        /** @var Item[] map from item ID to Item objects that require a location being set */
-	        $needLocation = [];
-	        /** @var Item[] plain array of results (return this one) */
-	        $results = [];
-	        while(($row = $s->fetch(\PDO::FETCH_ASSOC)) !== false) {
-	        	if(isset($items[$row['ItemID']])) {
-			        $thisItem = $items[$row['ItemID']];
-		        } else {
-			        $thisItem = new Item($row['Code']);
-			        $items[$row['ItemID']] = $thisItem;
-		        }
-		        if($row['Depth'] === 0) {
-			        $results[] = $thisItem;
-		        	if(isset($row['Parent']) && $row['Parent'] !== null) {
-				        $needLocation[$row['ItemID']] = $thisItem;
-			        }
-		        } else {
-			        if(isset($items[$row['Parent']])) {
-				        $items[$row['Parent']]->addContent($thisItem);
-			        } else {
-				        throw new \LogicException('Cannot find parent ' . $row['Parent'] . ' for Item ' . $thisItem->getCode() . ' (' . $row['ItemID'] . ')');
-			        }
-		        }
-	        }
-	        $s->closeCursor();
-	        // object are always passed by reference: update an Item in any array, every other gets updated too
+			/** @var Item[] map from item ID to Item objects that require a location being set */
+			$needLocation = [];
+			/** @var Item[] plain array of results (return this one) */
+			$results = [];
+			while(($row = $s->fetch(\PDO::FETCH_ASSOC)) !== false) {
+				if(isset($items[$row['ItemID']])) {
+					$thisItem = $items[$row['ItemID']];
+				} else {
+					$thisItem              = new Item($row['Code']);
+					$items[$row['ItemID']] = $thisItem;
+				}
+				if($row['Depth'] === 0) {
+					$results[] = $thisItem;
+					if(isset($row['Parent']) && $row['Parent'] !== null) {
+						$needLocation[$row['ItemID']] = $thisItem;
+					}
+				} else {
+					if(isset($items[$row['Parent']])) {
+						$items[$row['Parent']]->addContent($thisItem);
+					} else {
+						throw new \LogicException('Cannot find parent ' . $row['Parent'] . ' for Item ' . $thisItem->getCode() . ' (' . $row['ItemID'] . ')');
+					}
+				}
+			}
+			$s->closeCursor();
+			// object are always passed by reference: update an Item in any array, every other gets updated too
 			$this->database->featureDAO()->setFeatures($items);
-	        $this->database->itemDAO()->setLocations($needLocation);
+			$this->database->itemDAO()->setLocations($needLocation);
 			$this->sortItems($results, $sorts);
-            return $results;
-        }
-    }
 
-    public function addItems($items, ItemIncomplete $parent = null) {
-        if($items instanceof Item) {
-            $items = [$items];
-        } else if(!is_array($items)) {
-            throw new \InvalidArgumentException('Items must be passed as an array or a single Item');
-        }
+			return $results;
+		}
+	}
 
-        if(empty($items)) {
-            return;
-        }
+	public function addItems($items, ItemIncomplete $parent = null) {
+		if($items instanceof Item) {
+			$items = [$items];
+		} else if(!is_array($items)) {
+			throw new \InvalidArgumentException('Items must be passed as an array or a single Item');
+		}
 
-        foreach($items as $item) {
-            $this->addItem($item, $parent);
-        }
+		if(empty($items)) {
+			return;
+		}
 
-        return;
-    }
+		foreach($items as $item) {
+			$this->addItem($item, $parent);
+		}
 
-    private $addItemStatement = null;
+		return;
+	}
+
+	private $addItemStatement = null;
 
 	/**
 	 * Insert a single item into the database, return its id. Basically just add a row to Item, no features are added.
@@ -259,45 +269,46 @@ final class ItemDAO extends DAO {
 	 * @throws InvalidParameterException
 	 * @see addItems
 	 */
-    private function addItem(Item $item, ItemIncomplete $parent = null) {
-        if(!($item instanceof Item)) {
-            throw new \InvalidArgumentException('Items must be objects of Item class, ' . gettype($item) . ' given'); // will say "object" if it's another object which is kinda useless, whatever
-        }
+	private function addItem(Item $item, ItemIncomplete $parent = null) {
+		if(!($item instanceof Item)) {
+			throw new \InvalidArgumentException('Items must be objects of Item class, ' . gettype($item) . ' given'); // will say "object" if it's another object which is kinda useless, whatever
+		}
 
-	    $isDefault = $item instanceof ItemDefault ? true : false;
+		$isDefault = $item instanceof ItemDefault ? true : false;
 
-        $pdo = $this->getPDO();
-        if(!$pdo->inTransaction()) {
-            throw new \LogicException('addItem called outside of transaction');
-        }
+		$pdo = $this->getPDO();
+		if(!$pdo->inTransaction()) {
+			throw new \LogicException('addItem called outside of transaction');
+		}
 
-        if($this->addItemStatement === null) {
-	        $this->addItemStatement = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault, `Default`) VALUES (:c, :isd, :def)');
-        }
+		if($this->addItemStatement === null) {
+			$this->addItemStatement = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault, `Default`) VALUES (:c, :isd, :def)');
+		}
 
-	    $this->addItemStatement->bindValue(':c', $item->getCode(), \PDO::PARAM_STR);
-	    $this->addItemStatement->bindValue(':isd', $isDefault, \PDO::PARAM_INT);
-	    if($isDefault || ($default = $item->getDefaultCode()) === null) {
-		    $this->addItemStatement->bindValue(':def', null, \PDO::PARAM_NULL);
-	    } else {
-		    $this->addItemStatement->bindValue(':def', $default, \PDO::PARAM_STR);
-	    }
-	    $this->addItemStatement->execute();
+		$this->addItemStatement->bindValue(':c', $item->getCode(), \PDO::PARAM_STR);
+		$this->addItemStatement->bindValue(':isd', $isDefault, \PDO::PARAM_INT);
+		if($isDefault || ($default = $item->getDefaultCode()) === null) {
+			$this->addItemStatement->bindValue(':def', null, \PDO::PARAM_NULL);
+		} else {
+			$this->addItemStatement->bindValue(':def', $default, \PDO::PARAM_STR);
+		}
+		$this->addItemStatement->execute();
 
-	    /** @var Item $item */
-	    $this->database->featureDAO()->addFeatures($item);
-	    $this->database->modificationDAO()->setItemModified($item);
-	    $this->database->treeDAO()->addToTree($item, $parent);
+		/** @var Item $item */
+		$this->database->featureDAO()->addFeatures($item);
+		$this->database->modificationDAO()->setItemModified($item);
+		$this->database->treeDAO()->addToTree($item, $parent);
 
-	    $childItems = $item->getContent();
-	    foreach($childItems as $childItem) {
-	    	// yay recursion!
-	    	$this->addItem($childItem, $item);
-	    }
-    }
+		$childItems = $item->getContent();
+		foreach($childItems as $childItem) {
+			// yay recursion!
+			$this->addItem($childItem, $item);
+		}
+	}
 
 	private $getItemIdStatement = null;
 	private $getItemIdCache = [];
+
 	public function getItemId(ItemIncomplete $item) {
 		$code = $item->getCode();
 		if(isset($this->getItemIdCache[$code])) {
@@ -339,7 +350,7 @@ final class ItemDAO extends DAO {
 		//}
 		// items are always sorted by code. Doing it in PHP instead of SQL is probably faster, since only root items are sorted
 
-		usort($items, function ($a, $b) use ($sortBy) {
+		usort($items, function($a, $b) use ($sortBy) {
 			if(!($a instanceof Item) || !($b instanceof Item)) {
 				throw new \InvalidArgumentException('Items must be Item objects');
 			}
@@ -349,9 +360,9 @@ final class ItemDAO extends DAO {
 				foreach($sortBy as $feature => $order) {
 					if(isset($featuresA[$feature]) && isset($featuresB[$feature])) {
 						if($order === '+') {
-							$result = strnatcmp($featuresA[ $feature ], $featuresB[ $feature ]);
+							$result = strnatcmp($featuresA[$feature], $featuresB[$feature]);
 						} else {
-							$result = strnatcmp($featuresB[ $feature ], $featuresA[ $feature ]);
+							$result = strnatcmp($featuresB[$feature], $featuresA[$feature]);
 						}
 						if($result !== 0) {
 							return $result;
@@ -359,6 +370,7 @@ final class ItemDAO extends DAO {
 					}
 				}
 			}
+
 			return strnatcmp($a->getCode(), $b->getCode());
 		});
 	}
@@ -392,6 +404,7 @@ final class ItemDAO extends DAO {
 
 	private $setItemDefaultsStatementSelect = null;
 	private $setItemDefaultsStatementUpdate = null;
+
 	private function setItemDefaults(ItemUpdate $item) {
 		$db = $this->getPDO();
 
@@ -433,7 +446,7 @@ final class ItemDAO extends DAO {
 			return;
 		}
 
-		$inItemID = DAO::multipleIn(':loc', $items);
+		$inItemID              = DAO::multipleIn(':loc', $items);
 		$getLocationsStatement = $this->getPDO()->prepare('SELECT Tree.DescendantID AS ItemID, Item.Code AS Ancestor, Tree.Depth AS Depth
 			FROM Item, Tree
 			WHERE Tree.AncestorID = Item.ItemID AND Tree.DescendantID IN (' . $inItemID . ') AND Tree.Depth <> 0;
@@ -448,7 +461,7 @@ final class ItemDAO extends DAO {
 			if($getLocationsStatement->rowCount() > 0) {
 				foreach($getLocationsStatement as $row) {
 					/** @var Item[] $items */
-					$items[ $row['ItemID'] ]->addAncestor((int) $row['Depth'], $row['Ancestor']);
+					$items[$row['ItemID']]->addAncestor((int) $row['Depth'], $row['Ancestor']);
 				}
 			}
 		} finally {
@@ -462,7 +475,7 @@ final class ItemDAO extends DAO {
 
 	private $getNextCodeStatement = null;
 	private $setNextCodeStatement = null;
-	private $lockTablesStatement  = null;
+	private $lockTablesStatement = null;
 
 	/**
 	 * Locks Codes table and begins a transaction.
@@ -564,7 +577,7 @@ final class ItemDAO extends DAO {
 		// Integer should be last used one, so increment it before checking if it's available.
 		// Checking is necessary since there could be items with manually-assigned codes.
 		do {
-			$integer++;
+			$integer ++;
 			$exists = $this->checkIfItemExists($prefix . $integer);
 		} while($exists);
 
@@ -597,6 +610,7 @@ final class ItemDAO extends DAO {
 		$this->checkIfItemExistsStatement->execute();
 		$result = $this->checkIfItemExistsStatement->fetchAll(\PDO::FETCH_ASSOC)[0];
 		$this->checkIfItemExistsStatement->closeCursor();
+
 		return ((int) $result['c']) > 0;
 	}
 }

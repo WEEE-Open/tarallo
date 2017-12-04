@@ -20,102 +20,102 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	private $prefixes = [];
 	private $notes = null;
 
-    protected function parseContent($array) {
-        foreach($array as $op => $itemsArray) {
-        	if(!is_string($op)) {
-        		// that would come from invalid JSON...
-		        throw new \InvalidArgumentException('Action identifiers should be strings, ' . gettype($op) . ' given');
-	        }
-	        if($itemsArray === null) {
-        		continue;
-	        }
-        	switch($op) {
-		        case 'create':
-		        case 'update':
-			        if(!is_array($itemsArray)) {
-				        throw new InvalidParameterException('"'.$op.'" value should be array or null, ' . gettype($op) . ' given');
-			        }
-			        $i = 1;
-		        	foreach($itemsArray as $itemPieces) {
-		        		try {
-		        			if($op === 'create') {
-						        $newItem = $this->buildItem($itemPieces, $this->itemsWithoutCodes);
-						        $parent = $newItem->getAncestor(1);
-						        if($parent === null) {
-							        $this->newItemsNoParent[] = $newItem;
-						        } else {
-							        $this->newItems[$parent->getCode()][] = $newItem;
-						        }
-					        } else {
-						        $newItem = $this->buildItemUpdate($itemPieces);
-						        $this->updateItems[$newItem->getCode()] = $newItem;
-					        }
-				        } catch(\Exception $e) {
-		        			throw new InvalidParameterException('Error reading item ' . $i . ' for "' . $op . '": ' . $e->getMessage());
-				        }
-				        $i++;
-			        }
-		        	break;
-		        case 'delete':
-			        if(!is_array($itemsArray)) {
-				        throw new InvalidParameterException('"delete" parameters should be objects or null, ' . gettype($op) . ' given');
-			        }
-			        foreach($itemsArray as $itemCode) {
-				        $this->deleteItems[] = new ItemIncomplete($itemCode);
-			        }
-			        break;
-		        case 'notes':
-		        	if($itemsArray !== null) {
-				        $this->notes = (string) $itemsArray;
-			        }
-			        break;
-		        default:
-		        	throw new InvalidParameterException('Unknown action ' . $op);
-	        }
-        }
-        if(count($this->newItems) === 0 && count($this->newItemsNoParent) === 0 && count($this->updateItems) === 0 && count($this->deleteItems) === 0) {
-        	throw new InvalidParameterException('Nothing was requested and nothing was done');
-        }
-        $this->prefixes = $this->guessPrefixes($this->itemsWithoutCodes);
-    }
+	protected function parseContent($array) {
+		foreach($array as $op => $itemsArray) {
+			if(!is_string($op)) {
+				// that would come from invalid JSON...
+				throw new \InvalidArgumentException('Action identifiers should be strings, ' . gettype($op) . ' given');
+			}
+			if($itemsArray === null) {
+				continue;
+			}
+			switch($op) {
+				case 'create':
+				case 'update':
+					if(!is_array($itemsArray)) {
+						throw new InvalidParameterException('"' . $op . '" value should be array or null, ' . gettype($op) . ' given');
+					}
+					$i = 1;
+					foreach($itemsArray as $itemPieces) {
+						try {
+							if($op === 'create') {
+								$newItem = $this->buildItem($itemPieces, $this->itemsWithoutCodes);
+								$parent  = $newItem->getAncestor(1);
+								if($parent === null) {
+									$this->newItemsNoParent[] = $newItem;
+								} else {
+									$this->newItems[$parent->getCode()][] = $newItem;
+								}
+							} else {
+								$newItem                                = $this->buildItemUpdate($itemPieces);
+								$this->updateItems[$newItem->getCode()] = $newItem;
+							}
+						} catch(\Exception $e) {
+							throw new InvalidParameterException('Error reading item ' . $i . ' for "' . $op . '": ' . $e->getMessage());
+						}
+						$i ++;
+					}
+					break;
+				case 'delete':
+					if(!is_array($itemsArray)) {
+						throw new InvalidParameterException('"delete" parameters should be objects or null, ' . gettype($op) . ' given');
+					}
+					foreach($itemsArray as $itemCode) {
+						$this->deleteItems[] = new ItemIncomplete($itemCode);
+					}
+					break;
+				case 'notes':
+					if($itemsArray !== null) {
+						$this->notes = (string) $itemsArray;
+					}
+					break;
+				default:
+					throw new InvalidParameterException('Unknown action ' . $op);
+			}
+		}
+		if(count($this->newItems) === 0 && count($this->newItemsNoParent) === 0 && count($this->updateItems) === 0 && count($this->deleteItems) === 0) {
+			throw new InvalidParameterException('Nothing was requested and nothing was done');
+		}
+		$this->prefixes = $this->guessPrefixes($this->itemsWithoutCodes);
+	}
 
-    public function run($user, Database $db) {
-        if(!($user instanceof User)) {
-	        throw new InvalidParameterException('Not logged in');
-        }
+	public function run($user, Database $db) {
+		if(!($user instanceof User)) {
+			throw new InvalidParameterException('Not logged in');
+		}
 
-        $codes = $db->itemDAO()->getNextCodes($this->prefixes);
-        if(count($codes) !== count($this->itemsWithoutCodes)) {
-	        throw new \LogicException('Generated ' . count($codes) . ' but needed ' . count($this->itemsWithoutCodes) . ' of them (this shouldn\'t happen)');
-        }
-        foreach($this->itemsWithoutCodes as $key => $item) {
-        	/** @var Item $item */
-        	$item->setCode($codes[$key]);
-        }
+		$codes = $db->itemDAO()->getNextCodes($this->prefixes);
+		if(count($codes) !== count($this->itemsWithoutCodes)) {
+			throw new \LogicException('Generated ' . count($codes) . ' but needed ' . count($this->itemsWithoutCodes) . ' of them (this shouldn\'t happen)');
+		}
+		foreach($this->itemsWithoutCodes as $key => $item) {
+			/** @var Item $item */
+			$item->setCode($codes[$key]);
+		}
 
-        $db->modificationDAO()->modifcationBegin($user, $this->notes);
-        try {
-	        $db->itemDAO()->addItems($this->newItemsNoParent, null);
-        	foreach($this->newItems as $parent => $items) {
-		        $db->itemDAO()->addItems($items, new ItemIncomplete($parent));
-	        }
+		$db->modificationDAO()->modifcationBegin($user, $this->notes);
+		try {
+			$db->itemDAO()->addItems($this->newItemsNoParent, null);
+			foreach($this->newItems as $parent => $items) {
+				$db->itemDAO()->addItems($items, new ItemIncomplete($parent));
+			}
 
-	        if($this->updateItems !== null) {
-		        $db->itemDAO()->updateItems($this->updateItems);
-	        }
+			if($this->updateItems !== null) {
+				$db->itemDAO()->updateItems($this->updateItems);
+			}
 
-	        foreach($this->deleteItems as $item) {
-		        $db->treeDAO()->removeFromTree($item);
-	        }
+			foreach($this->deleteItems as $item) {
+				$db->treeDAO()->removeFromTree($item);
+			}
 
-	        $db->modificationDAO()->modificationCommit();
-        } catch(\Exception $e) {
-        	$db->modificationDAO()->modificationRollback();
-        	throw $e;
-        }
+			$db->modificationDAO()->modificationCommit();
+		} catch(\Exception $e) {
+			$db->modificationDAO()->modificationRollback();
+			throw $e;
+		}
 
-        // TODO: return newly inserted items?
-    }
+		// TODO: return newly inserted items?
+	}
 
 	/**
 	 * JSON serialize query back to its original form.
@@ -123,39 +123,40 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	 *
 	 * @return array
 	 */
-    function jsonSerialize() {
-        $result = [];
-	    if(!empty($this->newItemsNoParent)) {
-		    foreach($this->newItemsNoParent as $item) {
-		    	// TODO: is calling jsonSerializable explicitly really needed?
-			    $result['create'][] = $item->jsonSerialize();
-		    }
-	    }
-        if(!empty($this->newItems)) {
-        	foreach($this->newItems as $parent => $items) {
-        		foreach($items as $item) {
-        			/** @var Item $item */
-			        $serialItemzed = $item->jsonSerialize();
-			        if($parent !== null && $parent !== '') {
-				        $serialItemzed['parent'] = $parent;
-			        }
-			        $result['create'][] = $serialItemzed;
-		        }
-	        }
-        }
-	    if(!empty($this->updateItems)) {
-		    $result['update'] = $this->updateItems;
-	    }
-	    if(!empty($this->deleteItems)) {
-        	foreach($this->deleteItems as $item) {
-		        $result['delete'][] = $item;
-	        }
-	    }
-	    if($this->notes !== null) {
-        	$result['notes'] = $this->notes;
-	    }
-	    return $result;
-    }
+	function jsonSerialize() {
+		$result = [];
+		if(!empty($this->newItemsNoParent)) {
+			foreach($this->newItemsNoParent as $item) {
+				// TODO: is calling jsonSerializable explicitly really needed?
+				$result['create'][] = $item->jsonSerialize();
+			}
+		}
+		if(!empty($this->newItems)) {
+			foreach($this->newItems as $parent => $items) {
+				foreach($items as $item) {
+					/** @var Item $item */
+					$serialItemzed = $item->jsonSerialize();
+					if($parent !== null && $parent !== '') {
+						$serialItemzed['parent'] = $parent;
+					}
+					$result['create'][] = $serialItemzed;
+				}
+			}
+		}
+		if(!empty($this->updateItems)) {
+			$result['update'] = $this->updateItems;
+		}
+		if(!empty($this->deleteItems)) {
+			foreach($this->deleteItems as $item) {
+				$result['delete'][] = $item;
+			}
+		}
+		if($this->notes !== null) {
+			$result['notes'] = $this->notes;
+		}
+
+		return $result;
+	}
 
 	/**
 	 * Build an Item from various parameters supplied in an array
@@ -168,9 +169,9 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	 * @throws InvalidParameterException
 	 */
 	private function buildItem($itemPieces, &$itemsWithoutCodes, $outer = true) {
-    	if(!is_array($itemPieces)) {
-    		throw new InvalidParameterException('Items should be objects, ' . gettype($itemPieces) . ' given');
-	    }
+		if(!is_array($itemPieces)) {
+			throw new InvalidParameterException('Items should be objects, ' . gettype($itemPieces) . ' given');
+		}
 		$itemCode = self::codePeek($itemPieces);
 		if($this->isDefaultItemPeek($itemPieces)) {
 			if(isset($itemPieces['default'])) {
@@ -243,6 +244,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 				}
 			}
 		}
+
 		return $item;
 	}
 
@@ -251,7 +253,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			throw new InvalidParameterException('Items should be objects, ' . gettype($itemPieces) . ' given');
 		}
 		$itemCode = self::codePeek($itemPieces);
-		$item = new ItemUpdate($itemCode);
+		$item     = new ItemUpdate($itemCode);
 		foreach($itemPieces as $key => $value) {
 			switch($key) {
 				case 'code':
@@ -288,6 +290,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 					break;
 			}
 		}
+
 		return $item;
 	}
 
@@ -295,15 +298,17 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	 * Checks if is_default === true, basically.
 	 *
 	 * @param $pieces - array of random stuff belonging to an item (content, location, is_default, and so on)
+	 *
 	 * @return bool is it a default item?
 	 */
 	private static function isDefaultItemPeek($pieces) {
-    	if(!is_array($pieces)) {
-    		return false;
-	    }
+		if(!is_array($pieces)) {
+			return false;
+		}
 		if(isset($pieces['is_default']) && $pieces['is_default'] === true) {
 			return true;
 		}
+
 		return false;
 	}
 
@@ -311,6 +316,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 	 * Find unique code in new/edited items and return it.
 	 *
 	 * @param array $pieces - array of random stuff belonging to an item (content, location, is_default, and so on)
+	 *
 	 * @return string
 	 */
 	private static function codePeek($pieces) {
@@ -344,9 +350,9 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 			return true;
 		}
 		if($key === null) {
-			throw new InvalidParameterException('Should be an object or null, ' . gettype( $value ) . ' given');
+			throw new InvalidParameterException('Should be an object or null, ' . gettype($value) . ' given');
 		} else {
-			throw new InvalidParameterException($key . ' should be an object or null, ' . gettype( $value ) . ' given');
+			throw new InvalidParameterException($key . ' should be an object or null, ' . gettype($value) . ' given');
 		}
 	}
 
@@ -362,6 +368,7 @@ class EditQuery extends PostJSONQuery implements \JsonSerializable {
 		foreach($itemsWithoutCodes as $key => $item) {
 			$prefixes[$key] = ItemPrefixer::get($item);
 		}
+
 		return $prefixes;
 	}
 }

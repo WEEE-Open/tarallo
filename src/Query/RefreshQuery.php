@@ -1,4 +1,5 @@
 <?php
+
 namespace WEEEOpen\Tarallo\Query;
 
 use WEEEOpen\Tarallo;
@@ -6,7 +7,8 @@ use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\InvalidParameterException;
 
 class RefreshQuery extends AbstractQuery {
-	public function __construct($string) {}
+	public function __construct($string) {
+	}
 
 	/**
 	 * @param Tarallo\User|null $user current user ("recovered" from session)

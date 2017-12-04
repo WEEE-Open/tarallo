@@ -1,6 +1,7 @@
 <?php
 
 namespace WEEEOpen\Tarallo;
+
 use WEEEOpen\Tarallo\Database\Database;
 
 class Session {
@@ -46,7 +47,7 @@ class Session {
 	private static function newIdentifier() {
 		$str = '';
 		for($i = 0; $i < 32; $i ++) {
-			$str .= self::KEYSPACE[ random_int(0, self::KEYSPACE_STRLEN - 1) ];
+			$str .= self::KEYSPACE[random_int(0, self::KEYSPACE_STRLEN - 1)];
 		}
 
 		return $str;
@@ -64,11 +65,13 @@ class Session {
 	 * @return User|null the user, or null if not found (expired/invalid session, no cookie, etc...)
 	 */
 	public static function restore(Database $db) {
-		if(isset($_COOKIE[ self::COOKIE_NAME ])) {
-			$user = $db->userDAO()->getUserFromSession($_COOKIE[ self::COOKIE_NAME ]);
+		if(isset($_COOKIE[self::COOKIE_NAME])) {
+			$user = $db->userDAO()->getUserFromSession($_COOKIE[self::COOKIE_NAME]);
 			if($user instanceof User) {
-				$db->userDAO()->setSessionFromUser($user->getUsername(), $_COOKIE[ self::COOKIE_NAME ], time() + self::SESSION_DURATION);
+				$db->userDAO()->setSessionFromUser($user->getUsername(), $_COOKIE[self::COOKIE_NAME],
+					time() + self::SESSION_DURATION);
 			}
+
 			return $user;
 		}
 

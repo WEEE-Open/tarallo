@@ -31,6 +31,7 @@ class ItemUpdate extends Item implements \JsonSerializable {
 			$this->defaultCode = $this->sanitizeCode($code);
 		}
 		$this->defaultCodeChanged = true;
+
 		return $this;
 	}
 
@@ -43,8 +44,9 @@ class ItemUpdate extends Item implements \JsonSerializable {
 	}
 
 	public function setIsDefault($is) {
-		$this->isDefault = (bool) $is;
+		$this->isDefault        = (bool) $is;
 		$this->isDefaultChanged = true;
+
 		return $this;
 	}
 
@@ -87,6 +89,7 @@ class ItemUpdate extends Item implements \JsonSerializable {
 
 	/**
 	 * @param ItemIncomplete|null $parent
+	 *
 	 * @return ItemUpdate $this
 	 */
 	public function setParent($parent) {
@@ -96,6 +99,7 @@ class ItemUpdate extends Item implements \JsonSerializable {
 			throw new \InvalidArgumentException('Parent should be an instance of ItemIncomplete or null, ' . gettype($parent) . ' given');
 		}
 		$this->parentChanged = true;
+
 		return $this;
 	}
 
@@ -115,9 +119,9 @@ class ItemUpdate extends Item implements \JsonSerializable {
 			parent::addFeature($name, $value);
 
 		}
+
 		return $this;
 	}
-
 
 
 	public function setFeaturesChanged() {
@@ -125,7 +129,7 @@ class ItemUpdate extends Item implements \JsonSerializable {
 	}
 
 	public function jsonSerialize() {
-		$array = [];
+		$array         = [];
 		$array['code'] = $this->getCode();
 		if(!empty($this->featuresChanged)) {
 			$array['features'] = $this->getFeatures();
@@ -139,6 +143,7 @@ class ItemUpdate extends Item implements \JsonSerializable {
 		if($this->parentChanged) {
 			$array['parent'] = $this->parent;
 		}
+
 		return $array;
 	}
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace WEEEOpen\Tarallo\Query\Field;
 
 
@@ -12,6 +13,7 @@ class Location extends Multifield implements QueryField {
 		foreach($this->getContent() as $location) {
 			$result .= '/Location/' . $location;
 		}
+
 		return $result;
 	}
 }

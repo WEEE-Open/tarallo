@@ -1,4 +1,5 @@
 <?php
+
 namespace WEEEOpen\Tarallo;
 
 class User {
@@ -37,7 +38,7 @@ class User {
 
 		$this->username = $username;
 		$this->password = $password;
-		$this->hash = $hash;
+		$this->hash     = $hash;
 	}
 
 	private static function password_verify($password, $hash) {
@@ -63,6 +64,7 @@ class User {
 		if($this->password === null) {
 			throw new \LogicException('Tried to read plaintext password when it\'s not available (try reading the hash instead)');
 		}
+
 		return $this->password;
 	}
 
@@ -73,6 +75,7 @@ class User {
 			}
 			$this->hash = self::password_hash($this->password);
 		}
+
 		return $this->hash;
 	}
 
@@ -80,16 +83,17 @@ class User {
 		return $this->username;
 	}
 
-    private function nullOrNonEmptyString($string) {
-        if($string === null) {
-            return true;
-        }
-        if(!is_string($string)) {
-            return false;
-        }
-        if($string === '') {
-            return false;
-        }
-        return true;
-    }
+	private function nullOrNonEmptyString($string) {
+		if($string === null) {
+			return true;
+		}
+		if(!is_string($string)) {
+			return false;
+		}
+		if($string === '') {
+			return false;
+		}
+
+		return true;
+	}
 }

@@ -2,7 +2,6 @@
 
 namespace WEEEOpen\Tarallo;
 
-// TODO: use some sort of configuration file, or something that can be set by the user, instead of hardcoding every value
 class ItemPrefixer {
 	public static function get(Item $item) {
 		$features = $item->getCombinedFeatures();
@@ -19,6 +18,7 @@ class ItemPrefixer {
 				if(isset($features['brand']) && isset($features['model']) && $features['brand'] === 'Dell' && $features['model'] === 'DA-2') {
 					return 'AD';
 				}
+
 				return 'A';
 			case 'case':
 				return '';

@@ -29,7 +29,7 @@ final class ModificationDAO extends DAO {
 	private $itemLocationModifiedStatement = null;
 
 	private function setItemMovedTo(ItemIncomplete $item, ItemIncomplete $to) {
-		$itemID = $this->database->itemDAO()->getItemId($item);
+		$itemID   = $this->database->itemDAO()->getItemId($item);
 		$parentID = $this->database->itemDAO()->getItemId($to);
 
 		if($this->itemLocationModifiedStatement === null) {
@@ -61,7 +61,10 @@ final class ModificationDAO extends DAO {
 		if($this->itemModifiedStatement === null) {
 			$this->itemModifiedStatement = $pdo->prepare('INSERT INTO ItemModification (ModificationID, ItemID) SELECT ?, ItemID FROM Item WHERE Item.Code = ?');
 		}
-		$this->itemModifiedStatement->execute([$this->getModificationId(), $this->database->itemDAO()->getItemId($item)]);
+		$this->itemModifiedStatement->execute([
+			$this->getModificationId(),
+			$this->database->itemDAO()->getItemId($item)
+		]);
 	}
 
 	public function modifcationBegin(User $user, $notes = null) {
@@ -86,12 +89,13 @@ final class ModificationDAO extends DAO {
 
 	private function getNewModificationId(User $user, $notes) {
 		// TODO: decouple ModificationDAO from User by passing string instead of User?
-		$pdo = $this->getPDO();
+		$pdo   = $this->getPDO();
 		$stuff = $pdo->prepare('INSERT INTO Modification (UserID, `Date`, Notes) SELECT `User`.UserID, :dat, :notes FROM `User` WHERE `User`.Name = :username');
 		$stuff->bindValue(':username', $user->getUsername());
 		$stuff->bindValue(':dat', time());
 		$stuff->bindValue(':notes', $notes);
 		$stuff->execute();
+
 		return $pdo->lastInsertId();
 	}
 
@@ -102,6 +106,7 @@ final class ModificationDAO extends DAO {
 		if($this->currentModificationId === null) {
 			throw new \LogicException('Transaction started but no modification ID set (= something went horribly wrong)');
 		}
+
 		return $this->currentModificationId;
 	}
 }
