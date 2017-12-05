@@ -27,8 +27,19 @@ final class ItemDAO extends DAO {
 	 */
 	private function codePrepare($codes) {
 		if(self::isArrayAndFull($codes)) {
-			$codeWhere = '`Code` IN (' . $this->multipleIn(':code', $codes);
-			return $codeWhere . ')';
+			$pieces = [];
+			foreach($codes as $k => $code) {
+				if(!is_integer($k)) {
+					throw new \InvalidArgumentException('Codes array keys should be integers, ' . $k . ' given');
+				}
+				$pieces[] = '`Code` LIKE :code' . $k;
+			}
+			$result = self::implodeOptional($pieces, ' OR ');
+			if(strlen($result) <= 0) {
+				return '';
+			} else {
+				return '(' . $result . ')';
+			}
 		} else {
 			return '';
 		}
@@ -133,7 +144,7 @@ final class ItemDAO extends DAO {
 	 */
 	private static function implodeOptionalWhereAnd() {
 		$args = func_get_args();
-		$where = self::implodeAnd($args);
+		$where = self::implodeOptional($args, ' AND ');
 		if($where === '') {
 			return '';
 		} else {
@@ -142,15 +153,20 @@ final class ItemDAO extends DAO {
 	}
 
 	/**
-	 * Join non-empty string arguments via " AND " to add in a WHERE clause.
-	 *
-	 * @see implodeOptionalWhereAnd
+	 * Concatenate strings with separator (" AND " or " OR ", usually), ignore empty strings.
 	 *
 	 * @param $args string[]
+	 * @param $glue string
 	 *
-	 * @return string string separated by AND, or empty string if supplied strings where empty
+	 * @return string Concatenated strings or
 	 */
-	private static function implodeAnd($args) {
+	private static function implodeOptional($args, $glue) {
+		if(!is_array($args)) {
+			throw new \InvalidArgumentException('implodeOptional expected an array, ' . gettype($args) . ' given');
+		}
+		if(!is_string($glue) || strlen($glue) <= 0) {
+			throw new \InvalidArgumentException('implodeOptional "glue" should be a non-empty string');
+		}
 		$stuff = [];
 		foreach($args as $arg) {
 			if(is_string($arg) && strlen($arg) > 0) {
@@ -162,7 +178,7 @@ final class ItemDAO extends DAO {
 			return '';
 		}
 
-		return implode(' AND ', $stuff);
+		return implode($glue, $stuff);
 	}
 
 	/**
