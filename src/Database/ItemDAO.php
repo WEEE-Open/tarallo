@@ -32,7 +32,11 @@ final class ItemDAO extends DAO {
 				if(!is_integer($k)) {
 					throw new \InvalidArgumentException('Codes array keys should be integers, ' . $k . ' given');
 				}
-				$pieces[] = '`Code` LIKE :code' . $k;
+				if(strpos($code, '%') === false && strpos($code, '_') === false) {
+					$pieces[] = '`Code` = :code' . $k;
+				} else {
+					$pieces[] = '`Code` LIKE :code' . $k;
+				}
 			}
 			$result = self::implodeOptional($pieces, ' OR ');
 			if(strlen($result) <= 0) {
@@ -202,8 +206,8 @@ final class ItemDAO extends DAO {
 			$searchSubquery = '';
 		}
 
-		if(self::isArrayAndFull($searches)) {
-			$parentSubquery = $this->parentPrepare($searches);
+		if(self::isArrayAndFull($parent)) {
+			$parentSubquery = $this->parentPrepare($parent);
 		} else {
 			$parentSubquery = '';
 		}
@@ -231,7 +235,7 @@ final class ItemDAO extends DAO {
             SELECT `ItemID`
             FROM Item
             ' . $this->implodeOptionalWhereAnd($this->codePrepare($codes), $this->tokenPrepare($token),
-				$searchSubquery) . '
+				$parentSubquery, $searchSubquery) . '
         )
         GROUP BY DescendantItem.`ItemID`, DescendantItem.`Code`, Tree.`Depth`
         ORDER BY IFNULL(Tree.`Depth`, 0) ASC
