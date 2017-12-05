@@ -44,9 +44,9 @@ final class ItemDAO extends DAO {
 
 	/**
 	 * Get the ABNORME search subquery.
-	 * Bind :searchkey0, :searchkey1, ... to keys and :searchvalue0, :searchvalue1, ... to values.
+	 * Bind :searchkey0, :searchdefaultkey0, :searchkey1, ... to keys and :searchvalue0, :searchdefaultvalue0, ... to values.
 	 *
-	 * @param $searches array of SearchTriplet
+	 * @param SearchTriplet[] $searches array of SearchTriplet
 	 *
 	 * @return string piece of query string
 	 * @see FeatureDAO::getWhereStringFromSearches
@@ -79,6 +79,48 @@ final class ItemDAO extends DAO {
 			WHERE IsDefault = 0
 			' . $subquery . '
 		)
+		';
+
+		return $query;
+	}
+
+	/**
+	 * Get search subquery for parent features.
+	 * Works like searchPrepare.
+	 *
+	 * @param SearchTriplet[] $parentFeatures array of SearchTriplet
+	 *
+	 * @return string piece of query string
+	 * @see ItemDAO::searchPrepare()
+	 */
+	private function parentPrepare($parentFeatures) {
+		if(!self::isArrayAndFull($parentFeatures)) {
+			throw new \InvalidArgumentException('Search parameters must be passed as a non-empty array');
+		}
+
+		$wheres = $this->database->featureDAO()->getWhereStringFromSearches($parentFeatures, 'parent');
+		$wheresdefault = $this->database->featureDAO()->getWhereStringFromSearches($parentFeatures, 'parentdefault');
+		if(count($wheres) <= 0 || count($wheresdefault) <= 0) {
+			throw new \LogicException('getWhereStringFromSearches() did not return anything, but there were ' . count($parentFeatures) . ' search parameters for parent items');
+		}
+
+		$subquery = '';
+		foreach($wheres as $k => $where) {
+			$subquery .= '
+			AND (
+				ParentSubqueryTree.AncestorID IN (SELECT Item.ItemID ' . $where . ')
+				OR
+				ParentSubqueryItem.`Default` IN (SELECT Item.ItemID ' . $wheresdefault[$k] . ')
+			)';
+		}
+
+		$query = '
+			AND Tree.AncestorID IN (
+				SELECT ParentSubqueryTree.DescendantID
+				FROM Tree AS ParentSubqueryTree, Item AS ParentSubqueryItem
+				WHERE ParentSubqueryTree.AncestorID=ParentSubqueryItem.ItemID
+				' . $subquery . '
+			)
 		';
 
 		return $query;
@@ -142,6 +184,12 @@ final class ItemDAO extends DAO {
 			$searchSubquery = $this->searchPrepare($searches);
 		} else {
 			$searchSubquery = '';
+		}
+
+		if(self::isArrayAndFull($searches)) {
+			$parentSubquery = $this->parentPrepare($searches);
+		} else {
+			$parentSubquery = '';
 		}
 
 		// sanitization
