@@ -127,12 +127,11 @@ final class FeatureDAO extends DAO {
 	 * array.
 	 *
 	 * @param SearchTriplet[] $searches non-empty array of SearchTriplet
+	 * @param string $parameterIdentifier Parameter name, will be assembled as follows: ":" . $string . "name" (or "value").
 	 *
 	 * @return string[] array of WHERE statements(?) (no "WHERE" keyword itself)
-	 * @throws InvalidParameterException
-	 * @throws \InvalidArgumentException - wrong parameters
 	 */
-	public function getWhereStringFromSearches($searches) {
+	public function getWhereStringFromSearches($searches, $parameterIdentifier) {
 		$queries = [];
 
 		foreach($searches as $key => $triplet) {
@@ -159,9 +158,9 @@ final class FeatureDAO extends DAO {
 					FROM Item
 					NATURAL JOIN ItemFeature
 					NATURAL JOIN Feature
-					WHERE Feature.FeatureName = :searchname' . $key . '
+					WHERE Feature.FeatureName = :'.$parameterIdentifier.'name' . $key . '
 					AND Feature.FeatureType = ' . self::FEATURE_NUMBER . '
-					AND ItemFeature.Value ' . $compare . ' :searchvalue' . $key;
+					AND ItemFeature.Value ' . $compare . ' :'.$parameterIdentifier.'value' . $key;
 					break;
 				case self::FEATURE_ENUM:
 					$queries[] = '
@@ -170,9 +169,9 @@ final class FeatureDAO extends DAO {
 					JOIN Feature ON ItemFeature.FeatureID = Feature.FeatureID
 					JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
 					WHERE ItemFeature.ValueEnum = FeatureValue.ValueEnum
-					AND Feature.FeatureName = :searchname' . $key . '
+					AND Feature.FeatureName = :'.$parameterIdentifier.'name' . $key . '
 					AND Feature.FeatureType = ' . self::FEATURE_ENUM . '
-					AND FeatureValue.ValueText = :searchvalue' . $key;
+					AND FeatureValue.ValueText = :'.$parameterIdentifier.'value' . $key;
 					break;
 				default:
 				case self::FEATURE_TEXT:
@@ -180,9 +179,9 @@ final class FeatureDAO extends DAO {
 					FROM Item
 					NATURAL JOIN ItemFeature
 					NATURAL JOIN Feature
-					WHERE Feature.FeatureName = :searchname' . $key . '
+					WHERE Feature.FeatureName = :'.$parameterIdentifier.'name' . $key . '
 					AND Feature.FeatureType = ' . self::FEATURE_TEXT . '
-					AND ItemFeature.ValueText LIKE :searchvalue' . $key;
+					AND ItemFeature.ValueText LIKE :'.$parameterIdentifier.'value' . $key;
 			}
 		}
 

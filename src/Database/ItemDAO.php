@@ -57,24 +57,13 @@ final class ItemDAO extends DAO {
 		}
 
 		$subquery = '';
-		$wheres = $this->database->featureDAO()->getWhereStringFromSearches($searches);
-		if(count($wheres) <= 0) {
+		$wheres = $this->database->featureDAO()->getWhereStringFromSearches($searches, 'search');
+		$wheresdefault = $this->database->featureDAO()->getWhereStringFromSearches($searches, 'searchdefault');
+		if(count($wheres) <= 0 || count($wheresdefault) <= 0) {
 			throw new \LogicException('getWhereStringFromSearches() did not return anything, but there were ' . count($searches) . ' search parameters');
 		}
-		$wheresdefault = $wheres;
-		foreach($wheresdefault as $k => $where) {
-			$wheresdefault[$k] = str_replace(':searchname', ':searchnamedefault', $wheresdefault[$k]);
-			$wheresdefault[$k] = str_replace(':searchvalue', ':searchvaluedefault', $wheresdefault[$k]);
-		}
+
 		foreach($wheres as $k => $where) {
-			//			$subquery .= '
-			//			AND (
-			//				ItemID IN (SELECT ItemID ' . $where . ')
-			//				OR (
-			//					Default IS NOT NULL
-			//					AND Default IN (SELECT ItemID ' . $where . ')
-			//				)
-			//			)';
 			$subquery .= '
 			AND (
 				ItemID IN (SELECT Item.ItemID ' . $where . ')
@@ -204,9 +193,9 @@ final class ItemDAO extends DAO {
 				$key = $triplet->getKey();
 				$value = $triplet->getValue();
 				$s->bindValue(':searchname' . $numericKey, $key);
-				$s->bindValue(':searchnamedefault' . $numericKey, $key);
+				$s->bindValue(':searchdefaultname' . $numericKey, $key);
 				$s->bindValue(':searchvalue' . $numericKey, $value);
-				$s->bindValue(':searchvaluedefault' . $numericKey, $value);
+				$s->bindValue(':searchdefaultvalue' . $numericKey, $value);
 			}
 		}
 
