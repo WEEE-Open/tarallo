@@ -121,11 +121,12 @@ final class ItemDAO extends DAO {
 
 		$subquery = '';
 		foreach($wheres as $k => $where) {
+			// Depth > 0 excludes matching item itself, since it should be a parent/ancestor to returned items... It's a lacchezzo abnorme™, basically.
 			$subquery .= '
 			AND (
-				ParentSubqueryTree.AncestorID IN (SELECT Item.ItemID ' . $where . ')
+				ParentSubqueryTree.AncestorID IN (SELECT Item.ItemID ' . $where . ' AND Depth > 0)
 				OR
-				ParentSubqueryItem.`Default` IN (SELECT Item.ItemID ' . $wheresdefault[$k] . ')
+				ParentSubqueryItem.`Default` IN (SELECT Item.ItemID ' . $wheresdefault[$k] . ' AND Depth > 0)
 			)';
 		}
 
