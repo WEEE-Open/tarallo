@@ -33,11 +33,6 @@ class Search extends Multifield implements QueryField {
 	}
 
 	public function __toString() {
-		$result = '';
-		foreach($this->getContent() as $triplet) {
-			$result .= '/Search/' . (string) $triplet;
-		}
-
-		return $result;
+		return '/Search/' . (string) implode(',', $this->getContent());
 	}
 }
