@@ -130,7 +130,7 @@ final class ItemDAO extends DAO {
 		}
 
 		$query = '
-			AND Tree.AncestorID IN (
+			Tree.AncestorID IN (
 				SELECT ParentSubqueryTree.DescendantID
 				FROM Tree AS ParentSubqueryTree, Item AS ParentSubqueryItem
 				WHERE ParentSubqueryTree.AncestorID=ParentSubqueryItem.ItemID
@@ -264,6 +264,18 @@ final class ItemDAO extends DAO {
 				$s->bindValue(':searchdefaultname' . $numericKey, $key);
 				$s->bindValue(':searchvalue' . $numericKey, $value);
 				$s->bindValue(':searchdefaultvalue' . $numericKey, $value);
+			}
+		}
+
+		if(self::isArrayAndFull($parent)) {
+			foreach($parent as $numericKey => $triplet) {
+				/** @var SearchTriplet $triplet */
+				$key = $triplet->getKey();
+				$value = $triplet->getValue();
+				$s->bindValue(':parentname' . $numericKey, $key);
+				$s->bindValue(':parentdefaultname' . $numericKey, $key);
+				$s->bindValue(':parentvalue' . $numericKey, $value);
+				$s->bindValue(':parentdefaultvalue' . $numericKey, $value);
 			}
 		}
 
