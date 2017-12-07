@@ -39,7 +39,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(32, 'pcie-power', 2),
 	(33, 'pcie-sockets-n', 1),
 	(34, 'pci-sockets-n', 1),
-	(35, 'power-connector-type', 2),
+	(35, 'power-connector', 2),
 	(36, 'power-idle-watt', 1),
 	(37, 'power-rated-watt', 1),
 	(38, 'ps2-ports-n', 1),
@@ -59,8 +59,9 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(52, 'serial-ports-n', 1),
 	(53, 'parallel-ports-n', 1),
 	(54, 'ram-form-factor', 2),
-	(55, 'weight-g', 1),
-	(56, 'spin-rate-rpm', 1);
+	(55, 'weight-gram', 1),
+	(56, 'spin-rate-rpm', 1),
+	(57, 'dms-59-ports-n', 1); -- the weird DVI port which is actually 2 DVI ports in one
 -- TODO: SCSI ports
 
 TRUNCATE `FeatureValue`;
@@ -172,8 +173,8 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(32, 1, '6pin'),
 	(32, 2, '8pin'),
 	(32, 3, 'more'),
-	(35, 0, 'C13'),
-	(35, 1, 'C19'),
+	(35, 0, 'c13'),
+	(35, 1, 'c19'),
 	(35, 2, 'barrel'),
 	(35, 3, 'other'), 
 	(40, 0, 'other'),
@@ -183,7 +184,6 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(40, 4, 'atx-p4-extended'),
 	(40, 5, 'atx-p4-4pin'),
 	(40, 6, 'atx-p4-8pin'),
-	(40, 7, 'atx-p4-8pin'),
 	(42, 0, 'pc66'),	
 	(42, 1, 'pc100'),
 	(42, 2, 'pc133'),
