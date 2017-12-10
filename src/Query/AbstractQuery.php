@@ -5,10 +5,19 @@ namespace WEEEOpen\Tarallo\Query;
 
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\InvalidParameterException;
+use WEEEOpen\Tarallo\User;
 
 abstract class AbstractQuery {
 	abstract public function __construct($string);
 
+	/**
+	 * Run query, acquire results
+	 *
+	 * @param User|null $user Current user (null if logging in)
+	 * @param Database $db Current database (there's also only 1 database, so...)
+	 *
+	 * @return \JsonSerializable
+	 */
 	abstract public function run($user, Database $db);
 
 	public static final function factory($method, $path, $postJSON) {

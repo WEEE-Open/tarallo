@@ -200,7 +200,7 @@ final class ItemDAO extends DAO {
 	 * @param $pageLimit int How many items per page. Use -1 for "all" (ignores the $page parameter). Note that pagination is done in PHP and not in the database, so using a huge number is fine. It's the whole concept of "pagination in PHP" that isn't fine at all.
 	 *
 	 * @return Item[]
-	 * @TODO actually implement $parent and $location
+	 * @TODO actually implement $location
 	 */
 	public function getItem($codes = null, $searches = null, $depth = null, $parent = null, $sorts = null, $token = null, $locations = null, $page = 1, $pageLimit = -1) {
 		if(self::isArrayAndFull($searches)) {

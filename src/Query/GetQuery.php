@@ -11,7 +11,9 @@ class GetQuery extends AbstractQuery {
 	const FIELD_SEARCH = 'Search';
 	const FIELD_SORT = 'Sort';
 	const FIELD_DEPTH = 'Depth';
+	const FIELD_LOCATION = 'Depth';
 	const FIELD_PARENT = 'Parent';
+	const FIELD_PAGE = 'Page';
 	const FIELD_LANGUAGE = 'Language';
 	const FIELD_TOKEN = 'Token';
 
@@ -34,8 +36,12 @@ class GetQuery extends AbstractQuery {
 				return new Field\Sort($parameter);
 			case self::FIELD_DEPTH:
 				return new Field\Depth($parameter);
+			case self::FIELD_LOCATION:
+				throw new InvalidParameterException('Unsupported field Location');
 			case self::FIELD_PARENT:
 				return new Field\ParentField($parameter);
+			case self::FIELD_PAGE:
+				return new Field\Page($parameter);
 			case self::FIELD_LANGUAGE:
 				return new Field\Language($parameter);
 			case self::FIELD_TOKEN:
@@ -123,14 +129,15 @@ class GetQuery extends AbstractQuery {
 		}
 		/** @var Field\QueryField[] $qf */
 		$qf = $this->queryFields; // this is only needed because PHPStorm doesn't understand "$this->queryFields" in PHPDoc comments.
-		$location = isset($qf[self::FIELD_CODE]) ? $qf[self::FIELD_CODE]->getContent() : null;
+		$codes = isset($qf[self::FIELD_CODE]) ? $qf[self::FIELD_CODE]->getContent() : null;
 		$search = isset($qf[self::FIELD_SEARCH]) ? $qf[self::FIELD_SEARCH]->getContent() : null;
 		$depth = isset($qf[self::FIELD_DEPTH]) ? $qf[self::FIELD_DEPTH]->getContent() : null;
+		$location = isset($qf[self::FIELD_LOCATION]) ? $qf[self::FIELD_LOCATION]->getContent() : null;
+		$page = isset($qf[self::FIELD_PAGE]) ? $qf[self::FIELD_PAGE]->getContent() : 1;
 		$parent = isset($qf[self::FIELD_PARENT]) ? $qf[self::FIELD_PARENT]->getContent() : null;
 		$sort = isset($qf[self::FIELD_SORT]) ? $qf[self::FIELD_SORT]->getContent() : null;
 		$token = isset($qf[self::FIELD_TOKEN]) ? $qf[self::FIELD_TOKEN]->getContent() : null;
 
-		// TODO: return... what? Some array? JSON? Response object?
-		return ['items' => $db->itemDAO()->getItem($location, $search, $depth, $parent, $sort, $token)];
+		return ['items' => $db->itemDAO()->getItem($codes, $search, $depth, $parent, $sort, $token, $location, $page, 20)];
 	}
 }

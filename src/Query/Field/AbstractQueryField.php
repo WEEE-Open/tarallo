@@ -12,6 +12,7 @@ abstract class AbstractQueryField implements QueryField {
 	}
 
 	public function add($parameter) {
+		// TODO: what was this supposed to do, anyway?
 		throw new InvalidParameterException('Invalid duplicate parameter in query string');
 	}
 }
