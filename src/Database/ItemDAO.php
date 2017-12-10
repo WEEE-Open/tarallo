@@ -196,11 +196,13 @@ final class ItemDAO extends DAO {
 	 * @param $sorts string[]|null key (feature name) => order (+ or -)
 	 * @param $token string|null token. Must match for every root item, so it only makes sense for "$code and nothing else" searches
 	 * @param $locations string[]|null Item codes, only their descendants will be searched.
+	 * @param $page int Which page of results to display, starting from 1
+	 * @param $pageLimit int How many items per page. Use -1 for "all" (ignores the $page parameter). Note that pagination is done in PHP and not in the database, so using a huge number is fine. It's the whole concept of "pagination in PHP" that isn't fine at all.
 	 *
 	 * @return Item[]
 	 * @TODO actually implement $parent and $location
 	 */
-	public function getItem($codes = null, $searches = null, $depth = null, $parent = null, $sorts = null, $token = null, $locations = null) {
+	public function getItem($codes = null, $searches = null, $depth = null, $parent = null, $sorts = null, $token = null, $locations = null, $page = 1, $pageLimit = -1) {
 		if(self::isArrayAndFull($searches)) {
 			$searchSubquery = $this->searchPrepare($searches);
 		} else {
@@ -317,8 +319,9 @@ final class ItemDAO extends DAO {
 			$this->database->featureDAO()->setFeatures($items);
 			$this->database->itemDAO()->setLocations($needLocation);
 			$this->sortItems($results, $sorts);
+			$this->paginateItems($results, $page, $pageLimit);
 
-			return $results;
+			return array_values($results); // Reindex array so json_encode considers it an array and not an object (associative array)
 		}
 	}
 
@@ -456,6 +459,35 @@ final class ItemDAO extends DAO {
 
 			return strnatcmp($a->getCode(), $b->getCode());
 		});
+	}
+
+	/**
+	 * Remove items outside current page
+	 *
+	 * @param $items Item[] Reference to items, will be changed in-place
+	 * @param $page int current page, starting from 1
+	 * @param $perPage int items per page, -1 returns everything
+	 */
+	private function paginateItems(&$items, $page, $perPage = -1) {
+		if($perPage === -1) {
+			return;
+		}
+		if($perPage <= 0) {
+			throw new \InvalidArgumentException('Items per page should be -1 or a positive number, ' . $perPage . ' given');
+		}
+		if($page <= 0) {
+			throw new \InvalidArgumentException('Page should be a positive number, ' . $perPage . ' given');
+		}
+		$from = ($page - 1) * $perPage; // left included
+		$to = $from + $perPage; // right excluded
+
+		$counter = 0;
+		foreach($items as $k => $item) {
+			if($counter < $from || $counter >= $to) {
+				unset($items[$k]);
+			}
+			$counter++;
+		}
 	}
 
 	public function updateItems($items) {
