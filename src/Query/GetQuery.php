@@ -137,7 +137,16 @@ class GetQuery extends AbstractQuery {
 		$parent = isset($qf[self::FIELD_PARENT]) ? $qf[self::FIELD_PARENT]->getContent() : null;
 		$sort = isset($qf[self::FIELD_SORT]) ? $qf[self::FIELD_SORT]->getContent() : null;
 		$token = isset($qf[self::FIELD_TOKEN]) ? $qf[self::FIELD_TOKEN]->getContent() : null;
+		$count = 0;
+		$pages = 0;
 
-		return ['items' => $db->itemDAO()->getItem($codes, $search, $depth, $parent, $sort, $token, $location, $page, 20)];
+		$result = ['items' => $db->itemDAO()->getItem($codes, $search, $depth, $parent, $sort, $token, $location, $page, 20, $count, $pages)];
+		if($count > 0) {
+			$result['count'] = $count;
+		}
+		if($pages > 0) {
+			$result['pages'] = $pages;
+		}
+		return $result;
 	}
 }

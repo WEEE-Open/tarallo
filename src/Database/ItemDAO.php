@@ -198,11 +198,13 @@ final class ItemDAO extends DAO {
 	 * @param $locations string[]|null Item codes, only their descendants will be searched.
 	 * @param $page int Which page of results to display, starting from 1
 	 * @param $pageLimit int How many items per page. Use -1 for "all" (ignores the $page parameter). Note that pagination is done in PHP and not in the database, so using a huge number is fine. It's the whole concept of "pagination in PHP" that isn't fine at all.
+	 * @param $total int Reference that will contain total number of items (0 if no results)
+	 * @param $pages int Reference that will contain total number of pages (0 if no results)
 	 *
 	 * @return Item[]
 	 * @TODO actually implement $location
 	 */
-	public function getItem($codes = null, $searches = null, $depth = null, $parent = null, $sorts = null, $token = null, $locations = null, $page = 1, $pageLimit = -1) {
+	public function getItem($codes = null, $searches = null, $depth = null, $parent = null, $sorts = null, $token = null, $locations = null, $page = 1, $pageLimit = -1, &$total = null, &$pages = null) {
 		if(self::isArrayAndFull($searches)) {
 			$searchSubquery = $this->searchPrepare($searches);
 		} else {
@@ -319,7 +321,14 @@ final class ItemDAO extends DAO {
 			$this->database->featureDAO()->setFeatures($items);
 			$this->database->itemDAO()->setLocations($needLocation);
 			$this->sortItems($results, $sorts);
+			$totalCount = count($results);
+			if($total !== null) {
+				$total = $totalCount;
+			}
 			$this->paginateItems($results, $page, $pageLimit);
+			if($pages !== null) {
+				$pages = (int) ceil($totalCount / $pageLimit);
+			}
 
 			return array_values($results); // Reindex array so json_encode considers it an array and not an object (associative array)
 		}
