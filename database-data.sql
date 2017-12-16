@@ -62,7 +62,8 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(55, 'weight-gram', 1),
 	(56, 'spin-rate-rpm', 1),
 	(57, 'dms-59-ports-n', 1), -- the weird DVI port which is actually 2 DVI ports in one
-	(58, 'check', 2);
+	(58, 'check', 2),
+	(59, 'ram-ecc', 2);
 -- TODO: SCSI ports
 
 TRUNCATE `FeatureValue`;
@@ -194,13 +195,16 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(42, 6, 'ddr4'),
 	(49, 0, 'no'),
 	(49, 1, 'yes'),
-	(54, 0, 'dimm'),
-	(54, 1, 'sodimm'),
-	(54, 2, 'minidimm'),
-	(54, 3, 'microdimm'),
+	(54, 0, 'simm'),
+	(54, 1, 'dimm'),
+	(54, 2, 'sodimm'),
+	(54, 3, 'minidimm'),
+	(54, 4, 'microdimm'),
 	(58, 0, 'missing-data'),
 	(58, 1, 'wrong-data'),
-	(58, 2, 'wrong-location');
+	(58, 2, 'wrong-location'),
+	(59, 0, 'no'),
+	(59, 1, 'yes');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
