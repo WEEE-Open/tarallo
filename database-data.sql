@@ -63,7 +63,9 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(56, 'spin-rate-rpm', 1),
 	(57, 'dms-59-ports-n', 1), -- the weird DVI port which is actually 2 DVI ports in one
 	(58, 'check', 2),
-	(59, 'ram-ecc', 2);
+	(59, 'ram-ecc', 2),
+	(60, 'other-code', 0),
+	(61, 'hdmi-ports-n', 1);
 -- TODO: SCSI ports
 
 TRUNCATE `FeatureValue`;
