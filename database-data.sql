@@ -46,7 +46,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(39, 'psu-ampere', 1),
 	(40, 'psu-socket', 2),
 	(41, 'psu-volt', 1),
-	(42, 'ram-socket', 2),
+	(42, 'ram-type', 2),
 	(43, 'sata-ports-n', 1),
 	(44, 'software', 0),
 	(45, 'usb-ports-n', 1),
@@ -205,6 +205,9 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(58, 0, 'missing-data'),
 	(58, 1, 'wrong-data'),
 	(58, 2, 'wrong-location'),
+	(58, 3, 'wrong-content'),
+	(58, 4, 'missing-content'),
+	(58, 5, 'wrong-data-and-content'),
 	(59, 0, 'no'),
 	(59, 1, 'yes');
 -- TRUNCATE `Codes`;
