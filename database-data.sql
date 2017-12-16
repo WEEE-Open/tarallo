@@ -61,7 +61,8 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(54, 'ram-form-factor', 2),
 	(55, 'weight-gram', 1),
 	(56, 'spin-rate-rpm', 1),
-	(57, 'dms-59-ports-n', 1); -- the weird DVI port which is actually 2 DVI ports in one
+	(57, 'dms-59-ports-n', 1), -- the weird DVI port which is actually 2 DVI ports in one
+	(58, 'check', 2);
 -- TODO: SCSI ports
 
 TRUNCATE `FeatureValue`;
@@ -184,9 +185,9 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(40, 4, 'atx-p4-extended'),
 	(40, 5, 'atx-p4-4pin'),
 	(40, 6, 'atx-p4-8pin'),
-	(42, 0, 'pc66'),	
-	(42, 1, 'pc100'),
-	(42, 2, 'pc133'),
+	(42, 0, 'simm'),
+	(42, 1, 'edo'),
+	(42, 2, 'sdr'),
 	(42, 3, 'ddr'),
 	(42, 4, 'ddr2'),
 	(42, 5, 'ddr3'),
@@ -194,9 +195,12 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(49, 0, 'no'),
 	(49, 1, 'yes'),
 	(54, 0, 'dimm'),
-	(54, 1, 'so-dimm'),
+	(54, 1, 'sodimm'),
 	(54, 2, 'minidimm'),
-	(54, 3, 'microdimm');
+	(54, 3, 'microdimm'),
+	(58, 0, 'missing-data'),
+	(58, 1, 'wrong-data'),
+	(58, 2, 'wrong-location');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
