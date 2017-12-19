@@ -67,7 +67,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(60, 'other-code', 0),
 	(61, 'hdmi-ports-n', 1),
 	(62, 'scsi-sca2-ports-n', 1), -- SCA 2 (80 pin)
-	(63, 'scsi-dh68-ports-n', 1), -- DH68 (68 pin)
+	(63, 'scsi-db68-ports-n', 1), -- DB68 (68 pin)
 	(64, 'mini-ide-ports-n', 1), -- Laptop IDE
 	(65, 'data-erased', 2), -- HDD entirely erased
 	(66, 'surface-scan', 2), -- Running badblocks on HDDs
