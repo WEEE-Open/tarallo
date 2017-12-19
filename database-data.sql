@@ -65,8 +65,13 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(58, 'check', 2),
 	(59, 'ram-ecc', 2),
 	(60, 'other-code', 0),
-	(61, 'hdmi-ports-n', 1);
--- TODO: SCSI ports
+	(61, 'hdmi-ports-n', 1),
+	(62, 'scsi-sca2-ports-n', 1), -- SCA 2 (80 pin)
+	(63, 'scsi-dh68-ports-n', 1), -- DH68 (68 pin)
+	(64, 'mini-ide-ports-n', 1), -- Laptop IDE
+	(65, 'data-erased', 2), -- HDD entirely erased
+	(66, 'surface-scan', 2), -- Running badblocks on HDDs
+	(67, 'smart-data', 2); -- S.M.A.R.T.
 
 TRUNCATE `FeatureValue`;
 INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
@@ -209,7 +214,14 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(58, 4, 'missing-content'),
 	(58, 5, 'wrong-data-and-content'),
 	(59, 0, 'no'),
-	(59, 1, 'yes');
+	(59, 1, 'yes'),
+	-- (65, 0, 'no'),
+	(65, 1, 'yes'), -- Just don't add the feature if it hasn't been erased...
+	(66, 0, 'fail'),
+	(66, 1, 'pass'),
+	(67, 0, 'fail'),
+	(67, 1, 'old'), -- old and tired HDDs, but still no reallocated sectors or other serious warnings
+	(67, 2, 'ok');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
