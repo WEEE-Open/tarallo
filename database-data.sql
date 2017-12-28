@@ -31,7 +31,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(23, 'dvi-ports-n', 1),
 	(24, 'ethernet-ports-1000m-n', 1),
 	(25, 'ethernet-ports-100m-n', 1),
-	(26, 'ethernet-ports-10base2-n', 1),
+	(26, 'ethernet-ports-10base2-bnc-n', 1),
 	(27, 'ethernet-ports-10m-n', 1),
 	(28, 'hdd-odd-form-factor', 2),
 	(29, 'ide-ports-n', 1),
@@ -56,7 +56,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(49, 'soldered-in-place', 2),
 	(50, 'power-idle-pfc', 0),
 	(51, 'firewire-ports-n', 1),
-	(52, 'serial-ports-n', 1),
+	(52, 'serial-ports-n', 1), -- DE-9 ports, also known as RS-232 (which apparently is a standard that also works on DB-25 ports, so don't call them like that)
 	(53, 'parallel-ports-n', 1),
 	(54, 'ram-form-factor', 2),
 	(55, 'weight-gram', 1),
@@ -72,7 +72,17 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(65, 'data-erased', 2), -- HDD entirely erased
 	(66, 'surface-scan', 2), -- Running badblocks on HDDs
 	(67, 'smart-data', 2), -- S.M.A.R.T.
-	(68, 'wireless-receiver', 2);
+	(68, 'wireless-receiver', 2),
+	(69, 'rj11-ports-n', 1),
+	(70, 'ethernet-ports-10base5-aui-n', 1),
+	(71, 'midi-ports-n', 1),
+	(72, 'mini-jack-ports-n', 1),
+	(73, 'rca-mono-ports-n', 1),
+	(74, 'tv-out-ports-n', 1),
+	(75, 's-video-ports-n', 1),
+	(76, 'serial-db25-ports-n', 1), -- DB-25 serial ports
+	(77, 'isa-sockets-n', 1),
+	(78, 'mini-pcie-sockets-n', 1);
 
 TRUNCATE `FeatureValue`;
 INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
@@ -99,6 +109,7 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(6, 20, 'heatsink'),
 	(6, 21, 'fan'),
 	(6, 22, 'fan-controller'),
+	(6, 23, 'modem-card'),
 	(7, 0, 'no'),
 	(7, 1, 'yes'),
 	(7, 2, 'maybe'),
@@ -226,9 +237,9 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(67, 0, 'fail'),
 	(67, 1, 'old'), -- old and tired HDDs, but still no reallocated sectors or other serious warnings
 	(67, 2, 'ok'),
-	(67, 1, 'inside'), -- wireless receiver: located inside
-	(67, 2, 'near'), -- or nearby if cannot be placed inside
-	(67, 0, 'missing'); -- or missing, making the peripheral completely useless since these are always proprietary
+	(68, 1, 'inside'), -- wireless receiver: located inside, nearby or missing, making the peripheral completely useless since these are always proprietary
+	(68, 2, 'near'),
+	(68, 0, 'missing');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
