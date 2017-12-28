@@ -71,7 +71,8 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(64, 'mini-ide-ports-n', 1), -- Laptop IDE
 	(65, 'data-erased', 2), -- HDD entirely erased
 	(66, 'surface-scan', 2), -- Running badblocks on HDDs
-	(67, 'smart-data', 2); -- S.M.A.R.T.
+	(67, 'smart-data', 2), -- S.M.A.R.T.
+	(68, 'wireless-receiver', 2);
 
 TRUNCATE `FeatureValue`;
 INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
@@ -119,6 +120,8 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(13, 13, 'violet'),
 	(13, 14, 'sip-brown'),
 	(13, 15, 'lightblue'),
+	(13, 16, 'yellowed'),
+	(13, 17, 'transparent-dark'),
 	(14, 0, 'atx'),
 	(14, 1, 'miniatx'),
 	(14, 2, 'microatx'),
@@ -213,6 +216,7 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(58, 3, 'wrong-content'),
 	(58, 4, 'missing-content'),
 	(58, 5, 'wrong-data-and-content'),
+	(58, 6, 'wrong-location-and-data'),
 	(59, 0, 'no'),
 	(59, 1, 'yes'),
 	-- (65, 0, 'no'),
@@ -221,7 +225,10 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(66, 1, 'pass'),
 	(67, 0, 'fail'),
 	(67, 1, 'old'), -- old and tired HDDs, but still no reallocated sectors or other serious warnings
-	(67, 2, 'ok');
+	(67, 2, 'ok'),
+	(67, 1, 'inside'), -- wireless receiver: located inside
+	(67, 2, 'near'), -- or nearby if cannot be placed inside
+	(67, 0, 'missing'); -- or missing, making the peripheral completely useless since these are always proprietary
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
