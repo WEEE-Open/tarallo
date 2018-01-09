@@ -204,11 +204,11 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(35, 3, 'other'), 
 	(40, 0, 'other'),
 	(40, 1, 'at'),
-	(40, 2, 'atx'),
-	(40, 3, 'atx-p4'),
-	(40, 4, 'atx-p4-extended'),
-	(40, 5, 'atx-p4-4pin'),
-	(40, 6, 'atx-p4-8pin'),
+	(40, 2, 'atx-old'), -- 20  pin, lots of amperes on 5 V
+	(40, 4, 'atx12v'), -- 20+4 pin, SATA
+	(40, 5, 'atx12v-extended'), -- 20+4 pin, that weird extended thing
+	(40, 6, 'atx12v-4pin'), -- 20+4 pin, 4 pin for CPU, SATA
+	(40, 7, 'atx12v-8pin'), -- 20+4 pin, 8 pin for CPU, SATA
 	(42, 0, 'simm'),
 	(42, 1, 'edo'),
 	(42, 2, 'sdr'),
