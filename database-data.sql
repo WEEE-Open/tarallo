@@ -44,7 +44,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(37, 'power-rated-watt', 1),
 	(38, 'ps2-ports-n', 1),
 	(39, 'psu-ampere', 1),
-	(40, 'psu-socket', 2),
+	(40, 'psu-socket', 2), -- use sata-ports-n and pcie-power for that stuff
 	(41, 'psu-volt', 1),
 	(42, 'ram-type', 2),
 	(43, 'sata-ports-n', 1),
@@ -82,7 +82,8 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(75, 's-video-ports-n', 1),
 	(76, 'serial-db25-ports-n', 1), -- DB-25 serial ports
 	(77, 'isa-sockets-n', 1),
-	(78, 'mini-pcie-sockets-n', 1);
+	(78, 'mini-pcie-sockets-n', 1),
+	(79, 'brand-reseller', 0);
 
 TRUNCATE `FeatureValue`;
 INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
@@ -112,6 +113,7 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(6, 23, 'modem-card'),
 	(6, 24, 'scsi-card'),
 	(6, 25, 'wifi-card'),
+	(6, 26, 'external-psu'),
 	(7, 0, 'no'),
 	(7, 1, 'yes'),
 	(7, 2, 'maybe'),
@@ -198,10 +200,13 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(32, 1, '6pin'),
 	(32, 2, '8pin'),
 	(32, 3, 'more'),
-	(35, 0, 'c13'),
-	(35, 1, 'c19'),
-	(35, 2, 'barrel'),
-	(35, 3, 'other'), 
+	(35, 0, 'other'),
+	(35, 1, 'c13'), -- C13 is the plug and C14 the inlet but they're "paired"
+	(35, 2, 'c19'),
+	(35, 3, 'barrel'),
+	(35, 4, 'miniusb'),
+	(35, 5, 'microusb'),
+	(35, 6, 'da-2'), -- Dell DA-2
 	(40, 0, 'other'),
 	(40, 1, 'at'),
 	(40, 2, 'atx-old'), -- 20  pin, lots of amperes on 5 V
