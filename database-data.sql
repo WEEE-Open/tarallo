@@ -44,7 +44,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(37, 'power-rated-watt', 1),
 	(38, 'ps2-ports-n', 1),
 	(39, 'psu-ampere', 1),
-	(40, 'psu-socket', 2), -- use sata-ports-n and pcie-power for that stuff
+	(40, 'psu-socket', 2), -- use sata-ports-n and pcie-power-pin-n for that stuff
 	(41, 'psu-volt', 1),
 	(42, 'ram-type', 2),
 	(43, 'sata-ports-n', 1),
@@ -207,7 +207,8 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(35, 3, 'barrel'),
 	(35, 4, 'miniusb'),
 	(35, 5, 'microusb'),
-	(35, 6, 'da-2'), -- Dell DA-2
+	(35, 6, 'proprietary'),
+	(35, 7, 'da-2'), -- Dell DA-2
 	(40, 0, 'other'),
 	(40, 1, 'at'),
 	(40, 2, 'atx-old'), -- 20 pin
