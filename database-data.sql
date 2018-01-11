@@ -36,7 +36,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(28, 'hdd-odd-form-factor', 2),
 	(29, 'ide-ports-n', 1),
 	(31, 'odd-type', 2),
-	(32, 'pcie-power', 2),
+	(32, 'pcie-power-pin-n', 1),
 	(33, 'pcie-sockets-n', 1),
 	(34, 'pci-sockets-n', 1),
 	(35, 'power-connector', 2),
@@ -84,7 +84,9 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(77, 'isa-sockets-n', 1),
 	(78, 'mini-pcie-sockets-n', 1),
 	(79, 'brand-reseller', 0),
-	(80, 'psu-form-factor', 2);
+	(80, 'psu-form-factor', 2),
+	(81, 'cib-old', 0),
+	(82, 'restrictions', 2);
 
 TRUNCATE `FeatureValue`;
 INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
@@ -115,6 +117,7 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(6, 24, 'scsi-card'),
 	(6, 25, 'wifi-card'),
 	(6, 26, 'external-psu'),
+	(6, 27, 'zip-drive'),
 	(7, 0, 'no'),
 	(7, 1, 'yes'),
 	(7, 2, 'maybe'),
@@ -138,6 +141,7 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(13, 15, 'lightblue'),
 	(13, 16, 'yellowed'),
 	(13, 17, 'transparent-dark'),
+	(13, 18, 'golden'),
 	(14, 0, 'atx'),
 	(14, 1, 'miniatx'),
 	(14, 2, 'microatx'),
@@ -197,10 +201,6 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(31, 3, 'dvd-rw'),
 	(31, 4, 'bd-r'),
 	(31, 5, 'bd-rw'),
-	(32, 0, '4pin'),
-	(32, 1, '6pin'),
-	(32, 2, '8pin'),
-	(32, 3, 'more'),
 	(35, 0, 'other'),
 	(35, 1, 'c13'), -- C13 is the plug and C14 the inlet but they're "paired"
 	(35, 2, 'c19'),
@@ -259,7 +259,12 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(80, 8, 'tfx'), -- I don't even know anymore
 	(80, 9, 'flexatx'),
 	(80, 10, 'proprietary'),
-	(80, 10, 'eps');
+	(80, 11, 'eps'),
+	(82, 0, 'loan'), -- borrowed items that should be returned to owner, can't be donated
+	(82, 1, 'in-use'), -- items that shouldn't be donated right now because we're using them (e.g. switch, pc used for invetory management, server)
+	(82, 2, 'bought'), -- items bought with funds from our annual budget, can't be donated at all ever
+	-- PCs to be used for training and demonstrations (because they're old, slow and with the case full of scratches, mostly), but still working and that can be potentially donated
+	(82, 3, 'training');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
