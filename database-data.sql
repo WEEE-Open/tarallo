@@ -83,7 +83,8 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(76, 'serial-db25-ports-n', 1), -- DB-25 serial ports
 	(77, 'isa-sockets-n', 1),
 	(78, 'mini-pcie-sockets-n', 1),
-	(79, 'brand-reseller', 0);
+	(79, 'brand-reseller', 0),
+	(80, 'psu-form-factor', 2);
 
 TRUNCATE `FeatureValue`;
 INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
@@ -210,10 +211,10 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(40, 0, 'other'),
 	(40, 1, 'at'),
 	(40, 2, 'atx-old'), -- 20  pin, lots of amperes on 5 V
-	(40, 4, 'atx12v'), -- 20+4 pin, SATA
+	(40, 4, 'atx12v'), -- 20+4 pin
 	(40, 5, 'atx12v-extended'), -- 20+4 pin, that weird extended thing
-	(40, 6, 'atx12v-4pin'), -- 20+4 pin, 4 pin for CPU, SATA
-	(40, 7, 'atx12v-8pin'), -- 20+4 pin, 8 pin for CPU, SATA
+	(40, 6, 'atx12v-4pin'), -- 20+4 pin, 4 pin for CPU
+	(40, 7, 'atx12v-8pin'), -- 20+4 pin, 8 pin for CPU
 	(42, 0, 'simm'),
 	(42, 1, 'edo'),
 	(42, 2, 'sdr'),
@@ -246,7 +247,19 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(67, 2, 'ok'),
 	(68, 1, 'inside'), -- wireless receiver: located inside, nearby or missing, making the peripheral completely useless since these are always proprietary
 	(68, 2, 'near'),
-	(68, 0, 'missing');
+	(68, 0, 'missing'),
+	(80, 0, 'atx'),
+	(80, 1, 'cfx'), -- the wide L-shaped ones
+	(80, 2, 'lfx'), -- long and L-shaped
+	(80, 3, 'sfx-lowprofile'), -- SFX has lots of variants
+	(80, 4, 'sfx-topfan'),
+	(80, 5, 'sfx-topfan-reduceddepth'),
+	(80, 6, 'sfx'),
+	(80, 7, 'sfx-ps3'),
+	(80, 8, 'tfx'), -- I don't even know anymore
+	(80, 9, 'flexatx'),
+	(80, 10, 'proprietary'),
+	(80, 10, 'eps');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
