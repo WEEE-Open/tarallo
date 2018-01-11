@@ -210,7 +210,7 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(35, 6, 'da-2'), -- Dell DA-2
 	(40, 0, 'other'),
 	(40, 1, 'at'),
-	(40, 2, 'atx-old'), -- 20  pin, lots of amperes on 5 V
+	(40, 2, 'atx-old'), -- 20 pin
 	(40, 4, 'atx12v'), -- 20+4 pin
 	(40, 5, 'atx12v-extended'), -- 20+4 pin, that weird extended thing
 	(40, 6, 'atx12v-4pin'), -- 20+4 pin, 4 pin for CPU
