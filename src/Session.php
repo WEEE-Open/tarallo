@@ -18,8 +18,9 @@ class Session {
 	 */
 	public static function start(User $user, Database $db) {
 		$id = self::newUniqueIdentifier($db);
-		self::setContent($id);
-		$db->userDAO()->setSessionFromUser($user->getUsername(), $id, time() + self::SESSION_DURATION);
+		$expire = time() + self::SESSION_DURATION;
+		self::setContent($id, $expire);
+		$db->userDAO()->setSessionFromUser($user->getUsername(), $id, $expire);
 	}
 
 	/**
@@ -53,8 +54,9 @@ class Session {
 		return $str;
 	}
 
-	private static function setContent($newContent) {
-		setcookie(self::COOKIE_NAME, $newContent);
+	private static function setContent($newContent, $expire) {
+		// TODO: set secure=true, if we ever get HTTPS?
+		setcookie(self::COOKIE_NAME, $newContent, $expire, '', '', false, true);
 	}
 
 	/**
@@ -86,7 +88,7 @@ class Session {
 	 */
 	public static function close(User $user, Database $db) {
 		// Delete cookie
-		setcookie(self::COOKIE_NAME, "", 1);
+		self::setContent('', 1);
 		$db->userDAO()->setSessionFromUser($user->getUsername(), null, null);
 	}
 }
