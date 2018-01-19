@@ -118,6 +118,8 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(6, 25, 'wifi-card'),
 	(6, 26, 'external-psu'),
 	(6, 27, 'zip-drive'),
+	(6, 28, 'printer'),
+	(6, 29, 'scanner'),
 	(7, 0, 'no'),
 	(7, 1, 'yes'),
 	(7, 2, 'maybe'),
