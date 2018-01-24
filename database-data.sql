@@ -51,8 +51,8 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(44, 'software', 0),
 	(45, 'usb-ports-n', 1),
 	(46, 'vga-ports-n', 1),
-	(47, 'windows-serial-number', 0),
-	(48, 'windows-serial-version', 0),
+	(47, 'os-serial-number', 0),
+	(48, 'os-serial-version', 0),
 	(49, 'soldered-in-place', 2),
 	(50, 'power-idle-pfc', 0),
 	(51, 'firewire-ports-n', 1),
@@ -194,9 +194,13 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(28, 0, '5.25'),
 	(28, 1, '3.5'),
 	(28, 2, '2.5'),
-	(28, 3, '2.5slim'), -- TODO: does this exist?
+	(28, 3, '2.5-15mm'), -- second number is the height in millimeters (these are specified as 15 but most common sizes, for both bays and drives, are 7 mm and 9.5 mm: the more you know...)
 	(28, 4, 'm2'),
 	(28, 5, 'm2.2'),
+	(28, 6, '2.5-7mm'),
+	(28, 7, '2.5-9.5mm'),
+	(28, 8, 'laptop-odd-standard'), -- to be replaced with actual name if we ever find what it is
+	(28, 9, 'laptop-odd-slim'), -- I have no idea there was a difference: https://superuser.com/a/276241
 	(31, 0, 'cd-r'),
 	(31, 1, 'cd-rw'),
 	(31, 2, 'dvd-r'),
@@ -232,6 +236,7 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(54, 2, 'sodimm'),
 	(54, 3, 'minidimm'),
 	(54, 4, 'microdimm'),
+	(54, 5, 'fbdimm'),
 	(58, 0, 'missing-data'),
 	(58, 1, 'wrong-data'),
 	(58, 2, 'wrong-location'),
