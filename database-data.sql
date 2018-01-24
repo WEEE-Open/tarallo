@@ -271,8 +271,9 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(82, 0, 'loan'), -- borrowed items that should be returned to owner, can't be donated
 	(82, 1, 'in-use'), -- items that shouldn't be donated right now because we're using them (e.g. switch, pc used for invetory management, server)
 	(82, 2, 'bought'), -- items bought with funds from our annual budget, can't be donated at all ever
-	-- PCs to be used for training and demonstrations (because they're old, slow and with the case full of scratches, mostly), but still working and that can be potentially donated
-	(82, 3, 'training');
+	(82, 3, 'training'), -- PCs to be used for training and demonstrations (because they're old, slow and with the case full of scratches, mostly), but still working and that can be potentially donated
+	-- "other" still means "cannot be donated right now"
+	(83, 4, 'other');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
