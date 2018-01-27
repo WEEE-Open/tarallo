@@ -53,7 +53,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(46, 'vga-ports-n', 1),
 	(47, 'os-serial-number', 0),
 	(48, 'os-serial-version', 0),
-	(49, 'soldered-in-place', 2),
+	(49, 'soldered-in-place', 2), -- TODO: replace with "movable" in Item table (convert back and forth on server only maybe with triggers or modify protocol and client too?)
 	(50, 'power-idle-pfc', 0),
 	(51, 'firewire-ports-n', 1),
 	(52, 'serial-ports-n', 1), -- DE-9 ports, also known as RS-232 (which apparently is a standard that also works on DB-25 ports, so don't call them like that)

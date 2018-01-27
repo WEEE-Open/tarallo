@@ -26,6 +26,7 @@ CREATE TABLE `Item` (
 	`Code` varchar(190)
 	COLLATE utf8mb4_unicode_ci NOT NULL,
 	`IsDefault` tinyint(1) NOT NULL,
+	`Movable` tinyint(1) NOT NULL DEFAULT 1,
 	`Default` bigint(20) unsigned DEFAULT NULL,
 	UNIQUE KEY (`Code`),
 	INDEX (`Code`),
