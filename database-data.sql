@@ -18,7 +18,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(9, 'frequency-hertz', 1),
 	(10, 'diameter-mm', 1),
 	(11, 'diagonal-inch', 1),
-	(12, 'has-gpu', 2),
+	(12, 'has-gpu', 2), -- TODO: remove?
 	(13, 'color', 2),
 	(14, 'motherboard-form-factor', 2),
 	(15, 'notes', 0),
@@ -93,7 +93,7 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(6, 0, 'location'),
 	(6, 1, 'case'),
 	(6, 2, 'motherboard'),
-	(6, 3, 'cpu'),
+	(6, 3, 'cpu'), -- TODO: add a "cpu-isa" feature (x86, x86-64, ARMvWhatever, etc...)
 	(6, 4, 'graphics-card'),
 	(6, 5, 'ram'),
 	(6, 6, 'hdd'),
@@ -151,6 +151,8 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(14, 4, 'proprietary'),
 	(14, 5, 'btx'),
 	(14, 6, 'flexatx'),
+	(14, 7, 'proprietary-laptop'), -- Who knows, maybe distinguishing proprietary motherboards between desktops and laptops will turn out to be useful to...
+	(14, 8, 'eatx'),
 	(22, 0, 'other'),
 	(22, 1, 'other-slot'),
 	(22, 2, 'other-socket'),
@@ -159,10 +161,12 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(22, 5, 'g2'),
 	(22, 7, 'socket7'),
 	(22, 8, 'm'),	
+	(22, 9, 'p'), -- Socket P, which has 478 pins but it's completely different from socket 478
 	(22, 370, 'socket370'),
 	(22, 462, 'socket462a'), -- A aka 462
 	(22, 423, 'socket423'),
 	(22, 478, 'socket478'), -- 478 aka mPGA478B
+	(22, 479, 'socket479'),
 	(22, 603, 'socket603'),
 	(22, 754, 'socket754'),
 	(22, 940, 'socket940'),
@@ -229,7 +233,7 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(42, 4, 'ddr2'),
 	(42, 5, 'ddr3'),
 	(42, 6, 'ddr4'),
-	(49, 0, 'no'),
+	-- (49, 0, 'no'),
 	(49, 1, 'yes'),
 	(54, 0, 'simm'),
 	(54, 1, 'dimm'),
@@ -268,12 +272,13 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(80, 9, 'flexatx'),
 	(80, 10, 'proprietary'),
 	(80, 11, 'eps'),
-	(82, 0, 'loan'), -- borrowed items that should be returned to owner, can't be donated
-	(82, 1, 'in-use'), -- items that shouldn't be donated right now because we're using them (e.g. switch, pc used for invetory management, server)
-	(82, 2, 'bought'), -- items bought with funds from our annual budget, can't be donated at all ever
-	(82, 3, 'training'), -- PCs to be used for training and demonstrations (because they're old, slow and with the case full of scratches, mostly), but still working and that can be potentially donated
-	-- "other" still means "cannot be donated right now"
-	(83, 4, 'other');
+	(82, 1, 'loan'), -- borrowed items that should be returned to owner, can't be donated
+	(82, 2, 'in-use'), -- items that shouldn't be donated right now because we're using them (e.g. switch, pc used for invetory management, server)
+	(82, 3, 'bought'), -- items bought with funds from our annual budget, can't be donated at all ever
+	(82, 4, 'training'), -- PCs to be used for training and demonstrations (because they're old, slow and with the case full of scratches, mostly), but still working and that can be potentially donated
+	(83, 5, 'ready'), -- Completely "restored", cleaned, OS installed, ready for donation, so don't mess them up
+	-- "other" also means "cannot be donated right now"
+	(83, 0, 'other');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
