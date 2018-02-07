@@ -18,7 +18,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(9, 'frequency-hertz', 1),
 	(10, 'diameter-mm', 1),
 	(11, 'diagonal-inch', 1),
-	(12, 'has-gpu', 2), -- TODO: remove?
+	(12, 'isa', 2),
 	(13, 'color', 2),
 	(14, 'motherboard-form-factor', 2),
 	(15, 'notes', 0),
@@ -86,14 +86,16 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(79, 'brand-reseller', 0),
 	(80, 'psu-form-factor', 2),
 	(81, 'cib-old', 0),
-	(82, 'restrictions', 2);
+	(82, 'restrictions', 2),
+	(83, 'displayport-ports-n', 1),
+	(84, 'pci-low-profile', 2);
 
 TRUNCATE `FeatureValue`;
 INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(6, 0, 'location'),
 	(6, 1, 'case'),
 	(6, 2, 'motherboard'),
-	(6, 3, 'cpu'), -- TODO: add a "cpu-isa" feature (x86, x86-64, ARMvWhatever, etc...)
+	(6, 3, 'cpu'),
 	(6, 4, 'graphics-card'),
 	(6, 5, 'ram'),
 	(6, 6, 'hdd'),
@@ -123,8 +125,10 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(7, 0, 'no'),
 	(7, 1, 'yes'),
 	(7, 2, 'maybe'),
-	(12, 0, 'no'),
-	(12, 1, 'yes'),
+	(12, 0, 'x86-32'),
+	(12, 1, 'x86-64'),
+	(12, 2, 'ia-64'),
+	(12, 3, 'arm'),
 	(13, 0, 'black'),
 	(13, 1, 'white'),
 	(13, 2, 'green'),
@@ -276,9 +280,12 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(82, 2, 'in-use'), -- items that shouldn't be donated right now because we're using them (e.g. switch, pc used for invetory management, server)
 	(82, 3, 'bought'), -- items bought with funds from our annual budget, can't be donated at all ever
 	(82, 4, 'training'), -- PCs to be used for training and demonstrations (because they're old, slow and with the case full of scratches, mostly), but still working and that can be potentially donated
-	(83, 5, 'ready'), -- Completely "restored", cleaned, OS installed, ready for donation, so don't mess them up
-	-- "other" also means "cannot be donated right now"
-	(83, 0, 'other');
+	(82, 5, 'ready'), -- Completely "restored", cleaned, OS installed, ready for donation, so don't mess them up
+	(82, 0, 'other'), -- "other" also means "cannot be donated right now"
+	(84, 0, 'no'),
+	(84, 1, 'possibile'), -- no low profile metal thing but the card itself is low profile
+	(84, 2, 'dual'), -- we've got both the full height and low profile thing
+	(84, 3, 'yes');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
