@@ -230,6 +230,7 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(40, 5, 'atx12v-extended'), -- 20+4 pin, that weird extended thing
 	(40, 6, 'atx12v-4pin'), -- 20+4 pin, 4 pin for CPU
 	(40, 7, 'atx12v-8pin'), -- 20+4 pin, 8 pin for CPU
+	(40, 8, 'proprietary'),
 	(42, 0, 'simm'),
 	(42, 1, 'edo'),
 	(42, 2, 'sdr'),
