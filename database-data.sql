@@ -167,6 +167,19 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(22, 7, 'socket7'),
 	(22, 8, 'm'),	
 	(22, 9, 'p'), -- Socket P, which has 478 pins but it's completely different from socket 478
+	(22, 10, 'am1'),
+	(22, 11, 'am2'),
+	(22, 12, 'am2plus'),
+	(22, 13, 'am3'),
+	(22, 14, 'am3plus'),
+	(22, 15, 'am4'),
+	(22, 16, 'fm1'),
+	(22, 17, 'fm2'),
+	(22, 18, 'fm2plus'),
+	(22, 19, 'g34'),
+	(22, 20, 'c32'),
+	(22, 21, 'g3'), -- aka rPGA988A
+	(22, 22, 'slot1'),
 	(22, 370, 'socket370'),
 	(22, 462, 'socket462a'), -- A aka 462
 	(22, 423, 'socket423'),
@@ -178,25 +191,13 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(22, 939, 'socket939'),
 	(22, 775, 'lga775'), -- LGA775 aka socket T aka socket775
 	(22, 771, 'lga771'), -- LGA775 aka socket J
-	(22, 10, 'am1'),
-	(22, 11, 'am2'),
-	(22, 12, 'am2plus'),
-	(22, 13, 'am3'),
-	(22, 14, 'am3plus'),
-	(22, 15, 'am4'),
-	(22, 16, 'fm1'),
-	(22, 17, 'fm2'),
-	(22, 18, 'fm2plus'),
 	(22, 1366, 'lga1366'), -- LGA775 aka socket B
 	(22, 1156, 'lga1156'), -- aka H1
-	(22, 19, 'g34'),
-	(22, 20, 'c32'),
 	(22, 1248, 'lga1248'),
 	(22, 1567, 'lga1567'),
 	(22, 1155, 'lga1155'), -- aka H2
 	(22, 2011, 'lga2011'), -- R
 	(22, 1150, 'lga1150'), -- aka H3
-	(22, 21, 'g3'), -- aka rPGA988A
 	(22, 1151, 'lga1151'), -- aka H4
 	(22, 3647, 'lga3647'),
 	(22, 2066, 'lga2066'),
