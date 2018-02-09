@@ -226,8 +226,9 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(35, 7, 'da-2'), -- Dell DA-2
 	(40, 0, 'proprietary'),
 	(40, 1, 'at'),
-	(40, 2, 'atx-20pin'), -- 20 pin
-	(40, 3, 'atx-24pin'), -- 20+4 pin
+	(40, 2, 'atx-20pin'),
+	(40, 3, 'atx-24pin'),
+	(40, 4, 'atx-20pin-aux'), -- AUX connector, which looks kind of like an AT connector
 	(42, 0, 'simm'),
 	(42, 1, 'edo'),
 	(42, 2, 'sdr'),
@@ -285,10 +286,9 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(84, 2, 'dual'), -- we've got both the full height and low profile thing
 	(84, 3, 'yes'),
 	(85, 0, 'none'),
-	(85, 1, 'aux'),
-	(85, 2, '4pin'),
-	(85, 3, '8pin'),
-	(85, 4, 'proprietary');
+	(85, 1, '4pin'),
+	(85, 2, '8pin'),
+	(85, 3, 'proprietary');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
