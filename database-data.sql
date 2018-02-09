@@ -51,8 +51,8 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(44, 'software', 0),
 	(45, 'usb-ports-n', 1),
 	(46, 'vga-ports-n', 1),
-	(47, 'os-serial-number', 0),
-	(48, 'os-serial-version', 0),
+	(47, 'os-license-code', 0),
+	(48, 'os-license-version', 0),
 	(49, 'soldered-in-place', 2), -- TODO: replace with "movable" in Item table (convert back and forth on server only maybe with triggers or modify protocol and client too?)
 	(50, 'power-idle-pfc', 0),
 	(51, 'firewire-ports-n', 1),
@@ -89,7 +89,8 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(82, 'restrictions', 2),
 	(83, 'displayport-ports-n', 1),
 	(84, 'pci-low-profile', 2),
-	(85, 'psu-connector-cpu', 2);
+	(85, 'psu-connector-cpu', 2),
+	(86, 'game-ports-n', 1);
 
 TRUNCATE `FeatureValue`;
 INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
@@ -123,6 +124,9 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(6, 27, 'zip-drive'),
 	(6, 28, 'printer'),
 	(6, 29, 'scanner'),
+	(6, 30, 'inventoried-object'),
+	(6, 31, 'adapter'),
+	(6, 32, 'usbhub'),
 	(7, 0, 'no'),
 	(7, 1, 'yes'),
 	(7, 2, 'maybe'),
