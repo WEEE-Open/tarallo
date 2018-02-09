@@ -44,7 +44,7 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(37, 'power-rated-watt', 1),
 	(38, 'ps2-ports-n', 1),
 	(39, 'psu-ampere', 1),
-	(40, 'psu-socket', 2), -- use sata-ports-n and pcie-power-pin-n for that stuff
+	(40, 'psu-connector-motherboard', 2), -- use sata-ports-n and pcie-power-pin-n for that stuff
 	(41, 'psu-volt', 1),
 	(42, 'ram-type', 2),
 	(43, 'sata-ports-n', 1),
@@ -88,7 +88,8 @@ INSERT INTO `Feature` (`FeatureID`, `FeatureName`, `FeatureType`) VALUES
 	(81, 'cib-old', 0),
 	(82, 'restrictions', 2),
 	(83, 'displayport-ports-n', 1),
-	(84, 'pci-low-profile', 2);
+	(84, 'pci-low-profile', 2),
+	(85, 'psu-connector-cpu', 2);
 
 TRUNCATE `FeatureValue`;
 INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
@@ -223,14 +224,10 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(35, 5, 'microusb'),
 	(35, 6, 'proprietary'),
 	(35, 7, 'da-2'), -- Dell DA-2
-	(40, 0, 'other'),
+	(40, 0, 'proprietary'),
 	(40, 1, 'at'),
-	(40, 2, 'atx-old'), -- 20 pin
-	(40, 4, 'atx12v'), -- 20+4 pin
-	(40, 5, 'atx12v-extended'), -- 20+4 pin, that weird extended thing
-	(40, 6, 'atx12v-4pin'), -- 20+4 pin, 4 pin for CPU
-	(40, 7, 'atx12v-8pin'), -- 20+4 pin, 8 pin for CPU
-	(40, 8, 'proprietary'),
+	(40, 2, 'atx-20pin'), -- 20 pin
+	(40, 3, 'atx-24pin'), -- 20+4 pin
 	(42, 0, 'simm'),
 	(42, 1, 'edo'),
 	(42, 2, 'sdr'),
@@ -286,7 +283,12 @@ INSERT INTO `FeatureValue` (`FeatureID`, `ValueEnum`, `ValueText`) VALUES
 	(84, 0, 'no'),
 	(84, 1, 'possibile'), -- no low profile metal thing but the card itself is low profile
 	(84, 2, 'dual'), -- we've got both the full height and low profile thing
-	(84, 3, 'yes');
+	(84, 3, 'yes'),
+	(85, 0, 'none'),
+	(85, 1, 'aux'),
+	(85, 2, '4pin'),
+	(85, 3, '8pin'),
+	(85, 4, 'proprietary');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;
