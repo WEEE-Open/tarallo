@@ -1,11 +1,11 @@
 <?php
 
-namespace WEEEOpen\Tarallo;
+namespace WEEEOpen\Tarallo\Server;
 
-use WEEEOpen\Tarallo\Database\Database;
+use WEEEOpen\Tarallo\Server\Database\Database;
 
 class Session {
-	const COOKIE_NAME = 'tarallo';
+	const COOKIE_NAME = 'session';
 	const SESSION_DURATION = 21600; // 6 hours
 	const KEYSPACE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
 	const KEYSPACE_STRLEN = 64;
@@ -64,7 +64,7 @@ class Session {
 	 *
 	 * @param Database $db
 	 *
-	 * @return User|null the user, or null if not found (expired/invalid session, no cookie, etc...)
+	 * @return User the user, or null if not found (expired/invalid session, no cookie, etc...)
 	 */
 	public static function restore(Database $db) {
 		if(isset($_COOKIE[self::COOKIE_NAME])) {
@@ -72,12 +72,12 @@ class Session {
 			if($user instanceof User) {
 				$db->userDAO()->setSessionFromUser($user->getUsername(), $_COOKIE[self::COOKIE_NAME],
 					time() + self::SESSION_DURATION);
-			}
 
-			return $user;
+				return $user;
+			}
 		}
 
-		return null;
+		return new UserAnonymous();
 	}
 
 	/**

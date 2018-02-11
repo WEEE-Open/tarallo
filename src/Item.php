@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo;
+namespace WEEEOpen\Tarallo\Server;
 
 /**
  * Class Item

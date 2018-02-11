@@ -3,7 +3,7 @@
 namespace WEEEOpen\Tarallo\Query;
 
 
-use WEEEOpen\Tarallo\InvalidParameterException;
+use WEEEOpen\Tarallo\Server\InvalidParameterException;
 
 class SearchTriplet {
 	private $key;

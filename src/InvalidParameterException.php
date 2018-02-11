@@ -1,7 +1,7 @@
 <?php
 
-namespace WEEEOpen\Tarallo;
+namespace WEEEOpen\Tarallo\Server;
 
-class InvalidParameterException extends \Exception {
+class InvalidParameterException extends \RuntimeException {
 
 }

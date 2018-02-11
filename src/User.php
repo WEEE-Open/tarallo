@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo;
+namespace WEEEOpen\Tarallo\Server;
 
 class User {
 	private $username;
@@ -95,5 +95,17 @@ class User {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get authorization level for user.
+	 * 0 = root, 3 = everyone else, like the ring 0 ... ring 3 thing,
+	 * just hope you don't find a buggy fork of Minix running at ring -3...
+	 *
+	 * @TODO implement
+	 * @return int
+	 */
+	public function getLevel() {
+		return 0;
 	}
 }

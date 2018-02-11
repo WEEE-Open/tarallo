@@ -1,10 +1,10 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Database;
+namespace WEEEOpen\Tarallo\Server\Database;
 
-use WEEEOpen\Tarallo\InvalidParameterException;
-use WEEEOpen\Tarallo\ItemIncomplete;
-use WEEEOpen\Tarallo\User;
+use WEEEOpen\Tarallo\Server\InvalidParameterException;
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\User;
 
 
 final class ModificationDAO extends DAO {

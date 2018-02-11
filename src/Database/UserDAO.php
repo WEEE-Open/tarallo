@@ -1,8 +1,8 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Database;
+namespace WEEEOpen\Tarallo\Server\Database;
 
-use WEEEOpen\Tarallo\User;
+use WEEEOpen\Tarallo\Server\User;
 
 final class UserDAO extends DAO {
 

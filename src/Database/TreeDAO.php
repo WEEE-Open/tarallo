@@ -1,8 +1,8 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Database;
+namespace WEEEOpen\Tarallo\Server\Database;
 
-use WEEEOpen\Tarallo\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
 
 final class TreeDAO extends DAO {
 	/**

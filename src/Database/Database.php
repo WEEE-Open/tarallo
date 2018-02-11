@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Database;
+namespace WEEEOpen\Tarallo\Server\Database;
 
 class Database {
 	/** @var \PDO */

@@ -1,13 +1,13 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Database;
+namespace WEEEOpen\Tarallo\Server\Database;
 
-use WEEEOpen\Tarallo\InvalidParameterException;
-use WEEEOpen\Tarallo\Item;
-use WEEEOpen\Tarallo\ItemDefault;
-use WEEEOpen\Tarallo\ItemIncomplete;
-use WEEEOpen\Tarallo\ItemUpdate;
-use WEEEOpen\Tarallo\Query\SearchTriplet;
+use WEEEOpen\Tarallo\Server\InvalidParameterException;
+use WEEEOpen\Tarallo\Server\Item;
+use WEEEOpen\Tarallo\Server\ItemDefault;
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemUpdate;
+use WEEEOpen\Tarallo\Server\Query\SearchTriplet;
 
 final class ItemDAO extends DAO {
 	private function depthSanitize($depth) {
