@@ -67,7 +67,7 @@ if($rawquerystring === null) {
 if(trim($rawcontents) === '') {
 	$payload = null;
 } else {
-	$payload = json_decode($rawcontents);
+	$payload = json_decode($rawcontents, true);
 	if(json_last_error() !== JSON_ERROR_NONE) {
 		Response::sendError('Error: malformed JSON, ' . json_last_error_msg(), 'JSON', null, 400);
 	}
@@ -146,7 +146,7 @@ if($route[0] === FastRoute\Dispatcher::METHOD_NOT_ALLOWED) {
 }
 
 if($route[0] !== FastRoute\Dispatcher::FOUND) {
-	Response::SendError('Server error: unhandled router result');
+	Response::sendError('Server error: unhandled router result');
 }
 
 $callback = [v1\Adapter::class, $route[1]];
@@ -154,7 +154,7 @@ $parameters = $route[2];
 unset($route);
 
 if(!is_callable($callback)) {
-	Response::SendError('Server error: cannot call "' . implode('::', $callback) . '"');
+	Response::sendError('Server error: cannot call "' . implode('::', $callback) . '"');
 }
 
 try {
@@ -166,7 +166,7 @@ try {
 }
 
 try {
-	call_user_func($callback, $user, $db, $parameters, $querystring, $payload);
+	$response = call_user_func($callback, $user, $db, $parameters, $querystring, $payload);
 } catch(AuthorizationException $e) {
 	Response::sendError('Not authorized (insufficient permission)', 'AUTH403', null, 403);
 } catch(AuthenticationException $e) {
@@ -179,5 +179,11 @@ try {
 } catch(\Exception $e) {
 	Response::sendError('Unhandled exception :(', null, ['message' => $e->getMessage(), 'code' => $e->getCode()]);
 }
+assert(isset($response));
 
-http_response_code(200);
+if($response === null) {
+	http_response_code(204);
+} else {
+	http_response_code(200);
+	echo json_encode($response, \JSON_PRETTY_PRINT);
+}

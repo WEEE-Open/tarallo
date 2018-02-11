@@ -16,7 +16,10 @@ class Adapter {
 	}
 
 	public static function sessionStart(User $user, Database $db, $parameters, $querystring, $payload) {
-		Session::start($user, $db);
+		self::validateArray($payload);
+		$username = self::validateString($payload, 'username');
+		$password = self::validateString($payload, 'password');
+		Session::start(new User($username, $password), $db);
 		return null;
 	}
 
@@ -57,6 +60,57 @@ class Adapter {
 	private static function authenticate(User $user) {
 		if($user instanceof UserAnonymous) {
 			throw new AuthenticationException();
+		}
+	}
+
+	/**
+	 * Check that payload array has a key and it's not null
+	 *
+	 * @param array $payload THE array
+	 * @param mixed $key Some key
+	 *
+	 * @return mixed Value for that key
+	 */
+	private static function validateHas(array $payload, $key) {
+		if(isset($payload[$key])) {
+			return $payload[$key];
+		} else {
+			throw new InvalidPayloadParameterException($key);
+		}
+	}
+
+	/**
+	 * Check that key exists and it's a string.
+	 * Or a number, which will be cast to a string because nobody cares.
+	 *
+	 * @param array $payload THE array
+	 * @param mixed $key Some key
+	 *
+	 * @return string
+	 */
+	private static function validateString($payload, $key) {
+		$value = self::validateHas($payload, $key);
+		if(is_string($value)) {
+			return $value;
+		} else if(is_numeric($value)) {
+			return (string) $value;
+		} else {
+			throw new InvalidPayloadParameterException($key, $value);
+		}
+	}
+
+	/**
+	 * Check that an array ($payload, basically) is
+	 * actually an array and contains something.
+	 *
+	 * @param mixed $array
+	 */
+	private static function validateArray($array) {
+		if(!is_array($array)) {
+			throw new InvalidPayloadParameterException('*', null, 'Missing request body');
+		}
+		if(empty($array)) {
+			throw new InvalidPayloadParameterException('*', null, 'Empty request body');
 		}
 	}
 }
