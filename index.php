@@ -18,8 +18,18 @@ require 'db.php';
 //	$mediaType->getValue();
 //}
 
+if(isset($_SERVER['PATH_INFO'])) {
+	$uri = urldecode($_SERVER['PATH_INFO']);
+} else if(isset($_SERVER['REQUEST_URI'])) {
+	$where = strpos($_SERVER['REQUEST_URI'], '/v1/');
+	if($where === false) {
+		Response::sendError('Server error: can\'t figure out the request URI');
+	}
+	$uri = substr($_SERVER['REQUEST_URI'], $where);
+} else {
+	$uri = '';
+}
 $method = $_SERVER['REQUEST_METHOD'];
-$uri = isset($_SERVER['PATH_INFO']) ? urldecode($_SERVER['PATH_INFO']) : '';
 // TODO: crash and burn if encoding is anything other than utf-8?
 $contentType = isset($_SERVER['CONTENT_TYPE']) ? trim(explode(';', $_SERVER['CONTENT_TYPE'])[0]) : '';
 
