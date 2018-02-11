@@ -3,41 +3,54 @@
 namespace WEEEOpen\Tarallo\Server;
 
 /**
- * Class Item
- * Regular items.
- * Note that is_default is always set to false in JSON serialization, use ItemDefault to represent default items instead
+ * Regular items
  *
  * @package WEEEOpen\Tarallo
  */
 class Item extends ItemIncomplete implements \JsonSerializable {
 	protected $features = [];
-	private $featuresDefault = [];
-	protected $content = [];
+	protected $contents = [];
 	private $location = [];
-	protected $defaultCode = null;
+	protected $product = null;
 
-	public function __construct($code, $defaultCode = null) {
+	/**
+	 * Create an Item
+	 *
+	 * @param string|null $code Item code, or null if not yet known
+	 * @param Product $product Product referenced by Item, default null
+	 */
+	public function __construct($code, Product $product = null) {
 		if($code === null) {
 			$this->code = null;
 		} else {
-			parent::__construct($code);
-		}
-		if($defaultCode !== null) {
 			try {
-				$this->defaultCode = $this->sanitizeCode($defaultCode);
-			} catch(InvalidParameterException $e) {
-				throw new InvalidParameterException('Failed setting parent Item: ' . $e->getMessage());
+				parent::__construct($code);
+			} catch(\InvalidArgumentException $e) {
+				throw new \InvalidArgumentException("Item code must be a non-empty string or null");
 			}
 		}
+		$this->product = $product;
 	}
 
+	/**
+	 * Set code, unless it has already been set
+	 *
+	 * @param string $code Item code
+	 */
 	public function setCode($code) {
 		if($this->code !== null) {
 			throw new \LogicException('Cannot change code for item ' . $this->getCode() . ' since it\'s already set');
 		}
+
 		parent::__construct($code);
 	}
 
+	/**
+	 * Get code, if it's set
+	 *
+	 * @return string
+	 * @see setCode
+	 */
 	public function getCode() {
 		if($this->code === null) {
 			throw new \LogicException('Trying to read code from an Item without code');
@@ -46,31 +59,16 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		return parent::getCode();
 	}
 
-	private static function featureNameIsValid($name) {
-		if(is_string($name)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	protected static function featureValueIsValid($value) {
-		// values are all unsigned ints in the database
-		if(is_string($value) || (is_int($value) && $value >= 0)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
 	/**
-	 * @param string $name
-	 * @param string|int $value
+	 * @param Feature $feature
 	 *
 	 * @return Item $this
 	 */
-	public function addFeature($name, $value) {
-		$this->addFeatureInternal($name, $value, $this->features);
+	public function addFeature(Feature $feature) {
+		if(isset($this->features[$feature->name])) {
+			throw new \InvalidArgumentException('Feature ' . $feature->name . ' already added to ' . (string) $this);
+		}
+		$this->features[$feature->name] = $feature;
 
 		return $this;
 	}
@@ -81,7 +79,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 * @return Item $this
 	 */
 	public function deleteFeature($name) {
-		$this->deleteFeatureInternal($name, $this->features);
+		unset($this->features[$name]);
 
 		return $this;
 	}
@@ -101,7 +99,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 			throw new \InvalidArgumentException('Ancestor distance too small: ' . $code . ' is at distance ' . $distance . ' from its descendant ' . $this->getCode());
 		}
 
-		$this->location[-- $distance] = new ItemIncomplete($code);
+		$this->location[--$distance] = new ItemIncomplete($code);
 	}
 
 	/**
@@ -117,7 +115,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		if($distance < 1) {
 			throw new \InvalidArgumentException('Ancestor distance ' . $distance . ' too small in ' . $this->getCode());
 		}
-		$distance --;
+		$distance--;
 
 		if(isset($this->location[$distance])) {
 			return $this->location[$distance];
@@ -127,52 +125,13 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	}
 
 	/**
-	 * @param string $name
-	 * @param string|int $value
-	 *
-	 * @return Item $this
-	 */
-	public function addFeatureDefault($name, $value) {
-		$this->addFeatureInternal($name, $value, $this->featuresDefault);
-
-		return $this;
-	}
-
-	private function addFeatureInternal($name, $value, &$array) {
-		$this->checkFeature($name, $value, $array);
-		$array[$name] = $value;
-	}
-
-	private function deleteFeatureInternal($name, &$array) {
-		if(!self::featureNameIsValid($name)) {
-			throw new \InvalidArgumentException('Feature name must be a string, ' . gettype($name) . ' given');
-		}
-		unset($array[$name]);
-	}
-
-	private function checkFeature($name, $value, $array) {
-		if(!self::featureNameIsValid($name)) {
-			throw new \InvalidArgumentException('Feature name must be a string, ' . gettype($name) . ' given');
-		}
-		if(!self::featureValueIsValid($value)) {
-			throw new \InvalidArgumentException('Feature value must be a string or positive integer, ' . gettype($value) . ' given');
-		}
-		if(isset($array[$name])) {
-			throw new InvalidParameterException('Feature ' . $name . ' already inserted into item ' . (string) $this);
-		}
-	}
-
-	/**
 	 * @param array $features
 	 *
 	 * @return Item $this
 	 */
-	public function addMultipleFeatures($features) {
-		if(!is_array($features)) {
-			throw new \InvalidArgumentException('Features must be passed as an array');
-		}
-		foreach($features as $name => $value) {
-			$this->addFeature($name, $value);
+	public function addMultipleFeatures(array $features) {
+		foreach($features as $feature) {
+			$this->addFeature($feature);
 		}
 
 		return $this;
@@ -186,45 +145,44 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	}
 
 	/**
-	 * @return array
-	 */
-	public function getFeaturesDefault() {
-		return $this->featuresDefault;
-	}
-
-	/**
 	 * Get features and default features, all in one.
 	 * Some features may override default features.
 	 *
 	 * @return array
 	 */
 	public function getCombinedFeatures() {
-		return array_merge($this->getFeaturesDefault(), $this->getFeatures());
+		return array_merge($this->product->getFeatures(), $this->getFeatures());
 	}
 
 	/**
-	 * @return null|string
+	 * Get product referenced by this item
+	 *
+	 * @return null|Product
 	 */
-	public function getDefaultCode() {
-		return $this->defaultCode;
+	public function getProduct() {
+		return $this->product;
 	}
 
 	/**
+	 * Add another item inside
+	 *
 	 * @param Item $item
 	 *
 	 * @return Item $this
 	 */
 	public function addContent(Item $item) {
-		$this->content[] = $item;
+		$this->contents[] = $item;
 
 		return $this;
 	}
 
 	/**
+	 * Get items located inside
+	 *
 	 * @return Item[]
 	 */
-	public function getContent() {
-		return $this->content;
+	public function getContents() {
+		return $this->contents;
 	}
 
 	public function jsonSerialize() {
@@ -233,14 +191,8 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		if(!empty($this->features)) {
 			$array['features'] = $this->features;
 		}
-		if(!empty($this->content)) {
-			$array['content'] = $this->content;
-		}
-		if(!empty($this->featuresDefault)) {
-			$array['features_default'] = $this->featuresDefault;
-		}
-		if($this->defaultCode !== null) {
-			$array['default'] = $this->defaultCode;
+		if(!empty($this->contents)) {
+			$array['contents'] = $this->contents;
 		}
 		if(!empty($this->location)) {
 			ksort($this->location);
@@ -253,8 +205,8 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	public function __toString() {
 		if(isset($this->features['type'])) {
 			return parent::getCode() . ' (' . $this->features['type'] . ')';
-		} else if(isset($this->featuresDefault['type'])) {
-			return parent::getCode() . ' (' . $this->featuresDefault['type'] . ')';
+		} else if($this->product !== null && isset($this->product->getFeatures()['type'])) {
+			return parent::getCode() . ' (' . $this->product->getFeatures()['type'] . ')';
 		} else {
 			return parent::getCode();
 		}

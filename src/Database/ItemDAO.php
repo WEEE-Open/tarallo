@@ -4,7 +4,7 @@ namespace WEEEOpen\Tarallo\Server\Database;
 
 use WEEEOpen\Tarallo\Server\InvalidParameterException;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemDefault;
+use WEEEOpen\Tarallo\Server\Product;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\ItemUpdate;
 use WEEEOpen\Tarallo\Server\Query\SearchTriplet;
@@ -204,7 +204,7 @@ final class ItemDAO extends DAO {
 	 * @return Item[]
 	 * @TODO actually implement $location
 	 */
-	public function getItem($codes = null, $searches = null, $depth = null, $parent = null, $sorts = null, $token = null, $locations = null, $page = 1, $pageLimit = -1, &$total = null, &$pages = null) {
+	public function getItems($codes = null, $searches = null, $depth = null, $parent = null, $sorts = null, $token = null, $locations = null, $page = 1, $pageLimit = -1, &$total = null, &$pages = null) {
 		if(self::isArrayAndFull($searches)) {
 			$searchSubquery = $this->searchPrepare($searches);
 		} else {
@@ -369,7 +369,7 @@ final class ItemDAO extends DAO {
 			throw new \InvalidArgumentException('Items must be objects of Item class, ' . gettype($item) . ' given'); // will say "object" if it's another object which is kinda useless, whatever
 		}
 
-		$isDefault = $item instanceof ItemDefault ? true : false;
+		$isDefault = $item instanceof Product ? true : false;
 
 		$pdo = $this->getPDO();
 		if(!$pdo->inTransaction()) {
@@ -394,7 +394,7 @@ final class ItemDAO extends DAO {
 		$this->database->modificationDAO()->setItemModified($item);
 		$this->database->treeDAO()->addToTree($item, $parent);
 
-		$childItems = $item->getContent();
+		$childItems = $item->getContents();
 		foreach($childItems as $childItem) {
 			// yay recursion!
 			$this->addItem($childItem, $item);

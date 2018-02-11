@@ -1,14 +1,15 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Test\Database;
+namespace WEEEOpen\Tarallo\Server\Test\Database;
 
 use PHPUnit\DbUnit\DataSet\YamlDataSet;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\DbUnit\TestCaseTrait;
-use WEEEOpen\Tarallo\Database\Database;
-use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\Query\SearchTriplet;
-use WEEEOpen\Tarallo\User;
+use WEEEOpen\Tarallo\Server\Database\Database;
+use WEEEOpen\Tarallo\Server\Feature;
+use WEEEOpen\Tarallo\Server\Item;
+use WEEEOpen\Tarallo\Server\User;
 
 class DatabaseTest extends TestCase {
 	use TestCaseTrait;
@@ -18,19 +19,19 @@ class DatabaseTest extends TestCase {
 	// this cannot be done, PLAIN AND SIMPLE. Even though it comes straight from an example inside documentation.
 	// setUp() comes from a trait, so there's no way to override it AND call it. parent::setUp() calls a pointless empty function.
 	// Excellent documentation, very clear, would rate it 10/10.
-    //protected function setUp() {
-    //    if(!extension_loaded('pdo_mysql')) {
-    //        $this->markTestSkipped('The PDO MySQL extension is not available.');
-    //    }
-    //}
+	//protected function setUp() {
+	//    if(!extension_loaded('pdo_mysql')) {
+	//        $this->markTestSkipped('The PDO MySQL extension is not available.');
+	//    }
+	//}
 
 	private function getPdo() {
-		return new \PDO('mysql:dbname=tarallo_test;host=10.13.37.6;charset=utf8mb4', 'root', 'root', [
-			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-			\PDO::ATTR_CASE => \PDO::CASE_NATURAL,
+		return new \PDO('mysql:dbname=tarallo_test;host=localhost;charset=utf8mb4', 'root', 'root', [
+			\PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
+			\PDO::ATTR_CASE               => \PDO::CASE_NATURAL,
 			\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
 			// \PDO::ATTR_AUTOCOMMIT => false, // PHPUnit crashes and burns with autocommits disabled and, for some unfathomable reason, two SEPARATE, DISTINCT, UNIQUE PDO object will forcefully share the same connection to MySQL (apparently?), so there's no way to have a connection with autocommits and another one without.
-			\PDO::ATTR_EMULATE_PREPARES => false,
+			\PDO::ATTR_EMULATE_PREPARES   => false,
 		]);
 	}
 
@@ -39,142 +40,157 @@ class DatabaseTest extends TestCase {
 	}
 
 	public function getDataSet() {
-		return new YamlDataSet(
-			dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "database.yml"
-		);
+		$file = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "database.yml";
+		return new YamlDataSet($file);
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database\Database
-	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
-	 * @uses  \WEEEOpen\Tarallo\Database\DAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserInvalidSession() {
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('foo'));
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database\Database
-	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserAccountDisabled() {
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('this-really-is-a-session-1234567'));
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database\Database
-	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserAccountExpiredSession() {
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('this-really-is-a-session-7654321'));
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\User
-	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserAccountValidSession() {
-		$this->assertEquals('asd-valid', (string) $this->getDb()->userDAO()->getUserFromSession('this-really-is-a-valid-session-1'));
+		$this->assertEquals('asd-valid',
+			(string) $this->getDb()->userDAO()->getUserFromSession('this-really-is-a-valid-session-1'));
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\User
-	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserFromLoginValid() {
 		$this->assertEquals('asd', (string) $this->getDb()->userDAO()->getUserFromLogin('asd', 'asd'));
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database\Database
-	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserFromLoginDisabledAccount() {
 		$this->assertEquals(null, (string) $this->getDb()->userDAO()->getUserFromLogin('asd-disabled', 'asd'));
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\User
-	 * @covers \WEEEOpen\Tarallo\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserFromLoginWrongPassword() {
 		$this->assertEquals(null, (string) $this->getDb()->userDAO()->getUserFromLogin('asd', 'wrong'));
 	}
 
-    /**
-     * @covers \WEEEOpen\Tarallo\Database\Database
-     * @uses   \WEEEOpen\Tarallo\User
-     * @covers \WEEEOpen\Tarallo\Database\UserDAO
-     * @uses   \WEEEOpen\Tarallo\Database\DAO
-     */
-    public function testUserLoginLogout() {
-        $this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
-        $this->getDb()->userDAO()->setSessionFromUser('asd', 'session-started-in-test-12345678', 9223372036854775807);
-        $this->assertEquals('asd', (string) $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
-        $this->getDb()->userDAO()->setSessionFromUser('asd', null, null);
-        $this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
-    }
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
+	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
+	 */
+	public function testUserLoginLogout() {
+		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
+		$this->getDb()->userDAO()->setSessionFromUser('asd', 'session-started-in-test-12345678', 9223372036854775807);
+		$this->assertEquals('asd',
+			(string) $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
+		$this->getDb()->userDAO()->setSessionFromUser('asd', null, null);
+		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
+	}
 
 	/**
-	 * @uses   \WEEEOpen\Tarallo\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
-	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
+	 * @uses   \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
 	 */
-    public function testFeatureList() {
-	    $features = $this->getDb()->featureDAO()->getFeatureList();
-	    $this->assertTrue(count($features) > 0, 'There should be some features');
-	    $this->assertContainsOnly("string", $features, 'Feature names should be only strings');
-    }
+	public function testFeatureList() {
+		$features = $this->getDb()->featureDAO()->getFeatureList();
+		$this->assertTrue(count($features) > 0, 'There should be some features');
+		$this->assertContainsOnly("string", $features, 'Feature names should be only strings');
+	}
 
 	/**
 	 * Database tests are really slow and this code is a bit complex to say the least, testing everything
 	 * in a sensible manner will be difficult. But some tests are better than no tests at all, right?
 	 *
-	 * @covers \WEEEOpen\Tarallo\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\User
-	 * @uses   \WEEEOpen\Tarallo\Item
-	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
-	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
-	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
-	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
-	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses    \WEEEOpen\Tarallo\Server\User
+	 * @uses    \WEEEOpen\Tarallo\Server\Item
+	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\TreeDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
 	 * @depends testFeatureList
 	 */
 	public function testAddingAndRetrievingSomeItems() {
 		$db = $this->getDb();
 		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
 		/** @var $case Item */ // PHPStorm suddenly doesn't recognize chained methods. Only the last one of every chain, specifically.
-		$case = (new Item('PC-42'))->addFeature('brand', 'TI')->addFeature('model', 'GreyPC-\'98')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx');
-		$discone1 = (new Item('SATAna-1'))->addFeature('capacity-byte', 666)->addFeature('brand', 'SATAn Storage Corporation Inc.')->addFeature('model', 'Discone da 666 byte')->addFeature('type', 'hdd');
-		$discone2 = (new Item('SATAna-2'))->addFeature('capacity-byte', 666)->addFeature('brand', 'SATAn Storage Corporation Inc.')->addFeature('model', 'Discone da 666 byte')->addFeature('type', 'hdd');
+		$case = (new Item('PC-42'))
+			->addFeature(new Feature('brand', 'TI'))
+			->addFeature(new Feature('model', 'GreyPC-\'98'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'atx'));
+		$discone1 = (new Item('SATAna-1'))
+			->addFeature(new Feature('capacity-byte', 666))
+			->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'))
+			->addFeature(new Feature('model', 'Discone da 666 byte'))
+			->addFeature(new Feature('type', 'hdd'));
+		$discone2 = (new Item('SATAna-2'))
+			->addFeature(new Feature('capacity-byte', 666))
+			->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'))
+			->addFeature(new Feature('model', 'Discone da 666 byte'))
+			->addFeature(new Feature('type', 'hdd'));
 		$case->addContent($discone1);
 		$case->addContent($discone2);
 		$db->itemDAO()->addItems($case);
 		$db->modificationDAO()->modificationCommit();
 
-		$items = $db->itemDAO()->getItem(['PC-42'], null, null, null, null, null);
+		$items = $db->itemDAO()->getItems(['PC-42'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'Only one root Item');
 		/** @var Item $newCase */
 		$newCase = reset($items); // get the only Item
-		$this->assertEquals(2, count($newCase->getContent()), 'Two child Item');
-		$this->assertContainsOnly(Item::class, $newCase->getContent(), null, 'Only Items are contained in an Item');
-		foreach($newCase->getContent() as $child) {
+		$this->assertEquals(2, count($newCase->getContents()), 'Two child Item');
+		$this->assertContainsOnly(Item::class, $newCase->getContents(), null, 'Only Items are contained in an Item');
+		foreach($newCase->getContents() as $child) {
 			/** @var Item $child */
-			$this->assertTrue($child->getCode() === 'SATAna-1' || $child->getCode() === 'SATAna-2', 'Sub-Item is one of the two expected items, ' . (string) $child);
+			$this->assertTrue($child->getCode() === 'SATAna-1' || $child->getCode() === 'SATAna-2',
+				'Sub-Item is one of the two expected items, ' . (string) $child);
 			/** @noinspection PhpUndefinedMethodInspection */
-			$this->assertTrue($case->getContent()[0]->getFeatures() == $child->getFeatures(), 'Sub-Item ' . (string) $child . ' has same features as before'); // this works because the two items are identical except for the code...
-			$this->assertTrue(empty($child->getContent()), 'No children of child Item ' . (string) $child);
+			$this->assertTrue($case->getContents()[0]->getFeatures() == $child->getFeatures(),
+				'Sub-Item ' . (string) $child . ' has same features as before'); // this works because the two items are identical except for the code...
+			$this->assertTrue(empty($child->getContents()), 'No children of child Item ' . (string) $child);
 			$features = $child->getFeatures();
 			$this->assertEquals(4, count($features), 'Items should still have all their features and none more');
 			$this->assertArrayHasKey('capacity-byte', $features);
@@ -185,15 +201,15 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @uses   \WEEEOpen\Tarallo\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\User
-	 * @uses   \WEEEOpen\Tarallo\Item
-	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
-	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\FeatureDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\TreeDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
-	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses    \WEEEOpen\Tarallo\Server\User
+	 * @uses    \WEEEOpen\Tarallo\Server\Item
+	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\TreeDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
 	 * @depends testAddingAndRetrievingSomeItems
 	 */
 	public function testGettingPrefixes() {
@@ -208,15 +224,15 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @uses   \WEEEOpen\Tarallo\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\User
-	 * @uses   \WEEEOpen\Tarallo\Item
-	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
-	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\FeatureDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\TreeDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
-	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses    \WEEEOpen\Tarallo\Server\User
+	 * @uses    \WEEEOpen\Tarallo\Server\Item
+	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\TreeDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
 	 * @depends testGettingPrefixes
 	 */
 	public function testGettingPrefixesSkippingDuplicates() {
@@ -224,7 +240,7 @@ class DatabaseTest extends TestCase {
 
 		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
 		for($i = 74; $i < 77; $i++) {
-			$db->itemDAO()->addItems((new Item('T'.$i))->addFeature('type', 'keyboard'));
+			$db->itemDAO()->addItems((new Item('T' . $i))->addFeature(new Feature('type', 'keyboard')));
 		}
 		$db->modificationDAO()->modificationCommit();
 
@@ -235,139 +251,169 @@ class DatabaseTest extends TestCase {
 	}
 
 
-    /**
-     * Database tests are really slow and this code is a bit complex to say the least, testing everything
-     * in a sensible manner will be difficult. But some tests are better than no tests at all, right?
-     *
-     * @covers \WEEEOpen\Tarallo\Database\Database
-     * @uses   \WEEEOpen\Tarallo\User
-     * @uses   \WEEEOpen\Tarallo\Item
-     * @uses   \WEEEOpen\Tarallo\ItemIncomplete
-     * @covers \WEEEOpen\Tarallo\Database\ItemDAO
-     * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
-     * @covers \WEEEOpen\Tarallo\Database\TreeDAO
-     * @uses   \WEEEOpen\Tarallo\Database\DAO
-     * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
-     */
-    public function testSubtreeRemoval() {
-        $db = $this->getDb();
-        $db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
-        /** @var $case Item */
-        $lab = (new Item('CHERNOBYL'));
-        $case = (new Item('PC-42'));
-        $discone1 = (new Item('HDD-1'));
-        $discone2 = (new Item('HDD-2'));
-        $case->addContent($discone1);
-        $case->addContent($discone2);
-        $lab->addContent($case);
-        $db->itemDAO()->addItems($lab);
-        $db->modificationDAO()->modificationCommit();
+	/**
+	 * Database tests are really slow and this code is a bit complex to say the least, testing everything
+	 * in a sensible manner will be difficult. But some tests are better than no tests at all, right?
+	 *
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses   \WEEEOpen\Tarallo\Server\User
+	 * @uses   \WEEEOpen\Tarallo\Server\Item
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
+	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
+	 * @uses   \WEEEOpen\Tarallo\Server\Database\ModificationDAO
+	 */
+	public function testSubtreeRemoval() {
+		$db = $this->getDb();
+		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		/** @var $case Item */
+		$lab = (new Item('CHERNOBYL'));
+		$case = (new Item('PC-42'));
+		$discone1 = (new Item('HDD-1'));
+		$discone2 = (new Item('HDD-2'));
+		$case->addContent($discone1);
+		$case->addContent($discone2);
+		$lab->addContent($case);
+		$db->itemDAO()->addItems($lab);
+		$db->modificationDAO()->modificationCommit();
 
-        $items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
-        $this->assertContainsOnly(Item::class, $items);
-        /** @var Item[] $items */
-        $this->assertEquals(1, count($items), 'Only one root Item');
-        /** @var Item $caseContent */
-        $case = $items[0]->getContent()[0];
-        $this->assertEquals('PC-42', $case->getCode(), 'PC-42 is still there');
-        $this->assertTrue($this->itemCompare($lab, $items[0]), 'Lab should be unchanged');
+		$items = $db->itemDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
+		$this->assertContainsOnly(Item::class, $items);
+		/** @var Item[] $items */
+		$this->assertEquals(1, count($items), 'Only one root Item');
+		/** @var Item $caseContent */
+		$case = $items[0]->getContents()[0];
+		$this->assertEquals('PC-42', $case->getCode(), 'PC-42 is still there');
+		$this->assertTrue($this->itemCompare($lab, $items[0]), 'Lab should be unchanged');
 
-        $db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
-        $db->treeDAO()->removeFromTree($case);
-        $db->modificationDAO()->modificationCommit();
+		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$db->treeDAO()->removeFromTree($case);
+		$db->modificationDAO()->modificationCommit();
 
-        $items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
-        $this->assertContainsOnly(Item::class, $items);
-        $this->assertEquals(1, count($items), 'Still only one root Item');
-        $this->assertEquals(0, count($items[0]->getContent()), 'Lab is empty');
+		$items = $db->itemDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(1, count($items), 'Still only one root Item');
+		$this->assertEquals(0, count($items[0]->getContents()), 'Lab is empty');
 
-        $items = $db->itemDAO()->getItem(['PC-42'], null, null, null, null, null);
-        $this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
+		$items = $db->itemDAO()->getItems(['PC-42'], null, null, null, null, null);
+		$this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
 
-        $items = $db->itemDAO()->getItem(['HDD-1'], null, null, null, null, null);
-        $this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
+		$items = $db->itemDAO()->getItems(['HDD-1'], null, null, null, null, null);
+		$this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
 
-        $items = $db->itemDAO()->getItem(['HDD-2'], null, null, null, null, null);
-        $this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
+		$items = $db->itemDAO()->getItems(['HDD-2'], null, null, null, null, null);
+		$this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
 
-    }
+	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\User
-	 * @uses   \WEEEOpen\Tarallo\Item
-	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
-	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
-	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
-	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
-	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
-	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses    \WEEEOpen\Tarallo\Server\User
+	 * @uses    \WEEEOpen\Tarallo\Server\Item
+	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\TreeDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
 	 * @depends testAddingAndRetrievingSomeItems
 	 * @depends testFeatureList
 	 */
 	public function testItemSearchSorting() {
 		$db = $this->getDb();
-		$pc['PC-55'] = (new Item('PC-55'))->addFeature('brand', 'TI')->addFeature('model', 'GreyPC-\'98')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx');
-		$pc['PC-20'] = (new Item('PC-20'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
-		$pc['PC-21'] = (new Item('PC-21'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'grey')->addFeature('working', 'yes');
-		$pc['PC-22'] = (new Item('PC-22'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
-		$pc['SCHIFOMACCHINA'] = (new Item('SCHIFOMACCHINA'))->addFeature('brand', 'eMac')->addFeature('model', 'EZ1600')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white'); // based on a real PC we have in our laboratory.
+		$pc['PC-55'] = (new Item('PC-55'))
+			->addFeature(new Feature('brand', 'TI'))
+			->addFeature(new Feature('model', 'GreyPC-\'98'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'atx'));
+		$pc['PC-20'] = (new Item('PC-20'))
+			->addFeature(new Feature('brand', 'Dill'))
+			->addFeature(new Feature('model', 'DI-360'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
+			->addFeature(new Feature('color', 'black'))
+			->addFeature(new Feature('working', 'yes'));
+		$pc['PC-21'] = (new Item('PC-21'))
+			->addFeature(new Feature('brand', 'Dill'))
+			->addFeature(new Feature('model', 'DI-360'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
+			->addFeature(new Feature('color', 'grey'))
+			->addFeature(new Feature('working', 'yes'));
+		$pc['PC-22'] = (new Item('PC-22'))
+			->addFeature(new Feature('brand', 'Dill'))
+			->addFeature(new Feature('model', 'DI-360'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
+			->addFeature(new Feature('color', 'black'))
+			->addFeature(new Feature('working', 'yes'));
+		$pc['SCHIFOMACCHINA'] = (new Item('SCHIFOMACCHINA'))
+			->addFeature(new Feature('brand', 'eMac'))
+			->addFeature(new Feature('model', 'EZ1600'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
+			->addFeature(new Feature('color', 'white')); // based on a real PC we have in our laboratory.
 
 		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
 		$db->itemDAO()->addItems($pc);
 		$db->modificationDAO()->modificationCommit();
 
-		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'case')], null, null, ['motherboard-form-factor' => '-', 'color' => '+'], null);
+		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null,
+			['motherboard-form-factor' => '-', 'color' => '+'], null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(5, count($items), 'There should be 5 items');
 		/** @var Item[] $items */
 		foreach(['PC-20', 'PC-22', 'PC-21', 'SCHIFOMACCHINA', 'PC-55'] as $pos => $code) {
-			$this->assertEquals($code, $items[$pos]->getCode(), 'Item in position ' . $pos . ' should be ' . $code . ' (it\'s ' . $items[$pos]->getCode() . ')');
+			$this->assertEquals($code, $items[$pos]->getCode(),
+				'Item in position ' . $pos . ' should be ' . $code . ' (it\'s ' . $items[$pos]->getCode() . ')');
 			$this->assertEquals($pc[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 
-		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'case')], null, null, null, null);
+		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(5, count($items), 'There should be 5 items');
 		// no sorting options => sort by code
 		foreach(['PC-20', 'PC-21', 'PC-22', 'PC-55', 'SCHIFOMACCHINA'] as $pos => $code) {
-			$this->assertEquals($code, $items[$pos]->getCode(), 'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
+			$this->assertEquals($code, $items[$pos]->getCode(),
+				'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
 			$this->assertEquals($pc[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 
-		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('color', '=', 'white')], null, null, null, null);
+		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('color', '=', 'white')], null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'There should be only one item');
-		$this->assertEquals(reset($items), $pc['SCHIFOMACCHINA'], 'Only SCHIFOMACCHINA should be returned'); // excellent piece of hardware, by the way. 2 minutes from power on to POST OK.
+		$this->assertEquals(reset($items), $pc['SCHIFOMACCHINA'],
+			'Only SCHIFOMACCHINA should be returned'); // excellent piece of hardware, by the way. 2 minutes from power on to POST OK.
 	}
 
 	/**
-	 * @uses   \WEEEOpen\Tarallo\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\User
-	 * @uses   \WEEEOpen\Tarallo\Item
-	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
-	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\FeatureDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\TreeDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
-	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
-	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses    \WEEEOpen\Tarallo\Server\User
+	 * @uses    \WEEEOpen\Tarallo\Server\Item
+	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\TreeDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
 	 * @depends testAddingAndRetrievingSomeItems
 	 * @depends testItemSearchSorting
 	 */
 	public function testGettingItemsWithLocation() {
 		$db = $this->getDb();
 		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
-		$case     = (new Item('PC-42'))->addFeature('brand', 'TI');
-		$discone1 = (new Item('SATAna-1'))->addFeature('brand', 'SATAn Storage Corporation Inc.');
-		$discone2 = (new Item('SATAna-2'))->addFeature('brand', 'SATAn Storage Corporation Inc.');
+		$case = (new Item('PC-42'))->addFeature(new Feature('brand', 'TI'));
+		$discone1 = (new Item('SATAna-1'))->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'));
+		$discone2 = (new Item('SATAna-2'))->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'));
 		$case->addContent($discone1);
 		$case->addContent($discone2);
 		$db->itemDAO()->addItems($case);
 		$db->modificationDAO()->modificationCommit();
 
-		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('brand', '=', 'SATAn Storage Corporation Inc.')], null, null, null, null);
+		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('brand', '=', 'SATAn Storage Corporation Inc.')],
+			null, null, null, null);
 		$this->assertEquals(2, count($items));
 		$this->assertInstanceOf(Item::class, $items[0]);
 		$this->assertInstanceOf(Item::class, $items[1]);
@@ -382,97 +428,124 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @uses   \WEEEOpen\Tarallo\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\User
-	 * @uses   \WEEEOpen\Tarallo\Item
-	 * @covers \WEEEOpen\Tarallo\Item::jsonSerialize()
-	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
-	 * @uses   \WEEEOpen\Tarallo\Database\ItemDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\FeatureDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\TreeDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
-	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
-	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses    \WEEEOpen\Tarallo\Server\User
+	 * @uses    \WEEEOpen\Tarallo\Server\Item
+	 * @covers  \WEEEOpen\Tarallo\Server\Item::jsonSerialize()
+	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\TreeDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
 	 * @depends testAddingAndRetrievingSomeItems
 	 * @depends testFeatureList
 	 * @depends testItemSearchSorting
 	 */
 	public function testItemSearchSerialization() {
 		$db = $this->getDb();
-		$pc['PC-55'] = (new Item('PC-55'))->addFeature('brand', 'TI')->addFeature('model', 'GreyPC-\'98')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx');
-		$pc['PC-20'] = (new Item('PC-20'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
-		$pc['PC-21'] = (new Item('PC-21'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'grey')->addFeature('working', 'yes');
-		$pc['PC-22'] = (new Item('PC-22'))->addFeature('brand', 'Dill')->addFeature('model', 'DI-360')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'proprietary')->addFeature('color', 'black')->addFeature('working', 'yes');
-		$pc['SCHIFOMACCHINA'] = (new Item('SCHIFOMACCHINA'))->addFeature('brand', 'eMac')->addFeature('model', 'EZ1600')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white'); // based on a real PC we have in our laboratory.
+		$pc['PC-55'] = (new Item('PC-55'))
+			->addFeature(new Feature('brand', 'TI'))
+			->addFeature(new Feature('model', 'GreyPC-\'98'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'atx'));
+		$pc['PC-20'] = (new Item('PC-20'))
+			->addFeature(new Feature('brand', 'Dill'))
+			->addFeature(new Feature('model', 'DI-360'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
+			->addFeature(new Feature('color', 'black'))
+			->addFeature(new Feature('working', 'yes'));
+		$pc['PC-21'] = (new Item('PC-21'))
+			->addFeature(new Feature('brand', 'Dill'))
+			->addFeature(new Feature('model', 'DI-360'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
+			->addFeature(new Feature('color', 'grey'))
+			->addFeature(new Feature('working', 'yes'));
+		$pc['PC-22'] = (new Item('PC-22'))
+			->addFeature(new Feature('brand', 'Dill'))
+			->addFeature(new Feature('model', 'DI-360'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
+			->addFeature(new Feature('color', 'black'))
+			->addFeature(new Feature('working', 'yes'));
+		$pc['SCHIFOMACCHINA'] = (new Item('SCHIFOMACCHINA'))// based on a real PC we have in our laboratory.
+		->addFeature(new Feature('brand', 'eMac'))
+			->addFeature(new Feature('model', 'EZ1600'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
+			->addFeature(new Feature('color', 'white'));
 
 		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
 		$db->itemDAO()->addItems($pc);
 		$db->modificationDAO()->modificationCommit();
-		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'case')], null, null, ['motherboard-form-factor' => '-', 'color' => '+'], null);
-		$expected = array ( // this ugly code courtesy of var_export
+		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null,
+			['motherboard-form-factor' => '-', 'color' => '+'], null);
+		$expected = [ // this ugly code courtesy of var_export
 			0 =>
-				array (
-					'code' => 'PC-20',
+				[
+					'code'     => 'PC-20',
 					'features' =>
-						array (
-							'brand' => 'Dill',
-							'color' => 'black',
-							'model' => 'DI-360',
+						[
+							'brand'                   => 'Dill',
+							'color'                   => 'black',
+							'model'                   => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
-							'type' => 'case',
-							'working' => 'yes',
-						),
-				),
+							'type'                    => 'case',
+							'working'                 => 'yes',
+						],
+				],
 			1 =>
-				array (
-					'code' => 'PC-22',
+				[
+					'code'     => 'PC-22',
 					'features' =>
-						array (
-							'brand' => 'Dill',
-							'color' => 'black',
-							'model' => 'DI-360',
+						[
+							'brand'                   => 'Dill',
+							'color'                   => 'black',
+							'model'                   => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
-							'type' => 'case',
-							'working' => 'yes',
-						),
-				),
+							'type'                    => 'case',
+							'working'                 => 'yes',
+						],
+				],
 			2 =>
-				array (
-					'code' => 'PC-21',
+				[
+					'code'     => 'PC-21',
 					'features' =>
-						array (
-							'brand' => 'Dill',
-							'color' => 'grey',
-							'model' => 'DI-360',
+						[
+							'brand'                   => 'Dill',
+							'color'                   => 'grey',
+							'model'                   => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
-							'type' => 'case',
-							'working' => 'yes',
-						),
-				),
+							'type'                    => 'case',
+							'working'                 => 'yes',
+						],
+				],
 			3 =>
-				array (
-					'code' => 'SCHIFOMACCHINA',
+				[
+					'code'     => 'SCHIFOMACCHINA',
 					'features' =>
-						array (
-							'brand' => 'eMac',
-							'color' => 'white',
-							'model' => 'EZ1600',
+						[
+							'brand'                   => 'eMac',
+							'color'                   => 'white',
+							'model'                   => 'EZ1600',
 							'motherboard-form-factor' => 'miniitx',
-							'type' => 'case',
-						),
-				),
+							'type'                    => 'case',
+						],
+				],
 			4 =>
-				array (
-					'code' => 'PC-55',
+				[
+					'code'     => 'PC-55',
 					'features' =>
-						array (
-							'brand' => 'TI',
-							'model' => 'GreyPC-\'98',
+						[
+							'brand'                   => 'TI',
+							'model'                   => 'GreyPC-\'98',
 							'motherboard-form-factor' => 'atx',
-							'type' => 'case',
-						),
-				),
-		);
+							'type'                    => 'case',
+						],
+				],
+		];
 		$array = [];
 		foreach($items as $item) {
 			/** @var $item Item */
@@ -482,77 +555,107 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\User
-	 * @uses   \WEEEOpen\Tarallo\Item
-	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
-	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
-	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
-	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
-	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
-	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses    \WEEEOpen\Tarallo\Server\User
+	 * @uses    \WEEEOpen\Tarallo\Server\Item
+	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\TreeDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
 	 * @depends testAddingAndRetrievingSomeItems
 	 * @depends testFeatureList
 	 */
 	public function testItemSearchFiltering() {
-		$cpu['INTEL-1'] = (new Item('INTEL-1'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Core 2.0 Trio')->addFeature('frequency-hz',    1400000000);
-		$cpu['INTEL-2'] = (new Item('INTEL-2'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Core 3.0 Quadrio')->addFeature('frequency-hz', 2000000000);
-		$cpu['INTEL-3'] = (new Item('INTEL-3'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Atomic 5L0W-NE55')->addFeature('frequency-hz', 42);
-		$cpu['INTEL-4'] = (new Item('INTEL-4'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Centrino DellaNonna')->addFeature('frequency-hz', 1000000000);
-		$cpu['AMD-42']  = (new Item('AMD-42') )->addFeature('type', 'cpu')->addFeature('brand', 'Advanced Magnificent Processors')->addFeature('model', 'A4-200g')->addFeature('notes', 'A4, 200 g/cm², come la carta.')->addFeature('frequency-hz', 1900000000);
-		$cpu['AMD-737'] = (new Item('AMD-737'))->addFeature('type', 'cpu')->addFeature('brand', 'Advanced Magnificent Processors')->addFeature('model', '737-800')->addFeature('frequency-hz', 3700000000);
+		$cpu['INTEL-1'] = (new Item('INTEL-1'))
+			->addFeature(new Feature('type', 'cpu'))
+			->addFeature(new Feature('brand', 'Intel-lighenzia'))
+			->addFeature(new Feature('model', 'Core 2.0 Trio'))
+			->addFeature(new Feature('frequency-hz', 1400000000));
+		$cpu['INTEL-2'] = (new Item('INTEL-2'))
+			->addFeature(new Feature('type', 'cpu'))
+			->addFeature(new Feature('brand', 'Intel-lighenzia'))
+			->addFeature(new Feature('model', 'Core 3.0 Quadrio'))
+			->addFeature(new Feature('frequency-hz', 2000000000));
+		$cpu['INTEL-3'] = (new Item('INTEL-3'))
+			->addFeature(new Feature('type', 'cpu'))
+			->addFeature(new Feature('brand', 'Intel-lighenzia'))
+			->addFeature(new Feature('model', 'Atomic 5L0W-NE55'))
+			->addFeature(new Feature('frequency-hz', 42));
+		$cpu['INTEL-4'] = (new Item('INTEL-4'))
+			->addFeature(new Feature('type', 'cpu'))
+			->addFeature(new Feature('brand', 'Intel-lighenzia'))
+			->addFeature(new Feature('model', 'Centrino DellaNonna'))
+			->addFeature(new Feature('frequency-hz', 1000000000));
+		$cpu['AMD-42'] = (new Item('AMD-42'))
+			->addFeature(new Feature('type', 'cpu'))
+			->addFeature(new Feature('brand', 'Advanced Magnificent Processors'))
+			->addFeature(new Feature('model', 'A4-200g'))
+			->addFeature(new Feature('notes', 'A4, 200 g/cm², come la carta.'))
+			->addFeature(new Feature('frequency-hz', 1900000000));
+		$cpu['AMD-737'] = (new Item('AMD-737'))
+			->addFeature(new Feature('type', 'cpu'))
+			->addFeature(new Feature('brand', 'Advanced Magnificent Processors'))
+			->addFeature(new Feature('model', '737-800'))
+			->addFeature(new Feature('frequency-hz', 3700000000));
 		$db = $this->getDb();
 
 		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
 		$db->itemDAO()->addItems($cpu);
 		$db->modificationDAO()->modificationCommit();
 
-		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'cpu')], null, null, null, null);
+		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('type', '=', 'cpu')], null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(6, count($items), 'There should be 6 items');
 		/** @var Item[] $items */
 		foreach(['AMD-42', 'AMD-737', 'INTEL-1', 'INTEL-2', 'INTEL-3', 'INTEL-4'] as $pos => $code) {
-			$this->assertEquals($code, $items[$pos]->getCode(), 'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
+			$this->assertEquals($code, $items[$pos]->getCode(),
+				'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
 			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 
-		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('type', '=', 'cpu')], null, null, ['frequency-hz' => '-'], null);
+		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('type', '=', 'cpu')], null, null,
+			['frequency-hz' => '-'], null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(6, count($items), 'There should be 6 items');
 		foreach(['AMD-737', 'INTEL-2', 'AMD-42', 'INTEL-1', 'INTEL-4', 'INTEL-3'] as $pos => $code) {
-			$this->assertEquals($code, $items[$pos]->getCode(), 'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
+			$this->assertEquals($code, $items[$pos]->getCode(),
+				'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
 			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 
-		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('brand', '=', 'Intel')], null, null, null, null);
+		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('brand', '=', 'Intel')], null, null, null, null);
 		$this->assertEquals(0, count($items), 'No items returned without wildcard');
 
-		$itemsGeq = $db->itemDAO()->getItem(null, [new SearchTriplet('brand', '>', 'Intel%')], null, null, null, null);
+		$itemsGeq = $db->itemDAO()->getItems(null, [new SearchTriplet('brand', '>', 'Intel%')], null, null, null, null);
 		$this->assertContainsOnly(Item::class, $itemsGeq);
-		$this->assertEquals(4, count($itemsGeq), 'There should be 4 items when using > (query should contain LIKE regardless)');
+		$this->assertEquals(4, count($itemsGeq),
+			'There should be 4 items when using > (query should contain LIKE regardless)');
 
-		$items = $db->itemDAO()->getItem(null, [new SearchTriplet('brand', '=', 'Intel%')], null, null, null, null);
+		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('brand', '=', 'Intel%')], null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
-		$this->assertEquals(4, count($items), 'There should be 4 items when using = (in this case query should use LIKE)');
-		$this->assertEquals($items, $itemsGeq, 'Same result set in same order when using >, < or = on a field that uses LIKE');
+		$this->assertEquals(4, count($items),
+			'There should be 4 items when using = (in this case query should use LIKE)');
+		$this->assertEquals($items, $itemsGeq,
+			'Same result set in same order when using >, < or = on a field that uses LIKE');
 		foreach(['INTEL-1', 'INTEL-2', 'INTEL-3', 'INTEL-4'] as $pos => $code) {
-			$this->assertEquals($code, $items[$pos]->getCode(), 'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
+			$this->assertEquals($code, $items[$pos]->getCode(),
+				'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
 			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\User
-	 * @uses   \WEEEOpen\Tarallo\Item
-	 * @uses   \WEEEOpen\Tarallo\ItemIncomplete
-	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
-	 * @covers \WEEEOpen\Tarallo\Database\FeatureDAO
-	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
-	 * @uses   \WEEEOpen\Tarallo\Database\DAO
-	 * @uses   \WEEEOpen\Tarallo\Database\ModificationDAO
-	 * @uses   \WEEEOpen\Tarallo\Query\SearchTriplet
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\Database
+	 * @uses    \WEEEOpen\Tarallo\Server\User
+	 * @uses    \WEEEOpen\Tarallo\Server\Item
+	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @covers  \WEEEOpen\Tarallo\Server\Database\TreeDAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
+	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
 	 * @depends testAddingAndRetrievingSomeItems
 	 * @depends testSubtreeRemoval
 	 * @depends testFeatureList
@@ -560,33 +663,70 @@ class DatabaseTest extends TestCase {
 	public function testTreeMove() {
 		// These items should be added in database.yml, but that just increases the amount of data to import for each test
 		// and I find more readable this than a YAML file full of numbers.
-		$chernobyl = (new Item('CHERNOBYL'))->addFeature('type', 'location');
-		$tavolone = (new Item('TAVOLONE'))->addFeature('type', 'location');
-		$chernobyl->addContent($tavolone)->addContent((new Item('Armadio L'))->addFeature('type', 'location'))->addContent((new Item('Armadio R'))->addFeature('type', 'location'));
+		$chernobyl = (new Item('CHERNOBYL'))
+			->addFeature(new Feature('type', 'location'));
+		$tavolone = (new Item('TAVOLONE'))
+			->addFeature(new Feature('type', 'location'));
+		$chernobyl
+			->addContent($tavolone)
+			->addContent((new Item('Armadio L'))
+				->addFeature(new Feature('type', 'location')))
+			->addContent((new Item('Armadio R'))
+				->addFeature(new Feature('type', 'location')));
+		$tavolone
+			->addContent(
+				(new Item('SCHIFOMACCHINA'))
+					->addFeature(new Feature('brand', 'eMac'))
+					->addFeature(new Feature('model', 'EZ1600'))
+					->addFeature(new Feature('type', 'case'))
+					->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
+					->addFeature(new Feature('color', 'white'))
+			);
+		$ti = (new Item('PC-TI'))
+			->addFeature(new Feature('brand', 'TI'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
+			->addFeature(new Feature('color', 'white'))
+			->addContent(
+				(new Item('RAM-22'))
+					->addFeature(new Feature('type', 'ram'))
+					->addFeature(new Feature('capacity-byte', 32))
+			)
+			->addContent(
+				(new Item('RAM-23'))
+					->addFeature(new Feature('type', 'ram'))
+					->addFeature(new Feature('capacity-byte', 32))
+			)
+			->addContent(
+				(new Item('PC-TI-MOBO'))
+					->addFeature(new Feature('type', 'motherboard'))
+					->addFeature(new Feature('color', 'green'))
+			)
+			->addContent(
+				(new Item('PC-TI-CPU'))
+					->addFeature(new Feature('type', 'cpu'))
+					->addFeature(new Feature('brand', 'Intel-lighenzia'))
+					->addFeature(new Feature('model', 'Atomic 5L0W-NE55'))
+					->addFeature(new Feature('frequency-hz', 42))
+			);
 		$tavolone->addContent(
-					(new Item('SCHIFOMACCHINA'))->addFeature('brand', 'eMac')->addFeature('model', 'EZ1600')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white'));
-		$ti = (new Item('PC-TI'))->addFeature('brand', 'TI')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'miniitx')->addFeature('color', 'white')
-					->addContent(
-						(new Item('RAM-22'))->addFeature('type', 'ram')->addFeature('capacity-byte', 32)
-					)
-					->addContent(
-						(new Item('RAM-23'))->addFeature('type', 'ram')->addFeature('capacity-byte', 32)
-					)
-					->addContent(
-						(new Item('PC-TI-MOBO'))->addFeature('type', 'motherboard')->addFeature('color', 'green')
-					)
-					->addContent(
-						(new Item('PC-TI-CPU'))->addFeature('type', 'cpu')->addFeature('brand', 'Intel-lighenzia')->addFeature('model', 'Atomic 5L0W-NE55')->addFeature('frequency-hz', 42)
-					);
-		$tavolone->addContent(
-					(new Item('ROSETTA'))->addFeature('brand', 'pH')->addFeature('model', 'ReliaPro MLG555')->addFeature('type', 'case')->addFeature('motherboard-form-factor', 'atx')->addFeature('color', 'grey')
-					->addContent(
-						(new Item('RAM-3342'))->addFeature('type', 'ram')->addFeature('capacity-byte', 1073741824)
-					)
-					->addContent(
-						(new Item('RAM-2452'))->addFeature('type', 'ram')->addFeature('capacity-byte', 1073741824)
-					));
-		$chernobyl->addContent($zb = (new Item('Zona blu'))->addFeature('type', 'location'));
+			(new Item('ROSETTA'))
+				->addFeature(new Feature('brand', 'pH'))
+				->addFeature(new Feature('model', 'ReliaPro MLG555')))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'atx'))
+			->addFeature(new Feature('color', 'grey'))
+			->addContent(
+				(new Item('RAM-3342'))
+					->addFeature(new Feature('type', 'ram'))
+					->addFeature(new Feature('capacity-byte', 1073741824))
+			)
+			->addContent(
+				(new Item('RAM-2452'))
+					->addFeature(new Feature('type', 'ram'))
+					->addFeature(new Feature('capacity-byte', 1073741824))
+			);
+		$chernobyl->addContent($zb = (new Item('Zona blu'))->addFeature(new Feature('type', 'location')));
 		$tavolone->addContent($ti);
 
 		$db = $this->getDb();
@@ -595,7 +735,7 @@ class DatabaseTest extends TestCase {
 		$db->itemDAO()->addItems($chernobyl);
 		$db->modificationDAO()->modificationCommit();
 
-		$items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
+		$items = $db->itemDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'Only one root Item');
 
@@ -604,14 +744,14 @@ class DatabaseTest extends TestCase {
 		$db->treeDAO()->moveItem($ti, $zb);
 		$db->modificationDAO()->modificationCommit();
 
-		$items = $db->itemDAO()->getItem(['CHERNOBYL'], null, null, null, null, null);
+		$items = $db->itemDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'Only one root Item');
 		/** @var Item $chernobylPost */
 		$chernobylPost = $items[0];
 		$zonaBluPost = null;
 		$tavolonePost = null;
-		$this->assertContainsOnly(Item::class, $itemz = $chernobylPost->getContent());
+		$this->assertContainsOnly(Item::class, $itemz = $chernobylPost->getContents());
 		/** @var Item[] $itemz */
 		foreach($itemz as $item) {
 			if($item->getCode() === 'Zona blu') {
@@ -626,12 +766,12 @@ class DatabaseTest extends TestCase {
 		/** @var Item $tavolonePost */
 		$tiShouldBeHere = null;
 		$tiShouldNotBeHere = null;
-		foreach($zonaBluPost->getContent() as $item) {
+		foreach($zonaBluPost->getContents() as $item) {
 			if($item->getCode() === 'PC-TI') {
 				$tiShouldBeHere = $item;
 			}
 		}
-		foreach($tavolonePost->getContent() as $item) {
+		foreach($tavolonePost->getContents() as $item) {
 			if($item->getCode() === 'PC-TI') {
 				$tiShouldNotBeHere = $item;
 			}
@@ -653,6 +793,7 @@ class DatabaseTest extends TestCase {
 			//$prop->setValue($db, $this->getPdo());
 			$this->db = $db;
 		}
+
 		return $this->db;
 	}
 
@@ -660,27 +801,22 @@ class DatabaseTest extends TestCase {
 		if($a->getCode() !== $b->getCode()) {
 			return false;
 		}
-		if($a->getDefaultCode() !== $b->getDefaultCode()) {
-			return false;
-		}
+		// TODO: compare recursively
+		//if($a->getProduct() !== $b->getProduct()) {
+		//	return false;
+		//}
 		if(count($a->getFeatures()) !== count($b->getFeatures())) {
 			return false;
 		}
 		if(!empty(array_diff_assoc($a->getFeatures(), $b->getFeatures()))) {
 			return false;
 		}
-		if(count($a->getFeaturesDefault()) !== count($b->getFeaturesDefault())) {
-			return false;
-		}
-		if(!empty(array_diff_assoc($a->getFeaturesDefault(), $b->getFeaturesDefault()))) {
-			return false;
-		}
-		if(count($a->getContent()) !== count($b->getContent())) {
+		if(count($a->getContents()) !== count($b->getContents())) {
 			return false;
 		}
 		/** @var Item[] $bContent */
-		$bContent = $b->getContent();
-		foreach($a->getContent() as $item) {
+		$bContent = $b->getContents();
+		foreach($a->getContents() as $item) {
 			$code = $item->getCode();
 			foreach($bContent as $item2) {
 				if($code === $item2->getCode()) {
@@ -690,6 +826,7 @@ class DatabaseTest extends TestCase {
 				}
 			}
 		}
+
 		return true;
 	}
 }

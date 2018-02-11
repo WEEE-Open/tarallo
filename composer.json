@@ -15,5 +15,9 @@
     "paragonie/random_compat": "^2.0",
     "nannehuiges/jsend": "^2.1",
     "willdurand/negotiation": "^2.3"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6.0",
+    "phpunit/dbunit": "^3.0.0"
   }
 }

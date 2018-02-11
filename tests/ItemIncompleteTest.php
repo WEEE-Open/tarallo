@@ -1,12 +1,12 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use WEEEOpen\Tarallo\InvalidParameterException;
-use WEEEOpen\Tarallo\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\InvalidParameterException;
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
 
 class ItemIncompleteTest extends TestCase {
 	/**
-	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
+	 * @covers         \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemValidCodeString() {
 		$pc77 = new ItemIncomplete('PC-77');
@@ -15,7 +15,7 @@ class ItemIncompleteTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
+	 * @covers         \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemValidCodeInt() {
 		$quarantadue = new ItemIncomplete(42);
@@ -24,7 +24,7 @@ class ItemIncompleteTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
+	 * @covers         \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemNullCode() {
 		$this->expectException(InvalidParameterException::class);
@@ -32,7 +32,7 @@ class ItemIncompleteTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
+	 * @covers         \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemEmptyCode() {
 		$this->expectException(InvalidParameterException::class);
@@ -40,7 +40,7 @@ class ItemIncompleteTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
+	 * @covers         \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemArrayCode() {
 		$this->expectException(InvalidParameterException::class);
@@ -48,7 +48,7 @@ class ItemIncompleteTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\ItemIncomplete
+	 * @covers         \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testJsonSerialize() {
 		$i = new ItemIncomplete("TEST");

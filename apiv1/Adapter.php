@@ -36,6 +36,10 @@ class Adapter {
 		return null;
 	}
 
+	public static function getItem() {
+
+	}
+
 	/**
 	 * Check that an user is authorized (and authenticated too, or the entire thing won't make any sense)
 	 *
