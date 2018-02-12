@@ -46,6 +46,17 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	}
 
 	/**
+	 * Has code already been set? Do we need to generate it?
+	 *
+	 * @return bool
+	 *
+	 * @see setCode to set it
+	 */
+	public function hasCode() {
+		return $this->code !== null;
+	}
+
+	/**
 	 * Get code, if it's set
 	 *
 	 * @return string
@@ -106,7 +117,11 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 * @return array
 	 */
 	public function getCombinedFeatures() {
-		return array_merge($this->product->getFeatures(), $this->getFeatures());
+		if($this->product === null) {
+			return $this->getFeatures();
+		} else {
+			return array_merge($this->product->getFeatures(), $this->getFeatures());
+		}
 	}
 
 	/**

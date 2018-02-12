@@ -74,8 +74,8 @@ CREATE TABLE `ItemFeature` (
 		ON DELETE NO ACTION
 		ON UPDATE CASCADE,
 	CHECK ((`Value` IS NOT NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL)
-			OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND `ValueEnum` IS NULL)
-			OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NOT NULL))
+		OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND `ValueEnum` IS NULL)
+		OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NOT NULL))
 )
 	ENGINE = InnoDB
 	DEFAULT CHARSET = utf8mb4
@@ -185,7 +185,7 @@ CREATE TABLE `User` (
 	`SessionExpiry` bigint(20),
 	`Enabled` tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
 	CHECK ((`Session` IS NOT NULL AND `SessionExpiry` IS NOT NULL)
-			OR (`Session` IS NULL AND `SessionExpiry` IS NULL)),
+		OR (`Session` IS NULL AND `SessionExpiry` IS NULL)),
 	PRIMARY KEY (`UserID`),
 	UNIQUE KEY (`Session`),
 	UNIQUE KEY (`Name`),
@@ -194,3 +194,52 @@ CREATE TABLE `User` (
 	ENGINE = InnoDB
 	DEFAULT CHARSET = utf8mb4
 	COLLATE = utf8mb4_unicode_ci;
+
+
+-- Now we're getting real.
+DELIMITER $$
+
+CREATE FUNCTION GenerateCode(IN currentPrefix varchar(20) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci')
+	RETURNS varchar(190) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'
+	MODIFIES SQL DATA
+	-- This means that in two identical databases, with the same values everywhere, the function produces the same
+	-- results, which is useful to know for replication. Setting to deterministic also enables some optimizations,
+	-- apparently. However many people on TEH INTERNETS say that anything other than a pure function is nonderministic,
+	-- so who knows! If the database crashes and burns, we'll know it wasn't actually deterministic.
+	DETERMINISTIC
+	BEGIN
+		DECLARE foundPrefix varchar(20) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
+		DECLARE foundInteger bigint UNSIGNED;
+		DECLARE duplicateExists boolean;
+		DECLARE newCode varchar(190) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
+
+		SELECT Prefix, `Integer`
+		INTO foundPrefix, foundInteger
+		FROM Codes
+		WHERE Prefix = currentPrefix;
+
+		IF (foundPrefix IS NOT NULL)
+		THEN
+			REPEAT
+				SET foundInteger = foundInteger + 1;
+				SET NewCode = CONCAT(foundPrefix, CAST(foundInteger AS char(20)));
+
+				SELECT IF(COUNT(*) > 0, TRUE, FALSE)
+				INTO duplicateExists
+				FROM Item
+				WHERE Code = NewCode;
+			UNTIL duplicateExists = FALSE
+			END REPEAT;
+
+			UPDATE Codes
+			SET `Integer` = foundInteger
+			WHERE Prefix = foundPrefix;
+
+			RETURN newCode;
+		ELSE
+			RETURN NULL;
+		END IF;
+
+	END$$
+
+DELIMITER ;

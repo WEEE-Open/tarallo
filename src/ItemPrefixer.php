@@ -3,12 +3,20 @@
 namespace WEEEOpen\Tarallo\Server;
 
 class ItemPrefixer {
+	/**
+	 * Generate a prefix for an item.
+	 *
+	 * @param Item $item
+	 *
+	 * @return string
+	 * @throws \InvalidArgumentException if required features for type generation are not present ("features" means "type" and that's it, others are currently unused)
+	 */
 	public static function get(Item $item) {
 		$features = $item->getCombinedFeatures();
 		if(!isset($features['type'])) {
 			throw new \InvalidArgumentException('Item has no type, cannot generate code');
 		}
-		// TODO: more prefixes (NET, ADA, ODD, FL, HDD, AR, RAM, CPU, SA, SG, ETH)
+		// TODO: more prefixes (NET, ADA, ODD, FL, HDD, AR, R, C, B, SA, SG)
 		switch($features['type']) {
 			case 'mouse':
 				return 'M';
