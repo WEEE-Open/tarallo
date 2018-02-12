@@ -16,6 +16,7 @@ class Database {
 	private $callback;
 
 	public function __construct($user, $pass, $dsn) {
+		// TODO: ad $autocommit parameter?
 		$this->username = $user;
 		$this->password = $pass;
 		$this->dsn = $dsn;

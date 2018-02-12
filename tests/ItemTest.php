@@ -24,7 +24,7 @@ class ItemTest extends TestCase {
 	 * @covers         \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemInvalidDefaultEmptyString() {
-		$this->expectException(InvalidParameterException::class);
+		$this->expectException(\TypeError::class);
 		new Item('HDD-238947283', '');
 	}
 
@@ -36,7 +36,8 @@ class ItemTest extends TestCase {
 		$hdd = new Item('HDD-123');
 
 		$hdd->addAncestor(1, 'PC-999');
-		$this->assertTrue($hdd->getAncestor(1) instanceof \WEEEOpen\Tarallo\Server\ItemIncomplete, 'Ancestors are ItemIncomplete objects');
+		$this->assertTrue($hdd->getAncestor(1) instanceof \WEEEOpen\Tarallo\Server\ItemIncomplete,
+			'Ancestors are ItemIncomplete objects');
 
 		$this->assertEquals('PC-999', $hdd->getAncestor(1)->getCode(), 'Ancestor 1 should be there');
 		$this->assertEquals(null, $hdd->getAncestor(2), 'Ancestor 2 shouldn\'t exist yet');
@@ -55,7 +56,7 @@ class ItemTest extends TestCase {
 		$hdd->addAncestor(1, 'PC-999');
 		$hdd->addAncestor(2, 'ZONA-BLU');
 		$hdd->addAncestor(4, 'CHERNOBYL');
-		$this->assertEquals('PC-999', $hdd->getAncestor(1)->getCode(),'Ancestor 1 should be there');
+		$this->assertEquals('PC-999', $hdd->getAncestor(1)->getCode(), 'Ancestor 1 should be there');
 		$this->assertEquals('ZONA-BLU', $hdd->getAncestor(2)->getCode(), 'Ancestor 2 should be there');
 		$this->assertEquals(null, $hdd->getAncestor(3), 'Ancestor 3 should be null');
 		$this->assertEquals('CHERNOBYL', $hdd->getAncestor(4)->getCode(), 'Ancestor 4 should be there');
@@ -154,7 +155,6 @@ class ItemTest extends TestCase {
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Server\Item
 	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 * @depends        testItemFeature
 	 */
 	public function testItemDeleteFeature() {
 		$item = new Item('TEST');
@@ -181,7 +181,6 @@ class ItemTest extends TestCase {
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Server\Item
 	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 * @depends        testItemFeature
 	 */
 	public function testItemMultipleFeatures() {
 		$item = new Item('TEST');
@@ -250,7 +249,11 @@ class ItemTest extends TestCase {
 	 */
 	public function testItemMultipleFeaturesArray() {
 		$item = new Item('TEST');
-		$item->addMultipleFeatures(['capacity-byte' => 9001, 'color' => 'white', 'brand' => 'bar'])->addFeature(new Feature('test', 'test'));
+		$item->addMultipleFeatures([
+			'capacity-byte' => 9001,
+			'color'         => 'white',
+			'brand'         => 'bar'
+		])->addFeature(new Feature('test', 'test'));
 
 		$this->assertArrayHasKey('capacity-byte', $item->getFeatures());
 		$this->assertEquals(9001, $item->getFeatures()['capacity-byte']);
@@ -271,7 +274,11 @@ class ItemTest extends TestCase {
 	 */
 	public function testValidAddChild() {
 		$item = new Item('TEST');
-		$child = (new Item('brand'))->addMultipleFeatures(['capacity-byte' => 9001, 'color' => 'white', 'brand' => 'bar']);
+		$child = (new Item('brand'))->addMultipleFeatures([
+			'capacity-byte' => 9001,
+			'color'         => 'white',
+			'brand'         => 'bar'
+		]);
 
 		$item->addContent($child);
 		$this->assertContains($child, $item->getContents());
@@ -283,7 +290,11 @@ class ItemTest extends TestCase {
 	 */
 	public function testMultipleAddChild() {
 		$item = new Item('TEST');
-		$child = (new Item('brand'))->addMultipleFeatures(['capacity-byte' => 9001, 'color' => 'white', 'brand' => 'bar']);
+		$child = (new Item('brand'))->addMultipleFeatures([
+			'capacity-byte' => 9001,
+			'color'         => 'white',
+			'brand'         => 'bar'
+		]);
 		$child2 = (new Item('bar'))->addMultipleFeatures(['capacity-byte' => 999, 'color' => 'grey']);
 
 		$item->addContent($child)->addContent($child2);

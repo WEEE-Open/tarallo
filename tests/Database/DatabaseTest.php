@@ -3,12 +3,12 @@
 namespace WEEEOpen\Tarallo\Server\Test\Database;
 
 use PHPUnit\DbUnit\DataSet\YamlDataSet;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\DbUnit\TestCaseTrait;
-use WEEEOpen\Tarallo\Query\SearchTriplet;
+use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
+use WEEEOpen\Tarallo\Server\SearchTriplet;
 use WEEEOpen\Tarallo\Server\User;
 
 class DatabaseTest extends TestCase {
@@ -41,6 +41,7 @@ class DatabaseTest extends TestCase {
 
 	public function getDataSet() {
 		$file = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "database.yml";
+
 		return new YamlDataSet($file);
 	}
 
@@ -150,7 +151,6 @@ class DatabaseTest extends TestCase {
 	 * @covers  \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
-	 * @depends testFeatureList
 	 */
 	public function testAddingAndRetrievingSomeItems() {
 		$db = $this->getDb();
@@ -194,9 +194,9 @@ class DatabaseTest extends TestCase {
 			$features = $child->getFeatures();
 			$this->assertEquals(4, count($features), 'Items should still have all their features and none more');
 			$this->assertArrayHasKey('capacity-byte', $features);
-			$this->assertEquals(666, $features['capacity-byte']);
+			$this->assertEquals(666, $features['capacity-byte']->value);
 			$this->assertArrayHasKey('brand', $features);
-			$this->assertEquals('SATAn Storage Corporation Inc.', $features['brand']);
+			$this->assertEquals('SATAn Storage Corporation Inc.', $features['brand']->value);
 		}
 	}
 
@@ -210,7 +210,6 @@ class DatabaseTest extends TestCase {
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
-	 * @depends testAddingAndRetrievingSomeItems
 	 */
 	public function testGettingPrefixes() {
 		$db = $this->getDb();
@@ -233,7 +232,6 @@ class DatabaseTest extends TestCase {
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
-	 * @depends testGettingPrefixes
 	 */
 	public function testGettingPrefixesSkippingDuplicates() {
 		$db = $this->getDb();
@@ -318,8 +316,6 @@ class DatabaseTest extends TestCase {
 	 * @covers  \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
-	 * @depends testAddingAndRetrievingSomeItems
-	 * @depends testFeatureList
 	 */
 	public function testItemSearchSorting() {
 		$db = $this->getDb();
@@ -398,8 +394,6 @@ class DatabaseTest extends TestCase {
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
-	 * @depends testAddingAndRetrievingSomeItems
-	 * @depends testItemSearchSorting
 	 */
 	public function testGettingItemsWithLocation() {
 		$db = $this->getDb();
@@ -438,9 +432,6 @@ class DatabaseTest extends TestCase {
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
-	 * @depends testAddingAndRetrievingSomeItems
-	 * @depends testFeatureList
-	 * @depends testItemSearchSorting
 	 */
 	public function testItemSearchSerialization() {
 		$db = $this->getDb();
@@ -564,41 +555,39 @@ class DatabaseTest extends TestCase {
 	 * @covers  \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
-	 * @depends testAddingAndRetrievingSomeItems
-	 * @depends testFeatureList
 	 */
 	public function testItemSearchFiltering() {
 		$cpu['INTEL-1'] = (new Item('INTEL-1'))
 			->addFeature(new Feature('type', 'cpu'))
 			->addFeature(new Feature('brand', 'Intel-lighenzia'))
 			->addFeature(new Feature('model', 'Core 2.0 Trio'))
-			->addFeature(new Feature('frequency-hz', 1400000000));
+			->addFeature(new Feature('frequency-hertz', 1400000000));
 		$cpu['INTEL-2'] = (new Item('INTEL-2'))
 			->addFeature(new Feature('type', 'cpu'))
 			->addFeature(new Feature('brand', 'Intel-lighenzia'))
 			->addFeature(new Feature('model', 'Core 3.0 Quadrio'))
-			->addFeature(new Feature('frequency-hz', 2000000000));
+			->addFeature(new Feature('frequency-hertz', 2000000000));
 		$cpu['INTEL-3'] = (new Item('INTEL-3'))
 			->addFeature(new Feature('type', 'cpu'))
 			->addFeature(new Feature('brand', 'Intel-lighenzia'))
 			->addFeature(new Feature('model', 'Atomic 5L0W-NE55'))
-			->addFeature(new Feature('frequency-hz', 42));
+			->addFeature(new Feature('frequency-hertz', 42));
 		$cpu['INTEL-4'] = (new Item('INTEL-4'))
 			->addFeature(new Feature('type', 'cpu'))
 			->addFeature(new Feature('brand', 'Intel-lighenzia'))
 			->addFeature(new Feature('model', 'Centrino DellaNonna'))
-			->addFeature(new Feature('frequency-hz', 1000000000));
+			->addFeature(new Feature('frequency-hertz', 1000000000));
 		$cpu['AMD-42'] = (new Item('AMD-42'))
 			->addFeature(new Feature('type', 'cpu'))
 			->addFeature(new Feature('brand', 'Advanced Magnificent Processors'))
 			->addFeature(new Feature('model', 'A4-200g'))
 			->addFeature(new Feature('notes', 'A4, 200 g/cm², come la carta.'))
-			->addFeature(new Feature('frequency-hz', 1900000000));
+			->addFeature(new Feature('frequency-hertz', 1900000000));
 		$cpu['AMD-737'] = (new Item('AMD-737'))
+			->addFeature(new Feature('frequency-hertz', 3700000000))
 			->addFeature(new Feature('type', 'cpu'))
 			->addFeature(new Feature('brand', 'Advanced Magnificent Processors'))
-			->addFeature(new Feature('model', '737-800'))
-			->addFeature(new Feature('frequency-hz', 3700000000));
+			->addFeature(new Feature('model', '737-800'));
 		$db = $this->getDb();
 
 		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
@@ -610,19 +599,17 @@ class DatabaseTest extends TestCase {
 		$this->assertEquals(6, count($items), 'There should be 6 items');
 		/** @var Item[] $items */
 		foreach(['AMD-42', 'AMD-737', 'INTEL-1', 'INTEL-2', 'INTEL-3', 'INTEL-4'] as $pos => $code) {
-			$this->assertEquals($code, $items[$pos]->getCode(),
-				'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
+			$this->assertEquals($code, $items[$pos]->getCode(), "Item in position $pos should be $code");
 			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 
 		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('type', '=', 'cpu')], null, null,
-			['frequency-hz' => '-'], null);
+			['frequency-hertz' => '-'], null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(6, count($items), 'There should be 6 items');
 		foreach(['AMD-737', 'INTEL-2', 'AMD-42', 'INTEL-1', 'INTEL-4', 'INTEL-3'] as $pos => $code) {
-			$this->assertEquals($code, $items[$pos]->getCode(),
-				'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
-			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
+			$this->assertEquals($code, $items[$pos]->getCode(), "Item in position $pos should be $code");
+			$this->assertEquals($cpu[$code], $items[$pos], "Item $code should be unchanged");
 		}
 
 		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('brand', '=', 'Intel')], null, null, null, null);
@@ -640,9 +627,8 @@ class DatabaseTest extends TestCase {
 		$this->assertEquals($items, $itemsGeq,
 			'Same result set in same order when using >, < or = on a field that uses LIKE');
 		foreach(['INTEL-1', 'INTEL-2', 'INTEL-3', 'INTEL-4'] as $pos => $code) {
-			$this->assertEquals($code, $items[$pos]->getCode(),
-				'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
-			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
+			$this->assertEquals($code, $items[$pos]->getCode(), "Item in position $pos should be $code");
+			$this->assertEquals($cpu[$code], $items[$pos], "Item $code should be unchanged");
 		}
 	}
 
@@ -656,9 +642,6 @@ class DatabaseTest extends TestCase {
 	 * @covers  \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
 	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
-	 * @depends testAddingAndRetrievingSomeItems
-	 * @depends testSubtreeRemoval
-	 * @depends testFeatureList
 	 */
 	public function testTreeMove() {
 		// These items should be added in database.yml, but that just increases the amount of data to import for each test
@@ -707,7 +690,7 @@ class DatabaseTest extends TestCase {
 					->addFeature(new Feature('type', 'cpu'))
 					->addFeature(new Feature('brand', 'Intel-lighenzia'))
 					->addFeature(new Feature('model', 'Atomic 5L0W-NE55'))
-					->addFeature(new Feature('frequency-hz', 42))
+					->addFeature(new Feature('frequency-hertz', 42))
 			);
 		$tavolone->addContent(
 			(new Item('ROSETTA'))

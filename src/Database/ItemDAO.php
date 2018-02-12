@@ -4,10 +4,9 @@ namespace WEEEOpen\Tarallo\Server\Database;
 
 use WEEEOpen\Tarallo\Server\InvalidParameterException;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\Product;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\ItemUpdate;
-use WEEEOpen\Tarallo\Server\Query\SearchTriplet;
+use WEEEOpen\Tarallo\Server\SearchTriplet;
 
 final class ItemDAO extends DAO {
 	private function depthSanitize($depth) {
@@ -59,7 +58,8 @@ final class ItemDAO extends DAO {
 
 	/**
 	 * Get the ABNORME search subquery.
-	 * Bind :searchkey0, :searchdefaultkey0, :searchkey1, ... to keys and :searchvalue0, :searchdefaultvalue0, ... to values.
+	 * Bind :searchkey0, :searchdefaultkey0, :searchkey1, ... to keys and :searchvalue0, :searchdefaultvalue0, ... to
+	 * values.
 	 *
 	 * @param SearchTriplet[] $searches array of SearchTriplet
 	 *
@@ -194,17 +194,32 @@ final class ItemDAO extends DAO {
 	 * @param $depth integer|null Max depth in returned tree
 	 * @param $parent SearchTriplet[]|null Search by feature values in parent items
 	 * @param $sorts string[]|null key (feature name) => order (+ or -)
-	 * @param $token string|null token. Must match for every root item, so it only makes sense for "$code and nothing else" searches
+	 * @param $token string|null token. Must match for every root item, so it only makes sense for "$code and nothing
+	 *     else" searches
 	 * @param $locations string[]|null Item codes, only their descendants will be searched.
 	 * @param $page int Which page of results to display, starting from 1
-	 * @param $pageLimit int How many items per page. Use -1 for "all" (ignores the $page parameter). Note that pagination is done in PHP and not in the database, so using a huge number is fine. It's the whole concept of "pagination in PHP" that isn't fine at all.
+	 * @param $pageLimit int How many items per page. Use -1 for "all" (ignores the $page parameter). Note that
+	 *     pagination is done in PHP and not in the database, so using a huge number is fine. It's the whole concept of
+	 *     "pagination in PHP" that isn't fine at all.
 	 * @param $total int Reference that will contain total number of items (0 if no results)
 	 * @param $pages int Reference that will contain total number of pages (0 if no results)
 	 *
 	 * @return Item[]
 	 * @TODO actually implement $location
 	 */
-	public function getItems($codes = null, $searches = null, $depth = null, $parent = null, $sorts = null, $token = null, $locations = null, $page = 1, $pageLimit = -1, &$total = null, &$pages = null) {
+	public function getItems(
+		$codes = null,
+		$searches = null,
+		$depth = null,
+		$parent = null,
+		$sorts = null,
+		$token = null,
+		$locations = null,
+		$page = 1,
+		$pageLimit = -1,
+		&$total = null,
+		&$pages = null
+	) {
 		if(self::isArrayAndFull($searches)) {
 			$searchSubquery = $this->searchPrepare($searches);
 		} else {
@@ -361,15 +376,12 @@ final class ItemDAO extends DAO {
 	 * @param Item $item the item to be inserted
 	 * @param ItemIncomplete $parent parent item
 	 *
-	 * @throws InvalidParameterException
 	 * @see addItems
 	 */
 	private function addItem(Item $item, ItemIncomplete $parent = null) {
 		if(!($item instanceof Item)) {
 			throw new \InvalidArgumentException('Items must be objects of Item class, ' . gettype($item) . ' given'); // will say "object" if it's another object which is kinda useless, whatever
 		}
-
-		$isDefault = $item instanceof Product ? true : false;
 
 		$pdo = $this->getPDO();
 		if(!$pdo->inTransaction()) {
@@ -381,12 +393,8 @@ final class ItemDAO extends DAO {
 		}
 
 		$this->addItemStatement->bindValue(':c', $item->getCode(), \PDO::PARAM_STR);
-		$this->addItemStatement->bindValue(':isd', $isDefault, \PDO::PARAM_INT);
-		if($isDefault || ($default = $item->getDefaultCode()) === null) {
-			$this->addItemStatement->bindValue(':def', null, \PDO::PARAM_NULL);
-		} else {
-			$this->addItemStatement->bindValue(':def', $default, \PDO::PARAM_STR);
-		}
+		$this->addItemStatement->bindValue(':isd', 0, \PDO::PARAM_INT);
+		$this->addItemStatement->bindValue(':def', null, \PDO::PARAM_NULL); // TODO: remove this stuff
 		$this->addItemStatement->execute();
 
 		/** @var Item $item */
@@ -526,44 +534,14 @@ final class ItemDAO extends DAO {
 		}
 	}
 
-	private $setItemDefaultsStatementSelect = null;
-	private $setItemDefaultsStatementUpdate = null;
-
 	private function setItemDefaults(ItemUpdate $item) {
-		$db = $this->getPDO();
-
-		if(!$item->getDefaultCodeChanged() || !$item->getIsDefaultChanged()) {
-			if($this->setItemDefaultsStatementSelect === null) {
-				$this->setItemDefaultsStatementSelect = $db->prepare('SELECT `Default`, IsDefault FROM Item WHERE ItemID = ? LIMIT 1');
-			}
-
-			$this->setItemDefaultsStatementSelect->bindValue(1, $this->getItemId($item), \PDO::PARAM_STR);
-			$this->setItemDefaultsStatementSelect->execute();
-			$result = $this->setItemDefaultsStatementSelect->fetch(\PDO::FETCH_ASSOC);
-			$this->setItemDefaultsStatementSelect->closeCursor();
-
-			$isDefault = $item->getIsDefaultChanged() ? (int) $item->getIsDefault() : (int) $result['IsDefault'];
-			$defaultId = $item->getDefaultCodeChanged() ? $this->getItemId(new ItemIncomplete($item->getDefaultCode())) : (int) $result['Default'];
-		} else {
-			$isDefault = (int) $item->getIsDefault();
-			$defaultId = $this->getItemId(new ItemIncomplete($item->getDefaultCode()));
-		}
-
-		if($this->setItemDefaultsStatementUpdate === null) {
-			$this->setItemDefaultsStatementUpdate = $db->prepare('UPDATE Item SET IsDefault = ? AND `Default` = ? WHERE ItemID = ? LIMIT 1');
-		}
-		$this->setItemDefaultsStatementUpdate->bindValue(1, $isDefault, \PDO::PARAM_INT);
-		$this->setItemDefaultsStatementUpdate->bindValue(2, $defaultId, \PDO::PARAM_INT);
-		$this->setItemDefaultsStatementUpdate->bindValue(3, $this->getItemId($item), \PDO::PARAM_INT);
-		$this->setItemDefaultsStatementUpdate->execute();
+		// TODO: reimplement
 	}
 
 	/**
 	 * Add location array to items
 	 *
 	 * @param Item[] $items - array that maps item IDs to Item objects (tree roots only)
-	 *
-	 * @throws InvalidParameterException - I don't even know anymore
 	 */
 	private function setLocations($items) {
 		if(empty($items)) {
@@ -611,8 +589,6 @@ final class ItemDAO extends DAO {
 	 * be locked too. WIRTE locked. This would completely nuke performance, so it isn't done.
 	 * Because of this, adding items may fail randomly if someone else is simultaneously adding items with manually-set
 	 * codes that collide with generated ones.
-	 *
-	 * @throws \Exception if Codes table cannot be locked.
 	 */
 	private function beginNextCodeTransaction() {
 		$this->getPDO()->beginTransaction();
@@ -628,8 +604,6 @@ final class ItemDAO extends DAO {
 
 	/**
 	 * Commit stuff, but don't unlock tables, that will be done by the next BEGIN TRANSACTION
-	 *
-	 * @throws \Exception if transaction cannot be committed
 	 */
 	private function endNextCodeTransaction() {
 		$committed = $this->getPDO()->commit();
@@ -645,7 +619,6 @@ final class ItemDAO extends DAO {
 	 * @param $forWhat array - List of prefixes
 	 *
 	 * @return array - same array as input, but with each prefix replaced by its generated code
-	 * @throws \Exception if codes cannot be generated (unlockable Codes table, cannot commit, etc...)
 	 */
 	public function getNextCodes($forWhat) {
 		if(!is_array($forWhat)) {
@@ -684,6 +657,7 @@ final class ItemDAO extends DAO {
 	 * @see endNextCodeTransaction
 	 */
 	private function getNextCode($prefix = '') {
+		// TODO: increment and get, instead of get then increment?
 		if($this->getNextCodeStatement === null) {
 			$this->getNextCodeStatement = $this->getPDO()->prepare('SELECT `Integer` FROM Codes WHERE Prefix = ?');
 		}
@@ -701,7 +675,7 @@ final class ItemDAO extends DAO {
 		// Integer should be last used one, so increment it before checking if it's available.
 		// Checking is necessary since there could be items with manually-assigned codes.
 		do {
-			$integer ++;
+			$integer++;
 			$exists = $this->checkIfItemExists($prefix . $integer);
 		} while($exists);
 

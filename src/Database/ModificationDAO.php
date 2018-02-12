@@ -2,7 +2,6 @@
 
 namespace WEEEOpen\Tarallo\Server\Database;
 
-use WEEEOpen\Tarallo\Server\InvalidParameterException;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\User;
 
@@ -15,8 +14,6 @@ final class ModificationDAO extends DAO {
 	 *
 	 * @param ItemIncomplete $item - item that has been moved
 	 * @param ItemIncomplete|null $to - new parent, or null if deleted
-	 *
-	 * @throws InvalidParameterException
 	 */
 	public function setItemMoved(ItemIncomplete $item, ItemIncomplete $to = null) {
 		if($to === null) {

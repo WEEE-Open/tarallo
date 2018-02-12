@@ -2,11 +2,12 @@
 
 namespace WEEEOpen\Tarallo\Server\Database;
 
+use WEEEOpen\Tarallo\Server\SearchTriplet;
+use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\InvalidParameterException;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\ItemUpdate;
-use WEEEOpen\Tarallo\Server\Query\SearchTriplet;
 
 final class FeatureDAO extends DAO {
 
@@ -60,7 +61,7 @@ final class FeatureDAO extends DAO {
 			if($featureStatement->rowCount() > 0) {
 				foreach($featureStatement as $row) {
 					/** @var Item[] $items */
-					$items[$row['ItemID']]->addFeature($row['FeatureName'], $row['FeatureValue']);
+					$items[$row['ItemID']]->addFeature(Feature::ofString($row['FeatureName'], $row['FeatureValue']));
 				}
 			}
 		} finally {
@@ -76,46 +77,6 @@ final class FeatureDAO extends DAO {
 			}
 		} finally {
 			$defaultFeatureStatement->closeCursor();
-		}
-	}
-
-	private $featureTypeStatement = null;
-	const FEATURE_TEXT = 0;
-	const FEATURE_NUMBER = 1;
-	const FEATURE_ENUM = 2;
-
-	/**
-	 * @param $featureName
-	 *
-	 * @return int
-	 * @throws InvalidParameterException
-	 */
-	private function getFeatureTypeFromName($featureName) {
-		$pdo = $this->getPDO();
-		if($this->featureTypeStatement === null) {
-			$this->featureTypeStatement = $pdo->prepare('SELECT `FeatureType` FROM Feature WHERE FeatureName = ? LIMIT 1');
-		}
-		$this->featureTypeStatement->bindValue(1, $featureName);
-		$this->featureTypeStatement->execute();
-		try {
-			if($this->featureTypeStatement->rowCount() === 0) {
-				throw new InvalidParameterException('Unknown feature name ' . $featureName);
-			}
-			$type = (int) $this->featureTypeStatement->fetch(\PDO::FETCH_NUM)[0];
-		} finally {
-			$this->featureTypeStatement->closeCursor();
-		}
-
-		/** @noinspection PhpUndefinedVariableInspection without the try-block PHPStorm didn't complain, but apparently looks like a catch-block to it */
-		switch($type) {
-			case 0:
-				return self::FEATURE_TEXT;
-			case 1:
-				return self::FEATURE_NUMBER;
-			case 2:
-				return self::FEATURE_ENUM;
-			default:
-				throw new \LogicException('Unknown feature type for ' . $featureName . ' found in database');
 		}
 	}
 
@@ -148,8 +109,8 @@ final class FeatureDAO extends DAO {
 		}
 
 		foreach($searches as $key => $triplet) {
-			switch($this->database->featureDAO()->getFeatureTypeFromName($triplet->getKey())) {
-				case self::FEATURE_NUMBER:
+			switch(Feature::getType($triplet->getKey())) {
+				case Feature::INTEGER:
 					$compare = $searches[$key]->getCompare();
 					if($compare === '>' || $compare === '<') {
 						$compare .= '='; // greater than OR EQUAL, and the like
@@ -159,10 +120,10 @@ final class FeatureDAO extends DAO {
 					NATURAL JOIN ItemFeature
 					NATURAL JOIN Feature
 					WHERE Feature.FeatureName = :'.$parameterIdentifier.'name' . $key . '
-					AND Feature.FeatureType = ' . self::FEATURE_NUMBER . '
+					AND Feature.FeatureType = ' . Feature::INTEGER . '
 					AND ItemFeature.Value ' . $compare . ' :'.$parameterIdentifier.'value' . $key;
 					break;
-				case self::FEATURE_ENUM:
+				case Feature::ENUM:
 					$queries[] = '
 					FROM Item
 					JOIN ItemFeature ON Item.ItemID = ItemFeature.ItemID
@@ -170,17 +131,17 @@ final class FeatureDAO extends DAO {
 					JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
 					WHERE ItemFeature.ValueEnum = FeatureValue.ValueEnum
 					AND Feature.FeatureName = :'.$parameterIdentifier.'name' . $key . '
-					AND Feature.FeatureType = ' . self::FEATURE_ENUM . '
+					AND Feature.FeatureType = ' . Feature::ENUM . '
 					AND FeatureValue.ValueText = :'.$parameterIdentifier.'value' . $key;
 					break;
 				default:
-				case self::FEATURE_TEXT:
+				case Feature::STRING:
 					$queries[] = '
 					FROM Item
 					NATURAL JOIN ItemFeature
 					NATURAL JOIN Feature
 					WHERE Feature.FeatureName = :'.$parameterIdentifier.'name' . $key . '
-					AND Feature.FeatureType = ' . self::FEATURE_TEXT . '
+					AND Feature.FeatureType = ' . Feature::STRING . '
 					AND ItemFeature.ValueText LIKE :'.$parameterIdentifier.'value' . $key;
 			}
 		}
@@ -197,7 +158,7 @@ final class FeatureDAO extends DAO {
 		}
 		$this->featureEnumNameStatement->bindValue(':n', $featureName);
 		$this->featureEnumNameStatement->bindValue(':valuetext', $featureValueText);
-		$this->featureEnumNameStatement->bindValue(':type', self::FEATURE_ENUM);
+		$this->featureEnumNameStatement->bindValue(':type', Feature::ENUM);
 		$this->featureEnumNameStatement->execute();
 		try {
 			if($this->featureEnumNameStatement->rowCount() === 0) {
@@ -237,7 +198,7 @@ final class FeatureDAO extends DAO {
 		foreach($features as $feature => $value) {
 			$this->deleteFeature($item, $feature);
 			if($value !== null) {
-				$newItem->addFeature($feature, $value);
+				$newItem->addFeature(new Feature($feature, $value));
 			}
 		}
 		$this->addFeatures($newItem);
@@ -268,31 +229,31 @@ final class FeatureDAO extends DAO {
 
 		$itemId = $this->database->itemDAO()->getItemId($item);
 		$this->featureNumberStatement->bindValue(':item', $itemId, \PDO::PARAM_INT);
-		$this->featureTextStatement->bindValue(':item', $itemId, \PDO::PARAM_INT);
+		$this->featureTextStatement->bindValue(':item', $itemId, \PDO::PARAM_STR);
 		$this->featureEnumStatement->bindValue(':item', $itemId, \PDO::PARAM_INT);
 
-		foreach($features as $feature => $value) {
-			$featureType = $this->database->featureDAO()->getFeatureTypeFromName($feature);
-			switch($featureType) {
+		foreach($features as $feature) {
+			$name = $feature->name;
+			$value = $feature->value;
+			switch($feature->type) {
 				// was really tempted to use variable variables here...
-				case self::FEATURE_TEXT:
-					$this->featureTextStatement->bindValue(':feature', $feature);
+				case Feature::STRING:
+					$this->featureTextStatement->bindValue(':feature', $name);
 					$this->featureTextStatement->bindValue(':val', $value);
 					$this->featureTextStatement->execute();
 					break;
-				case self::FEATURE_NUMBER:
-					$this->featureNumberStatement->bindValue(':feature', $feature);
+				case Feature::INTEGER:
+					$this->featureNumberStatement->bindValue(':feature', $name);
 					$this->featureNumberStatement->bindValue(':val', $value);
 					$this->featureNumberStatement->execute();
 					break;
-				case self::FEATURE_ENUM:
-					$this->featureEnumStatement->bindValue(':feature', $feature);
-					$this->featureEnumStatement->bindValue(':val',
-						$this->database->featureDAO()->getFeatureValueEnumFromName($feature, $value));
+				case Feature::ENUM:
+					$this->featureEnumStatement->bindValue(':feature', $name);
+					$this->featureEnumStatement->bindValue(':val', $this->database->featureDAO()->getFeatureValueEnumFromName($name, $value));
 					$this->featureEnumStatement->execute();
 					break;
 				default:
-					throw new \LogicException('Unknown feature type ' . $featureType . ' returned by getFeatureTypeFromName (should never happen unless a cosmic ray flips a bit somewhere)');
+					throw new \LogicException('Unknown feature type ' . $feature->type . ' returned by getFeatureTypeFromName (should never happen unless a cosmic ray flips a bit somewhere)');
 			}
 		}
 	}
