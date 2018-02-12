@@ -132,6 +132,34 @@ class Feature {
 		$this->type = self::getType($name);
 	}
 
+	/**
+	 * Get a feature with value of correct type,
+	 * even if you only have it as string
+	 *
+	 * @param string $name
+	 * @param string $value
+	 *
+	 * @return Feature
+	 */
+	public static function ofString($name, $value) {
+		self::validateFeatureName($name);
+		switch(Feature::getType($name)) {
+			case Feature::INTEGER:
+				if(!is_numeric($value)) {
+					throw new \InvalidArgumentException("Cannot cast feature $name to integer: $value is not numeric");
+				}
+				$value = (int) $value;
+				break;
+			case Feature::DOUBLE:
+				if(!is_numeric($value)) {
+					throw new \InvalidArgumentException("Cannot cast feature $name to double: $value is not numeric");
+				}
+				$value = (double) $value;
+				break;
+		}
+		return new self($name, $value);
+	}
+
 	public function __set($name, $value) {
 		throw new \LogicException('Feature values are read-only');
 	}
@@ -157,7 +185,7 @@ class Feature {
 	 *
 	 * @return int
 	 */
-	private static function getType($name) {
+	public static function getType($name) {
 		return is_int(self::features[$name]) ? self::features[$name] : self::ENUM;
 	}
 
@@ -202,6 +230,6 @@ class Feature {
 	}
 
 	public function __toString() {
-		return $this->value;
+		return (string) $this->value;
 	}
 }

@@ -1,9 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Query;
-
-
-use WEEEOpen\Tarallo\Server\InvalidParameterException;
+namespace WEEEOpen\Tarallo\Server;
 
 class SearchTriplet {
 	private $key;

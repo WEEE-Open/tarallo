@@ -4,34 +4,40 @@ namespace WEEEOpen\Tarallo\Server;
 
 /**
  * Products, once called "default items".
- * They're simply Item objects, with some properties missing (e.g. no ancestors).
  *
  * @package WEEEOpen\Tarallo
  */
-class Product extends Item implements \JsonSerializable {
-	public function __construct($code) {
-		if($code === null) {
-			throw new \InvalidArgumentException('Cannot create a default item (ItemDefault) without a code');
-		}
-		parent::__construct($code, null);
-	}
+class Product implements \JsonSerializable {
+	use ItemFeatures;
+	const DEFAULT_VARIANT = '0';
+	private $brand;
+	private $model;
+	private $variant;
 
-	public function addFeatureDefault($name, $value) {
-		throw new \LogicException('Trying to add default features to a default Item (use addFeature() instead)');
-	}
-
-	public function addAncestor($distance, $code) {
-		throw new \LogicException('Default items cannot have ancestors');
-	}
-
-	public function getAncestor($distance) {
-		return null;
+	/**
+	 * Product constructor.
+	 *
+	 * @param string $brand
+	 * @param string $model
+	 * @param string $variant
+	 */
+	public function __construct($brand, $model, $variant = self::DEFAULT_VARIANT) {
+		$this->brand = $brand;
+		$this->model = $model;
+		$this->variant = $variant;
 	}
 
 	function jsonSerialize() {
-		$array = parent::jsonSerialize();
-		$array['is_default'] = true;
+		$array = [];
 
 		return $array;
+	}
+
+	function __toString() {
+		if($this->variant === self::DEFAULT_VARIANT) {
+			return $this->model . ' ' . $this->model;
+		} else {
+			return $this->model . ' ' . $this->model . '(' . $this->variant . ')';
+		}
 	}
 }

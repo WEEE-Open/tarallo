@@ -8,7 +8,7 @@ namespace WEEEOpen\Tarallo\Server;
  * @package WEEEOpen\Tarallo
  */
 class Item extends ItemIncomplete implements \JsonSerializable {
-	protected $features = [];
+	use ItemFeatures;
 	protected $contents = [];
 	private $location = [];
 	protected $product = null;
@@ -60,31 +60,6 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	}
 
 	/**
-	 * @param Feature $feature
-	 *
-	 * @return Item $this
-	 */
-	public function addFeature(Feature $feature) {
-		if(isset($this->features[$feature->name])) {
-			throw new \InvalidArgumentException('Feature ' . $feature->name . ' already added to ' . (string) $this);
-		}
-		$this->features[$feature->name] = $feature;
-
-		return $this;
-	}
-
-	/**
-	 * @param string $name
-	 *
-	 * @return Item $this
-	 */
-	public function deleteFeature($name) {
-		unset($this->features[$name]);
-
-		return $this;
-	}
-
-	/**
 	 * Add ancestor to location.
 	 *
 	 * @param int $distance 1 for direct parent, etc...
@@ -122,26 +97,6 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		} else {
 			return null;
 		}
-	}
-
-	/**
-	 * @param array $features
-	 *
-	 * @return Item $this
-	 */
-	public function addMultipleFeatures(array $features) {
-		foreach($features as $feature) {
-			$this->addFeature($feature);
-		}
-
-		return $this;
-	}
-
-	/**
-	 * @return array
-	 */
-	public function getFeatures() {
-		return $this->features;
 	}
 
 	/**
