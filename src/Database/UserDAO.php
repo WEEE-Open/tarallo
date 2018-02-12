@@ -7,8 +7,8 @@ use WEEEOpen\Tarallo\Server\User;
 final class UserDAO extends DAO {
 
 	public function getUserFromSession($session) {
-		$s = $this->getPDO()->prepare('SELECT `Name`, `Password` FROM `User` WHERE `Session` = ? AND `SessionExpiry` > NOW() AND `Enabled` > 0');
-		$s->execute([$session]);
+		$s = $this->getPDO()->prepare('SELECT `Name`, `Password` FROM `User` WHERE `Session` = ? AND `SessionExpiry` > ? AND `Enabled` > 0');
+		$s->execute([$session, time()]);
 		if($s->rowCount() > 1) {
 			$s->closeCursor();
 			throw new \LogicException('Duplicate session session identifier in database');

@@ -107,7 +107,7 @@ class DatabaseTest extends TestCase {
 	 */
 	public function testUserLoginLogout() {
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
-		$this->getDb()->userDAO()->setSessionFromUser('asd', 'session-started-in-test-12345678', 9223372036854775807);
+		$this->getDb()->userDAO()->setSessionFromUser('asd', 'session-started-in-test-12345678', PHP_INT_MAX);
 		$this->assertEquals('asd',
 			(string) $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
 		$this->getDb()->userDAO()->setSessionFromUser('asd', null, null);
@@ -135,17 +135,17 @@ class DatabaseTest extends TestCase {
 	public function testAddingAndRetrievingSomeItems() {
 		$db = $this->getDb();
 		/** @var $case Item */ // PHPStorm suddenly doesn't recognize chained methods. Only the last one of every chain, specifically.
-		$case = (new Item('PC-42'))
+		$case = (new Item('PC42'))
 			->addFeature(new Feature('brand', 'TI'))
 			->addFeature(new Feature('model', 'GreyPC-\'98'))
 			->addFeature(new Feature('type', 'case'))
 			->addFeature(new Feature('motherboard-form-factor', 'atx'));
-		$discone1 = (new Item('SATAna-1'))
+		$discone1 = (new Item('SATAna1'))
 			->addFeature(new Feature('capacity-byte', 666))
 			->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'))
 			->addFeature(new Feature('model', 'Discone da 666 byte'))
 			->addFeature(new Feature('type', 'hdd'));
-		$discone2 = (new Item('SATAna-2'))
+		$discone2 = (new Item('SATAna2'))
 			->addFeature(new Feature('capacity-byte', 666))
 			->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'))
 			->addFeature(new Feature('model', 'Discone da 666 byte'))
@@ -154,7 +154,7 @@ class DatabaseTest extends TestCase {
 		$case->addContent($discone2);
 		$db->itemDAO()->addItems([$case]);
 
-		$items = $db->searchDAO()->getItems(['PC-42'], null, null, null, null, null);
+		$items = $db->searchDAO()->getItems(['PC42'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'Only one root Item');
 		/** @var Item $newCase */
@@ -163,7 +163,7 @@ class DatabaseTest extends TestCase {
 		$this->assertContainsOnly(Item::class, $newCase->getContents(), null, 'Only Items are contained in an Item');
 		foreach($newCase->getContents() as $child) {
 			/** @var Item $child */
-			$this->assertTrue($child->getCode() === 'SATAna-1' || $child->getCode() === 'SATAna-2',
+			$this->assertTrue($child->getCode() === 'SATAna1' || $child->getCode() === 'SATAna2',
 				'Sub-Item is one of the two expected items, ' . (string) $child);
 			/** @noinspection PhpUndefinedMethodInspection */
 			$this->assertTrue($case->getContents()[0]->getFeatures() == $child->getFeatures(),
@@ -230,9 +230,9 @@ class DatabaseTest extends TestCase {
 		$db = $this->getDb();
 		/** @var $case Item */
 		$lab = (new Item('CHERNOBYL'));
-		$case = (new Item('PC-42'));
-		$discone1 = (new Item('HDD-1'));
-		$discone2 = (new Item('HDD-2'));
+		$case = (new Item('PC42'));
+		$discone1 = (new Item('HDD1'));
+		$discone2 = (new Item('HDD2'));
 		$case->addContent($discone1);
 		$case->addContent($discone2);
 		$lab->addContent($case);
@@ -244,7 +244,7 @@ class DatabaseTest extends TestCase {
 		$this->assertEquals(1, count($items), 'Only one root Item');
 		/** @var Item $caseContent */
 		$case = $items[0]->getContents()[0];
-		$this->assertEquals('PC-42', $case->getCode(), 'PC-42 is still there');
+		$this->assertEquals('PC42', $case->getCode(), 'PC42 is still there');
 		$this->assertTrue($this->itemCompare($lab, $items[0]), 'Lab should be unchanged');
 
 		$db->beginTransaction();
@@ -256,13 +256,13 @@ class DatabaseTest extends TestCase {
 		$this->assertEquals(1, count($items), 'Still only one root Item');
 		$this->assertEquals(0, count($items[0]->getContents()), 'Lab is empty');
 
-		$items = $db->searchDAO()->getItems(['PC-42'], null, null, null, null, null);
+		$items = $db->searchDAO()->getItems(['PC42'], null, null, null, null, null);
 		$this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
 
-		$items = $db->searchDAO()->getItems(['HDD-1'], null, null, null, null, null);
+		$items = $db->searchDAO()->getItems(['HDD1'], null, null, null, null, null);
 		$this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
 
-		$items = $db->searchDAO()->getItems(['HDD-2'], null, null, null, null, null);
+		$items = $db->searchDAO()->getItems(['HDD2'], null, null, null, null, null);
 		$this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
 
 	}
@@ -275,26 +275,26 @@ class DatabaseTest extends TestCase {
 	 */
 	public function testItemSearchSorting() {
 		$db = $this->getDb();
-		$pc['PC-55'] = (new Item('PC-55'))
+		$pc['PC55'] = (new Item('PC55'))
 			->addFeature(new Feature('brand', 'TI'))
 			->addFeature(new Feature('model', 'GreyPC-\'98'))
 			->addFeature(new Feature('type', 'case'))
 			->addFeature(new Feature('motherboard-form-factor', 'atx'));
-		$pc['PC-20'] = (new Item('PC-20'))
+		$pc['PC20'] = (new Item('PC20'))
 			->addFeature(new Feature('brand', 'Dill'))
 			->addFeature(new Feature('model', 'DI-360'))
 			->addFeature(new Feature('type', 'case'))
 			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
 			->addFeature(new Feature('color', 'black'))
 			->addFeature(new Feature('working', 'yes'));
-		$pc['PC-21'] = (new Item('PC-21'))
+		$pc['PC21'] = (new Item('PC21'))
 			->addFeature(new Feature('brand', 'Dill'))
 			->addFeature(new Feature('model', 'DI-360'))
 			->addFeature(new Feature('type', 'case'))
 			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
 			->addFeature(new Feature('color', 'grey'))
 			->addFeature(new Feature('working', 'yes'));
-		$pc['PC-22'] = (new Item('PC-22'))
+		$pc['PC22'] = (new Item('PC22'))
 			->addFeature(new Feature('brand', 'Dill'))
 			->addFeature(new Feature('model', 'DI-360'))
 			->addFeature(new Feature('type', 'case'))
@@ -315,7 +315,7 @@ class DatabaseTest extends TestCase {
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(5, count($items), 'There should be 5 items');
 		/** @var Item[] $items */
-		foreach(['PC-20', 'PC-22', 'PC-21', 'SCHIFOMACCHINA', 'PC-55'] as $pos => $code) {
+		foreach(['PC20', 'PC22', 'PC21', 'SCHIFOMACCHINA', 'PC55'] as $pos => $code) {
 			$this->assertEquals($code, $items[$pos]->getCode(),
 				'Item in position ' . $pos . ' should be ' . $code . ' (it\'s ' . $items[$pos]->getCode() . ')');
 			$this->assertEquals($pc[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
@@ -325,7 +325,7 @@ class DatabaseTest extends TestCase {
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(5, count($items), 'There should be 5 items');
 		// no sorting options => sort by code
-		foreach(['PC-20', 'PC-21', 'PC-22', 'PC-55', 'SCHIFOMACCHINA'] as $pos => $code) {
+		foreach(['PC20', 'PC21', 'PC22', 'PC55', 'SCHIFOMACCHINA'] as $pos => $code) {
 			$this->assertEquals($code, $items[$pos]->getCode(),
 				'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
 			$this->assertEquals($pc[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
@@ -343,9 +343,9 @@ class DatabaseTest extends TestCase {
 	 */
 	public function testGettingItemsWithLocation() {
 		$db = $this->getDb();
-		$case = (new Item('PC-42'))->addFeature(new Feature('brand', 'TI'));
-		$discone1 = (new Item('SATAna-1'))->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'));
-		$discone2 = (new Item('SATAna-2'))->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'));
+		$case = (new Item('PC42'))->addFeature(new Feature('brand', 'TI'));
+		$discone1 = (new Item('SATAna1'))->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'));
+		$discone2 = (new Item('SATAna2'))->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'));
 		$case->addContent($discone1);
 		$case->addContent($discone2);
 		$db->itemDAO()->addItems([$case]);
@@ -356,11 +356,11 @@ class DatabaseTest extends TestCase {
 		$this->assertInstanceOf(Item::class, $items[0]);
 		$this->assertInstanceOf(Item::class, $items[1]);
 		/** @noinspection PhpUndefinedMethodInspection */
-		$this->assertEquals('PC-42', $items[0]->getAncestor(1));
+		$this->assertEquals('PC42', $items[0]->getAncestor(1));
 		/** @noinspection PhpUndefinedMethodInspection */
 		$this->assertEquals(null, $items[0]->getAncestor(2));
 		/** @noinspection PhpUndefinedMethodInspection */
-		$this->assertEquals('PC-42', $items[1]->getAncestor(1));
+		$this->assertEquals('PC42', $items[1]->getAncestor(1));
 		/** @noinspection PhpUndefinedMethodInspection */
 		$this->assertEquals(null, $items[1]->getAncestor(2));
 	}
@@ -370,26 +370,26 @@ class DatabaseTest extends TestCase {
 	 */
 	public function testItemSearchSerialization() {
 		$db = $this->getDb();
-		$pc['PC-55'] = (new Item('PC-55'))
+		$pc['PC55'] = (new Item('PC55'))
 			->addFeature(new Feature('brand', 'TI'))
 			->addFeature(new Feature('model', 'GreyPC-\'98'))
 			->addFeature(new Feature('type', 'case'))
 			->addFeature(new Feature('motherboard-form-factor', 'atx'));
-		$pc['PC-20'] = (new Item('PC-20'))
+		$pc['PC20'] = (new Item('PC20'))
 			->addFeature(new Feature('brand', 'Dill'))
 			->addFeature(new Feature('model', 'DI-360'))
 			->addFeature(new Feature('type', 'case'))
 			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
 			->addFeature(new Feature('color', 'black'))
 			->addFeature(new Feature('working', 'yes'));
-		$pc['PC-21'] = (new Item('PC-21'))
+		$pc['PC21'] = (new Item('PC21'))
 			->addFeature(new Feature('brand', 'Dill'))
 			->addFeature(new Feature('model', 'DI-360'))
 			->addFeature(new Feature('type', 'case'))
 			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
 			->addFeature(new Feature('color', 'grey'))
 			->addFeature(new Feature('working', 'yes'));
-		$pc['PC-22'] = (new Item('PC-22'))
+		$pc['PC22'] = (new Item('PC22'))
 			->addFeature(new Feature('brand', 'Dill'))
 			->addFeature(new Feature('model', 'DI-360'))
 			->addFeature(new Feature('type', 'case'))
@@ -408,7 +408,7 @@ class DatabaseTest extends TestCase {
 		$expected = [ // this ugly code courtesy of var_export
 			0 =>
 				[
-					'code' => 'PC-20',
+					'code' => 'PC20',
 					'features' =>
 						[
 							'brand' => 'Dill',
@@ -421,7 +421,7 @@ class DatabaseTest extends TestCase {
 				],
 			1 =>
 				[
-					'code' => 'PC-22',
+					'code' => 'PC22',
 					'features' =>
 						[
 							'brand' => 'Dill',
@@ -434,7 +434,7 @@ class DatabaseTest extends TestCase {
 				],
 			2 =>
 				[
-					'code' => 'PC-21',
+					'code' => 'PC21',
 					'features' =>
 						[
 							'brand' => 'Dill',
@@ -459,7 +459,7 @@ class DatabaseTest extends TestCase {
 				],
 			4 =>
 				[
-					'code' => 'PC-55',
+					'code' => 'PC55',
 					'features' =>
 						[
 							'brand' => 'TI',
@@ -484,33 +484,33 @@ class DatabaseTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 */
 	public function testItemSearchFiltering() {
-		$cpu['INTEL-1'] = (new Item('INTEL-1'))
+		$cpu['INTEL1'] = (new Item('INTEL1'))
 			->addFeature(new Feature('type', 'cpu'))
 			->addFeature(new Feature('brand', 'Intel-lighenzia'))
 			->addFeature(new Feature('model', 'Core 2.0 Trio'))
 			->addFeature(new Feature('frequency-hertz', 1400000000));
-		$cpu['INTEL-2'] = (new Item('INTEL-2'))
+		$cpu['INTEL2'] = (new Item('INTEL2'))
 			->addFeature(new Feature('type', 'cpu'))
 			->addFeature(new Feature('brand', 'Intel-lighenzia'))
 			->addFeature(new Feature('model', 'Core 3.0 Quadrio'))
 			->addFeature(new Feature('frequency-hertz', 2000000000));
-		$cpu['INTEL-3'] = (new Item('INTEL-3'))
+		$cpu['INTEL3'] = (new Item('INTEL3'))
 			->addFeature(new Feature('type', 'cpu'))
 			->addFeature(new Feature('brand', 'Intel-lighenzia'))
 			->addFeature(new Feature('model', 'Atomic 5L0W-NE55'))
 			->addFeature(new Feature('frequency-hertz', 42));
-		$cpu['INTEL-4'] = (new Item('INTEL-4'))
+		$cpu['INTEL4'] = (new Item('INTEL4'))
 			->addFeature(new Feature('type', 'cpu'))
 			->addFeature(new Feature('brand', 'Intel-lighenzia'))
 			->addFeature(new Feature('model', 'Centrino DellaNonna'))
 			->addFeature(new Feature('frequency-hertz', 1000000000));
-		$cpu['AMD-42'] = (new Item('AMD-42'))
+		$cpu['AMD42'] = (new Item('AMD42'))
 			->addFeature(new Feature('type', 'cpu'))
 			->addFeature(new Feature('brand', 'Advanced Magnificent Processors'))
 			->addFeature(new Feature('model', 'A4-200g'))
 			->addFeature(new Feature('notes', 'A4, 200 g/cm², come la carta.'))
 			->addFeature(new Feature('frequency-hertz', 1900000000));
-		$cpu['AMD-737'] = (new Item('AMD-737'))
+		$cpu['AMD737'] = (new Item('AMD737'))
 			->addFeature(new Feature('frequency-hertz', 3700000000))
 			->addFeature(new Feature('type', 'cpu'))
 			->addFeature(new Feature('brand', 'Advanced Magnificent Processors'))
@@ -523,7 +523,7 @@ class DatabaseTest extends TestCase {
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(6, count($items), 'There should be 6 items');
 		/** @var Item[] $items */
-		foreach(['AMD-42', 'AMD-737', 'INTEL-1', 'INTEL-2', 'INTEL-3', 'INTEL-4'] as $pos => $code) {
+		foreach(['AMD42', 'AMD737', 'INTEL1', 'INTEL2', 'INTEL3', 'INTEL4'] as $pos => $code) {
 			$this->assertEquals($code, $items[$pos]->getCode(), "Item in position $pos should be $code");
 			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
@@ -532,7 +532,7 @@ class DatabaseTest extends TestCase {
 			['frequency-hertz' => '-'], null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(6, count($items), 'There should be 6 items');
-		foreach(['AMD-737', 'INTEL-2', 'AMD-42', 'INTEL-1', 'INTEL-4', 'INTEL-3'] as $pos => $code) {
+		foreach(['AMD737', 'INTEL2', 'AMD42', 'INTEL1', 'INTEL4', 'INTEL3'] as $pos => $code) {
 			$this->assertEquals($code, $items[$pos]->getCode(), "Item in position $pos should be $code");
 			$this->assertEquals($cpu[$code], $items[$pos], "Item $code should be unchanged");
 		}
@@ -551,7 +551,7 @@ class DatabaseTest extends TestCase {
 			'There should be 4 items when using = (in this case query should use LIKE)');
 		$this->assertEquals($items, $itemsGeq,
 			'Same result set in same order when using >, < or = on a field that uses LIKE');
-		foreach(['INTEL-1', 'INTEL-2', 'INTEL-3', 'INTEL-4'] as $pos => $code) {
+		foreach(['INTEL1', 'INTEL2', 'INTEL3', 'INTEL4'] as $pos => $code) {
 			$this->assertEquals($code, $items[$pos]->getCode(), "Item in position $pos should be $code");
 			$this->assertEquals($cpu[$code], $items[$pos], "Item $code should be unchanged");
 		}
@@ -572,9 +572,9 @@ class DatabaseTest extends TestCase {
 			->addFeature(new Feature('type', 'location'));
 		$chernobyl
 			->addContent($tavolone)
-			->addContent((new Item('Armadio L'))
+			->addContent((new Item('ArmadioL'))
 				->addFeature(new Feature('type', 'location')))
-			->addContent((new Item('Armadio R'))
+			->addContent((new Item('ArmadioR'))
 				->addFeature(new Feature('type', 'location')));
 		$tavolone
 			->addContent(
@@ -585,28 +585,28 @@ class DatabaseTest extends TestCase {
 					->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
 					->addFeature(new Feature('color', 'white'))
 			);
-		$ti = (new Item('PC-TI'))
+		$ti = (new Item('PCTI'))
 			->addFeature(new Feature('brand', 'TI'))
 			->addFeature(new Feature('type', 'case'))
 			->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
 			->addFeature(new Feature('color', 'white'))
 			->addContent(
-				(new Item('RAM-22'))
+				(new Item('RAM22'))
 					->addFeature(new Feature('type', 'ram'))
 					->addFeature(new Feature('capacity-byte', 32))
 			)
 			->addContent(
-				(new Item('RAM-23'))
+				(new Item('RAM23'))
 					->addFeature(new Feature('type', 'ram'))
 					->addFeature(new Feature('capacity-byte', 32))
 			)
 			->addContent(
-				(new Item('PC-TI-MOBO'))
+				(new Item('PCTIMOBO'))
 					->addFeature(new Feature('type', 'motherboard'))
 					->addFeature(new Feature('color', 'green'))
 			)
 			->addContent(
-				(new Item('PC-TI-CPU'))
+				(new Item('PCTICPU'))
 					->addFeature(new Feature('type', 'cpu'))
 					->addFeature(new Feature('brand', 'Intel-lighenzia'))
 					->addFeature(new Feature('model', 'Atomic 5L0W-NE55'))
@@ -620,17 +620,17 @@ class DatabaseTest extends TestCase {
 				->addFeature(new Feature('motherboard-form-factor', 'atx'))
 				->addFeature(new Feature('color', 'grey'))
 				->addContent(
-					(new Item('RAM-3342'))
+					(new Item('RAM3342'))
 						->addFeature(new Feature('type', 'ram'))
 						->addFeature(new Feature('capacity-byte', 1073741824))
 				)
 				->addContent(
-					(new Item('RAM-2452'))
+					(new Item('RAM2452'))
 						->addFeature(new Feature('type', 'ram'))
 						->addFeature(new Feature('capacity-byte', 1073741824))
 				)
 		);
-		$chernobyl->addContent($zb = (new Item('Zona blu'))->addFeature(new Feature('type', 'location')));
+		$chernobyl->addContent($zb = (new Item('ZonaBlu'))->addFeature(new Feature('type', 'location')));
 		$tavolone->addContent($ti);
 
 		$db = $this->getDb();
@@ -640,7 +640,7 @@ class DatabaseTest extends TestCase {
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'Only one root Item');
 
-		// Move TI from TAVOLONE to Zona blu.
+		// Move TI from TAVOLONE to ZonaBlu.
 		$db->beginTransaction();
 		$db->treeDAO()->moveItem($ti, $zb);
 
@@ -654,31 +654,31 @@ class DatabaseTest extends TestCase {
 		$this->assertContainsOnly(Item::class, $itemz = $chernobylPost->getContents());
 		/** @var Item[] $itemz */
 		foreach($itemz as $item) {
-			if($item->getCode() === 'Zona blu') {
+			if($item->getCode() === 'ZonaBlu') {
 				$zonaBluPost = $item;
 			} else if($item->getCode() === 'TAVOLONE') {
 				$tavolonePost = $item;
 			}
 		}
-		$this->assertInstanceOf(Item::class, $zonaBluPost, 'Zona blu should still exist');
+		$this->assertInstanceOf(Item::class, $zonaBluPost, 'ZonaBlu should still exist');
 		$this->assertInstanceOf(Item::class, $tavolonePost, 'TAVOLONE should still exist');
 		/** @var Item $zonaBluPost */
 		/** @var Item $tavolonePost */
 		$tiShouldBeHere = null;
 		$tiShouldNotBeHere = null;
 		foreach($zonaBluPost->getContents() as $item) {
-			if($item->getCode() === 'PC-TI') {
+			if($item->getCode() === 'PCTI') {
 				$tiShouldBeHere = $item;
 			}
 		}
 		foreach($tavolonePost->getContents() as $item) {
-			if($item->getCode() === 'PC-TI') {
+			if($item->getCode() === 'PCTI') {
 				$tiShouldNotBeHere = $item;
 			}
 		}
-		$this->assertInstanceOf(Item::class, $tiShouldBeHere, 'PC-TI should have moved to Zona blu');
-		$this->assertEquals(null, $tiShouldNotBeHere, 'TAVOLONE should not contain PC-TI');
-		$this->assertTrue($this->itemCompare($ti, $tiShouldBeHere), 'PC-TI should have the same content');
+		$this->assertInstanceOf(Item::class, $tiShouldBeHere, 'PCTI should have moved to ZonaBlu');
+		$this->assertEquals(null, $tiShouldNotBeHere, 'TAVOLONE should not contain PCTI');
+		$this->assertTrue($this->itemCompare($ti, $tiShouldBeHere), 'PCTI should have the same content');
 	}
 
 	/**

@@ -8,9 +8,9 @@ class ItemIncompleteTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemValidCodeString() {
-		$pc77 = new ItemIncomplete('PC-77');
-		$this->assertEquals('PC-77', (string) $pc77);
-		$this->assertEquals('PC-77', $pc77->getCode());
+		$pc77 = new ItemIncomplete('PC77');
+		$this->assertEquals('PC77', (string) $pc77);
+		$this->assertEquals('PC77', $pc77->getCode());
 	}
 
 	/**

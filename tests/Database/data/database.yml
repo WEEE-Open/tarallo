@@ -1,25 +1,22 @@
 User:
   -
-    UserID: 1
     Name: asd
     Password: "$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6"
     Enabled: 1
+    SessionExpiry: 0
   -
-    UserID: 2
     Name: not-enabled
     Password: "$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6"
     Enabled: 0
     Session: this-really-is-a-session-1234567
     SessionExpiry: 9223372036854775807
   -
-    UserID: 3
     Name: asd-expired
     Password: "$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6"
     Enabled: 1
     Session: this-really-is-a-session-7654321
     SessionExpiry: 1337
   -
-    UserID: 4
     Name: asd-valid
     Password: "$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6"
     Enabled: 1

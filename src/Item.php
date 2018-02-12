@@ -26,7 +26,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 			try {
 				parent::__construct($code);
 			} catch(\InvalidArgumentException $e) {
-				throw new \InvalidArgumentException("Item code must be a non-empty string or null");
+				throw new \InvalidArgumentException("Item code must be a non-empty alphanumeric string or null");
 			}
 		}
 		$this->product = $product;

@@ -178,11 +178,9 @@ CREATE TABLE `Codes` (
 CREATE TABLE `User` (
 	`Name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Password` text COLLATE utf8mb4_unicode_ci NOT NULL,
-	`Session` char(32) COLLATE ascii,
-	`SessionExpiry` timestamp NOT NULL DEFAULT 0, -- ON UPDATE CURRENT_TIMESTAMP + INTERVAL 6 HOUR,
+	`Session` char(32) COLLATE utf8mb4_bin,
+	`SessionExpiry` bigint unsigned NOT NULL DEFAULT 0, -- timestamp NOT NULL DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP + INTERVAL 6 HOUR,
 	`Enabled` boolean NOT NULL DEFAULT FALSE,
-	CHECK ((`Session` IS NOT NULL AND `SessionExpiry` IS NOT NULL)
-		OR (`Session` IS NULL AND `SessionExpiry` IS NULL)),
 	PRIMARY KEY (`Name`),
 	UNIQUE KEY (`Session`),
 	UNIQUE KEY (`Name`),
@@ -195,10 +193,8 @@ CREATE TABLE `User` (
 -- Now we're getting real.
 DELIMITER $$
 
-CREATE FUNCTION GenerateCode(IN currentPrefix varchar(20) CHARACTER SET 'utf8mb4'
-COLLATE 'utf8mb4_unicode_ci')
-	RETURNS varchar(190) CHARACTER SET 'utf8mb4'
-	COLLATE 'utf8mb4_unicode_ci'
+CREATE FUNCTION GenerateCode(currentPrefix varchar(20))
+	RETURNS varchar(190)
 MODIFIES SQL DATA
 	-- This means that in two identical databases, with the same values everywhere, the function produces the same
 	-- results, which is useful to know for replication. Setting to deterministic also enables some optimizations,
@@ -242,10 +238,13 @@ DETERMINISTIC
 
 	END$$
 
+DELIMITER ;
+DELIMITER $$
+
 -- TODO: extend and use to log in?
-CREATE PROCEDURE SetUser(IN username varchar(100) COLLATE utf8mb4_unicode_ci)
+CREATE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
 	BEGIN
 		SET @taralloAuditUsername = username;
-	END $$
+	END$$
 
 DELIMITER ;
