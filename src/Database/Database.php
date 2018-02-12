@@ -7,9 +7,9 @@ class Database {
 	private $pdo = null;
 	private $userDAO = null;
 	private $itemDAO = null;
+	private $searchDAO = null;
 	private $featureDAO = null;
 	private $treeDAO = null;
-	private $modificationDAO = null;
 	private $username;
 	private $password;
 	private $dsn;
@@ -75,6 +75,14 @@ class Database {
 		return $this->itemDAO;
 	}
 
+	public function searchDAO() {
+		if($this->searchDAO === null) {
+			$this->searchDAO = new SearchDAO($this, $this->callback);
+		}
+
+		return $this->searchDAO;
+	}
+
 	public function featureDAO() {
 		if($this->featureDAO === null) {
 			$this->featureDAO = new FeatureDAO($this, $this->callback);
@@ -83,20 +91,36 @@ class Database {
 		return $this->featureDAO;
 	}
 
-	public function modificationDAO() {
-		if($this->modificationDAO === null) {
-			$this->modificationDAO = new ModificationDAO($this, $this->callback);
-		}
-
-		return $this->modificationDAO;
-	}
-
 	public function treeDAO() {
 		if($this->treeDAO === null) {
 			$this->treeDAO = new TreeDAO($this, $this->callback);
 		}
 
 		return $this->treeDAO;
+	}
+
+	public function beginTransaction() {
+		$pdo = $this->getPDO();
+		if($pdo->inTransaction()) {
+			throw new \LogicException('Trying to start nested transactions');
+		}
+		$pdo->beginTransaction();
+	}
+
+	public function commit() {
+		$pdo = $this->getPDO();
+		if(!$pdo->inTransaction()) {
+			throw new \LogicException('Trying to commit transaction that hasn\'t been started');
+		}
+		$pdo->commit();
+	}
+
+	public function rollback() {
+		$pdo = $this->getPDO();
+		if(!$pdo->inTransaction()) {
+			throw new \LogicException('Trying to rollback transaction that hasn\'t been started');
+		}
+		$pdo->rollBack();
 	}
 
 }

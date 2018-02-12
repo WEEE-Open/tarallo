@@ -9,7 +9,6 @@ use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\SearchTriplet;
-use WEEEOpen\Tarallo\Server\User;
 
 class DatabaseTest extends TestCase {
 	use TestCaseTrait;
@@ -129,13 +128,13 @@ class DatabaseTest extends TestCase {
 	 * in a sensible manner will be difficult. But some tests are better than no tests at all, right?
 	 *
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
-	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 */
 	public function testAddingAndRetrievingSomeItems() {
 		$db = $this->getDb();
-		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$db->beginTransaction();
 		/** @var $case Item */ // PHPStorm suddenly doesn't recognize chained methods. Only the last one of every chain, specifically.
 		$case = (new Item('PC-42'))
 			->addFeature(new Feature('brand', 'TI'))
@@ -155,9 +154,9 @@ class DatabaseTest extends TestCase {
 		$case->addContent($discone1);
 		$case->addContent($discone2);
 		$db->itemDAO()->addItems($case);
-		$db->modificationDAO()->modificationCommit();
+		$db->commit();
 
-		$items = $db->itemDAO()->getItems(['PC-42'], null, null, null, null, null);
+		$items = $db->searchDAO()->getItems(['PC-42'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'Only one root Item');
 		/** @var Item $newCase */
@@ -182,7 +181,7 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 */
 	public function testGettingPrefixes() {
 		$db = $this->getDb();
@@ -196,16 +195,16 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 */
 	public function testGettingPrefixesSkippingDuplicates() {
 		$db = $this->getDb();
 
-		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$db->beginTransaction();
 		for($i = 74; $i < 77; $i++) {
 			$db->itemDAO()->addItems((new Item('T' . $i))->addFeature(new Feature('type', 'keyboard')));
 		}
-		$db->modificationDAO()->modificationCommit();
+		$db->commit();
 
 		$codes = $db->itemDAO()->getNextCodes([0 => 'T']);
 		$this->assertEquals(1, count($codes));
@@ -219,13 +218,13 @@ class DatabaseTest extends TestCase {
 	 * in a sensible manner will be difficult. But some tests are better than no tests at all, right?
 	 *
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
-	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 */
 	public function testSubtreeRemoval() {
 		$db = $this->getDb();
-		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$db->beginTransaction();
 		/** @var $case Item */
 		$lab = (new Item('CHERNOBYL'));
 		$case = (new Item('PC-42'));
@@ -235,9 +234,9 @@ class DatabaseTest extends TestCase {
 		$case->addContent($discone2);
 		$lab->addContent($case);
 		$db->itemDAO()->addItems($lab);
-		$db->modificationDAO()->modificationCommit();
+		$db->commit();
 
-		$items = $db->itemDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
+		$items = $db->searchDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		/** @var Item[] $items */
 		$this->assertEquals(1, count($items), 'Only one root Item');
@@ -246,29 +245,29 @@ class DatabaseTest extends TestCase {
 		$this->assertEquals('PC-42', $case->getCode(), 'PC-42 is still there');
 		$this->assertTrue($this->itemCompare($lab, $items[0]), 'Lab should be unchanged');
 
-		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$db->beginTransaction();
 		$db->treeDAO()->removeFromTree($case);
-		$db->modificationDAO()->modificationCommit();
+		$db->commit();
 
-		$items = $db->itemDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
+		$items = $db->searchDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'Still only one root Item');
 		$this->assertEquals(0, count($items[0]->getContents()), 'Lab is empty');
 
-		$items = $db->itemDAO()->getItems(['PC-42'], null, null, null, null, null);
+		$items = $db->searchDAO()->getItems(['PC-42'], null, null, null, null, null);
 		$this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
 
-		$items = $db->itemDAO()->getItems(['HDD-1'], null, null, null, null, null);
+		$items = $db->searchDAO()->getItems(['HDD-1'], null, null, null, null, null);
 		$this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
 
-		$items = $db->itemDAO()->getItems(['HDD-2'], null, null, null, null, null);
+		$items = $db->searchDAO()->getItems(['HDD-2'], null, null, null, null, null);
 		$this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
 
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
-	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 */
@@ -307,11 +306,11 @@ class DatabaseTest extends TestCase {
 			->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
 			->addFeature(new Feature('color', 'white')); // based on a real PC we have in our laboratory.
 
-		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$db->beginTransaction();
 		$db->itemDAO()->addItems($pc);
-		$db->modificationDAO()->modificationCommit();
+		$db->commit();
 
-		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null,
+		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null,
 			['motherboard-form-factor' => '-', 'color' => '+'], null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(5, count($items), 'There should be 5 items');
@@ -322,7 +321,7 @@ class DatabaseTest extends TestCase {
 			$this->assertEquals($pc[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 
-		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null, null, null);
+		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(5, count($items), 'There should be 5 items');
 		// no sorting options => sort by code
@@ -332,7 +331,7 @@ class DatabaseTest extends TestCase {
 			$this->assertEquals($pc[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 
-		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('color', '=', 'white')], null, null, null, null);
+		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('color', '=', 'white')], null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'There should be only one item');
 		$this->assertEquals(reset($items), $pc['SCHIFOMACCHINA'],
@@ -340,20 +339,20 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 */
 	public function testGettingItemsWithLocation() {
 		$db = $this->getDb();
-		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$db->beginTransaction();
 		$case = (new Item('PC-42'))->addFeature(new Feature('brand', 'TI'));
 		$discone1 = (new Item('SATAna-1'))->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'));
 		$discone2 = (new Item('SATAna-2'))->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'));
 		$case->addContent($discone1);
 		$case->addContent($discone2);
 		$db->itemDAO()->addItems($case);
-		$db->modificationDAO()->modificationCommit();
+		$db->commit();
 
-		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('brand', '=', 'SATAn Storage Corporation Inc.')],
+		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('brand', '=', 'SATAn Storage Corporation Inc.')],
 			null, null, null, null);
 		$this->assertEquals(2, count($items));
 		$this->assertInstanceOf(Item::class, $items[0]);
@@ -406,10 +405,10 @@ class DatabaseTest extends TestCase {
 			->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
 			->addFeature(new Feature('color', 'white'));
 
-		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$db->beginTransaction();
 		$db->itemDAO()->addItems($pc);
-		$db->modificationDAO()->modificationCommit();
-		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null,
+		$db->commit();
+		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null,
 			['motherboard-form-factor' => '-', 'color' => '+'], null);
 		$expected = [ // this ugly code courtesy of var_export
 			0 =>
@@ -485,7 +484,7 @@ class DatabaseTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
-	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 */
@@ -523,11 +522,11 @@ class DatabaseTest extends TestCase {
 			->addFeature(new Feature('model', '737-800'));
 		$db = $this->getDb();
 
-		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$db->beginTransaction();
 		$db->itemDAO()->addItems($cpu);
-		$db->modificationDAO()->modificationCommit();
+		$db->commit();
 
-		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('type', '=', 'cpu')], null, null, null, null);
+		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('type', '=', 'cpu')], null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(6, count($items), 'There should be 6 items');
 		/** @var Item[] $items */
@@ -536,7 +535,7 @@ class DatabaseTest extends TestCase {
 			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 
-		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('type', '=', 'cpu')], null, null,
+		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('type', '=', 'cpu')], null, null,
 			['frequency-hertz' => '-'], null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(6, count($items), 'There should be 6 items');
@@ -545,15 +544,15 @@ class DatabaseTest extends TestCase {
 			$this->assertEquals($cpu[$code], $items[$pos], "Item $code should be unchanged");
 		}
 
-		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('brand', '=', 'Intel')], null, null, null, null);
+		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('brand', '=', 'Intel')], null, null, null, null);
 		$this->assertEquals(0, count($items), 'No items returned without wildcard');
 
-		$itemsGeq = $db->itemDAO()->getItems(null, [new SearchTriplet('brand', '>', 'Intel%')], null, null, null, null);
+		$itemsGeq = $db->searchDAO()->getItems(null, [new SearchTriplet('brand', '>', 'Intel%')], null, null, null, null);
 		$this->assertContainsOnly(Item::class, $itemsGeq);
 		$this->assertEquals(4, count($itemsGeq),
 			'There should be 4 items when using > (query should contain LIKE regardless)');
 
-		$items = $db->itemDAO()->getItems(null, [new SearchTriplet('brand', '=', 'Intel%')], null, null, null, null);
+		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('brand', '=', 'Intel%')], null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(4, count($items),
 			'There should be 4 items when using = (in this case query should use LIKE)');
@@ -567,7 +566,7 @@ class DatabaseTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
-	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 */
@@ -643,20 +642,20 @@ class DatabaseTest extends TestCase {
 
 		$db = $this->getDb();
 
-		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$db->beginTransaction();
 		$db->itemDAO()->addItems($chernobyl);
-		$db->modificationDAO()->modificationCommit();
+		$db->commit();
 
-		$items = $db->itemDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
+		$items = $db->searchDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'Only one root Item');
 
 		// Move TI from TAVOLONE to Zona blu.
-		$db->modificationDAO()->modifcationBegin(new User('asd', 'asd'));
+		$db->beginTransaction();
 		$db->treeDAO()->moveItem($ti, $zb);
-		$db->modificationDAO()->modificationCommit();
+		$db->commit();
 
-		$items = $db->itemDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
+		$items = $db->searchDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(1, count($items), 'Only one root Item');
 		/** @var Item $chernobylPost */

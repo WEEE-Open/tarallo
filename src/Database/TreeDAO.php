@@ -16,7 +16,6 @@ final class TreeDAO extends DAO {
 		if($parent !== null) {
 			$this->setParent($parent, $child);
 		}
-		$this->database->modificationDAO()->setItemMoved($child, $parent);
 	}
 
 	/**
@@ -31,7 +30,6 @@ final class TreeDAO extends DAO {
 		if($newParent !== null) {
 			$this->setParent($newParent, $item);
 		}
-		$this->database->modificationDAO()->setItemMoved($item, $newParent);
 	}
 
 	private $removeFromTreeStatement = null;
@@ -54,7 +52,6 @@ final class TreeDAO extends DAO {
 		}
 
 		$this->removeFromTreeStatement->execute([$this->database->itemDAO()->getItemId($item)]);
-		$this->database->modificationDAO()->setItemMoved($item, null);
 	}
 
 	private $addItemAsRootStatement = null;

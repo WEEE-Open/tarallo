@@ -8,7 +8,7 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 -- USE `tarallo`;
 
 CREATE TABLE `Feature` (
-	`FeatureID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+	`FeatureID` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`FeatureName` varchar(190)
 	COLLATE utf8mb4_unicode_ci NOT NULL,
 	`FeatureType` int NOT NULL, -- 0 = text, 1 = number, 2 = "enum"
@@ -22,12 +22,12 @@ CREATE TABLE `Feature` (
 
 
 CREATE TABLE `Item` (
-	`ItemID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+	`ItemID` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`Code` varchar(190)
 	COLLATE utf8mb4_unicode_ci NOT NULL,
 	`IsDefault` tinyint(1) NOT NULL,
 	`Movable` tinyint(1) NOT NULL DEFAULT 1,
-	`Default` bigint(20) unsigned DEFAULT NULL,
+	`Default` bigint(20) UNSIGNED DEFAULT NULL,
 	UNIQUE KEY (`Code`),
 	INDEX (`Code`),
 	FOREIGN KEY (`Default`) REFERENCES `Item` (`ItemID`)
@@ -42,8 +42,8 @@ CREATE TABLE `Item` (
 
 
 CREATE TABLE `FeatureValue` (
-	`FeatureID` bigint(20) unsigned NOT NULL,
-	`ValueEnum` bigint(20) unsigned NOT NULL,
+	`FeatureID` bigint(20) UNSIGNED NOT NULL,
+	`ValueEnum` bigint(20) UNSIGNED NOT NULL,
 	`ValueText` text NOT NULL,
 	PRIMARY KEY (`FeatureID`, `ValueEnum`),
 	CONSTRAINT FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`)
@@ -56,10 +56,10 @@ CREATE TABLE `FeatureValue` (
 
 
 CREATE TABLE `ItemFeature` (
-	`FeatureID` bigint(20) unsigned NOT NULL,
-	`ItemID` bigint(20) unsigned NOT NULL,
-	`Value` bigint(20) unsigned DEFAULT NULL,
-	`ValueEnum` bigint(20) unsigned DEFAULT NULL,
+	`FeatureID` bigint(20) UNSIGNED NOT NULL,
+	`ItemID` bigint(20) UNSIGNED NOT NULL,
+	`Value` bigint(20) UNSIGNED DEFAULT NULL,
+	`ValueEnum` bigint(20) UNSIGNED DEFAULT NULL,
 	`ValueText` text DEFAULT NULL,
 	PRIMARY KEY (`FeatureID`, `ItemID`),
 	KEY `ItemID` (`ItemID`),
@@ -81,79 +81,79 @@ CREATE TABLE `ItemFeature` (
 	DEFAULT CHARSET = utf8mb4
 	COLLATE = utf8mb4_unicode_ci;
 
-
-CREATE TABLE `ItemLocationModification` (
-	`ModificationID` bigint(20) unsigned NOT NULL,
-	`ItemID` bigint(20) unsigned NOT NULL,
-	-- parentFrom is useless if adding an item also creates a new row here: first row is the original parent...
-	`ParentTo` bigint(20) unsigned NOT NULL,
-	PRIMARY KEY (`ModificationID`, `ItemID`),
-	KEY (`ParentTo`),
-	CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE,
-	CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE,
-	CONSTRAINT FOREIGN KEY (`ParentTo`) REFERENCES `Item` (`ItemID`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE
-)
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
-
-CREATE TABLE `ItemModificationDelete` (
-	`ModificationID` bigint(20) unsigned NOT NULL,
-	`ItemID` bigint(20) unsigned NOT NULL,
-	PRIMARY KEY (`ModificationID`, `ItemID`),
-	KEY (`ItemID`),
-	CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE,
-	CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE
-)
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
-
-CREATE TABLE `ItemModification` (
-	`ModificationID` bigint(20) unsigned NOT NULL,
-	`ItemID` bigint(20) unsigned NOT NULL,
-	PRIMARY KEY (`ModificationID`, `ItemID`),
-	KEY (`ItemID`),
-	CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE,
-	CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE
-)
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
-
-CREATE TABLE `Modification` (
-	`ModificationID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-	`UserID` bigint(20) unsigned NOT NULL,
-	`Date` bigint(20) unsigned NOT NULL,
-	`Notes` text COLLATE utf8mb4_unicode_ci,
-	PRIMARY KEY (`ModificationID`),
-	KEY (`UserID`),
-	CONSTRAINT FOREIGN KEY (`UserID`) REFERENCES `User` (`UserID`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE
-)
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
+-- To be added again in future and managed via triggers
+# CREATE TABLE `ItemLocationModification` (
+# 	`ModificationID` bigint(20) unsigned NOT NULL,
+# 	`ItemID` bigint(20) unsigned NOT NULL,
+# 	-- parentFrom is useless if adding an item also creates a new row here: first row is the original parent...
+# 	`ParentTo` bigint(20) unsigned NOT NULL,
+# 	PRIMARY KEY (`ModificationID`, `ItemID`),
+# 	KEY (`ParentTo`),
+# 	CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`)
+# 		ON DELETE NO ACTION
+# 		ON UPDATE CASCADE,
+# 	CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`)
+# 		ON DELETE NO ACTION
+# 		ON UPDATE CASCADE,
+# 	CONSTRAINT FOREIGN KEY (`ParentTo`) REFERENCES `Item` (`ItemID`)
+# 		ON DELETE NO ACTION
+# 		ON UPDATE CASCADE
+# )
+# 	ENGINE = InnoDB
+# 	DEFAULT CHARSET = utf8mb4
+# 	COLLATE = utf8mb4_unicode_ci;
+#
+# CREATE TABLE `ItemModificationDelete` (
+# 	`ModificationID` bigint(20) unsigned NOT NULL,
+# 	`ItemID` bigint(20) unsigned NOT NULL,
+# 	PRIMARY KEY (`ModificationID`, `ItemID`),
+# 	KEY (`ItemID`),
+# 	CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`)
+# 		ON DELETE NO ACTION
+# 		ON UPDATE CASCADE,
+# 	CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`)
+# 		ON DELETE NO ACTION
+# 		ON UPDATE CASCADE
+# )
+# 	ENGINE = InnoDB
+# 	DEFAULT CHARSET = utf8mb4
+# 	COLLATE = utf8mb4_unicode_ci;
+#
+# CREATE TABLE `ItemModification` (
+# 	`ModificationID` bigint(20) unsigned NOT NULL,
+# 	`ItemID` bigint(20) unsigned NOT NULL,
+# 	PRIMARY KEY (`ModificationID`, `ItemID`),
+# 	KEY (`ItemID`),
+# 	CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`)
+# 		ON DELETE NO ACTION
+# 		ON UPDATE CASCADE,
+# 	CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`)
+# 		ON DELETE NO ACTION
+# 		ON UPDATE CASCADE
+# )
+# 	ENGINE = InnoDB
+# 	DEFAULT CHARSET = utf8mb4
+# 	COLLATE = utf8mb4_unicode_ci;
+#
+# CREATE TABLE `Modification` (
+# 	`ModificationID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+# 	`UserID` bigint(20) unsigned NOT NULL,
+# 	`Date` bigint(20) unsigned NOT NULL,
+# 	`Notes` text COLLATE utf8mb4_unicode_ci,
+# 	PRIMARY KEY (`ModificationID`),
+# 	KEY (`UserID`),
+# 	CONSTRAINT FOREIGN KEY (`UserID`) REFERENCES `User` (`UserID`)
+# 		ON DELETE NO ACTION
+# 		ON UPDATE CASCADE
+# )
+# 	ENGINE = InnoDB
+# 	DEFAULT CHARSET = utf8mb4
+# 	COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `Tree` (
-	`AncestorID` bigint(20) unsigned NOT NULL,
-	`DescendantID` bigint(20) unsigned NOT NULL,
-	`Depth` int(10) unsigned NOT NULL, -- This may need an index
+	`AncestorID` bigint(20) UNSIGNED NOT NULL,
+	`DescendantID` bigint(20) UNSIGNED NOT NULL,
+	`Depth` int(10) UNSIGNED NOT NULL, -- This may need an index
 	PRIMARY KEY (`AncestorID`, `DescendantID`),
 	CONSTRAINT FOREIGN KEY (`AncestorID`) REFERENCES `Item` (`ItemID`)
 		ON DELETE NO ACTION
@@ -168,7 +168,7 @@ CREATE TABLE `Tree` (
 
 CREATE TABLE `Codes` (
 	`Prefix` varchar(20) NOT NULL,
-	`Integer` bigint(20) unsigned NOT NULL DEFAULT 0,
+	`Integer` bigint(20) UNSIGNED NOT NULL DEFAULT 0,
 	PRIMARY KEY (`Prefix`)
 )
 	ENGINE = InnoDB
@@ -176,14 +176,14 @@ CREATE TABLE `Codes` (
 	COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `User` (
-	`UserID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+	`UserID` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`Name` varchar(190) -- 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
 	COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Password` text COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Session` char(32)
 	COLLATE utf8mb4_unicode_ci,
 	`SessionExpiry` bigint(20),
-	`Enabled` tinyint(1) unsigned NOT NULL DEFAULT 0,
+	`Enabled` tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
 	CHECK ((`Session` IS NOT NULL AND `SessionExpiry` IS NOT NULL)
 			OR (`Session` IS NULL AND `SessionExpiry` IS NULL)),
 	PRIMARY KEY (`UserID`),
