@@ -786,7 +786,7 @@ class DatabaseTest extends TestCase {
 	 */
 	private function getDb() {
 		if($this->db === null) {
-			$db = new Database('root', 'root', 'mysql:dbname=tarallo_test;host=mysql.local');
+			$db = new Database('root', 'root', 'mysql:dbname=tarallo_test;host=127.0.0.1');
 			//$dbr  = new \ReflectionObject($db);
 			//$prop = $dbr->getProperty('pdo');
 			//$prop->setAccessible(true);
