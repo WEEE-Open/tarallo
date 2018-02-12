@@ -18,10 +18,9 @@ class UserTest extends TestCase {
 
 	/**
 	 * @covers  \WEEEOpen\Tarallo\Server\User
-	 *
-	 * @param User $user "new User('asd', null, null);".
 	 */
-	public function testReadHashNotAvailable($user) {
+	public function testReadHashNotAvailable() {
+		$user = new User('asd');
 		$this->expectException(LogicException::class);
 		$user->getHash();
 	}
@@ -120,17 +119,5 @@ class UserTest extends TestCase {
 		$this->assertEquals('asd', (string) $user2); // should not throw
 
 		return [$user2, $hash];
-	}
-
-	/**
-	 * Pointless exercise in style of using output of previous test.
-	 *
-	 * @covers  \WEEEOpen\Tarallo\Server\User
-	 *
-	 * @param $userAndHash array with user and password hash, respectively
-	 */
-	public function testPasswordHashMemoization($userAndHash) {
-		/** @var $userAndHash [0] User */
-		$this->assertEquals($userAndHash[1], $userAndHash[0]->getHash());
 	}
 }

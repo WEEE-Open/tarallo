@@ -13,10 +13,8 @@ class ItemIncomplete implements \JsonSerializable {
 
 	// TODO: more $code validation?
 	function __construct($code) {
-		if(is_string($code)) {
-			if(trim($code) !== '') {
-				$this->code = $code;
-			}
+		if(is_string($code) && trim($code) !== '') {
+			$this->code = $code;
 		} else {
 			throw new \InvalidArgumentException('ItemIncomplete code must be a non-null string');
 		}

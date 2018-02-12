@@ -61,7 +61,7 @@ Feature:
     FeatureType: 1
   -
     FeatureID: 9
-    FeatureName: frequency-hz
+    FeatureName: frequency-hertz
     FeatureType: 1
   -
     FeatureID: 10

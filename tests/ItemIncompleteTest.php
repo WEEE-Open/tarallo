@@ -17,17 +17,16 @@ class ItemIncompleteTest extends TestCase {
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
-	public function testItemValidCodeInt() {
-		$quarantadue = new ItemIncomplete(42);
-		$this->assertEquals('42', (string) $quarantadue);
-		$this->assertEquals(42, $quarantadue->getCode());
+	public function testItemIntCode() {
+		$this->expectException(\InvalidArgumentException::class);
+		new ItemIncomplete(42);
 	}
 
 	/**
 	 * @covers         \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemNullCode() {
-		$this->expectException(InvalidParameterException::class);
+		$this->expectException(\InvalidArgumentException::class);
 		new ItemIncomplete(null);
 	}
 
@@ -35,7 +34,7 @@ class ItemIncompleteTest extends TestCase {
 	 * @covers         \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemEmptyCode() {
-		$this->expectException(InvalidParameterException::class);
+		$this->expectException(\InvalidArgumentException::class);
 		new ItemIncomplete('');
 	}
 
@@ -43,7 +42,7 @@ class ItemIncompleteTest extends TestCase {
 	 * @covers         \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemArrayCode() {
-		$this->expectException(InvalidParameterException::class);
+		$this->expectException(\InvalidArgumentException::class);
 		new ItemIncomplete(["cose" => "a caso"]);
 	}
 

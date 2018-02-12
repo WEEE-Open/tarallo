@@ -695,19 +695,20 @@ class DatabaseTest extends TestCase {
 		$tavolone->addContent(
 			(new Item('ROSETTA'))
 				->addFeature(new Feature('brand', 'pH'))
-				->addFeature(new Feature('model', 'ReliaPro MLG555')))
-			->addFeature(new Feature('type', 'case'))
-			->addFeature(new Feature('motherboard-form-factor', 'atx'))
-			->addFeature(new Feature('color', 'grey'))
-			->addContent(
-				(new Item('RAM-3342'))
-					->addFeature(new Feature('type', 'ram'))
-					->addFeature(new Feature('capacity-byte', 1073741824))
-			)
-			->addContent(
-				(new Item('RAM-2452'))
-					->addFeature(new Feature('type', 'ram'))
-					->addFeature(new Feature('capacity-byte', 1073741824))
+				->addFeature(new Feature('model', 'ReliaPro MLG555'))
+				->addFeature(new Feature('type', 'case'))
+				->addFeature(new Feature('motherboard-form-factor', 'atx'))
+				->addFeature(new Feature('color', 'grey'))
+				->addContent(
+					(new Item('RAM-3342'))
+						->addFeature(new Feature('type', 'ram'))
+						->addFeature(new Feature('capacity-byte', 1073741824))
+				)
+				->addContent(
+					(new Item('RAM-2452'))
+						->addFeature(new Feature('type', 'ram'))
+						->addFeature(new Feature('capacity-byte', 1073741824))
+				)
 			);
 		$chernobyl->addContent($zb = (new Item('Zona blu'))->addFeature(new Feature('type', 'location')));
 		$tavolone->addContent($ti);
