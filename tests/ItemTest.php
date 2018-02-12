@@ -8,8 +8,8 @@ use WEEEOpen\Tarallo\Server\Item;
 class ItemTest extends TestCase {
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemValidCodeString() {
 		$pc77 = new Item('PC-77');
@@ -20,8 +20,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @covers         \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @covers \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemInvalidDefaultEmptyString() {
 		$this->expectException(\TypeError::class);
@@ -29,8 +29,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemValidAncestors() {
 		$hdd = new Item('HDD-123');
@@ -63,8 +63,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemInvalidAncestorAdd() {
 		$hdd = new Item('HDD-123');
@@ -73,8 +73,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemInvalidAncestorAdd2() {
 		$hdd = new Item('HDD-123');
@@ -83,8 +83,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemInvalidAncestorGet() {
 		$hdd = new Item('HDD-123');
@@ -93,8 +93,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemInvalidAncestorGet2() {
 		$hdd = new Item('HDD-123');
@@ -103,8 +103,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemInvalidCodeInt() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -112,8 +112,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemNullCode() {
 		$it = new Item(null);
@@ -122,8 +122,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemSetCode() {
 		$it = new Item(null);
@@ -132,8 +132,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemEmptyCode() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -141,8 +141,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemFeature() {
 		$item = new Item('TEST');
@@ -153,8 +153,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemDeleteFeature() {
 		$item = new Item('TEST');
@@ -168,8 +168,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemToString() {
 		$item = new Item('TEST');
@@ -179,8 +179,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemMultipleFeatures() {
 		$item = new Item('TEST');
@@ -201,8 +201,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testInvalidFeatureNameArray() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -210,8 +210,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testInvalidFeatureNameInteger() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -219,8 +219,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testInvalidFeatureValueNegative() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -228,8 +228,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testInvalidFeatureValueArray() {
 		$this->expectException(\InvalidArgumentException::class);
@@ -237,8 +237,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testInvalidFeatureDuplicate() {
 		$item = (new Item('TEST'))->addFeature(new Feature('capacity-byte', 500));
@@ -247,8 +247,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testItemMultipleFeaturesArray() {
 		$item = new Item('TEST');
@@ -272,8 +272,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testValidAddChild() {
 		$item = new Item('TEST');
@@ -288,8 +288,8 @@ class ItemTest extends TestCase {
 	}
 
 	/**
-	 * @covers         \WEEEOpen\Tarallo\Server\Item
-	 * @uses           \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
 	public function testMultipleAddChild() {
 		$item = new Item('TEST');

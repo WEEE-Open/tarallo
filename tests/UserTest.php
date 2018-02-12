@@ -17,7 +17,7 @@ class UserTest extends TestCase {
 	}
 
 	/**
-	 * @covers  \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\Server\User
 	 */
 	public function testReadHashNotAvailable() {
 		$user = new User('asd');

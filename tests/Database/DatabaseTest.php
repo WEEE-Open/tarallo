@@ -20,18 +20,18 @@ class DatabaseTest extends TestCase {
 	// setUp() comes from a trait, so there's no way to override it AND call it. parent::setUp() calls a pointless empty function.
 	// Excellent documentation, very clear, would rate it 10/10.
 	//protected function setUp() {
-	//    if(!extension_loaded('pdo_mysql')) {
-	//        $this->markTestSkipped('The PDO MySQL extension is not available.');
-	//    }
+	// if(!extension_loaded('pdo_mysql')) {
+	// $this->markTestSkipped('The PDO MySQL extension is not available.');
+	// }
 	//}
 
 	private function getPdo() {
 		return new \PDO('mysql:dbname=tarallo_test;host=localhost;charset=utf8mb4', 'root', 'root', [
-			\PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
-			\PDO::ATTR_CASE               => \PDO::CASE_NATURAL,
+			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+			\PDO::ATTR_CASE => \PDO::CASE_NATURAL,
 			\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
 			// \PDO::ATTR_AUTOCOMMIT => false, // PHPUnit crashes and burns with autocommits disabled and, for some unfathomable reason, two SEPARATE, DISTINCT, UNIQUE PDO object will forcefully share the same connection to MySQL (apparently?), so there's no way to have a connection with autocommits and another one without.
-			\PDO::ATTR_EMULATE_PREPARES   => false,
+			\PDO::ATTR_EMULATE_PREPARES => false,
 		]);
 	}
 
@@ -48,7 +48,6 @@ class DatabaseTest extends TestCase {
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
 	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserInvalidSession() {
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('foo'));
@@ -57,7 +56,6 @@ class DatabaseTest extends TestCase {
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
 	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserAccountDisabled() {
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('this-really-is-a-session-1234567'));
@@ -66,7 +64,6 @@ class DatabaseTest extends TestCase {
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
 	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserAccountExpiredSession() {
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('this-really-is-a-session-7654321'));
@@ -74,9 +71,7 @@ class DatabaseTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\Server\User
 	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserAccountValidSession() {
 		$this->assertEquals('asd-valid',
@@ -85,9 +80,7 @@ class DatabaseTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\Server\User
 	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserFromLoginValid() {
 		$this->assertEquals('asd', (string) $this->getDb()->userDAO()->getUserFromLogin('asd', 'asd'));
@@ -96,7 +89,6 @@ class DatabaseTest extends TestCase {
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
 	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserFromLoginDisabledAccount() {
 		$this->assertEquals(null, (string) $this->getDb()->userDAO()->getUserFromLogin('asd-disabled', 'asd'));
@@ -104,9 +96,7 @@ class DatabaseTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\Server\User
 	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testGetUserFromLoginWrongPassword() {
 		$this->assertEquals(null, (string) $this->getDb()->userDAO()->getUserFromLogin('asd', 'wrong'));
@@ -114,9 +104,7 @@ class DatabaseTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\Server\User
 	 * @covers \WEEEOpen\Tarallo\Server\Database\UserDAO
-	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 */
 	public function testUserLoginLogout() {
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
@@ -128,8 +116,6 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @uses   \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
 	 */
 	public function testFeatureList() {
@@ -142,15 +128,10 @@ class DatabaseTest extends TestCase {
 	 * Database tests are really slow and this code is a bit complex to say the least, testing everything
 	 * in a sensible manner will be difficult. But some tests are better than no tests at all, right?
 	 *
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses    \WEEEOpen\Tarallo\Server\User
-	 * @uses    \WEEEOpen\Tarallo\Server\Item
-	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\FeatureDAO
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\TreeDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 */
 	public function testAddingAndRetrievingSomeItems() {
 		$db = $this->getDb();
@@ -201,15 +182,7 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses    \WEEEOpen\Tarallo\Server\User
-	 * @uses    \WEEEOpen\Tarallo\Server\Item
-	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\FeatureDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\TreeDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
 	 */
 	public function testGettingPrefixes() {
 		$db = $this->getDb();
@@ -223,15 +196,7 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses    \WEEEOpen\Tarallo\Server\User
-	 * @uses    \WEEEOpen\Tarallo\Server\Item
-	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\FeatureDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\TreeDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
 	 */
 	public function testGettingPrefixesSkippingDuplicates() {
 		$db = $this->getDb();
@@ -254,14 +219,9 @@ class DatabaseTest extends TestCase {
 	 * in a sensible manner will be difficult. But some tests are better than no tests at all, right?
 	 *
 	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses   \WEEEOpen\Tarallo\Server\User
-	 * @uses   \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
 	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
-	 * @uses   \WEEEOpen\Tarallo\Server\Database\DAO
-	 * @uses   \WEEEOpen\Tarallo\Server\Database\ModificationDAO
 	 */
 	public function testSubtreeRemoval() {
 		$db = $this->getDb();
@@ -307,15 +267,10 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses    \WEEEOpen\Tarallo\Server\User
-	 * @uses    \WEEEOpen\Tarallo\Server\Item
-	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\FeatureDAO
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\TreeDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 */
 	public function testItemSearchSorting() {
 		$db = $this->getDb();
@@ -385,15 +340,7 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses    \WEEEOpen\Tarallo\Server\User
-	 * @uses    \WEEEOpen\Tarallo\Server\Item
-	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\FeatureDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\TreeDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
 	 */
 	public function testGettingItemsWithLocation() {
 		$db = $this->getDb();
@@ -422,16 +369,7 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses    \WEEEOpen\Tarallo\Server\User
-	 * @uses    \WEEEOpen\Tarallo\Server\Item
-	 * @covers  \WEEEOpen\Tarallo\Server\Item::jsonSerialize()
-	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\ItemDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\FeatureDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\TreeDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Item::jsonSerialize()
 	 */
 	public function testItemSearchSerialization() {
 		$db = $this->getDb();
@@ -476,64 +414,64 @@ class DatabaseTest extends TestCase {
 		$expected = [ // this ugly code courtesy of var_export
 			0 =>
 				[
-					'code'     => 'PC-20',
+					'code' => 'PC-20',
 					'features' =>
 						[
-							'brand'                   => 'Dill',
-							'color'                   => 'black',
-							'model'                   => 'DI-360',
+							'brand' => 'Dill',
+							'color' => 'black',
+							'model' => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
-							'type'                    => 'case',
-							'working'                 => 'yes',
+							'type' => 'case',
+							'working' => 'yes',
 						],
 				],
 			1 =>
 				[
-					'code'     => 'PC-22',
+					'code' => 'PC-22',
 					'features' =>
 						[
-							'brand'                   => 'Dill',
-							'color'                   => 'black',
-							'model'                   => 'DI-360',
+							'brand' => 'Dill',
+							'color' => 'black',
+							'model' => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
-							'type'                    => 'case',
-							'working'                 => 'yes',
+							'type' => 'case',
+							'working' => 'yes',
 						],
 				],
 			2 =>
 				[
-					'code'     => 'PC-21',
+					'code' => 'PC-21',
 					'features' =>
 						[
-							'brand'                   => 'Dill',
-							'color'                   => 'grey',
-							'model'                   => 'DI-360',
+							'brand' => 'Dill',
+							'color' => 'grey',
+							'model' => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
-							'type'                    => 'case',
-							'working'                 => 'yes',
+							'type' => 'case',
+							'working' => 'yes',
 						],
 				],
 			3 =>
 				[
-					'code'     => 'SCHIFOMACCHINA',
+					'code' => 'SCHIFOMACCHINA',
 					'features' =>
 						[
-							'brand'                   => 'eMac',
-							'color'                   => 'white',
-							'model'                   => 'EZ1600',
+							'brand' => 'eMac',
+							'color' => 'white',
+							'model' => 'EZ1600',
 							'motherboard-form-factor' => 'miniitx',
-							'type'                    => 'case',
+							'type' => 'case',
 						],
 				],
 			4 =>
 				[
-					'code'     => 'PC-55',
+					'code' => 'PC-55',
 					'features' =>
 						[
-							'brand'                   => 'TI',
-							'model'                   => 'GreyPC-\'98',
+							'brand' => 'TI',
+							'model' => 'GreyPC-\'98',
 							'motherboard-form-factor' => 'atx',
-							'type'                    => 'case',
+							'type' => 'case',
 						],
 				],
 		];
@@ -546,15 +484,10 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses    \WEEEOpen\Tarallo\Server\User
-	 * @uses    \WEEEOpen\Tarallo\Server\Item
-	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\FeatureDAO
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\TreeDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 */
 	public function testItemSearchFiltering() {
 		$cpu['INTEL-1'] = (new Item('INTEL-1'))
@@ -633,15 +566,10 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\Database
-	 * @uses    \WEEEOpen\Tarallo\Server\User
-	 * @uses    \WEEEOpen\Tarallo\Server\Item
-	 * @uses    \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\ItemDAO
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\FeatureDAO
-	 * @covers  \WEEEOpen\Tarallo\Server\Database\TreeDAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\DAO
-	 * @uses    \WEEEOpen\Tarallo\Server\Database\ModificationDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\Database
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
 	 */
 	public function testTreeMove() {
 		// These items should be added in database.yml, but that just increases the amount of data to import for each test
@@ -709,7 +637,7 @@ class DatabaseTest extends TestCase {
 						->addFeature(new Feature('type', 'ram'))
 						->addFeature(new Feature('capacity-byte', 1073741824))
 				)
-			);
+		);
 		$chernobyl->addContent($zb = (new Item('Zona blu'))->addFeature(new Feature('type', 'location')));
 		$tavolone->addContent($ti);
 
@@ -771,7 +699,7 @@ class DatabaseTest extends TestCase {
 	private function getDb() {
 		if($this->db === null) {
 			$db = new Database('root', 'root', 'mysql:dbname=tarallo_test;host=127.0.0.1');
-			//$dbr  = new \ReflectionObject($db);
+			//$dbr = new \ReflectionObject($db);
 			//$prop = $dbr->getProperty('pdo');
 			//$prop->setAccessible(true);
 			//$prop->setValue($db, $this->getPdo());
