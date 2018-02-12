@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\Server\v1;
 use WEEEOpen\Tarallo\Server\AuthenticationException;
 use WEEEOpen\Tarallo\Server\AuthorizationException;
 use WEEEOpen\Tarallo\Server\Database\Database;
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
 use WEEEOpen\Tarallo\Server\UserAnonymous;
@@ -36,8 +37,19 @@ class Adapter {
 		return null;
 	}
 
-	public static function getItem() {
+	public static function getItem(User $user, Database $db, $parameters, $querystring, $payload) {
+		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+		$token = isset($parameters['token']) ? (string) $parameters['token'] : null;
 
+		if($token === null) {
+			self::authorize($user);
+		}
+
+		if($id === null) {
+			throw new \LogicException('Not implemented');
+		} else {
+			$item = $db->itemDAO()->getItem(new ItemIncomplete($id), $token);
+		}
 	}
 
 	/**

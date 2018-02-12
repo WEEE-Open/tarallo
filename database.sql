@@ -23,7 +23,7 @@ CREATE TABLE `Feature` (
 
 CREATE TABLE `Item` (
 	`ItemID` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`Code` varchar(190)
+	`Code` varchar(190) -- 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
 	COLLATE utf8mb4_unicode_ci NOT NULL,
 	`IsDefault` tinyint(1) NOT NULL,
 	`Movable` tinyint(1) NOT NULL DEFAULT 1,
@@ -176,17 +176,14 @@ CREATE TABLE `Codes` (
 	COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `User` (
-	`UserID` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`Name` varchar(190) -- 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
-	COLLATE utf8mb4_unicode_ci NOT NULL,
+	`Name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Password` text COLLATE utf8mb4_unicode_ci NOT NULL,
-	`Session` char(32)
-	COLLATE utf8mb4_unicode_ci,
-	`SessionExpiry` bigint(20),
-	`Enabled` tinyint(1) UNSIGNED NOT NULL DEFAULT 0,
+	`Session` char(32) COLLATE ascii,
+	`SessionExpiry` timestamp NOT NULL DEFAULT 0, -- ON UPDATE CURRENT_TIMESTAMP + INTERVAL 6 HOUR,
+	`Enabled` boolean NOT NULL DEFAULT FALSE,
 	CHECK ((`Session` IS NOT NULL AND `SessionExpiry` IS NOT NULL)
 		OR (`Session` IS NULL AND `SessionExpiry` IS NULL)),
-	PRIMARY KEY (`UserID`),
+	PRIMARY KEY (`Name`),
 	UNIQUE KEY (`Session`),
 	UNIQUE KEY (`Name`),
 	INDEX (`Name`)
@@ -195,23 +192,26 @@ CREATE TABLE `User` (
 	DEFAULT CHARSET = utf8mb4
 	COLLATE = utf8mb4_unicode_ci;
 
-
 -- Now we're getting real.
 DELIMITER $$
 
-CREATE FUNCTION GenerateCode(IN currentPrefix varchar(20) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci')
-	RETURNS varchar(190) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci'
-	MODIFIES SQL DATA
+CREATE FUNCTION GenerateCode(IN currentPrefix varchar(20) CHARACTER SET 'utf8mb4'
+COLLATE 'utf8mb4_unicode_ci')
+	RETURNS varchar(190) CHARACTER SET 'utf8mb4'
+	COLLATE 'utf8mb4_unicode_ci'
+MODIFIES SQL DATA
 	-- This means that in two identical databases, with the same values everywhere, the function produces the same
 	-- results, which is useful to know for replication. Setting to deterministic also enables some optimizations,
 	-- apparently. However many people on TEH INTERNETS say that anything other than a pure function is nonderministic,
 	-- so who knows! If the database crashes and burns, we'll know it wasn't actually deterministic.
-	DETERMINISTIC
+DETERMINISTIC
 	BEGIN
-		DECLARE foundPrefix varchar(20) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
+		DECLARE foundPrefix varchar(20) CHARACTER SET 'utf8mb4'
+		COLLATE 'utf8mb4_unicode_ci';
 		DECLARE foundInteger bigint UNSIGNED;
 		DECLARE duplicateExists boolean;
-		DECLARE newCode varchar(190) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
+		DECLARE newCode varchar(190) CHARACTER SET 'utf8mb4'
+		COLLATE 'utf8mb4_unicode_ci';
 
 		SELECT Prefix, `Integer`
 		INTO foundPrefix, foundInteger
@@ -241,5 +241,11 @@ CREATE FUNCTION GenerateCode(IN currentPrefix varchar(20) CHARACTER SET 'utf8mb4
 		END IF;
 
 	END$$
+
+-- TODO: extend and use to log in?
+CREATE PROCEDURE SetUser(IN username varchar(100) COLLATE utf8mb4_unicode_ci)
+	BEGIN
+		SET @taralloAuditUsername = username;
+	END $$
 
 DELIMITER ;

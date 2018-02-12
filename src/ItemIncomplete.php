@@ -14,9 +14,21 @@ class ItemIncomplete implements \JsonSerializable {
 	// TODO: more $code validation?
 	function __construct($code) {
 		if(is_string($code) && trim($code) !== '') {
+			self::validateCode($code);
 			$this->code = $code;
 		} else {
 			throw new \InvalidArgumentException('ItemIncomplete code must be a non-null string');
+		}
+	}
+
+	public static function validateCode($code) {
+		if(function_exists('ctype_alnum')) {
+			$valid = ctype_alnum($code);
+		} else {
+			$valid = preg_match('/^[a-zA-Z0-9]+$/', $code);
+		}
+		if(!$valid) {
+			throw new \InvalidArgumentException("Code must be alphanumeric, '$code' isn't");
 		}
 	}
 

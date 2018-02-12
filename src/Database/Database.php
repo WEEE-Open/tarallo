@@ -16,7 +16,7 @@ class Database {
 	private $callback;
 
 	public function __construct($user, $pass, $dsn) {
-		// TODO: ad $autocommit parameter?
+		// TODO: add $autocommit parameter?
 		$this->username = $user;
 		$this->password = $pass;
 		$this->dsn = $dsn;
@@ -43,7 +43,7 @@ class Database {
 				\PDO::ATTR_EMULATE_PREPARES   => false,
 			]);
 		} catch(\PDOException $e) {
-			throw new \Exception('Cannot connect to database: ' . $e->getMessage());
+			throw new DatabaseException('Cannot connect to database: ' . $e->getMessage());
 		}
 	}
 

@@ -4,6 +4,7 @@ namespace WEEEOpen\Tarallo\Server;
 
 use FastRoute;
 use WEEEOpen\Tarallo\Server\Database\Database;
+use WEEEOpen\Tarallo\Server\Database\DatabaseException;
 use WEEEOpen\Tarallo\Server\v1\InvalidPayloadParameterException;
 
 // in case something goes wrong (reset to 200 when sending a JSON response)
