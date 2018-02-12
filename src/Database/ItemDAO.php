@@ -38,6 +38,7 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param Item $item the item to be inserted
 	 * @param ItemIncomplete $parent parent item
+	 *
 	 * @TODO: is parent still necessary? Is it a good design? Can't inner items have a full "location"?
 	 *
 	 * @see addItems
@@ -100,6 +101,7 @@ final class ItemDAO extends DAO {
 			if($code === null) {
 				throw new \LogicException("Cannot generate code for prefix $prefix, NULL returned");
 			}
+
 			return (string) $code;
 		} finally {
 			$this->getNewCodeStatement->closeCursor();
@@ -157,6 +159,38 @@ final class ItemDAO extends DAO {
 				$this->database->treeDAO()->moveItem($item, $item->getParent());
 			}
 			$this->database->featureDAO()->updateDeleteFeatures($item);
+		}
+	}
+
+	private $getItemQuery = null;
+
+	/**
+	 * Get a single item (and its content)
+	 *
+	 * @param ItemIncomplete $item
+	 * @param null $token
+	 * @param int $depth
+	 */
+	public function getItem(ItemIncomplete $item, $token = null, $depth = 10) {
+		if($this->getItemQuery === null) {
+			$this->getItemQuery = $this->getPDO()->prepare(<<<EOQ
+				SELECT DescendantItem.Code, AncestorItem.Code AS ImmediateParent
+				FROM Tree
+				JOIN Item AS AncestorItem ON AncestorID=AncestorItem.ItemID
+				JOIN Item AS DescendantItem ON DescendantID=DescendantItem.ItemID
+				WHERE DescendantID IN (
+				SELECT DISTINCT DescendantID
+				FROM Tree
+				WHERE AncestorID = (
+				SELECT ItemID
+				FROM Item
+				WHERE Code = 'ZonaBlu'
+				)
+				ORDER BY Depth
+				)
+				AND Depth = 1
+EOQ
+			);
 		}
 	}
 
