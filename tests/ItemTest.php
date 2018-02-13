@@ -3,6 +3,7 @@
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
 
 class ItemTest extends TestCase {
 
@@ -35,71 +36,23 @@ class ItemTest extends TestCase {
 	public function testItemValidAncestors() {
 		$hdd = new Item('HDD123');
 
-		$hdd->addAncestor(1, 'PC999');
-		$this->assertTrue($hdd->getAncestor(1) instanceof \WEEEOpen\Tarallo\Server\ItemIncomplete,
+		$hdd->addAncestor(1, new ItemIncomplete('PC999'));
+		$this->assertTrue($hdd->getPath()[0] instanceof \WEEEOpen\Tarallo\Server\ItemIncomplete,
 			'Ancestors are ItemIncomplete objects');
+		$this->assertEquals(1, count($hdd->getPath()), 'Only one ancestor');
 
-		$this->assertEquals('PC999', $hdd->getAncestor(1)->getCode(), 'Ancestor 1 should be there');
-		$this->assertEquals(null, $hdd->getAncestor(2), 'Ancestor 2 shouldn\'t exist yet');
-		$hdd->addAncestor(2, 'CHERNOBYL');
-		$this->assertEquals('PC999', $hdd->getAncestor(1)->getCode(), 'Ancestor 1 should still be there');
-		$this->assertEquals('CHERNOBYL', $hdd->getAncestor(2)->getCode(), 'Ancestor 2 should be there');
+		$ancestor = $hdd->getPath()[0];
 
-		$hdd->addAncestor(2, 'ZONABLU');
-		$this->assertEquals('PC999', $hdd->getAncestor(1)->getCode(), 'Unchanged ancestor should still be there');
-		$this->assertEquals('ZONABLU', $hdd->getAncestor(2)->getCode(), 'Replaced ancestor should be there');
-		$this->assertEquals(null, $hdd->getAncestor(3), 'Ancestor 3 shouldn\'t exist');
-	}
-
-	public function testItemValidAncestorSkip() {
-		$hdd = new Item('HDD123');
-		$hdd->addAncestor(1, 'PC999');
-		$hdd->addAncestor(2, 'ZONABLU');
-		$hdd->addAncestor(4, 'CHERNOBYL');
-		$this->assertEquals('PC999', $hdd->getAncestor(1)->getCode(), 'Ancestor 1 should be there');
-		$this->assertEquals('ZONABLU', $hdd->getAncestor(2)->getCode(), 'Ancestor 2 should be there');
-		$this->assertEquals(null, $hdd->getAncestor(3), 'Ancestor 3 should be null');
-		$this->assertEquals('CHERNOBYL', $hdd->getAncestor(4)->getCode(), 'Ancestor 4 should be there');
+		$this->assertEquals('PC999', $ancestor->getCode(), 'Ancestor PC999 should be there');
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
 	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
 	 */
-	public function testItemInvalidAncestorAdd() {
+	public function testItemNoAncestorGet() {
 		$hdd = new Item('HDD123');
-		$this->expectException(InvalidArgumentException::class);
-		$hdd->addAncestor(0, 'PC999');
-	}
-
-	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 */
-	public function testItemInvalidAncestorAdd2() {
-		$hdd = new Item('HDD123');
-		$this->expectException(InvalidArgumentException::class);
-		$hdd->addAncestor(-1, 'PC999');
-	}
-
-	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 */
-	public function testItemInvalidAncestorGet() {
-		$hdd = new Item('HDD123');
-		$this->expectException(InvalidArgumentException::class);
-		$hdd->getAncestor(0);
-	}
-
-	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 */
-	public function testItemInvalidAncestorGet2() {
-		$hdd = new Item('HDD123');
-		$this->expectException(\InvalidArgumentException::class);
-		$hdd->getAncestor(-1);
+		$this->assertEquals([], $hdd->getPath());
 	}
 
 	/**

@@ -25,218 +25,146 @@ User:
 
 Feature:
   -
-    FeatureID: 1
-    FeatureName: brand
-    FeatureType: 0
+    Feature: brand
+    Type: 0
   -
-    FeatureID: 2
-    FeatureName: model
-    FeatureType: 0
+    Feature: model
+    Type: 0
   -
-    FeatureID: 3
-    FeatureName: owner
-    FeatureType: 0
+    Feature: owner
+    Type: 0
   -
-    FeatureID: 4
-    FeatureName: sn
-    FeatureType: 0
+    Feature: sn
+    Type: 0
   -
-    FeatureID: 5
-    FeatureName: mac
-    FeatureType: 0
+    Feature: mac
+    Type: 0
   -
-    FeatureID: 6
-    FeatureName: type
-    FeatureType: 2
+    Feature: type
+    Type: 2
   -
-    FeatureID: 7
-    FeatureName: working
-    FeatureType: 2
+    Feature: working
+    Type: 2
   -
-    FeatureID: 8
-    FeatureName: capacity-byte
-    FeatureType: 1
+    Feature: capacity-byte
+    Type: 1
   -
-    FeatureID: 9
-    FeatureName: frequency-hertz
-    FeatureType: 1
+    Feature: frequency-hertz
+    Type: 1
   -
-    FeatureID: 10
-    FeatureName: diameter-mm
-    FeatureType: 1
+    Feature: diameter-mm
+    Type: 1
   -
-    FeatureID: 11
-    FeatureName: diagonal-inch
-    FeatureType: 1
+    Feature: diagonal-inch
+    Type: 1
   -
-    FeatureID: 12
-    FeatureName: has-gpu
-    FeatureType: 2
+    Feature: color
+    Type: 2
   -
-    FeatureID: 13
-    FeatureName: color
-    FeatureType: 2
+    Feature: motherboard-form-factor
+    Type: 2
   -
-    FeatureID: 14
-    FeatureName: motherboard-form-factor
-    FeatureType: 2
-  -
-    FeatureID: 15
-    FeatureName: notes
-    FeatureType: 0
+    Feature: notes
+    Type: 0
 
-FeatureValue:
+FeatureEnum:
   -
-    FeatureID: 6
-    ValueEnum: 0
-    ValueText: location
+    Feature: type
+    ValueEnum: location
   -
-    FeatureID: 6
-    ValueEnum: 1
-    ValueText: case
+    Feature: type
+    ValueEnum: case
   -
-    FeatureID: 6
-    ValueEnum: 2
-    ValueText: motherboard
+    Feature: type
+    ValueEnum: motherboard
   -
-    FeatureID: 6
-    ValueEnum: 3
-    ValueText: cpu
+    Feature: type
+    ValueEnum: cpu
   -
-    FeatureID: 6
-    ValueEnum: 4
-    ValueText: gpu
+    Feature: type
+    ValueEnum: gpu
   -
-    FeatureID: 6
-    ValueEnum: 5
-    ValueText: ram
+    Feature: type
+    ValueEnum: ram
   -
-    FeatureID: 6
-    ValueEnum: 6
-    ValueText: hdd
+    Feature: type
+    ValueEnum: hdd
   -
-    FeatureID: 6
-    ValueEnum: 7
-    ValueText: odd
+    Feature: type
+    ValueEnum: odd
   -
-    FeatureID: 6
-    ValueEnum: 8
-    ValueText: psu
+    Feature: type
+    ValueEnum: psu
   -
-    FeatureID: 6
-    ValueEnum: 9
-    ValueText: audio-card
+    Feature: type
+    ValueEnum: audio-card
   -
-    FeatureID: 6
-    ValueEnum: 10
-    ValueText: network-card
+    Feature: type
+    ValueEnum: network-card
   -
-    FeatureID: 6
-    ValueEnum: 11
-    ValueText: monitor
+    Feature: type
+    ValueEnum: monitor
   -
-    FeatureID: 6
-    ValueEnum: 12
-    ValueText: mouse
+    Feature: type
+    ValueEnum: mouse
   -
-    FeatureID: 6
-    ValueEnum: 13
-    ValueText: keyboard
+    Feature: type
+    ValueEnum: keyboard
   -
-    FeatureID: 6
-    ValueEnum: 14
-    ValueText: inventory-sticker-polito
+    Feature: working
+    ValueEnum: no
   -
-    FeatureID: 6
-    ValueEnum: 15
-    ValueText: inventory-sticker-polito-old
+    Feature: working
+    ValueEnum: yes
   -
-    FeatureID: 6
-    ValueEnum: 16
-    ValueText: inventory-sticker-disat
+    Feature: working
+    ValueEnum: maybe
   -
-    FeatureID: 6
-    ValueEnum: 17
-    ValueText: windows-sticker
+    Feature: color
+    ValueEnum: black
   -
-    FeatureID: 7
-    ValueEnum: 0
-    ValueText: no
+    Feature: color
+    ValueEnum: white
   -
-    FeatureID: 7
-    ValueEnum: 1
-    ValueText: yes
+    Feature: color
+    ValueEnum: green
   -
-    FeatureID: 7
-    ValueEnum: 2
-    ValueText: cant-tell
+    Feature: color
+    ValueEnum: yellow
   -
-    FeatureID: 12
-    ValueEnum: 0
-    ValueText: no
+    Feature: color
+    ValueEnum: red
   -
-    FeatureID: 12
-    ValueEnum: 1
-    ValueText: yes
+    Feature: color
+    ValueEnum: blue
   -
-    FeatureID: 13
-    ValueEnum: 0
-    ValueText: black
+    Feature: color
+    ValueEnum: grey
   -
-    FeatureID: 13
-    ValueEnum: 1
-    ValueText: white
+    Feature: color
+    ValueEnum: sip-brown
   -
-    FeatureID: 13
-    ValueEnum: 2
-    ValueText: green
+    Feature: motherboard-form-factor
+    ValueEnum: atx
   -
-    FeatureID: 13
-    ValueEnum: 3
-    ValueText: yellow
+    Feature: motherboard-form-factor
+    ValueEnum: miniatx
   -
-    FeatureID: 13
-    ValueEnum: 4
-    ValueText: red
+    Feature: motherboard-form-factor
+    ValueEnum: microatx
   -
-    FeatureID: 13
-    ValueEnum: 5
-    ValueText: blue
+    Feature: motherboard-form-factor
+    ValueEnum: miniitx
   -
-    FeatureID: 13
-    ValueEnum: 6
-    ValueText: grey
-  -
-    FeatureID: 13
-    ValueEnum: 7
-    ValueText: sip-brown
-  -
-    FeatureID: 14
-    ValueEnum: 0
-    ValueText: atx
-  -
-    FeatureID: 14
-    ValueEnum: 1
-    ValueText: miniatx
-  -
-    FeatureID: 14
-    ValueEnum: 2
-    ValueText: microatx
-  -
-    FeatureID: 14
-    ValueEnum: 3
-    ValueText: miniitx
-  -
-    FeatureID: 14
-    ValueEnum: 4
-    ValueText: proprietary
+    Feature: motherboard-form-factor
+    ValueEnum: proprietary
 Item:
 
 ItemFeature:
 
 Tree:
 
-Codes:
+Prefixes:
   -
     Prefix: M
     Integer: 10

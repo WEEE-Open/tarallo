@@ -80,6 +80,8 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 *
 	 * @throws InvalidParameterException if code is invalid
 	 * @throws \InvalidArgumentException if distance is less than 1
+	 *
+	 * @deprecated make private to avoid holes?
 	 */
 	public function addAncestor($distance, ItemIncomplete $ancestor) {
 		$distance = (int) $distance;
@@ -121,7 +123,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 				$result[] = $ancestor;
 			}
 			$last = end($result);
-		} while($last !== false && count($last->location) > 0);
+		} while($last !== false && $last instanceof Item && count($last->location) > 0);
 
 		// TODO: apply memoization ($this->location = $result)?
 

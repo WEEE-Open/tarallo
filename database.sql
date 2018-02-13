@@ -39,7 +39,7 @@ CREATE TABLE `Feature` (
 CREATE TABLE `FeatureEnum` (
 	`Feature` varchar(40) COLLATE utf8mb4_bin NOT NULL,
 	`ValueEnum` varchar(40) COLLATE utf8mb4_bin NOT NULL,
-	PRIMARY KEY (`Feature`),
+	PRIMARY KEY (`Feature`, `ValueEnum`),
 	CONSTRAINT FOREIGN KEY (`Feature`) REFERENCES `Feature` (`Feature`)
 		ON DELETE NO ACTION
 		ON UPDATE CASCADE
