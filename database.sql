@@ -7,46 +7,39 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 -- CREATE DATABASE `tarallo` DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 -- USE `tarallo`;
 
-CREATE TABLE `Feature` (
-	`FeatureID` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`FeatureName` varchar(190)
-	COLLATE utf8mb4_unicode_ci NOT NULL,
-	`FeatureType` int NOT NULL, -- 0 = text, 1 = number, 2 = "enum"
-	INDEX (`FeatureName`),
-	UNIQUE KEY (`FeatureName`),
-	PRIMARY KEY (`FeatureID`)
-)
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
-
-
 CREATE TABLE `Item` (
-	`ItemID` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-	`Code` varchar(190) -- 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
-	COLLATE utf8mb4_unicode_ci NOT NULL,
-	`IsDefault` tinyint(1) NOT NULL,
-	`Movable` tinyint(1) NOT NULL DEFAULT 1,
-	`Default` bigint(20) UNSIGNED DEFAULT NULL,
+	-- Max length would be approx. 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
+	`Code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+	`Brand` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+	`Model` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+	`Variant` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+	`Movable` boolean NOT NULL DEFAULT 1,
 	UNIQUE KEY (`Code`),
 	INDEX (`Code`),
-	FOREIGN KEY (`Default`) REFERENCES `Item` (`ItemID`)
-		ON DELETE SET NULL
-		ON UPDATE CASCADE, -- very foreign, it's the same table. I'm not really convinced by that SET NULL, anyway.
-	CHECK ((IsDefault = 1 AND `Default` IS NULL) OR IsDefault = 0),
-	PRIMARY KEY (`ItemID`)
+	FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Products` (`Brand`, `Model`, `Variant`)
+		ON DELETE NO ACTION
+		ON UPDATE CASCADE,
+	PRIMARY KEY (`Code`)
+)
+	ENGINE = InnoDB
+	DEFAULT CHARSET = utf8mb4
+	COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `Feature` (
+	`Feature` varchar(40) COLLATE utf8mb4_bin NOT NULL,
+	`Type` int NOT NULL, -- 0 = text, 1 = number, 2 = "enum", 3 = double
+	PRIMARY KEY (`Feature`)
 )
 	ENGINE = InnoDB
 	DEFAULT CHARSET = utf8mb4
 	COLLATE = utf8mb4_unicode_ci;
 
 
-CREATE TABLE `FeatureValue` (
-	`FeatureID` bigint(20) UNSIGNED NOT NULL,
-	`ValueEnum` bigint(20) UNSIGNED NOT NULL,
-	`ValueText` text NOT NULL,
-	PRIMARY KEY (`FeatureID`, `ValueEnum`),
-	CONSTRAINT FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`)
+CREATE TABLE `FeatureEnum` (
+	`Feature` varchar(40) COLLATE utf8mb4_bin NOT NULL,
+	`ValueEnum` varchar(40) COLLATE utf8mb4_bin NOT NULL,
+	PRIMARY KEY (`Feature`),
+	CONSTRAINT FOREIGN KEY (`Feature`) REFERENCES `Feature` (`Feature`)
 		ON DELETE NO ACTION
 		ON UPDATE CASCADE
 )
@@ -56,26 +49,27 @@ CREATE TABLE `FeatureValue` (
 
 
 CREATE TABLE `ItemFeature` (
-	`FeatureID` bigint(20) UNSIGNED NOT NULL,
-	`ItemID` bigint(20) UNSIGNED NOT NULL,
+	`Code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+	`Feature` varchar(40) COLLATE utf8mb4_bin NOT NULL,
 	`Value` bigint(20) UNSIGNED DEFAULT NULL,
-	`ValueEnum` bigint(20) UNSIGNED DEFAULT NULL,
-	`ValueText` text DEFAULT NULL,
-	PRIMARY KEY (`FeatureID`, `ItemID`),
-	KEY `ItemID` (`ItemID`),
-	KEY `Value` (`Value`),
-	KEY `ValueEnum` (`ValueEnum`),
-	-- this doesn't work, for no reason at all
-	-- CONSTRAINT `FK_FeatureEnum_FeatureValue` FOREIGN KEY (`ValueEnum`) REFERENCES `FeatureValue` (`ValueEnum`) ON DELETE NO ACTION ON UPDATE CASCADE,
-	CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`)
+	`ValueEnum` varchar(40) COLLATE utf8mb4_bin DEFAULT NULL,
+	`ValueText` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+	`ValueDouble` double DEFAULT NULL,
+	PRIMARY KEY (`Code`, `Feature`),
+	INDEX `Feature` (`Feature`),
+	INDEX `Value1` (`Value`),
+	INDEX `Value2` (`ValueEnum`),
+	INDEX `Value3` (`ValueDouble`),
+	CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`)
 		ON DELETE CASCADE
 		ON UPDATE CASCADE,
-	CONSTRAINT FOREIGN KEY (`FeatureID`) REFERENCES `Feature` (`FeatureID`)
+	CONSTRAINT FOREIGN KEY (`Feature`) REFERENCES `Feature` (`Feature`)
 		ON DELETE NO ACTION
-		ON UPDATE CASCADE,
-	CHECK ((`Value` IS NOT NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL)
-		OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND `ValueEnum` IS NULL)
-		OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NOT NULL))
+		ON UPDATE CASCADE
+	# TODO: replace with a trigger
+	#CHECK ((`Value` IS NOT NULL AND `ValueText` IS NULL AND `ValueDouble` IS NULL)
+	#	OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND `ValueDouble` IS NULL)
+	#	OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueDouble` IS NOT NULL))
 )
 	ENGINE = InnoDB
 	DEFAULT CHARSET = utf8mb4
@@ -151,14 +145,17 @@ CREATE TABLE `ItemFeature` (
 # 	COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `Tree` (
-	`AncestorID` bigint(20) UNSIGNED NOT NULL,
-	`DescendantID` bigint(20) UNSIGNED NOT NULL,
-	`Depth` int(10) UNSIGNED NOT NULL, -- This may need an index
-	PRIMARY KEY (`AncestorID`, `DescendantID`),
-	CONSTRAINT FOREIGN KEY (`AncestorID`) REFERENCES `Item` (`ItemID`)
+	`Ancestor` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+	`Descendant` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+	`Depth` int UNSIGNED NOT NULL,
+	PRIMARY KEY (`Ancestor`, `Descendant`),
+	-- PK is already an index on Ancestor
+	INDEX (`Descendant`),
+	INDEX (`Depth`),
+	CONSTRAINT FOREIGN KEY (`Ancestor`) REFERENCES `Item` (`Code`)
 		ON DELETE NO ACTION
 		ON UPDATE CASCADE,
-	CONSTRAINT FOREIGN KEY (`DescendantID`) REFERENCES `Item` (`ItemID`)
+	CONSTRAINT FOREIGN KEY (`Descendant`) REFERENCES `Item` (`Code`)
 		ON DELETE NO ACTION
 		ON UPDATE CASCADE
 )
@@ -166,7 +163,7 @@ CREATE TABLE `Tree` (
 	DEFAULT CHARSET = utf8mb4
 	COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `Codes` (
+CREATE TABLE `Prefixes` (
 	`Prefix` varchar(20) NOT NULL,
 	`Integer` bigint(20) UNSIGNED NOT NULL DEFAULT 0,
 	PRIMARY KEY (`Prefix`)
@@ -179,7 +176,7 @@ CREATE TABLE `User` (
 	`Name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Password` text COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Session` char(32) COLLATE utf8mb4_bin,
-	`SessionExpiry` bigint unsigned NOT NULL DEFAULT 0, -- timestamp NOT NULL DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP + INTERVAL 6 HOUR,
+	`SessionExpiry` bigint UNSIGNED NOT NULL DEFAULT 0, -- timestamp NOT NULL DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP + INTERVAL 6 HOUR,
 	`Enabled` boolean NOT NULL DEFAULT FALSE,
 	PRIMARY KEY (`Name`),
 	UNIQUE KEY (`Session`),
@@ -202,23 +199,23 @@ MODIFIES SQL DATA
 	-- so who knows! If the database crashes and burns, we'll know it wasn't actually deterministic.
 DETERMINISTIC
 	BEGIN
-		DECLARE foundPrefix varchar(20) CHARACTER SET 'utf8mb4'
+		DECLARE thePrefix varchar(20) CHARACTER SET 'utf8mb4'
 		COLLATE 'utf8mb4_unicode_ci';
-		DECLARE foundInteger bigint UNSIGNED;
+		DECLARE theInteger bigint UNSIGNED;
 		DECLARE duplicateExists boolean;
 		DECLARE newCode varchar(190) CHARACTER SET 'utf8mb4'
 		COLLATE 'utf8mb4_unicode_ci';
 
 		SELECT Prefix, `Integer`
-		INTO foundPrefix, foundInteger
-		FROM Codes
+		INTO thePrefix, theInteger
+		FROM Prefixes
 		WHERE Prefix = currentPrefix;
 
-		IF (foundPrefix IS NOT NULL)
+		IF (thePrefix IS NOT NULL)
 		THEN
 			REPEAT
-				SET foundInteger = foundInteger + 1;
-				SET NewCode = CONCAT(foundPrefix, CAST(foundInteger AS char(20)));
+				SET theInteger = theInteger + 1;
+				SET NewCode = CONCAT(thePrefix, CAST(theInteger AS char(20)));
 
 				SELECT IF(COUNT(*) > 0, TRUE, FALSE)
 				INTO duplicateExists
@@ -227,9 +224,9 @@ DETERMINISTIC
 			UNTIL duplicateExists = FALSE
 			END REPEAT;
 
-			UPDATE Codes
-			SET `Integer` = foundInteger
-			WHERE Prefix = foundPrefix;
+			UPDATE Prefixes
+			SET `Integer` = theInteger
+			WHERE Prefix = thePrefix;
 
 			RETURN newCode;
 		ELSE
