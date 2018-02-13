@@ -247,13 +247,13 @@ final class SearchDAO extends DAO {
         SELECT DescendantItem.`ItemID`, DescendantItem.`Code`, Tree.`Depth`,
         MAX(IF(Parents.`Depth`=1, Parents.`AncestorID`, NULL)) AS Parent
         FROM Tree
-        JOIN Item AS AncestorItem ON Tree.AncestorID = AncestorItem.ItemID
-        JOIN Item AS DescendantItem ON Tree.DescendantID = DescendantItem.ItemID
+        JOIN Item AS AncestorItem ON Tree.Ancestor = AncestorItem.ItemID
+        JOIN Item AS DescendantItem ON Tree.Descendant = DescendantItem.ItemID
         JOIN Tree AS Parents ON DescendantItem.ItemID = Parents.DescendantID
         WHERE AncestorItem.isDefault = 0
         AND Tree.`Depth` <= :depth
-        AND Tree.AncestorID IN (
-            SELECT `ItemID`
+        AND Tree.Ancestor IN (
+            SELECT `Code`
             FROM Item
             ' . $this->implodeOptionalWhereAnd($this->codePrepare($codes), $this->tokenPrepare($token),
 				$parentSubquery, $searchSubquery) . '

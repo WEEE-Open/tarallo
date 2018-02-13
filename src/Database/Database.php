@@ -99,28 +99,44 @@ class Database {
 		return $this->treeDAO;
 	}
 
+	/**
+	 * @see \PDO::beginTransaction()
+	 */
 	public function beginTransaction() {
 		$pdo = $this->getPDO();
 		if($pdo->inTransaction()) {
 			throw new \LogicException('Trying to start nested transactions');
 		}
-		$pdo->beginTransaction();
+		$result = $pdo->beginTransaction();
+		if(!$result) {
+			throw new DatabaseException('Cannot begin transaction (returned false)');
+		}
 	}
 
+	/**
+	 * @see \PDO::commit()
+	 */
 	public function commit() {
 		$pdo = $this->getPDO();
 		if(!$pdo->inTransaction()) {
 			throw new \LogicException('Trying to commit transaction that hasn\'t been started');
 		}
-		$pdo->commit();
+		$result = $pdo->commit();
+		if(!$result) {
+			throw new DatabaseException('Cannot commit transaction (returned false)');
+		}
 	}
 
+	/**
+	 * @see \PDO::rollBack()
+	 */
 	public function rollback() {
 		$pdo = $this->getPDO();
 		if(!$pdo->inTransaction()) {
 			throw new \LogicException('Trying to rollback transaction that hasn\'t been started');
 		}
 		$pdo->rollBack();
+		// Can return false, but what can we do? Try to rollback again, and again, over and over again, forever until the end of times?
 	}
 
 }

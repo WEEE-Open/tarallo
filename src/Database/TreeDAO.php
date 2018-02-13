@@ -12,6 +12,10 @@ final class TreeDAO extends DAO {
 	 * @param ItemIncomplete|null $parent some existing Item as parent, NULL if it has no parent (root Item)
 	 */
 	public function addToTree(ItemIncomplete $child, ItemIncomplete $parent = null) {
+		if(!$this->getPDO()->inTransaction()) {
+			throw new \LogicException('addToTree called outside of transaction');
+		}
+
 		$this->addItemAsRoot($child);
 		if($parent !== null) {
 			$this->setParent($parent, $child);
@@ -43,7 +47,7 @@ final class TreeDAO extends DAO {
 	 */
 	public function getPathTo(ItemIncomplete $item) {
 		if($this->getPathToStatement === null) {
-			$this->getPathToStatement = $this->getPDO()->prepare('SELECT Ancestor FROM Tree WHERE Descendant = ? ORDER BY Depth ASC');
+			$this->getPathToStatement = $this->getPDO()->prepare('SELECT Ancestor FROM Tree WHERE Descendant = ? ORDER BY Depth DESC');
 		}
 
 		try {
@@ -123,10 +127,10 @@ final class TreeDAO extends DAO {
 		$pdo = $this->getPDO();
 		if($this->setParentStatement === null) {
 			// This is the standard query for subtree insertion, just with a cartesian product which is actually a join, instead of a join. It's exactly the same thing.
-			$this->setParentStatement = $pdo->prepare('INSERT INTO Tree (AncestorID, DescendantID, Depth)
-			SELECT ltree.AncestorID, rtree.DescendantID, ltree.Depth+rtree.Depth+1
+			$this->setParentStatement = $pdo->prepare('INSERT INTO Tree (Ancestor, Descendant, Depth)
+			SELECT ltree.Ancestor, rtree.Descendant, ltree.Depth+rtree.Depth+1
 			FROM Tree ltree, Tree rtree 
-			WHERE ltree.DescendantID = :parent AND rtree.AncestorID = :new;');
+			WHERE ltree.Descendant = :parent AND rtree.Ancestor = :new;');
 		}
 		$parentID = $parent->getCode();
 		$childID = $child->getCode();

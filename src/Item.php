@@ -171,6 +171,11 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 		return $this;
 	}
 
+	// TODO: use a separate field, in future
+	public function isMovable() {
+		return !isset($this->features['soldered-in-place']);
+	}
+
 	/**
 	 * Get items located inside
 	 *

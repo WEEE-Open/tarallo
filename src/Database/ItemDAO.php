@@ -10,25 +10,36 @@ use WEEEOpen\Tarallo\Server\ItemUpdate;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 
 final class ItemDAO extends DAO {
+	/**
+	 * Add all items. Also starts and finishes the necessary transaction.
+	 *
+	 * @param array $items Items to add
+	 * @param ItemIncomplete|null $parent Parent item for all these
+	 *
+	 * @return Item[] All inserted items, in same order, retrieved from database. Array keys are preserved.
+	 * @throws \Throwable whatever was thrown inside, PHPStorm is forcind me to add a comment
+	 *
+	 * @see addItem to add one item (and manage transaction yourself)
+	 */
 	public function addItems(array $items, ItemIncomplete $parent = null) {
 		if(empty($items)) {
-			return;
+			return [];
 		}
 
-		$this->database->beginTransaction();
+		$heads = [];
 
 		try {
-			foreach($items as $item) {
-				/**
-				 * @var Item $item
-				 */
-				$this->addItem($item, $parent);
+			$this->database->beginTransaction();
+			foreach($items as $k => $item) {
+				$heads[$k] = $this->addItem($item, $parent);
 			}
+			$this->database->commit();
 		} catch(\Throwable $e) {
 			$this->database->rollback();
 			throw $e;
 		}
-		$this->database->commit();
+
+		return $heads;
 	}
 
 	private $addItemStatement = null;
@@ -40,37 +51,55 @@ final class ItemDAO extends DAO {
 	 * @param Item $item the item to be inserted
 	 * @param ItemIncomplete $parent parent item
 	 *
-	 * @TODO: is parent still necessary? Is it a good design? Can't inner items have a full "location"?
+	 * @return Item Same item, retrieved from database
 	 *
 	 * @see addItems
 	 */
-	private function addItem(Item $item, ItemIncomplete $parent = null) {
-		if(!($item instanceof Item)) {
-			// will say "object" if it's another object which is kinda useless, whatever
-			throw new \InvalidArgumentException('Items must be objects of Item class, ' . gettype($item) . ' given');
+	public function addItem(Item $item, ItemIncomplete $parent = null) {
+		if($parent === null) {
+			return $this->addItemInternal($item);
+		} else {
+			return $this->addItemInternal($item, $parent);
 		}
+	}
 
+	/**
+	 * @see addItem
+	 *
+	 * @param Item $item the item to be inserted
+	 * @param ItemIncomplete $parent parent item
+	 * @param bool $last leave it as it is
+	 *
+	 * @return null|Item Outer call always returns Item, internal ones (it's recursive) return null
+	 */
+	public function addItemInternal(Item $item, ItemIncomplete $parent = null, $last = true) {
 		$pdo = $this->getPDO();
 		if(!$pdo->inTransaction()) {
 			throw new \LogicException('addItem called outside of transaction');
 		}
 
 		if(!$item->hasCode()) {
-			// TODO: use getNewCode only for "head" items and use directly in query for inner ones? Then query database to get all inner items again (so they aren't left un-updated)?
-			// That also makes easier to insert items with a known parent but unknown full list of ancestors (got the code, query everything again, done!)
 			$prefix = ItemPrefixer::get($item);
 			$code = $this->getNewCode($prefix);
 			$item->setCode($code);
 		}
 
 		if($this->addItemStatement === null) {
-			$this->addItemStatement = $pdo->prepare('INSERT INTO Item (`Code`, IsDefault, `Default`) VALUES (:c, :isd, :def)');
+			// TODO: add brand, model, variant
+			$this->addItemStatement = $pdo->prepare('INSERT INTO Item (`Code`, Movable) VALUES (:cod, :mov)');
 		}
 
-		$this->addItemStatement->bindValue(':c', $item->getCode(), \PDO::PARAM_STR);
-		$this->addItemStatement->bindValue(':isd', 0, \PDO::PARAM_INT);
-		$this->addItemStatement->bindValue(':def', null, \PDO::PARAM_NULL); // TODO: remove this stuff
-		$this->addItemStatement->execute();
+		try {
+			$this->addItemStatement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
+			// PDO::PARAM_BOOL doesn't work, query fails FOR NO REASON, cleanly returns false with no errors
+			// Known bug from 2006, still alive and well in PHP 7.1 (or a regression?): https://bugs.php.net/bug.php?id=38546
+			$this->addItemStatement->bindValue(':mov', (int) $item->isMovable(), \PDO::PARAM_INT);
+			if(!$this->addItemStatement->execute()) {
+				throw new DatabaseException('Cannot insert item ' . $item->getCode() . ' for unknown reasons');
+			}
+		} finally {
+			$this->addItemStatement->closeCursor();
+		}
 
 		/** @var Item $item */
 		$this->database->featureDAO()->addFeatures($item);
@@ -79,7 +108,15 @@ final class ItemDAO extends DAO {
 		$childItems = $item->getContents();
 		foreach($childItems as $childItem) {
 			// yay recursion!
-			$this->addItem($childItem, $item);
+			$this->addItemInternal($childItem, $item, false);
+		}
+
+		if($last) {
+			// TODO: test stuff
+			//$this->database->commit();
+			return $this->getItem($item, null);
+		} else {
+			return null;
 		}
 	}
 
@@ -117,6 +154,8 @@ final class ItemDAO extends DAO {
 	 * @param ItemIncomplete $item
 	 * @param null $token
 	 * @param int $depth
+	 *
+	 * @return Item
 	 */
 	public function getItem(ItemIncomplete $item, $token = null, $depth = 10) {
 		if($token !== null && !$this->checkToken($item, $token)) {
@@ -131,7 +170,7 @@ final class ItemDAO extends DAO {
 			$this->getItemQuery = $this->getPDO()->prepare(<<<EOQ
 				SELECT `Code`, `Brand`, `Model`, `Variant`, `Movable`, Ancestor AS Parent
 				FROM Tree
-				JOIN Item ON Descendant=`Code`
+				JOIN Item ON Descendant=`Code` -- right join? qualcosa? Boh. È ovvio (e conseguentemente ineffabile) a tutti meno che a me come fare la query del subtree. C'era quel MAX(IF(...)) incomprensibile da talmente era OVVISSIMO E SEMPLICISSIMO, infatti. 
 				WHERE Descendant IN (
 					SELECT DISTINCT Descendant
 					FROM Tree
@@ -144,7 +183,7 @@ EOQ
 			);
 		}
 
-		$this->getItemQuery->execute([$item->getCode(), $depth + 1]);
+		$this->getItemQuery->execute([$item->getCode(), $depth]);
 
 		if(($row = $this->getItemQuery->fetch(\PDO::FETCH_ASSOC)) === false) {
 			throw new NotFoundException();
@@ -161,8 +200,11 @@ EOQ
 			if(!isset($flat[$row['Parent']])) {
 				throw new \LogicException('Broken tree: got ' . $row['Code'] . ' before its parent ' . $row['Parent']);
 			}
-			$this->fillItem(new Item($row['Code']), $row['Brand'], $row['Model'], $row['Variant'], $row['Movable'], $flat[$row['Parent']]);
+			$this->fillItem(new Item($row['Code']), $row['Brand'], $row['Model'], $row['Variant'], $row['Movable'],
+				$flat[$row['Parent']]);
 		}
+
+		return $head;
 	}
 
 	/**
@@ -201,7 +243,9 @@ EOQ
 		$brand === null ?: $item->addFeature(new Feature('brand', $brand));
 		$model === null ?: $item->addFeature(new Feature('model', $model));
 		// TODO: these shouldn't be plain features... also, don't discard $variant
-		$movable === null ?: $item->addFeature(new Feature('soldered-in-place', $movable ? 'no' : 'yes'));
+		if(!$movable) {
+			$item->addFeature(new Feature('soldered-in-place', 'yes'));
+		}
 
 		if($parent !== null) {
 			$parent->addContent($item);
