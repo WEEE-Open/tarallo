@@ -2,6 +2,8 @@
 
 namespace WEEEOpen\Tarallo\Server;
 
+use WEEEOpen\Tarallo\Server\Database\TreeDAO;
+
 /**
  * Regular items
  *
@@ -74,40 +76,56 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 * Add ancestor to location.
 	 *
 	 * @param int $distance 1 for direct parent, etc...
-	 * @param string $code ancestor code
+	 * @param ItemIncomplete $ancestor
 	 *
 	 * @throws InvalidParameterException if code is invalid
 	 * @throws \InvalidArgumentException if distance is less than 1
 	 */
-	public function addAncestor($distance, $code) {
+	public function addAncestor($distance, ItemIncomplete $ancestor) {
 		$distance = (int) $distance;
 		if($distance < 1) {
-			throw new \InvalidArgumentException('Ancestor distance too small: ' . $code . ' is at distance ' . $distance . ' from its descendant ' . $this->getCode());
+			throw new \InvalidArgumentException('Ancestor distance too small: ' . $ancestor->getCode() . ' is at distance ' . $distance . ' from its descendant ' . $this->getCode());
 		}
 
-		$this->location[--$distance] = new ItemIncomplete($code);
+		$this->location[--$distance] = $ancestor;
 	}
 
 	/**
-	 * Get ancestor of an item from its "location", if set.
-	 * Null if not set.
+	 * Add all ancestors
 	 *
-	 * @param int $distance 1 for direct parent, 2 for parent's parent, etc... 0 or less is invalid.
+	 * @param ItemIncomplete[] $ancestors in order from direct parent from most distant one
+	 *
+	 * @see TreeDAO::getPathTo() function to obtain the needed array
+	 */
+	public function addAncestors(array $ancestors) {
+		$d = 1;
+		foreach($ancestors as $ancestor) {
+			$this->addAncestor($d, $ancestor);
+			$d++;
+		}
+	}
+
+	/**
+	 * Get full path to item.
+	 * Work for non-head items, too.
 	 *
 	 * @throws \InvalidArgumentException if distance is less than 1
-	 * @return ItemIncomplete|null parent code
+	 * @return ItemIncomplete[] first item is direct parent, second is parent's parent, ad so on
 	 */
-	public function getAncestor($distance) {
-		if($distance < 1) {
-			throw new \InvalidArgumentException('Ancestor distance ' . $distance . ' too small in ' . $this->getCode());
-		}
-		$distance--;
+	public function getPath() {
+		$result = [];
+		$last = $this;
+		do {
+			foreach($last->location as $ancestor) {
+				// array_merge returns a new array, not very efficient if called multiple times...
+				$result[] = $ancestor;
+			}
+			$last = end($result);
+		} while($last !== false && count($last->location) > 0);
 
-		if(isset($this->location[$distance])) {
-			return $this->location[$distance];
-		} else {
-			return null;
-		}
+		// TODO: apply memoization ($this->location = $result)?
+
+		return $result;
 	}
 
 	/**
@@ -142,6 +160,11 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 */
 	public function addContent(Item $item) {
 		$this->contents[] = $item;
+		if(empty($this->location)) {
+			$item->addAncestor(1, $this);
+		} else {
+			$item->location = array_merge([$this], $this->getPath());
+		}
 
 		return $this;
 	}
@@ -165,8 +188,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 			$array['contents'] = $this->contents;
 		}
 		if(!empty($this->location)) {
-			ksort($this->location);
-			$array['location'] = array_reverse($this->location);
+			$array['location'] = $this->getPath();
 		}
 
 		return $array;

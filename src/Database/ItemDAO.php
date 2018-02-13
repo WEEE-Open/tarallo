@@ -2,11 +2,12 @@
 
 namespace WEEEOpen\Tarallo\Server\Database;
 
-use WEEEOpen\Tarallo\Server\InvalidParameterException;
+use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\ItemPrefixer;
 use WEEEOpen\Tarallo\Server\ItemUpdate;
+use WEEEOpen\Tarallo\Server\NotFoundException;
 
 final class ItemDAO extends DAO {
 	public function addItems(array $items, ItemIncomplete $parent = null) {
@@ -108,60 +109,6 @@ final class ItemDAO extends DAO {
 		}
 	}
 
-	private $getItemIdStatement = null;
-	private $getItemIdCache = [];
-
-	public function getItemId(ItemIncomplete $item) {
-		$code = $item->getCode();
-		if(isset($this->getItemIdCache[$code])) {
-			// let's just HOPE this thing doesn't blow up catastrophically.
-			return $this->getItemIdCache[$code];
-		}
-
-		if($this->getItemIdStatement === null) {
-			$this->getItemIdStatement = $this->getPDO()->prepare('SELECT ItemID FROM Item WHERE `Code` = ? LIMIT 1');
-		}
-
-		$this->getItemIdStatement->execute([$code]);
-		if($this->getItemIdStatement->rowCount() === 0) {
-			$this->getItemIdStatement->closeCursor();
-			throw new InvalidParameterException('Unknown item ' . $item->getCode());
-		} else {
-			$id = (int) $this->getItemIdStatement->fetch(\PDO::FETCH_NUM)[0];
-			$this->getItemIdStatement->closeCursor();
-			$this->getItemIdCache[$code] = $id;
-		}
-
-		return $id;
-	}
-
-
-	public function updateItems($items) {
-		if($items instanceof ItemUpdate) {
-			$items = [$items];
-		} else if(!is_array($items)) {
-			throw new \InvalidArgumentException('Items to be updated must be passed as an array or a single ItemUpdated, ' . gettype($items) . ' given');
-		}
-
-		if(empty($items)) {
-			return;
-		}
-
-		foreach($items as $item) {
-			if(!($item instanceof ItemUpdate)) {
-				throw new \InvalidArgumentException('Items to be updated must be ItemUpdate objects');
-			}
-			/** @var ItemUpdate $item */
-			if($item->getDefaultCodeChanged() || $item->getIsDefaultChanged()) {
-				$this->setItemDefaults($item);
-			}
-			if($item->getParentChanged()) {
-				$this->database->treeDAO()->moveItem($item, $item->getParent());
-			}
-			$this->database->featureDAO()->updateDeleteFeatures($item);
-		}
-	}
-
 	private $getItemQuery = null;
 
 	/**
@@ -172,25 +119,92 @@ final class ItemDAO extends DAO {
 	 * @param int $depth
 	 */
 	public function getItem(ItemIncomplete $item, $token = null, $depth = 10) {
+		if($token !== null && !$this->checkToken($item, $token)) {
+			throw new NotFoundException();
+		}
+
+		if(!is_int($depth)) {
+			throw new \InvalidArgumentException('Depth must be an integer, ' . gettype($token) . ' given');
+		}
+
 		if($this->getItemQuery === null) {
 			$this->getItemQuery = $this->getPDO()->prepare(<<<EOQ
-				SELECT DescendantItem.Code, AncestorItem.Code AS ImmediateParent
+				SELECT `Code`, `Brand`, `Model`, `Variant`, `Movable`, Ancestor AS Parent
 				FROM Tree
-				JOIN Item AS AncestorItem ON AncestorID=AncestorItem.ItemID
-				JOIN Item AS DescendantItem ON DescendantID=DescendantItem.ItemID
-				WHERE DescendantID IN (
-				SELECT DISTINCT DescendantID
-				FROM Tree
-				WHERE AncestorID = (
-				SELECT ItemID
-				FROM Item
-				WHERE Code = 'ZonaBlu'
-				)
-				ORDER BY Depth
+				JOIN Item ON Descendant=`Code`
+				WHERE Descendant IN (
+					SELECT DISTINCT Descendant
+					FROM Tree
+					WHERE Ancestor = ?
+					AND Depth < ?
+					ORDER BY Depth
 				)
 				AND Depth = 1
 EOQ
 			);
+		}
+
+		$this->getItemQuery->execute([$item->getCode(), $depth + 1]);
+
+		if(($row = $this->getItemQuery->fetch(\PDO::FETCH_ASSOC)) === false) {
+			throw new NotFoundException();
+		}
+
+		$flat = [];
+
+		$flat[] = $head = new Item($row['Code']);
+
+		$this->fillItem($head, $row['Brand'], $row['Model'], $row['Variant'], $row['Movable']);
+		$head->addAncestors($this->database->treeDAO()->getPathTo($head));
+
+		while(($row = $this->getItemQuery->fetch(\PDO::FETCH_ASSOC)) !== false) {
+			if(!isset($flat[$row['Parent']])) {
+				throw new \LogicException('Broken tree: got ' . $row['Code'] . ' before its parent ' . $row['Parent']);
+			}
+			$this->fillItem(new Item($row['Code']), $row['Brand'], $row['Model'], $row['Variant'], $row['Movable'], $flat[$row['Parent']]);
+		}
+	}
+
+	/**
+	 * Check that item can be obtained with a token.
+	 *
+	 * @param ItemIncomplete $item
+	 * @param string $token
+	 *
+	 * @return bool true if possible, false if wrong token or item doesn't exist
+	 */
+	private function checkToken(ItemIncomplete $item, $token) {
+		if(!is_string($token)) {
+			throw new \InvalidArgumentException('Token must be a string, ' . gettype($token) . ' given');
+		}
+
+		$tokenquery = $this->getPDO()->prepare(<<<EOQ
+			SELECT IF(COUNT(*) > 0, TRUE, FALSE)
+			FROM Item
+			WHERE `Code` = ? AND Token = ?
+EOQ
+		);
+
+		$tokenquery->execute([$item->getCode(), $token]);
+		$result = $tokenquery->fetch(\PDO::FETCH_NUM);
+		if(!is_bool($result[0])) {
+			throw new \LogicException('Result is not boolean');
+		}
+		if($result[0] === true) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	private function fillItem(Item $item, $brand, $model, $variant, $movable, Item $parent = null) {
+		$brand === null ?: $item->addFeature(new Feature('brand', $brand));
+		$model === null ?: $item->addFeature(new Feature('model', $model));
+		// TODO: these shouldn't be plain features... also, don't discard $variant
+		$movable === null ?: $item->addFeature(new Feature('soldered-in-place', $movable ? 'no' : 'yes'));
+
+		if($parent !== null) {
+			$parent->addContent($item);
 		}
 	}
 

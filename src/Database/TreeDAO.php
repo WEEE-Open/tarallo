@@ -32,6 +32,42 @@ final class TreeDAO extends DAO {
 		}
 	}
 
+	private $getPathToStatement = null;
+
+	/**
+	 * Get path to an item (item itself excluded).
+	 *
+	 * @param ItemIncomplete $item
+	 *
+	 * @return ItemIncomplete[] 0 is direct parent, 1 is parent's parent, and so on
+	 */
+	public function getPathTo(ItemIncomplete $item) {
+		if($this->getPathToStatement === null) {
+			$this->getPathToStatement = $this->getPDO()->prepare('SELECT Ancestor FROM Tree WHERE Descendant = ? ORDER BY Depth ASC');
+		}
+
+		try {
+			$this->getPathToStatement->execute([$item->getCode()]);
+
+			$result = [];
+
+			while(($row = $this->getPathToStatement->fetch(\PDO::FETCH_ASSOC)) !== false) {
+				$result[] = new ItemIncomplete($row['Ancestor']);
+			}
+
+			if(!empty($result)) {
+				$lastcode = array_pop($result)->getCode();
+				if($lastcode !== $item->getCode()) {
+					throw new \LogicException('Path to ' . $item->getCode() . " terminates at $lastcode instead");
+				}
+			}
+
+			return $result;
+		} finally {
+			$this->getPathToStatement->closeCursor();
+		}
+	}
+
 	private $removeFromTreeStatement = null;
 
 	public function removeFromTree(ItemIncomplete $item) {
@@ -47,11 +83,12 @@ final class TreeDAO extends DAO {
 			 * This is incomprehensible (I can only HOPE it does the same job) but works in MySQL:
 			 */
 			$this->removeFromTreeStatement = $this->getPDO()->prepare('DELETE Tree.* FROM Tree, Tree AS Pointless
-            WHERE Tree.DescendantID=Pointless.DescendantID
-            AND Pointless.AncestorID = ?;');
+            WHERE Tree.Descendant=Pointless.Descendant
+            AND Pointless.Ancestor = ?;');
 		}
 
-		$this->removeFromTreeStatement->execute([$this->database->itemDAO()->getItemId($item)]);
+		$this->removeFromTreeStatement->execute([$item->getCode()]);
+		$this->removeFromTreeStatement->closeCursor(); // TODO: needed?
 	}
 
 	private $addItemAsRootStatement = null;
@@ -66,9 +103,9 @@ final class TreeDAO extends DAO {
 	private function addItemAsRoot(ItemIncomplete $item) {
 		$pdo = $this->getPDO();
 		if($this->addItemAsRootStatement === null) {
-			$this->addItemAsRootStatement = $pdo->prepare('INSERT INTO Tree (AncestorID, DescendantID, Depth) VALUES (?, ?, 0)');
+			$this->addItemAsRootStatement = $pdo->prepare('INSERT INTO Tree (Ancestor, Descendant, Depth) VALUES (?, ?, 0)');
 		}
-		$id = $this->database->itemDAO()->getItemId($item);
+		$id = $item->getCode();
 		$this->addItemAsRootStatement->execute([$id, $id]);
 	}
 
@@ -91,17 +128,18 @@ final class TreeDAO extends DAO {
 			FROM Tree ltree, Tree rtree 
 			WHERE ltree.DescendantID = :parent AND rtree.AncestorID = :new;');
 		}
-		$itemDAO = $this->database->itemDAO();
-		$parentID = $itemDAO->getItemId($parent);
-		$childID = $itemDAO->getItemId($child);
+		$parentID = $parent->getCode();
+		$childID = $child->getCode();
 
 		if($parentID === $childID) {
-			// Adding an item into itself works. It doesn't add a row with Depth=0, it places an item into itself and creates new useless paths, which doesn't make any sense.
+			// Adding an item into itself "works", unfortunately.
+			// It doesn't add a row with Depth=0, it places an item into itself and creates new useless paths, which doesn't make any sense.
+			// So we need to check it here
 			return;
 		}
 
-		$this->setParentStatement->bindValue(':parent', $parentID, \PDO::PARAM_INT);
-		$this->setParentStatement->bindValue(':new', $childID, \PDO::PARAM_INT);
+		$this->setParentStatement->bindValue(':parent', $parentID, \PDO::PARAM_STR);
+		$this->setParentStatement->bindValue(':new', $childID, \PDO::PARAM_STR);
 		$this->setParentStatement->execute();
 	}
 
@@ -117,15 +155,13 @@ final class TreeDAO extends DAO {
 			// straight from Bill Karwin's post (https://www.percona.com/blog/2011/02/14/moving-subtrees-in-closure-table/)
 			// other solutions exist, but they don't work in MySQL BECAUSE MYSQL, THAT'S WHY.
 			$this->extractFromTreeStatement = $this->getPDO()->prepare('DELETE a.* FROM Tree AS a
-			JOIN Tree AS d ON a.DescendantID = d.DescendantID
+			JOIN Tree AS d ON a.Descendant = d.Descendant
 			LEFT JOIN Tree AS x
-			ON x.AncestorID = d.AncestorID AND x.DescendantID = a.AncestorID
-			WHERE d.AncestorID = ? AND x.AncestorID IS NULL;');
+			ON x.Ancestor = d.Ancestor AND x.Descendant = a.Ancestor
+			WHERE d.Ancestor = ? AND x.Ancestor IS NULL;');
 		}
 
-		$id = $this->database->itemDAO()->getItemId($item);
-
-		$this->extractFromTreeStatement->bindValue(1, $id);
+		$this->extractFromTreeStatement->bindValue(1, $item->getCode(), \PDO::PARAM_STR);
 		$this->extractFromTreeStatement->execute();
 	}
 }

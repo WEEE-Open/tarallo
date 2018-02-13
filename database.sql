@@ -13,6 +13,7 @@ CREATE TABLE `Item` (
 	`Brand` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 	`Model` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 	`Variant` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+	`Token` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
 	`Movable` boolean NOT NULL DEFAULT 1,
 	UNIQUE KEY (`Code`),
 	INDEX (`Code`),

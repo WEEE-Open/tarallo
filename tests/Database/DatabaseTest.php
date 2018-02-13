@@ -115,15 +115,6 @@ class DatabaseTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\FeatureDAO
-	 */
-	public function testFeatureList() {
-		$features = $this->getDb()->featureDAO()->getFeatureList();
-		$this->assertTrue(count($features) > 0, 'There should be some features');
-		$this->assertContainsOnly("string", $features, 'Feature names should be only strings');
-	}
-
-	/**
 	 * Database tests are really slow and this code is a bit complex to say the least, testing everything
 	 * in a sensible manner will be difficult. But some tests are better than no tests at all, right?
 	 *

@@ -4,7 +4,6 @@ namespace WEEEOpen\Tarallo\Server\Database;
 
 use WEEEOpen\Tarallo\Server\SearchTriplet;
 use WEEEOpen\Tarallo\Server\Feature;
-use WEEEOpen\Tarallo\Server\InvalidParameterException;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\ItemUpdate;
@@ -22,7 +21,7 @@ final class FeatureDAO extends DAO {
 		}
 
 		/*
-		 * This seems a good query to fetch default and non-default features:
+		 * This seemed a good query to fetch default and non-default features, when database structure was different:
 		 *
 		 * SELECT Item2.ItemID, Item2.ItemFor, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `FeatureValue`
 		 * FROM (SELECT ItemID, ItemID AS ItemFor FROM Item UNION ALL SELECT `Default` AS ItemID, ItemID AS ItemFor FROM Item WHERE `Default` IS NOT NULL)  Item2
@@ -34,26 +33,20 @@ final class FeatureDAO extends DAO {
 		 *
 		 * However, the subquery gives the correct and expected result, but the main query loses FOR UNFATHOMABLE REASONS the second half of the UNIONed data.
 		 * So we're doing two queries. That UNION probably killed performance, too, so it's acceptable anyway.
+		 *
+		 * TODO: retry with new structure: who knows, it might work!
 		 */
 
 		$inItemID = $this->multipleIn(':item', $items);
-		$featureStatement = $this->getPDO()->prepare('SELECT ItemID, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `FeatureValue`
-            FROM Feature, ItemFeature
-            LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
-            WHERE ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
-            AND ItemID IN (' . $inItemID . ');
+		$featureStatement = $this->getPDO()->prepare('SELECT `Code`, Feature, COALESCE(`Value`, ValueText, ValueEnum) AS `FeatureValue`
+            FROM ItemFeature
+            WHERE `Code` IN (' . $inItemID . ');
 		');
 
-		$defaultFeatureStatement = $this->getPDO()->prepare('SELECT Item.ItemID, Feature.FeatureName, COALESCE(ItemFeature.`Value`, ItemFeature.ValueText, FeatureValue.ValueText) AS `FeatureValue`
-			FROM Item, Feature, ItemFeature
-			LEFT JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
-			WHERE (Item.`Default` = ItemFeature.ItemID AND Item.`Default` IS NOT NULL AND Item.isDefault = 1) AND ItemFeature.FeatureID = Feature.FeatureID AND (ItemFeature.ValueEnum = FeatureValue.ValueEnum OR ItemFeature.ValueEnum IS NULL)
-			AND Item.ItemID IN (' . $inItemID . ');
-		');
+		// TODO: default features
 
 		foreach($items as $itemID => $item) {
 			$featureStatement->bindValue(':item' . $itemID, $itemID, \PDO::PARAM_INT);
-			$defaultFeatureStatement->bindValue(':item' . $itemID, $itemID, \PDO::PARAM_INT);
 		}
 
 		$featureStatement->execute();
@@ -66,17 +59,6 @@ final class FeatureDAO extends DAO {
 			}
 		} finally {
 			$featureStatement->closeCursor();
-		}
-
-		$defaultFeatureStatement->execute();
-		try {
-			if($defaultFeatureStatement->rowCount() > 0) {
-				foreach($defaultFeatureStatement as $row) {
-					$items[$row['ItemID']]->addFeatureDefault($row['FeatureName'], $row['FeatureValue']);
-				}
-			}
-		} finally {
-			$defaultFeatureStatement->closeCursor();
 		}
 	}
 
@@ -149,41 +131,16 @@ final class FeatureDAO extends DAO {
 		return $queries;
 	}
 
-	private $featureEnumNameStatement = null;
-
-	public function getFeatureValueEnumFromName($featureName, $featureValueText) {
-		$pdo = $this->getPDO();
-		if($this->featureEnumNameStatement === null) {
-			$this->featureEnumNameStatement = $pdo->prepare('SELECT `ValueEnum` FROM FeatureValue, Feature WHERE Feature.FeatureID = FeatureValue.FeatureID AND Feature.FeatureName = :n AND FeatureValue.ValueText = :valuetext AND Feature.FeatureType = :type LIMIT 1');
-		}
-		$this->featureEnumNameStatement->bindValue(':n', $featureName);
-		$this->featureEnumNameStatement->bindValue(':valuetext', $featureValueText);
-		$this->featureEnumNameStatement->bindValue(':type', Feature::ENUM);
-		$this->featureEnumNameStatement->execute();
-		try {
-			if($this->featureEnumNameStatement->rowCount() === 0) {
-				$this->featureEnumNameStatement->closeCursor();
-				throw new InvalidParameterException('Invalid value ' . $featureValueText . ' for feature ' . $featureName);
-			}
-			$result = $this->featureEnumNameStatement->fetch(\PDO::FETCH_NUM);
-		} finally {
-			$this->featureEnumNameStatement->closeCursor();
-		}
-
-		/** @noinspection PhpUndefinedVariableInspection */
-		return $result[0];
-	}
-
 	private $deleteFeatureStatement = null;
 
-	private function deleteFeature(ItemIncomplete $item, $featureName) {
+	private function deleteFeature(ItemIncomplete $item, Feature $feature) {
 		// TODO: this method may turn out SLIGHTLY too slow, since it's a single prepared statement executed a million times in a loop somewhere outside this method.
 		$pdo = $this->getPDO();
 		if($this->deleteFeatureStatement === null) {
-			$this->deleteFeatureStatement = $pdo->prepare('DELETE ItemFeature.* FROM ItemFeature JOIN Feature ON ItemFeature.FeatureID = Feature.FeatureID WHERE ItemFeature.ItemID = :id AND Feature.FeatureName = :feat');
+			$this->deleteFeatureStatement = $pdo->prepare('DELETE * FROM ItemFeature WHERE `Code` = :id AND Feature = :feat');
 		}
-		$this->deleteFeatureStatement->bindValue(':id', $this->database->itemDAO()->getItemId($item), \PDO::PARAM_INT);
-		$this->deleteFeatureStatement->bindValue(':feat', $featureName, \PDO::PARAM_STR);
+		$this->deleteFeatureStatement->bindValue(':id', $item->getCode(), \PDO::PARAM_STR);
+		$this->deleteFeatureStatement->bindValue(':feat', $feature->name, \PDO::PARAM_STR);
 		$this->deleteFeatureStatement->execute();
 	}
 
@@ -195,10 +152,10 @@ final class FeatureDAO extends DAO {
 		}
 
 		$newItem = new Item($item->getCode());
-		foreach($features as $feature => $value) {
+		foreach($features as $feature) {
 			$this->deleteFeature($item, $feature);
-			if($value !== null) {
-				$newItem->addFeature(new Feature($feature, $value));
+			if($feature->value !== null) {
+				$newItem->addFeature(new Feature($feature, $feature->value));
 			}
 		}
 		$this->addFeatures($newItem);
@@ -218,19 +175,19 @@ final class FeatureDAO extends DAO {
 		$pdo = $this->getPDO();
 
 		if($this->featureNumberStatement === null) {
-			$this->featureNumberStatement = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `Value`)   SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+			$this->featureNumberStatement = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `Value`) VALUES (:feature, :item, :val)');
 		}
 		if($this->featureTextStatement === null) {
-			$this->featureTextStatement = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueText`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+			$this->featureTextStatement = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `ValueText`) VALUES (:feature, :item, :val)');
 		}
 		if($this->featureEnumStatement === null) {
-			$this->featureEnumStatement = $pdo->prepare('INSERT INTO ItemFeature (FeatureID, ItemID, `ValueEnum`) SELECT FeatureID, :item, :val FROM Feature WHERE Feature.FeatureName = :feature');
+			$this->featureEnumStatement = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `ValueEnum`) VALUES (:feature, :item, :val)');
 		}
 
-		$itemId = $this->database->itemDAO()->getItemId($item);
+		$itemId = $item->getCode();
 		$this->featureNumberStatement->bindValue(':item', $itemId, \PDO::PARAM_INT);
 		$this->featureTextStatement->bindValue(':item', $itemId, \PDO::PARAM_STR);
-		$this->featureEnumStatement->bindValue(':item', $itemId, \PDO::PARAM_INT);
+		$this->featureEnumStatement->bindValue(':item', $itemId, \PDO::PARAM_STR);
 
 		foreach($features as $feature) {
 			$name = $feature->name;
@@ -249,33 +206,12 @@ final class FeatureDAO extends DAO {
 					break;
 				case Feature::ENUM:
 					$this->featureEnumStatement->bindValue(':feature', $name);
-					$this->featureEnumStatement->bindValue(':val', $this->database->featureDAO()->getFeatureValueEnumFromName($name, $value));
+					$this->featureEnumStatement->bindValue(':val', $name);
 					$this->featureEnumStatement->execute();
 					break;
 				default:
 					throw new \LogicException('Unknown feature type ' . $feature->type . ' returned by getFeatureTypeFromName (should never happen unless a cosmic ray flips a bit somewhere)');
 			}
 		}
-	}
-
-	private $getFeatureListStatement = null;
-
-	public function getFeatureList() {
-		if($this->getFeatureListStatement === null) {
-			$this->getFeatureListStatement = $this->getPDO()->prepare('SELECT FeatureName FROM Feature');
-		}
-		$this->getFeatureListStatement->execute();
-		if($this->getFeatureListStatement->rowCount() > 0) {
-			$result = [];
-			while(($row = $this->getFeatureListStatement->fetch(\PDO::FETCH_ASSOC)) !== false) {
-				$result[] = $row['FeatureName'];
-			}
-			$this->getFeatureListStatement->closeCursor();
-
-			return $result;
-		}
-		$this->getFeatureListStatement->closeCursor();
-
-		return [];
 	}
 }
