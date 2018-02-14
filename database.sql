@@ -245,4 +245,18 @@ CREATE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
 		SET @taralloAuditUsername = username;
 	END$$
 
+CREATE FUNCTION GetParent(child varchar(100))
+	RETURNS varchar(100)
+READS SQL DATA
+DETERMINISTIC
+	BEGIN
+		DECLARE found varchar(100);
+		SELECT Ancestor
+		INTO found
+		FROM Tree
+		WHERE Descendant = child
+			AND Depth = 1;
+		RETURN found;
+	END$$
+
 DELIMITER ;

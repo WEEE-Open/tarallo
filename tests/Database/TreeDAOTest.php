@@ -4,6 +4,8 @@ namespace WEEEOpen\Tarallo\Server\Test\Database;
 
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\NotFoundException;
 
 class TreeDAOTest extends DatabaseTest {
 	/**
@@ -21,33 +23,44 @@ class TreeDAOTest extends DatabaseTest {
 		$lab->addContent($case);
 		$db->itemDAO()->addItems([$lab]);
 
-		$items = $db->searchDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
-		$this->assertContainsOnly(Item::class, $items);
-		/** @var Item[] $items */
-		$this->assertEquals(1, count($items), 'Only one root Item');
+		$lab = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));
+		$this->assertInstanceOf(Item::class, $lab);
 		/** @var Item $caseContent */
-		$case = $items[0]->getContents()[0];
+		$case = $lab->getContents()[0];
 		$this->assertEquals('PC42', $case->getCode(), 'PC42 is still there');
-		$this->assertTrue($this->itemCompare($lab, $items[0]), 'Lab should be unchanged');
+		$this->assertTrue($this->itemCompare($lab, $lab), 'Lab should be unchanged');
 
 		$db->beginTransaction();
 		$db->treeDAO()->removeFromTree($case);
 		$db->commit();
 
-		$items = $db->searchDAO()->getItems(['CHERNOBYL'], null, null, null, null, null);
-		$this->assertContainsOnly(Item::class, $items);
-		$this->assertEquals(1, count($items), 'Still only one root Item');
-		$this->assertEquals(0, count($items[0]->getContents()), 'Lab is empty');
+		$lab = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));
+		$this->assertInstanceOf(Item::class, $lab);
+		$this->assertEquals(0, count($lab->getContents()), 'Lab is empty');
 
-		$items = $db->searchDAO()->getItems(['PC42'], null, null, null, null, null);
-		$this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
+		$ex = null;
+		try {
+			$db->itemDAO()->getItem(new ItemIncomplete('PC42'));
+		} catch(\Throwable $e) {
+			$ex = $e;
+		}
+		$this->assertInstanceOf(NotFoundException::class, $ex, 'Items outside Tree cannot be selected');
 
-		$items = $db->searchDAO()->getItems(['HDD1'], null, null, null, null, null);
-		$this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
+		$ex = null;
+		try {
+			$db->itemDAO()->getItem(new ItemIncomplete('HDD1'));
+		} catch(\Throwable $e) {
+			$ex = $e;
+		}
+		$this->assertInstanceOf(NotFoundException::class, $ex, 'Items outside Tree cannot be selected');
 
-		$items = $db->searchDAO()->getItems(['HDD2'], null, null, null, null, null);
-		$this->assertEquals(0, count($items), 'Item outside Tree cannot be selected');
-
+		$ex = null;
+		try {
+			$db->itemDAO()->getItem(new ItemIncomplete('HDD2'));
+		} catch(\Throwable $e) {
+			$ex = $e;
+		}
+		$this->assertInstanceOf(NotFoundException::class, $ex, 'Items outside Tree cannot be selected');
 	}
 
 	/**

@@ -135,14 +135,6 @@ final class TreeDAO extends DAO {
 	 * @param ItemIncomplete $child
 	 */
 	private function setParent(ItemIncomplete $parent, ItemIncomplete $child) {
-		$pdo = $this->getPDO();
-		if($this->setParentStatement === null) {
-			// This is the standard query for subtree insertion, just with a cartesian product which is actually a join, instead of a join. It's exactly the same thing.
-			$this->setParentStatement = $pdo->prepare('INSERT INTO Tree (Ancestor, Descendant, Depth)
-			SELECT ltree.Ancestor, rtree.Descendant, ltree.Depth+rtree.Depth+1
-			FROM Tree ltree, Tree rtree 
-			WHERE ltree.Descendant = :parent AND rtree.Ancestor = :new;');
-		}
 		$parentID = $parent->getCode();
 		$childID = $child->getCode();
 
@@ -151,6 +143,16 @@ final class TreeDAO extends DAO {
 			// It doesn't add a row with Depth=0, it places an item into itself and creates new useless paths, which doesn't make any sense.
 			// So we need to check it here
 			return;
+		}
+
+		$pdo = $this->getPDO();
+
+		if($this->setParentStatement === null) {
+			// This is the standard query for subtree insertion, just with a cartesian product which is actually a join, instead of a join. It's exactly the same thing.
+			$this->setParentStatement = $pdo->prepare('INSERT INTO Tree (Ancestor, Descendant, Depth)
+			SELECT ltree.Ancestor, rtree.Descendant, ltree.Depth+rtree.Depth+1
+			FROM Tree ltree, Tree rtree 
+			WHERE ltree.Descendant = :parent AND rtree.Ancestor = :new;');
 		}
 
 		$this->setParentStatement->bindValue(':parent', $parentID, \PDO::PARAM_STR);
