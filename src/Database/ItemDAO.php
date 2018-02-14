@@ -102,7 +102,7 @@ final class ItemDAO extends DAO {
 		}
 
 		/** @var Item $item */
-		$this->database->featureDAO()->addFeatures($item);
+		$this->database->featureDAO()->setFeatures($item);
 		$this->database->treeDAO()->addToTree($item, $parent);
 
 		$childItems = $item->getContents();
@@ -146,14 +146,14 @@ final class ItemDAO extends DAO {
 		}
 	}
 
-	private $getItemQuery = null;
+	private $getItemStatement = null;
 
 	/**
 	 * Get a single item (and its content)
 	 *
 	 * @param ItemIncomplete $item
-	 * @param null $token
-	 * @param int $depth
+	 * @param string|null $token
+	 * @param int $depth max depth
 	 *
 	 * @return Item
 	 */
@@ -166,11 +166,20 @@ final class ItemDAO extends DAO {
 			throw new \InvalidArgumentException('Depth must be an integer, ' . gettype($token) . ' given');
 		}
 
-		if($this->getItemQuery === null) {
-			$this->getItemQuery = $this->getPDO()->prepare(<<<EOQ
+		/**
+		 * All items in this subtree, flattened
+		 */
+		$flat = [];
+
+		$head = $this->getHeadItem($item);
+		unset($item);
+		$flat[$head->getCode()] = $head;
+
+		if($this->getItemStatement === null) {
+			$this->getItemStatement = $this->getPDO()->prepare(<<<EOQ
 				SELECT `Code`, `Brand`, `Model`, `Variant`, `Movable`, Ancestor AS Parent
 				FROM Tree
-				JOIN Item ON Descendant=`Code` -- right join? qualcosa? Boh. È ovvio (e conseguentemente ineffabile) a tutti meno che a me come fare la query del subtree. C'era quel MAX(IF(...)) incomprensibile da talmente era OVVISSIMO E SEMPLICISSIMO, infatti. 
+				JOIN Item ON Descendant=`Code` 
 				WHERE Descendant IN (
 					SELECT DISTINCT Descendant
 					FROM Tree
@@ -183,25 +192,55 @@ EOQ
 			);
 		}
 
-		$this->getItemQuery->execute([$item->getCode(), $depth]);
+		try {
+			$this->getItemStatement->execute([$head->getCode(), $depth]);
 
-		if(($row = $this->getItemQuery->fetch(\PDO::FETCH_ASSOC)) === false) {
-			throw new NotFoundException();
+			while(($row = $this->getItemStatement->fetch(\PDO::FETCH_ASSOC)) !== false) {
+				if(!isset($flat[$row['Parent']])) {
+					throw new \LogicException('Broken tree: got ' . $row['Code'] . ' before its parent ' . $row['Parent']);
+				}
+				$this->fillItem(new Item($row['Code']), $row['Brand'], $row['Model'], $row['Variant'], $row['Movable'],
+					$flat[$row['Parent']]);
+			}
+		} finally {
+			$this->getItemStatement->closeCursor();
+		}
+		$this->database->treeDAO()->getPathTo($head);
+		$this->database->featureDAO()->getFeaturesAll($flat);
+
+		return $head;
+	}
+
+	private $getHeadItemStatement = null;
+
+	/**
+	 * Get head Item and "fill" it.
+	 * No descendants, no features, no path, nothing else.
+	 *
+	 * The only purpose of this method is to reduce clutter inside getItem, basically.
+	 *
+	 * @param ItemIncomplete $item what to get
+	 *
+	 * @return Item new Item
+	 *
+	 * @see getItem for the whole thing
+	 */
+	private function getHeadItem(ItemIncomplete $item) {
+		$head = new Item($item->getCode());
+		unset($item);
+
+		if($this->getHeadItemStatement === null) {
+			$this->getHeadItemStatement = $this->getPDO()->prepare('SELECT `Code`, `Brand`, `Model`, `Variant`, `Movable` FROM Item WHERE `Code` = :cod');
 		}
 
-		$flat = [];
-
-		$flat[] = $head = new Item($row['Code']);
-
-		$this->fillItem($head, $row['Brand'], $row['Model'], $row['Variant'], $row['Movable']);
-		$head->addAncestors($this->database->treeDAO()->getPathTo($head));
-
-		while(($row = $this->getItemQuery->fetch(\PDO::FETCH_ASSOC)) !== false) {
-			if(!isset($flat[$row['Parent']])) {
-				throw new \LogicException('Broken tree: got ' . $row['Code'] . ' before its parent ' . $row['Parent']);
+		try {
+			$this->getHeadItemStatement->execute([$head->getCode()]);
+			if(($row = $this->getHeadItemStatement->fetch(\PDO::FETCH_ASSOC)) === false) {
+				throw new NotFoundException();
 			}
-			$this->fillItem(new Item($row['Code']), $row['Brand'], $row['Model'], $row['Variant'], $row['Movable'],
-				$flat[$row['Parent']]);
+			$this->fillItem($head, $row['Brand'], $row['Model'], $row['Variant'], $row['Movable']);
+		} finally {
+			$this->getHeadItemStatement->closeCursor();
 		}
 
 		return $head;

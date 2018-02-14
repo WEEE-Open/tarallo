@@ -2,6 +2,7 @@
 
 namespace WEEEOpen\Tarallo\Server\Database;
 
+use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 
 final class TreeDAO extends DAO {
@@ -39,13 +40,23 @@ final class TreeDAO extends DAO {
 	private $getPathToStatement = null;
 
 	/**
+	 * Get path to an item and set it.
+	 * Item code must be not null, obviously.
+	 *
+	 * @param Item $item
+	 */
+	public function getPathTo(Item $item) {
+		$item->addAncestors($this->getPathToArray($item));
+	}
+
+	/**
 	 * Get path to an item (item itself excluded).
 	 *
 	 * @param ItemIncomplete $item
 	 *
 	 * @return ItemIncomplete[] 0 is direct parent, 1 is parent's parent, and so on
 	 */
-	public function getPathTo(ItemIncomplete $item) {
+	private function getPathToArray(ItemIncomplete $item) {
 		if($this->getPathToStatement === null) {
 			$this->getPathToStatement = $this->getPDO()->prepare('SELECT Ancestor FROM Tree WHERE Descendant = ? ORDER BY Depth DESC');
 		}

@@ -334,7 +334,7 @@ final class SearchDAO extends DAO {
 			}
 			$s->closeCursor();
 			// object are always passed by reference: update an Item in any array, every other gets updated too
-			$this->database->featureDAO()->setFeatures($items);
+			$this->database->featureDAO()->getFeaturesAll($items);
 			$this->setLocations($needLocation);
 			$this->sortItems($results, $sorts);
 			$totalCount = count($results);

@@ -20,6 +20,8 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 *
 	 * @param string|null $code Item code, or null if not yet known
 	 * @param Product $product Product referenced by Item, default null
+	 *
+	 * @TODO: allow ItemIncomplete as first parameter, read code as-is, avoid multiple validations
 	 */
 	public function __construct($code, Product $product = null) {
 		if($code === null) {
