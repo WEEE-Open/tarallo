@@ -172,7 +172,7 @@ final class ItemDAO extends DAO {
 		$flat = [];
 
 		$head = $this->getHeadItem($item);
-		unset($item);
+		$item = null;
 		$flat[$head->getCode()] = $head;
 
 		if($this->getItemStatement === null) {
@@ -199,7 +199,8 @@ EOQ
 				if(!isset($flat[$row['Parent']])) {
 					throw new \LogicException('Broken tree: got ' . $row['Code'] . ' before its parent ' . $row['Parent']);
 				}
-				$this->fillItem(new Item($row['Code']), $row['Brand'], $row['Model'], $row['Variant'], $row['Movable'],
+				$flat[$row['Code']] = new Item($row['Code']);
+				$this->fillItem($flat[$row['Code']], $row['Brand'], $row['Model'], $row['Variant'], $row['Movable'],
 					$flat[$row['Parent']]);
 			}
 		} finally {
@@ -227,7 +228,7 @@ EOQ
 	 */
 	private function getHeadItem(ItemIncomplete $item) {
 		$head = new Item($item->getCode());
-		unset($item);
+		$item = null;
 
 		if($this->getHeadItemStatement === null) {
 			$this->getHeadItemStatement = $this->getPDO()->prepare('SELECT `Code`, `Brand`, `Model`, `Variant`, `Movable` FROM Item WHERE `Code` = :cod');

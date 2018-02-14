@@ -53,15 +53,10 @@ class ItemDAOTest extends DatabaseTest {
 			foreach($oldFeatures as $name => $feature) {
 				$value = $feature->value;
 				$this->assertTrue(isset($newFeatures[$name]), "Feature $name should still exist");
-				$this->assertEquals($value, $newFeatures[$name]->value, "Sub-Item $child should have $name=$value as before");
+				$this->assertEquals($value, $newFeatures[$name]->value,
+					"Sub-Item $child should have $name=$value as before");
 			}
-			$this->assertTrue(empty($child->getContents()), 'No children of child Item ' . (string) $child);
-			$features = $child->getFeatures();
-			$this->assertEquals(4, count($features), 'Items should still have all their features and none more');
-			$this->assertArrayHasKey('capacity-byte', $features);
-			$this->assertEquals(666, $features['capacity-byte']->value);
-			$this->assertArrayHasKey('brand', $features);
-			$this->assertEquals('SATAn Storage Corporation Inc.', $features['brand']->value);
+			$this->assertTrue(empty($child->getContents()), "No children of child Item $child should exist");
 		}
 	}
 

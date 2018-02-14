@@ -4,9 +4,8 @@ namespace WEEEOpen\Tarallo\Server\Database;
 
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
-use WEEEOpen\Tarallo\Server\ItemUpdate;
 use WEEEOpen\Tarallo\Server\SearchTriplet;
+
 
 final class FeatureDAO extends DAO {
 
@@ -21,6 +20,7 @@ final class FeatureDAO extends DAO {
 		foreach($items as $item) {
 			$this->getFeatures($item);
 		}
+
 		return $items;
 	}
 
@@ -53,7 +53,7 @@ final class FeatureDAO extends DAO {
 
 		// TODO: default features
 		if($this->getFeaturesStatement === null) {
-			$this->getFeaturesStatement = $this->getPDO()->prepare('SELECT `Code`, Feature, COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`
+			$this->getFeaturesStatement = $this->getPDO()->prepare('SELECT Feature, COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`
             FROM ItemFeature
             WHERE `Code` = :cod;');
 		}
@@ -201,8 +201,9 @@ final class FeatureDAO extends DAO {
 				$statement->bindValue(':item', $item->getCode(), \PDO::PARAM_STR);
 				$statement->bindValue(':val', $value, $type);
 				$statement->bindValue(':val2', $value, $type);
-				if(!$statement->execute())
+				if(!$statement->execute()) {
 					throw new DatabaseException("Cannot add/upadate feature $name with value $value for item " . $item->getCode());
+				}
 			} finally {
 				$statement->closeCursor();
 			}
