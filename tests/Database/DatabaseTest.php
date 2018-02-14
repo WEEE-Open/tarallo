@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\SearchTriplet;
 
 class DatabaseTest extends TestCase {
@@ -145,11 +146,9 @@ class DatabaseTest extends TestCase {
 		$case->addContent($discone2);
 		$db->itemDAO()->addItems([$case]);
 
-		$items = $db->searchDAO()->getItems(['PC42'], null, null, null, null, null);
-		$this->assertContainsOnly(Item::class, $items);
-		$this->assertEquals(1, count($items), 'Only one root Item');
+		$newCase = $db->itemDAO()->getItem(new ItemIncomplete('PC42'));
+		$this->assertInstanceOf(Item::class, $newCase);
 		/** @var Item $newCase */
-		$newCase = reset($items); // get the only Item
 		$this->assertEquals(2, count($newCase->getContents()), 'Two child Item');
 		$this->assertContainsOnly(Item::class, $newCase->getContents(), null, 'Only Items are contained in an Item');
 		foreach($newCase->getContents() as $child) {
