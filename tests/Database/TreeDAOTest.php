@@ -212,4 +212,35 @@ class TreeDAOTest extends DatabaseTest {
 		$this->expectExceptionCode(TreeDAO::EXCEPTION_CODE_PARENT);
 		$db->treeDAO()->moveItem(new ItemIncomplete('TAVOLONE'), new ItemIncomplete('NOWHERE'));
 	}
+
+	public function testRemoveFromTree() {
+		$tree = (new Item('CHERNOBYL'))
+			->addContent((new Item('TAVOLONE'))
+				->addContent((new Item('PC42'))
+					->addContent(new Item('RAM9001'))));
+
+		$db = $this->getDb();
+		$db->itemDAO()->addItem($tree);
+
+		$db->treeDAO()->removeFromTree(new ItemIncomplete('PC42'));
+
+		$ex = null;
+		try {
+			$db->itemDAO()->getItem(new ItemIncomplete('PC42'));
+		} catch(NotFoundException $e) {
+			$ex = $e;
+		}
+		$this->assertInstanceOf(NotFoundException::class, $ex);
+
+		$ex = null;
+		try {
+			$db->itemDAO()->getItem(new ItemIncomplete('RAM9001'));
+		} catch(NotFoundException $e) {
+			$ex = $e;
+		}
+		$this->assertInstanceOf(NotFoundException::class, $ex);
+
+		$bigtable = $db->itemDAO()->getItem(new ItemIncomplete('TAVOLONE'));
+		$this->assertInstanceOf(Item::class, $bigtable);
+	}
 }

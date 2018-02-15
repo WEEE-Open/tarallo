@@ -63,6 +63,10 @@ class Adapter {
 
 	public static function removeItem(User $user, Database $db, $parameters, $querystring, $payload) {
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+
+		$db->treeDAO()->removeFromTree(new ItemIncomplete($id));
+
+		return null;
 	}
 
 	public static function setItemParent(User $user, Database $db, $parameters, $querystring, $payload) {

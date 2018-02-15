@@ -82,6 +82,14 @@ final class ItemDAO extends DAO {
 
 	private $itemExistsStament = null;
 
+	/**
+	 * Check if items still exist.
+	 *
+	 * @param ItemIncomplete $item
+	 * @TODO: deleted items, do something. What? Two separate function? Boolean? Tri-state (available, deleted, not found (by throwing an exception, which is what happens anyways, usually))? That seems somewhat sensible, so every function could decide if it makes sense to operate on deleted items (for recovery) or not...
+	 *
+	 * @return bool
+	 */
 	public function itemExists(ItemIncomplete $item) {
 		if($this->itemExistsStament === null) {
 			$this->itemExistsStament = $this->getPDO()->prepare('SELECT IF(COUNT(*) > 0, TRUE, FALSE) FROM Item WHERE `Code` = :cod');
