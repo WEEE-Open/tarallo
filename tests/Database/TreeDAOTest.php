@@ -2,6 +2,7 @@
 
 namespace WEEEOpen\Tarallo\Server\Test\Database;
 
+use WEEEOpen\Tarallo\Server\Database\TreeDAO;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
@@ -192,7 +193,7 @@ class TreeDAOTest extends DatabaseTest {
 		$db->itemDAO()->addItem($chernobyl);
 
 		$this->expectException(NotFoundException::class);
-		$this->expectExceptionCode(1);
+		$this->expectExceptionCode(TreeDAO::EXCEPTION_CODE_CHILD);
 		$db->treeDAO()->moveItem(new ItemIncomplete('SOMETHING'), new ItemIncomplete('TAVOLONE'));
 	}
 
@@ -208,7 +209,7 @@ class TreeDAOTest extends DatabaseTest {
 		$db->itemDAO()->addItem($chernobyl);
 
 		$this->expectException(NotFoundException::class);
-		$this->expectExceptionCode(2);
+		$this->expectExceptionCode(TreeDAO::EXCEPTION_CODE_PARENT);
 		$db->treeDAO()->moveItem(new ItemIncomplete('TAVOLONE'), new ItemIncomplete('NOWHERE'));
 	}
 }

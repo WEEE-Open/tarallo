@@ -7,6 +7,9 @@ use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 
 final class TreeDAO extends DAO {
+	const EXCEPTION_CODE_PARENT = 1;
+	const EXCEPTION_CODE_CHILD = 2;
+	
 	/**
 	 * Add a new Item to the tree. Don't call if it's already in the tree.
 	 *
@@ -14,12 +17,12 @@ final class TreeDAO extends DAO {
 	 * @param ItemIncomplete|null $parent some existing Item as parent, NULL if it has no parent (root Item)
 	 */
 	public function addToTree(ItemIncomplete $child, ItemIncomplete $parent = null) {
-		if(!$this->database->itemDAO()->itemExists($parent)) {
-			throw new NotFoundException(1);
+		if($parent !== null && !$this->database->itemDAO()->itemExists($parent)) {
+			throw new NotFoundException(self::EXCEPTION_CODE_PARENT);
 		}
 
 		if(!$this->database->itemDAO()->itemExists($child)) {
-			throw new NotFoundException(2);
+			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
 		}
 
 		$this->addItemAsRoot($child);
@@ -37,11 +40,11 @@ final class TreeDAO extends DAO {
 	 */
 	public function moveItem(ItemIncomplete $item, ItemIncomplete $newParent = null) {
 		if(!$this->database->itemDAO()->itemExists($newParent)) {
-			throw new NotFoundException(1);
+			throw new NotFoundException(self::EXCEPTION_CODE_PARENT);
 		}
 
 		if(!$this->database->itemDAO()->itemExists($item)) {
-			throw new NotFoundException(2);
+			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
 		}
 
 		$this->splitSubtree($item);
@@ -100,7 +103,7 @@ final class TreeDAO extends DAO {
 
 	public function removeFromTree(ItemIncomplete $item) {
 		if(!$this->database->itemDAO()->itemExists($item)) {
-			throw new NotFoundException(2);
+			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
 		}
 
 		if($this->removeFromTreeStatement === null) {

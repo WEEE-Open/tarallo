@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\Server\v1;
 use WEEEOpen\Tarallo\Server\AuthenticationException;
 use WEEEOpen\Tarallo\Server\AuthorizationException;
 use WEEEOpen\Tarallo\Server\Database\Database;
+use WEEEOpen\Tarallo\Server\Database\TreeDAO;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
@@ -72,7 +73,7 @@ class Adapter {
 		try {
 			$db->treeDAO()->moveItem(new ItemIncomplete($id), new ItemIncomplete($payload));
 		} catch(NotFoundException $e) {
-			if($e->getCode() === 2) {
+			if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
 				throw new InvalidPayloadParameterException('*', $payload, "Parent item doesn't exist");
 			} else {
 				throw $e;
