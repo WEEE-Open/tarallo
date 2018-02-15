@@ -45,7 +45,9 @@ class SearchDAOTest extends DatabaseTest {
 			->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
 			->addFeature(new Feature('color', 'white')); // based on a real PC we have in our laboratory.
 
-		$db->itemDAO()->addItems($pc);
+		foreach($pc as $i) {
+			$db->itemDAO()->addItem($i);
+		}
 
 		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null,
 			['motherboard-form-factor' => '-', 'color' => '+'], null);
@@ -85,7 +87,7 @@ class SearchDAOTest extends DatabaseTest {
 		$discone2 = (new Item('SATAna2'))->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'));
 		$case->addContent($discone1);
 		$case->addContent($discone2);
-		$db->itemDAO()->addItems([$case]);
+		$db->itemDAO()->addItem($case);
 
 		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('brand', '=', 'SATAn Storage Corporation Inc.')],
 			null, null, null, null);
@@ -139,7 +141,11 @@ class SearchDAOTest extends DatabaseTest {
 			->addFeature(new Feature('type', 'case'))
 			->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
 			->addFeature(new Feature('color', 'white'));
-		$db->itemDAO()->addItems($pc);
+
+		foreach($pc as $i) {
+			$db->itemDAO()->addItem($i);
+		}
+
 		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null,
 			['motherboard-form-factor' => '-', 'color' => '+'], null);
 		$expected = [ // this ugly code courtesy of var_export
@@ -251,7 +257,9 @@ class SearchDAOTest extends DatabaseTest {
 			->addFeature(new Feature('model', '737-800'));
 		$db = $this->getDb();
 
-		$db->itemDAO()->addItems($cpu);
+		foreach($cpu as $c) {
+			$db->itemDAO()->addItem($c);
+		}
 
 		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('type', '=', 'cpu')], null, null, null, null);
 		$this->assertContainsOnly(Item::class, $items);

@@ -6,6 +6,7 @@ use WEEEOpen\Tarallo\Server\AuthenticationException;
 use WEEEOpen\Tarallo\Server\AuthorizationException;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
 use WEEEOpen\Tarallo\Server\UserAnonymous;
@@ -18,8 +19,8 @@ class Adapter {
 
 	public static function sessionStart(User $user, Database $db, $parameters, $querystring, $payload) {
 		self::validateArray($payload);
-		$username = self::validateString($payload, 'username');
-		$password = self::validateString($payload, 'password');
+		$username = self::validateHasString($payload, 'username');
+		$password = self::validateHasString($payload, 'password');
 		Session::start(new User($username, $password), $db);
 		return null;
 	}
@@ -48,8 +49,37 @@ class Adapter {
 		if($id === null) {
 			throw new \LogicException('Not implemented');
 		} else {
-			$item = $db->itemDAO()->getItem(new ItemIncomplete($id), $token);
+			return $db->itemDAO()->getItem(new ItemIncomplete($id), $token);
 		}
+	}
+
+	public static function createItem(User $user, Database $db, $parameters, $querystring, $payload) {
+		self::authorize($user);
+		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+
+		// TODO: implement
+	}
+
+	public static function removeItem(User $user, Database $db, $parameters, $querystring, $payload) {
+		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+	}
+
+	public static function setItemParent(User $user, Database $db, $parameters, $querystring, $payload) {
+		self::authorize($user);
+		self::validateIsString($payload);
+		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+
+		try {
+			$db->treeDAO()->moveItem(new ItemIncomplete($id), new ItemIncomplete($payload));
+		} catch(NotFoundException $e) {
+			if($e->getCode() === 2) {
+				throw new InvalidPayloadParameterException('*', $payload, "Parent item doesn't exist");
+			} else {
+				throw $e;
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -97,18 +127,18 @@ class Adapter {
 
 	/**
 	 * Check that key exists and it's a string.
-	 * Or a number, which will be cast to a string because nobody cares.
+	 * Or an int, which will be cast to a string because nobody cares.
 	 *
 	 * @param array $payload THE array
 	 * @param mixed $key Some key
 	 *
 	 * @return string
 	 */
-	private static function validateString($payload, $key) {
+	private static function validateHasString($payload, $key) {
 		$value = self::validateHas($payload, $key);
 		if(is_string($value)) {
 			return $value;
-		} else if(is_numeric($value)) {
+		} else if(is_int($value)) {
 			return (string) $value;
 		} else {
 			throw new InvalidPayloadParameterException($key, $value);
@@ -127,6 +157,24 @@ class Adapter {
 		}
 		if(empty($array)) {
 			throw new InvalidPayloadParameterException('*', null, 'Empty request body');
+		}
+	}
+
+	/**
+	 * Validate that the entire payload (or some other variable) IS a string
+	 * and it's no empty. Or is a number, which will be converted into a string.
+	 *
+	 * @param $possiblyString
+	 */
+	private static function validateIsString($possiblyString) {
+		if(is_int($possiblyString)) {
+			$possiblyString = (string) $possiblyString;
+		}
+		if(!is_string($possiblyString)) {
+			throw new InvalidPayloadParameterException('*', '', 'Request body should be a string');
+		}
+		if(trim($possiblyString) === '') {
+			throw new InvalidPayloadParameterException('*', '', 'Empty string is not acceptable');
 		}
 	}
 }

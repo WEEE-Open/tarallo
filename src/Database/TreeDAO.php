@@ -4,6 +4,7 @@ namespace WEEEOpen\Tarallo\Server\Database;
 
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\NotFoundException;
 
 final class TreeDAO extends DAO {
 	/**
@@ -13,8 +14,12 @@ final class TreeDAO extends DAO {
 	 * @param ItemIncomplete|null $parent some existing Item as parent, NULL if it has no parent (root Item)
 	 */
 	public function addToTree(ItemIncomplete $child, ItemIncomplete $parent = null) {
-		if(!$this->getPDO()->inTransaction()) {
-			throw new \LogicException('addToTree called outside of transaction');
+		if(!$this->database->itemDAO()->itemExists($parent)) {
+			throw new NotFoundException(1);
+		}
+
+		if(!$this->database->itemDAO()->itemExists($child)) {
+			throw new NotFoundException(2);
 		}
 
 		$this->addItemAsRoot($child);
@@ -31,6 +36,14 @@ final class TreeDAO extends DAO {
 	 *     root Item)
 	 */
 	public function moveItem(ItemIncomplete $item, ItemIncomplete $newParent = null) {
+		if(!$this->database->itemDAO()->itemExists($newParent)) {
+			throw new NotFoundException(1);
+		}
+
+		if(!$this->database->itemDAO()->itemExists($item)) {
+			throw new NotFoundException(2);
+		}
+
 		$this->splitSubtree($item);
 		if($newParent !== null) {
 			$this->setParent($newParent, $item);
@@ -86,6 +99,10 @@ final class TreeDAO extends DAO {
 	private $removeFromTreeStatement = null;
 
 	public function removeFromTree(ItemIncomplete $item) {
+		if(!$this->database->itemDAO()->itemExists($item)) {
+			throw new NotFoundException(2);
+		}
+
 		if($this->removeFromTreeStatement === null) {
 			/* This is readable but doesn't work in MySQL:
 			 *

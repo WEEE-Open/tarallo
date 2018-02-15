@@ -21,7 +21,7 @@ class TreeDAOTest extends DatabaseTest {
 		$case->addContent($discone1);
 		$case->addContent($discone2);
 		$lab->addContent($case);
-		$db->itemDAO()->addItems([$lab]);
+		$db->itemDAO()->addItem($lab);
 
 		$lab = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));
 		$this->assertInstanceOf(Item::class, $lab);
@@ -138,7 +138,7 @@ class TreeDAOTest extends DatabaseTest {
 		$tavolone->addContent($ti);
 
 		$db = $this->getDb();
-		$db->itemDAO()->addItems([$chernobyl]);
+		$db->itemDAO()->addItem($chernobyl);
 
 		$item = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));
 		$this->assertInstanceOf(Item::class, $item);
@@ -181,5 +181,37 @@ class TreeDAOTest extends DatabaseTest {
 		$this->assertInstanceOf(Item::class, $tiShouldBeHere, 'PCTI should have moved to ZonaBlu');
 		$this->assertEquals(null, $tiShouldNotBeHere, 'TAVOLONE should not contain PCTI');
 		$this->assertTrue($this->itemCompare($ti, $tiShouldBeHere), 'PCTI should have the same content');
+	}
+
+	public function testTreeMoveFromNonexistant() {
+		$chernobyl = (new Item('CHERNOBYL'))
+			->addFeature(new Feature('type', 'location'));
+		$tavolone = (new Item('TAVOLONE'))
+			->addFeature(new Feature('type', 'location'));
+		$chernobyl
+			->addContent($tavolone);
+
+		$db = $this->getDb();
+		$db->itemDAO()->addItem($chernobyl);
+
+		$this->expectException(NotFoundException::class);
+		$this->expectExceptionCode(1);
+		$db->treeDAO()->moveItem(new ItemIncomplete('SOMETHING'), new ItemIncomplete('TAVOLONE'));
+	}
+
+	public function testTreeMoveToNonexistant() {
+		$chernobyl = (new Item('CHERNOBYL'))
+			->addFeature(new Feature('type', 'location'));
+		$tavolone = (new Item('TAVOLONE'))
+			->addFeature(new Feature('type', 'location'));
+		$chernobyl
+			->addContent($tavolone);
+
+		$db = $this->getDb();
+		$db->itemDAO()->addItem($chernobyl);
+
+		$this->expectException(NotFoundException::class);
+		$this->expectExceptionCode(2);
+		$db->treeDAO()->moveItem(new ItemIncomplete('TAVOLONE'), new ItemIncomplete('NOWHERE'));
 	}
 }

@@ -25,14 +25,11 @@ final class UserDAO extends DAO {
 	}
 
 	public function setSessionFromUser($username, $session, $expiry) {
-		$pdo = $this->getPDO();
-		$pdo->beginTransaction();
 		$s = $this->getPDO()->prepare('UPDATE `User` SET `Session` = :s, SessionExpiry = :se WHERE `Name` = :n AND `Enabled` > 0');
 		$s->bindValue(':s', $session);
 		$s->bindValue(':se', $expiry);
 		$s->bindValue(':n', $username);
 		$s->execute();
-		$pdo->commit();
 	}
 
 	/**

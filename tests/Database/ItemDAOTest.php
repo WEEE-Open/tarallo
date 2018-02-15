@@ -36,7 +36,7 @@ class ItemDAOTest extends DatabaseTest {
 			->addFeature(new Feature('type', 'hdd'));
 		$case->addContent($discone1);
 		$case->addContent($discone2);
-		$db->itemDAO()->addItems([$case]);
+		$db->itemDAO()->addItem($case);
 
 		$newCase = $db->itemDAO()->getItem(new ItemIncomplete('PC42'));
 		$this->assertInstanceOf(Item::class, $newCase);
@@ -72,7 +72,8 @@ class ItemDAOTest extends DatabaseTest {
 		$this->assertFalse($keyboard->hasCode());
 		$this->assertFalse($mouse->hasCode());
 
-		$db->itemDAO()->addItems([$keyboard, $mouse]);
+		$db->itemDAO()->addItem($keyboard);
+		$db->itemDAO()->addItem($mouse);
 
 		$this->assertTrue($keyboard->hasCode());
 		$this->assertTrue($mouse->hasCode());
@@ -93,7 +94,9 @@ class ItemDAOTest extends DatabaseTest {
 		$keyboardz[] = $keyboardWithNoCode = (new Item(null))->addFeature(new Feature('type', 'keyboard'));
 
 		$this->assertFalse($keyboardWithNoCode->hasCode());
-		$db->itemDAO()->addItems($keyboardz);
+		foreach($keyboardz as $k) {
+			$db->itemDAO()->addItem($k);
+		}
 
 		$this->assertTrue($keyboardWithNoCode->hasCode());
 		$this->assertEquals('T77', $keyboardWithNoCode->getCode());
@@ -103,7 +106,7 @@ class ItemDAOTest extends DatabaseTest {
 		$db = $this->getDb();
 		$case = (new Item('PC42'))->addFeature(new Feature('motherboard-form-factor', 'atx'));
 		$case->token = 'this-is-a-token';
-		$db->itemDAO()->addItems([$case]);
+		$db->itemDAO()->addItem($case);
 
 		$newCase = $db->itemDAO()->getItem(new ItemIncomplete('PC42'));
 		$this->assertInstanceOf(Item::class, $newCase);
@@ -113,7 +116,7 @@ class ItemDAOTest extends DatabaseTest {
 		$db = $this->getDb();
 		$case = (new Item('PC42'))->addFeature(new Feature('motherboard-form-factor', 'atx'));
 		$case->token = 'this-is-a-token';
-		$db->itemDAO()->addItems([$case]);
+		$db->itemDAO()->addItem($case);
 
 		$getMe = new ItemIncomplete('PC42');
 		$newCase = $db->itemDAO()->getItem($getMe, 'this-is-a-token');
@@ -125,7 +128,7 @@ class ItemDAOTest extends DatabaseTest {
 		$db = $this->getDb();
 		$case = (new Item('PC42'))->addFeature(new Feature('motherboard-form-factor', 'atx'));
 		$case->token = 'this-is-a-token';
-		$db->itemDAO()->addItems([$case]);
+		$db->itemDAO()->addItem($case);
 
 		$getMe = new ItemIncomplete('PC42');
 		$this->expectException(NotFoundException::class);

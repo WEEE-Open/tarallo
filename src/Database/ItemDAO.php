@@ -10,50 +10,17 @@ use WEEEOpen\Tarallo\Server\ItemUpdate;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 
 final class ItemDAO extends DAO {
-	/**
-	 * Add all items. Also starts and finishes the necessary transaction.
-	 *
-	 * @param array $items Items to add
-	 * @param ItemIncomplete|null $parent Parent item for all these
-	 *
-	 * @return Item[] All inserted items, in same order, retrieved from database. Array keys are preserved.
-	 * @throws \Throwable whatever was thrown inside, PHPStorm is forcind me to add a comment
-	 *
-	 * @see addItem to add one item (and manage transaction yourself)
-	 */
-	public function addItems(array $items, ItemIncomplete $parent = null) {
-		if(empty($items)) {
-			return [];
-		}
-
-		$heads = [];
-
-		try {
-			$this->database->beginTransaction();
-			foreach($items as $k => $item) {
-				$heads[$k] = $this->addItem($item, $parent);
-			}
-			$this->database->commit();
-		} catch(\Throwable $e) {
-			$this->database->rollback();
-			throw $e;
-		}
-
-		return $heads;
-	}
 
 	private $addItemStatement = null;
 
 	/**
-	 * Insert a single item into the database, return its id. Basically just add a row to Item, no features are added.
-	 * Must be called while in transaction.
+	 * Insert a single item into the database, then returns it by querying the database again.
 	 *
 	 * @param Item $item the item to be inserted
 	 * @param ItemIncomplete $parent parent item
 	 *
 	 * @return Item Same item, retrieved from database
 	 *
-	 * @see addItems
 	 */
 	public function addItem(Item $item, ItemIncomplete $parent = null) {
 		if($parent === null) {
@@ -74,9 +41,6 @@ final class ItemDAO extends DAO {
 	 */
 	public function addItemInternal(Item $item, ItemIncomplete $parent = null, $last = true) {
 		$pdo = $this->getPDO();
-		if(!$pdo->inTransaction()) {
-			throw new \LogicException('addItem called outside of transaction');
-		}
 
 		if(!$item->hasCode()) {
 			$prefix = ItemPrefixer::get($item);
@@ -114,6 +78,23 @@ final class ItemDAO extends DAO {
 		} else {
 			return null;
 		}
+	}
+
+	private $itemExistsStament = null;
+
+	public function itemExists(ItemIncomplete $item) {
+		if($this->itemExistsStament === null) {
+			$this->itemExistsStament = $this->getPDO()->prepare('SELECT IF(COUNT(*) > 0, TRUE, FALSE) FROM Item WHERE `Code` = :cod');
+		}
+		try {
+			$this->itemExistsStament->execute([$item->getCode()]);
+			$result = $this->itemExistsStament->fetch(\PDO::FETCH_NUM);
+			$exists = (bool) $result[0];
+		} finally {
+			$this->itemExistsStament->closeCursor();
+		}
+
+		return $exists;
 	}
 
 	private $getNewCodeStatement = null;
@@ -234,12 +215,16 @@ EOQ
 EOQ
 		);
 
-		$tokenquery->execute([$item->getCode(), $token]);
-		$result = $tokenquery->fetch(\PDO::FETCH_NUM);
-		// MySQL doesn't understand booleans, they're just tinyints, and we get that lack of abstraction slapped right on our face because yes.
-		$exists = (bool) $result[0];
+		try {
+			$tokenquery->execute([$item->getCode(), $token]);
+			$result = $tokenquery->fetch(\PDO::FETCH_NUM);
+			// MySQL doesn't understand booleans, they're just tinyints, and we get that lack of abstraction slapped right on our face because yes.
+			$exists = (bool) $result[0];
 
-		return $exists;
+			return $exists;
+		} finally {
+			$tokenquery->closeCursor();
+		}
 	}
 
 	private function fillItem(Item $item, $brand, $model, $variant, Item $parent = null) {

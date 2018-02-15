@@ -86,11 +86,9 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 				$r->put('', 'createItem');
 				$r->delete('', 'removeItem');
 
-				$r->get('/parent', 'getItemParent');
+				// Useless
+				//$r->get('/parent', 'getItemParent');
 				$r->put('/parent', 'setItemParent');
-
-				$r->get('/movable', 'getItemMovable');
-				$r->put('/movable', 'setItemMovable');
 
 				$r->get('/product', 'getItemProduct');
 				$r->put('/product', 'setItemProduct');
@@ -104,7 +102,6 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 			});
 		});
 
-		/*
 		$r->post('/search', 'createSearch');
 		$r->patch('/search/{id}', 'refineSearch');
 		$r->get('/search/{id}[/page/{page}]', 'getSearch');
@@ -124,7 +121,6 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 		});
 
 		$r->get('/logs[/page/{page}]', 'getLogs');
-		*/
 
 		$r->get('/session', 'sessionWhoami');
 		$r->post('/session', 'sessionStart');
@@ -160,14 +156,26 @@ if(!is_callable($callback)) {
 
 try {
 	$db = new Database(DB_USERNAME, DB_PASSWORD, DB_DSN);
+	$db->beginTransaction();
 	$user = Session::restore($db);
+	$db->commit();
 } catch(\Exception $e) {
+	if(isset($db)) {
+		$db->rollback();
+	}
 	Response::sendError('Server error: ' . $e->getMessage());
 	assert(isset($user)); // pointless, sendError exit()s, this just stops the IDE from throwing warnings at me
 }
 
 try {
-	$response = call_user_func($callback, $user, $db, $parameters, $querystring, $payload);
+	try {
+		$db->beginTransaction();
+		$response = call_user_func($callback, $user, $db, $parameters, $querystring, $payload);
+		$db->commit();
+	} catch(\Throwable $e) {
+		$db->rollback();
+		throw $e;
+	}
 } catch(AuthorizationException $e) {
 	Response::sendError('Not authorized (insufficient permission)', 'AUTH403', null, 403);
 } catch(AuthenticationException $e) {
@@ -177,6 +185,9 @@ try {
 	Response::sendFail($e->getParameter(), $e->getReason());
 } catch(DatabaseException $e) {
 	Response::sendError('Database error: ' . $e->getMessage());
+} catch(NotFoundException $e) {
+	http_response_code(404);
+	exit();
 } catch(\Exception $e) {
 	Response::sendError('Unhandled exception :(', null, ['message' => $e->getMessage(), 'code' => $e->getCode()]);
 }
