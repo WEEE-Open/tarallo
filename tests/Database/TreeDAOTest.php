@@ -30,9 +30,7 @@ class TreeDAOTest extends DatabaseTest {
 		$this->assertEquals('PC42', $case->getCode(), 'PC42 is still there');
 		$this->assertTrue($this->itemCompare($lab, $lab), 'Lab should be unchanged');
 
-		$db->beginTransaction();
 		$db->treeDAO()->removeFromTree($case);
-		$db->commit();
 
 		$lab = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));
 		$this->assertInstanceOf(Item::class, $lab);
@@ -144,7 +142,6 @@ class TreeDAOTest extends DatabaseTest {
 		$this->assertInstanceOf(Item::class, $item);
 
 		// Move TI from TAVOLONE to ZonaBlu.
-		$db->beginTransaction();
 		$db->treeDAO()->moveItem($ti, $zb);
 
 		$item = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));

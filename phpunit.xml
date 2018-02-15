@@ -7,7 +7,6 @@
     <testsuites>
         <testsuite name="TARALLO">
             <directory>./tests</directory>
-            <exclude>./tests/Database/UserDAOTest.php</exclude>
         </testsuite>
     </testsuites>
 
