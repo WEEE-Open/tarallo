@@ -11,7 +11,7 @@ use WEEEOpen\Tarallo\Server\Item;
 abstract class DatabaseTest extends TestCase {
 	use TestCaseTrait;
 
-	private $db = null;
+	protected $db = null;
 
 	// this cannot be done, PLAIN AND SIMPLE. Even though it comes straight from an example inside documentation.
 	// setUp() comes from a trait, so there's no way to override it AND call it. parent::setUp() calls a pointless empty function.
