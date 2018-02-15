@@ -86,14 +86,12 @@ final class ItemDAO extends DAO {
 
 		if($this->addItemStatement === null) {
 			// TODO: add brand, model, variant
-			$this->addItemStatement = $pdo->prepare('INSERT INTO Item (`Code`, Movable) VALUES (:cod, :mov)');
+			$this->addItemStatement = $pdo->prepare('INSERT INTO Item (`Code`, Token) VALUES (:cod, :tok)');
 		}
 
 		try {
 			$this->addItemStatement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
-			// PDO::PARAM_BOOL doesn't work, query fails FOR NO REASON, cleanly returns false with no errors
-			// Known bug from 2006, still alive and well in PHP 7.1 (or a regression?): https://bugs.php.net/bug.php?id=38546
-			$this->addItemStatement->bindValue(':mov', (int) $item->isMovable(), \PDO::PARAM_INT);
+			$this->addItemStatement->bindValue(':tok', $item->token, \PDO::PARAM_STR);
 			if(!$this->addItemStatement->execute()) {
 				throw new DatabaseException('Cannot insert item ' . $item->getCode() . ' for unknown reasons');
 			}
@@ -167,7 +165,7 @@ final class ItemDAO extends DAO {
 		if($this->getItemStatement === null) {
 			// TODO: we can also select Depth here, may be useful to select depth = maxdepth + 1 and see if there are items inside and discard them, but it's slow and unefficient...
 			$this->getItemStatement = $this->getPDO()->prepare(<<<EOQ
-				SELECT `Code`, `Brand`, `Model`, `Variant`, `Movable`, GetParent(`Code`) AS Parent
+				SELECT `Code`, `Brand`, `Model`, `Variant`, GetParent(`Code`) AS Parent
 				FROM Item
 				JOIN Tree ON Descendant=`Code` 
 				WHERE Ancestor = ?
@@ -193,7 +191,7 @@ EOQ
 				throw new NotFoundException();
 			}
 
-			$this->fillItem($head, $row['Brand'], $row['Model'], $row['Variant'], $row['Movable']);
+			$this->fillItem($head, $row['Brand'], $row['Model'], $row['Variant']);
 			$flat[$head->getCode()] = $head;
 
 			// Other items
@@ -203,7 +201,7 @@ EOQ
 					throw new \LogicException('Broken tree: got ' . $row['Code'] . ' before its parent ' . $row['Parent']);
 				}
 				$current = $flat[$row['Code']] = new Item($row['Code']);
-				$this->fillItem($current, $row['Brand'], $row['Model'], $row['Variant'], $row['Movable'], $parent);
+				$this->fillItem($current, $row['Brand'], $row['Model'], $row['Variant'], $parent);
 			}
 			$parent = null;
 			unset($parent);
@@ -238,23 +236,16 @@ EOQ
 
 		$tokenquery->execute([$item->getCode(), $token]);
 		$result = $tokenquery->fetch(\PDO::FETCH_NUM);
-		if(!is_bool($result[0])) {
-			throw new \LogicException('Result is not boolean');
-		}
-		if($result[0] === true) {
-			return true;
-		} else {
-			return false;
-		}
+		// MySQL doesn't understand booleans, they're just tinyints, and we get that lack of abstraction slapped right on our face because yes.
+		$exists = (bool) $result[0];
+
+		return $exists;
 	}
 
-	private function fillItem(Item $item, $brand, $model, $variant, $movable, Item $parent = null) {
+	private function fillItem(Item $item, $brand, $model, $variant, Item $parent = null) {
 		$brand === null ?: $item->addFeature(new Feature('brand', $brand));
 		$model === null ?: $item->addFeature(new Feature('model', $model));
 		// TODO: these shouldn't be plain features... also, don't discard $variant
-		if(!$movable) {
-			$item->addFeature(new Feature('soldered-in-place', 'yes'));
-		}
 
 		if($parent !== null) {
 			$parent->addContent($item);

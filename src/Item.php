@@ -14,6 +14,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	protected $contents = [];
 	private $location = [];
 	protected $product = null;
+	public $token = null;
 
 	/**
 	 * Create an Item

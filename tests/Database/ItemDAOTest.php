@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\Server\Test\Database;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\NotFoundException;
 
 class ItemDAOTest extends DatabaseTest {
 	/**
@@ -96,6 +97,39 @@ class ItemDAOTest extends DatabaseTest {
 
 		$this->assertTrue($keyboardWithNoCode->hasCode());
 		$this->assertEquals('T77', $keyboardWithNoCode->getCode());
+	}
+
+	public function testAddItemToken() {
+		$db = $this->getDb();
+		$case = (new Item('PC42'))->addFeature(new Feature('motherboard-form-factor', 'atx'));
+		$case->token = 'this-is-a-token';
+		$db->itemDAO()->addItems([$case]);
+
+		$newCase = $db->itemDAO()->getItem(new ItemIncomplete('PC42'));
+		$this->assertInstanceOf(Item::class, $newCase);
+	}
+
+	public function testGetItemToken() {
+		$db = $this->getDb();
+		$case = (new Item('PC42'))->addFeature(new Feature('motherboard-form-factor', 'atx'));
+		$case->token = 'this-is-a-token';
+		$db->itemDAO()->addItems([$case]);
+
+		$getMe = new ItemIncomplete('PC42');
+		$newCase = $db->itemDAO()->getItem($getMe, 'this-is-a-token');
+		$this->assertInstanceOf(Item::class, $newCase);
+	}
+
+
+	public function testGetItemWrongToken() {
+		$db = $this->getDb();
+		$case = (new Item('PC42'))->addFeature(new Feature('motherboard-form-factor', 'atx'));
+		$case->token = 'this-is-a-token';
+		$db->itemDAO()->addItems([$case]);
+
+		$getMe = new ItemIncomplete('PC42');
+		$this->expectException(NotFoundException::class);
+		$db->itemDAO()->getItem($getMe, 'WRONGWRONGWRONG');
 	}
 
 }
