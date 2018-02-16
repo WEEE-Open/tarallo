@@ -187,6 +187,36 @@ CREATE TABLE `User` (
 	DEFAULT CHARSET = utf8mb4
 	COLLATE = utf8mb4_unicode_ci;
 
+CREATE TABLE `Search` (
+	`Code` bigint UNSIGNED AUTO_INCREMENT NOT NULL,
+	`Expires` bigint UNSIGNED NOT NULL,
+	`ResultsCount` bigint UNSIGNED NOT NULL,
+	`Owner` varchar(100) COLLATE utf8mb4_unicode_ci,
+	PRIMARY KEY (`Code`),
+	FOREIGN KEY (`Owner`) REFERENCES `User` (`Name`)
+		ON UPDATE CASCADE
+		ON DELETE SET NULL
+)
+	ENGINE = InnoDB
+	DEFAULT CHARSET = utf8mb4
+	COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `SearchResult` (
+	Search bigint UNSIGNED,
+	`Item` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+	`Order` bigint UNSIGNED NOT NULL,
+	PRIMARY KEY (Search, `Item`),
+	FOREIGN KEY (Search) REFERENCES `Search` (`Code`)
+		ON UPDATE CASCADE
+		ON DELETE CASCADE,
+	FOREIGN KEY (`Item`) REFERENCES `Item` (`Code`)
+		ON UPDATE CASCADE
+		ON DELETE CASCADE
+)
+	ENGINE = InnoDB
+	DEFAULT CHARSET = utf8mb4
+	COLLATE = utf8mb4_unicode_ci;
+
 -- Now we're getting real.
 DELIMITER $$
 
@@ -257,5 +287,42 @@ DETERMINISTIC
 			AND Depth = 1;
 		RETURN found;
 	END$$
+
+CREATE TRIGGER SearchResultsDelete
+	AFTER DELETE
+	ON SearchResult
+	FOR EACH ROW -- MySQL doesn't have statement-level triggers. Excellent piece of software, I must say.
+	BEGIN
+		UPDATE Search
+		SET ResultsCount = ResultsCount - 1
+		WHERE Code = OLD.Search;
+	END $$
+
+CREATE TRIGGER SearchResultsUpdate
+	AFTER UPDATE -- Also can't specify UPDATE of what.
+	ON SearchResult
+	FOR EACH ROW
+	BEGIN
+		-- "UPDATE OF Search"
+		IF (OLD.Search != NEW.Search)
+		THEN
+			UPDATE Search
+			SET ResultsCount = ResultsCount - 1
+			WHERE Code = OLD.Search;
+			UPDATE Search
+			SET ResultsCount = ResultsCount - 1
+			WHERE Code = OLD.Search;
+		END IF;
+	END $$
+
+CREATE TRIGGER SearchResultsInsert
+	AFTER INSERT
+	ON SearchResult
+	FOR EACH ROW -- This may kill performance...
+	BEGIN
+		UPDATE Search
+		SET ResultsCount = ResultsCount + 1
+		WHERE Code = NEW.Search;
+	END $$
 
 DELIMITER ;

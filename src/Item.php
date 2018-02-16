@@ -76,26 +76,6 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	}
 
 	/**
-	 * Add ancestor to location.
-	 *
-	 * @param int $distance 1 for direct parent, etc...
-	 * @param ItemIncomplete $ancestor
-	 *
-	 * @throws InvalidParameterException if code is invalid
-	 * @throws \InvalidArgumentException if distance is less than 1
-	 *
-	 * @deprecated make private to avoid holes?
-	 */
-	public function addAncestor($distance, ItemIncomplete $ancestor) {
-		$distance = (int) $distance;
-		if($distance < 1) {
-			throw new \InvalidArgumentException('Ancestor distance too small: ' . $ancestor->getCode() . ' is at distance ' . $distance . ' from its descendant ' . $this->getCode());
-		}
-
-		$this->location[--$distance] = $ancestor;
-	}
-
-	/**
 	 * Add all ancestors
 	 *
 	 * @param ItemIncomplete[] $ancestors in order from direct parent from most distant one
@@ -103,10 +83,8 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	 * @see TreeDAO::getPathTo() function to obtain the needed array
 	 */
 	public function addAncestors(array $ancestors) {
-		$d = 1;
 		foreach($ancestors as $ancestor) {
-			$this->addAncestor($d, $ancestor);
-			$d++;
+			$this->location[] = $ancestor;
 		}
 	}
 

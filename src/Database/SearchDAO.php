@@ -6,14 +6,6 @@ use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\SearchTriplet;
 
 final class SearchDAO extends DAO {
-	private function depthSanitize($depth) {
-		if(is_numeric($depth)) {
-			return (int) $depth;
-		} else {
-			return 10;
-		}
-	}
-
 	/**
 	 * Prepare "code" part of query.
 	 *
@@ -186,18 +178,11 @@ final class SearchDAO extends DAO {
 	/**
 	 * Go get those items!
 	 *
-	 * @param $codes string[]|null Directly select those items (and filter with other parameters)
+	 * @param $codes string|null Filter by code (% and _ are allowed, % is appended at the end anyway)
 	 * @param $searches SearchTriplet[]|null Search by feature values
-	 * @param $depth integer|null Max depth in returned tree
-	 * @param $parent SearchTriplet[]|null Search by feature values in parent items
+	 * @param $ancestors SearchTriplet[]|null Search by feature values in ancestor items
 	 * @param $sorts string[]|null key (feature name) => order (+ or -)
-	 * @param $token string|null token. Must match for every root item, so it only makes sense for "$code and nothing
-	 *     else" searches
 	 * @param $locations string[]|null Item codes, only their descendants will be searched.
-	 * @param $page int Which page of results to display, starting from 1
-	 * @param $pageLimit int How many items per page. Use -1 for "all" (ignores the $page parameter). Note that
-	 *     pagination is done in PHP and not in the database, so using a huge number is fine. It's the whole concept of
-	 *     "pagination in PHP" that isn't fine at all.
 	 * @param $total int Reference that will contain total number of items (0 if no results)
 	 * @param $pages int Reference that will contain total number of pages (0 if no results)
 	 *
@@ -207,10 +192,8 @@ final class SearchDAO extends DAO {
 	public function getItems(
 		$codes = null,
 		$searches = null,
-		$depth = null,
-		$parent = null,
+		$ancestors = null,
 		$sorts = null,
-		$token = null,
 		$locations = null,
 		$page = 1,
 		$pageLimit = -1,
@@ -227,8 +210,8 @@ final class SearchDAO extends DAO {
 			$searchSubquery = '';
 		}
 
-		if(self::isArrayAndFull($parent)) {
-			$parentSubquery = $this->parentPrepare($parent);
+		if(self::isArrayAndFull($ancestors)) {
+			$parentSubquery = $this->parentPrepare($ancestors);
 		} else {
 			$parentSubquery = '';
 		}
@@ -288,8 +271,8 @@ final class SearchDAO extends DAO {
 			}
 		}
 
-		if(self::isArrayAndFull($parent)) {
-			foreach($parent as $numericKey => $triplet) {
+		if(self::isArrayAndFull($ancestors)) {
+			foreach($ancestors as $numericKey => $triplet) {
 				/** @var SearchTriplet $triplet */
 				$key = $triplet->getKey();
 				$value = $triplet->getValue();
@@ -351,39 +334,6 @@ final class SearchDAO extends DAO {
 	}
 
 	/**
-	 * Add location array to items
-	 *
-	 * @param Item[] $items - array that maps item IDs to Item objects (tree roots only)
-	 */
-	private function setLocations($items) {
-		if(empty($items)) {
-			return;
-		}
-
-		$inItemID = DAO::multipleIn(':loc', $items);
-		$getLocationsStatement = $this->getPDO()->prepare('SELECT Tree.DescendantID AS ItemID, Item.Code AS Ancestor, Tree.Depth AS Depth
-			FROM Item, Tree
-			WHERE Tree.AncestorID = Item.ItemID AND Tree.DescendantID IN (' . $inItemID . ') AND Tree.Depth <> 0;
-		');
-
-		foreach($items as $itemID => $item) {
-			$getLocationsStatement->bindValue(':loc' . $itemID, $itemID, \PDO::PARAM_INT);
-		}
-		$getLocationsStatement->execute();
-
-		try {
-			if($getLocationsStatement->rowCount() > 0) {
-				foreach($getLocationsStatement as $row) {
-					/** @var Item[] $items */
-					$items[$row['ItemID']]->addAncestor((int) $row['Depth'], $row['Ancestor']);
-				}
-			}
-		} finally {
-			$getLocationsStatement->closeCursor();
-		}
-	}
-
-	/**
 	 * Exactly what it says on the tin.
 	 *
 	 * @param Item[] $items Items to be sorted
@@ -431,6 +381,8 @@ final class SearchDAO extends DAO {
 	 * @param $items Item[] Reference to items, will be changed in-place
 	 * @param $page int current page, starting from 1
 	 * @param $perPage int items per page, -1 returns everything
+	 *
+	 * @deprecated use the Order column and LIMIT
 	 */
 	private function paginateItems(&$items, $page, $perPage = -1) {
 		if($perPage === -1) {
