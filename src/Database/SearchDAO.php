@@ -175,35 +175,7 @@ final class SearchDAO extends DAO {
 		return implode($glue, $stuff);
 	}
 
-	/**
-	 * Go get those items!
-	 *
-	 * @param $codes string|null Filter by code (% and _ are allowed, % is appended at the end anyway)
-	 * @param $searches SearchTriplet[]|null Search by feature values
-	 * @param $ancestors SearchTriplet[]|null Search by feature values in ancestor items
-	 * @param $sorts string[]|null key (feature name) => order (+ or -)
-	 * @param $locations string[]|null Item codes, only their descendants will be searched.
-	 * @param $total int Reference that will contain total number of items (0 if no results)
-	 * @param $pages int Reference that will contain total number of pages (0 if no results)
-	 *
-	 * @return Item[]
-	 * @TODO actually implement $location
-	 */
-	public function getItems(
-		$codes = null,
-		$searches = null,
-		$ancestors = null,
-		$sorts = null,
-		$locations = null,
-		$page = 1,
-		$pageLimit = -1,
-		&$total = null,
-		&$pages = null
-	) {
-		if($locations !== null) {
-			throw new \RuntimeException('Not implemented');
-		}
-
+	public function getItems(Search $search) {
 		if(self::isArrayAndFull($searches)) {
 			$searchSubquery = $this->searchPrepare($searches);
 		} else {
