@@ -39,7 +39,7 @@ final class ItemDAO extends DAO {
 	 *
 	 * @return null|Item Outer call always returns Item, internal ones (it's recursive) return null
 	 */
-	public function addItemInternal(Item $item, ItemIncomplete $parent = null, $last = true) {
+	private function addItemInternal(Item $item, ItemIncomplete $parent = null, $last = true) {
 		$pdo = $this->getPDO();
 
 		if(!$item->hasCode()) {
