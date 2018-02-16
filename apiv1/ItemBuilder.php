@@ -21,7 +21,11 @@ class ItemBuilder {
 		$item = self::ofArrayInternal($input, $code);
 
 		if(isset($input['parent'])) {
-			$parent = new ItemIncomplete($input['parent']);
+			try {
+				$parent = new ItemIncomplete($input['parent']);
+			} catch(\InvalidArgumentException $e) {
+				throw new InvalidPayloadParameterException('parent', $input['parent'], 'Parent: ' . $e->getMessage());
+			}
 		} else {
 			$parent = null;
 		}
@@ -43,7 +47,7 @@ class ItemBuilder {
 		try {
 			$item = new Item($code);
 		} catch(\InvalidArgumentException $e) {
-			throw new InvalidPayloadParameterException('*', $input['code'], $e->getMessage());
+			throw new InvalidPayloadParameterException('*', $code, $e->getMessage());
 		}
 
 		if($inner && isset($input['parent'])) {
