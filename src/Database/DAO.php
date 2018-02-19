@@ -40,19 +40,4 @@ abstract class DAO {
 		return substr($in, 0, strlen($in) - 2); //remove last ', '
 	}
 
-	/**
-	 * Is it an array and does it contain anything?
-	 * Exactly what it says on the tin.
-	 *
-	 * @param $something
-	 *
-	 * @return bool
-	 */
-	protected static function isArrayAndFull($something) {
-		if(is_array($something) && !empty($something)) {
-			return true;
-		} else {
-			return false;
-		}
-	}
 }

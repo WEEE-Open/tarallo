@@ -189,8 +189,8 @@ CREATE TABLE `User` (
 
 CREATE TABLE `Search` (
 	`Code` bigint UNSIGNED AUTO_INCREMENT NOT NULL,
-	`Expires` bigint UNSIGNED NOT NULL,
-	`ResultsCount` bigint UNSIGNED NOT NULL,
+	`Expires` bigint UNSIGNED NOT NULL DEFAULT CURRENT_TIMESTAMP + INTERVAL 6 HOUR,
+	`ResultsCount` bigint UNSIGNED NOT NULL DEFAULT 0,
 	`Owner` varchar(100) COLLATE utf8mb4_unicode_ci,
 	PRIMARY KEY (`Code`),
 	FOREIGN KEY (`Owner`) REFERENCES `User` (`Name`)
@@ -204,7 +204,7 @@ CREATE TABLE `Search` (
 CREATE TABLE `SearchResult` (
 	Search bigint UNSIGNED,
 	`Item` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-	`Order` bigint UNSIGNED NOT NULL,
+	`Order` bigint UNSIGNED,
 	PRIMARY KEY (Search, `Item`),
 	FOREIGN KEY (Search) REFERENCES `Search` (`Code`)
 		ON UPDATE CASCADE
@@ -288,6 +288,7 @@ DETERMINISTIC
 		RETURN found;
 	END$$
 
+-- TODO: update expiration date, too
 CREATE TRIGGER SearchResultsDelete
 	AFTER DELETE
 	ON SearchResult

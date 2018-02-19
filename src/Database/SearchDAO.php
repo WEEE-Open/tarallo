@@ -4,6 +4,7 @@ namespace WEEEOpen\Tarallo\Server\Database;
 
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\SearchTriplet;
+use WEEEOpen\Tarallo\Server\User;
 
 final class SearchDAO extends DAO {
 	/**
@@ -175,23 +176,37 @@ final class SearchDAO extends DAO {
 		return implode($glue, $stuff);
 	}
 
-	public function getItems(Search $search) {
-		if(self::isArrayAndFull($searches)) {
-			$searchSubquery = $this->searchPrepare($searches);
-		} else {
-			$searchSubquery = '';
-		}
+	/**
+	 * Begin searching. By obtaining an ID for this search, setting its expiration date, and the like.
+	 *
+	 * @param User $user
+	 *
+	 * @return string
+	 */
+	private function newSearch(User $user) {
+		$s = $this->getPDO()->prepare('INSERT INTO SearchResults(`Owner`) VALUES ?');
+		$result = $s->execute([$user->getUsername()]);
 
-		if(self::isArrayAndFull($ancestors)) {
-			$parentSubquery = $this->parentPrepare($ancestors);
+		if($result) {
+			return $this->getPDO()->lastInsertId();
 		} else {
-			$parentSubquery = '';
+			throw new DatabaseException('Cannot start search for unfathomable reasons');
 		}
+	}
 
-		// sanitization
-		if(self::isArrayAndFull($codes)) {
-			$codes = array_values($codes);
-		}
+	public function search(Search $search, $previousSearchId = null) {
+		$megaquery = /** @lang MySQL */
+			<<<EOQ
+INSERT INTO SearchResult(Search, Item)
+SELECT :searchId, `Code`
+FROM Item, ItemFeature -- , ProductFeature
+WHERE Item.Code=ItemFeature.Code
+-- AND Item.Brand=ProductFeature.Brand
+-- AND Item.Model=ProductFeature.Model
+-- AND Item.Variant=ProductFeature.Variant
+AND ...
+		
+EOQ;
 
 		// Search items by features, filter by location and token, tree lookup using found items as roots
 		// (find all descendants) and join with Item, filter by depth, SELECT.

@@ -24,15 +24,6 @@ class Search {
 		$this->sort($sorts);
 	}
 
-	public function reFilter(Search $other) {
-		// TODO: merge other search. So the Adapter can create a new Search when new filtering parameters are received, apply it via DAO, then merge here. If that's needed.
-	}
-
-	public function reSort(array $sorts) {
-		// Replaces previous sorts
-		$this->sort($sorts);
-	}
-
 
 	private function filter($code = null, array $features = null, array $ancestors = null, array $locations = null) {
 		$this->validateGlobally($code, $features, $ancestors, $locations);
@@ -106,6 +97,23 @@ class Search {
 
 		if(!$searchSomething) {
 			throw new \InvalidArgumentException('Nothing to search');
+		}
+	}
+
+
+	/**
+	 * Is it an array and does it contain anything?
+	 * Exactly what it says on the tin.
+	 *
+	 * @param $something
+	 *
+	 * @return bool
+	 */
+	protected static function isArrayAndFull($something) {
+		if(is_array($something) && !empty($something)) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 }
