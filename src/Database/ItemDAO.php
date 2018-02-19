@@ -173,7 +173,9 @@ EOQ
 		$item = null;
 
 		try {
-			$this->getItemStatement->execute([$head->getCode(), $depth]);
+			if(!$this->getItemStatement->execute([$head->getCode(), $depth])) {
+				throw new DatabaseException('Query failed for no reason');
+			}
 
 			// First Item is the head Item
 			if(($row = $this->getItemStatement->fetch(\PDO::FETCH_ASSOC)) === false) {

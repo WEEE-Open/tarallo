@@ -2,7 +2,9 @@
 
 namespace WEEEOpen\Tarallo\Server\Database;
 
+use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
+use WEEEOpen\Tarallo\Server\Search;
 use WEEEOpen\Tarallo\Server\SearchTriplet;
 use WEEEOpen\Tarallo\Server\User;
 
@@ -176,6 +178,10 @@ final class SearchDAO extends DAO {
 		return implode($glue, $stuff);
 	}
 
+	private static function getCompare(SearchTriplet $triplet) {
+		// TODO: use Feature to obtain type, return a "ValueEnum=..." or whatever with correct column
+	}
+
 	/**
 	 * Begin searching. By obtaining an ID for this search, setting its expiration date, and the like.
 	 *
@@ -195,16 +201,38 @@ final class SearchDAO extends DAO {
 	}
 
 	public function search(Search $search, $previousSearchId = null) {
+		foreach($search->searchFeatures as $triplet) {
+			/**
+			 * @var $triplet SearchTriplet
+			 */
+			$compare = self::getCompare($triplet);
+
+			$subqueries[] = /** @lang MySQL */ <<<EOQ
+				SELECT `Code`
+				FROM ItemFeature -- , ProductFeature
+				WHERE Feature=$triplet->name -- TODO: parametrize
+				AND $compare
+				-- AND Item.Brand=ProductFeature.Brand
+				-- AND Item.Model=ProductFeature.Model
+				-- AND Item.Variant=ProductFeature.Variant
+EOQ;
+		}
+
+		foreach($search->searchLocations as $location) {
+			$subqueries[] = /** @lang MySQL */ <<<EOQ
+			SELECT `Descendant`
+			FROM Tree
+			WHERE Ancestor = :a -- TODO: add an ID (= index in $subqueries)
+EOQ;
+		}
+
 		$megaquery = /** @lang MySQL */
 			<<<EOQ
 INSERT INTO SearchResult(Search, Item)
 SELECT :searchId, `Code`
-FROM Item, ItemFeature -- , ProductFeature
+FROM Item, ItemFeature
 WHERE Item.Code=ItemFeature.Code
--- AND Item.Brand=ProductFeature.Brand
--- AND Item.Model=ProductFeature.Model
--- AND Item.Variant=ProductFeature.Variant
-AND ...
+$features
 		
 EOQ;
 
