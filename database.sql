@@ -7,6 +7,8 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 -- CREATE DATABASE `tarallo` DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 -- USE `tarallo`;
 
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 CREATE TABLE `Item` (
 	-- Max length would be approx. 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
 	`Code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -164,7 +166,7 @@ CREATE TABLE `Tree` (
 	COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `Prefixes` (
-	`Prefix` varchar(20) NOT NULL,
+	`Prefix` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Integer` bigint(20) UNSIGNED NOT NULL DEFAULT 0,
 	PRIMARY KEY (`Prefix`)
 )
@@ -189,7 +191,8 @@ CREATE TABLE `User` (
 
 CREATE TABLE `Search` (
 	`Code` bigint UNSIGNED AUTO_INCREMENT NOT NULL,
-	`Expires` bigint UNSIGNED NOT NULL DEFAULT CURRENT_TIMESTAMP + INTERVAL 6 HOUR,
+	-- Too good to be true, PHPStorm even considered it valid SQL in MySQL dialect...
+	`Expires` bigint UNSIGNED NOT NULL DEFAULT 0, -- TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP),
 	`ResultsCount` bigint UNSIGNED NOT NULL DEFAULT 0,
 	`Owner` varchar(100) COLLATE utf8mb4_unicode_ci,
 	PRIMARY KEY (`Code`),
@@ -299,6 +302,7 @@ CREATE TRIGGER SearchResultsDelete
 		WHERE Code = OLD.Search;
 	END $$
 
+-- These triggers can't be added, BTW, because UPDATE and DELETE are the same action for MySQL apparently and it can't have two triggers for the same action
 CREATE TRIGGER SearchResultsUpdate
 	AFTER UPDATE -- Also can't specify UPDATE of what.
 	ON SearchResult
@@ -324,6 +328,20 @@ CREATE TRIGGER SearchResultsInsert
 		UPDATE Search
 		SET ResultsCount = ResultsCount + 1
 		WHERE Code = NEW.Search;
+	END $$
+
+CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
+	BEFORE INSERT ON Search
+	FOR EACH ROW
+	BEGIN
+		SET NEW.Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP);
+	END $$
+
+CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCantAgain
+	BEFORE UPDATE ON Search
+	FOR EACH ROW
+	BEGIN
+		SET NEW.Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP);
 	END $$
 
 DELIMITER ;

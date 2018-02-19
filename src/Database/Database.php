@@ -41,6 +41,8 @@ class Database {
 				\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
 				//\PDO::ATTR_AUTOCOMMIT => false, // disabled BECAUSE PHPUNIT. Or some weird bug/feature in mysqlnd or PDO, which has never been encountered by anyone before (according to Google)
 				\PDO::ATTR_EMULATE_PREPARES   => false,
+				\PDO::MYSQL_ATTR_INIT_COMMAND => /** @lang MySQL */
+					"SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci",
 			]);
 		} catch(\PDOException $e) {
 			throw new DatabaseException('Cannot connect to database: ' . $e->getMessage());

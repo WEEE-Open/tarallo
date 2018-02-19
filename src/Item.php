@@ -144,7 +144,7 @@ class Item extends ItemIncomplete implements \JsonSerializable {
 	public function addContent(Item $item) {
 		$this->contents[] = $item;
 		if(empty($this->location)) {
-			$item->addAncestor(1, $this);
+			$item->location[] = $this;
 		} else {
 			$item->location = array_merge([$this], $this->getPath());
 		}

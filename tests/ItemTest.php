@@ -36,7 +36,9 @@ class ItemTest extends TestCase {
 	public function testItemValidAncestors() {
 		$hdd = new Item('HDD123');
 
-		$hdd->addAncestor(1, new ItemIncomplete('PC999'));
+		$other = new Item('PC999');
+		$other->addContent($hdd);
+
 		$this->assertTrue($hdd->getPath()[0] instanceof \WEEEOpen\Tarallo\Server\ItemIncomplete,
 			'Ancestors are ItemIncomplete objects');
 		$this->assertEquals(1, count($hdd->getPath()), 'Only one ancestor');
