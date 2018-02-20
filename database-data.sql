@@ -240,57 +240,57 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('ram-type', 'ddr2'),
 	('ram-type', 'ddr3'),
 	('ram-type', 'ddr4'),
-	('ram-form-factor' , 'simm'),
-	('ram-form-factor' , 'dimm'),
-	('ram-form-factor' , 'sodimm'),
-	('ram-form-factor' , 'minidimm'),
-	('ram-form-factor' , 'microdimm'),
-	('ram-form-factor' , 'fbdimm'),
-	('check' , 'missing-data'),
-	('check' , 'wrong-data'),
-	('check' , 'wrong-location'),
-	('check' , 'wrong-content'),
-	('check' , 'missing-content'),
-	('check' , 'wrong-data-and-content'),
-	('check' , 'wrong-location-and-data'),
-	('ram-ecc' , 'no'),
-	('ram-ecc' , 'yes'),
+	('ram-form-factor', 'simm'),
+	('ram-form-factor', 'dimm'),
+	('ram-form-factor', 'sodimm'),
+	('ram-form-factor', 'minidimm'),
+	('ram-form-factor', 'microdimm'),
+	('ram-form-factor', 'fbdimm'),
+	('check', 'missing-data'),
+	('check', 'wrong-data'),
+	('check', 'wrong-location'),
+	('check', 'wrong-content'),
+	('check', 'missing-content'),
+	('check', 'wrong-data-and-content'),
+	('check', 'wrong-location-and-data'),
+	('ram-ecc', 'no'),
+	('ram-ecc', 'yes'),
 	-- (65, 0, 'no'),
 	('data-erased', 'yes'), -- Just don't add the feature if it hasn't been erased...
-	('surface-scan' , 'fail'),
-	('surface-scan' , 'pass'),
-	('smart-data' , 'fail'),
-	('smart-data' , 'old'), -- old and tired HDDs, but still no reallocated sectors or other serious warnings
-	('smart-data' , 'ok'),
-	('wireless-receiver' , 'inside'), -- wireless receiver: located inside, nearby or missing, making the peripheral completely useless since these are always proprietary
-	('wireless-receiver' , 'near'),
-	('wireless-receiver' , 'missing'),
-	('psu-form-factor' , 'atx'),
-	('psu-form-factor' , 'cfx'), -- the wide L-shaped ones
-	('psu-form-factor' , 'lfx'), -- long and L-shaped
-	('psu-form-factor' , 'sfx-lowprofile'), -- SFX has lots of variants
-	('psu-form-factor' , 'sfx-topfan'),
-	('psu-form-factor' , 'sfx-topfan-reduceddepth'),
-	('psu-form-factor' , 'sfx'),
-	('psu-form-factor' , 'sfx-ps3'),
-	('psu-form-factor' , 'tfx'), -- I don't even know anymore
-	('psu-form-factor' , 'flexatx'),
-	('psu-form-factor' , 'proprietary'),
-	('psu-form-factor' , 'eps'),
-	('restrictions' , 'loan'), -- borrowed items that should be returned to owner, can't be donated
-	('restrictions' , 'in-use'), -- items that shouldn't be donated right now because we're using them (e.g. switch, pc used for invetory management, server)
-	('restrictions' , 'bought'), -- items bought with funds from our annual budget, can't be donated at all ever
-	('restrictions' , 'training'), -- PCs to be used for training and demonstrations (because they're old, slow and with the case full of scratches, mostly), but still working and that can be potentially donated
-	('restrictions' , 'ready'), -- Completely "restored", cleaned, OS installed, ready for donation, so don't mess them up
-	('restrictions' , 'other'), -- "other" also means "cannot be donated right now"
-	('pci-low-profile' , 'no'),
-	('pci-low-profile' , 'possibile'), -- no low profile metal thing but the card itself is low profile
-	('pci-low-profile' , 'dual'), -- we've got both the full height and low profile thing
-	('pci-low-profile' , 'yes'),
-	('psu-connector-cpu' , 'none'),
-	('psu-connector-cpu' , '4pin'),
-	('psu-connector-cpu' , '8pin'),
-	('psu-connector-cpu' , 'proprietary');
+	('surface-scan', 'fail'),
+	('surface-scan', 'pass'),
+	('smart-data', 'fail'),
+	('smart-data', 'old'), -- old and tired HDDs, but still no reallocated sectors or other serious warnings
+	('smart-data', 'ok'),
+	('wireless-receiver', 'inside'), -- wireless receiver: located inside, nearby or missing, making the peripheral completely useless since these are always proprietary
+	('wireless-receiver', 'near'),
+	('wireless-receiver', 'missing'),
+	('psu-form-factor', 'atx'),
+	('psu-form-factor', 'cfx'), -- the wide L-shaped ones
+	('psu-form-factor', 'lfx'), -- long and L-shaped
+	('psu-form-factor', 'sfx-lowprofile'), -- SFX has lots of variants
+	('psu-form-factor', 'sfx-topfan'),
+	('psu-form-factor', 'sfx-topfan-reduceddepth'),
+	('psu-form-factor', 'sfx'),
+	('psu-form-factor', 'sfx-ps3'),
+	('psu-form-factor', 'tfx'), -- I don't even know anymore
+	('psu-form-factor', 'flexatx'),
+	('psu-form-factor', 'proprietary'),
+	('psu-form-factor', 'eps'),
+	('restrictions', 'loan'), -- borrowed items that should be returned to owner, can't be donated
+	('restrictions', 'in-use'), -- items that shouldn't be donated right now because we're using them (e.g. switch, pc used for invetory management, server)
+	('restrictions', 'bought'), -- items bought with funds from our annual budget, can't be donated at all ever
+	('restrictions', 'training'), -- PCs to be used for training and demonstrations (because they're old, slow and with the case full of scratches, mostly), but still working and that can be potentially donated
+	('restrictions', 'ready'), -- Completely "restored", cleaned, OS installed, ready for donation, so don't mess them up
+	('restrictions', 'other'), -- "other" also means "cannot be donated right now"
+	('pci-low-profile', 'no'),
+	('pci-low-profile', 'possibile'), -- no low profile metal thing but the card itself is low profile
+	('pci-low-profile', 'dual'), -- we've got both the full height and low profile thing
+	('pci-low-profile', 'yes'),
+	('psu-connector-cpu', 'none'),
+	('psu-connector-cpu', '4pin'),
+	('psu-connector-cpu', '8pin'),
+	('psu-connector-cpu', 'proprietary');
 -- TRUNCATE `Codes`;
 -- TRUNCATE `Item`;
 -- TRUNCATE `ItemFeature`;

@@ -56,7 +56,6 @@ class Feature {
 		'vga-ports-n' => self::INTEGER,
 		'os-license-code' => self::STRING,
 		'os-license-version' => self::STRING,
-		'soldered-in-place' => ['yes' => true],
 		'power-idle-pfc' => self::STRING,
 		'firewire-ports-n' => self::INTEGER,
 		'serial-ports-n' => self::INTEGER,
