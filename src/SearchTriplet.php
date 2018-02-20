@@ -3,46 +3,40 @@
 namespace WEEEOpen\Tarallo\Server;
 
 class SearchTriplet {
-	private $key;
+	private $feature;
 	private $compare;
-	private $value;
-	private static $separators = ['=', '>', '<'];
+	//private static $separators = ['>', '>=', '=', '<=', '<', '<>', '~', '≥', '≤', '!='];
+	const separatorsOrdering = ['>', '>=', '<=', '<'];
+	const separatorsPartial = ['~', '!~'];
+	const separatorsOther = ['=', '<>'];
 
 	public function __construct($key, $compare, $value) {
-		if(!is_string($key) || strlen($key) === 0) {
-			throw new InvalidParameterException('Search key must be a non-empty string');
+		$this->feature = new Feature($key, $value);
+		
+		if(in_array($compare, self::separatorsPartial)) {
+			self::checkCanPartialMatch($this->feature);
+		} else if(in_array($compare, self::separatorsOrdering)) {
+			self::checkWellOrdered($this->feature, $compare);
+		} else if(!in_array($compare, self::separatorsOther)) {
+			throw new \InvalidArgumentException("'$compare' is not a valid comparison operator");
 		}
 
-		if(!is_string($value) || strlen($value) === 0) {
-			throw new InvalidParameterException('Search key must be a non-empty string');
-		}
-
-		if(!in_array($compare, static::$separators)) {
-			throw new InvalidParameterException('"' . $compare . '" is not a valid comparison operator (allowed: =, >, <)');
-		}
-
-		$this->key = $key;
 		$this->compare = $compare;
-		$this->value = $value;
-	}
-
-	public static function getSeparators() {
-		return static::$separators;
 	}
 
 	public function __toString() {
-		return $this->key . $this->compare . $this->value;
+		return $this->getKey() . $this->getCompare() . $this->getValue();
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getKey() {
-		return $this->key;
+		return $this->feature->name;
 	}
 
 	/**
-	 * @return mixed
+	 * @return string
 	 */
 	public function getCompare() {
 		return $this->compare;
@@ -52,6 +46,25 @@ class SearchTriplet {
 	 * @return string
 	 */
 	public function getValue() {
-		return $this->value;
+		return $this->feature->value;
+	}
+
+	/**
+	 * @return Feature
+	 */
+	public function getAsFeature() {
+		return $this->feature;
+	}
+
+	private static function checkCanPartialMatch(Feature $feature) {
+		if($feature->type !== Feature::STRING) {
+			throw new \InvalidArgumentException('Cannot partially match feature ' . $feature->name . ': not a text feature');
+		}
+	}
+
+	private static function checkWellOrdered(Feature $feature, $operator) {
+		if($feature->type !== Feature::INTEGER && $feature->type !== Feature::DOUBLE) {
+			throw new \InvalidArgumentException("Cannot apply operator '$operator' to " . $feature->name . ': cannot be ordered');
+		}
 	}
 }
