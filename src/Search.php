@@ -6,10 +6,10 @@ namespace WEEEOpen\Tarallo\Server;
 class Search {
 	private $code = null;
 	public $results = 0;
-	public $searchCode;  
-	public $searchFeatures;  
-	public $searchAncestors;  
-	public $searchLocations;  
+	public $searchCode;
+	public $searchFeatures;
+	public $searchAncestors;
+	public $searchLocations;
 	public $sort;
 
 	/**
@@ -19,11 +19,16 @@ class Search {
 	 * @param ItemIncomplete[]|null $locations Only descendants of these items will be searched
 	 * @param string[]|null $sorts Map (associative array) from feature name to order (+ or -)
 	 */
-	public function __construct($code = null, array $features = null, array $ancestors = null, array $locations = null, array $sorts = null) {
+	public function __construct(
+		$code = null,
+		array $features = null,
+		array $ancestors = null,
+		array $locations = null,
+		array $sorts = null
+	) {
 		$this->filter($code, $features, $ancestors, $locations);
 		$this->sort($sorts);
 	}
-
 
 	private function filter($code = null, array $features = null, array $ancestors = null, array $locations = null) {
 		$this->validateGlobally($code, $features, $ancestors, $locations);
@@ -76,7 +81,12 @@ class Search {
 	 * @param SearchTriplet[]|null $ancestors
 	 * @param ItemIncomplete[]|null $locations
 	 */
-	private static function validateGlobally($code, array $features = null, array $ancestors = null, array $locations = null) {
+	private static function validateGlobally(
+		$code,
+		array $features = null,
+		array $ancestors = null,
+		array $locations = null
+	) {
 		$searchSomething = false;
 
 		if($code !== null) {
@@ -100,23 +110,6 @@ class Search {
 
 		if(!$searchSomething) {
 			throw new \InvalidArgumentException('Nothing to search');
-		}
-	}
-
-
-	/**
-	 * Is it an array and does it contain anything?
-	 * Exactly what it says on the tin.
-	 *
-	 * @param $something
-	 *
-	 * @return bool
-	 */
-	protected static function isArrayAndFull($something) {
-		if(is_array($something) && !empty($something)) {
-			return true;
-		} else {
-			return false;
 		}
 	}
 }
