@@ -4,7 +4,9 @@ namespace WEEEOpen\Tarallo\Server\Test\Database;
 
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
+use WEEEOpen\Tarallo\Server\Search;
 use WEEEOpen\Tarallo\Server\SearchTriplet;
+use WEEEOpen\Tarallo\Server\User;
 
 class SearchDAOTest extends DatabaseTest {
 	/**
@@ -49,8 +51,10 @@ class SearchDAOTest extends DatabaseTest {
 			$db->itemDAO()->addItem($i);
 		}
 
-		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null,
-			['motherboard-form-factor' => '-', 'color' => '+'], null);
+		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('type', '=', 'case')]), new User('asd'));
+		// TODO: sort ['motherboard-form-factor' => '-', 'color' => '+']
+		$this->assertTrue(is_int($id), 'Search ID should be an integer');
+
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(5, count($items), 'There should be 5 items');
 		/** @var Item[] $items */
