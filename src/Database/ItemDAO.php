@@ -246,8 +246,4 @@ EOQ
 			$parent->addContent($item);
 		}
 	}
-
-	private function setItemDefaults(ItemUpdate $item) {
-		// TODO: reimplement
-	}
 }

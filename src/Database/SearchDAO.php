@@ -4,6 +4,7 @@ namespace WEEEOpen\Tarallo\Server\Database;
 
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\Search;
 use WEEEOpen\Tarallo\Server\SearchTriplet;
 use WEEEOpen\Tarallo\Server\User;
@@ -124,7 +125,7 @@ EOQ;
 			SELECT `Descendant`
 			FROM ItemFeature, Tree
 			WHERE ItemFeature.Code=Tree.Ancestor
-			AND Feature = $name
+			AND Feature = :fn$i
 			AND $compare
 EOQ;
 				$i++;
@@ -193,9 +194,77 @@ EOQ;
 			throw new DatabaseException('Cannot execute search for unknown reasons');
 		}
 
-		// TODO: sorting
+		$this->sort($search, $id);
 
 		return $id;
+	}
+
+	public function sort(Search $search, $searchId) {
+		if($search->sort === null) {
+			return;
+		}
+
+		if(!is_array($search->sort)) {
+			throw new \InvalidArgumentException('"Sorts" must be an array');
+		}
+
+		if(empty($search->sort)) {
+			return;
+		}
+
+		if(!is_int($searchId)) {
+			throw new \InvalidArgumentException('Search ID must be an integer');
+		}
+
+		// TODO: finish implementation
+	}
+
+	private $getResultsStatement;
+
+	/**
+	 * Get results from a previous search, already sorted.
+	 *
+	 * @param int $id Search ID
+	 * @param int $page Current page, starting from 1
+	 * @param int $perPage Items per page
+	 * @param int|null $depth Depth of each Item tree
+	 *
+	 * @return Item[]
+	 */
+	public function getResults($id, $page, $perPage, $depth = null) {
+		if(!is_int($id)) {
+			throw new \InvalidArgumentException('Search ID must be an integer');
+		}
+
+		if(!is_int($page)) {
+			throw new \InvalidArgumentException('Page number must be an integer');
+		}
+
+		if(!is_int($perPage)) {
+			throw new \InvalidArgumentException('"Items per page" must be an integer');
+		}
+
+		if($this->getResultsStatement === null) {
+			$this->getResultsStatement = /** @lang MySQL */ 'SELECT `Item` FROM SearchResult WHERE Search = :id ORDER BY `Order` ASC LIMIT :offs, :cnt';
+		}
+
+		$statement = $this->getPDO()->prepare($this->getResultsStatement);
+		$items = [];
+		$itemDAO = $this->database->itemDAO();
+
+		try {
+			$statement->bindValue(':id', $id, \PDO::PARAM_INT);
+			$statement->bindValue(':offs', ($page - 1) * $perPage, \PDO::PARAM_INT);
+			$statement->bindValue(':cnt', $perPage, \PDO::PARAM_INT);
+			$statement->execute();
+			foreach($statement as $result) {
+				$items[] = $itemDAO->getItem(new ItemIncomplete($result['Item']), $depth);
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $items;
 	}
 
 	// TODO: everything

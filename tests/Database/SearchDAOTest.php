@@ -12,7 +12,7 @@ class SearchDAOTest extends DatabaseTest {
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 */
-	public function testItemSearchSorting() {
+	public function testItemSearch() {
 		$db = $this->getDb();
 		$pc['PC55'] = (new Item('PC55'))
 			->addFeature(new Feature('brand', 'TI'))
@@ -51,9 +51,63 @@ class SearchDAOTest extends DatabaseTest {
 			$db->itemDAO()->addItem($i);
 		}
 
-		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('type', '=', 'case')]), new User('asd'));
-		// TODO: sort ['motherboard-form-factor' => '-', 'color' => '+']
+		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('color', '=', 'white')]), new User('asd'));
 		$this->assertTrue(is_int($id), 'Search ID should be an integer');
+		$items = $db->searchDAO()->getResults($id, 1, 100);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(1, count($items), 'There should be only one item');
+		$this->assertEquals('SCHIFOMACCHINA', $items[0]->getCode(),
+			'Only SCHIFOMACCHINA should be returned'); // excellent piece of hardware, by the way. 2 minutes from power on to POST OK.
+
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
+	 */
+	public function testItemSearchSorting() {
+		$db = $this->getDb();
+		$pc['PC55'] = (new Item('PC55'))
+			->addFeature(new Feature('brand', 'TI'))
+			->addFeature(new Feature('model', 'GreyPC-\'98'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'atx'));
+		$pc['PC20'] = (new Item('PC20'))
+			->addFeature(new Feature('brand', 'Dill'))
+			->addFeature(new Feature('model', 'DI-360'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
+			->addFeature(new Feature('color', 'black'))
+			->addFeature(new Feature('working', 'yes'));
+		$pc['PC21'] = (new Item('PC21'))
+			->addFeature(new Feature('brand', 'Dill'))
+			->addFeature(new Feature('model', 'DI-360'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
+			->addFeature(new Feature('color', 'grey'))
+			->addFeature(new Feature('working', 'yes'));
+		$pc['PC22'] = (new Item('PC22'))
+			->addFeature(new Feature('brand', 'Dill'))
+			->addFeature(new Feature('model', 'DI-360'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
+			->addFeature(new Feature('color', 'black'))
+			->addFeature(new Feature('working', 'yes'));
+		$pc['SCHIFOMACCHINA'] = (new Item('SCHIFOMACCHINA'))
+			->addFeature(new Feature('brand', 'eMac'))
+			->addFeature(new Feature('model', 'EZ1600'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
+			->addFeature(new Feature('color', 'white'));
+
+		foreach($pc as $i) {
+			$db->itemDAO()->addItem($i);
+		}
+
+		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('type', '=', 'case')], null, null,
+			['motherboard-form-factor' => '-', 'color' => '+']), new User('asd'));
+		$this->assertTrue(is_int($id), 'Search ID should be an integer');
+
+		$items = $db->searchDAO()->getResults($id, 1, 100);
 
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(5, count($items), 'There should be 5 items');
@@ -63,28 +117,12 @@ class SearchDAOTest extends DatabaseTest {
 				'Item in position ' . $pos . ' should be ' . $code . ' (it\'s ' . $items[$pos]->getCode() . ')');
 			$this->assertEquals($pc[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
-
-		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('type', '=', 'case')], null, null, null, null);
-		$this->assertContainsOnly(Item::class, $items);
-		$this->assertEquals(5, count($items), 'There should be 5 items');
-		// no sorting options => sort by code
-		foreach(['PC20', 'PC21', 'PC22', 'PC55', 'SCHIFOMACCHINA'] as $pos => $code) {
-			$this->assertEquals($code, $items[$pos]->getCode(),
-				'Item in position ' . $pos . ' should be ' . $code . '(it\'s ' . $items[$pos]->getCode() . ')');
-			$this->assertEquals($pc[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
-		}
-
-		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('color', '=', 'white')], null, null, null, null);
-		$this->assertContainsOnly(Item::class, $items);
-		$this->assertEquals(1, count($items), 'There should be only one item');
-		$this->assertEquals(reset($items), $pc['SCHIFOMACCHINA'],
-			'Only SCHIFOMACCHINA should be returned'); // excellent piece of hardware, by the way. 2 minutes from power on to POST OK.
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 */
-	public function testGettingItemsWithLocation() {
+	public function testGettingItemsCheckPath() {
 		$db = $this->getDb();
 		$case = (new Item('PC42'))->addFeature(new Feature('brand', 'TI'));
 		$discone1 = (new Item('SATAna1'))->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'));
@@ -93,25 +131,23 @@ class SearchDAOTest extends DatabaseTest {
 		$case->addContent($discone2);
 		$db->itemDAO()->addItem($case);
 
-		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('brand', '=', 'SATAn Storage Corporation Inc.')],
-			null, null, null, null);
+		$id = $db->searchDAO()->search(new Search(null,
+			[new SearchTriplet('brand', '=', 'SATAn Storage Corporation Inc.')]), new User('asd'));
+		$items = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertEquals(2, count($items));
 		$this->assertInstanceOf(Item::class, $items[0]);
 		$this->assertInstanceOf(Item::class, $items[1]);
-		/** @noinspection PhpUndefinedMethodInspection */
-		$this->assertEquals('PC42', $items[0]->getAncestor(1));
-		/** @noinspection PhpUndefinedMethodInspection */
-		$this->assertEquals(null, $items[0]->getAncestor(2));
-		/** @noinspection PhpUndefinedMethodInspection */
-		$this->assertEquals('PC42', $items[1]->getAncestor(1));
-		/** @noinspection PhpUndefinedMethodInspection */
-		$this->assertEquals(null, $items[1]->getAncestor(2));
+		$this->assertEquals('PC42', $items[0]->getPath()[0]);
+		$this->assertEquals('PC42', $items[1]->getPath()[0]);
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item::jsonSerialize()
 	 */
 	public function testItemSearchSerialization() {
+		$this->markTestSkipped();
+
+		return;
 		$db = $this->getDb();
 		$pc['PC55'] = (new Item('PC55'))
 			->addFeature(new Feature('brand', 'TI'))
@@ -265,7 +301,8 @@ class SearchDAOTest extends DatabaseTest {
 			$db->itemDAO()->addItem($c);
 		}
 
-		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('type', '=', 'cpu')], null, null, null, null);
+		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('type', '=', 'cpu')]), new User('asd'));
+		$items = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(6, count($items), 'There should be 6 items');
 		/** @var Item[] $items */
@@ -274,8 +311,8 @@ class SearchDAOTest extends DatabaseTest {
 			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 
-		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('type', '=', 'cpu')], null, null,
-			['frequency-hertz' => '-'], null);
+		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('type', '=', 'cpu')]), new User('asd'));
+		$items = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(6, count($items), 'There should be 6 items');
 		foreach(['AMD737', 'INTEL2', 'AMD42', 'INTEL1', 'INTEL4', 'INTEL3'] as $pos => $code) {
@@ -283,21 +320,15 @@ class SearchDAOTest extends DatabaseTest {
 			$this->assertEquals($cpu[$code], $items[$pos], "Item $code should be unchanged");
 		}
 
-		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('brand', '=', 'Intel')], null, null, null, null);
+		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('brand', '=', 'Intel')]), new User('asd'));
+		$items = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertEquals(0, count($items), 'No items returned without wildcard');
 
-		$itemsGeq = $db->searchDAO()->getItems(null, [new SearchTriplet('brand', '>', 'Intel%')], null, null, null,
-			null);
+		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('brand', '~', 'Intel%')]), new User('asd'));
+		$itemsGeq = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertContainsOnly(Item::class, $itemsGeq);
 		$this->assertEquals(4, count($itemsGeq),
-			'There should be 4 items when using > (query should contain LIKE regardless)');
-
-		$items = $db->searchDAO()->getItems(null, [new SearchTriplet('brand', '=', 'Intel%')], null, null, null, null);
-		$this->assertContainsOnly(Item::class, $items);
-		$this->assertEquals(4, count($items),
-			'There should be 4 items when using = (in this case query should use LIKE)');
-		$this->assertEquals($items, $itemsGeq,
-			'Same result set in same order when using >, < or = on a field that uses LIKE');
+			'There should be 4 items when using ~ (query should contain LIKE)');
 		foreach(['INTEL1', 'INTEL2', 'INTEL3', 'INTEL4'] as $pos => $code) {
 			$this->assertEquals($code, $items[$pos]->getCode(), "Item in position $pos should be $code");
 			$this->assertEquals($cpu[$code], $items[$pos], "Item $code should be unchanged");
