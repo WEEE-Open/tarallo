@@ -104,7 +104,7 @@ class SearchDAOTest extends DatabaseTest {
 		}
 
 		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('type', '=', 'case')], null, null,
-			['motherboard-form-factor' => '-', 'color' => '+']), new User('asd'));
+			['motherboard-form-factor' => '-']), new User('asd'));
 		$this->assertTrue(is_int($id), 'Search ID should be an integer');
 
 		$items = $db->searchDAO()->getResults($id, 1, 100);

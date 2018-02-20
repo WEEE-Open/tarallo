@@ -216,7 +216,22 @@ EOQ;
 			throw new \InvalidArgumentException('Search ID must be an integer');
 		}
 
-		// TODO: finish implementation
+		reset($search->sort);
+		$featureName = key($search->sort);
+
+		// TODO: see if this thing works
+		return;
+
+		$miniquery = /** @lang MySQL */ 'CALL rankResults(?, ?, ?);';
+
+		$statement = $this->getPDO()->prepare($miniquery);
+		try {
+			if(!$statement->execute([$searchId, $featureName, $search->sort[$featureName]])) {
+				throw new DatabaseException('Sorting failed for no apparent reason');
+			}
+		} finally {
+			$statement->closeCursor();
+		}
 	}
 
 	private $getResultsStatement;
@@ -245,7 +260,8 @@ EOQ;
 		}
 
 		if($this->getResultsStatement === null) {
-			$this->getResultsStatement = /** @lang MySQL */ 'SELECT `Item` FROM SearchResult WHERE Search = :id ORDER BY `Order` ASC LIMIT :offs, :cnt';
+			$this->getResultsStatement = /** @lang MySQL */
+				'SELECT `Item` FROM SearchResult WHERE Search = :id ORDER BY `Order` ASC LIMIT :offs, :cnt';
 		}
 
 		$statement = $this->getPDO()->prepare($this->getResultsStatement);

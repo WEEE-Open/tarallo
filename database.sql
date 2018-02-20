@@ -7,7 +7,8 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 -- CREATE DATABASE `tarallo` DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
 -- USE `tarallo`;
 
-SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
+SET NAMES utf8mb4
+COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE `Item` (
 	-- Max length would be approx. 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
@@ -331,17 +332,66 @@ CREATE TRIGGER SearchResultsInsert
 	END $$
 
 CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
-	BEFORE INSERT ON Search
+	BEFORE INSERT
+	ON Search
 	FOR EACH ROW
 	BEGIN
 		SET NEW.Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP);
 	END $$
 
 CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCantAgain
-	BEFORE UPDATE ON Search
+	BEFORE UPDATE
+	ON Search
 	FOR EACH ROW
 	BEGIN
 		SET NEW.Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP);
 	END $$
+
+CREATE PROCEDURE rankResults(IN searchId bigint UNSIGNED, IN featureName varchar(100) CHARACTER SET 'utf8mb4',
+	IN sortOrder char(1) CHARACTER SET 'utf8mb4') BEGIN
+	DECLARE done boolean DEFAULT FALSE;
+	DECLARE sortMe bigint UNSIGNED;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done := TRUE;
+	DECLARE curRank bigint UNSIGNED;
+
+	IF (sortOrder = '+')
+	THEN
+		DECLARE cur CURSOR FOR SELECT Item
+		FROM SearchResult
+		JOIN ItemFeature ON SearchResult.`Item` = ItemFeature.`Code`
+		WHERE Search = searchId
+			AND ItemFeature.Feature = featureName
+		ORDER BY TheColumn ASC; -- I doubt this will work...
+	ELSEIF (sortOrder = '-')
+		THEN
+			DECLARE cur CURSOR FOR SELECT Item
+			FROM SearchResult
+			JOIN ItemFeature ON SearchResult.`Item` = ItemFeature.`Code`
+			WHERE Search = searchId
+				AND ItemFeature.Feature = featureName
+			ORDER BY TheColumn DESC;
+	END IF;
+
+	SET curRank := 0;
+
+	OPEN cur;
+
+	-- https://stackoverflow.com/a/14327995
+	items: LOOP
+		FETCH cur
+		INTO sortMe;
+		IF done
+		THEN
+			LEAVE items;
+		END IF;
+		UPDATE SearchResult
+		SET `Order` = curRank
+		WHERE Search = searchId
+			AND Item = sortMe;
+		SET curRank := 0;
+	END LOOP items;
+	CLOSE cur;
+
+END $$
 
 DELIMITER ;

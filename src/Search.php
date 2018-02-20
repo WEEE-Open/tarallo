@@ -60,6 +60,9 @@ class Search {
 	 * @param string[]|null $sorts Map (associative array) from feature name to order (+ or -)
 	 */
 	private function sort(array $sorts = null) {
+		if($sorts !== null && count($sorts) > 1) {
+			throw new \InvalidArgumentException('Sorting by more than one field is currently unsupported');
+		}
 		$this->sort = $sorts;
 	}
 

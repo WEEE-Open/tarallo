@@ -185,6 +185,9 @@ class Feature {
 	 * @return int
 	 */
 	public static function getType($name) {
+		if(!isset(self::features[$name])) {
+			throw new \InvalidArgumentException("Cannot get type for feature $name: doesn't exist");
+		}
 		return is_int(self::features[$name]) ? self::features[$name] : self::ENUM;
 	}
 
