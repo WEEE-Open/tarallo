@@ -6,7 +6,6 @@ use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\ItemPrefixer;
-use WEEEOpen\Tarallo\Server\ItemUpdate;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 
 final class ItemDAO extends DAO {
@@ -18,28 +17,8 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param Item $item the item to be inserted
 	 * @param ItemIncomplete $parent parent item
-	 *
-	 * @return Item Same item, retrieved from database
-	 *
 	 */
 	public function addItem(Item $item, ItemIncomplete $parent = null) {
-		if($parent === null) {
-			return $this->addItemInternal($item);
-		} else {
-			return $this->addItemInternal($item, $parent);
-		}
-	}
-
-	/**
-	 * @see addItem
-	 *
-	 * @param Item $item the item to be inserted
-	 * @param ItemIncomplete $parent parent item
-	 * @param bool $last leave it as it is
-	 *
-	 * @return null|Item Outer call always returns Item, internal ones (it's recursive) return null
-	 */
-	private function addItemInternal(Item $item, ItemIncomplete $parent = null, $last = true) {
 		$pdo = $this->getPDO();
 
 		if(!$item->hasCode()) {
@@ -70,13 +49,7 @@ final class ItemDAO extends DAO {
 		$childItems = $item->getContents();
 		foreach($childItems as $childItem) {
 			// yay recursion!
-			$this->addItemInternal($childItem, $item, false);
-		}
-
-		if($last) {
-			return $this->getItem($item, null);
-		} else {
-			return null;
+			$this->addItem($childItem, $item);
 		}
 	}
 
@@ -86,7 +59,10 @@ final class ItemDAO extends DAO {
 	 * Check if items still exist.
 	 *
 	 * @param ItemIncomplete $item
-	 * @TODO: deleted items, do something. What? Two separate function? Boolean? Tri-state (available, deleted, not found (by throwing an exception, which is what happens anyways, usually))? That seems somewhat sensible, so every function could decide if it makes sense to operate on deleted items (for recovery) or not...
+	 *
+	 * @TODO: deleted items, do something. What? Two separate function? Boolean? Tri-state (available, deleted, not
+	 *     found (by throwing an exception, which is what happens anyways, usually))? That seems somewhat sensible, so
+	 *     every function could decide if it makes sense to operate on deleted items (for recovery) or not...
 	 *
 	 * @return bool
 	 */

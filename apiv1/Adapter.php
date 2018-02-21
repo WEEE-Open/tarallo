@@ -6,6 +6,7 @@ use WEEEOpen\Tarallo\Server\AuthenticationException;
 use WEEEOpen\Tarallo\Server\AuthorizationException;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Database\TreeDAO;
+use WEEEOpen\Tarallo\Server\ItemFeatures;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
@@ -15,6 +16,7 @@ use WEEEOpen\Tarallo\Server\UserAnonymous;
 class Adapter {
 	public static function sessionWhoami(User $user, Database $db, $parameters, $querystring, $payload) {
 		self::authorize($user);
+
 		return ['username' => $user->getUsername()];
 	}
 
@@ -23,6 +25,7 @@ class Adapter {
 		$username = self::validateHasString($payload, 'username');
 		$password = self::validateHasString($payload, 'password');
 		Session::start(new User($username, $password), $db);
+
 		return null;
 	}
 
@@ -30,12 +33,14 @@ class Adapter {
 		// If we ever add another level for e.g. banned users, this at least allows them to log out
 		self::authenticate($user);
 		Session::close($user, $db);
+
 		return null;
 	}
 
 	public static function sessionRefresh(User $user, Database $db, $parameters, $querystring, $payload) {
 		// The refresh itself has already been done by Session::restore, sooooo...
 		self::authenticate($user);
+
 		return null;
 	}
 
@@ -60,6 +65,8 @@ class Adapter {
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
 		$db->itemDAO()->addItem($item, $parent);
+
+		return $db->itemDAO()->getItem($item);
 	}
 
 	public static function removeItem(User $user, Database $db, $parameters, $querystring, $payload) {
@@ -89,11 +96,48 @@ class Adapter {
 		return null;
 	}
 
+	public static function getItemFeatures(User $user, Database $db, $parameters, $querystring, $payload) {
+		self::authorize($user);
+		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+
+	}
+
+	public static function setItemFeatures(User $user, Database $db, $parameters, $querystring, $payload) {
+		self::authorize($user);
+		self::validateArray($payload);
+		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+
+		$item = new ItemFeatures($id);
+		// PUT => delete every feature, replace with new ones
+		ItemBuilder::addFeatures($payload, $item);
+		$db->featureDAO()->deleteFeaturesAll($item);
+		$db->featureDAO()->setFeatures($item);
+
+		return $db->itemDAO()->getItem($item);
+	}
+
+	public static function updateItemFeatures(User $user, Database $db, $parameters, $querystring, $payload) {
+		self::authorize($user);
+		self::validateArray($payload);
+		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+
+		$item = new ItemFeatures($id);
+		// PATCH => specify features to update and to delete, other are left as they are
+		$delete = ItemBuilder::addFeaturesDelta($payload, $item);
+		foreach($delete as $feature) {
+			$db->featureDAO()->deleteFeature($item, $feature);
+		}
+		$db->featureDAO()->setFeatures($item);
+
+		return $db->itemDAO()->getItem($item);
+	}
+
 	/**
 	 * Check that an user is authorized (and authenticated too, or the entire thing won't make any sense)
 	 *
 	 * @param User|null $user Current, logged-in user. Or none if not authenticated.
 	 * @param int $level Permission level required
+	 *
 	 * @see User::getLevel()
 	 */
 	private static function authorize(User $user, $level = 3) {
@@ -108,6 +152,7 @@ class Adapter {
 	 * You probably want authorize() instead, which also checks permission.
 	 *
 	 * @see Adapter::authorize()
+	 *
 	 * @param User $user
 	 */
 	private static function authenticate(User $user) {
