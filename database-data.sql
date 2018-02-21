@@ -79,9 +79,11 @@ INSERT INTO `Feature` (`Feature`, `Type`) VALUES
 	('rca-mono-ports-n', 1),
 	('tv-out-ports-n', 1),
 	('s-video-ports-n', 1),
+	('composite-video-ports-n', 1),
 	('serial-db25-ports-n', 1), -- DB-25 serial ports
 	('isa-sockets-n', 1),
 	('mini-pcie-sockets-n', 1),
+	('mini-pci-sockets-n', 1),
 	('brand-reseller', 0),
 	('psu-form-factor', 2),
 	('cib-old', 0),
@@ -89,6 +91,7 @@ INSERT INTO `Feature` (`Feature`, `Type`) VALUES
 	('displayport-ports-n', 1),
 	('pci-low-profile', 2),
 	('psu-connector-cpu', 2),
+	('jae-ports-n', 1), -- Old laptop ODDs use a 50-pin connector which is just an IDE with 10 pins for power, and it's apparently called JAE. Basically no information exist on this connector anywhere on the internet...
 	('game-ports-n', 1);
 
 TRUNCATE `FeatureEnum`;
@@ -119,6 +122,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('type', 'modem-card'),
 	('type', 'scsi-card'),
 	('type', 'wifi-card'),
+	('type', 'bluetooth-card'),
 	('type', 'external-psu'),
 	('type', 'zip-drive'),
 	('type', 'printer'),
@@ -187,7 +191,11 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'socket462a'), -- A aka 462
 	('cpu-socket', 'socket423'),
 	('cpu-socket', 'socket478'), -- 478 aka mPGA478B
-	('cpu-socket', 'socket479'),
+	-- There are 3 sockets with multiple names and each one is also called socket 479. And they have 478 pins. Mechanically identical, electrically incompatible.
+	('cpu-socket', 'socket479a'), -- 479 aka mPGA478A
+	('cpu-socket', 'socket479c'), -- 479 aka mPGA478C
+	('cpu-socket', 'socket479m'), -- 479 aka socket M
+	('cpu-socket', 'socket495'),
 	('cpu-socket', 'socket603'),
 	('cpu-socket', 'socket754'),
 	('cpu-socket', 'socket940'),
@@ -289,6 +297,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('pci-low-profile', 'yes'),
 	('psu-connector-cpu', 'none'),
 	('psu-connector-cpu', '4pin'),
+	('psu-connector-cpu', '6pin'), -- well, it exists and it's not a PCIe power connector.
 	('psu-connector-cpu', '8pin'),
 	('psu-connector-cpu', 'proprietary');
 -- TRUNCATE `Codes`;
