@@ -24,7 +24,11 @@ class Adapter {
 		self::validateArray($payload);
 		$username = self::validateHasString($payload, 'username');
 		$password = self::validateHasString($payload, 'password');
-		Session::start(new User($username, $password), $db);
+		$user = $db->userDAO()->getUserFromLogin($username, $password);
+		if($user === null) {
+			throw new InvalidPayloadParameterException('*', '', 'Wrong username or password');
+		}
+		Session::start($user, $db);
 
 		return null;
 	}
