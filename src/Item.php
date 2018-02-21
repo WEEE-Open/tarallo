@@ -9,8 +9,7 @@ use WEEEOpen\Tarallo\Server\Database\TreeDAO;
  *
  * @package WEEEOpen\Tarallo
  */
-class Item extends ItemIncomplete implements \JsonSerializable {
-	use ItemFeatures;
+class Item extends ItemFeatures implements \JsonSerializable {
 	protected $contents = [];
 	private $location = [];
 	protected $product = null;

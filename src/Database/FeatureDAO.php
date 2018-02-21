@@ -4,7 +4,8 @@ namespace WEEEOpen\Tarallo\Server\Database;
 
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\SearchTriplet;
+use WEEEOpen\Tarallo\Server\ItemFeatures;
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
 
 
 final class FeatureDAO extends DAO {
@@ -12,9 +13,9 @@ final class FeatureDAO extends DAO {
 	/**
 	 * Add features to ALL TEH ITEMS
 	 *
-	 * @param Item[] $items
+	 * @param ItemFeatures[] $items
 	 *
-	 * @return Item[] same array
+	 * @return ItemFeatures[]|Item[] same array
 	 */
 	public function getFeaturesAll(array $items) {
 		foreach($items as $item) {
@@ -29,11 +30,11 @@ final class FeatureDAO extends DAO {
 	/**
 	 * Add features to an item
 	 *
-	 * @param Item $item
+	 * @param ItemFeatures $item
 	 *
-	 * @return Item same item
+	 * @return ItemFeatures|Item same item
 	 */
-	public function getFeatures(Item $item) {
+	public function getFeatures(ItemFeatures $item) {
 		/*
 		 * This seemed a good query to fetch default and non-default features, when database structure was different:
 		 *
@@ -75,82 +76,12 @@ final class FeatureDAO extends DAO {
 		return $item;
 	}
 
-	/**
-	 * Build some dynamic SQL queries, or rather pieces of queries, because that's how we roll.
-	 * They are actually missing the SELECT part, so add it. Count on Item, ItemFeature and Feature being present
-	 * and correctly joined, other tables may or may not be there.
-	 * Bind search key to ":searchname . $key" and value to ":searchvalue . $key". Where $key is a key in the $searches
-	 * array.
-	 *
-	 * @param SearchTriplet[] $searches non-empty array of SearchTriplet
-	 * @param string $parameterIdentifier Parameter name, will be assembled as follows: ":" . $string . "name" (or
-	 *     "value").
-	 *
-	 * @return string[] array of WHERE statements(?) (no "WHERE" keyword itself)
-	 */
-	public function getWhereStringFromSearches($searches, $parameterIdentifier) {
-		$queries = [];
-
-		foreach($searches as $key => $triplet) {
-			if(!is_integer($key)) {
-				throw new \InvalidArgumentException('Keys should be integers, ' . $key . ' isn\'t');
-			}
-			if(!($triplet instanceof SearchTriplet)) {
-				if(is_object($triplet)) {
-					throw new \InvalidArgumentException('Search parameters must be instances of SearchTriplet, ' . get_class($triplet) . ' given');
-				} else {
-					throw new \InvalidArgumentException('Search parameters must be instances of SearchTriplet, ' . gettype($triplet) . ' given');
-				}
-			}
-		}
-
-		foreach($searches as $key => $triplet) {
-			switch(Feature::getType($triplet->getKey())) {
-				case Feature::INTEGER:
-					$compare = $searches[$key]->getCompare();
-					if($compare === '>' || $compare === '<') {
-						$compare .= '='; // greater than OR EQUAL, and the like
-					}
-					$queries[] = '
-					FROM Item
-					NATURAL JOIN ItemFeature
-					NATURAL JOIN Feature
-					WHERE Feature.FeatureName = :' . $parameterIdentifier . 'name' . $key . '
-					AND Feature.FeatureType = ' . Feature::INTEGER . '
-					AND ItemFeature.Value ' . $compare . ' :' . $parameterIdentifier . 'value' . $key;
-					break;
-				case Feature::ENUM:
-					$queries[] = '
-					FROM Item
-					JOIN ItemFeature ON Item.ItemID = ItemFeature.ItemID
-					JOIN Feature ON ItemFeature.FeatureID = Feature.FeatureID
-					JOIN FeatureValue ON ItemFeature.FeatureID = FeatureValue.FeatureID
-					WHERE ItemFeature.ValueEnum = FeatureValue.ValueEnum
-					AND Feature.FeatureName = :' . $parameterIdentifier . 'name' . $key . '
-					AND Feature.FeatureType = ' . Feature::ENUM . '
-					AND FeatureValue.ValueText = :' . $parameterIdentifier . 'value' . $key;
-					break;
-				default:
-				case Feature::STRING:
-					$queries[] = '
-					FROM Item
-					NATURAL JOIN ItemFeature
-					NATURAL JOIN Feature
-					WHERE Feature.FeatureName = :' . $parameterIdentifier . 'name' . $key . '
-					AND Feature.FeatureType = ' . Feature::STRING . '
-					AND ItemFeature.ValueText LIKE :' . $parameterIdentifier . 'value' . $key;
-			}
-		}
-
-		return $queries;
-	}
-
 	private $featureNumberStatement = null;
 	private $featureTextStatement = null;
 	private $featureEnumStatement = null;
 	private $featureDoubleStatement = null;
 
-	public function setFeatures(Item $item) {
+	public function setFeatures(ItemFeatures $item) {
 		$features = $item->getFeatures();
 
 		if(empty($features)) {
@@ -207,6 +138,53 @@ final class FeatureDAO extends DAO {
 			} finally {
 				$statement->closeCursor();
 			}
+		}
+	}
+
+	private $deleteFeatureStatement = null;
+
+	/**
+	 * Delete a single feature from an item
+	 *
+	 * @param ItemFeatures $item
+	 * @param string $feature
+	 */
+	public function deleteFeature(ItemFeatures $item, $feature) {
+		if(!is_string($feature)) {
+			throw new \InvalidArgumentException('Name of feature to be deleted should be a string');
+		}
+
+		if($this->deleteFeatureStatement === null) {
+			$this->deleteFeatureStatement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ? AND `Feature`= ?');
+		}
+
+		try {
+			if(!$this->deleteFeatureStatement->execute([$item->getCode(), $feature])) {
+				throw new DatabaseException("Cannot delete feature $feature from " . $item->getCode() . ' for unknown reasons');
+			}
+		} finally {
+			$this->deleteFeatureStatement->closeCursor();
+		}
+	}
+
+	private $deleteFeaturesAllStatement = null;
+
+	/**
+	 * Delete all features from an item
+	 *
+	 * @param ItemIncomplete $item
+	 */
+	public function deleteFeaturesAll(ItemIncomplete $item) {
+		if($this->deleteFeaturesAllStatement === null) {
+			$this->deleteFeaturesAllStatement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ?');
+		}
+
+		try {
+			if(!$this->deleteFeaturesAllStatement->execute([$item->getCode()])) {
+				throw new DatabaseException('Cannot delete features from ' . $item->getCode() . ' for unknown reasons');
+			}
+		} finally {
+			$this->deleteFeaturesAllStatement->closeCursor();
 		}
 	}
 }

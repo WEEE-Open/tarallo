@@ -3,8 +3,12 @@
 namespace WEEEOpen\Tarallo\Server;
 
 
-trait ItemFeatures {
+class ItemFeatures extends ItemIncomplete {
 	protected $features = [];
+
+	function __construct($code) {
+		parent::__construct($code);
+	}
 
 	/**
 	 * @param Feature $feature
