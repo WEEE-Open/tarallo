@@ -169,7 +169,12 @@ class Item extends ItemFeatures implements \JsonSerializable {
 		$array = [];
 		$array['code'] = $this->getCode();
 		if(!empty($this->features)) {
-			$array['features'] = $this->features;
+			foreach($this->features as $feature) {
+				/** @var Feature $feature */
+				$name = $feature->name;
+				$value = $feature->value;
+				$array['features'][$name] = $value;
+			}
 		}
 		if(!empty($this->contents)) {
 			$array['contents'] = $this->contents;

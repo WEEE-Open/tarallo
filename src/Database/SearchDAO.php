@@ -158,7 +158,7 @@ INSERT INTO SearchResult(Search, Item)
 SELECT DISTINCT :searchId, Item.`Code`
 FROM Item, ItemFeature
 $everything
-ORDER BY Item.`Code`;
+ORDER BY Item.`Code` ASC;
 EOQ;
 
 		$statement = $this->getPDO()->prepare($megaquery);
@@ -218,16 +218,84 @@ EOQ;
 
 		reset($search->sort);
 		$featureName = key($search->sort);
+		$ascdesc = $search->sort[$featureName] === '+' ? 'ASC' : 'DESC';
+		switch(Feature::getType($featureName)) {
+			case Feature::STRING:
+				$column = 'ValueText';
+				break;
+			case Feature::INTEGER:
+				$column = 'Value';
+				break;
+			case Feature::ENUM:
+				$column = 'ValueEnum';
+				break;
+			case Feature::DOUBLE:
+				$column = 'ValueDouble';
+				break;
+			default:
+				throw new \LogicException("Cannot sort on $featureName: unknown type");
+		}
 
-		// TODO: see if this thing works
-		return;
+		self::unsort($searchId);
 
-		$miniquery = /** @lang MySQL */ 'CALL rankResults(?, ?, ?);';
+		$miniquery = /** @lang MySQL */
+			"SELECT DISTINCT `Code` FROM ItemFeature WHERE `Code` IN (SELECT `Item` FROM SearchResult WHERE Search = ?) AND Feature = ? ORDER BY $column $ascdesc, `Code` ASC;";
+		$updatequery = /** @lang MySQL */
+			"UPDATE SearchResult SET `Order` = :pos WHERE Search = :sea AND Item = :cod";
 
-		$statement = $this->getPDO()->prepare($miniquery);
+		$sortedStatement = $this->getPDO()->prepare($miniquery);
 		try {
-			if(!$statement->execute([$searchId, $featureName, $search->sort[$featureName]])) {
+			if(!$sortedStatement->execute([$searchId, $featureName])) {
 				throw new DatabaseException('Sorting failed for no apparent reason');
+			}
+			$sorted = $sortedStatement->fetchAll(\PDO::FETCH_ASSOC);
+		} finally {
+			$sortedStatement->closeCursor();
+		}
+
+		if(!isset($sorted)) {
+			throw new \LogicException('Lost sorted items along the way somehow');
+		}
+		if(count($sorted) === 0) {
+			return;
+		}
+
+		$updateStatement = $this->getPDO()->prepare($updatequery);
+		try {
+			$updateStatement->bindValue(':sea', $searchId, \PDO::PARAM_INT);
+
+			$i = 0;
+			foreach($sorted as $result) {
+				$code = $result['Code'];
+				$updateStatement->bindValue(':pos', $i, \PDO::PARAM_INT);
+				$updateStatement->bindValue(':cod', $code, \PDO::PARAM_STR);
+				if(!$updateStatement->execute()) {
+					throw new DatabaseException("Cannot set item $code to position $i for unknown reasons");
+				}
+				$updateStatement->closeCursor();
+
+				$i++;
+			}
+		} finally {
+			$updateStatement->closeCursor();
+		}
+	}
+
+	/**
+	 * Remove sorting information from search results
+	 *
+	 * @param int $searchId
+	 */
+	private function unsort($searchId) {
+		if(!is_int($searchId)) {
+			throw new \InvalidArgumentException('Search ID must be an integer');
+		}
+
+		$statement = $this->getPDO()->prepare('UPDATE SearchResult SET `Order` = NULL WHERE Search = ?');
+
+		try {
+			if(!$statement->execute([$searchId])) {
+				throw new DatabaseException("Cannot 'unsort' search $searchId for unknown reasons");
 			}
 		} finally {
 			$statement->closeCursor();
