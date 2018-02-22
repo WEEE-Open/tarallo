@@ -1,4 +1,12 @@
 RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^v1/(.*)$ index.php [L,QSA] 
+# RewriteCond %{REQUEST_FILENAME} !-f
+# RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !^(.*)\.(css|js)$
+
+# Send v1 API requests to server
+RewriteRule ^v1/(.*)$ index.php/v1/$1 [QSA,L]
+
+# When rewriting an URI, it's parsed again so falls into 404 unless we stop it...
+# However, this doesn't work, nothing works, there's nothing to be done.
+# RewriteCond %{REQUEST_FILENAME} !^index\.php$
+# RewriteRule ^(.*)$ - [R=404,L]
