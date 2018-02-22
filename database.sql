@@ -17,8 +17,10 @@ CREATE TABLE `Item` (
 	`Model` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 	`Variant` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 	`Token` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
+	`DeletedAt` timestamp NULL DEFAULT NULL,
 	UNIQUE KEY (`Code`),
 	INDEX (`Code`),
+	INDEX (`DeletedAt`),
 	FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Products` (`Brand`, `Model`, `Variant`)
 		ON DELETE NO ACTION
 		ON UPDATE CASCADE,
@@ -54,7 +56,7 @@ CREATE TABLE `FeatureEnum` (
 CREATE TABLE `ItemFeature` (
 	`Code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Feature` varchar(40) COLLATE utf8mb4_bin NOT NULL,
-	`Value` bigint(20) UNSIGNED DEFAULT NULL,
+	`Value` bigint UNSIGNED DEFAULT NULL,
 	`ValueEnum` varchar(40) COLLATE utf8mb4_bin DEFAULT NULL,
 	`ValueText` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 	`ValueDouble` double DEFAULT NULL,
@@ -68,11 +70,14 @@ CREATE TABLE `ItemFeature` (
 		ON UPDATE CASCADE,
 	CONSTRAINT FOREIGN KEY (`Feature`) REFERENCES `Feature` (`Feature`)
 		ON DELETE NO ACTION
-		ON UPDATE CASCADE
-	# TODO: replace with a trigger
-	#CHECK ((`Value` IS NOT NULL AND `ValueText` IS NULL AND `ValueDouble` IS NULL)
-	#	OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND `ValueDouble` IS NULL)
-	#	OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueDouble` IS NOT NULL))
+		ON UPDATE CASCADE,
+	CONSTRAINT FOREIGN KEY (`Feature`, `ValueEnum`) REFERENCES `FeatureEnum` (`Feature`, `ValueEnum`)
+		ON DELETE NO ACTION
+		ON UPDATE CASCADE,
+	CHECK ((`Value` IS NOT NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NULL)
+		OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NULL)
+		OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NOT NULL AND `ValueDouble` IS NULL)
+		OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NOT NULL))
 )
 	ENGINE = InnoDB
 	DEFAULT CHARSET = utf8mb4
@@ -179,7 +184,7 @@ CREATE TABLE `User` (
 	`Name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Password` text COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Session` char(32) COLLATE utf8mb4_bin,
-	`SessionExpiry` bigint UNSIGNED NOT NULL DEFAULT 0, -- timestamp NOT NULL DEFAULT 0 ON UPDATE CURRENT_TIMESTAMP + INTERVAL 6 HOUR,
+	`SessionExpiry` bigint UNSIGNED NOT NULL DEFAULT 0,
 	`Enabled` boolean NOT NULL DEFAULT FALSE,
 	PRIMARY KEY (`Name`),
 	UNIQUE KEY (`Session`),
@@ -192,8 +197,7 @@ CREATE TABLE `User` (
 
 CREATE TABLE `Search` (
 	`Code` bigint UNSIGNED AUTO_INCREMENT NOT NULL,
-	-- Too good to be true, PHPStorm even considered it valid SQL in MySQL dialect...
-	`Expires` bigint UNSIGNED NOT NULL DEFAULT 0, -- TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP),
+	`Expires` timestamp NOT NULL DEFAULT 0,
 	`ResultsCount` bigint UNSIGNED NOT NULL DEFAULT 0,
 	`Owner` varchar(100) COLLATE utf8mb4_unicode_ci,
 	PRIMARY KEY (`Code`),
