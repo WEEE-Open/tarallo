@@ -5,7 +5,7 @@ DROP TRIGGER IF EXISTS SearchResultsDelete;
 DROP TRIGGER IF EXISTS SearchResultsUpdate;
 DROP TRIGGER IF EXISTS SearchResultsInsert;
 DROP TRIGGER IF EXISTS SetRealSearchResultTimestampBecauseMySQLCant;
-DROP TRIGGER IF EXISTS SetRealSearchResultTimestampBecauseMySQLCantAgain;
+DROP PROCEDURE IF EXISTS RefreshSearch;
 
 DELIMITER $$
 -- Now we're getting real.
@@ -74,12 +74,12 @@ DETERMINISTIC
 		RETURN found;
 	END$$
 
--- TODO: update expiration date, too
 CREATE TRIGGER SearchResultsDelete
 	AFTER DELETE
 	ON SearchResult
 	FOR EACH ROW -- MySQL doesn't have statement-level triggers. Excellent piece of software, I must say.
 	BEGIN
+		CALL RefreshSearch(OLD.Search);
 		UPDATE Search
 		SET ResultsCount = ResultsCount - 1
 		WHERE Code = OLD.Search;
@@ -93,6 +93,8 @@ CREATE TRIGGER SearchResultsUpdate
 		-- "UPDATE OF Search"
 		IF (OLD.Search != NEW.Search)
 		THEN
+			CALL RefreshSearch(NEW.Search);
+			CALL RefreshSearch(OLD.Search);
 			UPDATE Search
 			SET ResultsCount = ResultsCount - 1
 			WHERE Code = OLD.Search;
@@ -107,12 +109,14 @@ CREATE TRIGGER SearchResultsInsert
 	ON SearchResult
 	FOR EACH ROW -- This may kill performance...
 	BEGIN
+		CALL RefreshSearch(NEW.Search);
 		UPDATE Search
 		SET ResultsCount = ResultsCount + 1
 		WHERE Code = NEW.Search;
 	END $$
 
 CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
+	-- Adds a default value for the field
 	BEFORE INSERT
 	ON Search
 	FOR EACH ROW
@@ -120,11 +124,9 @@ CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
 		SET NEW.Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP);
 	END $$
 
-CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCantAgain
-	BEFORE UPDATE
-	ON Search
-	FOR EACH ROW
+CREATE PROCEDURE RefreshSearch(id bigint UNSIGNED)
 	BEGIN
-		SET NEW.Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP);
+		UPDATE Search SET Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP) WHERE Code = id;
 	END $$
+
 DELIMITER ;

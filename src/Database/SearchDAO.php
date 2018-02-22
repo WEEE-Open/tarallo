@@ -84,6 +84,8 @@ final class SearchDAO extends DAO {
 			$id = $previousSearchId;
 		}
 
+		//$this->refresh($id);
+
 		if($search->searchFeatures !== null) {
 			foreach($search->searchFeatures as $triplet) {
 				/** @var $triplet SearchTriplet */
@@ -327,6 +329,8 @@ EOQ;
 			throw new \InvalidArgumentException('"Items per page" must be an integer');
 		}
 
+		$this->refresh($id);
+
 		if($this->getResultsStatement === null) {
 			$this->getResultsStatement = /** @lang MySQL */
 				'SELECT `Item` FROM SearchResult WHERE Search = :id ORDER BY `Order` ASC LIMIT :offs, :cnt';
@@ -349,5 +353,23 @@ EOQ;
 		}
 
 		return $items;
+	}
+
+	/**
+	 * Update search expiration date.
+	 * Already done via triggers for INSERT, UPDATE and DELETE operations.
+	 *
+	 * @param int $id
+	 */
+	private function refresh($id) {
+		if(!is_int($id)) {
+			throw new \InvalidArgumentException('Search ID to refresh should be an integer');
+		}
+		// ID is an int, no riks of SQL injection...
+		$result = $this->getPDO()->exec("CALL RefreshSearch($id)");
+		// may be 0 for number of affected rows, or false on failure
+		if($result === false) {
+			throw new DatabaseException('Cannot update expiration date for search ' . $id);
+		}
 	}
 }
