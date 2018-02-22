@@ -1,8 +1,14 @@
-
--- Now we're getting real.
-
 DROP FUNCTION IF EXISTS GenerateCode;
+DROP PROCEDURE IF EXISTS SetUser;
+DROP FUNCTION IF EXISTS GetParent;
+DROP TRIGGER IF EXISTS SearchResultsDelete;
+DROP TRIGGER IF EXISTS SearchResultsUpdate;
+DROP TRIGGER IF EXISTS SearchResultsInsert;
+DROP TRIGGER IF EXISTS SetRealSearchResultTimestampBecauseMySQLCant;
+DROP TRIGGER IF EXISTS SetRealSearchResultTimestampBecauseMySQLCantAgain;
+
 DELIMITER $$
+-- Now we're getting real.
 CREATE FUNCTION GenerateCode(currentPrefix varchar(20))
 	RETURNS varchar(190)
 MODIFIES SQL DATA
@@ -47,17 +53,13 @@ DETERMINISTIC
 		END IF;
 
 	END$$
-DELIMITER ;
 
 -- TODO: extend and use to log in?
-DROP PROCEDURE IF EXISTS SetUser;
-DELIMITER $$
 CREATE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
 	BEGIN
 		SET @taralloAuditUsername = username;
 	END$$
 
-DROP FUNCTION IF EXISTS GetParent;
 CREATE FUNCTION GetParent(child varchar(100))
 	RETURNS varchar(100)
 READS SQL DATA
@@ -71,11 +73,8 @@ DETERMINISTIC
 			AND Depth = 1;
 		RETURN found;
 	END$$
-DELIMITER ;
 
 -- TODO: update expiration date, too
-DROP TRIGGER IF EXISTS SearchResultsDelete;
-DELIMITER $$
 CREATE TRIGGER SearchResultsDelete
 	AFTER DELETE
 	ON SearchResult
@@ -85,11 +84,7 @@ CREATE TRIGGER SearchResultsDelete
 		SET ResultsCount = ResultsCount - 1
 		WHERE Code = OLD.Search;
 	END $$
-DELIMITER ;
 
--- These triggers can't be added, BTW, because UPDATE and DELETE are the same action for MySQL apparently and it can't have two triggers for the same action
-DROP TRIGGER IF EXISTS SearchResultsUpdate;
-DELIMITER $$
 CREATE TRIGGER SearchResultsUpdate
 	AFTER UPDATE -- Also can't specify UPDATE of what.
 	ON SearchResult
@@ -106,10 +101,7 @@ CREATE TRIGGER SearchResultsUpdate
 			WHERE Code = OLD.Search;
 		END IF;
 	END $$
-DELIMITER ;
 
-DROP TRIGGER IF EXISTS SearchResultsInsert;
-DELIMITER $$
 CREATE TRIGGER SearchResultsInsert
 	AFTER INSERT
 	ON SearchResult
@@ -119,10 +111,7 @@ CREATE TRIGGER SearchResultsInsert
 		SET ResultsCount = ResultsCount + 1
 		WHERE Code = NEW.Search;
 	END $$
-DELIMITER ;
 
-DROP TRIGGER IF EXISTS SetRealSearchResultTimestampBecauseMySQLCant;
-DELIMITER $$
 CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
 	BEFORE INSERT
 	ON Search
@@ -130,10 +119,7 @@ CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
 	BEGIN
 		SET NEW.Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP);
 	END $$
-DELIMITER ;
 
-DROP TRIGGER IF EXISTS SetRealSearchResultTimestampBecauseMySQLCantAgain;
-DELIMITER $$
 CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCantAgain
 	BEFORE UPDATE
 	ON Search
