@@ -1,38 +1,41 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server;
+namespace WEEEOpen\Tarallo;
 
-use FastRoute;
-use WEEEOpen\Tarallo\Server\Database\Database;
-use WEEEOpen\Tarallo\Server\Database\DatabaseException;
-use WEEEOpen\Tarallo\Server\v1\InvalidPayloadParameterException;
+use WEEEOpen\Tarallo\APIv1;
 
-// in case something goes wrong (reset to 200 when sending a JSON response)
+// in case something goes wrong (gets changed when sending a response, usually)
 http_response_code(500);
 
 require 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 require 'db.php';
+
+if(isset($_SERVER['PATH_INFO'])) {
+	$uri = urldecode($_SERVER['PATH_INFO']);
+} else if(!isset($_SERVER['REQUEST_URI'])) {
+	$uri = '';
+} else {
+	header('Content-Type: text/plain');
+	echo 'No PATH_INFO';
+	exit(2);
+}
+
+if(strpos($uri, '/v1/') === 0) {
+	$uri = substr($uri, 3);
+	$api = APIv1\Adapter::class;
+} else {
+	$api = APIv1\Adapter::class;
+}
+
+$method = $_SERVER['REQUEST_METHOD'];
+// TODO: crash and burn if encoding is anything other than utf-8?
+$contentType = isset($_SERVER['CONTENT_TYPE']) ? trim(explode(';', $_SERVER['CONTENT_TYPE'])[0]) : '';
 
 // TODO: enable this someday
 //$mediaType = (new Negotiator())->getBest(isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : '', ['application/json']);
 //if($mediaType !== null) {
 //	$mediaType->getValue();
 //}
-
-if(isset($_SERVER['PATH_INFO'])) {
-	$uri = urldecode($_SERVER['PATH_INFO']);
-} else if(isset($_SERVER['REQUEST_URI'])) {
-	$where = strpos($_SERVER['REQUEST_URI'], '/v1/');
-	if($where === false) {
-		Response::sendError('Server error: can\'t figure out the request URI');
-	}
-	$uri = substr($_SERVER['REQUEST_URI'], $where);
-} else {
-	$uri = '';
-}
-$method = $_SERVER['REQUEST_METHOD'];
-// TODO: crash and burn if encoding is anything other than utf-8?
-$contentType = isset($_SERVER['CONTENT_TYPE']) ? trim(explode(';', $_SERVER['CONTENT_TYPE'])[0]) : '';
 
 switch($contentType) {
 	case '': // GET request
@@ -50,11 +53,11 @@ switch($contentType) {
 		$rawcontents = null;
 		break;
 	default:
-		Response::sendError('Error: unknown content type: ' . $contentType, 'CONTENT', null, 415);
+		http_response_code(415);
+		header('Content-Type: text/plain');
+		echo 'Error: unknown content type: ' . $contentType;
+		exit();
 }
-
-assert(isset($rawquerystring));
-assert(isset($rawcontents));
 
 if($rawquerystring === null) {
 	$querystring = null;
@@ -70,133 +73,17 @@ if(trim($rawcontents) === '') {
 } else {
 	$payload = json_decode($rawcontents, true);
 	if(json_last_error() !== JSON_ERROR_NONE) {
-		Response::sendError('Error: malformed JSON, ' . json_last_error_msg(), 'JSON', null, 400);
+		http_response_code(400);
+		header('Content-Type: text/plain');
+		echo 'Error: malformed JSON, ' . json_last_error_msg();
+		exit();
 	}
 }
 
-// TODO: use cachedDispatcher
-$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
-	$r->addGroup('/v1', function(FastRoute\RouteCollector $r) {
-		$r->addGroup('/items', function(FastRoute\RouteCollector $r) {
-			$r->get('', 'getItem');
-			$r->post('', 'createItem');
-
-			$r->addGroup('/{id:[a-zA-Z0-9]+}', function(FastRoute\RouteCollector $r) {
-				$r->get('[/token/{token}]', 'getItem');
-				$r->put('', 'createItem');
-				$r->delete('', 'removeItem');
-
-				// Useless
-				//$r->get('/parent', 'getItemParent');
-				$r->put('/parent', 'setItemParent');
-
-				$r->get('/product', 'getItemProduct');
-				$r->put('/product', 'setItemProduct');
-				$r->delete('/product', 'deleteItemProduct');
-
-				// Also useless, just get the item
-				// $r->get('/features', 'getItemFeatures');
-				$r->put('/features', 'setItemFeatures');
-				$r->patch('/features', 'updateItemFeatures');
-
-				$r->get('/contents', 'getItemContents');
-			});
-		});
-
-		$r->post('/search', 'createSearch');
-		$r->patch('/search/{id}', 'refineSearch');
-		$r->get('/search/{id}[/page/{page}]', 'getSearch');
-
-		$r->addGroup('/products', function(FastRoute\RouteCollector $r) {
-			$r->get('', 'getProduct');
-			$r->get('/{brand}[/{model}[/{variant}]]', 'getProduct');
-
-			$r->post('/{brand}/{model}', 'createProduct');
-			$r->put('/{brand}/{model}/{variant}', 'createProduct');
-
-			$r->addGroup('/{brand}/{model}/{variant}', function(FastRoute\RouteCollector $r) {
-				$r->get('/features', 'getProductFeatures');
-				$r->post('/features', 'setProductFeatures');
-				$r->patch('/features', 'updateProductFeatures');
-			});
-		});
-
-		$r->get('/logs[/page/{page}]', 'getLogs');
-
-		$r->get('/session', 'sessionWhoami');
-		$r->post('/session', 'sessionStart');
-		$r->delete('/session', 'sessionClose');
-		$r->head('/session', 'sessionRefresh');
-	});
-});
-
-$route = $dispatcher->dispatch($method, $uri);
-
-if($route[0] === FastRoute\Dispatcher::NOT_FOUND) {
-	http_response_code(404);
-	exit();
-}
-
-if($route[0] === FastRoute\Dispatcher::METHOD_NOT_ALLOWED) {
-	http_response_code(405);
-	header('Allow: ' . implode(', ', $route[1]));
-	exit();
-}
-
-if($route[0] !== FastRoute\Dispatcher::FOUND) {
-	Response::sendError('Server error: unhandled router result');
-}
-
-$callback = [v1\Adapter::class, $route[1]];
-$parameters = $route[2];
-unset($route);
-
-if(!is_callable($callback)) {
-	Response::sendError('Server error: cannot call "' . implode('::', $callback) . '"');
-}
-
-try {
-	$db = new Database(DB_USERNAME, DB_PASSWORD, DB_DSN);
-	$db->beginTransaction();
-	$user = Session::restore($db);
-	$db->commit();
-} catch(\Exception $e) {
-	if(isset($db)) {
-		$db->rollback();
-	}
-	Response::sendError('Server error: ' . $e->getMessage());
-	assert(isset($user)); // pointless, sendError exit()s, this just stops the IDE from throwing warnings at me
-}
-
-try {
-	try {
-		$db->beginTransaction();
-		$response = call_user_func($callback, $user, $db, $parameters, $querystring, $payload);
-		$db->commit();
-	} catch(\Throwable $e) {
-		$db->rollback();
-		throw $e;
-	}
-} catch(AuthorizationException $e) {
-	Response::sendError('Not authorized (insufficient permission)', 'AUTH403', null, 403);
-} catch(AuthenticationException $e) {
-	// 401 requires a WWW authentication challenge in the response, so use 403 again
-	Response::sendError('Not authenticated or session expired', 'AUTH401', ['notes' => 'Try POSTing to /session'], 403);
-} catch(InvalidPayloadParameterException $e) {
-	Response::sendFail($e->getParameter(), $e->getReason());
-} catch(DatabaseException $e) {
-	Response::sendError('Database error: ' . $e->getMessage());
-} catch(NotFoundException $e) {
-	http_response_code(404);
-	exit();
-} catch(\Exception $e) {
-	Response::sendError('Unhandled exception :(', null, ['message' => $e->getMessage(), 'code' => $e->getCode()]);
-}
-assert(isset($response));
-
-if($response === null) {
-	http_response_code(204);
+if($api === APIv1\Adapter::class) {
+	$response = APIv1\Adapter::go($method, $uri, $querystring, $payload);
+	$response->send();
+	return;
 } else {
-	http_response_code(200);
-	echo json_encode($response, \JSON_PRETTY_PRINT);
+	SSRv1\Adapter::go($method, $uri, $querystring, $payload);
 }

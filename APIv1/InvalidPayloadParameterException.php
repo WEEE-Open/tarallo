@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\v1;
+namespace WEEEOpen\Tarallo\APIv1;
 
 class InvalidPayloadParameterException extends \RuntimeException {
 	private $parameter;

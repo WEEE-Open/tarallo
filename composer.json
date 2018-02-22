@@ -6,7 +6,8 @@
   "autoload": {
     "psr-4": {
       "WEEEOpen\\Tarallo\\Server\\": "src/",
-      "WEEEOpen\\Tarallo\\Server\\v1\\": "apiv1/"
+      "WEEEOpen\\Tarallo\\APIv1\\": "APIv1/",
+      "WEEEOpen\\Tarallo\\SSRv1\\": "SSRv1/"
     }
   },
   "require": {

@@ -2,13 +2,13 @@
 
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
-use WEEEOpen\Tarallo\Server\v1\InvalidPayloadParameterException;
-use WEEEOpen\Tarallo\Server\v1\ItemBuilder;
+use WEEEOpen\Tarallo\APIv1\InvalidPayloadParameterException;
+use WEEEOpen\Tarallo\APIv1\ItemBuilder;
 
 class ItemBuilderTest extends TestCase {
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\v1\ItemBuilder
+	 * @covers \WEEEOpen\Tarallo\APIv1\ItemBuilder
 	 */
 	public function testInvalidCode() {
 		$this->expectException(InvalidPayloadParameterException::class);
@@ -16,7 +16,7 @@ class ItemBuilderTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\v1\ItemBuilder
+	 * @covers \WEEEOpen\Tarallo\APIv1\ItemBuilder
 	 */
 	public function testValidCode() {
 		$item = ItemBuilder::ofArray([], 'PC42', $discarded);
@@ -25,7 +25,7 @@ class ItemBuilderTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\v1\ItemBuilder
+	 * @covers \WEEEOpen\Tarallo\APIv1\ItemBuilder
 	 */
 	public function testInvalidFeaturesType() {
 		$this->expectException(InvalidPayloadParameterException::class);
@@ -33,7 +33,7 @@ class ItemBuilderTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\v1\ItemBuilder
+	 * @covers \WEEEOpen\Tarallo\APIv1\ItemBuilder
 	 */
 	public function testInvalidFeaturesName() {
 		$this->expectException(InvalidPayloadParameterException::class);
@@ -41,7 +41,7 @@ class ItemBuilderTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\v1\ItemBuilder
+	 * @covers \WEEEOpen\Tarallo\APIv1\ItemBuilder
 	 */
 	public function testInvalidFeaturesValue() {
 		$this->expectException(InvalidPayloadParameterException::class);
@@ -49,7 +49,7 @@ class ItemBuilderTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\v1\ItemBuilder
+	 * @covers \WEEEOpen\Tarallo\APIv1\ItemBuilder
 	 */
 	public function testValidFeatures() {
 		$item = ItemBuilder::ofArray(['features' => ['motherboard-form-factor' => 'atx']], 'PC42', $discarded);
@@ -59,7 +59,7 @@ class ItemBuilderTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\v1\ItemBuilder
+	 * @covers \WEEEOpen\Tarallo\APIv1\ItemBuilder
 	 */
 	public function testInvalidParent() {
 		$this->expectException(InvalidPayloadParameterException::class);
@@ -67,7 +67,7 @@ class ItemBuilderTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\v1\ItemBuilder
+	 * @covers \WEEEOpen\Tarallo\APIv1\ItemBuilder
 	 */
 	public function testValidParent() {
 		ItemBuilder::ofArray(['parent' => 'ZonaBlu'], 'PC42', $parent);
