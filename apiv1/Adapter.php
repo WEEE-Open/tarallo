@@ -77,7 +77,7 @@ class Adapter {
 		self::authorize($user);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
 
-		$db->treeDAO()->removeFromTree(new ItemIncomplete($id));
+		$db->itemDAO()->deleteItem(new ItemIncomplete($id));
 
 		return null;
 	}
@@ -98,12 +98,6 @@ class Adapter {
 		}
 
 		return null;
-	}
-
-	public static function getItemFeatures(User $user, Database $db, $parameters, $querystring, $payload) {
-		self::authorize($user);
-		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
-
 	}
 
 	public static function setItemFeatures(User $user, Database $db, $parameters, $querystring, $payload) {

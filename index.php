@@ -94,7 +94,8 @@ $dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 				$r->put('/product', 'setItemProduct');
 				$r->delete('/product', 'deleteItemProduct');
 
-				$r->get('/features', 'getItemFeatures');
+				// Also useless, just get the item
+				// $r->get('/features', 'getItemFeatures');
 				$r->put('/features', 'setItemFeatures');
 				$r->patch('/features', 'updateItemFeatures');
 
