@@ -17,11 +17,11 @@ final class TreeDAO extends DAO {
 	 * @param ItemIncomplete|null $parent some existing Item as parent, NULL if it has no parent (root Item)
 	 */
 	public function addToTree(ItemIncomplete $child, ItemIncomplete $parent = null) {
-		if($parent !== null && !$this->database->itemDAO()->itemExists($parent)) {
+		if($parent !== null && !$this->database->itemDAO()->itemAvailable($parent)) {
 			throw new NotFoundException(self::EXCEPTION_CODE_PARENT);
 		}
 
-		if(!$this->database->itemDAO()->itemExists($child)) {
+		if(!$this->database->itemDAO()->itemAvailable($child)) {
 			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
 		}
 
@@ -39,11 +39,11 @@ final class TreeDAO extends DAO {
 	 *     root Item)
 	 */
 	public function moveItem(ItemIncomplete $item, ItemIncomplete $newParent = null) {
-		if(!$this->database->itemDAO()->itemExists($newParent)) {
+		if(!$this->database->itemDAO()->itemAvailable($newParent)) {
 			throw new NotFoundException(self::EXCEPTION_CODE_PARENT);
 		}
 
-		if(!$this->database->itemDAO()->itemExists($item)) {
+		if(!$this->database->itemDAO()->itemAvailable($item)) {
 			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
 		}
 
@@ -102,7 +102,7 @@ final class TreeDAO extends DAO {
 	private $removeFromTreeStatement = null;
 
 	public function removeFromTree(ItemIncomplete $item) {
-		if(!$this->database->itemDAO()->itemExists($item)) {
+		if(!$this->database->itemDAO()->itemAvailable($item)) {
 			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
 		}
 

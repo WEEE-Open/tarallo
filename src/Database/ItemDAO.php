@@ -2,7 +2,6 @@
 
 namespace WEEEOpen\Tarallo\Server\Database;
 
-use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\ItemPrefixer;
@@ -19,8 +18,6 @@ final class ItemDAO extends DAO {
 	 * @param ItemIncomplete $parent parent item
 	 */
 	public function addItem(Item $item, ItemIncomplete $parent = null) {
-		$pdo = $this->getPDO();
-
 		if(!$item->hasCode()) {
 			$prefix = ItemPrefixer::get($item);
 			$code = $this->getNewCode($prefix);
@@ -28,8 +25,7 @@ final class ItemDAO extends DAO {
 		}
 
 		if($this->addItemStatement === null) {
-			// TODO: add brand, model, variant
-			$this->addItemStatement = $pdo->prepare('INSERT INTO Item (`Code`, Token) VALUES (:cod, :tok)');
+			$this->addItemStatement = $this->getPDO()->prepare('INSERT INTO Item (`Code`, Token) VALUES (:cod, :tok)');
 		}
 
 		try {
@@ -53,32 +49,82 @@ final class ItemDAO extends DAO {
 		}
 	}
 
-	private $itemExistsStament = null;
+	private $deleteItemStatement;
+
+	public function deleteItem(ItemIncomplete $item) {
+		if($this->deleteItemStatement === null) {
+			$this->deleteItemStatement = $this->getPDO()->prepare('UPDATE Item SET DeletedAt = NOW() WHERE `Code` = ?');
+		}
+
+		$this->database->treeDAO()->removeFromTree($item);
+
+		try {
+			$this->deleteItemStatement->execute([$item->getCode()]);
+		} finally {
+			$this->deleteItemStatement->closeCursor();
+		}
+	}
+
+	private $itemIsDeletedStatement = null;
 
 	/**
-	 * Check if items still exist.
+	 * Yes, it's kinda like the true/false/FileNotFound thing.
 	 *
 	 * @param ItemIncomplete $item
 	 *
-	 * @TODO: deleted items, do something. What? Two separate function? Boolean? Tri-state (available, deleted, not
-	 *     found (by throwing an exception, which is what happens anyways, usually))? That seems somewhat sensible, so
-	 *     every function could decide if it makes sense to operate on deleted items (for recovery) or not...
-	 *
-	 * @return bool
+	 * @return bool|null tri-state: true if marked as deleted, false if not marked but exists, null if doesn't exist
 	 */
-	public function itemExists(ItemIncomplete $item) {
-		if($this->itemExistsStament === null) {
-			$this->itemExistsStament = $this->getPDO()->prepare('SELECT IF(COUNT(*) > 0, TRUE, FALSE) FROM Item WHERE `Code` = :cod');
+	private function itemIsDeleted(ItemIncomplete $item) {
+		if($this->itemIsDeletedStatement === null) {
+			$this->itemIsDeletedStatement = $this->getPDO()->prepare('SELECT IF(DeletedAt IS NULL, FALSE, TRUE) FROM Item WHERE `Code` = :cod');
 		}
 		try {
-			$this->itemExistsStament->execute([$item->getCode()]);
-			$result = $this->itemExistsStament->fetch(\PDO::FETCH_NUM);
+			$this->itemIsDeletedStatement->execute([$item->getCode()]);
+			if($this->itemIsDeletedStatement->rowCount() === 0) {
+				return null;
+			}
+			$result = $this->itemIsDeletedStatement->fetch(\PDO::FETCH_NUM);
 			$exists = (bool) $result[0];
+
+			return $exists;
+
 		} finally {
-			$this->itemExistsStament->closeCursor();
+			$this->itemIsDeletedStatement->closeCursor();
+		}
+	}
+
+	/**
+	 * True If item exists and is not marked as deleted, false otherwise.
+	 *
+	 * @param ItemIncomplete $item
+	 *
+	 * @return bool
+	 * @throws NotFoundException If item doesn't exist in any form anywhere
+	 */
+	public function itemAvailable(ItemIncomplete $item) {
+		$deleted = $this->itemIsDeleted($item);
+		if($deleted === false) {
+			return true;
 		}
 
-		return $exists;
+		return false;
+	}
+
+	/**
+	 * True if item exists in the database and is marked as deleted, false otherwise
+	 *
+	 * @param ItemIncomplete $item
+	 *
+	 * @return bool
+	 * @see itemAvailable to check wether item is available or deleted (call only that method, not both!)
+	 */
+	public function itemRecoverable(ItemIncomplete $item) {
+		$deleted = $this->itemIsDeleted($item);
+		if($deleted === true) {
+			return true;
+		}
+
+		return false;
 	}
 
 	private $getNewCodeStatement = null;
@@ -92,7 +138,8 @@ final class ItemDAO extends DAO {
 	 */
 	private function getNewCode($prefix) {
 		if($this->getNewCodeStatement === null) {
-			$this->getNewCodeStatement = $this->getPDO()->prepare('SELECT GenerateCode(?)');
+			$this->getNewCodeStatement = $this->getPDO()->prepare(/** @lang MySQL */
+				'SELECT GenerateCode(?)');
 		}
 		try {
 			$this->getNewCodeStatement->execute([$prefix]);
@@ -130,9 +177,8 @@ final class ItemDAO extends DAO {
 		if($this->getItemStatement === null) {
 			// TODO: we can also select Depth here, may be useful to select depth = maxdepth + 1 and see if there are items inside and discard them, but it's slow and unefficient...
 			$this->getItemStatement = $this->getPDO()->prepare(<<<EOQ
-				SELECT `Code`, `Brand`, `Model`, `Variant`, GetParent(`Code`) AS Parent
-				FROM Item
-				JOIN Tree ON Descendant=`Code` 
+				SELECT `Descendant` AS `Code`, GetParent(`Descendant`) AS Parent
+				FROM Tree
 				WHERE Ancestor = ?
 				AND Depth < ?
 				ORDER BY Depth
@@ -158,7 +204,6 @@ EOQ
 				throw new NotFoundException();
 			}
 
-			$this->fillItem($head, $row['Brand'], $row['Model'], $row['Variant']);
 			$flat[$head->getCode()] = $head;
 
 			// Other items
@@ -168,7 +213,7 @@ EOQ
 					throw new \LogicException('Broken tree: got ' . $row['Code'] . ' before its parent ' . $row['Parent']);
 				}
 				$current = $flat[$row['Code']] = new Item($row['Code']);
-				$this->fillItem($current, $row['Brand'], $row['Model'], $row['Variant'], $parent);
+				$parent->addContent($current);
 			}
 			$parent = null;
 			unset($parent);
@@ -210,16 +255,6 @@ EOQ
 			return $exists;
 		} finally {
 			$tokenquery->closeCursor();
-		}
-	}
-
-	private function fillItem(Item $item, $brand, $model, $variant, Item $parent = null) {
-		$brand === null ?: $item->addFeature(new Feature('brand', $brand));
-		$model === null ?: $item->addFeature(new Feature('model', $model));
-		// TODO: these shouldn't be plain features... also, don't discard $variant
-
-		if($parent !== null) {
-			$parent->addContent($item);
 		}
 	}
 }
