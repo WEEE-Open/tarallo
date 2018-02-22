@@ -61,6 +61,36 @@ class ItemDAOTest extends DatabaseTest {
 		}
 	}
 
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 */
+	public function testDeleteItem() {
+		$db = $this->getDb();
+		$case = new Item('PC42');
+		$db->itemDAO()->addItem($case);
+
+		$deleteMe = new ItemIncomplete('PC42');
+		$db->itemDAO()->deleteItem($deleteMe);
+		$this->assertFalse($db->itemDAO()->itemAvailable($deleteMe), 'Item shouldn\'t be available');
+		$this->assertTrue($db->itemDAO()->itemRecoverable($deleteMe), 'Item should be recoverable');
+		$this->expectException(NotFoundException::class);
+		$db->itemDAO()->getItem($deleteMe);
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 */
+	public function testNonExistingItem() {
+		$db = $this->getDb();
+
+		$notHere = new ItemIncomplete('PC9001');
+		$this->assertFalse($db->itemDAO()->itemAvailable($notHere), 'Item shouldn\'t be available');
+		$this->assertFalse($db->itemDAO()->itemRecoverable($notHere), 'Item shouldn\'t be recoverable');
+		$this->expectException(NotFoundException::class);
+		$db->itemDAO()->getItem($notHere);
+	}
+
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
 	 */
@@ -102,6 +132,9 @@ class ItemDAOTest extends DatabaseTest {
 		$this->assertEquals('T77', $keyboardWithNoCode->getCode());
 	}
 
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 */
 	public function testAddItemToken() {
 		$db = $this->getDb();
 		$case = (new Item('PC42'))->addFeature(new Feature('motherboard-form-factor', 'atx'));
@@ -112,6 +145,9 @@ class ItemDAOTest extends DatabaseTest {
 		$this->assertInstanceOf(Item::class, $newCase);
 	}
 
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 */
 	public function testGetItemToken() {
 		$db = $this->getDb();
 		$case = (new Item('PC42'))->addFeature(new Feature('motherboard-form-factor', 'atx'));
@@ -123,29 +159,9 @@ class ItemDAOTest extends DatabaseTest {
 		$this->assertInstanceOf(Item::class, $newCase);
 	}
 
-	public function testDeleteItem() {
-		$db = $this->getDb();
-		$case = new Item('PC42');
-		$db->itemDAO()->addItem($case);
-
-		$deleteMe = new ItemIncomplete('PC42');
-		$db->itemDAO()->deleteItem($deleteMe);
-		$this->assertFalse($db->itemDAO()->itemAvailable($deleteMe), 'Item shouldn\'t be available');
-		$this->assertTrue($db->itemDAO()->itemRecoverable($deleteMe), 'Item should be recoverable');
-		$this->expectException(NotFoundException::class);
-		$db->itemDAO()->getItem($deleteMe);
-	}
-
-	public function testNonExistingItem() {
-		$db = $this->getDb();
-
-		$notHere = new ItemIncomplete('PC9001');
-		$this->assertFalse($db->itemDAO()->itemAvailable($notHere), 'Item shouldn\'t be available');
-		$this->assertFalse($db->itemDAO()->itemRecoverable($notHere), 'Item shouldn\'t be recoverable');
-		$this->expectException(NotFoundException::class);
-		$db->itemDAO()->getItem($notHere);
-	}
-
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 */
 	public function testGetItemWrongToken() {
 		$db = $this->getDb();
 		$case = (new Item('PC42'))->addFeature(new Feature('motherboard-form-factor', 'atx'));
