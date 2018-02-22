@@ -24,13 +24,22 @@ final class UserDAO extends DAO {
 		}
 	}
 
+	/**
+	 * Set session id and expiration timestamp for a user
+	 *
+	 * @param string $username
+	 * @param string|null $session
+	 * @param int|null $expiry
+	 */
 	public function setSessionFromUser($username, $session, $expiry) {
 		try {
 			$s = $this->getPDO()->prepare('UPDATE `User` SET `Session` = :s, SessionExpiry = :se WHERE `Name` = :n AND `Enabled` > 0');
-			$s->bindValue(':s', $session);
-			$s->bindValue(':se', $expiry);
-			$s->bindValue(':n', $username);
-			$s->execute();
+			$s->bindValue(':s', $session, $session === null ? \PDO::PARAM_NULL : \PDO::PARAM_STR);
+			$s->bindValue(':se', $expiry === null ? 0 : (int) $expiry, \PDO::PARAM_INT);
+			$s->bindValue(':n', $username, \PDO::PARAM_STR);
+			if(!$s->execute()) {
+				throw new DatabaseException("Cannot update session for user $username for unknown reasons");
+			}
 		} finally {
 			$s->closeCursor();
 		}
