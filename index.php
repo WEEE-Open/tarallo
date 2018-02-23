@@ -96,8 +96,7 @@ try {
 	if(isset($db)) {
 		$db->rollback();
 	}
-
-	http_response_code(400);
+	http_response_code(500);
 	header('Content-Type: text/plain; charset=utf-8');
 	echo 'Server error: ' . $e->getMessage();
 	exit(3);
