@@ -281,6 +281,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('psu-form-factor', 'sfx-topfan-reduceddepth'),
 	('psu-form-factor', 'sfx'),
 	('psu-form-factor', 'sfx-ps3'),
+	('psu-form-factor', 'sfx-l'), -- Also called "mATX" or "mini ITX", size claimed to be 125×64×140 mm, NOWHERE to be found in the ATX or SFX specification but multiple models exist for sale right now
 	('psu-form-factor', 'tfx'), -- I don't even know anymore
 	('psu-form-factor', 'flexatx'),
 	('psu-form-factor', 'proprietary'),

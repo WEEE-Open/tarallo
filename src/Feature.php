@@ -88,7 +88,7 @@ class Feature {
 		'mini-pcie-sockets-n' => self::INTEGER,
 		'mini-pci-sockets-n' => self::INTEGER,
 		'brand-reseller' => self::STRING,
-		'psu-form-factor' => ['atx' => true, 'cfx' => true, 'lfx' => true, 'sfx-lowprofile' => true, 'sfx-topfan' => true, 'sfx-topfan-reduceddepth' => true, 'sfx' => true, 'sfx-ps3' => true, 'tfx' => true, 'flexatx' => true, 'proprietary' => true, 'eps' => true],
+		'psu-form-factor' => ['atx' => true, 'cfx' => true, 'lfx' => true, 'sfx-lowprofile' => true, 'sfx-topfan' => true, 'sfx-topfan-reduceddepth' => true, 'sfx' => true, 'sfx-ps3' => true, 'sfx-l' => true, 'tfx' => true, 'flexatx' => true, 'proprietary' => true, 'eps' => true],
 		'cib-old' => self::STRING,
 		'restrictions' => ['loan' => true, 'in-use' => true, 'bought' => true, 'training' => true, 'ready' => true, 'other' => true],
 		'displayport-ports-n' => self::INTEGER,
