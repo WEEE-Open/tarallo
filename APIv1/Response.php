@@ -85,11 +85,15 @@ class Response {
 	}
 
 	/**
-	 * Get content of response as the array that would be serialized to JSON
+	 * Get content of response as a string with JSON-serialized data
 	 *
-	 * @return array
+	 * @return string
 	 */
-	public function asArray() {
-		return $this->response->asArray();
+	public function asString() {
+		$result = json_encode($this->response->asArray());
+		if($result === false) {
+			throw new \LogicException('Cannot encode response');
+		}
+		return $result;
 	}
 }

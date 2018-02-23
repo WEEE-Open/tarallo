@@ -14,13 +14,13 @@ use WEEEOpen\Tarallo\Server\User;
 
 
 class Adapter {
-	public static function sessionWhoami(User $user, Database $db, $parameters, $querystring, $payload) {
+	public static function sessionWhoami(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		Validation::authorize($user);
 
 		return ['username' => $user->getUsername()];
 	}
 
-	public static function sessionStart(User $user, Database $db, $parameters, $querystring, $payload) {
+	public static function sessionStart(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		Validation::validateArray($payload);
 		$username = Validation::validateHasString($payload, 'username');
 		$password = Validation::validateHasString($payload, 'password');
@@ -33,7 +33,7 @@ class Adapter {
 		return null;
 	}
 
-	public static function sessionClose(User $user, Database $db, $parameters, $querystring, $payload) {
+	public static function sessionClose(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		// If we ever add another level for e.g. banned users, this at least allows them to log out
 		Validation::authenticate($user);
 		Session::close($user, $db);
@@ -41,14 +41,14 @@ class Adapter {
 		return null;
 	}
 
-	public static function sessionRefresh(User $user, Database $db, $parameters, $querystring, $payload) {
+	public static function sessionRefresh(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		// The refresh itself has already been done by Session::restore, sooooo...
 		Validation::authenticate($user);
 
 		return null;
 	}
 
-	public static function getItem(User $user, Database $db, $parameters, $querystring, $payload) {
+	public static function getItem(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
 		$token = isset($parameters['token']) ? (string) $parameters['token'] : null;
 
@@ -63,7 +63,7 @@ class Adapter {
 		}
 	}
 
-	public static function createItem(User $user, Database $db, $parameters, $querystring, $payload) {
+	public static function createItem(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		Validation::authorize($user);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
 
@@ -73,7 +73,7 @@ class Adapter {
 		return $db->itemDAO()->getItem($item);
 	}
 
-	public static function removeItem(User $user, Database $db, $parameters, $querystring, $payload) {
+	public static function removeItem(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		Validation::authorize($user);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
 
@@ -82,7 +82,7 @@ class Adapter {
 		return null;
 	}
 
-	public static function setItemParent(User $user, Database $db, $parameters, $querystring, $payload) {
+	public static function setItemParent(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		Validation::authorize($user);
 		Validation::validateIsString($payload);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
@@ -100,7 +100,7 @@ class Adapter {
 		return null;
 	}
 
-	public static function setItemFeatures(User $user, Database $db, $parameters, $querystring, $payload) {
+	public static function setItemFeatures(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		Validation::authorize($user);
 		Validation::validateArray($payload);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
@@ -114,7 +114,7 @@ class Adapter {
 		return $db->itemDAO()->getItem($item);
 	}
 
-	public static function updateItemFeatures(User $user, Database $db, $parameters, $querystring, $payload) {
+	public static function updateItemFeatures(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		Validation::authorize($user);
 		Validation::validateArray($payload);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;

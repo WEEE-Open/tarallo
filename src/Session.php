@@ -65,7 +65,7 @@ class Session {
 	 *
 	 * @param Database $db
 	 *
-	 * @return User the user, or null if not found (expired/invalid session, no cookie, etc...)
+	 * @return User|null the user, or null if not found (expired/invalid session, no cookie, etc...)
 	 */
 	public static function restore(Database $db) {
 		if(isset($_COOKIE[self::COOKIE_NAME])) {
@@ -78,7 +78,7 @@ class Session {
 			}
 		}
 
-		return new UserAnonymous();
+		return null;
 	}
 
 	/**

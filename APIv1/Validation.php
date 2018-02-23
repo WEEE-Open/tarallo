@@ -3,7 +3,6 @@
 namespace WEEEOpen\Tarallo\APIv1;
 
 use WEEEOpen\Tarallo\Server\User;
-use WEEEOpen\Tarallo\Server\UserAnonymous;
 
 class Validation {
 	/**
@@ -14,7 +13,7 @@ class Validation {
 	 *
 	 * @see User::getLevel()
 	 */
-	public static function authorize(User $user, $level = 3) {
+	public static function authorize(User $user = null, $level = 3) {
 		self::authenticate($user);
 		if($user->getLevel() > $level) {
 			throw new AuthorizationException();
@@ -29,8 +28,8 @@ class Validation {
 	 *
 	 * @param User $user
 	 */
-	public static function authenticate(User $user) {
-		if($user instanceof UserAnonymous) {
+	public static function authenticate(User $user = null) {
+		if(!($user instanceof User)) {
 			throw new AuthenticationException();
 		}
 	}
