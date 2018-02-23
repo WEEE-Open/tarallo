@@ -3,6 +3,13 @@
 namespace WEEEOpen\Tarallo;
 
 use WEEEOpen\Tarallo\APIv1;
+use WEEEOpen\Tarallo\Server\Database\Database;
+use WEEEOpen\Tarallo\Server\Session;
+
+// This is the entry point for the entire server.
+// It normalizes HTTP requests (e.g. gets and sanitizes PATH_INFO, query string and the like),
+// connects to database, gets current user from session if available, and then calls an Adapter
+// (which does routing and response generation). It's the MVA pattern, almost?
 
 // in case something goes wrong (gets changed when sending a response, usually)
 http_response_code(500);
@@ -15,7 +22,7 @@ if(isset($_SERVER['PATH_INFO'])) {
 } else if(!isset($_SERVER['REQUEST_URI'])) {
 	$uri = '';
 } else {
-	header('Content-Type: text/plain');
+	header('Content-Type: text/plain; charset=utf-8');
 	echo 'No PATH_INFO';
 	exit(2);
 }
@@ -42,7 +49,7 @@ switch($contentType) {
 		$rawquerystring = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : null;
 		$rawcontents = null;
 		break;
-	case 'text/plain':
+	case 'text/plain; charset=utf-8':
 	case 'application/json':
 	case '*/*':
 		$rawquerystring = isset($_SERVER['QUERY_STRING']) ? $_SERVER['QUERY_STRING'] : null;
@@ -54,7 +61,7 @@ switch($contentType) {
 		break;
 	default:
 		http_response_code(415);
-		header('Content-Type: text/plain');
+		header('Content-Type: text/plain; charset=utf-8');
 		echo 'Error: unknown content type: ' . $contentType;
 		exit();
 }
@@ -74,16 +81,32 @@ if(trim($rawcontents) === '') {
 	$payload = json_decode($rawcontents, true);
 	if(json_last_error() !== JSON_ERROR_NONE) {
 		http_response_code(400);
-		header('Content-Type: text/plain');
+		header('Content-Type: text/plain; charset=utf-8');
 		echo 'Error: malformed JSON, ' . json_last_error_msg();
 		exit();
 	}
 }
 
+try {
+	$db = new Database(DB_USERNAME, DB_PASSWORD, DB_DSN);
+	$db->beginTransaction();
+	$user = Session::restore($db);
+	$db->commit();
+} catch(\Exception $e) {
+	if(isset($db)) {
+		$db->rollback();
+	}
+
+	http_response_code(400);
+	header('Content-Type: text/plain; charset=utf-8');
+	echo 'Server error: ' . $e->getMessage();
+	exit(3);
+}
+
 if($api === APIv1\Adapter::class) {
-	$response = APIv1\Adapter::go($method, $uri, $querystring, $payload);
+	$response = APIv1\Adapter::go($method, $uri, $querystring, $payload, $db, $user);
 	$response->send();
 	return;
 } else {
-	SSRv1\Adapter::go($method, $uri, $querystring, $payload);
+	SSRv1\Adapter::go($method, $uri, $querystring, $payload, $db, $user);
 }

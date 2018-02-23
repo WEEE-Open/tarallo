@@ -135,11 +135,13 @@ class Adapter {
 	 * @param string $uri URI, e.g. /items/PC42
 	 * @param string[]|null $querystring Parsed query string (?foo=bar is ["foo" => "bar"]), null if none
 	 * @param mixed|null $payload Request contents (decoded JSON), null if none
+	 * @param Database $db
+	 * @param User|null $user Current user, authenticated, authorized, or null if not logged in
 	 *
 	 * @return Response
 	 * @throws \Throwable I have no idea but I'm forced to add this annotation
 	 */
-	public static function go($method, $uri, $querystring, $payload) {
+	public static function go($method, $uri, $querystring, $payload, Database $db, User $user = null) {
 		// TODO: use cachedDispatcher
 		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 
@@ -218,20 +220,6 @@ class Adapter {
 
 		if(!is_callable($callback)) {
 			return Response::ofError('Server error: cannot call "' . implode('::', $callback) . '"');
-		}
-
-		try {
-			$db = new Database(DB_USERNAME, DB_PASSWORD, DB_DSN);
-			$db->beginTransaction();
-			$user = Session::restore($db);
-			// TODO: store user or session key in Response object? It's part of the HTTP state...
-			$db->commit();
-		} catch(\Exception $e) {
-			if(isset($db)) {
-				$db->rollback();
-			}
-
-			return Response::ofError('Server error: ' . $e->getMessage());
 		}
 
 		try {

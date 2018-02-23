@@ -56,8 +56,7 @@ class Session {
 
 	private static function setContent($newContent, $expire) {
 		// TODO: set secure=true, if we ever get HTTPS?
-		// TODO: also change to httponly
-		setcookie(self::COOKIE_NAME, $newContent, $expire, '', '', false, false);
+		setcookie(self::COOKIE_NAME, $newContent, $expire, '', '', false, true);
 	}
 
 	/**
