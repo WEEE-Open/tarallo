@@ -249,6 +249,11 @@ class Adapter {
 				['message' => $e->getMessage(), 'code' => $e->getCode()]);
 		}
 
-		return Response::ofSuccess($result);
+		try {
+			return Response::ofSuccess($result);
+		} catch(\Exception $e) {
+			return Response::ofError('Unhandled exception', null,
+				['message' => $e->getMessage(), 'code' => $e->getCode()]);
+		}
 	}
 }

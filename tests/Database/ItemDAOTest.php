@@ -173,4 +173,39 @@ class ItemDAOTest extends DatabaseTest {
 		$db->itemDAO()->getItem($getMe, 'WRONGWRONGWRONG');
 	}
 
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Server\Item
+	 */
+	public function testItemSerializable() {
+		$db = $this->getDb();
+
+		$where = (new Item('Chernobyl'));
+		$where2 = (new Item('Tavolo'));
+		$where3 = (new Item('ZonaBlu'));
+		$where->addContent($where2)->addContent($where3);
+
+		$case = (new Item('PC42'))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('motherboard-form-factor', 'atx'));
+		$discone1 = (new Item('SATAna1'))
+			->addFeature(new Feature('capacity-byte', 666))
+			->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'))
+			->addFeature(new Feature('model', 'Discone da 666 byte'))
+			->addFeature(new Feature('type', 'hdd'));
+		$discone2 = (new Item('SATAna2'))
+			->addFeature(new Feature('capacity-byte', 666))
+			->addFeature(new Feature('brand', 'SATAn Storage Corporation Inc.'))
+			->addFeature(new Feature('model', 'Discone da 666 byte'))
+			->addFeature(new Feature('type', 'hdd'));
+		$case->addContent($discone1)->addContent($discone2);
+		$where->addContent($case);
+
+		$db->itemDAO()->addItem($where);
+		$getMe = new ItemIncomplete('PC42');
+		$result = $db->itemDAO()->getItem($getMe);
+		json_encode($result);
+		$this->assertEquals(JSON_ERROR_NONE, json_last_error());
+	}
+
 }

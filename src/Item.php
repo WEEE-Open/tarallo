@@ -138,15 +138,17 @@ class Item extends ItemFeatures implements \JsonSerializable {
 	 *
 	 * @param Item $item
 	 *
-	 * @return Item $this
+	 * @return Item $this parent item (itself)
 	 */
 	public function addContent(Item $item) {
 		$this->contents[] = $item;
-		if(empty($this->location)) {
-			$item->location[] = $this;
-		} else {
-			$item->location = array_merge([$this], $this->getPath());
-		}
+		// This was cool, but caused problems during serialization. Serious problems.
+		// It made the serialization fail because of recursion.
+		//if(empty($this->location)) {
+		//	$item->location[] = $this;
+		//} else {
+		//	$item->location = array_merge([$this], $this->getPath());
+		//}
 
 		return $this;
 	}

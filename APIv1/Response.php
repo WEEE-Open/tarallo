@@ -24,7 +24,19 @@ class Response {
 	 * @return Response
 	 */
 	public static function ofSuccess($data) {
-		return new self(JSendResponse::success($data), 200);
+		if($data === null) {
+			return new self(JSendResponse::success($data), 200);
+		} else if($data instanceof \JsonSerializable) {
+			// I hope that this works. JSendResponse wants an array, just an array, only an array, doesn't matter if objects are JSON-serializable or not.
+			$arrayed = $data->jsonSerialize();
+			if(json_last_error() !== JSON_ERROR_NONE) {
+				throw new \LogicException('Cannot encode response: ' . json_last_error_msg());
+			}
+			return new self(JSendResponse::success($arrayed), 200);
+		} else {
+			// Or throw
+			return new self(JSendResponse::success((array) $data), 200);
+		}
 	}
 
 	/**
@@ -67,9 +79,9 @@ class Response {
 	 * Set HTTP status code, send response and exit.
 	 */
 	public function send() {
+		http_response_code($this->httpStatus);
 		$this->response->setEncodingOptions(\JSON_PRETTY_PRINT);
 		$this->response->respond();
-		http_response_code($this->httpStatus);
 		if($this->response->isError()) {
 			exit(1);
 		} else {
