@@ -143,9 +143,9 @@ class Adapter implements AdapterInterface {
 	 * @param string[]|null $querystring Parsed query string (?foo=bar is ["foo" => "bar"]), null if none
 	 * @param mixed|null $payload Request contents to be decoded, null if none
 	 *
-	 * @return Response The JSend wrapper thinghy
+	 * @return JSend The JSend wrapper thinghy
 	 */
-	public static function goInternal($method, $uri, $querystring, $payload): Response {
+	public static function goInternal($method, $uri, $querystring, $payload): JSend {
 		// TODO: use cachedDispatcher
 		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 
@@ -215,7 +215,7 @@ class Adapter implements AdapterInterface {
 		}
 
 		if($route[0] !== FastRoute\Dispatcher::FOUND) {
-			return Response::ofError('Server error: unhandled router result');
+			return JSend::ofError('Server error: unhandled router result');
 		}
 
 		$callback = [Adapter::class, $route[1]];
@@ -223,7 +223,7 @@ class Adapter implements AdapterInterface {
 		unset($route);
 
 		if(!is_callable($callback)) {
-			return Response::ofError('Server error: cannot call "' . implode('::', $callback) . '"');
+			return JSend::ofError('Server error: cannot call "' . implode('::', $callback) . '"');
 		}
 
 		try {
@@ -237,13 +237,13 @@ class Adapter implements AdapterInterface {
 			}
 			http_response_code(500);
 
-			return Response::ofError('Server error: ' . $e->getMessage());
+			return JSend::ofError('Server error: ' . $e->getMessage());
 		}
 
 		if($payload !== null) {
 			$payload = json_decode($payload, true);
 			if(json_last_error() !== JSON_ERROR_NONE) {
-				return Response::ofError('Cannot decode JSON request body');
+				return JSend::ofError('Cannot decode JSON request body');
 			}
 		}
 
@@ -257,27 +257,27 @@ class Adapter implements AdapterInterface {
 				throw $e;
 			}
 		} catch(AuthorizationException $e) {
-			return Response::ofError('Not authorized (insufficient permission)', 'AUTH403', null, 403);
+			return JSend::ofError('Not authorized (insufficient permission)', 'AUTH403', null, 403);
 		} catch(AuthenticationException $e) {
 			// 401 requires a WWW authentication challenge in the response, so use 403 again
-			return Response::ofError('Not authenticated or session expired', 'AUTH401',
+			return JSend::ofError('Not authenticated or session expired', 'AUTH401',
 				['notes' => 'Try POSTing to /session'], 403);
 		} catch(InvalidPayloadParameterException $e) {
-			return Response::ofFail($e->getParameter(), $e->getReason());
+			return JSend::ofFail($e->getParameter(), $e->getReason());
 		} catch(DatabaseException $e) {
-			return Response::ofError('Database error: ' . $e->getMessage());
+			return JSend::ofError('Database error: ' . $e->getMessage());
 		} catch(NotFoundException $e) {
 			http_response_code(404);
 			exit();
 		} catch(\Throwable $e) {
-			return Response::ofError('Unhandled exception :(', null,
+			return JSend::ofError('Unhandled exception :(', null,
 				['message' => $e->getMessage(), 'code' => $e->getCode()]);
 		}
 
 		try {
-			return Response::ofSuccess($result);
+			return JSend::ofSuccess($result);
 		} catch(\Exception $e) {
-			return Response::ofError('Unhandled exception', null,
+			return JSend::ofError('Unhandled exception', null,
 				['message' => $e->getMessage(), 'code' => $e->getCode()]);
 		}
 	}
