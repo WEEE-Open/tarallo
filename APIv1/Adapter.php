@@ -241,7 +241,7 @@ class Adapter implements AdapterInterface {
 		}
 
 		if($payload !== null) {
-			$payload = json_decode($payload);
+			$payload = json_decode($payload, true);
 			if(json_last_error() !== JSON_ERROR_NONE) {
 				return Response::ofError('Cannot decode JSON request body');
 			}
