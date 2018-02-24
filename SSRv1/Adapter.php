@@ -3,6 +3,8 @@
 namespace WEEEOpen\Tarallo\SSRv1;
 
 use FastRoute;
+use League\Plates\Engine;
+use League\Plates\Extension\URI;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
 use WEEEOpen\Tarallo\Server\HTTP\Request;
@@ -12,8 +14,9 @@ use WEEEOpen\Tarallo\Server\User;
 
 
 class Adapter implements AdapterInterface {
-	public static function getItem(User $user = null, Database $db, $parameters, $querystring, $payload) {
-
+	public static function getItem(User $user = null, Database $db, Engine $engine, $parameters, $querystring): string {
+		$template = $engine->make('viewItem');
+		return $template->render(['code' => 'ASD']);
 	}
 
 	public static function go(Request $request): Response {
@@ -65,9 +68,12 @@ class Adapter implements AdapterInterface {
 			return new Response(500, 'text/plain; charset=utf-8', 'Server error: ' . $e->getMessage());
 		}
 
+		$templates = new Engine(__DIR__ . DIRECTORY_SEPARATOR . 'templates', 'tpl');
+		$templates->loadExtension(new URI($request->path));
+
 		try {
 			$db->beginTransaction();
-			$result = call_user_func($callback, $user, $db, $parameters, $querystring);
+			$result = call_user_func($callback, $user, $db, $templates, $parameters, $querystring);
 			$db->commit();
 		} catch(\Throwable $e) {
 			$db->rollback();

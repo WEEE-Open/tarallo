@@ -7,7 +7,11 @@ use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Database\DatabaseException;
 use WEEEOpen\Tarallo\Server\Database\TreeDAO;
 use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
+use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
+use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
+use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\HTTP\Request;
+use WEEEOpen\Tarallo\Server\HTTP\Response;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\ItemFeatures;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
@@ -133,7 +137,7 @@ class Adapter implements AdapterInterface {
 		return $db->itemDAO()->getItem($item);
 	}
 
-	public static function go(Request $request) : \WEEEOpen\Tarallo\Server\HTTP\Response {
+	public static function go(Request $request) : Response {
 		return self::goInternal($request->method, $request->path, $request->querystring, $request->payload)->asResponseInterface();
 	}
 
