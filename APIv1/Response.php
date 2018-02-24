@@ -5,6 +5,9 @@ namespace WEEEOpen\Tarallo\APIv1;
 use JSend\InvalidJSendException;
 use JSend\JSendResponse;
 
+/**
+ * @deprecated extend JSendResponse to add these static constructors and asResponseInterface
+ */
 class Response {
 	/** @var int $httpStatus */
 	private $httpStatus;
@@ -77,6 +80,7 @@ class Response {
 
 	/**
 	 * Set HTTP status code, send response and exit.
+	 * @deprecated
 	 */
 	public function send() {
 		http_response_code($this->httpStatus);
@@ -91,6 +95,8 @@ class Response {
 
 	/**
 	 * @return int
+	 *
+	 * @deprecated
 	 */
 	public function getHttpStatus() {
 		return $this->httpStatus;
@@ -99,13 +105,14 @@ class Response {
 	/**
 	 * Get content of response as a string with JSON-serialized data
 	 *
-	 * @return string
+	 * @return \WEEEOpen\Tarallo\Server\HTTP\Response
 	 */
-	public function asString() {
-		$result = json_encode($this->response->asArray());
+	public function asResponseInterface(): \WEEEOpen\Tarallo\Server\HTTP\Response {
+		$result = json_encode($this->response);
 		if($result === false) {
 			throw new \LogicException('Cannot encode response');
 		}
-		return $result;
+
+		return new \WEEEOpen\Tarallo\Server\HTTP\Response($this->httpStatus, 'application/json', $result);
 	}
 }

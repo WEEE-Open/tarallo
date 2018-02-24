@@ -6,6 +6,9 @@ use FastRoute;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Database\DatabaseException;
 use WEEEOpen\Tarallo\Server\Database\TreeDAO;
+use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
+use WEEEOpen\Tarallo\Server\HTTP\Request;
+use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\ItemFeatures;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\NotFoundException;
@@ -13,7 +16,7 @@ use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
 
 
-class Adapter {
+class Adapter implements AdapterInterface {
 	public static function sessionWhoami(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		Validation::authorize($user);
 
@@ -130,18 +133,19 @@ class Adapter {
 		return $db->itemDAO()->getItem($item);
 	}
 
+	public static function go(Request $request) : \WEEEOpen\Tarallo\Server\HTTP\Response {
+		return self::goInternal($request->method, $request->path, $request->querystring, $request->payload)->asResponseInterface();
+	}
+
 	/**
 	 * @param string $method HTTP method (GET, POST, ...)
 	 * @param string $uri URI, e.g. /items/PC42
 	 * @param string[]|null $querystring Parsed query string (?foo=bar is ["foo" => "bar"]), null if none
-	 * @param mixed|null $payload Request contents (decoded JSON), null if none
-	 * @param Database $db
-	 * @param User|null $user Current user, authenticated, authorized, or null if not logged in
+	 * @param mixed|null $payload Request contents to be decoded, null if none
 	 *
-	 * @return Response
-	 * @throws \Throwable I have no idea but I'm forced to add this annotation
+	 * @return Response The JSend wrapper thinghy
 	 */
-	public static function go($method, $uri, $querystring, $payload, Database $db, User $user = null) {
+	public static function goInternal($method, $uri, $querystring, $payload): Response {
 		// TODO: use cachedDispatcher
 		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 
@@ -223,6 +227,27 @@ class Adapter {
 		}
 
 		try {
+			$db = new Database(DB_USERNAME, DB_PASSWORD, DB_DSN);
+			$db->beginTransaction();
+			$user = Session::restore($db);
+			$db->commit();
+		} catch(\Exception $e) {
+			if(isset($db)) {
+				$db->rollback();
+			}
+			http_response_code(500);
+
+			return Response::ofError('Server error: ' . $e->getMessage());
+		}
+
+		if($payload !== null) {
+			$payload = json_decode($payload);
+			if(json_last_error() !== JSON_ERROR_NONE) {
+				return Response::ofError('Cannot decode JSON request body');
+			}
+		}
+
+		try {
 			try {
 				$db->beginTransaction();
 				$result = call_user_func($callback, $user, $db, $parameters, $querystring, $payload);
@@ -244,7 +269,7 @@ class Adapter {
 		} catch(NotFoundException $e) {
 			http_response_code(404);
 			exit();
-		} catch(\Exception $e) {
+		} catch(\Throwable $e) {
 			return Response::ofError('Unhandled exception :(', null,
 				['message' => $e->getMessage(), 'code' => $e->getCode()]);
 		}
