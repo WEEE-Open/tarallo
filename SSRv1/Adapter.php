@@ -7,6 +7,7 @@ use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
 use WEEEOpen\Tarallo\Server\HTTP\Request;
 use WEEEOpen\Tarallo\Server\HTTP\Response;
+use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
 
 
@@ -41,9 +42,7 @@ class Adapter implements AdapterInterface {
 
 		if($route[0] !== FastRoute\Dispatcher::FOUND) {
 			http_response_code(500);
-			header('Content-Type: text/plain; charset=utf-8');
-			echo 'Error: unknown router result';
-			exit(1);
+			return new Response(500, 'text/plain; charset=utf-8', 'SSR Error: unknown router result');
 		}
 
 		$callback = [Adapter::class, $route[1]];
@@ -52,8 +51,18 @@ class Adapter implements AdapterInterface {
 
 		if(!is_callable($callback)) {
 			echo 'Server error: cannot call "' . implode('::', $callback) . '" (SSR)';
+		}
 
-			return;
+		try {
+			$db = new Database(DB_USERNAME, DB_PASSWORD, DB_DSN);
+			$db->beginTransaction();
+			$user = Session::restore($db);
+			$db->commit();
+		} catch(\Exception $e) {
+			if(isset($db)) {
+				$db->rollback();
+			}
+			return new Response(500, 'text/plain; charset=utf-8', 'Server error: ' . $e->getMessage());
 		}
 
 		try {
@@ -64,5 +73,7 @@ class Adapter implements AdapterInterface {
 			$db->rollback();
 			throw $e;
 		}
+
+		return new Response(500, $request->responseType, $result);
 	}
 }

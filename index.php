@@ -23,7 +23,7 @@ if(strpos($request->path, '/v1/') === 0) {
 	// Some advanced URL rewriting techniques, right here.
 	// This could be called a metarouter, or hyperrouter, or something like that.
 	$request->path = substr($request->path, 3);
-	APIv1\Adapter::go($request);
+	APIv1\Adapter::go($request)->send();
 } else {
-	SSRv1\Adapter::go($request);
+	SSRv1\Adapter::go($request)->send();
 }
