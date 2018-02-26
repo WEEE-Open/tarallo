@@ -58,7 +58,7 @@ class Adapter implements AdapterInterface {
 		return $response;
 	}
 
-	private static function home(
+	private static function getHome(
 		User $user = null,
 		Database $db,
 		Engine $engine,
@@ -75,9 +75,17 @@ class Adapter implements AdapterInterface {
 		$uri = $request->path;
 		$querystring = $request->querystring;
 
+		$engine = new Engine(__DIR__ . DIRECTORY_SEPARATOR . 'templates');
+		$engine->addData(['lang' => 'it']); // TODO: lang
+		$engine->loadExtension(new URI($request->path));
+		$engine->registerFunction('u', function($component) {
+			return rawurlencode($component);
+		});
+
 		// TODO: use cachedDispatcher
 		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 			$r->get('/', 'getHome');
+			$r->get('/home', 'getHome');
 			$r->get('/item/{code}', 'getItem');
 			$r->addRoute(['GET', 'POST'], '/login', 'login');
 		});
@@ -85,14 +93,13 @@ class Adapter implements AdapterInterface {
 		$route = $dispatcher->dispatch($method, $uri);
 
 		if($route[0] === FastRoute\Dispatcher::NOT_FOUND) {
-			http_response_code(404);
-			exit();
+			return new Response(404, $request->responseType, $engine->render('notFound'));
 		}
 
 		if($route[0] === FastRoute\Dispatcher::METHOD_NOT_ALLOWED) {
 			http_response_code(405);
 			header('Allow: ' . implode(', ', $route[1]));
-			exit();
+			exit(); // TODO: return new Response instead of exiting
 		}
 
 		if($route[0] !== FastRoute\Dispatcher::FOUND) {
@@ -122,12 +129,8 @@ class Adapter implements AdapterInterface {
 			return new Response(500, 'text/plain; charset=utf-8', 'Server error: ' . $e->getMessage());
 		}
 
-		$engine = new Engine(__DIR__ . DIRECTORY_SEPARATOR . 'templates');
-		$engine->addData(['user' => $user, 'self' => '/server/ssr' . $uri, 'lang' => 'it']); // TODO: lang
-		$engine->loadExtension(new URI($request->path));
-		$engine->registerFunction('u', function($component) {
-			return rawurlencode($component);
-		});
+		// self is the routed path thingamajig
+		$engine->addData(['lang' => 'it', 'user' => $user, 'self' => $uri]);
 
 		try {
 			try {
