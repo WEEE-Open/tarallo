@@ -9,6 +9,7 @@ use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
+use WEEEOpen\Tarallo\Server\HTTP\RedirectResponse;
 use WEEEOpen\Tarallo\Server\HTTP\Request;
 use WEEEOpen\Tarallo\Server\HTTP\Response;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
@@ -19,19 +20,54 @@ use WEEEOpen\Tarallo\Server\User;
 
 
 class Adapter implements AdapterInterface {
-	public static function getItem(User $user = null, Database $db, Engine $engine, $parameters, $querystring): string {
+	private static function getItem(
+		User $user = null,
+		Database $db,
+		Engine $engine,
+		$parameters,
+		$querystring
+	): Response {
 		Validation::authorize($user);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
 
-		return $engine->render('viewItem',
-			['item' => $db->itemDAO()->getItem(new ItemIncomplete($id))]);
+		return new Response(200, 'text/html', $engine->render('viewItem',
+			['item' => $db->itemDAO()->getItem(new ItemIncomplete($id))]));
 	}
 
-	public static function login(User $user = null, Database $db, Engine $engine, $parameters, $querystring): string {
+	private static function login(
+		User $user = null,
+		Database $db,
+		Engine $engine,
+		$parameters,
+		$querystring
+	): Response {
 		if($querystring !== null) {
-			//var_dump($querystring);
+			$username = Validation::validateHasString($querystring, 'username');
+			$password = Validation::validateHasString($querystring, 'password');
+			$user = $db->userDAO()->getUserFromLogin($username, $password);
+			if($user === null) {
+				$response = new Response(400, 'text/html', $engine->render('login', ['failed' => true]));
+			} else {
+				Session::start($user, $db);
+				$response = new RedirectResponse(303, '/home');
+			}
+		} else {
+			$response = new Response(200, 'text/html', $engine->render('login'));
 		}
-		return $engine->render('login');
+
+		return $response;
+	}
+
+	private static function home(
+		User $user = null,
+		Database $db,
+		Engine $engine,
+		$parameters,
+		$querystring
+	): Response {
+		Validation::authorize($user);
+
+		return new Response(200, 'text/html', $engine->render('home'));
 	}
 
 	public static function go(Request $request): Response {
@@ -109,8 +145,10 @@ class Adapter implements AdapterInterface {
 			return new Response(403, $request->responseType, $engine->render('notAuthorized'));
 		} catch(NotFoundException $e) {
 			return new Response(404, $request->responseType, $engine->render('notFound'));
+		} catch(\Throwable $e) {
+			return new Response(500, 'text/plain', 'Unhandled exception: ' . $e->getMessage());
 		}
 
-		return new Response(200, $request->responseType, $result);
+		return $result;
 	}
 }

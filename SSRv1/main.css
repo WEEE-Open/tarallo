@@ -1,0 +1,233 @@
+html, body {
+	font-family: sans-serif;
+	margin: 0;
+	padding: 0;
+}
+
+header {
+	margin: 0;
+	padding: 0.5em;
+	background-color: #333;
+	color: #eee;
+	border-bottom: 1px solid #ccc;
+}
+
+header h1 {
+	margin: 0 0.5rem 0 0;
+	font-size: x-large;
+	display: inline-block;
+}
+
+header p {
+	margin: 0.5rem 0 0 0;
+	font-size: small;
+	display: inline-block;
+}
+
+input, button, select {
+	color: black;
+	background: white;
+	border: 1px solid #ccc;
+	border-radius: 0.3em;
+	margin: 0.2em;
+	padding: 0.2em 0.4em;
+	font-size: 100%;
+	font-family: inherit; /* I have no idea why is this needed */
+	transition: box-shadow,border-color 0.3s ease-out;
+}
+
+select {
+	/* I have no idea why this is needed or where the extra padding comes from. There's probably a bug somewhere else in the css file. */
+	padding-left: 0.15em;
+	padding-right: 0.15em;
+}
+
+button:hover, input[type="submit"]:hover {
+	/* TODO: optimize transition by using opacity of the ::after pseudo element instead of box-shadow */
+	border-color: #aaa;
+	box-shadow: 0 0 0.15rem rgba(0,0,0,0.29);
+	transition: box-shadow,border-color 0.1s ease-in;
+}
+
+button:active, input[type="submit"]:active, button:focus, select:focus {
+	outline: none;
+	background-color: #eee;
+}
+
+button::-moz-focus-inner, select::-moz-focus-inner {
+	border: 0;
+}
+
+button:disabled, button:disabled:hover, button:disabled:active, input[type="submit"]:disabled, input[type="submit"]:disabled:hover, input[type="submit"]:disabled:active {
+	color: #999;
+	border-color: #ccc;
+	background: white;
+	transition: none;
+	box-shadow: none;
+}
+
+nav#top {
+	margin-bottom: 1.5em;
+	box-shadow: 0 0.3em 0.6em -0.3em rgba(0,0,0,0.29);
+}
+
+nav#top nav {
+	margin-top: .5em;
+	margin-bottom: .5em;
+}
+
+nav#top nav .message {
+	padding: .5em;
+}
+
+nav#main {
+	padding: 0;
+	white-space: nowrap;
+}
+
+nav#main a {
+	color: inherit;
+	cursor: pointer;
+	padding: .5em;
+	display: block;
+	text-decoration: none;
+	vertical-align: middle;
+}
+
+nav#main a:hover, nav#main a.selected {
+	color: #eee;
+	background-color: #333;
+}
+
+nav#main ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+nav#main ul li {
+	padding: 0;
+	margin: 0;
+	height: 100%;
+	display: inline-block;
+	position: relative;
+}
+
+.info.message {
+	color: #00529B;
+	background-color: #BDE5F8;
+}
+.success.message {
+	color: #4F8A10;
+	background-color: #DFF2BF;
+}
+.warning.message {
+	color: #9F6000;
+	background-color: #FEEFB3;
+}
+
+.error.message {
+	color: #D8000C;
+	background-color: #FFBABA;
+}
+
+.item {
+	padding: 0.5em;
+	margin-bottom: 2em;
+}
+
+ul.breadcrumbs {
+	margin: 0;
+	padding: 0;
+	color: #aaa;
+}
+
+ul.breadcrumbs li {
+	margin: 0;
+	padding: 0;
+	display: inline-block;
+	list-style-type: none;
+}
+
+ul.breadcrumbs li a {
+	color: #333;
+	margin: 0 0.4em;
+	padding: 0.5em;
+	display: inline-block;
+	text-decoration: none;
+}
+
+ul.breadcrumbs li a:first-child {
+	margin-left: 0;
+}
+
+ul.breadcrumbs li a:hover {
+	color: #eee;
+	background-color: #333;
+}
+
+ul.breadcrumbs li:not(:first-child)::before {
+	content: ">";
+	margin-right: 0.4em;
+}
+
+.breadsetter {
+	color: #eee;
+	background-color: #333;
+	padding: 0.5em;
+}
+
+.breadsetter input:disabled {
+	color: #eee;
+	background-color: #333;
+}
+
+.item.working.yes {
+	border-color: #4F8A10;
+	box-shadow: 0 0 0.3em 0.2em #DFF2BF;
+}
+
+.item.working.maybe {
+	border-color: #9F6000;
+	box-shadow: 0 0 0.3em 0.2em #FEEFB3;
+}
+
+.item.working.no {
+	border-color: #D8000C;
+	box-shadow: 0 0 0.3em 0.2em #FFBABA;
+}
+
+.item > .features {
+	margin-top: 1em;
+	margin-bottom: 1em;
+	display: table;
+	box-sizing: border-box;
+	width: 100%;
+}
+
+.itembuttons {
+	float: right;
+}
+
+.inside > div > .item {
+	margin-bottom: 1em;
+}
+
+.pagination {
+	margin: 0 auto;
+	text-align: center;
+}
+
+.pagination a {
+	padding: 0.5em;
+}
+
+.pagination a:not(.disabled) {
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.pagination a:not(.disabled):hover {
+	background-color: #333;
+	color: #eee;
+}

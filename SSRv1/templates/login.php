@@ -11,5 +11,8 @@ $this->layout('main', ['title' => 'Login']) ?>
 			<label>Password: <input name="password" type="password"></label>
 			<input type="submit" value="VAI.">
 		</form>
+		<?php if(isset($failed) && $failed): ?>
+		<div class="error message">Wrong username or password</div>
+		<?php endif ?>
 	</nav>
 </nav>
