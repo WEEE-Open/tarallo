@@ -114,7 +114,7 @@ class Item extends ItemFeatures implements \JsonSerializable {
 	 * Get features and default features, all in one.
 	 * Some features may override default features.
 	 *
-	 * @return array
+	 * @return Feature[]
 	 */
 	public function getCombinedFeatures() {
 		if($this->product === null) {

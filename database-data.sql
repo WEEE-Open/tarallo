@@ -55,6 +55,7 @@ INSERT INTO `Feature` (`Feature`, `Type`) VALUES
 	('os-license-version', 0),
 	('power-idle-pfc', 0),
 	('firewire-ports-n', 1),
+	('mini-firewire-ports-n', 1),
 	('serial-ports-n', 1), -- DE-9 ports, also known as RS-232 (which apparently is a standard that also works on DB-25 ports, so don't call them like that)
 	('parallel-ports-n', 1),
 	('ram-form-factor', 2),

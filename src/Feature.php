@@ -58,6 +58,7 @@ class Feature {
 		'os-license-version' => self::STRING,
 		'power-idle-pfc' => self::STRING,
 		'firewire-ports-n' => self::INTEGER,
+		'mini-firewire-ports-n' => self::INTEGER,
 		'serial-ports-n' => self::INTEGER,
 		'parallel-ports-n' => self::INTEGER,
 		'ram-form-factor' => ['simm' => true, 'dimm' => true, 'sodimm' => true, 'minidimm' => true, 'microdimm' => true, 'fbdimm' => true],
