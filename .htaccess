@@ -1,10 +1,13 @@
 RewriteEngine On
 # RewriteCond %{REQUEST_FILENAME} !-f
 # RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !^(.*)\.(css|js)$
+# RewriteCond %{REQUEST_FILENAME} !^(.*)\.(css|js)$
 
 # Send v1 API requests to server
 RewriteRule ^v1/(.*)$ index.php/v1/$1 [QSA,L]
+# This shouldn't exist, but it does.
+RewriteRule ^ssr/main.css$ SSRv1/main.css [QSA,L]
+RewriteRule ^ssr/(.*)$ index.php/$1 [QSA,L]
 
 # When rewriting an URI, it's parsed again so falls into 404 unless we stop it...
 # However, this doesn't work, nothing works, there's nothing to be done.

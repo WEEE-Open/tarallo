@@ -51,7 +51,7 @@ class Request {
 			throw new \LogicException('Cannot find PATH_INFO');
 		}
 
-		if(isset($_SERVER['QUERY_STRING'])) {
+		if(isset($_SERVER['QUERY_STRING']) && $_SERVER['QUERY_STRING'] !== "") {
 			parse_str($_SERVER['QUERY_STRING'], $querystring);
 			if(empty($querystring)) {
 				$querystring = null;
@@ -62,7 +62,26 @@ class Request {
 
 		if(isset($_SERVER['CONTENT_TYPE'])) {
 			$contentType = self::reverseNegotiateContent($_SERVER['CONTENT_TYPE']);
-			$rawcontents = file_get_contents("php://input");
+			if($contentType === 'application/x-www-form-urlencoded') {
+				// Form with method = POST
+				$rawcontents = null;
+				parse_str(file_get_contents("php://input"), $querystring2);
+				// POSTed some data?
+				if(!empty($querystring2)) {
+					if(empty($querystring)) {
+						// There was nothing before: replace
+						$querystring = $querystring2;
+					} else {
+						// There was already something: merge
+						$querystring = array_merge($querystring, $querystring2);
+					}
+				}
+				// Avoid chaos and destruction
+				unset($querystring2);
+			} else {
+				// JSON
+				$rawcontents = file_get_contents("php://input");
+			}
 		} else {
 			// GET request
 			$contentType = null;
@@ -110,16 +129,16 @@ class Request {
 	}
 
 	private static function reverseNegotiateContent(string $content): string {
-		$negotiator = new Negotiator();
-		$supported = 'application/json; text/html;';
-		$contentType = $negotiator->getBest($supported, [$content]);
+		//$negotiator = new Negotiator();
+		//$supported = 'application/json; text/html; application/x-www-form-urlencoded;';
+		//$contentType = $negotiator->getBest($supported, [$content]);
 
-		if($contentType === null) {
-			throw new \RuntimeException('Content type ' . $content . ' not supported');
-		} else {
-			// Taken straight from the example: undefined method. But it's there, so ignore the warning.
-			/** @noinspection PhpUndefinedMethodInspection */
-			return $contentType->getType();
+		switch($content) {
+			case 'application/json':
+			case 'application/x-www-form-urlencoded':
+				return $content;
 		}
+
+		throw new \RuntimeException('Content type ' . $content . ' not supported');
 	}
 }
