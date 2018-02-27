@@ -60,7 +60,7 @@ class Request {
 			$querystring = null;
 		}
 
-		if(isset($_SERVER['CONTENT_TYPE'])) {
+		if(isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] !== '') {
 			$contentType = self::reverseNegotiateContent($_SERVER['CONTENT_TYPE']);
 			if($contentType === 'application/x-www-form-urlencoded') {
 				// Form with method = POST
