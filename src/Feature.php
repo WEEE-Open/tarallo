@@ -46,9 +46,9 @@ class Feature {
 		'power-idle-watt' => self::INTEGER,
 		'power-rated-watt' => self::INTEGER,
 		'ps2-ports-n' => self::INTEGER,
-		'psu-ampere' => self::INTEGER,
+		'psu-ampere' => self::DOUBLE,
 		'psu-connector-motherboard' => ['proprietary' => true, 'at' => true, 'atx-20pin' => true, 'atx-24pin' => true, 'atx-20pin-aux' => true],
-		'psu-volt' => self::INTEGER,
+		'psu-volt' => self::DOUBLE,
 		'ram-type' => ['simm' => true, 'edo' => true, 'sdr' => true, 'ddr' => true, 'ddr2' => true, 'ddr3' => true, 'ddr4' => true],
 		'sata-ports-n' => self::INTEGER,
 		'software' => self::STRING,
@@ -219,7 +219,7 @@ class Feature {
 				}
 				break;
 			case self::DOUBLE:
-				if(!is_int($value)) {
+				if(!is_double($value)) {
 					throw new \InvalidArgumentException('Feature value for ' . $name . ' must be double, ' . gettype($value) . ' given');
 				}
 				if($value < 0) {

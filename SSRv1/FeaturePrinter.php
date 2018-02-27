@@ -16,7 +16,7 @@ class FeaturePrinter {
 	 */
 	public static function prettyPrint(Feature $feature): string {
 		$unit = self::getUnit($feature);
-		$usePrefix = self::usePrefix($feature);
+		$usePrefix = self::usePrefix($unit);
 
 		if(!$usePrefix) {
 			return $feature->value . ' ' . $unit;

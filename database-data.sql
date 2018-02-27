@@ -43,9 +43,9 @@ INSERT INTO `Feature` (`Feature`, `Type`) VALUES
 	('power-idle-watt', 1),
 	('power-rated-watt', 1),
 	('ps2-ports-n', 1),
-	('psu-ampere', 1),
+	('psu-ampere', 3),
 	('psu-connector-motherboard', 2), -- use sata-ports-n and pcie-power-pin-n for that stuff
-	('psu-volt', 1),
+	('psu-volt', 3),
 	('ram-type', 2),
 	('sata-ports-n', 1),
 	('software', 0),
