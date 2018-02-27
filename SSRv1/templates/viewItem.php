@@ -5,11 +5,11 @@ $this->layout('internalPage', ['title' => 'Visualizza', 'user' => $user]) ?>
 
 <article class="item">
 	<section class="breadbox">
-		<nav class="breadcrumbs">
-			<?php foreach(array_reverse($item->getPath()) as $piece): ?>
+		<ul class="breadcrumbs">
+			<?php foreach($item->getPath() as $piece): ?>
 				<li><a href="/item/<?= $this->u($piece) ?>"><?= $this->e($piece) ?></a></li>
 			<?php endforeach; ?>
-		</nav>
+		</ul>
 		<!--<div class="breadsetter"><label>Set parent: <input></label></div>-->
 	</section>
 
