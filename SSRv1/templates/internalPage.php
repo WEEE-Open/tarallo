@@ -3,6 +3,7 @@
 /** @var string $title */
 $this->layout('main', ['title' => $title]) ?>
 
+<?php if(isset($user)): ?>
 <nav id="top">
 	<nav>
 		<span class="message">Logged in as <?= $user->getUsername() ?></span><button class="logout">Logout</button>
@@ -26,6 +27,7 @@ $this->layout('main', ['title' => $title]) ?>
 		<button>Sposta</button>
 	</nav>
 </nav>
+<?php endif ?>
 
 <section id="content">
 	<?=$this->section('content')?>
