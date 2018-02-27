@@ -25,7 +25,7 @@ $this->layout('internalPage', ['title' => 'Visualizza', 'user' => $user]) ?>
 				<h2>All features (no grouping, yet)</h2>
 				<ul>
 			<?php foreach($item->getCombinedFeatures() as $feature): ?>
-				<li><div><?= $feature->name ?></div><div><?= $feature->value ?></div></li>
+				<li><div><?= $feature->name ?></div><div><?= $this->printFeatureValue($feature) ?></div></li>
 			<?php endforeach; ?>
 				</ul>
 			</section>

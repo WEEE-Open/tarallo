@@ -6,6 +6,7 @@ use FastRoute;
 use League\Plates\Engine;
 use League\Plates\Extension\URI;
 use WEEEOpen\Tarallo\Server\Database\Database;
+use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
@@ -80,6 +81,17 @@ class Adapter implements AdapterInterface {
 		$engine->loadExtension(new URI($request->path));
 		$engine->registerFunction('u', function($component) {
 			return rawurlencode($component);
+		});
+		$engine->registerFunction('printFeatureValue', function(Feature $feature) {
+			if($feature->type === Feature::INTEGER || $feature->type === Feature::DOUBLE) {
+				try {
+					return FeaturePrinter::prettyPrint($feature);
+				} catch(\InvalidArgumentException $ignored) {
+
+				}
+			}
+
+			return $feature->value;
 		});
 
 		// TODO: use cachedDispatcher
