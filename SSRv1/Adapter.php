@@ -86,7 +86,7 @@ class Adapter implements AdapterInterface {
 		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 			$r->get('/', 'getHome');
 			$r->get('/home', 'getHome');
-			$r->get('/item/{code}', 'getItem');
+			$r->get('/item/{id}', 'getItem');
 			$r->addRoute(['GET', 'POST'], '/login', 'login');
 		});
 

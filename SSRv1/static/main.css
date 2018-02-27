@@ -113,6 +113,11 @@ nav#main ul li {
 	position: relative;
 }
 
+.httperror strong {
+	font-weight: normal;
+	font-size: 30vw;
+}
+
 .info.message {
 	color: #00529B;
 	background-color: #BDE5F8;
