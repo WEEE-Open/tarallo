@@ -80,6 +80,7 @@ INSERT INTO `Feature` (`Feature`, `Type`) VALUES
 	('rca-mono-ports-n', 1),
 	('tv-out-ports-n', 1),
 	('s-video-ports-n', 1),
+	('s-video-7pin-ports-n', 1),
 	('composite-video-ports-n', 1),
 	('serial-db25-ports-n', 1), -- DB-25 serial ports
 	('isa-sockets-n', 1),

@@ -83,6 +83,7 @@ class Feature {
 		'rca-mono-ports-n' => self::INTEGER,
 		'tv-out-ports-n' => self::INTEGER,
 		's-video-ports-n' => self::INTEGER,
+		's-video-7pin-ports-n' => self::INTEGER,
 		'composite-video-ports-n' => self::INTEGER,
 		'serial-db25-ports-n' => self::INTEGER,
 		'isa-sockets-n' => self::INTEGER,
