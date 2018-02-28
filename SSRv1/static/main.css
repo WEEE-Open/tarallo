@@ -136,6 +136,10 @@ nav#main ul li {
 	background-color: #FFBABA;
 }
 
+.breadbox {
+	margin: .5em .5em 0 .5em;
+}
+
 ul.breadcrumbs {
 	margin: 0;
 	padding: 0;
@@ -188,6 +192,10 @@ ul.breadcrumbs li:not(:first-child)::before {
 
 .item + .item {
 	margin-top: 2.5em;
+}
+
+.breadbox + .item {
+	margin-top: 0;
 }
 
 .item:not(.head) {
