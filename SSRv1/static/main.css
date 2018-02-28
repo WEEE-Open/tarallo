@@ -4,7 +4,7 @@ html, body {
 	padding: 0;
 }
 
-header {
+header#title {
 	margin: 0;
 	padding: 0.5em;
 	background-color: #333;
@@ -12,13 +12,13 @@ header {
 	border-bottom: 1px solid #ccc;
 }
 
-header h1 {
+header#title h1 {
 	margin: 0 0.5rem 0 0;
 	font-size: x-large;
 	display: inline-block;
 }
 
-header p {
+header#title p {
 	margin: 0.5rem 0 0 0;
 	font-size: small;
 	display: inline-block;
@@ -187,6 +187,49 @@ ul.breadcrumbs li:not(:first-child)::before {
 	background-color: #333;
 }
 
+.item h2 {
+	margin: 0;
+	padding: 0.32em;
+	font-size: x-large;
+	background-color: #333;
+	color: #eee;
+}
+
+.features section h3 {
+	margin: 0;
+	font-size: 100%;
+	font-weight: bold;
+	color: #333;
+}
+
+.item > .features, .item > .subitems {
+	padding: 0.32em;
+}
+
+.item .features ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: table;
+}
+
+.item .features ul li {
+	padding: 0;
+	margin: 0;
+	height: 100%;
+	display: table-row;
+}
+
+.item .features ul li div.name {
+	max-width: 20em;
+	text-align: right;
+	display: table-cell;
+}
+
+.item .features ul li div.value {
+	display: table-cell;
+}
+
 .item.working.yes {
 	border-color: #4F8A10;
 	box-shadow: 0 0 0.3em 0.2em #DFF2BF;
@@ -202,12 +245,8 @@ ul.breadcrumbs li:not(:first-child)::before {
 	box-shadow: 0 0 0.3em 0.2em #FFBABA;
 }
 
-.item > .features {
-	margin-top: 1em;
-	margin-bottom: 1em;
-	display: table;
-	box-sizing: border-box;
-	width: 100%;
+.subitems .item {
+	margin-left: .2em;
 }
 
 .itembuttons {
