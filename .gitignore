@@ -1,4 +1,4 @@
 .idea
 vendor/
 db.php
-riassunto_del_db.txt
+*.mo

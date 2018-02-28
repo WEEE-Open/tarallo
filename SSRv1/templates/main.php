@@ -2,7 +2,7 @@
 /** @var string $title */
 ?>
 <!doctype html>
-<html lang="it"><!-- TODO: set language -->
+<html lang="<?= $this->language ?>">
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -14,7 +14,7 @@
 </head>
 <body>
 
-<header>
+<header id="title">
 	<h1>T.A.R.A.L.L.O.</h1>
 	<p>Trabiccolo Amministrazione Rottami e Assistenza, Legalmente-noto-come L'inventario Opportuno</p>
 </header>

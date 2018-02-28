@@ -76,8 +76,10 @@ class Adapter implements AdapterInterface {
 		$uri = $request->path;
 		$querystring = $request->querystring;
 
+		Localizer::localize($request->language);
+
 		$engine = new Engine(__DIR__ . DIRECTORY_SEPARATOR . 'templates');
-		$engine->addData(['lang' => 'it']); // TODO: lang
+		$engine->addData(['lang' => $request->language]);
 		$engine->loadExtension(new URI($request->path));
 		$engine->registerFunction('u', function($component) {
 			return rawurlencode($component);

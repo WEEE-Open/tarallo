@@ -111,7 +111,7 @@ class Request {
 	}
 
 	private static function negotiateLanguage(string $languages = null): string {
-		$supported = ['en', 'it'];
+		$supported = ['en-US', 'it-IT'];
 
 		if($languages === null) {
 			return $supported[0];
