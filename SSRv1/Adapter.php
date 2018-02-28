@@ -144,7 +144,7 @@ class Adapter implements AdapterInterface {
 		}
 
 		// self is the routed path thingamajig
-		$engine->addData(['lang' => 'it', 'user' => $user, 'self' => $uri]);
+		$engine->addData(['user' => $user, 'self' => $uri]);
 
 		try {
 			try {

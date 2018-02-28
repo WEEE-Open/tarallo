@@ -23,7 +23,7 @@ if(!isset($recursion) || $recursion === false)
 		$features = $item->getCombinedFeatures();
 		if(count($features) > 0): ?>
 			<section>
-				<h3><?=_('All features (no grouping, yet)')?></h3>
+				<h3>All features (no grouping yet)</h3>
 				<ul>
 					<?php foreach($item->getCombinedFeatures() as $feature): ?>
 						<li>

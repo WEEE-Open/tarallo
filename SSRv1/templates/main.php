@@ -1,8 +1,9 @@
 <?php
 /** @var string $title */
+/** @var string $lang */
 ?>
 <!doctype html>
-<html lang="<?= $this->language ?>">
+<html lang="<?= /* $lang */ 'en-US' ?>">
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="x-ua-compatible" content="ie=edge">

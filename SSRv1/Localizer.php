@@ -14,10 +14,15 @@ class Localizer {
 			$locale = $locale[0] . '_' . strtoupper($locale[1]);
 		}
 
-		putenv("LC_ALL=$locale.UTF-8");
-		setlocale(LC_ALL, "$locale.UTF-8");
+		$domain = 'tarallo';
+		$directory = __DIR__ . DIRECTORY_SEPARATOR . 'locale';
 
-		bindtextdomain("tarallo", __DIR__ . DIRECTORY_SEPARATOR . "locale");
-		textdomain("tarallo");
+		// putenv is probably not necessary
+		putenv("LC_ALL=$locale.utf8");
+		setlocale(LC_ALL, "$locale.utf8");
+
+		bindtextdomain($domain, $directory);
+		bind_textdomain_codeset($domain, 'UTF-8');
+		textdomain($domain);
 	}
 }
