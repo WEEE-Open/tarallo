@@ -136,11 +136,6 @@ nav#main ul li {
 	background-color: #FFBABA;
 }
 
-.item {
-	padding: 0.5em;
-	margin-bottom: 2em;
-}
-
 ul.breadcrumbs {
 	margin: 0;
 	padding: 0;
@@ -187,6 +182,18 @@ ul.breadcrumbs li:not(:first-child)::before {
 	background-color: #333;
 }
 
+.item {
+	margin: .5em .5em .5em .5em;
+}
+
+.item + .item {
+	margin-top: 2.5em;
+}
+
+/*.item:not(.head) {
+	border-left: .1em solid #333;
+}*/
+
 .item h2 {
 	margin: 0;
 	padding: 0.32em;
@@ -196,7 +203,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 }
 
 .features section h3 {
-	margin: 0;
+	margin: 0 0 .2em 0;
 	font-size: 100%;
 	font-weight: bold;
 	color: #333;
@@ -214,14 +221,18 @@ ul.breadcrumbs li:not(:first-child)::before {
 }
 
 .item .features ul li {
-	padding: 0;
-	margin: 0;
 	height: 100%;
 	display: table-row;
 }
 
+.item .features div {
+	padding: .2em 0;
+}
+
 .item .features ul li div.name {
 	max-width: 20em;
+	padding-right: 1em;
+	color: #555;
 	text-align: right;
 	display: table-cell;
 }
@@ -230,17 +241,17 @@ ul.breadcrumbs li:not(:first-child)::before {
 	display: table-cell;
 }
 
-.item.working.yes {
+.item.working.yes > header > h2 {
 	border-color: #4F8A10;
 	box-shadow: 0 0 0.3em 0.2em #DFF2BF;
 }
 
-.item.working.maybe {
+.item.working.maybe > header > h2 {
 	border-color: #9F6000;
 	box-shadow: 0 0 0.3em 0.2em #FEEFB3;
 }
 
-.item.working.no {
+.item.working.no > header > h2 {
 	border-color: #D8000C;
 	box-shadow: 0 0 0.3em 0.2em #FFBABA;
 }
