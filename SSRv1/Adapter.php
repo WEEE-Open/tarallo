@@ -91,9 +91,14 @@ class Adapter implements AdapterInterface {
 				} catch(\InvalidArgumentException $ignored) {
 
 				}
+			} else if($feature->type === Feature::ENUM) {
+				return Localizer::printableValue($feature);
 			}
 
 			return $feature->value;
+		});
+		$engine->registerFunction('printFeatureName', function(Feature $feature) {
+			return Localizer::printableName($feature);
 		});
 
 		// TODO: use cachedDispatcher

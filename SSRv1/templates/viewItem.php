@@ -29,29 +29,32 @@ if(isset($features['working'])) {
 
 ?>
 
+<nav class="breadbox">
+	<ul class="breadcrumbs">
+		<?php foreach($item->getPath() as $piece): ?>
+			<li><a href="/item/<?=$this->u($piece)?>"><?=$this->e($piece)?></a></li>
+		<?php endforeach; ?>
+	</ul>
+	<!--<div class="breadsetter"><label>Set parent: <input></label></div>-->
+</nav>
 <article class="item <?= $recursion ? '' : 'head' ?> <?= $working ?>">
-	<nav class="breadbox">
-		<ul class="breadcrumbs">
-			<?php foreach($item->getPath() as $piece): ?>
-				<li><a href="/item/<?=$this->u($piece)?>"><?=$this->e($piece)?></a></li>
-			<?php endforeach; ?>
-		</ul>
-		<!--<div class="breadsetter"><label>Set parent: <input></label></div>-->
-	</nav>
-
 	<header>
-		<h2><?=$this->e($item->getCode())?></h2>
+		<h2 id="code-<?= $this->e($item->getCode()) ?>"><?=$this->e($item->getCode())?></h2>
 	</header>
+
+	<nav class="itembuttons">
+		<button class="edit">🛠️&nbsp;Edit</button><button class="delete">❌&nbsp;Delete</button>
+	</nav>
 
 	<section class="features">
 		<?php
 		if(count($features) > 0): ?>
-			<section>
+			<section class="remaining">
 				<h3>All features (no grouping yet)</h3>
 				<ul>
 					<?php foreach($features as $feature): ?>
 						<li>
-							<div class="name"><?=$feature->name?></div>
+							<div class="name"><?=$this->printFeatureName($feature)?></div>
 							<div class="value"><?=$this->printFeatureValue($feature)?></div>
 						</li>
 					<?php endforeach; ?>

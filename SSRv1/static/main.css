@@ -190,16 +190,19 @@ ul.breadcrumbs li:not(:first-child)::before {
 	margin-top: 2.5em;
 }
 
-/*.item:not(.head) {
-	border-left: .1em solid #333;
-}*/
+.item:not(.head) {
+	border: .1em solid #ccc;
+}
 
 .item h2 {
 	margin: 0;
-	padding: 0.32em;
 	font-size: x-large;
 	background-color: #333;
 	color: #eee;
+}
+
+.item h2, .item .features {
+	padding: 0.32em;
 }
 
 .features section h3 {
@@ -210,7 +213,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 }
 
 .item > .features, .item > .subitems {
-	padding: 0.32em;
+	padding: 0.6rem;
 }
 
 .item .features ul {
@@ -226,7 +229,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 }
 
 .item .features div {
-	padding: .2em 0;
+	padding: .3em 0;
 }
 
 .item .features ul li div.name {
@@ -241,18 +244,21 @@ ul.breadcrumbs li:not(:first-child)::before {
 	display: table-cell;
 }
 
-.item.working.yes > header > h2 {
-	border-color: #4F8A10;
+.item.working.yes /*> header > h2*/ {
+	/*border-color: #4F8A10;*/
+	border-color: #DFF2BF;
 	box-shadow: 0 0 0.3em 0.2em #DFF2BF;
 }
 
-.item.working.maybe > header > h2 {
-	border-color: #9F6000;
+.item.working.maybe /*> header > h2*/ {
+	/*border-color: #9F6000;*/
+	border-color: #FEEFB3;
 	box-shadow: 0 0 0.3em 0.2em #FEEFB3;
 }
 
-.item.working.no > header > h2 {
-	border-color: #D8000C;
+.item.working.no /*> header > h2*/ {
+	/*border-color: #D8000C;*/
+	border-color: #FFBABA;
 	box-shadow: 0 0 0.3em 0.2em #FFBABA;
 }
 
