@@ -159,14 +159,14 @@ final class ItemDAO extends DAO {
 	/**
 	 * Get a single item (and its content)
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemIncomplete $itemToGet
 	 * @param string|null $token
 	 * @param int $depth max depth
 	 *
 	 * @return Item
 	 */
-	public function getItem(ItemIncomplete $item, $token = null, $depth = 10) {
-		if($token !== null && !$this->checkToken($item, $token)) {
+	public function getItem(ItemIncomplete $itemToGet, $token = null, $depth = 10) {
+		if($token !== null && !$this->checkToken($itemToGet, $token)) {
 			throw new NotFoundException();
 		}
 
@@ -191,20 +191,20 @@ EOQ
 		 */
 		$flat = [];
 
-		$head = new Item($item->getCode());
-		$item = null;
-
 		try {
-			if(!$this->getItemStatement->execute([$head->getCode(), $depth])) {
+			if(!$this->getItemStatement->execute([$itemToGet->getCode(), $depth])) {
 				throw new DatabaseException('Query failed for no reason');
 			}
 
 			// First Item is the head Item
 			if(($row = $this->getItemStatement->fetch(\PDO::FETCH_ASSOC)) === false) {
 				throw new NotFoundException();
+			} else {
+				// Now we have the real code, with correct case (database is case-insensitive)
+				$head = new Item($row['Code']);
+				$flat[$head->getCode()] = $head;
+				$itemToGet = null;
 			}
-
-			$flat[$head->getCode()] = $head;
 
 			// Other items
 			while(($row = $this->getItemStatement->fetch(\PDO::FETCH_ASSOC)) !== false) {
