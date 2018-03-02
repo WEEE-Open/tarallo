@@ -89,6 +89,8 @@ INSERT INTO `Feature` (`Feature`, `Type`) VALUES
 	('brand-reseller', 0), -- Brand (reseller) -- TODO: turn it the other way round, use "Brand (manufacturer)"
 	('psu-form-factor', 2), -- Form factor (PSU) --
 	('cib-old', 0), -- CIB (old) --
+	('integrated-graphics-brand', 0), -- Integrated graphics brand -- TODO: replace with brand & model, once namespaced features are implemented
+	('integrated-graphics-model', 0), -- Integrated graphics model --
 	('restrictions', 2), -- Restrictions --
 	('displayport-ports-n', 1), -- Ports: DisplayPort --
 	('pci-low-profile', 2), -- PCI low profile --
@@ -130,6 +132,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('type', 'inventoried-object'), -- Other (with invetory sticker) --
 	('type', 'adapter'), -- Adapter --
 	('type', 'usbhub'), -- USB hub --
+	('type', 'tv-card'), -- TV tuner card --
 	('working', 'no'), -- No --
 	('working', 'yes'), -- Yes --
 	('working', 'maybe'), -- Maybe (unclear) --
@@ -162,6 +165,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('motherboard-form-factor', 'miniitx'), -- Mini ITX --
 	('motherboard-form-factor', 'proprietary'), -- Proprietary (desktop) --
 	('motherboard-form-factor', 'btx'), -- BTX --
+	('motherboard-form-factor', 'wtx'), -- WTX --
 	('motherboard-form-factor', 'flexatx'), -- Flex ATX --
 	('motherboard-form-factor', 'proprietary-laptop'), -- Laptop -- Who knows, maybe distinguishing proprietary motherboards between desktops and laptops will turn out to be useful...
 	('motherboard-form-factor', 'eatx'), -- Extended ATX --
@@ -195,6 +199,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'socket479m'), -- 479 (mobile, socket M) --
 	('cpu-socket', 'socket495'), -- 495 --
 	('cpu-socket', 'socket603'), -- 603 --
+	('cpu-socket', 'socket615'), -- 615 --
 	('cpu-socket', 'socket754'), -- 754 --
 	('cpu-socket', 'socket940'), -- 940 --
 	('cpu-socket', 'socket939'), -- 939 --
@@ -297,7 +302,8 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('pci-low-profile', 'yes'), -- Yes (low profile only) --
 	('psu-connector-cpu', 'none'), -- None --
 	('psu-connector-cpu', '4pin'), -- 4 pin --
-	('psu-connector-cpu', '6pin'), -- 6 pin (proprietary?) -- well, it exists and it's not a PCIe power connector.
+	('psu-connector-cpu', '6pin-hp'), -- 6 pin (HP proprietary) -- 2 black, 2 yellow, 1 purple, 1 blue
+	('psu-connector-cpu', '6pin'), -- 6 pin (not standard) --
 	('psu-connector-cpu', '8pin'), -- 8 pin --
 	('psu-connector-cpu', 'proprietary'); -- Proprietary --
 -- TRUNCATE `Codes`;
