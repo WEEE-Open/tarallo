@@ -1,15 +1,6 @@
-DROP FUNCTION IF EXISTS GenerateCode;
-DROP PROCEDURE IF EXISTS SetUser;
-DROP FUNCTION IF EXISTS GetParent;
-DROP TRIGGER IF EXISTS SearchResultsDelete;
-DROP TRIGGER IF EXISTS SearchResultsUpdate;
-DROP TRIGGER IF EXISTS SearchResultsInsert;
-DROP TRIGGER IF EXISTS SetRealSearchResultTimestampBecauseMySQLCant;
-DROP PROCEDURE IF EXISTS RefreshSearch;
-
 DELIMITER $$
 -- Now we're getting real.
-CREATE FUNCTION GenerateCode(currentPrefix varchar(20))
+CREATE OR REPLACE FUNCTION GenerateCode(currentPrefix varchar(20))
 	RETURNS varchar(190)
 MODIFIES SQL DATA
 	-- This means that in two identical databases, with the same values everywhere, the function produces the same
@@ -55,14 +46,14 @@ DETERMINISTIC
 	END$$
 
 -- TODO: extend and use to log in?
-CREATE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
+CREATE OR REPLACE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
 	BEGIN
 		SET @taralloAuditUsername = username;
 	END$$
 
 -- Tree ------------------------------------------------------------------------
 
-CREATE FUNCTION GetParent(child varchar(100))
+CREATE OR REPLACE FUNCTION GetParent(child varchar(100))
 	RETURNS varchar(100)
 READS SQL DATA
 DETERMINISTIC
@@ -79,16 +70,16 @@ DETERMINISTIC
 -- Search ----------------------------------------------------------------------
 
 -- Delete items from search results, when deleting from database
-CREATE TRIGGER ItemDeleteSearchIntegrity
+CREATE OR REPLACE TRIGGER ItemDeleteSearchIntegrity
 	AFTER DELETE
 	ON Item
 	FOR EACH ROW
 	BEGIN
-		DELETE * FROM SearchResult WHERE Code=OLD.Code;
+		DELETE FROM SearchResult WHERE Code=OLD.Code;
 	END $$
 
 -- Update item codes in search results, when changing code
-CREATE TRIGGER ItemUpdateSearchIntegrity
+CREATE OR REPLACE TRIGGER ItemUpdateSearchIntegrity
 	AFTER UPDATE
 	ON Item
 	FOR EACH ROW
@@ -100,7 +91,7 @@ CREATE TRIGGER ItemUpdateSearchIntegrity
 	END $$
 
 -- Update results counter when deleting a search result
-CREATE TRIGGER SearchResultsDelete
+CREATE OR REPLACE TRIGGER SearchResultsDelete
 	AFTER DELETE
 	ON SearchResult
 	FOR EACH ROW -- MySQL doesn't have statement-level triggers. Excellent piece of software, I must say.
@@ -112,7 +103,7 @@ CREATE TRIGGER SearchResultsDelete
 	END $$
 
 -- Update results counter when "renaming" a search (which should never happen, but still...)
-CREATE TRIGGER SearchResultsUpdate
+CREATE OR REPLACE TRIGGER SearchResultsUpdate
 	AFTER UPDATE -- Also can't specify UPDATE of what.
 	ON SearchResult
 	FOR EACH ROW
@@ -132,7 +123,7 @@ CREATE TRIGGER SearchResultsUpdate
 	END $$
 
 -- Update results counter when inserting new search results
-CREATE TRIGGER SearchResultsInsert
+CREATE OR REPLACE TRIGGER SearchResultsInsert
 	AFTER INSERT
 	ON SearchResult
 	FOR EACH ROW -- This may kill performance...
@@ -144,7 +135,7 @@ CREATE TRIGGER SearchResultsInsert
 	END $$
 
 -- Set default value for search expiration timestamp, just insert NULL and the trigger will do the rest
-CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
+CREATE OR REPLACE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
 	BEFORE INSERT
 	ON Search
 	FOR EACH ROW
@@ -153,7 +144,7 @@ CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
 	END $$
 
 -- Refresh expiration timestamp for a search. Already called by necessary triggers, call it when reading results or sorting, too.
-CREATE PROCEDURE RefreshSearch(id bigint UNSIGNED)
+CREATE OR REPLACE PROCEDURE RefreshSearch(id bigint UNSIGNED)
 	BEGIN
 		UPDATE Search SET Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP) WHERE Code = id;
 	END $$
