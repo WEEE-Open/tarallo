@@ -24,4 +24,4 @@
 	<label>into: <input class="to" type="text"></label>
 	<button>Move</button>
 </nav>
-<script src="main.js"></script>
+<script src="/main.js"></script>
