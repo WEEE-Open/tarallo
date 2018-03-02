@@ -60,6 +60,8 @@ CREATE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
 		SET @taralloAuditUsername = username;
 	END$$
 
+-- Tree ------------------------------------------------------------------------
+
 CREATE FUNCTION GetParent(child varchar(100))
 	RETURNS varchar(100)
 READS SQL DATA
@@ -74,6 +76,30 @@ DETERMINISTIC
 		RETURN found;
 	END$$
 
+-- Search ----------------------------------------------------------------------
+
+-- Delete items from search results, when deleting from database
+CREATE TRIGGER ItemDeleteSearchIntegrity
+	AFTER DELETE
+	ON Item
+	FOR EACH ROW
+	BEGIN
+		DELETE * FROM SearchResult WHERE Code=OLD.Code;
+	END $$
+
+-- Update item codes in search results, when changing code
+CREATE TRIGGER ItemUpdateSearchIntegrity
+	AFTER UPDATE
+	ON Item
+	FOR EACH ROW
+	BEGIN
+		IF(NEW.Code <> OLD.Code) THEN
+			UPDATE SearchResult SET Code = NEW.Code
+			WHERE Code = OLD.Code;
+		END IF;
+	END $$
+
+-- Update results counter when deleting a search result
 CREATE TRIGGER SearchResultsDelete
 	AFTER DELETE
 	ON SearchResult
@@ -85,6 +111,7 @@ CREATE TRIGGER SearchResultsDelete
 		WHERE Code = OLD.Search;
 	END $$
 
+-- Update results counter when "renaming" a search (which should never happen, but still...)
 CREATE TRIGGER SearchResultsUpdate
 	AFTER UPDATE -- Also can't specify UPDATE of what.
 	ON SearchResult
@@ -104,6 +131,7 @@ CREATE TRIGGER SearchResultsUpdate
 		END IF;
 	END $$
 
+-- Update results counter when inserting new search results
 CREATE TRIGGER SearchResultsInsert
 	AFTER INSERT
 	ON SearchResult
@@ -115,8 +143,8 @@ CREATE TRIGGER SearchResultsInsert
 		WHERE Code = NEW.Search;
 	END $$
 
+-- Set default value for search expiration timestamp, just insert NULL and the trigger will do the rest
 CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
-	-- Adds a default value for the field
 	BEFORE INSERT
 	ON Search
 	FOR EACH ROW
@@ -124,6 +152,7 @@ CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
 		SET NEW.Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP);
 	END $$
 
+-- Refresh expiration timestamp for a search. Already called by necessary triggers, call it when reading results or sorting, too.
 CREATE PROCEDURE RefreshSearch(id bigint UNSIGNED)
 	BEGIN
 		UPDATE Search SET Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP) WHERE Code = id;
