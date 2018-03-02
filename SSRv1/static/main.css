@@ -76,6 +76,10 @@ nav#top nav {
 	margin-bottom: .5em;
 }
 
+nav#top nav#main {
+	margin-bottom: 0;
+}
+
 nav#top nav .message {
 	padding: .5em;
 }
@@ -111,6 +115,19 @@ nav#main ul li {
 	height: 100%;
 	display: inline-block;
 	position: relative;
+}
+
+nav#top nav.quick {
+	display: none;
+}
+
+nav#top nav.quick.open {
+	display: block;
+	color: #eee;
+	background-color: #333;
+	margin-top: 0;
+	margin-bottom: 0;
+	padding: .5em;
 }
 
 .httperror strong {

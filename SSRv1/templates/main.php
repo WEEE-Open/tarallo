@@ -1,6 +1,7 @@
 <?php
 /** @var string $title */
 /** @var string $lang */
+/** @var \WEEEOpen\Tarallo\Server\User $user */
 ?>
 <!doctype html>
 <html lang="<?= /* $lang */ 'en-US' ?>">
@@ -20,7 +21,17 @@
 	<p>Trabiccolo Amministrazione Rottami e Assistenza, Legalmente-noto-come L'inventario Opportuno</p>
 </header>
 <section id="view">
-	<?=$this->section('content')?>
+	<?php if(isset($user) || $this->section('aftermenu')): ?>
+	<nav id="top">
+		<?php if(isset($user)):
+			echo $this->fetch('menu');
+		endif ?>
+		<?= $this->section('aftermenu', '') ?>
+	</nav>
+	<?php endif ?>
+	<section id="content">
+		<?=$this->section('content')?>
+	</section>
 </section>
 </body>
 </html>

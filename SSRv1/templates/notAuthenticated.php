@@ -2,8 +2,8 @@
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 /** @var string $title */
 /** @var string $self */
-$this->layout('main', ['title' => '403']) ?>
+$this->layout('main', ['title' => 'Authenticazion needed']) ?>
 
 <section id="content">
-	403, please log in
+	<p class="httperror"><strong>403</strong> <a href="/login">Please authenticate</a></p>
 </section>

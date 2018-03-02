@@ -3,7 +3,7 @@
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
 if(!isset($recursion) || $recursion === false) {
 	$recursion = false;
-	$this->layout('internalPage', ['title' => 'Visualizza', 'user' => $user]);
+	$this->layout('main', ['title' => 'Visualizza', 'user' => $user]);
 } else {
 	$recursion = true;
 }
