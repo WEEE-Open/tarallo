@@ -1,6 +1,7 @@
 <?php
 /** @var string $title */
 /** @var string $lang */
+/** @var boolean $itembuttons */
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 ?>
 <!doctype html>
@@ -33,5 +34,8 @@
 		<?=$this->section('content')?>
 	</section>
 </section>
+<?php if($itembuttons): ?>
+	<script src="/itembuttons.js"></script>
+<?php endif ?>
 </body>
 </html>

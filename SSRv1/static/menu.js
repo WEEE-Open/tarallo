@@ -6,7 +6,7 @@
 	let quickView = top.querySelector(".quick.view");
 	let quickMove = top.querySelector(".quick.move");
 
-	nav.addEventListener('click', function(ev) {
+	nav.addEventListener('click', ev => {
 		// noinspection JSUnresolvedVariable
 		if(!ev.target.classList || !ev.target.classList.contains('quick')) {
 			return true;

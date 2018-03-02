@@ -3,7 +3,7 @@
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
 if(!isset($recursion) || $recursion === false) {
 	$recursion = false;
-	$this->layout('main', ['title' => 'Visualizza', 'user' => $user]);
+	$this->layout('main', ['title' => 'Visualizza', 'user' => $user, 'itembuttons' => true]);
 } else {
 	$recursion = true;
 }
@@ -27,6 +27,13 @@ if(isset($features['working'])) {
 	unset($value);
 }
 
+$editing = $edit ?? false;
+
+if(isset($edit) && strtolower($edit) === strtolower($item->getCode())) {
+	$editingTarget = true;
+} else {
+	$editingTarget = false;
+}
 ?>
 
 <nav class="breadbox">
@@ -42,8 +49,12 @@ if(isset($features['working'])) {
 		<h2 id="code-<?= $this->e($item->getCode()) ?>"><?=$this->e($item->getCode())?></h2>
 	</header>
 
-	<nav class="itembuttons">
-		<button class="edit">🛠️&nbsp;Edit</button><button class="delete">❌&nbsp;Delete</button>
+	<nav class="itembuttons" data-for-item="<?= $this->e($item->getCode()) ?>">
+		<?php if($editing && $editingTarget): ?>
+			<button class="save">❌&nbsp;Save</button><button class="cancel">❌&nbsp;Save</button><button class="delete">❌&nbsp;Delete</button>
+		<?php elseif(!$editing): ?>
+			<button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button>
+		<?php endif ?>
 	</nav>
 
 	<section class="features">
