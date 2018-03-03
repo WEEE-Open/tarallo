@@ -60,6 +60,10 @@ class UltraFeature {
 			return 'Ports';
 		} else if(strpos($name, '-sockets-') > -1) {
 			return 'Sockets';
+		} else if(strpos($name, 'power-') > -1) {
+			return 'Power';
+		} else if(strpos($name, 'psu-') > -1) {
+			return 'Power';
 		} else if(substr($name, -5) === '-code') {
 			return 'Codes';
 		} else if(substr($name, 0,3) === 'cib') {
