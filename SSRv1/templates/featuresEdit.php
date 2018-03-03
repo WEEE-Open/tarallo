@@ -14,16 +14,18 @@ $groups = $this->getPrintableFeatures($features);
 				<?php foreach($group as $ultra): /** @var $ultra \WEEEOpen\Tarallo\SSRv1\UltraFeature */ ?>
 					<li>
 						<div class="name"><label for="feature-edit-<?= $ultra->feature->name ?>"><?=$ultra->name?></label></div>
-						<?php if($ultra->feature->type === \WEEEOpen\Tarallo\Server\Feature::ENUM): ?>
-							<select class="value" id="feature-edit-<?= $ultra->feature->name ?>">
+						<?php switch($ultra->feature->type): case \WEEEOpen\Tarallo\Server\Feature::ENUM: ?>
+							<select class="value" data-previous-value="<?= $this->e($ultra->feature->value, 'asTextContent')?>" id="feature-edit-<?= $ultra->feature->name ?>">
 								<?php foreach($this->getOptions($ultra->feature) as $optionValue => $optionName): ?>
 								<option value="<?= $optionValue ?>" <?= $optionValue === $ultra->feature->value ? 'selected' : '' ?>><?=$this->e($optionName)?></option>
 								<?php endforeach ?>
 							</select>
-						<?php else: ?>
-							<div class="value" data-internal-value="<?= $this->e($ultra->feature->value) ?>" id="feature-edit-<?= $ultra->feature->name ?>" contenteditable="true"><?=$this->contentEditableWrap($this->e($ultra->value))?></div>
-						<?php endif ?>
-							<div class="controls"><button>❌</button></div>
+						<?php break; default: case \WEEEOpen\Tarallo\Server\Feature::STRING: ?>
+							<div class="value" data-internal-type="s" data-internal-name="<?= $ultra->feature->name ?>" data-previous-value="<?= $this->e($ultra->feature->value, 'asTextContent') ?>" id="feature-edit-<?= $ultra->feature->name ?>" contenteditable="true"><?=$this->contentEditableWrap($this->e($ultra->value))?></div>
+						<?php break; case \WEEEOpen\Tarallo\Server\Feature::INTEGER:case \WEEEOpen\Tarallo\Server\Feature::DOUBLE: ?>
+							<div class="value" data-internal-type="n" data-internal-name="<?= $ultra->feature->name ?>" data-internal-value="<?= $ultra->feature->value ?>" data-previous-value="<?= $ultra->feature->value ?>" id="feature-edit-<?= $ultra->feature->name ?>" contenteditable="true"><?=$this->contentEditableWrap($this->e($ultra->value))?></div>
+						<?php endswitch; ?>
+							<div class="controls"><button data-name="<?= $ultra->feature->name ?>" class="delete">❌</button></div>
 					</li>
 				<?php endforeach; ?>
 			</ul>

@@ -18,6 +18,7 @@ class TemplateUtilities implements ExtensionInterface {
 		$engine->registerFunction('getPrintableFeatures', [$this, 'getPrintableFeatures']);
 		$engine->registerFunction('contentEditableWrap', [$this, 'contentEditableWrap']);
 		$engine->registerFunction('getOptions', [$this, 'getOptions']);
+		$engine->registerFunction('asTextContent', [$this, 'asTextContent']);
 	}
 
 	/**
@@ -40,10 +41,27 @@ class TemplateUtilities implements ExtensionInterface {
 		return $result;
 	}
 
-	public function contentEditableWrap(string $html) {
-		return '<p>' . str_replace(["\r\n", "\r", "\n"], '</p><p>', $html) . '</p>';
+	/**
+	 * Wrap text into paragraphs ("p" tags), to be used in contenteditable elements
+	 *
+	 * @param string $html
+	 *
+	 * @return string
+	 */
+	public function contentEditableWrap(string $html): string {
+		$paragraphed = '<p>' . str_replace(["\r\n", "\r", "\n"], '</p><p>', $html) . '</p>';
+		// According to the HTML spec, <p></p> should be ignored by browser.
+		// When inserting an empty line in a contenteditable element, Firefox adds <p><br></p>, so...
+		return str_replace('<p></p>', '<p><br></p>', $paragraphed);
 	}
 
+	/**
+	 * Get all options for an enum feature
+	 *
+	 * @param Feature $feature
+	 *
+	 * @return string[] Internal feature name => translated feature name
+	 */
 	public function getOptions(Feature $feature) {
 		$options = Feature::getOptions($feature);
 		foreach($options as $value => &$translated) {
@@ -51,5 +69,16 @@ class TemplateUtilities implements ExtensionInterface {
 		}
 		asort($options);
 		return $options;
+	}
+
+	/**
+	 * Convert a string into the representation that textContent would give. That is, remove newlines.
+	 *
+	 * @param string $something
+	 *
+	 * @return string
+	 */
+	public function asTextContent(string $something): string {
+		return str_replace(["\r\n", "\r", "\n"], '', $something);
 	}
 }

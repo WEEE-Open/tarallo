@@ -68,7 +68,6 @@ if(isset($edit)) {
 			<?php
 			$this->insert('featuresEdit', ['features' => $item->getFeatures(), 'featuresDefault' => $product === null ? [] : $product->getFeatures()]);
 			?>
-			<script>document.execCommand("defaultParagraphSeparator", false, "p");</script>
 		</section>
 
 		<section>
@@ -82,6 +81,7 @@ if(isset($edit)) {
 		<section class="product features">
 
 		</section>
+		<script src="/editor.js"></script>
 	<?php else: ?>
 		<section class="features">
 			<?php $this->insert('features', ['features' => $features]) ?>

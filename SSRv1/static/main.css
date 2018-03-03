@@ -254,8 +254,16 @@ ul.breadcrumbs li:not(:first-child)::before {
 	display: table-row;
 }
 
-.item:not(.editing) .features div {
+.item .features div {
 	padding: .3rem 0;
+}
+
+.item.editing :not(.subitems) .features div {
+	padding: .1rem;
+}
+
+.item.editing :not(.subitems) .features .changed {
+	border: .1em dotted red;
 }
 
 .item .features ul li .name {
