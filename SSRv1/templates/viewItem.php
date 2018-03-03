@@ -9,6 +9,7 @@ if(!isset($recursion) || $recursion === false) {
 }
 
 $features = $item->getCombinedFeatures();
+$product = $item->getProduct();
 
 // Too much logic in a template, blah bla blah... this templates renders an Item in every respect,
 // what would I gain by moving this logic outside and passing $works as a parameter? More code, scattering
@@ -27,12 +28,17 @@ if(isset($features['working'])) {
 	unset($value);
 }
 
-$editing = $edit ?? false;
-
-if(isset($edit) && strtolower($edit) === strtolower($item->getCode())) {
-	$editingTarget = true;
+$subitemParameters = ['recursion' => true];
+if(isset($edit)) {
+	$subitemParameters['edit'] = $edit;
+	$editing = true;
+	if(strtolower($edit) === strtolower($item->getCode())) {
+		$editingTarget = true;
+	} else {
+		$editingTarget = false;
+	}
 } else {
-	$editingTarget = false;
+	$editing = false;
 }
 ?>
 
@@ -51,34 +57,25 @@ if(isset($edit) && strtolower($edit) === strtolower($item->getCode())) {
 
 	<nav class="itembuttons" data-for-item="<?= $this->e($item->getCode()) ?>">
 		<?php if($editing && $editingTarget): ?>
-			<button class="save">❌&nbsp;Save</button><button class="cancel">❌&nbsp;Save</button><button class="delete">❌&nbsp;Delete</button>
+			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><button class="delete">❌&nbsp;Delete</button>
 		<?php elseif(!$editing): ?>
 			<button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button>
 		<?php endif ?>
 	</nav>
 
-	<section class="features">
-		<?php
-		if(count($features) > 0): ?>
-			<section class="remaining">
-				<h3>All features (no grouping yet)</h3>
-				<ul>
-					<?php foreach($features as $feature): ?>
-						<li>
-							<div class="name"><?=$this->printFeatureName($feature)?></div>
-							<div class="value"><?=$this->printFeatureValue($feature)?></div>
-						</li>
-					<?php endforeach; ?>
-				</ul>
-			</section>
-		<?php endif; ?>
-	</section>
+	<?php if($editing && $editingTarget) {
+		$this->insert('featuresEdit', ['features' => $item->getFeatures(), 'featuresDefault' => $product === null ? [] : $product->getFeatures()]);
+		?><script>document.execCommand("defaultParagraphSeparator", false, "p");</script><?php
+	} else {
+		$this->insert('features', ['features' => $features]);
+	}
+	?>
 
 	<section class="subitems">
 		<?php
 			$subitems = $item->getContents();
 			foreach($subitems as $subitem) {
-				$this->insert('viewItem', ['item' => $subitem, 'user' => $user, 'recursion' => true]);
+				$this->insert('viewItem', array_merge($subitemParameters, ['item' => $subitem]));
 			}
 		?>
 	</section>

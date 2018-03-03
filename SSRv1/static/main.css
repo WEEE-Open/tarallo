@@ -246,6 +246,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 	margin: 0;
 	padding: 0;
 	display: table;
+	width: 100%;
 }
 
 .item .features ul li {
@@ -257,16 +258,28 @@ ul.breadcrumbs li:not(:first-child)::before {
 	padding: .3em 0;
 }
 
-.item .features ul li div.name {
+.item .features ul li .name {
 	max-width: 20em;
 	padding-right: 1em;
 	color: #555;
 	text-align: right;
 	display: table-cell;
+	min-width: 10em;
 }
 
-.item .features ul li div.value {
+.item .features ul li .value {
 	display: table-cell;
+	width: 100%;
+	white-space: pre-wrap;
+}
+
+.item .features ul li .value[contenteditable] {
+	border-bottom: 0.1em dotted #ccc;
+}
+
+.item .features ul li .value p {
+	margin: 0;
+	padding: 0;
 }
 
 .item.working.yes /*> header > h2*/ {

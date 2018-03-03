@@ -30,9 +30,18 @@ class Adapter implements AdapterInterface {
 	): Response {
 		Validation::authorize($user);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+		$edit = isset($parameters['edit']) ? (string) $parameters['edit'] : null;
+		$add = isset($parameters['add']) ? (string) $parameters['add'] : null;
 
-		return new Response(200, 'text/html', $engine->render('viewItem',
-			['item' => $db->itemDAO()->getItem(new ItemIncomplete($id))]));
+		$renderParameters = ['item' => $db->itemDAO()->getItem(new ItemIncomplete($id))];
+		// These should be mutually exclusive
+		if($edit !== null) {
+			$renderParameters['edit'] = $edit;
+		} else if($add !== null) {
+			$renderParameters['add'] = $add;
+		}
+
+		return new Response(200, 'text/html', $engine->render('viewItem', $renderParameters));
 	}
 
 	private static function login(
@@ -100,12 +109,17 @@ class Adapter implements AdapterInterface {
 		$engine->registerFunction('printFeatureName', function(Feature $feature) {
 			return Localizer::printableName($feature);
 		});
+		$engine->registerFunction('makeEditable', function(string $html) {
+			return '<p>' . str_replace(["\r\n", "\r", "\n"], '</p><p>', $html) . '</p>';
+		});
 
 		// TODO: use cachedDispatcher
 		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 			$r->get('/', 'getHome');
 			$r->get('/home', 'getHome');
 			$r->get('/item/{id}', 'getItem');
+			$r->get('/item/{id}/add/{add}', 'getItem');
+			$r->get('/item/{id}/edit/{edit}', 'getItem');
 			$r->addRoute(['GET', 'POST'], '/login', 'login');
 		});
 
