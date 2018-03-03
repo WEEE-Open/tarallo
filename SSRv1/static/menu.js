@@ -27,6 +27,7 @@
 			bar.classList.remove("open")
 		} else {
 			bar.classList.add("open");
+			bar.querySelector('input').focus();
 		}
 	});
 
@@ -36,5 +37,13 @@
 			window.location.href = '/item/' + encodeURIComponent(code);
 		}
 	});
+
+
+	quickView.addEventListener('keydown', function(e) {
+		if(e.keyCode === 13) {
+			e.preventDefault();
+			quickView.querySelector('button').click();
+		}
+	})
 
 }());
