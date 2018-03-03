@@ -226,7 +226,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 	color: #eee;
 }
 
-.item h2, .item .features {
+.item h2 {
 	padding: 0.32em;
 }
 
@@ -237,7 +237,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 	color: #333;
 }
 
-.item > .features, .item > .subitems {
+.item > section {
 	padding: 0.6rem;
 }
 
@@ -254,8 +254,8 @@ ul.breadcrumbs li:not(:first-child)::before {
 	display: table-row;
 }
 
-.item .features div {
-	padding: .3em 0;
+.item:not(.editing) .features div {
+	padding: .3rem 0;
 }
 
 .item .features ul li .name {
@@ -271,6 +271,10 @@ ul.breadcrumbs li:not(:first-child)::before {
 	display: table-cell;
 	width: 100%;
 	white-space: pre-wrap;
+}
+
+.item .features ul li .controls {
+	display: table-cell;
 }
 
 /* Don't do this, as it also removes the blinking cursor in contenteditable areas */
