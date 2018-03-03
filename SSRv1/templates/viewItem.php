@@ -42,6 +42,7 @@ if(isset($edit)) {
 }
 ?>
 
+<?php if(!$recursion): ?>
 <nav class="breadbox">
 	<ul class="breadcrumbs">
 		<?php foreach($item->getPath() as $piece): ?>
@@ -50,6 +51,7 @@ if(isset($edit)) {
 	</ul>
 	<!--<div class="breadsetter"><label>Set parent: <input></label></div>-->
 </nav>
+<?php endif ?>
 <article class="item <?= $recursion ? '' : 'head' ?> <?= $working ?> <?= $editingTarget ? 'editing' : '' ?>">
 	<header>
 		<h2 id="code-<?= $this->e($item->getCode()) ?>"><?=$this->e($item->getCode())?></h2>
@@ -64,7 +66,7 @@ if(isset($edit)) {
 	</nav>
 
 	<?php if($editing && $editingTarget): ?>
-		<section class="own features">
+		<section class="own features editing">
 			<?php
 			$this->insert('featuresEdit', ['features' => $item->getFeatures(), 'featuresDefault' => $product === null ? [] : $product->getFeatures()]);
 			?>

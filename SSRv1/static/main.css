@@ -258,11 +258,11 @@ ul.breadcrumbs li:not(:first-child)::before {
 	padding: .3rem 0;
 }
 
-.item.editing :not(.subitems) .features div {
+.features.editing div {
 	padding: .1rem;
 }
 
-.item.editing :not(.subitems) .features .changed {
+.features.editing .changed {
 	border: .1em dotted red;
 }
 
