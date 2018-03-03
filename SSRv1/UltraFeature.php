@@ -60,8 +60,14 @@ class UltraFeature {
 			return 'Ports';
 		} else if(strpos($name, '-sockets-') > -1) {
 			return 'Sockets';
+		} else if(substr($name, -5) === '-code') {
+			return 'Codes';
+		} else if(substr($name, 0,3) === 'cib') {
+			return 'Codes';
+		} else if($name === 'os-license-version' || $name === 'sn') {
+			return 'Codes';
 		} else {
-			return 'Other';
+			return 'Features';
 		}
 	}
 }
