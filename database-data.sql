@@ -217,14 +217,13 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'lga2066'), -- LGA2066 --
 	('hdd-odd-form-factor', '5.25'), -- 5.25 in. --
 	('hdd-odd-form-factor', '3.5'), -- 3.5 in. --
-	('hdd-odd-form-factor', '2.5'), -- 2.5 in. -- TODO: remove, they're probably all 9.5 mm
 	('hdd-odd-form-factor', '2.5-15mm'), -- 2.5 in. (15 mm thick, uncommon) -- second number is the height in millimeters (these are specified as 15 but most common sizes, for both bays and drives, are 7 mm and 9.5 mm: the more you know...)
-	('hdd-odd-form-factor', 'm2'), -- M2 --
-	('hdd-odd-form-factor', 'm2.2'), -- M2.2 --
 	('hdd-odd-form-factor', '2.5-7mm'), -- 2.5 in. (7 mm thick) --
 	('hdd-odd-form-factor', '2.5-9.5mm'), -- 2.5 in. (9.5 mm thick) --
+	('hdd-odd-form-factor', 'm2'), -- M2 --
+	('hdd-odd-form-factor', 'm2.2'), -- M2.2 --
 	('hdd-odd-form-factor', 'laptop-odd-standard'), -- Laptop ODD (standard) -- to be replaced with actual name if we ever find what it is
-	('hdd-odd-form-factor', 'laptop-odd-slim'), -- Laptop ODD (slim, uncommon) -- I have no idea there was a difference: https://superuser.com/a/276241
+	('hdd-odd-form-factor', 'laptop-odd-slim'), -- Laptop ODD (slimmer, uncommon) -- I have no idea there was a difference: https://superuser.com/a/276241
 	('odd-type', 'cd-r'), -- CD-R --
 	('odd-type', 'cd-rw'), -- CD-RW --
 	('odd-type', 'dvd-r'), -- DVD-R --
