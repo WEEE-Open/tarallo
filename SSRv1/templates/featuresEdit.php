@@ -1,18 +1,19 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\Feature[] $features */
 /** @var \WEEEOpen\Tarallo\Server\Feature[] $featuresProduct */
-$features = $this->getPrintableFeatures($features);
-// TODO: same for $featuresProduct
+$groups = $this->getPrintableFeatures($features);
+// TODO: same for $featuresProduct.
 ?>
-<section class="features">
+<section class="features own">
 	<?php
-	if(count($features) > 0): ?>
-		<section class="remaining">
-			<h3>All features (no grouping yet)</h3>
+	if(count($features) > 0):
+		foreach($groups as $groupTitle => $group): ?>
+		<section>
+			<h3><?=$groupTitle?></h3>
 			<ul>
-				<?php foreach($features as $ultra): /** @var $ultra \WEEEOpen\Tarallo\SSRv1\UltraFeature */ ?>
+				<?php foreach($group as $ultra): /** @var $ultra \WEEEOpen\Tarallo\SSRv1\UltraFeature */ ?>
 					<li>
-						<div class="name"><label for="feature-edit-<?= $ultra->feature->name ?>"><?=$this->e($ultra->name)?></label></div>
+						<div class="name"><label for="feature-edit-<?= $ultra->feature->name ?>"><?=$ultra->name?></label></div>
 						<?php if($ultra->feature->type === \WEEEOpen\Tarallo\Server\Feature::ENUM): ?>
 							<select class="value" id="feature-edit-<?= $ultra->feature->name ?>">
 								<?php foreach($this->getOptions($ultra->feature) as $optionValue => $optionName): ?>
@@ -20,11 +21,19 @@ $features = $this->getPrintableFeatures($features);
 								<?php endforeach ?>
 							</select>
 						<?php else: ?>
-							<div class="value" id="feature-edit-<?= $ultra->feature->name ?>" contenteditable="true"><?=$this->contentEditableWrap($this->e($ultra->value))?></div>
+							<div class="value" data-internal-value="<?= $this->e($ultra->feature->value) ?>" id="feature-edit-<?= $ultra->feature->name ?>" contenteditable="true"><?=$this->contentEditableWrap($this->e($ultra->value))?></div>
 						<?php endif ?>
+							<div class="controls"><button>❌</button></div>
 					</li>
 				<?php endforeach; ?>
 			</ul>
 		</section>
-	<?php endif; ?>
+	<?php
+		endforeach;
+	endif;
+	?>
+</section>
+
+<section class="features default">
+
 </section>

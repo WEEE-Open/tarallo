@@ -23,14 +23,20 @@ class TemplateUtilities implements ExtensionInterface {
 	/**
 	 * @param Feature[] $features
 	 *
-	 * @return string[] Translated feature name => value
+	 * @return string[][] Translated group name => [Translated feature name => UltraFeature, ...]
 	 */
 	public function getPrintableFeatures(array $features) {
 		$result = [];
 		foreach($features as $feature) {
-			$result[$feature->name] = new \WEEEOpen\Tarallo\SSRv1\UltraFeature($feature, $this->template->data()->lang ?? 'en');
+			/** @noinspection PhpUndefinedMethodInspection It's there. */
+			$ultra = new UltraFeature($feature, $this->template->data()['lang'] ?? 'en');
+			$result[$ultra->group][$ultra->name] = $ultra;
 		}
 		ksort($result);
+		foreach($result as &$group) {
+			ksort($group);
+		}
+
 		return $result;
 	}
 
@@ -41,7 +47,7 @@ class TemplateUtilities implements ExtensionInterface {
 	public function getOptions(Feature $feature) {
 		$options = Feature::getOptions($feature);
 		foreach($options as $value => &$translated) {
-			$translated = \WEEEOpen\Tarallo\SSRv1\Localizer::printableValue($feature->name, $value);
+			$translated = Localizer::printableValue($feature->name, $value);
 		}
 		asort($options);
 		return $options;

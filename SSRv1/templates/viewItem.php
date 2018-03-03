@@ -50,7 +50,7 @@ if(isset($edit)) {
 	</ul>
 	<!--<div class="breadsetter"><label>Set parent: <input></label></div>-->
 </nav>
-<article class="item <?= $recursion ? '' : 'head' ?> <?= $working ?>">
+<article class="item <?= $recursion ? '' : 'head' ?> <?= $working ?> <?= $editingTarget ? 'editing' : '' ?>">
 	<header>
 		<h2 id="code-<?= $this->e($item->getCode()) ?>"><?=$this->e($item->getCode())?></h2>
 	</header>
@@ -63,13 +63,30 @@ if(isset($edit)) {
 		<?php endif ?>
 	</nav>
 
-	<?php if($editing && $editingTarget) {
-		$this->insert('featuresEdit', ['features' => $item->getFeatures(), 'featuresDefault' => $product === null ? [] : $product->getFeatures()]);
-		?><script>document.execCommand("defaultParagraphSeparator", false, "p");</script><?php
-	} else {
-		$this->insert('features', ['features' => $features]);
-	}
-	?>
+	<?php if($editing && $editingTarget): ?>
+		<section class="own features">
+			<?php
+			$this->insert('featuresEdit', ['features' => $item->getFeatures(), 'featuresDefault' => $product === null ? [] : $product->getFeatures()]);
+			?>
+			<script>document.execCommand("defaultParagraphSeparator", false, "p");</script>
+		</section>
+
+		<section>
+			<label>Feature:
+				<select>
+				<?php $this->insert('allFeatures') ?>
+				</select></label>
+			<button>Add</button>
+		</section>
+
+		<section class="product features">
+
+		</section>
+	<?php else: ?>
+		<section class="features">
+			<?php $this->insert('features', ['features' => $features]) ?>
+		</section>
+	<?php endif ?>
 
 	<section class="subitems">
 		<?php

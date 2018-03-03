@@ -5,6 +5,9 @@ namespace WEEEOpen\Tarallo\SSRv1;
 
 use WEEEOpen\Tarallo\Server\Feature;
 
+/**
+ * Pretty print feature values according to the SI (International System of Units), or something vaguely similar to the SI.
+ */
 class FeaturePrinter {
 	/**
 	 * Pretty print a feature value, with unit and multiples and whatnot
