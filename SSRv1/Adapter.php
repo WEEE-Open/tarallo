@@ -4,9 +4,7 @@ namespace WEEEOpen\Tarallo\SSRv1;
 
 use FastRoute;
 use League\Plates\Engine;
-use League\Plates\Extension\URI;
 use WEEEOpen\Tarallo\Server\Database\Database;
-use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
@@ -89,29 +87,8 @@ class Adapter implements AdapterInterface {
 
 		$engine = new Engine(__DIR__ . DIRECTORY_SEPARATOR . 'templates');
 		$engine->addData(['lang' => $request->language]);
-		$engine->loadExtension(new URI($request->path));
-		$engine->registerFunction('u', function($component) {
-			return rawurlencode($component);
-		});
-		$engine->registerFunction('printFeatureValue', function(Feature $feature) {
-			if($feature->type === Feature::INTEGER || $feature->type === Feature::DOUBLE) {
-				try {
-					return FeaturePrinter::prettyPrint($feature);
-				} catch(\InvalidArgumentException $ignored) {
-
-				}
-			} else if($feature->type === Feature::ENUM) {
-				return Localizer::printableValue($feature);
-			}
-
-			return $feature->value;
-		});
-		$engine->registerFunction('printFeatureName', function(Feature $feature) {
-			return Localizer::printableName($feature);
-		});
-		$engine->registerFunction('makeEditable', function(string $html) {
-			return '<p>' . str_replace(["\r\n", "\r", "\n"], '</p><p>', $html) . '</p>';
-		});
+		//$engine->loadExtension(new URI($request->path));
+		$engine->loadExtension(new TemplateUtilities());
 
 		// TODO: use cachedDispatcher
 		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {

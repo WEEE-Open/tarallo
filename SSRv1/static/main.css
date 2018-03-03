@@ -273,13 +273,19 @@ ul.breadcrumbs li:not(:first-child)::before {
 	white-space: pre-wrap;
 }
 
+/* Don't do this, as it also removes the blinking cursor in contenteditable areas */
+/*.item .features ul li .value:-moz-focusring {*/
+	/*color: transparent;*/
+	/*text-shadow: 0 0 0 #000;*/
+/*}*/
+
 .item .features ul li .value[contenteditable] {
 	border-bottom: 0.1em dotted #ccc;
 }
 
 .item .features ul li .value p {
-	margin: 0;
-	padding: 0;
+	margin: 0 .2em;
+	padding: 0 .4em;
 }
 
 .item.working.yes /*> header > h2*/ {

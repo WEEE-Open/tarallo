@@ -310,23 +310,23 @@ class Localizer {
 	 * @param string $locale E.g. en_US, es, etc...
 	 */
 	public static function localize(string $locale) {
-		$locale = explode('-', $locale, 2);
-		if(count($locale) === 1) {
-			$locale = $locale[0];
-		} else {
-			$locale = $locale[0] . '_' . strtoupper($locale[1]);
-		}
-
-		$domain = 'tarallo';
-		$directory = __DIR__ . DIRECTORY_SEPARATOR . 'locale';
-
-		// putenv is probably not necessary
-		putenv("LC_ALL=$locale.utf8");
-		setlocale(LC_ALL, "$locale.utf8");
-
-		bindtextdomain($domain, $directory);
-		bind_textdomain_codeset($domain, 'UTF-8');
-		textdomain($domain);
+//		$locale = explode('-', $locale, 2);
+//		if(count($locale) === 1) {
+//			$locale = $locale[0];
+//		} else {
+//			$locale = $locale[0] . '_' . strtoupper($locale[1]);
+//		}
+//
+//		$domain = 'tarallo';
+//		$directory = __DIR__ . DIRECTORY_SEPARATOR . 'locale';
+//
+//		// putenv is probably not necessary
+//		putenv("LC_ALL=$locale.utf8");
+//		setlocale(LC_ALL, "$locale.utf8");
+//
+//		bindtextdomain($domain, $directory);
+//		bind_textdomain_codeset($domain, 'UTF-8');
+//		textdomain($domain);
 	}
 
 	public static function printableName(Feature $feature): string {
@@ -337,17 +337,13 @@ class Localizer {
 		}
 	}
 
-	public static function printableValue(Feature $feature): string {
-		if($feature->type !== Feature::ENUM) {
-			throw new \InvalidArgumentException('Not an enum feature');
-		}
-
-		$lookup = $feature->name . '/' . $feature->value;
+	public static function printableValue(string $name, string $value): string {
+		$lookup = $name . '/' . $value;
 
 		if(isset(self::featuresEnum[$lookup])) {
 			return self::featuresEnum[$lookup];
 		} else {
-			return $feature->value;
+			return $value;
 		}
 	}
 }

@@ -238,6 +238,21 @@ class Feature {
 		}
 	}
 
+	/**
+	 * Get available options in an enum feature
+	 *
+	 * @param Feature $feature
+	 *
+	 * @return boolean[] map from feature value to true, because reasons.
+	 */
+	public static function getOptions(Feature $feature): array {
+		$name = $feature->name;
+		if(self::getType($name) !== self::ENUM) {
+			throw new \InvalidArgumentException("Feature $name is not an enum");
+		}
+		return self::features[$name];
+	}
+
 	public function __toString() {
 		return (string) $this->value;
 	}
