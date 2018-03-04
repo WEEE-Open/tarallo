@@ -39,6 +39,7 @@ if(isset($edit)) {
 	}
 } else {
 	$editing = false;
+	$editingTarget = false;
 }
 ?>
 
@@ -52,7 +53,7 @@ if(isset($edit)) {
 	<!--<div class="breadsetter"><label>Set parent: <input></label></div>-->
 </nav>
 <?php endif ?>
-<article class="item <?= $recursion ? '' : 'head' ?> <?= $working ?> <?= $editingTarget ? 'editing' : '' ?>">
+<article class="item <?= $recursion ? '' : 'head' ?> <?= $working ?> <?= $editingTarget ? 'editing' : '' ?>" data-code="<?=$this->e($item->getCode())?>">
 	<header>
 		<h2 id="code-<?= $this->e($item->getCode()) ?>"><?=$this->e($item->getCode())?></h2>
 	</header>
