@@ -5,15 +5,15 @@
 
 	let deletedFeatures = new Set();
 
-	let divs = document.querySelectorAll('.item.editing :not(.subitems) .features.own [contenteditable]');
-	let selects = document.querySelectorAll('.item.editing :not(.subitems) .features.own select');
-	let deletes = document.querySelectorAll('.item.editing :not(.subitems) .features.own .delete');
+	let divs = document.querySelectorAll('.features.own.editing [contenteditable]');
+	let selects = document.querySelectorAll('.features.own.editing select');
+	let deletes = document.querySelectorAll('.features.own.editing .delete');
 
 	for(let div of divs) {
 		if(div.dataset.internalType === 's') {
 			div.addEventListener('input', textChanged);
 		} else {
-			div.addEventListener('blur', numberChanged.bind(this));
+			div.addEventListener('blur', numberChanged);
 		}
 	}
 
@@ -26,6 +26,21 @@
 		deleteButton.addEventListener('click', bound);
 	}
 
+	/**
+	 * Remove last error message (or any element, really)
+	 *
+	 * @param {HTMLElement|null} element to be removed, or null to remove last error message
+	 */
+	function removeError(element = null) {
+		if(element === null) {
+			let last = document.getElementById('feature-edit-last-error');
+			if(last !== null) {
+				last.parentElement.removeChild(last);
+			}
+		} else {
+			element.parentElement.removeChild(element);
+		}
+	}
 
 	/**
 	 * Handle changing content of an editable text div
@@ -93,19 +108,37 @@
 			let newValue = printableToValue(unit, value);
 			if(ev.target.dataset.internalType = 'i' && (newValue % 1 !== 0)) {
 				// noinspection ExceptionCaughtLocallyJS
-				throw new Error("Value must represent an integer number of base units");
+				throw new Error("fractional-not-allowed");
 			}
 			// Store new value
 			ev.target.dataset.internalValue = newValue.toString();
 			// Print it
-			ev.target.getElementsByTagName('P')[0].textContent = valueToPrintable(unit, newValue);
+			let lines = ev.target.getElementsByTagName('P');
+			lines[0].textContent = valueToPrintable(unit, newValue);
+			while(lines.length > 1) {
+				let last = lines[lines.length - 1];
+				last.parentElement.removeChild(last);
+			}
 			// Save if for later
 			ev.target.dataset.previousValue = newValue.toString();
 		} catch(e) {
 			// rollback
-			console.log(e.message);
 			ev.target.dataset.internalValue = ev.target.dataset.previousValue;
 			ev.target.getElementsByTagName('P')[0].textContent = valueToPrintable(unit, parseInt(ev.target.dataset.previousValue));
+			// Display error message
+			let templateThingThatShouldExist = document.getElementById('feature-edit-template-' + e.message);
+			if(templateThingThatShouldExist === null) {
+				// Unhandled exception!
+				throw e;
+			}
+			let template = document.importNode(templateThingThatShouldExist.content, true);
+			removeError(null);
+			let item = document.querySelector('.item.editing');
+			item.insertBefore(template, item.getElementsByTagName('HEADER')[0].nextElementSibling);
+			// "template" is a document fragment, there's no way to get the element itself
+			let message = document.querySelector('.item.editing .error.message');
+			message.id = 'feature-edit-last-error';
+			message.getElementsByTagName('BUTTON')[0].addEventListener('click', removeError.bind(null, message));
 		}
 		if(ev.target.dataset.internalValue === ev.target.dataset.initialValue) {
 			ev.target.classList.remove('changed');
@@ -255,7 +288,7 @@
 			//case -3:
 			//	return 'n';
 		}
-		throw new Error('Invalid SI prefix');
+		throw new Error('invalid-prefix');
 	}
 
 	/**
@@ -271,11 +304,11 @@
 		/** @type {string} */
 		let string = input.trim();
 		if(string === "") {
-			throw new Error("Empty string is not valid, must be a number")
+			throw new Error("empty-input")
 		} else if(unit === 'n') {
 			let number = parseInt(input);
 			if(isNaN(number) || number <= 0) {
-				throw new Error(input + " should be a positive integer")
+				throw new Error("negative-input")
 			} else {
 				return number;
 			}
@@ -287,11 +320,11 @@
 			}
 		}
 		if(i === 0) {
-			throw new Error('"' + string + '" should start with a positive number');
+			throw new Error('string-start-nan');
 		}
 		let number = parseFloat(string.substr(0, 0 + i));
 		if(isNaN(number)) {
-			throw new Error('Cannot parse ' + string.substr(0, 0 + i) + ' as a number')
+			throw new Error('string-parse-nan')
 		}
 		let exp = 0;
 		if(unit === 'mm') {
