@@ -181,7 +181,7 @@ final class ItemDAO extends DAO {
 				FROM Tree
 				WHERE Ancestor = ?
 				AND Depth < ?
-				ORDER BY Depth
+				ORDER BY Depth ASC, Code ASC
 EOQ
 			);
 		}
