@@ -15,7 +15,7 @@ if(count($features) > 0):
 				<li>
 					<div class="name"><label for="feature-edit-<?= $ultra->feature->name ?>"><?=$ultra->name?></label></div>
 					<?php switch($ultra->feature->type): case \WEEEOpen\Tarallo\Server\Feature::ENUM: ?>
-						<select class="value" data-internal-name="<?= $ultra->feature->name ?>" data-internal-type="e" data-initial-value="<?= $this->e($ultra->feature->value, 'asTextContent')?>" id="feature-edit-<?= $ultra->feature->name ?>">
+						<select class="value" autocomplete="off" data-internal-name="<?= $ultra->feature->name ?>" data-internal-type="e" data-initial-value="<?= $this->e($ultra->feature->value, 'asTextContent')?>" id="feature-edit-<?= $ultra->feature->name ?>">
 							<?php foreach($this->getOptions($ultra->feature) as $optionValue => $optionName): ?>
 							<option value="<?= $optionValue ?>" <?= $optionValue === $ultra->feature->value ? 'selected' : '' ?>><?=$this->e($optionName)?></option>
 							<?php endforeach ?>
