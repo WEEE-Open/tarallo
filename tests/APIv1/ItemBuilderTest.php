@@ -2,7 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
-use WEEEOpen\Tarallo\APIv1\InvalidPayloadParameterException;
+use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\APIv1\ItemBuilder;
 
 class ItemBuilderTest extends TestCase {

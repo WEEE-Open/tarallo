@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\APIv1;
 
 use WEEEOpen\Tarallo\Server\Feature;
+use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemFeatures;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
