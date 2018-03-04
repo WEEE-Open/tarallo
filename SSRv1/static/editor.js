@@ -3,11 +3,14 @@
 (function() {
 	document.execCommand("defaultParagraphSeparator", false, "p");
 
+	/** @type {Set<string>} */
 	let deletedFeatures = new Set();
 
 	let divs = document.querySelectorAll('.features.own.editing [contenteditable]');
 	let selects = document.querySelectorAll('.features.own.editing select');
 	let deletes = document.querySelectorAll('.features.own.editing .delete');
+	// noinspection JSUnresolvedFunction It's perfectly resolved, it's there, it exists
+	document.querySelector('.item.editing .add button').addEventListener('click', addFeature);
 
 	for(let div of divs) {
 		if(div.dataset.internalType === 's') {
@@ -59,9 +62,8 @@
 			}
 		}
 		
-		// newly added element
+		// Newly added element
 		if(!ev.target.dataset.initialValue) {
-			ev.target.classList.add('changed');
 			return;
 		}
 
@@ -80,8 +82,10 @@
 	 * @param ev Event
 	 */
 	function selectChanged(ev) {
-		console.log(ev.target.value);
-		console.log(ev.target.dataset.initialValue);
+		// New elements don't have an initial value
+		if(!ev.target.dataset.initialValue) {
+			return;
+		}
 		if(ev.target.value === ev.target.dataset.initialValue) {
 			ev.target.classList.remove('changed');
 		} else {
@@ -139,6 +143,10 @@
 			let message = document.querySelector('.item.editing .error.message');
 			message.id = 'feature-edit-last-error';
 			message.getElementsByTagName('BUTTON')[0].addEventListener('click', removeError.bind(null, message));
+		}
+		// New elements don't have an initial value
+		if(!ev.target.dataset.initialValue) {
+			return;
 		}
 		if(ev.target.dataset.internalValue === ev.target.dataset.initialValue) {
 			ev.target.classList.remove('changed');
@@ -307,7 +315,7 @@
 			throw new Error("empty-input")
 		} else if(unit === 'n') {
 			let number = parseInt(input);
-			if(isNaN(number) || number <= 0) {
+			if(isNaN(number) || number < 0) {
 				throw new Error("negative-input")
 			} else {
 				return number;
@@ -352,13 +360,103 @@
 	}
 
 	/**
-	 * Handle changing content of an editable div containing numbers
+	 * Handle clicking the "X" button
 	 *
 	 * @param {Set} set Deleted features
 	 * @param ev Event
 	 */
 	function deleteItem(set, ev) {
-		// TODO: store into the set
+		set.add(ev.target.dataset.name);
+		ev.target.parentElement.parentElement.parentElement.removeChild(ev.target.parentElement.parentElement);
+	}
+
+	/**
+	 * Maybe a template would have been better...
+	 */
+	function addFeature() {
+		let name = document.querySelector('.item.editing .add select').value;
+		let translatedName = document.querySelector('.item.editing .add select').value;
+		let type = featureTypes.get(name);
+		let id = 'feature-edit-' + name;
+
+		let element = document.getElementById(id);
+		if(element !== null) {
+			element.focus();
+			return;
+		}
+		let newElement = document.createElement("li");
+		let elementName = document.createElement("div");
+		elementName.classList.add("name");
+		newElement.appendChild(elementName);
+		let elementLabel = document.createElement("label");
+		elementLabel.htmlFor = id;
+		elementLabel.textContent = translatedName;
+		elementName.appendChild(elementLabel);
+
+		let valueElement, p;
+		switch(type) {
+			case 'e':
+				valueElement = document.createElement('select');
+				let options = featureValues.get(name);
+				let optionsTranslated = featureValuesTranslated.get(name);
+				let optionsArray = [];
+				for(let i = 0; i < options.length; i++) {
+					let option = document.createElement('option');
+					option.value = options[i];
+					option.textContent = optionsTranslated[i];
+					optionsArray.push(option);
+				}
+				optionsArray.sort((a, b) => a.textContent.localeCompare(b.textContent, 'en'));
+				for(let option of optionsArray) {
+					valueElement.appendChild(option);
+				}
+				break;
+			case 'i':
+			case 'd':
+				valueElement = document.createElement('div');
+				valueElement.dataset.internalValue = '0';
+				valueElement.dataset.previousValue = '0';
+				valueElement.contentEditable = 'true';
+				valueElement.addEventListener('blur', numberChanged);
+
+				p = document.createElement('p');
+				p.textContent = '0';
+				valueElement.appendChild(p);
+				break;
+			default:
+				valueElement = document.createElement('div');
+				valueElement.dataset.internalValue = ''; // Actually unused
+				valueElement.dataset.previousValue = '';
+				valueElement.contentEditable = 'true';
+				valueElement.addEventListener('input', textChanged);
+
+				p = document.createElement('p');
+				p.textContent = '?'; // empty <p> are ignored
+				valueElement.appendChild(p);
+				break;
+		}
+
+		valueElement.dataset.internalType = type;
+		valueElement.dataset.internalName = name;
+		valueElement.classList.add("value");
+		valueElement.id = id;
+		newElement.appendChild(valueElement);
+
+		let controlsElement = document.createElement('div');
+		controlsElement.classList.add('controls');
+		newElement.appendChild(controlsElement);
+
+		let deleteButton = document.createElement('button');
+		deleteButton.classList.add('delete');
+		deleteButton.dataset.name = name;
+		deleteButton.textContent = '❌';
+		deleteButton.addEventListener('click', deleteItem.bind(null, deletedFeatures));
+		controlsElement.appendChild(deleteButton);
+
+		// Undelete
+		deletedFeatures.delete(name);
+		// Insert
+		document.querySelector('.item.editing .features.own.editing .new ul').appendChild(newElement);
 	}
 
 	function save() {

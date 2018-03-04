@@ -72,7 +72,7 @@ if(isset($edit)) {
 			?>
 		</section>
 
-		<section>
+		<section class="add">
 			<label>Feature:
 				<select>
 				<?php $this->insert('allFeatures') ?>
@@ -83,6 +83,7 @@ if(isset($edit)) {
 		<section class="product features">
 
 		</section>
+		<script src="/features.js"></script>
 		<script src="/editor.js"></script>
 	<?php else: ?>
 		<section class="features">

@@ -36,6 +36,10 @@ if(count($features) > 0):
 	endforeach;
 endif;
 ?>
+<section class="new">
+	<h3>New features</h3>
+	<ul></ul>
+</section>
 
 <!--<section class="features default">
 Moved to parent template
