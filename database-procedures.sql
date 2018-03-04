@@ -43,13 +43,13 @@ DETERMINISTIC
 			RETURN NULL;
 		END IF;
 
-	END$$
+	END $$
 
 -- TODO: extend and use to log in?
 CREATE OR REPLACE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
 	BEGIN
 		SET @taralloAuditUsername = username;
-	END$$
+	END $$
 
 -- Tree ------------------------------------------------------------------------
 
@@ -65,7 +65,7 @@ DETERMINISTIC
 		WHERE Descendant = child
 			AND Depth = 1;
 		RETURN found;
-	END$$
+	END $$
 
 -- Search ----------------------------------------------------------------------
 

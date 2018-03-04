@@ -184,7 +184,7 @@ CREATE TABLE `User` (
 	`Name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Password` text COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Session` char(32) COLLATE utf8mb4_bin,
-	`SessionExpiry` bigint UNSIGNED NOT NULL DEFAULT 0,
+	`SessionExpiry` timestamp NOT NULL DEFAULT 0,
 	`Enabled` boolean NOT NULL DEFAULT FALSE,
 	PRIMARY KEY (`Name`),
 	UNIQUE KEY (`Session`),

@@ -6,7 +6,6 @@ use WEEEOpen\Tarallo\Server\Database\Database;
 
 class Session {
 	const COOKIE_NAME = 'session';
-	const SESSION_DURATION = 21600; // 6 hours
 	const KEYSPACE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
 	const KEYSPACE_STRLEN = 64;
 
@@ -18,9 +17,8 @@ class Session {
 	 */
 	public static function start(User $user, Database $db) {
 		$id = self::newUniqueIdentifier($db);
-		$expire = time() + self::SESSION_DURATION;
-		self::setContent($id, $expire);
-		$db->userDAO()->setSessionFromUser($user->getUsername(), $id, $expire);
+		self::setContent($id, 0);
+		$db->userDAO()->setSessionFromUser($user->getUsername(), $id);
 	}
 
 	/**
@@ -70,8 +68,7 @@ class Session {
 		if(isset($_COOKIE[self::COOKIE_NAME])) {
 			$user = $db->userDAO()->getUserFromSession($_COOKIE[self::COOKIE_NAME]);
 			if($user instanceof User) {
-				$db->userDAO()->setSessionFromUser($user->getUsername(), $_COOKIE[self::COOKIE_NAME],
-					time() + self::SESSION_DURATION);
+				$db->userDAO()->setSessionFromUser($user->getUsername(), $_COOKIE[self::COOKIE_NAME]);
 
 				return $user;
 			}
@@ -89,6 +86,6 @@ class Session {
 	public static function close(User $user, Database $db) {
 		// Delete cookie
 		self::setContent('', 1);
-		$db->userDAO()->setSessionFromUser($user->getUsername(), null, null);
+		$db->userDAO()->setSessionFromUser($user->getUsername(), null);
 	}
 }
