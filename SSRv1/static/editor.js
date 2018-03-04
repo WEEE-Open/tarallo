@@ -13,7 +13,7 @@
 		if(div.dataset.internalType === 's') {
 			div.addEventListener('input', textChanged);
 		} else {
-			div.addEventListener('blur', numberChanged);
+			div.addEventListener('blur', numberChanged.bind(this));
 		}
 	}
 
@@ -45,13 +45,13 @@
 		}
 		
 		// newly added element
-		if(!ev.target.dataset.previousValue) {
+		if(!ev.target.dataset.initialValue) {
 			ev.target.classList.add('changed');
 			return;
 		}
 
-		if(ev.target.textContent.length === ev.target.dataset.previousValue.length) {
-			if(ev.target.textContent === ev.target.dataset.previousValue) {
+		if(ev.target.textContent.length === ev.target.dataset.initialValue.length) {
+			if(ev.target.textContent === ev.target.dataset.initialValue) {
 				ev.target.classList.remove('changed');
 				return;
 			}
@@ -66,8 +66,8 @@
 	 */
 	function selectChanged(ev) {
 		console.log(ev.target.value);
-		console.log(ev.target.dataset.previousValue);
-		if(ev.target.value === ev.target.dataset.previousValue) {
+		console.log(ev.target.dataset.initialValue);
+		if(ev.target.value === ev.target.dataset.initialValue) {
 			ev.target.classList.remove('changed');
 		} else {
 			ev.target.classList.add('changed');
@@ -80,8 +80,242 @@
 	 * @param ev Event
 	 */
 	function numberChanged(ev) {
-		// TODO: parse, store internal value and pretty print units. Also, set changed.
-		console.log(ev.target);
+		let value = ev.target.textContent;
+		let unit;
+		if(ev.target.dataset.unit) {
+			unit = ev.target.dataset.unit;
+		} else {
+			// Extreme caching techniques
+			unit = nameToType(ev.target.dataset.internalName);
+			ev.target.dataset.unit = unit;
+		}
+		try {
+			let newValue = printableToValue(unit, value);
+			if(ev.target.dataset.internalType = 'i' && (newValue % 1 !== 0)) {
+				// noinspection ExceptionCaughtLocallyJS
+				throw new Error("Value must represent an integer number of base units");
+			}
+			// Store new value
+			ev.target.dataset.internalValue = newValue.toString();
+			// Print it
+			ev.target.getElementsByTagName('P')[0].textContent = valueToPrintable(unit, newValue);
+			// Save if for later
+			ev.target.dataset.previousValue = newValue.toString();
+		} catch(e) {
+			// rollback
+			console.log(e.message);
+			ev.target.dataset.internalValue = ev.target.dataset.previousValue;
+			ev.target.getElementsByTagName('P')[0].textContent = valueToPrintable(unit, parseInt(ev.target.dataset.previousValue));
+		}
+		if(ev.target.dataset.internalValue === ev.target.dataset.initialValue) {
+			ev.target.classList.remove('changed');
+		} else {
+			ev.target.classList.add('changed');
+		}
+	}
+
+	/**
+	 * Get the correct representation of a unit, from the internal (untranslated) feature name
+	 *
+	 * @param {string} name "frequency-hertz" et al
+	 * @return {string} "Hz" et al
+	 */
+	function nameToType(name) {
+		let pieces = name.split('-');
+		switch(pieces[pieces.length - 1]) {
+			case 'byte':
+				return 'byte';
+			case 'hertz':
+				return 'Hz';
+			case 'decibyte':
+				return 'B';
+			case 'ampere':
+				return 'A';
+			case 'volt':
+				return 'V';
+			case 'watt':
+				return 'W';
+			case 'inch':
+				return 'in.';
+			case 'gram':
+				return 'g';
+			default: // mm, rpm, n, byte (they're all handled separately)
+				return pieces[pieces.length - 1];
+		}
+	}
+
+	/**
+	 * Parse the unit prefix and return exponent (or 0 if it isn't a prefix)
+	 *
+	 * @param {string} char - lowercase character
+	 * @returns {number} exponent
+	 */
+	function prefixToExponent(char) {
+		switch(char) {
+			case 'k':
+				return 1;
+			case 'm':
+				return 2;
+			case 'g':
+				return 3;
+			case 't':
+				return 4;
+			case 'p':
+				return 5;
+			case 'e':
+				return 6;
+			//case 'µ':
+			//case 'u':
+			//	return -2;
+			//case 'n':
+			//	return -3;
+			default:
+				return 0;
+		}
+	}
+
+	/**
+	 * Convert that number into something printable
+	 *
+	 * @param {string} unit - byte, Hz, V, W, etc...
+	 * @param {int} value
+	 * @returns {string}
+	 */
+	function valueToPrintable(unit, value) {
+		let prefix = 0;
+		switch(unit) {
+			case 'n':
+				return value.toString();
+			case 'rpm':
+			case 'mm':
+			case 'in.':
+				return value.toString() + ' ' + unit;
+			case 'byte':
+				while(value >= 1024 && prefix <= 6) {
+					value /= 1024; // this SHOULD already be optimized internally to use bit shift
+					prefix++;
+				}
+				let i = '';
+				if(prefix > 0) {
+					i = 'i';
+				}
+				return '' + value + ' ' + prefixToPrintable(prefix) + i +'B';
+			default:
+				return appendUnit(value, unit);
+		}
+	}
+
+	/**
+	 * Reduce a number to 3 digits (+ decimals) and add a unit to it
+	 *
+	 * @param {int} value - numeric value of the base unit (e.g. if base unit is -1, unit is "W", value is 1500, then result is "1.5 W")
+	 * @param {string} unit - unit symbol, will be added to the prefix
+	 * @param {int} [baseUnit] - base unit multiplier (e.g. 0 for volts, -1 for millivolts, 1 of kilovolts)
+	 * @return {string} "3.2 MHz" and the like
+	 */
+	function appendUnit(value, unit, baseUnit = 0) {
+		let prefix = baseUnit;
+		while(value >= 1000 && prefix <= 6) {
+			value /= 1000;
+			prefix++;
+		}
+		return '' + value + ' ' + prefixToPrintable(prefix) + unit;
+	}
+
+	/**
+	 * Get unit prefix in string format. 0 is none.
+	 *
+	 * @param int - 0 to 4
+	 * @return {string}
+	 */
+	function prefixToPrintable(int) {
+		switch(int) {
+			case 0:
+				return '';
+			case 1:
+				if(this.type === 'byte') {
+					return 'K';
+				} else {
+					return 'k';
+				}
+			case 2:
+				return 'M';
+			case 3:
+				return 'G';
+			case 4:
+				return 'T';
+			case 5:
+				return 'P';
+			case 6:
+				return 'E';
+			case -1:
+				return 'm';
+			//case -2:
+			//	return 'µ';
+			//case -3:
+			//	return 'n';
+		}
+		throw new Error('Invalid SI prefix');
+	}
+
+	/**
+	 * Parse input (from HTML) and convert to internal value.
+	 *
+	 * @param {string} unit
+	 * @param {string} input - a non-empty string
+	 * @throws Error if input is in wrong format
+	 * @return {number}
+	 * @private
+	 */
+	function printableToValue(unit, input) {
+		/** @type {string} */
+		let string = input.trim();
+		if(string === "") {
+			throw new Error("Empty string is not valid, must be a number")
+		} else if(unit === 'n') {
+			let number = parseInt(input);
+			if(isNaN(number) || number <= 0) {
+				throw new Error(input + " should be a positive integer")
+			} else {
+				return number;
+			}
+		}
+		let i;
+		for(i = 0; i < string.length; i++) {
+			if (!((string[i] >= '0' && string[i] <= '9') || string[i] === '.' || string[i] === ',')) {
+				break;
+			}
+		}
+		if(i === 0) {
+			throw new Error('"' + string + '" should start with a positive number');
+		}
+		let number = parseFloat(string.substr(0, 0 + i));
+		if(isNaN(number)) {
+			throw new Error('Cannot parse ' + string.substr(0, 0 + i) + ' as a number')
+		}
+		let exp = 0;
+		if(unit === 'mm') {
+			// everything breaks down because:
+			// - base unit ("m") contains an M
+			// - "m" and "M" are acceptable prefixes (M could be ignored, but still "m" and "m" and "mm" are ambiguous)
+			// so...
+			exp = 0;
+		} else {
+			for(; i < string.length; i++) {
+				let lower = string[i].toLowerCase();
+				if(lower >= 'a' && lower <= 'z') {
+					exp = prefixToExponent(lower);
+					break;
+				}
+			}
+		}
+		let base;
+		if(unit === 'byte') {
+			base = 1024;
+		} else {
+			base = 1000;
+		}
+		return number * (base ** exp);
 	}
 
 	/**
