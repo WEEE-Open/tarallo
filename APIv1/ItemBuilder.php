@@ -90,7 +90,7 @@ class ItemBuilder {
 	public static function addFeatures(array $features, ItemFeatures $item) {
 		foreach($features as $name => $value) {
 			try {
-				$item->addFeature(new Feature($name, $value));
+				$item->addFeature(Feature::ofString($name, $value));
 			} catch(\Throwable $e) {
 				throw new InvalidPayloadParameterException(is_string($name) ? $name : '?', $value,
 					'Features: ' . $e->getMessage());
@@ -119,6 +119,8 @@ class ItemBuilder {
 				$add[$name] = $value;
 			}
 		}
+
+		self::addFeatures($add, $item);
 
 		return $delete;
 	}

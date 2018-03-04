@@ -73,11 +73,16 @@ class Adapter implements AdapterInterface {
 	public static function createItem(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		Validation::authorize($user);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+		$loopback = isset($parameters['loopback']) ? true : false;
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
 		$db->itemDAO()->addItem($item, $parent);
 
-		return $db->itemDAO()->getItem($item);
+		if($loopback) {
+			return $db->itemDAO()->getItem($item);
+		} else {
+			return $item->getCode();
+		}
 	}
 
 	public static function removeItem(User $user = null, Database $db, $parameters, $querystring, $payload) {
@@ -111,6 +116,7 @@ class Adapter implements AdapterInterface {
 		Validation::authorize($user);
 		Validation::validateArray($payload);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+		$loopback = isset($parameters['loopback']) ? true : false;
 
 		$item = new ItemFeatures($id);
 		// PUT => delete every feature, replace with new ones
@@ -118,13 +124,18 @@ class Adapter implements AdapterInterface {
 		$db->featureDAO()->deleteFeaturesAll($item);
 		$db->featureDAO()->setFeatures($item);
 
-		return $db->itemDAO()->getItem($item);
+		if($loopback) {
+			return $db->itemDAO()->getItem($item);
+		} else {
+			return null;
+		}
 	}
 
 	public static function updateItemFeatures(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		Validation::authorize($user);
 		Validation::validateArray($payload);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+		$loopback = isset($parameters['loopback']) ? true : false;
 
 		$item = new ItemFeatures($id);
 		// PATCH => specify features to update and to delete, other are left as they are
@@ -134,7 +145,11 @@ class Adapter implements AdapterInterface {
 		}
 		$db->featureDAO()->setFeatures($item);
 
-		return $db->itemDAO()->getItem($item);
+		if($loopback) {
+			return $db->itemDAO()->getItem($item);
+		} else {
+			return null;
+		}
 	}
 
 	public static function go(Request $request) : Response {

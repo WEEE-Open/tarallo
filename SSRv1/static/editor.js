@@ -11,6 +11,10 @@
 	let deletes = document.querySelectorAll('.features.own.editing .delete');
 	// noinspection JSUnresolvedFunction It's perfectly resolved, it's there, it exists
 	document.querySelector('.item.editing .add button').addEventListener('click', addFeature);
+	// noinspection JSUnresolvedFunction
+	document.querySelector('.item.editing .itembuttons .save').addEventListener('click', saveClick);
+	// noinspection JSUnresolvedFunction
+	document.querySelector('.item.editing .itembuttons .cancel').addEventListener('click', cancelClick);
 
 	for(let div of divs) {
 		if(div.dataset.internalType === 's') {
@@ -240,7 +244,7 @@
 				if(prefix > 0) {
 					i = 'i';
 				}
-				return '' + value + ' ' + prefixToPrintable(prefix) + i +'B';
+				return '' + value + ' ' + prefixToPrintable(prefix, true) + i +'B';
 			default:
 				return appendUnit(value, unit);
 		}
@@ -266,15 +270,16 @@
 	/**
 	 * Get unit prefix in string format. 0 is none.
 	 *
-	 * @param int - 0 to 4
+	 * @param {int} int - 1 for k, 2 for M, etc...
+	 * @param {boolean} bigK - Use K instead of the standard k. Used for bytes, for some reason.
 	 * @return {string}
 	 */
-	function prefixToPrintable(int) {
+	function prefixToPrintable(int, bigK = false) {
 		switch(int) {
 			case 0:
 				return '';
 			case 1:
-				if(this.type === 'byte') {
+				if(bigK) {
 					return 'K';
 				} else {
 					return 'k';
@@ -341,6 +346,7 @@
 			// - "m" and "M" are acceptable prefixes (M could be ignored, but still "m" and "m" and "mm" are ambiguous)
 			// so...
 			exp = 0;
+			// TODO: match exactly "m", "Mm" and "mm", coerce "mM" and "MM" into something sensibile, if we need this. Also, shouldn't this be a double?
 		} else {
 			for(; i < string.length; i++) {
 				let lower = string[i].toLowerCase();
@@ -459,7 +465,68 @@
 		document.querySelector('.item.editing .features.own.editing .new ul').appendChild(newElement);
 	}
 
-	function save() {
-		// TODO: get all deleted and "changed" features, make a JSON request, SEND IT.
+	async function saveClick() {
+		let counter = 0;
+		let delta = {};
+
+		let changed = document.querySelectorAll('.item.editing .features.own.editing .value.changed, .item.editing .features.own.editing .new .value');
+
+		for(let element of changed) {
+			switch(element.dataset.internalType) {
+				case 'e':
+					delta[element.dataset.internalName] = element.value;
+					break;
+				case 'i':
+				case 'd':
+					delta[element.dataset.internalName] = element.dataset.internalValue;
+					break;
+				case 's':
+				default:
+					let paragraphs = element.getElementsByTagName('P');
+					let lines = [];
+					for(let paragraph of paragraphs) {
+						lines.push(paragraph.textContent);
+					}
+					delta[element.dataset.internalName] = lines.join('\n');
+			}
+			counter++;
+		}
+
+		for(let deleted of deletedFeatures) {
+			delta[deleted] = null;
+			counter++;
+		}
+
+		if(counter > 0) {
+			console.log("Vado, eh!");
+			let id = document.querySelector('.item.editing').dataset.code;
+			let response = await fetch('/v1/items/' + encodeURIComponent(id) + '/features', {
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				method: 'PATCH',
+				credentials: 'include',
+				body: JSON.stringify(delta)
+			});
+			console.log(response);
+			console.log(await response.json());
+		}
+	}
+
+	function cancelClick() {
+		let here = window.location.pathname;
+		let query = window.location.search;
+		let hash = window.location.hash;
+
+		let pieces = here.split('/');
+		let penultimate = pieces[pieces.length - 2];
+		if(penultimate === 'edit' || penultimate === 'add') {
+			pieces.splice(pieces.length - 2);
+			window.location.href = pieces.join('/') + query + hash;
+		} else {
+			// This feels sooooo 2001
+			window.history.back();
+		}
 	}
 }());
