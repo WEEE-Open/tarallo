@@ -3,7 +3,7 @@
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
 if(!isset($recursion) || $recursion === false) {
 	$recursion = false;
-	$this->layout('main', ['title' => 'Visualizza', 'user' => $user, 'itembuttons' => true]);
+	$this->layout('main', ['title' => $this->e($item->getCode()), 'user' => $user, 'itembuttons' => true]);
 } else {
 	$recursion = true;
 }
@@ -69,7 +69,7 @@ if(isset($edit)) {
 	<?php if($editing && $editingTarget): ?>
 		<section class="own features editing">
 			<?php
-			$this->insert('featuresEdit', ['features' => $item->getFeatures(), 'featuresDefault' => $product === null ? [] : $product->getFeatures()]);
+			$this->insert('featuresEdit', ['features' => $item->getFeatures()]);
 			?>
 		</section>
 
@@ -84,6 +84,11 @@ if(isset($edit)) {
 		<section class="product features">
 
 		</section>
+
+		<section class="default features">
+			<?php $this->insert('features', ['features' => $product === null ? [] : $product->getFeatures()]) ?>
+		</section>
+
 		<script src="/features.js"></script>
 		<script src="/editor.js"></script>
 	<?php else: ?>

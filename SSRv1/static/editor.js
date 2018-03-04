@@ -1,7 +1,7 @@
 "use strict";
 
 (function() {
-	document.execCommand("defaultParagraphSeparator", false, "p");
+	document.execCommand('defaultParagraphSeparator', false, 'div');
 
 	/** @type {Set<string>} */
 	let deletedFeatures = new Set();
@@ -56,16 +56,6 @@
 	 * @TODO: adding and removing newlines should count as "changed", but it's absurdly difficult to detect, apparently...
 	 */
 	function textChanged(ev) {
-		let paragraphs = ev.target.getElementsByTagName('P');
-		for(let p of paragraphs) {
-			let br = p.getElementsByTagName('BR')[0];
-			if(!br && p.textContent === '') {
-				p.append(document.createElement('br'));
-			} else if(br && p.textContent !== '') {
-				p.removeChild(br);
-			}
-		}
-		
 		// Newly added element
 		if(!ev.target.dataset.initialValue) {
 			return;
@@ -121,7 +111,7 @@
 			// Store new value
 			ev.target.dataset.internalValue = newValue.toString();
 			// Print it
-			let lines = ev.target.getElementsByTagName('P');
+			let lines = ev.target.getElementsByTagName('DIV');
 			lines[0].textContent = valueToPrintable(unit, newValue);
 			while(lines.length > 1) {
 				let last = lines[lines.length - 1];
@@ -132,7 +122,7 @@
 		} catch(e) {
 			// rollback
 			ev.target.dataset.internalValue = ev.target.dataset.previousValue;
-			ev.target.getElementsByTagName('P')[0].textContent = valueToPrintable(unit, parseInt(ev.target.dataset.previousValue));
+			ev.target.getElementsByTagName('DIV')[0].textContent = valueToPrintable(unit, parseInt(ev.target.dataset.previousValue));
 			// Display error message
 			let templateThingThatShouldExist = document.getElementById('feature-edit-template-' + e.message);
 			if(templateThingThatShouldExist === null) {
@@ -376,12 +366,14 @@
 		ev.target.parentElement.parentElement.parentElement.removeChild(ev.target.parentElement.parentElement);
 	}
 
+	let featureSelector = document.querySelector('.item.editing .add select');
+
 	/**
 	 * Maybe a template would have been better...
 	 */
 	function addFeature() {
-		let name = document.querySelector('.item.editing .add select').value;
-		let translatedName = document.querySelector('.item.editing .add select').value;
+		let name = featureSelector.value;
+		let translatedName = featureSelector.options[featureSelector.selectedIndex].textContent;
 		let type = featureTypes.get(name);
 		let id = 'feature-edit-' + name;
 
@@ -399,7 +391,7 @@
 		elementLabel.textContent = translatedName;
 		elementName.appendChild(elementLabel);
 
-		let valueElement, p;
+		let valueElement, div;
 		switch(type) {
 			case 'e':
 				valueElement = document.createElement('select');
@@ -425,9 +417,9 @@
 				valueElement.contentEditable = 'true';
 				valueElement.addEventListener('blur', numberChanged);
 
-				p = document.createElement('p');
-				p.textContent = '0';
-				valueElement.appendChild(p);
+				div = document.createElement('div');
+				div.textContent = '0';
+				valueElement.appendChild(div);
 				break;
 			default:
 				valueElement = document.createElement('div');
@@ -436,9 +428,9 @@
 				valueElement.contentEditable = 'true';
 				valueElement.addEventListener('input', textChanged);
 
-				p = document.createElement('p');
-				p.textContent = '?'; // empty <p> are ignored
-				valueElement.appendChild(p);
+				div = document.createElement('div');
+				div.textContent = '?'; // empty <div>s break everything
+				valueElement.appendChild(div);
 				break;
 		}
 
@@ -482,7 +474,7 @@
 					break;
 				case 's':
 				default:
-					let paragraphs = element.getElementsByTagName('P');
+					let paragraphs = element.getElementsByTagName('DIV');
 					let lines = [];
 					for(let paragraph of paragraphs) {
 						lines.push(paragraph.textContent);
@@ -512,6 +504,8 @@
 			console.log(response);
 			console.log(await response.json());
 		}
+
+		// TODO: error message or "cancel"
 	}
 
 	function cancelClick() {

@@ -295,13 +295,13 @@ ul.breadcrumbs li:not(:first-child)::before {
 	border-bottom: 0.1em dotted #ccc;
 }
 
-.features.editing .changed {
-	border: .1em dotted red !important;
-}
-
-.item .features ul li .value p {
+.item .features ul li .value div {
 	margin: 0 .2em;
 	padding: 0 .4em;
+}
+
+.features.editing .changed {
+	border: .1em dotted red !important;
 }
 
 .item.working.yes /*> header > h2*/ {
