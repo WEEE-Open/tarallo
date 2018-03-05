@@ -518,7 +518,6 @@
 		}
 
 		let id = document.querySelector('.item.editing').dataset.code;
-		let success = false;
 
 		for(let button of document.querySelectorAll('.itembuttons button')) {
 			button.disabled = true;
@@ -534,7 +533,6 @@
 			body: JSON.stringify(delta)
 		});
 
-		// TODO: better error handling...
 		await jsendMe(response, goBack, )
 	}
 
