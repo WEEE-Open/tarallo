@@ -56,6 +56,7 @@
 	 * @TODO: adding and removing newlines should count as "changed", but it's absurdly difficult to detect, apparently...
 	 */
 	function textChanged(ev) {
+		fixDiv(ev.target);
 		// Newly added element
 		if(!ev.target.dataset.initialValue) {
 			return;
@@ -93,6 +94,7 @@
 	 * @param ev Event
 	 */
 	function numberChanged(ev) {
+		fixDiv(ev.target);
 		let value = ev.target.textContent;
 		let unit;
 		if(ev.target.dataset.unit) {
@@ -593,6 +595,32 @@
 		} else {
 			// This feels sooooo 2001
 			window.history.back();
+		}
+	}
+
+	/**
+	 * Add divs that disappear randomly from contentEditable elements
+	 *
+	 * @param {HTMLElement} element
+	 */
+	function fixDiv(element) {
+		for(let node of element.childNodes) {
+			if(node.nodeType === 3) {
+				let div = document.createElement('div');
+				div.textContent = node.textContent;
+				element.insertBefore(div, node);
+				element.removeChild(node);
+
+				// Dima Viditch is the only person in the universe that has figured this out: https://stackoverflow.com/a/16863913
+				// Nothing else worked. NOTHING.
+				let wrongSelection = window.getSelection();
+				let pointlessRange = document.createRange();
+				div.innerHTML = '\u00a0';
+				pointlessRange.selectNodeContents(div);
+				wrongSelection.removeAllRanges();
+				wrongSelection.addRange(pointlessRange);
+				document.execCommand('delete', false, null);
+			}
 		}
 	}
 }());
