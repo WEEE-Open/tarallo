@@ -63,3 +63,6 @@ Moved to parent template
 <template id="feature-edit-template-string-parse-nan">
 	<section class="error message">Value must contain a number<button>OK</button></section>
 </template>
+<template id="feature-edit-template-generic-error">
+	<section class="error message">Error<button>OK</button></section>
+</template>

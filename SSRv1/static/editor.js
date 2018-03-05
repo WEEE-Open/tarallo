@@ -1,6 +1,6 @@
-"use strict";
-
 (function() {
+	"use strict";
+
 	document.execCommand('defaultParagraphSeparator', false, 'div');
 
 	/** @type {Set<string>} */
@@ -14,7 +14,7 @@
 	// noinspection JSUnresolvedFunction
 	document.querySelector('.item.editing .itembuttons .save').addEventListener('click', saveClick);
 	// noinspection JSUnresolvedFunction
-	document.querySelector('.item.editing .itembuttons .cancel').addEventListener('click', cancelClick);
+	document.querySelector('.item.editing .itembuttons .cancel').addEventListener('click', goBack);
 
 	for(let div of divs) {
 		if(div.dataset.internalType === 's') {
@@ -124,19 +124,11 @@
 			ev.target.dataset.internalValue = ev.target.dataset.previousValue;
 			ev.target.getElementsByTagName('DIV')[0].textContent = valueToPrintable(unit, parseInt(ev.target.dataset.previousValue));
 			// Display error message
-			let templateThingThatShouldExist = document.getElementById('feature-edit-template-' + e.message);
-			if(templateThingThatShouldExist === null) {
-				// Unhandled exception!
+			removeError(null);
+			let displayed = displayError(e.message);
+			if(!displayed) {
 				throw e;
 			}
-			let template = document.importNode(templateThingThatShouldExist.content, true);
-			removeError(null);
-			let item = document.querySelector('.item.editing');
-			item.insertBefore(template, item.getElementsByTagName('HEADER')[0].nextElementSibling);
-			// "template" is a document fragment, there's no way to get the element itself
-			let message = document.querySelector('.item.editing .error.message');
-			message.id = 'feature-edit-last-error';
-			message.getElementsByTagName('BUTTON')[0].addEventListener('click', removeError.bind(null, message));
 		}
 		// New elements don't have an initial value
 		if(!ev.target.dataset.initialValue) {
@@ -146,6 +138,36 @@
 			ev.target.classList.remove('changed');
 		} else {
 			ev.target.classList.add('changed');
+		}
+	}
+
+	/**
+	 * Show error messages.
+	 *
+	 * @param {string|null} templateName
+	 * @param {string|null} message
+	 */
+	function displayError(templateName = null, message = null) {
+		let templateThingThatShouldExist;
+		if(templateName === null) {
+			templateThingThatShouldExist = document.getElementById('feature-edit-template-generic-error');
+		} else {
+			templateThingThatShouldExist = document.getElementById('feature-edit-template-' + templateName);
+			if(templateThingThatShouldExist === null) {
+				// Unhandled exception!
+				return false;
+			}
+		}
+		let template = document.importNode(templateThingThatShouldExist.content, true);
+
+		let item = document.querySelector('.item.editing');
+		item.insertBefore(template, item.getElementsByTagName('HEADER')[0].nextElementSibling);
+		// "template" is a document fragment, there's no way to get the element itself
+		let inserted = document.querySelector('.item.editing .error.message');
+		inserted.id = 'feature-edit-last-error';
+		inserted.getElementsByTagName('BUTTON')[0].addEventListener('click', removeError.bind(null, inserted));
+		if(message !== null) {
+			inserted.firstChild.textContent = message;
 		}
 	}
 
@@ -489,26 +511,76 @@
 			counter++;
 		}
 
-		if(counter > 0) {
-			console.log("Vado, eh!");
-			let id = document.querySelector('.item.editing').dataset.code;
-			let response = await fetch('/v1/items/' + encodeURIComponent(id) + '/features', {
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				},
-				method: 'PATCH',
-				credentials: 'include',
-				body: JSON.stringify(delta)
-			});
-			console.log(response);
-			console.log(await response.json());
+		if(counter <= 0) {
+			return;
 		}
 
-		// TODO: error message or "cancel"
+		let id = document.querySelector('.item.editing').dataset.code;
+		let success = false;
+
+		for(let button of document.querySelectorAll('.itembuttons button')) {
+			button.disabled = true;
+		}
+
+		let response = await fetch('/v1/items/' + encodeURIComponent(id) + '/features', {
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			method: 'PATCH',
+			credentials: 'include',
+			body: JSON.stringify(delta)
+		});
+
+		// TODO: better error handling...
+		await jsendMe(response, goBack, )
 	}
 
-	function cancelClick() {
+	async function jsendMe(response, onsuccess) {
+		try {
+			if(response.headers.get("content-type").indexOf("application/json") > -1) {
+				try {
+					let jsend = await response.json();
+					if(response.ok && jsend.status === 'success') {
+						onsuccess();
+					} else {
+						if(jsend.status === 'fail') {
+							if(jsend.data) {
+								for(let field of Object.keys(jsend.data)) {
+									let message = jsend.data[field];
+									displayError(null, message);
+									let input = document.getElementById('feature-edit-' + field);
+									if(input !== null) {
+										input.classList.add('invalid');
+									}
+								}
+							} else {
+								// "fail" with no data
+								displayError(null, response.status.toString() + ': unspecified validation error');
+							}
+						} else {
+							// JSend error, or not a JSend response
+							displayError(null, response.status.toString() + ': ' + jsend.message ? jsend.message : '');
+						}
+					}
+				} catch(e) {
+					// invalid JSON
+					displayError(null, e.message);
+					console.error(response.body);
+				}
+			} else {
+				// not JSON
+				let text = await response.text();
+				displayError(null, response.status.toString() + ': ' + text);
+			}
+		} finally {
+			for(let button of document.querySelectorAll('.itembuttons button')) {
+				button.disabled = false;
+			}
+		}
+	}
+
+	function goBack() {
 		let here = window.location.pathname;
 		let query = window.location.search;
 		let hash = window.location.hash;
