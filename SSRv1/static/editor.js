@@ -104,7 +104,7 @@
 		}
 		try {
 			let newValue = printableToValue(unit, value);
-			if(ev.target.dataset.internalType = 'i' && (newValue % 1 !== 0)) {
+			if(ev.target.dataset.internalType === 'i' && (newValue % 1 !== 0)) {
 				// noinspection ExceptionCaughtLocallyJS
 				throw new Error("fractional-not-allowed");
 			}
