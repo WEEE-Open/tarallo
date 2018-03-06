@@ -3,7 +3,7 @@
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
 if(!isset($recursion) || $recursion === false) {
 	$recursion = false;
-	$this->layout('main', ['title' => $this->e($item->getCode()), 'user' => $user, 'itembuttons' => true]);
+	$this->layout('main', ['title' => $this->e($item->getCode()), 'user' => $user, 'itembuttons' => true]); // TODO: remove itembuttons (unused)?
 } else {
 	$recursion = true;
 }
@@ -28,18 +28,28 @@ if(isset($features['working'])) {
 	unset($value);
 }
 
-$subitemParameters = ['recursion' => true];
+// Until proven guilty, er, true
+$adding = false;
+$editing = false;
+$target = false;
+
+$nextItemParameters = ['recursion' => true];
 if(isset($edit)) {
-	$subitemParameters['edit'] = $edit;
+	$nextItemParameters['edit'] = $edit;
 	$editing = true;
 	if(strtolower($edit) === strtolower($item->getCode())) {
-		$editingTarget = true;
+		$target = true;
 	} else {
-		$editingTarget = false;
+		$target = false;
 	}
-} else {
-	$editing = false;
-	$editingTarget = false;
+} else if(isset($add)) {
+	$nextItemParameters['add'] = $add;
+	$adding = true;
+	if(strtolower($add) === strtolower($item->getCode())) {
+		$target = true;
+	} else {
+		$target = false;
+	}
 }
 ?>
 
@@ -53,20 +63,20 @@ if(isset($edit)) {
 	<!--<div class="breadsetter"><label>Set parent: <input></label></div>-->
 </nav>
 <?php endif ?>
-<article class="item <?= $recursion ? '' : 'head' ?> <?= $working ?> <?= $editingTarget ? 'editing' : '' ?>" data-code="<?=$this->e($item->getCode())?>">
+<article class="item <?= $recursion ? '' : 'head' ?> <?= $working ?> <?= $target ? 'editing' : '' ?>" data-code="<?=$this->e($item->getCode())?>">
 	<header>
 		<h2 id="code-<?= $this->e($item->getCode()) ?>"><?=$this->e($item->getCode())?></h2>
 	</header>
 
 	<nav class="itembuttons" data-for-item="<?= $this->e($item->getCode()) ?>">
-		<?php if($editing && $editingTarget): ?>
+		<?php if($editing && $target): ?>
 			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><button class="delete">❌&nbsp;Delete</button>
-		<?php elseif(!$editing): ?>
+		<?php elseif(!$adding && !$editing): ?>
 			<button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button>
 		<?php endif ?>
 	</nav>
 
-	<?php if($editing && $editingTarget): ?>
+	<?php if($editing && $target): ?>
 		<section class="own features editing">
 			<?php
 			$this->insert('featuresEdit', ['features' => $item->getFeatures()]);
@@ -82,10 +92,6 @@ if(isset($edit)) {
 		</section>
 
 		<section class="product features">
-
-		</section>
-
-		<section class="default features">
 			<?php $this->insert('features', ['features' => $product === null ? [] : $product->getFeatures()]) ?>
 		</section>
 
@@ -99,9 +105,14 @@ if(isset($edit)) {
 
 	<section class="subitems">
 		<?php
+			if($adding && $target) {
+				// It's basically another item head (items around it are read only, so who cares)
+				$this->insert('newItem', ['recursion' => false]); // TODO: display save button inside that (because no recursion. If creating a subtree of new items will ever be necessary, just set recursion = true after head item)
+			}
+
 			$subitems = $item->getContents();
 			foreach($subitems as $subitem) {
-				$this->insert('viewItem', array_merge($subitemParameters, ['item' => $subitem]));
+				$this->insert('viewItem', array_merge($nextItemParameters, ['item' => $subitem]));
 			}
 		?>
 	</section>
