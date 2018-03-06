@@ -533,10 +533,10 @@
 			body: JSON.stringify(delta)
 		});
 
-		await jsendMe(response, goBack, )
+		await jsendMe(response, goBack, displayError.bind(null, null));
 	}
 
-	async function jsendMe(response, onsuccess) {
+	async function jsendMe(response, onsuccess, onerror) {
 		try {
 			if(response.headers.get("content-type").indexOf("application/json") > -1) {
 				try {
@@ -548,7 +548,7 @@
 							if(jsend.data) {
 								for(let field of Object.keys(jsend.data)) {
 									let message = jsend.data[field];
-									displayError(null, message);
+									onerror(message);
 									let input = document.getElementById('feature-edit-' + field);
 									if(input !== null) {
 										input.classList.add('invalid');
@@ -556,22 +556,22 @@
 								}
 							} else {
 								// "fail" with no data
-								displayError(null, response.status.toString() + ': unspecified validation error');
+								onerror(response.status.toString() + ': unspecified validation error');
 							}
 						} else {
 							// JSend error, or not a JSend response
-							displayError(null, response.status.toString() + ': ' + jsend.message ? jsend.message : '');
+							onerror(response.status.toString() + ': ' + jsend.message ? jsend.message : '');
 						}
 					}
 				} catch(e) {
 					// invalid JSON
-					displayError(null, e.message);
+					onerror(e.message);
 					console.error(response.body);
 				}
 			} else {
 				// not JSON
 				let text = await response.text();
-				displayError(null, response.status.toString() + ': ' + text);
+				onerror(response.status.toString() + ': ' + text);
 			}
 		} finally {
 			for(let button of document.querySelectorAll('.itembuttons button')) {
