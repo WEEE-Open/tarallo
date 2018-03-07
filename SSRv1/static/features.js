@@ -28,8 +28,8 @@
 	featureValues.set('color', ['black', 'white', 'green', 'yellow', 'red', 'blue', 'grey', 'darkgrey', 'lightgrey', 'pink', 'transparent', 'brown', 'orange', 'violet', 'sip-brown', 'lightblue', 'yellowed', 'transparent-dark', 'golden']);
 	featureValuesTranslated.set('color', ['Black', 'White', 'Green', 'Yellow', 'Red', 'Blue', 'Grey', 'Dark grey', 'Light grey', 'Pink', 'Transparent', 'Brown', 'Orange', 'Violet', 'SIP brown', 'Light blue', 'Yellowed', 'Transparent (dark)', 'Golden']);
 	featureTypes.set('motherboard-form-factor', 'e');
-	featureValues.set('motherboard-form-factor', ['atx', 'miniatx', 'microatx', 'miniitx', 'proprietary', 'btx', 'wtx', 'flexatx', 'proprietary-laptop', 'eatx']);
-	featureValuesTranslated.set('motherboard-form-factor', ['ATX', 'Mini ATX (not standard)', 'Micro ATX', 'Mini ITX', 'Proprietary (desktop)', 'BTX', 'WTX', 'Flex ATX', 'Laptop', 'Extended ATX']);
+	featureValues.set('motherboard-form-factor', ['atx', 'miniatx', 'microatx', 'miniitx', 'proprietary', 'btx', 'microbtx', 'nanobtx', 'picobtx', 'wtx', 'flexatx', 'proprietary-laptop', 'eatx']);
+	featureValuesTranslated.set('motherboard-form-factor', ['ATX', 'Mini ATX (not standard)', 'Micro ATX', 'Mini ITX', 'Proprietary (desktop)', 'BTX (slots ≤ 7)', 'Micro BTX (slots ≤ 4)', 'Nano BTX (slots ≤ 2)', 'Pico BTX (slots ≤ 1)', 'WTX', 'Flex ATX', 'Laptop', 'Extended ATX']);
 	featureTypes.set('notes', 's');
 	featureTypes.set('agp-sockets-n', 'i');
 	featureTypes.set('arrival-batch', 's');
@@ -62,8 +62,8 @@
 	featureTypes.set('ps2-ports-n', 'i');
 	featureTypes.set('psu-ampere', 'd');
 	featureTypes.set('psu-connector-motherboard', 'e');
-	featureValues.set('psu-connector-motherboard', ['proprietary', 'at', 'atx-20pin', 'atx-24pin', 'atx-20pin-aux']);
-	featureValuesTranslated.set('psu-connector-motherboard', ['Proprietary', 'AT', 'ATX 20 pin', 'ATX 24 pin', 'ATX 20 pin + AUX']);
+	featureValues.set('psu-connector-motherboard', ['proprietary', 'at', 'atx-20pin', 'atx-24pin', 'atx-24pin-mini', 'atx-20pin-aux']);
+	featureValuesTranslated.set('psu-connector-motherboard', ['Proprietary', 'AT', 'ATX 20 pin', 'ATX 24 pin', 'Mini ATX 24 pin', 'ATX 20 pin + AUX']);
 	featureTypes.set('psu-volt', 'd');
 	featureTypes.set('ram-type', 'e');
 	featureValues.set('ram-type', ['simm', 'edo', 'sdr', 'ddr', 'ddr2', 'ddr3', 'ddr4']);
@@ -136,8 +136,8 @@
 	featureValues.set('pci-low-profile', ['no', 'possibile', 'dual', 'yes']);
 	featureValuesTranslated.set('pci-low-profile', ['No', 'Possible (no bracket)', 'Yes (both brackets)', 'Yes (low profile only)']);
 	featureTypes.set('psu-connector-cpu', 'e');
-	featureValues.set('psu-connector-cpu', ['none', '4pin', '6pin-hp', '6pin', '8pin', 'proprietary']);
-	featureValuesTranslated.set('psu-connector-cpu', ['None', '4 pin', '6 pin (HP proprietary)', '6 pin (not standard)', '8 pin', 'Proprietary']);
+	featureValues.set('psu-connector-cpu', ['none', '4pin', '6pin-hp', '6pin-hp-brown', '6pin', '8pin', 'proprietary']);
+	featureValuesTranslated.set('psu-connector-cpu', ['None', '4 pin', '6 pin (HP; 1 purple + 1 blue)', '6 pin (HP; 2 brown)', '6 pin (other)', '8 pin', 'Proprietary']);
 	featureTypes.set('jae-ports-n', 'i');
 	featureTypes.set('game-ports-n', 'i');
 	// END GENERATED CODE

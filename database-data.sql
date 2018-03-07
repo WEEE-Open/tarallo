@@ -164,7 +164,10 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('motherboard-form-factor', 'microatx'), -- Micro ATX --
 	('motherboard-form-factor', 'miniitx'), -- Mini ITX --
 	('motherboard-form-factor', 'proprietary'), -- Proprietary (desktop) --
-	('motherboard-form-factor', 'btx'), -- BTX --
+	('motherboard-form-factor', 'btx'), -- BTX (slots ≤ 7) --
+	('motherboard-form-factor', 'microbtx'), -- Micro BTX (slots ≤ 4) --
+	('motherboard-form-factor', 'nanobtx'), -- Nano BTX (slots ≤ 2) --
+	('motherboard-form-factor', 'picobtx'), -- Pico BTX (slots ≤ 1) --
 	('motherboard-form-factor', 'wtx'), -- WTX --
 	('motherboard-form-factor', 'flexatx'), -- Flex ATX --
 	('motherboard-form-factor', 'proprietary-laptop'), -- Laptop -- Who knows, maybe distinguishing proprietary motherboards between desktops and laptops will turn out to be useful...
@@ -242,6 +245,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('psu-connector-motherboard', 'at'), -- AT --
 	('psu-connector-motherboard', 'atx-20pin'), -- ATX 20 pin --
 	('psu-connector-motherboard', 'atx-24pin'), -- ATX 24 pin --
+	('psu-connector-motherboard', 'atx-24pin-mini'), -- Mini ATX 24 pin --
 	('psu-connector-motherboard', 'atx-20pin-aux'), -- ATX 20 pin + AUX -- AUX connector looks kind of like an AT connector
 	('ram-type', 'simm'), -- SIMM --
 	('ram-type', 'edo'), -- EDO --
@@ -301,8 +305,9 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('pci-low-profile', 'yes'), -- Yes (low profile only) --
 	('psu-connector-cpu', 'none'), -- None --
 	('psu-connector-cpu', '4pin'), -- 4 pin --
-	('psu-connector-cpu', '6pin-hp'), -- 6 pin (HP proprietary) -- 2 black, 2 yellow, 1 purple, 1 blue
-	('psu-connector-cpu', '6pin'), -- 6 pin (not standard) --
+	('psu-connector-cpu', '6pin-hp'), -- 6 pin (HP; 1 purple + 1 blue) -- 2 black, 2 yellow, 1 purple, 1 blue
+	('psu-connector-cpu', '6pin-hp-brown'), -- 6 pin (HP; 2 brown) -- 2 black, 2 yellow, 2 brown
+	('psu-connector-cpu', '6pin'), -- 6 pin (other) --
 	('psu-connector-cpu', '8pin'), -- 8 pin --
 	('psu-connector-cpu', 'proprietary'); -- Proprietary --
 -- TRUNCATE `Codes`;
