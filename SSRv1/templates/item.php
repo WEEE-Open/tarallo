@@ -60,7 +60,6 @@ if(isset($edit)) {
 			<li><a href="/item/<?=$this->u($piece)?>"><?=$this->e($piece)?></a></li>
 		<?php endforeach; ?>
 	</ul>
-	<!--<div class="breadsetter"><label>Set parent: <input></label></div>-->
 </nav>
 <?php endif ?>
 <article class="item <?= $recursion ? '' : 'head' ?> <?= $working ?> <?= $target ? 'editing' : '' ?>" data-code="<?=$this->e($item->getCode())?>">
@@ -107,12 +106,12 @@ if(isset($edit)) {
 		<?php
 			if($adding && $target) {
 				// It's basically another item head (items around it are read only, so who cares)
-				$this->insert('newItem', ['recursion' => false]); // TODO: display save button inside that (because no recursion. If creating a subtree of new items will ever be necessary, just set recursion = true after head item)
+				$this->insert('newItem', ['recursion' => false, 'floating' => false]);
 			}
 
 			$subitems = $item->getContents();
 			foreach($subitems as $subitem) {
-				$this->insert('viewItem', array_merge($nextItemParameters, ['item' => $subitem]));
+				$this->insert('item', array_merge($nextItemParameters, ['item' => $subitem]));
 			}
 		?>
 	</section>

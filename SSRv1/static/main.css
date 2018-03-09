@@ -228,10 +228,11 @@ ul.breadcrumbs li:not(:first-child)::before {
 	font-size: x-large;
 	background-color: #333;
 	color: #eee;
+	padding: 0.32em;
 }
 
-.item h2 {
-	padding: 0.32em;
+.new.item h2 {
+	font-size: large;
 }
 
 .features section h3 {

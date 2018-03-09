@@ -17,6 +17,6 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: SSRv1/templates/viewItem.php:26
+#: SSRv1/templates/item.php:26
 msgid "All features (no grouping, yet)"
 msgstr "Tutte le caratteristiche (nessun raggruppamento, per ora)"

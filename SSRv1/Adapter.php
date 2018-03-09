@@ -39,7 +39,7 @@ class Adapter implements AdapterInterface {
 			$renderParameters['add'] = $add;
 		}
 
-		return new Response(200, 'text/html', $engine->render('viewItem', $renderParameters));
+		return new Response(200, 'text/html', $engine->render('item', $renderParameters));
 	}
 
 	private static function login(
