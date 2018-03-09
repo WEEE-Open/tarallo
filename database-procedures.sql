@@ -67,6 +67,24 @@ DETERMINISTIC
 		RETURN found;
 	END $$
 
+CREATE OR REPLACE PROCEDURE DetachSubtree(root varchar(100))
+	BEGIN
+		DELETE Tree.* FROM Tree, Tree AS Pointless
+		WHERE Tree.Descendant=Pointless.Descendant
+		AND Pointless.Ancestor = root;
+	END $$
+
+-- Fires for each item, even when moving a subtree... maybe add a stored procedure for subtree moving?
+-- CREATE OR REPLACE TRIGGER ItemMoveAudit
+-- 	AFTER INSERT
+-- 	ON Tree
+-- 	FOR EACH ROW
+-- 	BEGIN
+-- 		IF(Depth = 0) THEN
+-- 			INSERT INTO Audit(`Code`, `Change`, `Other`, `Time`) VALUES (NEW.Descendant, 'M', NEW.Ancestor, NOW());
+-- 		END IF;
+-- 	END $$
+
 -- Search ----------------------------------------------------------------------
 
 -- Delete items from search results, when deleting from database

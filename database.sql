@@ -83,74 +83,20 @@ CREATE TABLE `ItemFeature` (
 	DEFAULT CHARSET = utf8mb4
 	COLLATE = utf8mb4_unicode_ci;
 
--- To be added again in future and managed via triggers
-# CREATE TABLE `ItemLocationModification` (
-# 	`ModificationID` bigint(20) unsigned NOT NULL,
-# 	`ItemID` bigint(20) unsigned NOT NULL,
-# 	-- parentFrom is useless if adding an item also creates a new row here: first row is the original parent...
-# 	`ParentTo` bigint(20) unsigned NOT NULL,
-# 	PRIMARY KEY (`ModificationID`, `ItemID`),
-# 	KEY (`ParentTo`),
-# 	CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`)
-# 		ON DELETE NO ACTION
-# 		ON UPDATE CASCADE,
-# 	CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`)
-# 		ON DELETE NO ACTION
-# 		ON UPDATE CASCADE,
-# 	CONSTRAINT FOREIGN KEY (`ParentTo`) REFERENCES `Item` (`ItemID`)
-# 		ON DELETE NO ACTION
-# 		ON UPDATE CASCADE
-# )
-# 	ENGINE = InnoDB
-# 	DEFAULT CHARSET = utf8mb4
-# 	COLLATE = utf8mb4_unicode_ci;
-#
-# CREATE TABLE `ItemModificationDelete` (
-# 	`ModificationID` bigint(20) unsigned NOT NULL,
-# 	`ItemID` bigint(20) unsigned NOT NULL,
-# 	PRIMARY KEY (`ModificationID`, `ItemID`),
-# 	KEY (`ItemID`),
-# 	CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`)
-# 		ON DELETE NO ACTION
-# 		ON UPDATE CASCADE,
-# 	CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`)
-# 		ON DELETE NO ACTION
-# 		ON UPDATE CASCADE
-# )
-# 	ENGINE = InnoDB
-# 	DEFAULT CHARSET = utf8mb4
-# 	COLLATE = utf8mb4_unicode_ci;
-#
-# CREATE TABLE `ItemModification` (
-# 	`ModificationID` bigint(20) unsigned NOT NULL,
-# 	`ItemID` bigint(20) unsigned NOT NULL,
-# 	PRIMARY KEY (`ModificationID`, `ItemID`),
-# 	KEY (`ItemID`),
-# 	CONSTRAINT FOREIGN KEY (`ModificationID`) REFERENCES `Modification` (`ModificationID`)
-# 		ON DELETE NO ACTION
-# 		ON UPDATE CASCADE,
-# 	CONSTRAINT FOREIGN KEY (`ItemID`) REFERENCES `Item` (`ItemID`)
-# 		ON DELETE NO ACTION
-# 		ON UPDATE CASCADE
-# )
-# 	ENGINE = InnoDB
-# 	DEFAULT CHARSET = utf8mb4
-# 	COLLATE = utf8mb4_unicode_ci;
-#
-# CREATE TABLE `Modification` (
-# 	`ModificationID` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-# 	`UserID` bigint(20) unsigned NOT NULL,
-# 	`Date` bigint(20) unsigned NOT NULL,
-# 	`Notes` text COLLATE utf8mb4_unicode_ci,
-# 	PRIMARY KEY (`ModificationID`),
-# 	KEY (`UserID`),
-# 	CONSTRAINT FOREIGN KEY (`UserID`) REFERENCES `User` (`UserID`)
-# 		ON DELETE NO ACTION
-# 		ON UPDATE CASCADE
-# )
-# 	ENGINE = InnoDB
-# 	DEFAULT CHARSET = utf8mb4
-# 	COLLATE = utf8mb4_unicode_ci;
+CREATE TABLE Audit (
+	`Code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+	`Change` char(1) COLLATE utf8mb4_bin NOT NULL,
+	`Other` varchar(100) COLLATE utf8mb4_unicode_ci,
+	`Time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY (`Code`),
+		CHECK ((`Change` = 'C') OR (`Change` = 'R') OR (`Change` = 'U') OR (`Change` = 'D') OR (`Change` = 'M')), -- R is for Rename, actually
+		CHECK (Other IS NULL OR (Other IS NOT NULL AND `Change` = 'M')),
+	CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`),
+	CONSTRAINT FOREIGN KEY (`Other`) REFERENCES `Item` (`Code`)
+)
+	ENGINE = InnoDB
+	DEFAULT CHARSET = utf8mb4
+	COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `Tree` (
 	`Ancestor` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
