@@ -3,7 +3,7 @@
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
 if(!isset($recursion) || $recursion === false) {
 	$recursion = false;
-	$this->layout('main', ['title' => $this->e($item->getCode()), 'user' => $user, 'itembuttons' => true]); // TODO: remove itembuttons (unused)?
+	$this->layout('main', ['title' => $this->e($item->getCode()), 'user' => $user, 'itembuttons' => true]);
 } else {
 	$recursion = true;
 }
@@ -105,8 +105,7 @@ if(isset($edit)) {
 	<section class="subitems">
 		<?php
 			if($adding && $target) {
-				// It's basically another item head (items around it are read only, so who cares)
-				$this->insert('newItem', ['recursion' => false, 'floating' => false]);
+				$this->insert('newItem', ['recursion' => true, 'innerrecursion' => false]);
 			}
 
 			$subitems = $item->getContents();

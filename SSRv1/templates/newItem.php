@@ -1,26 +1,31 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 
-$recursion = $recursion ?? false;
-$floating = $floating ?? false;
-// to display new inner items, set their $recursion to true
+$recursion = $recursion ?? false; // Placed inside another item (new or existing)
+$innerrecursion = $innerrecursion ?? false; // Placed inside another NEW item
+
+if(!$innerrecursion && !$recursion) {
+	$this->layout('main', ['title' => 'New item', 'user' => $user, 'itembuttons' => true]);
+}
+
+// to display new inner items, set their $recursion and $innerrecursion to true
 ?>
 
-<article class="item <?= $recursion ? '' : 'head' ?> new">
+<article class="item <?= $innerrecursion ? '' : 'head' ?> new">
 	<header>
 		<h2><label>Code: <input id="newcode" placeholder="Automatically generated"></label></h2>
 	</header>
 
-	<?php if(!$recursion && $floating): ?>
-		<div class="breadsetter"><label>Location: <input id="newparent"></label></div>
-	<?php endif ?>
-
 	<nav class="itembuttons">
-		<?php if(!$recursion): ?>
+		<?php if(!$innerrecursion && !$recursion): ?>
 			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button>
 		<?php endif ?>
 	</nav>
 
+
+	<?php if(!$innerrecursion && !$recursion): ?>
+		<div class="setlocation"><label>Location: <input id="newparent"></label></div>
+	<?php endif ?>
 
 	<section class="own features editing">
 		<?php

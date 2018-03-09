@@ -196,15 +196,10 @@ ul.breadcrumbs li:not(:first-child)::before {
 	margin-right: 0.4em;
 }
 
-.breadsetter {
-	color: #eee;
-	background-color: #333;
+.setlocation {
+	/*color: #eee;*/
+	/*background-color: #333;*/
 	padding: 0.5em;
-}
-
-.breadsetter input:disabled {
-	color: #eee;
-	background-color: #333;
 }
 
 .item {
@@ -233,6 +228,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 
 .new.item h2 {
 	font-size: large;
+	padding: 0.5rem;
 }
 
 .features section h3 {

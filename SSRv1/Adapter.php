@@ -42,6 +42,18 @@ class Adapter implements AdapterInterface {
 		return new Response(200, 'text/html', $engine->render('item', $renderParameters));
 	}
 
+	private static function addItem(
+		User $user = null,
+		Database $db,
+		Engine $engine,
+		$parameters,
+		$querystring
+	): Response {
+		Validation::authorize($user);
+
+		return new Response(200, 'text/html', $engine->render('newItem', ['add' => true]));
+	}
+
 	private static function login(
 		User $user = null,
 		Database $db,
@@ -97,6 +109,7 @@ class Adapter implements AdapterInterface {
 			$r->get('/item/{id}', 'getItem');
 			$r->get('/item/{id}/add/{add}', 'getItem');
 			$r->get('/item/{id}/edit/{edit}', 'getItem');
+			$r->get('/add', 'addItem');
 			$r->addRoute(['GET', 'POST'], '/login', 'login');
 		});
 
