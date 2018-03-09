@@ -62,7 +62,7 @@ if(isset($edit)) {
 	</ul>
 </nav>
 <?php endif ?>
-<article class="item <?= $recursion ? '' : 'head' ?> <?= $working ?> <?= $target ? 'editing' : '' ?>" data-code="<?=$this->e($item->getCode())?>">
+<article class="item <?= $recursion ? '' : 'head' ?> <?= $working ?> <?= $target && $editing ? 'editing' : '' ?>" data-code="<?=$this->e($item->getCode())?>">
 	<header>
 		<h2 id="code-<?= $this->e($item->getCode()) ?>"><?=$this->e($item->getCode())?></h2>
 	</header>

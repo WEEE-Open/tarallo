@@ -11,13 +11,13 @@ if(!$innerrecursion && !$recursion) {
 // to display new inner items, set their $recursion and $innerrecursion to true
 ?>
 
-<article class="item <?= $innerrecursion ? '' : 'head' ?> new">
+<article class="item <?= $innerrecursion ? '' : 'editing' ?> new">
 	<header>
-		<h2><label>Code: <input id="newcode" placeholder="Automatically generated"></label></h2>
+		<h2><label>Code: <input class="newcode" placeholder="Automatically generated"></label></h2>
 	</header>
 
 	<nav class="itembuttons">
-		<?php if(!$innerrecursion && !$recursion): ?>
+		<?php if(!$innerrecursion): ?>
 			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button>
 		<?php endif ?>
 	</nav>

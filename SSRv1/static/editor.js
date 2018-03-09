@@ -9,12 +9,21 @@
 	let divs = document.querySelectorAll('.features.own.editing [contenteditable]');
 	let selects = document.querySelectorAll('.features.own.editing select');
 	let deletes = document.querySelectorAll('.features.own.editing .delete');
+	let editing = document.querySelector('.item.editing');
+	let newItem = editing.classList.contains('new');
+
+	if(newItem) {
+		// noinspection JSUnresolvedFunction
+		document.querySelector('.itembuttons .save').addEventListener('click', saveNew);
+	} else {
+		// noinspection JSUnresolvedFunction
+		document.querySelector('.itembuttons .save').addEventListener('click', saveModified);
+	}
+	// noinspection JSUnresolvedFunction
+	document.querySelector('.itembuttons .cancel').addEventListener('click', goBack);
+
 	// noinspection JSUnresolvedFunction It's perfectly resolved, it's there, it exists
-	document.querySelector('.item.editing .add button').addEventListener('click', addFeature);
-	// noinspection JSUnresolvedFunction
-	document.querySelector('.item.editing .itembuttons .save').addEventListener('click', saveClick);
-	// noinspection JSUnresolvedFunction
-	document.querySelector('.item.editing .itembuttons .cancel').addEventListener('click', goBack);
+	editing.querySelector('.add button').addEventListener('click', addFeature);
 
 	for(let div of divs) {
 		if(div.dataset.internalType === 's') {
@@ -258,7 +267,7 @@
 				if(prefix > 0) {
 					i = 'i';
 				}
-				return '' + value + ' ' + prefixToPrintable(prefix, true) + i +'B';
+				return '' + value + ' ' + prefixToPrintable(prefix, true) + i + 'B';
 			default:
 				return appendUnit(value, unit);
 		}
@@ -342,7 +351,7 @@
 		}
 		let i;
 		for(i = 0; i < string.length; i++) {
-			if (!((string[i] >= '0' && string[i] <= '9') || string[i] === '.' || string[i] === ',')) {
+			if(!((string[i] >= '0' && string[i] <= '9') || string[i] === '.' || string[i] === ',')) {
 				break;
 			}
 		}
@@ -481,11 +490,17 @@
 		document.querySelector('.item.editing .features.own.editing .new ul').appendChild(newElement);
 	}
 
-	async function saveClick() {
+	/**
+	 * Get changed or added features (changeset)
+	 *
+	 * @param {HTMLElement|Element} featuresElement
+	 * @param {object} delta - Where to add the changeset
+	 *
+	 * @return {int} How many features have been changed or added
+	 */
+	function getChangedFeatures(featuresElement, delta) {
+		let changed = featuresElement.querySelectorAll('.value.changed, .new .value');
 		let counter = 0;
-		let delta = {};
-
-		let changed = document.querySelectorAll('.item.editing .features.own.editing .value.changed, .item.editing .features.own.editing .new .value');
 
 		for(let element of changed) {
 			switch(element.dataset.internalType) {
@@ -508,6 +523,102 @@
 			counter++;
 		}
 
+		return counter;
+	}
+
+	/**
+	 * Get new features (changeset) recursively, for a (sub)tree of new items
+	 *
+	 * @param {HTMLElement|Element} root - Item, the one with the "item" class
+	 * @param {object} delta - Where to add the changeset
+	 * @param {object[]} contents - Where to place inner items
+	 *
+	 * @return {int} How many features have been changed or added
+	 */
+	function getNewFeaturesRecursively(root, delta, contents) {
+		let counter;
+
+		let features, subitems;
+		for(let el of root.children) {
+			if(el.classList.contains('features')) {
+				features = el;
+			} else if(el.classList.contains('subitems')) {
+				subitems = el;
+			}
+		}
+
+		counter = getChangedFeatures(features, delta);
+
+		for(let subitem of subitems.children) {
+			let inner = {};
+			inner.features = {};
+			inner.contents = [];
+			inner.code = root.querySelector(':not(.subitems) ');
+			counter += getNewFeaturesRecursively(subitem, inner.features, inner.contents);
+			contents.push(inner);
+		}
+
+		return counter;
+	}
+
+	/**
+	 * @param {HTMLElement} root
+	 * @return {Promise<void>} Nothing, really.
+	 */
+	async function saveNew(root) {
+		let counter;
+		let delta = {};
+		let contents = [];
+
+		counter = getNewFeaturesRecursively(document.querySelector('.item.editing'), delta, contents);
+
+		if(counter <= 0) {
+			return;
+		}
+
+		toggleButtons(true);
+
+		// TODO: could this match inner items? It always matches first one, but that doesn't seem very robust... maybe add a newhead class and use head/newhead? Or .new.head? Or (.new).editing.head so it works in both cases?
+		let code = document.querySelector('.item.editing').dataset.code;
+		let request, response;
+
+		request = {};
+		// TODO: request.parent
+		request.features = delta;
+		request.contents = contents;
+
+		/////////////////////
+		// Extremely advanced debugging tools
+		/////////////////////
+		//console.log(request);
+		//toggleButtons(false);
+		//return;
+		/////////////////////
+
+		// TODO: POST if no id
+		response = await fetch('/v1/items/' + encodeURIComponent(code), {
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			method: 'PUT',
+			credentials: 'include',
+			body: JSON.stringify(request)
+		});
+
+		await jsendMe(response, goBack, displayError.bind(null, null));
+		toggleButtons(false);
+	}
+
+	/**
+	 * @return {Promise<void>} Nothing, really.
+	 */
+	async function saveModified() {
+		let counter;
+		let delta = {};
+
+		counter = getChangedFeatures(document.querySelector('.item.editing .features.own.editing'), delta);
+
 		for(let deleted of deletedFeatures) {
 			delta[deleted] = null;
 			counter++;
@@ -517,13 +628,11 @@
 			return;
 		}
 
-		let id = document.querySelector('.item.editing').dataset.code;
+		toggleButtons(true);
+		let code = document.querySelector('.item.editing').dataset.code;
+		let response;
 
-		for(let button of document.querySelectorAll('.itembuttons button')) {
-			button.disabled = true;
-		}
-
-		let response = await fetch('/v1/items/' + encodeURIComponent(id) + '/features', {
+		response = await fetch('/v1/items/' + encodeURIComponent(code) + '/features', {
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
@@ -534,6 +643,18 @@
 		});
 
 		await jsendMe(response, goBack, displayError.bind(null, null));
+		toggleButtons(false);
+	}
+
+	/**
+	 * Disable itembuttons. Or enable them.
+	 *
+	 * @param {boolean} disabled
+	 */
+	function toggleButtons(disabled) {
+		for(let button of document.querySelectorAll('.itembuttons button')) {
+			button.disabled = disabled;
+		}
 	}
 
 	async function jsendMe(response, onsuccess, onerror) {
