@@ -41,8 +41,6 @@ class ItemBuilder {
 	 * @param string|null $code Code for new item, if explicitly set
 	 * @param boolean $inner Used for recursion
 	 *
-	 * @TODO: handle brand, model, variant
-	 *
 	 * @return Item
 	 */
 	private static function ofArrayInternal(array $input, $code, $inner = false) {
@@ -55,6 +53,15 @@ class ItemBuilder {
 		if($inner && isset($input['parent'])) {
 			throw new InvalidPayloadParameterException('parent', $input['parent'],
 				'Cannot set parent for internal items');
+		}
+
+		if(isset($input['code'])) {
+			if($inner) {
+				$item->setCode($input['code']);
+			} else {
+				throw new InvalidPayloadParameterException('code', $input['code'],
+					'Cannot set code for head/root item this way, use the URI');
+			}
 		}
 
 		if(isset($input['features'])) {
@@ -72,7 +79,7 @@ class ItemBuilder {
 					'Contents must be an array, ' . gettype($input['contents']) . ' given');
 			}
 			foreach($input['contents'] as $other) {
-				$item->addContent(self::ofArrayInternal($other, true));
+				$item->addContent(self::ofArrayInternal($other, null, true));
 			}
 		}
 
