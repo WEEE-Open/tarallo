@@ -88,7 +88,7 @@ CREATE TABLE Audit (
 	`Change` char(1) COLLATE utf8mb4_bin NOT NULL,
 	`Other` varchar(100) COLLATE utf8mb4_unicode_ci,
 	`Time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-		PRIMARY KEY (`Code`),
+		PRIMARY KEY (`Code`, `Change`, `Time`),
 		CHECK ((`Change` = 'C') OR (`Change` = 'R') OR (`Change` = 'U') OR (`Change` = 'D') OR (`Change` = 'M')), -- R is for Rename, actually
 		CHECK (Other IS NULL OR (Other IS NOT NULL AND `Change` = 'M')),
 	CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`),
