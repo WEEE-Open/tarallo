@@ -650,26 +650,26 @@
 	}
 
 	/**
-	 * @param {HTMLElement} root
 	 * @return {Promise<void>} Nothing, really.
 	 */
-	async function saveNew(root) {
+	async function saveNew() {
 		let counter;
+		let root = document.querySelector('.head.item.editing');
 		let delta = {};
 		let contents = [];
 
-		counter = getNewFeaturesRecursively(document.querySelector('.head.item.editing'), delta, contents);
+		counter = getNewFeaturesRecursively(root, delta, contents);
 
 		if(counter <= 0) {
 			return;
 		}
 
-		toggleButtons(true);
-
-		let code = document.querySelector('.head.item.editing').dataset.code;
 		let request, response;
 
 		request = {};
+
+		let code = document.querySelector('.newcode').value;
+
 		// TODO: request.parent
 		request.features = delta;
 		request.contents = contents;
@@ -677,18 +677,27 @@
 		/////////////////////
 		// Extremely advanced debugging tools
 		/////////////////////
-		//console.log(request);
-		//toggleButtons(false);
-		//return;
+		console.log(request);
+		return;
 		/////////////////////
 
-		// TODO: POST if no id
-		response = await fetch('/v1/items/' + encodeURIComponent(code), {
+		toggleButtons(true);
+
+		let method, uri;
+		if(code) {
+			method = 'PUT';
+			uri = '/v1/items/' + encodeURIComponent(code);
+		} else {
+			method = 'POST';
+			uri = '/v1/items';
+		}
+
+		response = await fetch(uri, {
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
 			},
-			method: 'PUT',
+			method: method,
 			credentials: 'include',
 			body: JSON.stringify(request)
 		});
