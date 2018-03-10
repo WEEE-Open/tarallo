@@ -93,9 +93,6 @@ if(isset($edit)) {
 		<section class="product features">
 			<?php $this->insert('features', ['features' => $product === null ? [] : $product->getFeatures()]) ?>
 		</section>
-
-		<script src="/features.js"></script>
-		<script src="/editor.js"></script>
 	<?php else: ?>
 		<section class="features">
 			<?php $this->insert('features', ['features' => $features]) ?>
@@ -115,3 +112,7 @@ if(isset($edit)) {
 		?>
 	</section>
 </article>
+<?php if(($editing || $adding) && $target) {
+	$this->insert('editor');
+}
+?>

@@ -539,6 +539,12 @@
 		return newElement;
 	}
 
+	function newItem() {
+		let clone = document.importNode(document.getElementById('new-item-template').content, true);
+		// TODO: add event listener for the add button (which will be near impossible since "clone" is a weird thing without anything usable inside, not a Node)
+		return clone;
+	}
+
 	/**
 	 * Get changed or added features (changeset)
 	 *

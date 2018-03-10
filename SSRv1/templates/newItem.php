@@ -11,15 +11,17 @@ if(!$innerrecursion && !$recursion) {
 // to display new inner items, set their $recursion and $innerrecursion to true
 ?>
 
-<article class="item new editing <?= $recursion ? '' : 'root' ?> <?= $innerrecursion ? '' : 'head' ?>">
+<article class="item new editing <?=$recursion ? '' : 'root'?> <?=$innerrecursion ? '' : 'head'?>">
 	<header>
 		<h2><label>Code: <input class="newcode" placeholder="Automatically generated"></label></h2>
 	</header>
 
 	<nav class="itembuttons">
 		<?php if(!$innerrecursion): ?>
-			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button>
+			<button class="save">💾&nbsp;Save</button>
+			<button class="cancel">🔙&nbsp;Cancel</button>
 		<?php endif ?>
+		<button class="addnew">📄&nbsp;Add</button>
 	</nav>
 
 
@@ -36,15 +38,15 @@ if(!$innerrecursion && !$recursion) {
 	<section class="addfeatures">
 		<label>Feature:
 			<select>
-			<?php $this->insert('allFeatures') ?>
+				<?php $this->insert('allFeatures') ?>
 			</select></label>
 		<button>Add</button>
 	</section>
-
-	<script src="/features.js"></script>
-	<script src="/editor.js"></script>
 
 	<section class="subitems">
 
 	</section>
 </article>
+<?php if(!$recursion) {
+	$this->insert('editor');
+} ?>
