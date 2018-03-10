@@ -17,11 +17,7 @@ if(!$innerrecursion && !$recursion) {
 	</header>
 
 	<nav class="itembuttons">
-		<?php if(!$innerrecursion): ?>
-			<button class="save">💾&nbsp;Save</button>
-			<button class="cancel">🔙&nbsp;Cancel</button>
-		<?php endif ?>
-		<button class="addnew">📄&nbsp;Add</button>
+		<?php if(!$innerrecursion): ?><button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><?php else: ?><button class="removenew">❌&nbsp;Delete</button><?php endif ?><button class="addnew">🆕&nbsp;More</button>
 	</nav>
 
 

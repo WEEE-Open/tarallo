@@ -16,6 +16,10 @@
 		deleteClickBound = deleteFeature.bind(null, null);
 		// noinspection JSUnresolvedFunction It's perfectly resolved, it's there, it exists
 		itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveNew);
+		// noinspection JSUnresolvedFunction
+		itemEditing.querySelector('.itembuttons .addnew').addEventListener('click', addNewClick);
+		// Root "new item" cannot be deleted, just cancel the entire operation
+		// itemEditing.querySelector('.itembuttons .removenew').addEventListener('click', removeNewClick);
 	} else {
 		deletedFeatures = new Set();
 		deleteClickBound = deleteFeature.bind(null, deletedFeatures);
@@ -41,6 +45,7 @@
 		// Find "add" button and add listener
 		for(let el of item.children) {
 			if(el.classList.contains('addfeatures')) {
+				console.log(el);
 				el.querySelector('button').addEventListener('click', addFeatureClick.bind(null, el.querySelector('select'), item, featuresElement, typeof deletedFeatures !== 'undefined'));
 				break;
 			}
@@ -197,6 +202,7 @@
 		let item = document.querySelector('.item.head.editing');
 		item.insertBefore(template, item.getElementsByTagName('HEADER')[0].nextElementSibling);
 		// "template" is a document fragment, there's no way to get the element itself
+		// TODO: does template[0] or something like that work?
 		let inserted = document.querySelector('.item.head.editing .error.message');
 		document.getElementById('feature-edit-last-error').id = undefined;
 		inserted.id = 'feature-edit-last-error';
@@ -452,8 +458,6 @@
 		}
 
 		// Insert
-		console.log(featuresElement);
-		console.log(featuresElement.querySelector('.new ul'));
 		featuresElement.querySelector('.new ul').appendChild(newElement);
 	}
 
@@ -541,8 +545,33 @@
 
 	function newItem() {
 		let clone = document.importNode(document.getElementById('new-item-template').content, true);
-		// TODO: add event listener for the add button (which will be near impossible since "clone" is a weird thing without anything usable inside, not a Node)
+		// noinspection JSUnresolvedFunction PHPStorm decided that addEventListener doesn't exist, that's it. The end. There's nothing to do about that, other than littering every file with noinspection.
+		clone.querySelector('.removenew').addEventListener('click', removeNewClick);
+		// noinspection JSUnresolvedFunction
+		clone.querySelector('.addnew').addEventListener('click', addNewClick);
+		let item = clone.children[0];
+		let featuresElement = item.querySelector('.own.features.editing');
+		clone.querySelector('.addfeatures button').addEventListener('click', addFeatureClick.bind(null, clone.querySelector('.addfeatures select'), item, featuresElement, false));
 		return clone;
+	}
+
+	/**
+	 * Handle clicking the "add" button inside new items
+	 *
+	 * @param ev Event
+	 */
+	function addNewClick(ev) {
+		let item = newItem();
+		ev.target.parentElement.parentElement.querySelector('.subitems').appendChild(item);
+	}
+
+	/**
+	 * Handle clicking the "delete" button inside new items
+	 *
+	 * @param ev Event
+	 */
+	function removeNewClick(ev) {
+		ev.target.parentElement.parentElement.remove();
 	}
 
 	/**
@@ -606,9 +635,13 @@
 
 		for(let subitem of subitems.children) {
 			let inner = {};
+			let code = subitem.querySelector('.newcode').value;
+
+			if(code) {
+				inner.code = code;
+			}
 			inner.features = {};
 			inner.contents = [];
-			inner.code = root.querySelector('something'); // TODO: this
 			counter += getNewFeaturesRecursively(subitem, inner.features, inner.contents);
 			contents.push(inner);
 		}
