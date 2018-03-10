@@ -76,7 +76,13 @@ class Adapter implements AdapterInterface {
 		$loopback = isset($parameters['loopback']) ? true : false;
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
-		$db->itemDAO()->addItem($item, $parent);
+		try {
+			$db->itemDAO()->addItem($item, $parent);
+		} catch(NotFoundException $e) {
+			if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
+				throw new InvalidPayloadParameterException('parent', $parent, 'Requested location doesn\'t exist');
+			}
+		}
 
 		if($loopback) {
 			return $db->itemDAO()->getItem($item);
