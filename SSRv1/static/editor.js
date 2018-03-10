@@ -198,18 +198,22 @@
 			}
 		}
 		let template = document.importNode(templateThingThatShouldExist.content, true);
+		let element = template.children[0];
+		element.id = 'feature-edit-last-error';
+		element.getElementsByTagName('BUTTON')[0].addEventListener('click', removeError.bind(null, element));
+
+		if(message !== null) {
+			// firstChild is a text node
+			element.firstChild.textContent = message;
+		}
+
+		let last = document.getElementById('feature-edit-last-error');
+		if(last) {
+			last.id = undefined;
+		}
 
 		let item = document.querySelector('.item.head.editing');
 		item.insertBefore(template, item.getElementsByTagName('HEADER')[0].nextElementSibling);
-		// "template" is a document fragment, there's no way to get the element itself
-		// TODO: does template[0] or something like that work?
-		let inserted = document.querySelector('.item.head.editing .error.message');
-		document.getElementById('feature-edit-last-error').id = undefined;
-		inserted.id = 'feature-edit-last-error';
-		inserted.getElementsByTagName('BUTTON')[0].addEventListener('click', removeError.bind(null, inserted));
-		if(message !== null) {
-			inserted.firstChild.textContent = message;
-		}
 	}
 
 	/**
@@ -442,15 +446,16 @@
 	function addFeatureClick(select, item, featuresElement, trackDeleted) {
 		let name = select.value;
 		let translatedName = select.options[select.selectedIndex].textContent;
-		let id = 'feature-edit-' + name;
+		let pseudoId = 'feature-edit-' + name;
 
-		let element = document.getElementById(id);
-		if(element !== null) {
-			element.focus();
+		let duplicates = featuresElement.getElementsByClassName(pseudoId);
+		if(duplicates.length > 0) {
+			// There should be only one, hopefully
+			duplicates[0].focus();
 			return null;
 		}
 
-		let newElement = newFeature(name, translatedName, id);
+		let newElement = newFeature(name, translatedName, pseudoId, trackDeleted);
 
 		if(trackDeleted) {
 			// Undelete
@@ -461,19 +466,25 @@
 		featuresElement.querySelector('.new ul').appendChild(newElement);
 	}
 
+	// To generate unique IDs
+	let featureIdsCounter = 0;
+
 	/**
 	 * Maybe a template would have been better...
 	 *
 	 * @param {string} name - Feature name
 	 * @param {string} translatedName - Human-readable feature name
-	 * @param {string} id - Element id (already checked to be unique)
+	 * @param {string} pseudoId - Unique element identifier (already checked to be unique), used as class
+	 * @param {boolean} trackDeleted - True to use the deletedFeatures set
 	 */
-	function newFeature(name, translatedName, id) {
+	function newFeature(name, translatedName, pseudoId, trackDeleted) {
 		let type = featureTypes.get(name);
+		let id = pseudoId + featureIdsCounter++;
 
 		let newElement = document.createElement("li");
 		let elementName = document.createElement("div");
 		elementName.classList.add("name");
+		elementName.classList.add(pseudoId);
 		newElement.appendChild(elementName);
 		let elementLabel = document.createElement("label");
 		elementLabel.htmlFor = id;
@@ -537,7 +548,7 @@
 		deleteButton.classList.add('delete');
 		deleteButton.dataset.name = name;
 		deleteButton.textContent = '❌';
-		deleteButton.addEventListener('click', deleteFeature.bind(null, deletedFeatures));
+		deleteButton.addEventListener('click', deleteFeature.bind(null, trackDeleted ? deletedFeatures : null));
 		controlsElement.appendChild(deleteButton);
 
 		return newElement;
@@ -655,6 +666,7 @@
 	async function saveNew() {
 		let counter;
 		let root = document.querySelector('.head.item.editing');
+
 		let delta = {};
 		let contents = [];
 
@@ -669,17 +681,13 @@
 		request = {};
 
 		let code = document.querySelector('.newcode').value;
+		let parentSelector = root.querySelector('.setlocation input');
+		if(parentSelector && parentSelector.value !== '') {
+			request.parent = parentSelector.value;
+		}
 
-		// TODO: request.parent
 		request.features = delta;
 		request.contents = contents;
-
-		/////////////////////
-		// Extremely advanced debugging tools
-		/////////////////////
-		console.log(request);
-		return;
-		/////////////////////
 
 		toggleButtons(true);
 
@@ -692,6 +700,8 @@
 			uri = '/v1/items';
 		}
 
+		console.log(uri);
+		console.log(method);
 		response = await fetch(uri, {
 			headers: {
 				'Accept': 'application/json',
@@ -765,7 +775,7 @@
 			try {
 				let jsend = await response.json();
 				if(response.ok && jsend.status === 'success') {
-					onsuccess();
+					onsuccess(jsend.data);
 				} else {
 					if(jsend.status === 'fail') {
 						if(jsend.data) {
@@ -798,7 +808,12 @@
 		}
 	}
 
-	function goBack() {
+	/**
+	 * Go back to view mode. Or go forward to view mode, depending on tne point of view.
+	 *
+	 * @param {string|null} code - Newly added item code, to redirect there from add item page
+	 */
+	function goBack(code = null) {
 		let here = window.location.pathname;
 		let query = window.location.search;
 		let hash = window.location.hash;
@@ -809,8 +824,12 @@
 			pieces.splice(pieces.length - 2);
 			window.location.href = pieces.join('/') + query + hash;
 		} else {
-			// This feels sooooo 2001
-			window.history.back();
+			if(code) {
+				window.location.href = '/item/' + encodeURIComponent(code);
+			} else {
+				// This feels sooooo 2001
+				window.history.back();
+			}
 		}
 	}
 
