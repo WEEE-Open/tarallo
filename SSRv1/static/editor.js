@@ -35,7 +35,7 @@
 
 		for(let el of item.children) {
 			if(el.classList.contains('addfeatures')) {
-				el.addEventListener('click', addFeatureClick.bind(null, el.querySelector('select'), item));
+				el.addEventListener('click', addFeatureClick.bind(null, el.querySelector('select'), item, featuresElement));
 				break;
 			}
 		}
