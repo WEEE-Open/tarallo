@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\APIv1;
 use FastRoute;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Database\DatabaseException;
+use WEEEOpen\Tarallo\Server\Database\ItemDAO;
 use WEEEOpen\Tarallo\Server\Database\TreeDAO;
 use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
@@ -81,6 +82,12 @@ class Adapter implements AdapterInterface {
 		} catch(NotFoundException $e) {
 			if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
 				throw new InvalidPayloadParameterException('parent', $parent, 'Requested location doesn\'t exist');
+			}
+		} catch(\InvalidArgumentException $e) {
+			if($e->getCode() === ItemDAO::EXCEPTION_CODE_GENERATE_ID) {
+				throw new InvalidPayloadParameterException('code', null, 'Cannot generate code for an item (missing "type"?)');
+			} else {
+				throw $e;
 			}
 		}
 

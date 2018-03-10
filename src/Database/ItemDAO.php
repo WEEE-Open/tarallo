@@ -8,6 +8,7 @@ use WEEEOpen\Tarallo\Server\ItemPrefixer;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 
 final class ItemDAO extends DAO {
+	const EXCEPTION_CODE_GENERATE_ID = 3;
 
 	private $addItemStatement = null;
 
@@ -19,7 +20,11 @@ final class ItemDAO extends DAO {
 	 */
 	public function addItem(Item $item, ItemIncomplete $parent = null) {
 		if(!$item->hasCode()) {
-			$prefix = ItemPrefixer::get($item);
+			try {
+				$prefix = ItemPrefixer::get($item);
+			} catch(\InvalidArgumentException $e) {
+				throw new \InvalidArgumentException($e->getMessage(), self::EXCEPTION_CODE_GENERATE_ID);
+			}
 			$code = $this->getNewCode($prefix);
 			$item->setCode($code);
 		}
