@@ -681,8 +681,12 @@
 
 		let code = document.querySelector('.newcode').value;
 		let parentSelector = root.querySelector('.setlocation input');
-		if(parentSelector && parentSelector.value !== '') {
-			request.parent = parentSelector.value;
+		if(parentSelector) {
+			if(parentSelector.value !== '') {
+				request.parent = parentSelector.value;
+			}
+		} else {
+			// TODO: obtain parent from displayed items, set it
 		}
 
 		request.features = delta;
