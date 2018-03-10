@@ -45,7 +45,6 @@
 		// Find "add" button and add listener
 		for(let el of item.children) {
 			if(el.classList.contains('addfeatures')) {
-				console.log(el);
 				el.querySelector('button').addEventListener('click', addFeatureClick.bind(null, el.querySelector('select'), item, featuresElement, typeof deletedFeatures !== 'undefined'));
 				break;
 			}
@@ -451,7 +450,7 @@
 		let duplicates = featuresElement.getElementsByClassName(pseudoId);
 		if(duplicates.length > 0) {
 			// There should be only one, hopefully
-			duplicates[0].focus();
+			duplicates[0].querySelector('.value').focus();
 			return null;
 		}
 
@@ -482,14 +481,14 @@
 		let id = pseudoId + featureIdsCounter++;
 
 		let newElement = document.createElement("li");
-		let elementName = document.createElement("div");
-		elementName.classList.add("name");
-		elementName.classList.add(pseudoId);
-		newElement.appendChild(elementName);
-		let elementLabel = document.createElement("label");
-		elementLabel.htmlFor = id;
-		elementLabel.textContent = translatedName;
-		elementName.appendChild(elementLabel);
+		newElement.classList.add(pseudoId);
+		let nameElement = document.createElement("div");
+		nameElement.classList.add("name");
+		newElement.appendChild(nameElement);
+		let labelElement = document.createElement("label");
+		labelElement.htmlFor = id;
+		labelElement.textContent = translatedName;
+		nameElement.appendChild(labelElement);
 
 		let valueElement, div;
 		switch(type) {
@@ -700,8 +699,6 @@
 			uri = '/v1/items';
 		}
 
-		console.log(uri);
-		console.log(method);
 		response = await fetch(uri, {
 			headers: {
 				'Accept': 'application/json',
