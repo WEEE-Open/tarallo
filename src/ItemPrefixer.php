@@ -55,6 +55,8 @@ class ItemPrefixer {
 			case 'scsi-card':
 			case 'tv-card':
 				return 'SP';
+			case 'audio-card':
+				return 'SA';
 			case 'wifi-card':
 			case 'bluetooth-card':
 				return 'W';

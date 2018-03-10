@@ -310,12 +310,26 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('psu-connector-cpu', '6pin'), -- 6 pin (other) --
 	('psu-connector-cpu', '8pin'), -- 8 pin --
 	('psu-connector-cpu', 'proprietary'); -- Proprietary --
--- TRUNCATE `Codes`;
--- TRUNCATE `Item`;
--- TRUNCATE `ItemFeature`;
--- TRUNCATE `ItemLocationModification`;
--- TRUNCATE `ItemModification`;
--- TRUNCATE `ItemModificationDelete`;
--- TRUNCATE `Modification`;
--- TRUNCATE `Tree`;
--- TRUNCATE `User`;
+
+TRUNCATE `Prefixes`;
+INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
+	-- 0 is "last successfully generated code", duplicates are skipped, so there's no problem if they overlap
+	('M', 0),
+	('B', 0),
+	('C', 0),
+	('SG', 0),
+	('R', 100),
+	('HDD', 0),
+	('ODD', 0),
+	('AD', 0),
+	('AR', 0),
+	('A', 0),
+	('V', 0),
+	('FL', 0),
+	('SP', 0),
+	('SA', 0),
+	('W', 0),
+	('ADA', 0),
+	('NET', 0),
+	('T', 50),
+	('', 50);
