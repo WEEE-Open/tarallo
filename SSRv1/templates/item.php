@@ -62,7 +62,7 @@ if(isset($edit)) {
 	</ul>
 </nav>
 <?php endif ?>
-<article class="item <?= $recursion ? '' : 'head' ?> <?= $working ?> <?= $target && $editing ? 'editing' : '' ?>" data-code="<?=$this->e($item->getCode())?>">
+<article class="item <?= $recursion ? '' : 'root' ?> <?= $working ?> <?= $editing && $target ? 'head editing' : '' ?>" data-code="<?=$this->e($item->getCode())?>">
 	<header>
 		<h2 id="code-<?= $this->e($item->getCode()) ?>"><?=$this->e($item->getCode())?></h2>
 	</header>
@@ -82,7 +82,7 @@ if(isset($edit)) {
 			?>
 		</section>
 
-		<section class="add">
+		<section class="addfeatures">
 			<label>Feature:
 				<select>
 				<?php $this->insert('allFeatures') ?>

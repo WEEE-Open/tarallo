@@ -6,24 +6,40 @@
 	/** @type {Set<string>} */
 	let deletedFeatures = new Set();
 
-	let divs = document.querySelectorAll('.features.own.editing [contenteditable]');
-	let selects = document.querySelectorAll('.features.own.editing select');
-	let deletes = document.querySelectorAll('.features.own.editing .delete');
-	let editing = document.querySelector('.item.editing');
-	let newItem = editing.classList.contains('new');
+	let divs = document.querySelectorAll('.features.editing [contenteditable]');
+	let selects = document.querySelectorAll('.features.editing select');
+	let deletes = document.querySelectorAll('.features.editing .delete');
+	let itemEditing = document.querySelector('.item.head.editing');
+	let isNew = itemEditing.classList.contains('new');
 
-	if(newItem) {
-		// noinspection JSUnresolvedFunction
-		document.querySelector('.itembuttons .save').addEventListener('click', saveNew);
+	if(isNew) {
+		// noinspection JSUnresolvedFunction It's perfectly resolved, it's there, it exists
+		itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveNew);
 	} else {
 		// noinspection JSUnresolvedFunction
-		document.querySelector('.itembuttons .save').addEventListener('click', saveModified);
+		itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveModified);
 	}
 	// noinspection JSUnresolvedFunction
-	document.querySelector('.itembuttons .cancel').addEventListener('click', goBack);
+	itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack);
 
-	// noinspection JSUnresolvedFunction It's perfectly resolved, it's there, it exists
-	editing.querySelector('.add button').addEventListener('click', addFeature);
+	// There may be more than one new item
+	for(let item of document.querySelectorAll('.item.editing')) {
+		let featuresElement;
+
+		for(let el of item.children) {
+			if(el.classList.contains('own') && el.classList.contains('features')) {
+				featuresElement = el;
+				break;
+			}
+		}
+
+		for(let el of item.children) {
+			if(el.classList.contains('addfeatures')) {
+				el.addEventListener('click', addFeatureClick.bind(null, el.querySelector('select'), item));
+				break;
+			}
+		}
+	}
 
 	for(let div of divs) {
 		if(div.dataset.internalType === 's') {
@@ -38,12 +54,12 @@
 	}
 
 	for(let deleteButton of deletes) {
-		let bound = deleteItem.bind(null, deletedFeatures);
+		let bound = deleteFeature.bind(null, deletedFeatures);
 		deleteButton.addEventListener('click', bound);
 	}
 
 	/**
-	 * Remove last error message (or any element, really)
+	 * Remove an error message (or any element, really)
 	 *
 	 * @param {HTMLElement|null} element to be removed, or null to remove last error message
 	 */
@@ -51,10 +67,10 @@
 		if(element === null) {
 			let last = document.getElementById('feature-edit-last-error');
 			if(last !== null) {
-				last.parentElement.removeChild(last);
+				last.remove();
 			}
 		} else {
-			element.parentElement.removeChild(element);
+			element.remove();
 		}
 	}
 
@@ -126,7 +142,7 @@
 			lines[0].textContent = valueToPrintable(unit, newValue);
 			while(lines.length > 1) {
 				let last = lines[lines.length - 1];
-				last.parentElement.removeChild(last);
+				last.remove();
 			}
 			// Save if for later
 			ev.target.dataset.previousValue = newValue.toString();
@@ -135,7 +151,6 @@
 			ev.target.dataset.internalValue = ev.target.dataset.previousValue;
 			ev.target.getElementsByTagName('DIV')[0].textContent = valueToPrintable(unit, parseInt(ev.target.dataset.previousValue));
 			// Display error message
-			removeError(null);
 			let displayed = displayError(e.message);
 			if(!displayed) {
 				throw e;
@@ -171,10 +186,11 @@
 		}
 		let template = document.importNode(templateThingThatShouldExist.content, true);
 
-		let item = document.querySelector('.item.editing');
+		let item = document.querySelector('.item.head.editing');
 		item.insertBefore(template, item.getElementsByTagName('HEADER')[0].nextElementSibling);
 		// "template" is a document fragment, there's no way to get the element itself
-		let inserted = document.querySelector('.item.editing .error.message');
+		let inserted = document.querySelector('.item.head.editing .error.message');
+		document.getElementById('feature-edit-last-error').id = undefined;
 		inserted.id = 'feature-edit-last-error';
 		inserted.getElementsByTagName('BUTTON')[0].addEventListener('click', removeError.bind(null, inserted));
 		if(message !== null) {
@@ -394,19 +410,38 @@
 	 * @param {Set} set Deleted features
 	 * @param ev Event
 	 */
-	function deleteItem(set, ev) {
+	function deleteFeature(set, ev) {
 		set.add(ev.target.dataset.name);
-		ev.target.parentElement.parentElement.parentElement.removeChild(ev.target.parentElement.parentElement);
+		ev.target.parentElement.parentElement.remove();
 	}
 
-	let featureSelector = document.querySelector('.item.editing .add select');
+	/**
+	 * Handle clicking the "add" button for new features
+	 *
+	 * @param {HTMLSelectElement} select - HTML "select" element
+	 * @param {HTMLElement} item - The item itself
+	 * @param {HTMLElement} featuresElement - The "own features" element
+	 */
+	function addFeatureClick(select, item, featuresElement) {
+		let name = select.value;
+		let translatedName = select.options[select.selectedIndex].textContent;
+
+		let newElement = newFeature(name, translatedName);
+
+		// Undelete
+		// TODO: use only when editing (not adding)
+		deletedFeatures.delete(name);
+		// Insert
+		featuresElement.querySelector('.new ul').appendChild(newElement);
+	}
 
 	/**
 	 * Maybe a template would have been better...
+	 *
+	 * @param {string} name
+	 * @param {string} translatedName
 	 */
-	function addFeature() {
-		let name = featureSelector.value;
-		let translatedName = featureSelector.options[featureSelector.selectedIndex].textContent;
+	function newFeature(name, translatedName) {
 		let type = featureTypes.get(name);
 		let id = 'feature-edit-' + name;
 
@@ -481,13 +516,10 @@
 		deleteButton.classList.add('delete');
 		deleteButton.dataset.name = name;
 		deleteButton.textContent = '❌';
-		deleteButton.addEventListener('click', deleteItem.bind(null, deletedFeatures));
+		deleteButton.addEventListener('click', deleteFeature.bind(null, deletedFeatures));
 		controlsElement.appendChild(deleteButton);
 
-		// Undelete
-		deletedFeatures.delete(name);
-		// Insert
-		document.querySelector('.item.editing .features.own.editing .new ul').appendChild(newElement);
+		return newElement;
 	}
 
 	/**
@@ -553,7 +585,7 @@
 			let inner = {};
 			inner.features = {};
 			inner.contents = [];
-			inner.code = root.querySelector(':not(.subitems) ');
+			inner.code = root.querySelector('something'); // TODO: this
 			counter += getNewFeaturesRecursively(subitem, inner.features, inner.contents);
 			contents.push(inner);
 		}
@@ -570,7 +602,7 @@
 		let delta = {};
 		let contents = [];
 
-		counter = getNewFeaturesRecursively(document.querySelector('.item.editing'), delta, contents);
+		counter = getNewFeaturesRecursively(document.querySelector('.head.item.editing'), delta, contents);
 
 		if(counter <= 0) {
 			return;
@@ -578,8 +610,7 @@
 
 		toggleButtons(true);
 
-		// TODO: could this match inner items? It always matches first one, but that doesn't seem very robust... maybe add a newhead class and use head/newhead? Or .new.head? Or (.new).editing.head so it works in both cases?
-		let code = document.querySelector('.item.editing').dataset.code;
+		let code = document.querySelector('.head.item.editing').dataset.code;
 		let request, response;
 
 		request = {};
@@ -606,8 +637,12 @@
 			body: JSON.stringify(request)
 		});
 
-		await jsendMe(response, goBack, displayError.bind(null, null));
-		toggleButtons(false);
+		// TODO: don't use goBack when saving entirely new items
+		try {
+			await jsendMe(response, goBack, displayError.bind(null, null));
+		} finally {
+			toggleButtons(false);
+		}
 	}
 
 	/**
@@ -617,7 +652,7 @@
 		let counter;
 		let delta = {};
 
-		counter = getChangedFeatures(document.querySelector('.item.editing .features.own.editing'), delta);
+		counter = getChangedFeatures(document.querySelector('.item.head.editing .features.own.editing'), delta);
 
 		for(let deleted of deletedFeatures) {
 			delta[deleted] = null;
@@ -629,7 +664,7 @@
 		}
 
 		toggleButtons(true);
-		let code = document.querySelector('.item.editing').dataset.code;
+		let code = document.querySelector('.item.head.editing').dataset.code;
 		let response;
 
 		response = await fetch('/v1/items/' + encodeURIComponent(code) + '/features', {
@@ -642,8 +677,11 @@
 			body: JSON.stringify(delta)
 		});
 
-		await jsendMe(response, goBack, displayError.bind(null, null));
-		toggleButtons(false);
+		try {
+			await jsendMe(response, goBack, displayError.bind(null, null));
+		} finally {
+			toggleButtons(false);
+		}
 	}
 
 	/**
@@ -658,46 +696,40 @@
 	}
 
 	async function jsendMe(response, onsuccess, onerror) {
-		try {
-			if(response.headers.get("content-type").indexOf("application/json") > -1) {
-				try {
-					let jsend = await response.json();
-					if(response.ok && jsend.status === 'success') {
-						onsuccess();
-					} else {
-						if(jsend.status === 'fail') {
-							if(jsend.data) {
-								for(let field of Object.keys(jsend.data)) {
-									let message = jsend.data[field];
-									onerror(message);
-									let input = document.getElementById('feature-edit-' + field);
-									if(input !== null) {
-										input.classList.add('invalid');
-									}
+		if(response.headers.get("content-type").indexOf("application/json") > -1) {
+			try {
+				let jsend = await response.json();
+				if(response.ok && jsend.status === 'success') {
+					onsuccess();
+				} else {
+					if(jsend.status === 'fail') {
+						if(jsend.data) {
+							for(let field of Object.keys(jsend.data)) {
+								let message = jsend.data[field];
+								onerror(message);
+								let input = document.getElementById('feature-edit-' + field);
+								if(input !== null) {
+									input.classList.add('invalid');
 								}
-							} else {
-								// "fail" with no data
-								onerror(response.status.toString() + ': unspecified validation error');
 							}
 						} else {
-							// JSend error, or not a JSend response
-							onerror(response.status.toString() + ': ' + jsend.message ? jsend.message : '');
+							// "fail" with no data
+							onerror(response.status.toString() + ': unspecified validation error');
 						}
+					} else {
+						// JSend error, or not a JSend response
+						onerror(response.status.toString() + ': ' + jsend.message ? jsend.message : '');
 					}
-				} catch(e) {
-					// invalid JSON
-					onerror(e.message);
-					console.error(response.body);
 				}
-			} else {
-				// not JSON
-				let text = await response.text();
-				onerror(response.status.toString() + ': ' + text);
+			} catch(e) {
+				// invalid JSON
+				onerror(e.message);
+				console.error(response.body);
 			}
-		} finally {
-			for(let button of document.querySelectorAll('.itembuttons button')) {
-				button.disabled = false;
-			}
+		} else {
+			// not JSON
+			let text = await response.text();
+			onerror(response.status.toString() + ': ' + text);
 		}
 	}
 

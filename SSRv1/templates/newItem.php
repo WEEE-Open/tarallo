@@ -11,7 +11,7 @@ if(!$innerrecursion && !$recursion) {
 // to display new inner items, set their $recursion and $innerrecursion to true
 ?>
 
-<article class="item <?= $innerrecursion ? '' : 'editing' ?> new">
+<article class="item new editing <?= $recursion ? '' : 'root' ?> <?= $innerrecursion ? '' : 'head' ?>">
 	<header>
 		<h2><label>Code: <input class="newcode" placeholder="Automatically generated"></label></h2>
 	</header>
@@ -33,7 +33,7 @@ if(!$innerrecursion && !$recursion) {
 		?>
 	</section>
 
-	<section class="add">
+	<section class="addfeatures">
 		<label>Feature:
 			<select>
 			<?php $this->insert('allFeatures') ?>
