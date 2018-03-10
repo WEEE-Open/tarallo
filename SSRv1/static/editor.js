@@ -3,22 +3,26 @@
 
 	document.execCommand('defaultParagraphSeparator', false, 'div');
 
-	/** @type {Set<string>} */
-	let deletedFeatures = new Set();
-
 	let divs = document.querySelectorAll('.features.editing [contenteditable]');
 	let selects = document.querySelectorAll('.features.editing select');
 	let deletes = document.querySelectorAll('.features.editing .delete');
 	let itemEditing = document.querySelector('.item.head.editing');
 	let isNew = itemEditing.classList.contains('new');
 
+	/** @type {Set<string>} */
+	let deletedFeatures;
+	let deleteClickBound;
 	if(isNew) {
+		deleteClickBound = deleteFeature.bind(null, null);
 		// noinspection JSUnresolvedFunction It's perfectly resolved, it's there, it exists
 		itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveNew);
 	} else {
+		deletedFeatures = new Set();
+		deleteClickBound = deleteFeature.bind(null, deletedFeatures);
 		// noinspection JSUnresolvedFunction
 		itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveModified);
 	}
+
 	// noinspection JSUnresolvedFunction
 	itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack);
 
@@ -26,6 +30,7 @@
 	for(let item of document.querySelectorAll('.item.editing')) {
 		let featuresElement;
 
+		// Find own features
 		for(let el of item.children) {
 			if(el.classList.contains('own') && el.classList.contains('features')) {
 				featuresElement = el;
@@ -33,14 +38,21 @@
 			}
 		}
 
+		// Find "add" button and add listener
 		for(let el of item.children) {
 			if(el.classList.contains('addfeatures')) {
-				el.addEventListener('click', addFeatureClick.bind(null, el.querySelector('select'), item, featuresElement));
+				el.querySelector('button').addEventListener('click', addFeatureClick.bind(null, el.querySelector('select'), item, featuresElement, typeof deletedFeatures !== 'undefined'));
 				break;
 			}
 		}
 	}
 
+	// Enable the "X" button next to features
+	for(let deleteButton of deletes) {
+		deleteButton.addEventListener('click', deleteClickBound);
+	}
+
+	// Event listeners for string and numeric features
 	for(let div of divs) {
 		if(div.dataset.internalType === 's') {
 			div.addEventListener('input', textChanged);
@@ -49,13 +61,9 @@
 		}
 	}
 
+	// For enum features
 	for(let select of selects) {
 		select.addEventListener('change', selectChanged);
-	}
-
-	for(let deleteButton of deletes) {
-		let bound = deleteFeature.bind(null, deletedFeatures);
-		deleteButton.addEventListener('click', bound);
 	}
 
 	/**
@@ -407,11 +415,13 @@
 	/**
 	 * Handle clicking the "X" button
 	 *
-	 * @param {Set} set Deleted features
+	 * @param {Set<string>|null} set - Deleted features, null if not tracking
 	 * @param ev Event
 	 */
 	function deleteFeature(set, ev) {
-		set.add(ev.target.dataset.name);
+		if(set !== null) {
+			set.add(ev.target.dataset.name);
+		}
 		ev.target.parentElement.parentElement.remove();
 	}
 
@@ -421,35 +431,42 @@
 	 * @param {HTMLSelectElement} select - HTML "select" element
 	 * @param {HTMLElement} item - The item itself
 	 * @param {HTMLElement} featuresElement - The "own features" element
+	 * @param {boolean} trackDeleted - Note deleted/undeleted features in the global set
 	 */
-	function addFeatureClick(select, item, featuresElement) {
+	function addFeatureClick(select, item, featuresElement, trackDeleted) {
 		let name = select.value;
 		let translatedName = select.options[select.selectedIndex].textContent;
+		let id = 'feature-edit-' + name;
 
-		let newElement = newFeature(name, translatedName);
+		let element = document.getElementById(id);
+		if(element !== null) {
+			element.focus();
+			return null;
+		}
 
-		// Undelete
-		// TODO: use only when editing (not adding)
-		deletedFeatures.delete(name);
+		let newElement = newFeature(name, translatedName, id);
+
+		if(trackDeleted) {
+			// Undelete
+			deletedFeatures.delete(name);
+		}
+
 		// Insert
+		console.log(featuresElement);
+		console.log(featuresElement.querySelector('.new ul'));
 		featuresElement.querySelector('.new ul').appendChild(newElement);
 	}
 
 	/**
 	 * Maybe a template would have been better...
 	 *
-	 * @param {string} name
-	 * @param {string} translatedName
+	 * @param {string} name - Feature name
+	 * @param {string} translatedName - Human-readable feature name
+	 * @param {string} id - Element id (already checked to be unique)
 	 */
-	function newFeature(name, translatedName) {
+	function newFeature(name, translatedName, id) {
 		let type = featureTypes.get(name);
-		let id = 'feature-edit-' + name;
 
-		let element = document.getElementById(id);
-		if(element !== null) {
-			element.focus();
-			return;
-		}
 		let newElement = document.createElement("li");
 		let elementName = document.createElement("div");
 		elementName.classList.add("name");
