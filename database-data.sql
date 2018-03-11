@@ -43,9 +43,9 @@ INSERT INTO `Feature` (`Feature`, `Type`) VALUES
 	('power-idle-watt', 1), -- Power consumption (idle) --
 	('power-rated-watt', 1), -- Power (rated) --
 	('ps2-ports-n', 1), -- PS/2 --
-	('psu-ampere', 3), -- Output current --
+	('psu-ampere', 3), -- Power supply current --
 	('psu-connector-motherboard', 2), -- Power connector (motherboard) -- use sata-ports-n and pcie-power-pin-n for that stuff
-	('psu-volt', 3), -- Output voltage --
+	('psu-volt', 3), -- Power supply voltage --
 	('ram-type', 2), -- RAM type --
 	('sata-ports-n', 1), -- SATA --
 	('software', 0), -- Software --
@@ -177,6 +177,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'other-dip'), -- Other (DIP) --
 	('cpu-socket', 'g1'), -- G1 --
 	('cpu-socket', 'g2'), -- G2 --
+	('cpu-socket', 'socket3'), -- Socket 3 --
 	('cpu-socket', 'socket7'), -- Socket 7 --
 	('cpu-socket', 'p'), -- P -- which has 478 pins but it's completely different from socket 478
 	('cpu-socket', 'am1'), -- AM1 --
@@ -202,6 +203,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'socket479m'), -- 479 (mobile; socket M) --
 	('cpu-socket', 'socket495'), -- 495 --
 	('cpu-socket', 'socket603'), -- 603 --
+	('cpu-socket', 'socket604'), -- 604 --
 	('cpu-socket', 'socket615'), -- 615 --
 	('cpu-socket', 'socket754'), -- 754 --
 	('cpu-socket', 'socket940'), -- 940 --
@@ -216,8 +218,8 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'lga2011'), -- LGA2011 (Socket R) --
 	('cpu-socket', 'lga1150'), -- LGA1150 (Socket H3) --
 	('cpu-socket', 'lga1151'), -- LGA1151 (Socket H4) --
-	('cpu-socket', 'lga3647'), -- LGA3647 --
 	('cpu-socket', 'lga2066'), -- LGA2066 --
+	('cpu-socket', 'lga3647'), -- LGA3647 --
 	('hdd-odd-form-factor', '5.25'), -- 5.25 in. --
 	('hdd-odd-form-factor', '3.5'), -- 3.5 in. --
 	('hdd-odd-form-factor', '2.5-15mm'), -- 2.5 in. (15 mm thick; uncommon) -- second number is the height in millimeters (these are specified as 15 but most common sizes, for both bays and drives, are 7 mm and 9.5 mm: the more you know...)
