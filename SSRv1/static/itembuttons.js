@@ -13,14 +13,8 @@
 
 		if(ev.target.classList.contains("edit")) {
 			window.location.href = here + '/edit/' + encodeURIComponent(code) + query + hash;
-		} else if(ev.target.classList.contains("save")) {
-
-		} else if(ev.target.classList.contains("cancel")) {
-
 		} else if(ev.target.classList.contains("addinside")) {
 			window.location.href = here + '/add/' + encodeURIComponent(code) + query + hash;
-		} else if(ev.target.classList.contains("delete")) {
-
 		}
 	}
 

@@ -6,6 +6,10 @@
 	let quickView = top.querySelector(".quick.view");
 	let quickMove = top.querySelector(".quick.move");
 
+	for(let message of quickMove.getElementsByClassName('message')) {
+		message.style.display = 'none';
+	}
+
 	nav.addEventListener('click', ev => {
 		// noinspection JSUnresolvedVariable
 		if(!ev.target.classList || !ev.target.classList.contains('quick')) {
@@ -38,11 +42,59 @@
 		}
 	});
 
+	quickMove.querySelector('button').addEventListener('click', async () => {
+		let inputs = quickMove.querySelectorAll('input');
+		let code = inputs[0].value;
+		let parent = inputs[1].value;
+		if(code !== "" && parent !== "") {
+			for(let message of quickMove.getElementsByClassName('message')) {
+				message.style.display = 'none';
+			}
+
+			let response = await fetch('/v1/items/' + encodeURIComponent(code) + '/parent', {
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				method: 'PUT',
+				credentials: 'include',
+				body: JSON.stringify(parent)
+			});
+
+			if(response.ok) {
+				quickMove.getElementsByClassName('success')[0].style.display = '';
+			} else {
+				let jsend;
+				try {
+					jsend = await response.json();
+				} catch(e) {
+					quickMove.getElementsByClassName('error')[0].style.display = '';
+					console.log(response);
+					throw e;
+				}
+				console.log(jsend);
+				if(jsend.status === 'fail') {
+					quickMove.getElementsByClassName('warning')[0].style.display = '';
+				} else {
+					quickMove.getElementsByClassName('error')[0].style.display = '';
+				}
+			}
+
+			quickMove.querySelector('.success.message a').href = '/item/' + encodeURIComponent(code);
+		}
+	});
 
 	quickView.addEventListener('keydown', function(e) {
 		if(e.keyCode === 13) {
 			e.preventDefault();
-			quickView.querySelector('button').click();
+			quickView.getElementsByTagName('BUTTON')[0].click();
+		}
+	});
+
+	quickMove.addEventListener('keydown', function(e) {
+		if(e.keyCode === 13) {
+			e.preventDefault();
+			quickMove.getElementsByTagName('BUTTON')[0].click();
 		}
 	})
 

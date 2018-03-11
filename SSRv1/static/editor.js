@@ -719,7 +719,6 @@
 			body: JSON.stringify(request)
 		});
 
-		// TODO: don't use goBack when saving entirely new items
 		try {
 			await jsendMe(response, goBack, displayError.bind(null, null));
 		} finally {
