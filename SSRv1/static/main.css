@@ -214,7 +214,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 	margin-top: 0;
 }
 
-.item:not(.head) {
+.item:not(.root) {
 	border: .1em solid #ccc;
 }
 
