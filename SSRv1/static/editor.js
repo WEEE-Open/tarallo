@@ -686,7 +686,13 @@
 				request.parent = parentSelector.value;
 			}
 		} else {
-			// TODO: obtain parent from displayed items, set it
+			let parent = root.parentElement.parentElement.dataset.code;
+			if(parent) {
+				request.parent = parent;
+			} else {
+				displayError(null, 'Internal error: cannot find location');
+				return;
+			}
 		}
 
 		request.features = delta;
