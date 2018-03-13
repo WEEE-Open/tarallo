@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\SSRv1;
 use FastRoute;
 use League\Plates\Engine;
 use WEEEOpen\Tarallo\Server\Database\Database;
+use WEEEOpen\Tarallo\Server\Database\SearchDAO;
 use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
@@ -14,6 +15,7 @@ use WEEEOpen\Tarallo\Server\HTTP\Response;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\NotFoundException;
+use WEEEOpen\Tarallo\Server\Search;
 use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
 
@@ -90,6 +92,28 @@ class Adapter implements AdapterInterface {
 		return new Response(200, 'text/html', $engine->render('home'));
 	}
 
+	private static function search(
+		User $user = null,
+		Database $db,
+		Engine $engine,
+		$parameters,
+		$querystring
+	): Response {
+		Validation::authorize($user);
+		$id = isset($parameters['id']) ? (int) $parameters['id'] : null;
+		$page = isset($parameters['page']) ? (int) $parameters['page'] : 1;
+
+		if($id === null) {
+			$results = null;
+		} else {
+			$results = $db->searchDAO()->getResults($id, $page, 10);
+		}
+
+		// Example search: $db->searchDAO()->search(new Search('R%'), $user);
+
+		return new Response(200, 'text/html', $engine->render('search', ['searchId' => $id, 'page' => $page]));
+	}
+
 	public static function go(Request $request): Response {
 		$method = $request->method;
 		$uri = $request->path;
@@ -110,6 +134,7 @@ class Adapter implements AdapterInterface {
 			$r->get('/item/{id}/add/{add}', 'getItem');
 			$r->get('/item/{id}/edit/{edit}', 'getItem');
 			$r->get('/add', 'addItem');
+			$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', 'search');
 			$r->addRoute(['GET', 'POST'], '/login', 'login');
 		});
 
