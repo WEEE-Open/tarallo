@@ -137,7 +137,7 @@ EOQ;
 		if($search->searchCode === null) {
 			$codeSubquery = '';
 		} else {
-			$codeSubquery = '`Code` LIKE :cs';
+			$codeSubquery = 'Item.`Code` LIKE :cs';
 		}
 
 		$everything = '';

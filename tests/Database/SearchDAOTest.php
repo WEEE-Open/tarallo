@@ -2,6 +2,7 @@
 
 namespace WEEEOpen\Tarallo\Server\Test\Database;
 
+use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\Search;
@@ -9,11 +10,7 @@ use WEEEOpen\Tarallo\Server\SearchTriplet;
 use WEEEOpen\Tarallo\Server\User;
 
 class SearchDAOTest extends DatabaseTest {
-	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
-	 */
-	public function testItemSearch() {
-		$db = $this->getDb();
+	private function getSample() {
 		$pc['PC20'] = (new Item('PC20'))
 			->addFeature(new Feature('brand', 'Dill'))
 			->addFeature(new Feature('model', 'DI-360'))
@@ -47,9 +44,23 @@ class SearchDAOTest extends DatabaseTest {
 			->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
 			->addFeature(new Feature('color', 'white')); // based on a real PC we have in our laboratory.
 
+		return $pc;
+	}
+
+	private function loadSample(Database $db) {
+		$pc = $this->getSample();
+
 		foreach($pc as $i) {
 			$db->itemDAO()->addItem($i);
 		}
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
+	 */
+	public function testItemSearch() {
+		$db = $this->getDb();
+		$this->loadSample($db);
 
 		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('color', '=', 'white')]), new User('asd'));
 		$this->assertTrue(is_int($id), 'Search ID should be an integer');
@@ -64,44 +75,26 @@ class SearchDAOTest extends DatabaseTest {
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 */
+	public function testItemSearchByCode() {
+		$db = $this->getDb();
+		$this->loadSample($db);
+
+		$id = $db->searchDAO()->search(new Search('PC%'), new User('asd'));
+		$this->assertTrue(is_int($id), 'Search ID should be an integer');
+
+		$items = $db->searchDAO()->getResults($id, 1, 100);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(4, count($items), 'There should be only 4 items');
+
+
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
+	 */
 	public function testItemSearchSorting() {
 		$db = $this->getDb();
-		$pc['PC20'] = (new Item('PC20'))
-			->addFeature(new Feature('brand', 'Dill'))
-			->addFeature(new Feature('model', 'DI-360'))
-			->addFeature(new Feature('type', 'case'))
-			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
-			->addFeature(new Feature('color', 'black'))
-			->addFeature(new Feature('working', 'yes'));
-		$pc['PC90'] = (new Item('PC90'))
-			->addFeature(new Feature('brand', 'Dill'))
-			->addFeature(new Feature('model', 'DI-360'))
-			->addFeature(new Feature('type', 'case'))
-			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
-			->addFeature(new Feature('color', 'grey'))
-			->addFeature(new Feature('working', 'yes'));
-		$pc['PC55'] = (new Item('PC55'))
-			->addFeature(new Feature('brand', 'TI'))
-			->addFeature(new Feature('model', 'GreyPC-\'98'))
-			->addFeature(new Feature('type', 'case'))
-			->addFeature(new Feature('motherboard-form-factor', 'atx'));
-		$pc['PC22'] = (new Item('PC22'))
-			->addFeature(new Feature('brand', 'Dill'))
-			->addFeature(new Feature('model', 'DI-360'))
-			->addFeature(new Feature('type', 'case'))
-			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
-			->addFeature(new Feature('color', 'black'))
-			->addFeature(new Feature('working', 'yes'));
-		$pc['SCHIFOMACCHINA'] = (new Item('SCHIFOMACCHINA'))
-			->addFeature(new Feature('brand', 'eMac'))
-			->addFeature(new Feature('model', 'EZ1600'))
-			->addFeature(new Feature('type', 'case'))
-			->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
-			->addFeature(new Feature('color', 'white'));
-
-		foreach($pc as $i) {
-			$db->itemDAO()->addItem($i);
-		}
+		$this->loadSample($db);
 
 		$quest = new Search(null, [new SearchTriplet('type', '=', 'case')], null, null,
 			['motherboard-form-factor' => '-']);
@@ -112,6 +105,8 @@ class SearchDAOTest extends DatabaseTest {
 
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(5, count($items), 'There should be 5 items');
+
+		$pc = $this->getSample();
 		/** @var Item[] $items */
 		foreach(['PC20', 'PC22', 'PC90', 'SCHIFOMACCHINA', 'PC55'] as $pos => $code) {
 			$this->assertEquals($code, $items[$pos]->getCode(),
@@ -147,47 +142,13 @@ class SearchDAOTest extends DatabaseTest {
 	 */
 	public function testItemSearchSerialization() {
 		$db = $this->getDb();
-		$pc['PC55'] = (new Item('PC55'))
-			->addFeature(new Feature('brand', 'TI'))
-			->addFeature(new Feature('model', 'GreyPC-\'98'))
-			->addFeature(new Feature('type', 'case'))
-			->addFeature(new Feature('motherboard-form-factor', 'atx'));
-		$pc['PC20'] = (new Item('PC20'))
-			->addFeature(new Feature('brand', 'Dill'))
-			->addFeature(new Feature('model', 'DI-360'))
-			->addFeature(new Feature('type', 'case'))
-			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
-			->addFeature(new Feature('color', 'black'))
-			->addFeature(new Feature('working', 'yes'));
-		$pc['PC21'] = (new Item('PC21'))
-			->addFeature(new Feature('brand', 'Dill'))
-			->addFeature(new Feature('model', 'DI-360'))
-			->addFeature(new Feature('type', 'case'))
-			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
-			->addFeature(new Feature('color', 'grey'))
-			->addFeature(new Feature('working', 'yes'));
-		$pc['PC22'] = (new Item('PC22'))
-			->addFeature(new Feature('brand', 'Dill'))
-			->addFeature(new Feature('model', 'DI-360'))
-			->addFeature(new Feature('type', 'case'))
-			->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
-			->addFeature(new Feature('color', 'black'))
-			->addFeature(new Feature('working', 'yes'));
-		$pc['SCHIFOMACCHINA'] = (new Item('SCHIFOMACCHINA'))// based on a real PC we have in our laboratory.
-		->addFeature(new Feature('brand', 'eMac'))
-			->addFeature(new Feature('model', 'EZ1600'))
-			->addFeature(new Feature('type', 'case'))
-			->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
-			->addFeature(new Feature('color', 'white'));
-
-		foreach($pc as $i) {
-			$db->itemDAO()->addItem($i);
-		}
+		$this->loadSample($db);
 
 		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('type', '=', 'case')], null,
 			null, ['motherboard-form-factor' => '-']), new User('asd'));
 		$items = $db->searchDAO()->getResults($id, 1, 100);
 		// this ugly code courtesy of var_export(json_decode(json_encode($items), true), true);
+		// Items are sorted by what the search says, then code ascending. Or they should, anyway.
 		$expected = [
 			0 =>
 				[
@@ -204,11 +165,11 @@ class SearchDAOTest extends DatabaseTest {
 				],
 			1 =>
 				[
-					'code'     => 'PC21',
+					'code'     => 'PC22',
 					'features' =>
 						[
 							'brand'                   => 'Dill',
-							'color'                   => 'grey',
+							'color'                   => 'black',
 							'model'                   => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
 							'type'                    => 'case',
@@ -217,11 +178,11 @@ class SearchDAOTest extends DatabaseTest {
 				],
 			2 =>
 				[
-					'code'     => 'PC22',
+					'code'     => 'PC90',
 					'features' =>
 						[
 							'brand'                   => 'Dill',
-							'color'                   => 'black',
+							'color'                   => 'grey',
 							'model'                   => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
 							'type'                    => 'case',
