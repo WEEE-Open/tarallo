@@ -41,7 +41,7 @@ class Adapter implements AdapterInterface {
 			$renderParameters['add'] = $add;
 		}
 
-		return new Response(200, 'text/html', $engine->render('item', $renderParameters));
+		return new Response(200, 'text/html', $engine->render('viewItem', $renderParameters));
 	}
 
 	private static function addItem(
@@ -109,9 +109,10 @@ class Adapter implements AdapterInterface {
 			$results = $db->searchDAO()->getResults($id, $page, 10);
 		}
 
-		// Example search: $db->searchDAO()->search(new Search('R%'), $user);
+		// Example search:
+		//var_dump($db->searchDAO()->search(new Search('R%'), $user));
 
-		return new Response(200, 'text/html', $engine->render('search', ['searchId' => $id, 'page' => $page]));
+		return new Response(200, 'text/html', $engine->render('search', ['searchId' => $id, 'page' => $page, 'results' => $results]));
 	}
 
 	public static function go(Request $request): Response {

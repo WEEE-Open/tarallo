@@ -1,13 +1,10 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
-if(!isset($recursion) || $recursion === false) {
-	$recursion = false;
-	$this->layout('main', ['title' => $this->e($item->getCode()), 'user' => $user, 'itembuttons' => true]);
-} else {
-	$recursion = true;
-}
-
+/** @var string|null $add */
+/** @var string|null $edit */
+/** @var bool|null $recursion */
+$recursion = $recursion ?? false;
 $features = $item->getCombinedFeatures();
 $product = $item->getProduct();
 

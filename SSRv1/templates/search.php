@@ -14,7 +14,7 @@ if($searchId) {
 		echo 'Nothing found :(';
 	} else {
 		foreach($results as $item) {
-			$this->include('item', ['item' => $item]);
+			$this->insert('item', ['item' => $item]);
 		}
 	}
 }

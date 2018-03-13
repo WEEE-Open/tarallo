@@ -201,8 +201,33 @@ EOQ;
 		return $id;
 	}
 
-	public function sort(Search $search, $searchId) {
+	public function sortByCode(int $searchId) {
+		$query = /** @lang MySQL */
+			"SELECT `Item` FROM SearchResult WHERE Search = ? ORDER BY `Item` DESC;";
+		$sortedStatement = $this->getPDO()->prepare($query);
+
+		try {
+			if(!$sortedStatement->execute([$searchId])) {
+				throw new DatabaseException('Sorting with codes failed for no apparent reason');
+			}
+			$sorted = $sortedStatement->fetchAll(\PDO::FETCH_ASSOC);
+		} finally {
+			$sortedStatement->closeCursor();
+		}
+
+		if(!isset($sorted)) {
+			throw new \LogicException('Lost sorted items (by code) along the way somehow');
+		}
+		if(count($sorted) === 0) {
+			return;
+		}
+
+		// TODO: move $updateStatement to a separate function and call it
+	}
+
+	public function sort(Search $search, int $searchId) {
 		if($search->sort === null) {
+			$this->sortByCode($searchId);
 			return;
 		}
 
@@ -211,11 +236,8 @@ EOQ;
 		}
 
 		if(empty($search->sort)) {
+			$this->sortByCode($searchId);
 			return;
-		}
-
-		if(!is_int($searchId)) {
-			throw new \InvalidArgumentException('Search ID must be an integer');
 		}
 
 		reset($search->sort);
@@ -241,7 +263,7 @@ EOQ;
 		self::unsort($searchId);
 
 		$miniquery = /** @lang MySQL */
-			"SELECT DISTINCT `Code` FROM ItemFeature WHERE `Code` IN (SELECT `Item` FROM SearchResult WHERE Search = ?) AND Feature = ? ORDER BY $column $ascdesc, `Code` ASC;";
+			"SELECT DISTINCT `Code` FROM ItemFeature WHERE `Code` IN (SELECT `Item` FROM SearchResult WHERE Search = ?) AND Feature = ? ORDER BY $column $ascdesc, `Code` DESC;";
 		$updatequery = /** @lang MySQL */
 			"UPDATE SearchResult SET `Order` = :pos WHERE Search = :sea AND Item = :cod";
 
