@@ -71,6 +71,8 @@
 	featureTypes.set('sata-ports-n', 'i');
 	featureTypes.set('software', 's');
 	featureTypes.set('usb-ports-n', 'i');
+	featureTypes.set('usb-header-n', 'i');
+	featureTypes.set('internal-header-n', 'i');
 	featureTypes.set('vga-ports-n', 'i');
 	featureTypes.set('os-license-code', 's');
 	featureTypes.set('os-license-version', 's');

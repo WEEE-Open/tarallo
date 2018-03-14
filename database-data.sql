@@ -50,6 +50,8 @@ INSERT INTO `Feature` (`Feature`, `Type`) VALUES
 	('sata-ports-n', 1), -- SATA --
 	('software', 0), -- Software --
 	('usb-ports-n', 1), -- USB --
+	('usb-header-n', 1), -- USB (internal header) --
+	('internal-header-n', 1), -- Internal header --
 	('vga-ports-n', 1), -- VGA --
 	('os-license-code', 0), -- OS license code --
 	('os-license-version', 0), -- OS license version --

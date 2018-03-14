@@ -53,6 +53,8 @@ class Feature {
 		'sata-ports-n' => self::INTEGER,
 		'software' => self::STRING,
 		'usb-ports-n' => self::INTEGER,
+		'usb-header-n' => self::INTEGER,
+		'internal-header-n' => self::INTEGER,
 		'vga-ports-n' => self::INTEGER,
 		'os-license-code' => self::STRING,
 		'os-license-version' => self::STRING,
