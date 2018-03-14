@@ -202,7 +202,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 	padding: 0.5em;
 }
 
-.item {
+.item, #searcharea {
 	margin: .5em .5em .5em .5em;
 }
 

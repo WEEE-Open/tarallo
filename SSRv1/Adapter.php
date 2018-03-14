@@ -5,7 +5,6 @@ namespace WEEEOpen\Tarallo\SSRv1;
 use FastRoute;
 use League\Plates\Engine;
 use WEEEOpen\Tarallo\Server\Database\Database;
-use WEEEOpen\Tarallo\Server\Database\SearchDAO;
 use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
@@ -15,7 +14,6 @@ use WEEEOpen\Tarallo\Server\HTTP\Response;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\NotFoundException;
-use WEEEOpen\Tarallo\Server\Search;
 use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
 
@@ -102,17 +100,26 @@ class Adapter implements AdapterInterface {
 		Validation::authorize($user);
 		$id = isset($parameters['id']) ? (int) $parameters['id'] : null;
 		$page = isset($parameters['page']) ? (int) $parameters['page'] : 1;
+		// TODO: the add/edit thing
 
 		if($id === null) {
-			$results = null;
+			$parameters = ['searchId' => null];
 		} else {
 			$results = $db->searchDAO()->getResults($id, $page, 10);
+			$pages = 4; // TODO: get the real number (also total number of results?)
+			$parameters = [
+				'searchId'       => $id,
+				'page'           => $page,
+				'results'        => $results,
+				'pages'          => $pages,
+				'resultsPerPage' => 10
+			];
 		}
 
 		// Example search:
 		//var_dump($db->searchDAO()->search(new Search('R%'), $user));
 
-		return new Response(200, 'text/html', $engine->render('search', ['searchId' => $id, 'page' => $page, 'results' => $results]));
+		return new Response(200, 'text/html', $engine->render('search', $parameters));
 	}
 
 	public static function go(Request $request): Response {
