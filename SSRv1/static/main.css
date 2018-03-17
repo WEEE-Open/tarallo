@@ -242,7 +242,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 	padding: 0.6rem;
 }
 
-.item .features ul {
+.item .features ul, #searchcontrols {
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -250,7 +250,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 	width: 100%;
 }
 
-.item .features ul li {
+.item .features ul li, #searchcontrols > div {
 	height: 100%;
 	display: table-row;
 }
@@ -259,11 +259,11 @@ ul.breadcrumbs li:not(:first-child)::before {
 	padding: .3rem 0;
 }
 
-.features.editing div {
+.features.editing , #searchcontrols > div > * {
 	padding: .1rem;
 }
 
-.item .features ul li .name {
+.item .features ul li .name, #searchcontrols > div .searchby {
 	max-width: 20em;
 	padding-right: 1em;
 	color: #555;
@@ -272,7 +272,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 	min-width: 10em;
 }
 
-.item .features ul li .value {
+.item .features ul li .value, #searchcontrols > div .filter {
 	display: table-cell;
 	width: 100%;
 	white-space: pre-wrap;
@@ -329,6 +329,10 @@ ul.breadcrumbs li:not(:first-child)::before {
 
 .inside > div > .item {
 	margin-bottom: 1em;
+}
+
+#searchcontrols .disabled {
+	display: none;
 }
 
 .pagination {
