@@ -29,7 +29,17 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 		</div>
 		<div id="search-control-features" class="disabled">
 			<label class="searchby">Features:</label>
-			<div class="filter">TODO</div>
+			<div class="filter">
+				<div class="own features">
+
+				</div>
+				<div class="selector">
+				<label>Feature:
+					<select class="allfeatures">
+					</select></label>
+				<button>Add</button>
+				</div>
+			</div>
 		</div>
 		<div id="search-control-ancestor" class="disabled">
 			<label class="searchby">Ancestor:</label>
@@ -37,8 +47,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 		</div>
 		<div id="search-control-sort" class="disabled">
 			<label class="searchby" for="search-control-sort-input">Order by:</label>
-			<div class="filter"><select id="search-control-sort-input">
-					<?php $this->insert('allFeatures') ?>
+			<div class="filter"><select id="search-control-sort-input" class="allfeatures">
 			</select><label><select>
 				<option value="+">Ascending (alphabetical)</option>
 				<option value="-">Descending</option>
@@ -48,6 +57,8 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 	<button id="searchbutton"><?=$searchId === null ? 'Search' : 'Refine'?></button>
 </nav>
 
+<script src="/features.js"></script>
+<script src="editor.js"></script>
 <script src="search.js"></script>
 
 <div class="results">

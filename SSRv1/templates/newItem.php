@@ -33,8 +33,7 @@ if(!$innerrecursion && !$recursion) {
 
 	<section class="addfeatures">
 		<label>Feature:
-			<select>
-				<?php $this->insert('allFeatures') ?>
+			<select class="allfeatures">
 			</select></label>
 		<button>Add</button>
 	</section>

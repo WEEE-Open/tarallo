@@ -24,21 +24,27 @@ class TemplateUtilities implements ExtensionInterface {
 	/**
 	 * @param Feature[] $features
 	 *
-	 * @return string[][] Translated group name => [Translated feature name => UltraFeature, ...]
+	 * @return string[][] Translated group name => [UltraFeature, UltraFeature, ...]
+	 *
+	 * @deprecated
 	 */
 	public function getPrintableFeatures(array $features) {
-		$result = [];
+		$groups = [];
 		foreach($features as $feature) {
 			/** @noinspection PhpUndefinedMethodInspection It's there. */
 			$ultra = new UltraFeature($feature, $this->template->data()['lang'] ?? 'en');
-			$result[$ultra->group][$ultra->name] = $ultra;
+			$groups[$ultra->group][] = $ultra;
 		}
-		ksort($result);
-		foreach($result as &$group) {
-			ksort($group);
+		ksort($groups);
+		foreach($groups as $name => &$group) {
+			usort($group, [TemplateUtilities::class, 'featureNameSort']);
 		}
 
-		return $result;
+		return $groups;
+	}
+
+	private static function featureNameSort(UltraFeature $a, UltraFeature $b) {
+		return $a->name <=> $b->name;
 	}
 
 	/**
@@ -66,7 +72,7 @@ class TemplateUtilities implements ExtensionInterface {
 	public function getOptions(Feature $feature) {
 		$options = Feature::getOptions($feature);
 		foreach($options as $value => &$translated) {
-			$translated = Localizer::printableValue($feature->name, $value);
+			$translated = FeaturePrinter::printableEnumValue($feature->name, $value);
 		}
 		asort($options);
 		return $options;

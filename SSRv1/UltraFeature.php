@@ -21,57 +21,8 @@ class UltraFeature {
 	 */
 	public function __construct(Feature $feature, string $language) {
 		$this->feature = $feature;
-		$this->value = $this->getFeatureValue($feature);
-		$this->name = Localizer::printableName($feature);
-		$this->group = self::getGroup($feature->name);
-	}
-
-	/**
-	 * Translate, pretty print or somehow "make pleasant to the eye" a feature value.
-	 *
-	 * @param Feature $feature
-	 *
-	 * @return string Value to be show to the user
-	 */
-	private function getFeatureValue(Feature $feature) {
-		if($feature->type === Feature::INTEGER || $feature->type === Feature::DOUBLE) {
-			try {
-				return FeaturePrinter::prettyPrint($feature);
-			} catch(\InvalidArgumentException $ignored) {
-
-			}
-		} else if($feature->type === Feature::ENUM) {
-			return Localizer::printableValue($feature->name, $feature->value);
-		}
-
-		return $feature->value;
-	}
-
-	/**
-	 * Group to which that feature belongs
-	 *
-	 * @param string $name Feature name (untranslated)
-	 * @TODO: add a custom sorting function for groups, to use in uasort()
-	 *
-	 * @return string Translated group name
-	 */
-	public static function getGroup(string $name): string {
-		if(strpos($name, '-ports-') > -1) {
-			return 'Ports';
-		} else if(strpos($name, '-sockets-') > -1) {
-			return 'Sockets';
-		} else if(strpos($name, 'power-') > -1) {
-			return 'Power';
-		} else if(strpos($name, 'psu-') > -1) {
-			return 'Power';
-		} else if(substr($name, -5) === '-code') {
-			return 'Codes';
-		} else if(substr($name, 0,3) === 'cib') {
-			return 'Codes';
-		} else if($name === 'os-license-version' || $name === 'sn') {
-			return 'Codes';
-		} else {
-			return 'Features';
-		}
+		$this->value = FeaturePrinter::getFeatureValue($feature);
+		$this->name = FeaturePrinter::printableName($feature);
+		$this->group = FeaturePrinter::getGroup($feature->name);
 	}
 }

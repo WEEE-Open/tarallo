@@ -122,12 +122,23 @@ class Adapter implements AdapterInterface {
 		return new Response(200, 'text/html', $engine->render('search', $parameters));
 	}
 
+	private static function getFeaturesJson(
+		User $user = null,
+		Database $db,
+		Engine $engine,
+		$parameters,
+		$querystring
+	) {
+		// TODO: cache ("expires" header + last-modified if HEAD request, maybe?)
+		return new Response(200, 'text/json', $engine->render('featuresList'));
+	}
+
 	public static function go(Request $request): Response {
 		$method = $request->method;
 		$uri = $request->path;
 		$querystring = $request->querystring;
 
-		Localizer::localize($request->language);
+		//Localizer::localize($request->language);
 
 		$engine = new Engine(__DIR__ . DIRECTORY_SEPARATOR . 'templates');
 		$engine->addData(['lang' => $request->language]);
@@ -137,6 +148,7 @@ class Adapter implements AdapterInterface {
 		// TODO: use cachedDispatcher
 		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 			$r->get('/', 'getHome');
+			$r->get('/features.json', 'getFeaturesJson');
 			$r->get('/home', 'getHome');
 			$r->get('/item/{id}', 'getItem');
 			$r->get('/item/{id}/add/{add}', 'getItem');
