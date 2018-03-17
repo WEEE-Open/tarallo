@@ -29,11 +29,11 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 		</div>
 		<div id="search-control-features" class="disabled">
 			<label class="searchby">Features:</label>
-			<div class="filter"><div class="own features"></div><div class="selector"><label>Feature:<select class="allfeatures"></select></label><button>Add</button></div></div>
+			<div class="filter"><div class="own features"><ul></ul></div><div class="selector"><label>Feature:<select class="allfeatures"></select></label><button>Add</button></div></div>
 		</div>
 		<div id="search-control-ancestor" class="disabled">
 			<label class="searchby">Ancestor:</label>
-			<div class="filter"><div class="own features"></div><div class="selector"><label>Feature:<select class="allfeatures"></select></label><button>Add</button></div></div>
+			<div class="filter"><div class="own features"><ul></ul></div><div class="selector"><label>Feature:<select class="allfeatures"></select></label><button>Add</button></div></div>
 		</div>
 		<div id="search-control-sort" class="disabled">
 			<label class="searchby" for="search-control-sort-input">Order by:</label>
@@ -44,7 +44,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 			</select></label></div>
 		</div>
 	</div>
-	<button id="searchbutton"><?=$searchId === null ? 'Search' : 'Refine'?></button>
+	<button id="searchbutton" <?= $searchId === null ?: 'data-search-id="'.$searchId.'"' ?>><?=$searchId === null ? 'Search' : 'Refine'?></button>
 </nav>
 
 <div class="results">

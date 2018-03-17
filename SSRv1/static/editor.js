@@ -1,6 +1,16 @@
 (async function() {
 	"use strict";
 
+	window.newFeature = newFeature;
+
+	// To generate unique IDs for features
+	let featureIdsCounter = 0;
+
+	// For comparison in feature selectors (used for searches only)
+	const operatorsStandard = new Map([['=', '='], ['<>', '≠']]);
+	const operatorsOrdering = new Map([['>', '>'], ['>=', '≥'], ['<=', '≤'], ['<', '<']]);
+	const operatorsPartial = new Map([['~', '≈'], ['!~', '≉']]);
+
 	for(let select of document.querySelectorAll('.allfeatures')) {
 		select.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
 	}
@@ -500,11 +510,27 @@
 
 		// Insert
 		featuresElement.querySelector('.new ul').appendChild(newElement);
-		newElement.querySelector('input, .value').focus();
+		// TODO: replace with 'input, .value' once I figure out how to move the cursor to the right, or else the "line" div disappears spilling the text inside the outer div.
+		let input = newElement.querySelector('input');
+		if(input) {
+			input.focus();
+		}
 	}
 
-	// To generate unique IDs
-	let featureIdsCounter = 0;
+	/**
+	 * Get options from operators
+	 *
+	 * @param {Map<string,string>} operarators
+	 * @param {HTMLSelectElement} select
+	 */
+	function optionsFromOperators(operarators, select) {
+		for(let [operator, printable] of operarators) {
+			let option = document.createElement('option');
+			option.value = operator;
+			option.textContent = printable;
+			select.appendChild(option);
+		}
+	}
 
 	/**
 	 * Maybe a template would have been better...
@@ -512,9 +538,10 @@
 	 * @param {string} name - Feature name
 	 * @param {string} translatedName - Human-readable feature name
 	 * @param {string} pseudoId - Unique element identifier (already checked to be unique), used as class
-	 * @param {Set<string>|null} deletedFeatures - Deleted features set. Null if not tracked (for new items).
+	 * @param {Set<string>|null} deletedFeatures - Deleted features set. Null if not tracked (for new items)
+	 * @param {boolean} addComparison - Add the comparison select (for feature searches)
 	 */
-	function newFeature(name, translatedName, pseudoId, deletedFeatures) {
+	function newFeature(name, translatedName, pseudoId, deletedFeatures, addComparison = false) {
 		let type = featureTypes.get(name);
 		let id = pseudoId + featureIdsCounter++;
 
@@ -527,6 +554,25 @@
 		labelElement.htmlFor = id;
 		labelElement.textContent = translatedName;
 		nameElement.appendChild(labelElement);
+
+		if(addComparison) {
+			let wrappingDiv = document.createElement('div');
+			wrappingDiv.classList.add("comparison");
+			newElement.appendChild(wrappingDiv);
+
+			let pointlessLabel = document.createElement('label');
+			wrappingDiv.appendChild(pointlessLabel);
+
+			let comparisonElement = document.createElement('select');
+			optionsFromOperators(operatorsStandard, comparisonElement);
+			if(type === 'i' || type === 'd') {
+				optionsFromOperators(operatorsOrdering, comparisonElement);
+			} else if(type === 's') {
+				optionsFromOperators(operatorsPartial, comparisonElement);
+			}
+
+			pointlessLabel.appendChild(comparisonElement);
+		}
 
 		let valueElement, div;
 		switch(type) {
