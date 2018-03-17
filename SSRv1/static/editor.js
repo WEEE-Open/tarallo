@@ -1,73 +1,77 @@
 (function() {
 	"use strict";
 
-	document.execCommand('defaultParagraphSeparator', false, 'div');
+	// Enable editor buttons, if some have been rendered server-side
+	// noinspection JSUnresolvedVariable
+	if(typeof activate === 'boolean' && activate) {
+		document.execCommand('defaultParagraphSeparator', false, 'div');
 
-	let divs = document.querySelectorAll('.features.editing [contenteditable]');
-	let selects = document.querySelectorAll('.features.editing select');
-	let deletes = document.querySelectorAll('.features.editing .delete');
-	let itemEditing = document.querySelector('.item.head.editing');
-	let isNew = itemEditing.classList.contains('new');
+		let divs = document.querySelectorAll('.features.editing [contenteditable]');
+		let selects = document.querySelectorAll('.features.editing select');
+		let deletes = document.querySelectorAll('.features.editing .delete');
+		let itemEditing = document.querySelector('.item.head.editing');
+		let isNew = itemEditing.classList.contains('new');
 
-	/** @type {Set<string>} */
-	let deletedFeatures;
-	let deleteClickBound;
-	if(isNew) {
-		deleteClickBound = deleteFeature.bind(null, null);
-		// noinspection JSUnresolvedFunction It's perfectly resolved, it's there, it exists
-		itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveNew);
-		// noinspection JSUnresolvedFunction
-		itemEditing.querySelector('.itembuttons .addnew').addEventListener('click', addNewClick);
-		// Root "new item" cannot be deleted, just cancel the entire operation
-		// itemEditing.querySelector('.itembuttons .removenew').addEventListener('click', removeNewClick);
-	} else {
-		deletedFeatures = new Set();
-		deleteClickBound = deleteFeature.bind(null, deletedFeatures);
-		// noinspection JSUnresolvedFunction
-		itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveModified);
-	}
-
-	// noinspection JSUnresolvedFunction
-	itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack);
-
-	// There may be more than one new item
-	for(let item of document.querySelectorAll('.item.editing')) {
-		let featuresElement;
-
-		// Find own features
-		for(let el of item.children) {
-			if(el.classList.contains('own') && el.classList.contains('features')) {
-				featuresElement = el;
-				break;
-			}
-		}
-
-		// Find "add" button and add listener
-		for(let el of item.children) {
-			if(el.classList.contains('addfeatures')) {
-				el.querySelector('button').addEventListener('click', addFeatureClick.bind(null, el.querySelector('select'), item, featuresElement, typeof deletedFeatures !== 'undefined'));
-				break;
-			}
-		}
-	}
-
-	// Enable the "X" button next to features
-	for(let deleteButton of deletes) {
-		deleteButton.addEventListener('click', deleteClickBound);
-	}
-
-	// Event listeners for string and numeric features
-	for(let div of divs) {
-		if(div.dataset.internalType === 's') {
-			div.addEventListener('input', textChanged);
+		/** @type {Set<string>} */
+		let deletedFeatures;
+		let deleteClickBound;
+		if(isNew) {
+			deleteClickBound = deleteFeature.bind(null, null);
+			// noinspection JSUnresolvedFunction It's perfectly resolved, it's there, it exists
+			itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveNew);
+			// noinspection JSUnresolvedFunction
+			itemEditing.querySelector('.itembuttons .addnew').addEventListener('click', addNewClick);
+			// Root "new item" cannot be deleted, just cancel the entire operation
+			// itemEditing.querySelector('.itembuttons .removenew').addEventListener('click', removeNewClick);
 		} else {
-			div.addEventListener('blur', numberChanged);
+			deletedFeatures = new Set();
+			deleteClickBound = deleteFeature.bind(null, deletedFeatures);
+			// noinspection JSUnresolvedFunction
+			itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveModified.bind(null, deletedFeatures));
 		}
-	}
 
-	// For enum features
-	for(let select of selects) {
-		select.addEventListener('change', selectChanged);
+		// noinspection JSUnresolvedFunction
+		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack);
+
+		// There may be more than one new item
+		for(let item of document.querySelectorAll('.item.editing')) {
+			let featuresElement;
+
+			// Find own features
+			for(let el of item.children) {
+				if(el.classList.contains('own') && el.classList.contains('features')) {
+					featuresElement = el;
+					break;
+				}
+			}
+
+			// Find "add" button and add listener
+			for(let el of item.children) {
+				if(el.classList.contains('addfeatures')) {
+					el.querySelector('button').addEventListener('click', addFeatureClick.bind(null, el.querySelector('select'), featuresElement, deletedFeatures));
+					break;
+				}
+			}
+		}
+
+		// Enable the "X" button next to features
+		for(let deleteButton of deletes) {
+			deleteButton.addEventListener('click', deleteClickBound);
+		}
+
+		// Event listeners for string and numeric features
+		for(let div of divs) {
+			if(div.dataset.internalType === 's') {
+				div.addEventListener('input', textChanged);
+			} else {
+				div.addEventListener('blur', numberChanged);
+			}
+		}
+
+		// For enum features
+		for(let select of selects) {
+			select.addEventListener('change', selectChanged);
+		}
 	}
 
 	/**
@@ -438,11 +442,10 @@
 	 * Handle clicking the "add" button for new features
 	 *
 	 * @param {HTMLSelectElement} select - HTML "select" element
-	 * @param {HTMLElement} item - The item itself
 	 * @param {HTMLElement} featuresElement - The "own features" element
-	 * @param {boolean} trackDeleted - Note deleted/undeleted features in the global set
+	 * @param {Set<string>|null} deletedFeatures - Deleted features set, can be null if not tracked
 	 */
-	function addFeatureClick(select, item, featuresElement, trackDeleted) {
+	function addFeatureClick(select, featuresElement, deletedFeatures = null) {
 		let name = select.value;
 		let translatedName = select.options[select.selectedIndex].textContent;
 		let pseudoId = 'feature-edit-' + name;
@@ -454,15 +457,16 @@
 			return null;
 		}
 
-		let newElement = newFeature(name, translatedName, pseudoId, trackDeleted);
+		let newElement = newFeature(name, translatedName, pseudoId, deletedFeatures);
 
-		if(trackDeleted) {
+		if(deletedFeatures !== null) {
 			// Undelete
 			deletedFeatures.delete(name);
 		}
 
 		// Insert
 		featuresElement.querySelector('.new ul').appendChild(newElement);
+		newElement.querySelector('input, .value').focus();
 	}
 
 	// To generate unique IDs
@@ -474,9 +478,9 @@
 	 * @param {string} name - Feature name
 	 * @param {string} translatedName - Human-readable feature name
 	 * @param {string} pseudoId - Unique element identifier (already checked to be unique), used as class
-	 * @param {boolean} trackDeleted - True to use the deletedFeatures set
+	 * @param {Set<string>|null} deletedFeatures - Deleted features set. Null if not tracked (for new items).
 	 */
-	function newFeature(name, translatedName, pseudoId, trackDeleted) {
+	function newFeature(name, translatedName, pseudoId, deletedFeatures) {
 		let type = featureTypes.get(name);
 		let id = pseudoId + featureIdsCounter++;
 
@@ -547,7 +551,7 @@
 		deleteButton.classList.add('delete');
 		deleteButton.dataset.name = name;
 		deleteButton.textContent = '❌';
-		deleteButton.addEventListener('click', deleteFeature.bind(null, trackDeleted ? deletedFeatures : null));
+		deleteButton.addEventListener('click', deleteFeature.bind(null, deletedFeatures));
 		controlsElement.appendChild(deleteButton);
 
 		return newElement;
@@ -561,7 +565,7 @@
 		clone.querySelector('.addnew').addEventListener('click', addNewClick);
 		let item = clone.children[0];
 		let featuresElement = item.querySelector('.own.features.editing');
-		clone.querySelector('.addfeatures button').addEventListener('click', addFeatureClick.bind(null, clone.querySelector('.addfeatures select'), item, featuresElement, false));
+		clone.querySelector('.addfeatures button').addEventListener('click', addFeatureClick.bind(null, clone.querySelector('.addfeatures select'), featuresElement, false));
 		return clone;
 	}
 
@@ -729,7 +733,7 @@
 	/**
 	 * @return {Promise<void>} Nothing, really.
 	 */
-	async function saveModified() {
+	async function saveModified(deletedFeatures) {
 		let counter;
 		let delta = {};
 

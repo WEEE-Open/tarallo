@@ -23,4 +23,6 @@
 	<?php $this->insert('newItem', ['recursion' => true, 'innerrecursion' => true]) ?>
 </template>
 <script src="/features.js"></script>
+<!--suppress JSUnusedLocalSymbols -->
+<script>const activate = true;</script>
 <script src="/editor.js"></script>
