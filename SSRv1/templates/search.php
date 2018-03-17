@@ -25,7 +25,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 		</div>
 		<div id="search-control-location" class="disabled">
 			<label class="searchby" for="search-control-location-input">Location:</label>
-			<div class="filter"><input id="search-control-location-input"></div>
+			<div class="filter"><input id="search-control-location-input">&nbsp;(Supports % and _)</div>
 		</div>
 		<div id="search-control-features" class="disabled">
 			<label class="searchby">Features:</label>
@@ -38,7 +38,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 		<div id="search-control-sort" class="disabled">
 			<label class="searchby" for="search-control-sort-input">Order by:</label>
 			<div class="filter"><select id="search-control-sort-input" class="allfeatures">
-			</select><label><select>
+			</select><label><select id="search-control-sort-direction-input">
 				<option value="+">Ascending (alphabetical)</option>
 				<option value="-">Descending</option>
 			</select></label></div>

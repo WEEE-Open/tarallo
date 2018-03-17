@@ -51,6 +51,22 @@
 			id = ev.target.dataset.searchId;
 		}
 
+		let query = {};
 
+		if(!document.getElementById('search-control-code').classList.contains('disabled')) {
+			query.code = document.getElementById('search-control-code-input').value;
+		}
+		if(!document.getElementById('search-control-location').classList.contains('disabled')) {
+			query.location = document.getElementById('search-control-location-input').value;
+		}
+		// TODO: features
+		if(!document.getElementById('search-control-sort').classList.contains('disabled')) {
+			let orderby = document.getElementById('search-control-sort-input').value;
+			let direction = document.getElementById('search-control-sort-direction-input').value;
+			query.sort = {};
+			query.sort[orderby] = direction;
+		}
+
+		console.log(query);
 	}
 }());
