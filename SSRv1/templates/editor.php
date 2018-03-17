@@ -22,7 +22,8 @@
 <template id="new-item-template">
 	<?php $this->insert('newItem', ['recursion' => true, 'innerrecursion' => true]) ?>
 </template>
-<script src="/features.js"></script>
+<template id="features-select-template">
+	<?php $this->insert('featuresList'); ?>
+</template>
 <!--suppress JSUnusedLocalSymbols -->
-<script>const activate = true;</script>
 <script src="/editor.js"></script>

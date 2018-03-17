@@ -3,7 +3,8 @@
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
 /** @var string|null $add */
 /** @var string|null $edit */
-/** @var bool|null $recursion */
+/** @var bool $recursion */
+/** @var bool $allowIncludes */
 $recursion = $recursion ?? false;
 $features = $item->getCombinedFeatures();
 $product = $item->getProduct();
@@ -30,7 +31,7 @@ $adding = false;
 $editing = false;
 $target = false;
 
-$nextItemParameters = ['recursion' => true];
+$nextItemParameters = ['recursion' => true, 'allowincludes' => $allowIncludes];
 if(isset($edit)) {
 	$nextItemParameters['edit'] = $edit;
 	$editing = true;
@@ -59,12 +60,13 @@ if(isset($edit)) {
 	</ul>
 </nav>
 <?php endif ?>
-<article class="item <?= $recursion ? '' : 'root' ?> <?= $working ?> <?= $editing && $target ? 'head editing' : '' ?>" data-code="<?=$this->e($item->getCode())?>">
+<article class="item <?=$recursion ? '' : 'root'?> <?=$working?> <?=$editing && $target ? 'head editing' : ''?>"
+		data-code="<?=$this->e($item->getCode())?>">
 	<header>
-		<h2 id="code-<?= $this->e($item->getCode()) ?>"><?=$this->e($item->getCode())?></h2>
+		<h2 id="code-<?=$this->e($item->getCode())?>"><?=$this->e($item->getCode())?></h2>
 	</header>
 
-	<nav class="itembuttons" data-for-item="<?= $this->e($item->getCode()) ?>">
+	<nav class="itembuttons" data-for-item="<?=$this->e($item->getCode())?>">
 		<?php if($editing && $target): ?>
 			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><button class="delete">❌&nbsp;Delete</button>
 		<?php elseif(!$adding && !$editing): ?>
@@ -82,8 +84,7 @@ if(isset($edit)) {
 		<section class="addfeatures">
 			<label>Feature:
 				<select class="allfeatures">
-				</select></label>
-			<button>Add</button>
+				</select></label><button>Add</button>
 		</section>
 
 		<section class="product features">
@@ -97,18 +98,21 @@ if(isset($edit)) {
 
 	<section class="subitems">
 		<?php
-			if($adding && $target) {
-				$this->insert('newItem', ['recursion' => true, 'innerrecursion' => false]);
-			}
+		if($adding && $target) {
+			$this->insert('newItem', ['recursion' => true, 'innerrecursion' => false]);
+		}
 
-			$subitems = $item->getContents();
-			foreach($subitems as $subitem) {
-				$this->insert('item', array_merge($nextItemParameters, ['item' => $subitem]));
-			}
+		$subitems = $item->getContents();
+		foreach($subitems as $subitem) {
+			$this->insert('item', array_merge($nextItemParameters, ['item' => $subitem]));
+		}
 		?>
 	</section>
 </article>
-<?php if(($editing || $adding) && $target) {
-	$this->insert('editor');
-}
+<?php if(($editing || $adding) && $target && $allowIncludes): ?>
+	<script>const activate = true;</script>
+	<?php if($allowIncludes):
+		$this->insert('editor');
+	endif;
+endif;
 ?>

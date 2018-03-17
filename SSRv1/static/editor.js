@@ -1,5 +1,39 @@
-(function() {
+(async function() {
 	"use strict";
+
+	for(let select of document.querySelectorAll('.allfeatures')) {
+		select.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
+	}
+
+	let featureTypes = new Map();
+	let featureValues = new Map();
+	let featureValuesTranslated = new Map();
+
+	let response = await fetch('/features.json', {
+		headers: {
+			'Accept': 'application/json'
+		},
+		method: 'GET',
+		credentials: 'include',
+	});
+
+	if(response.ok) {
+		let everything = await response.json();
+
+		// Rebuild the Maps. These were previously precomputed.
+		for(let group of Object.keys(everything)) {
+			let features = everything[group];
+			for(let feature of features) {
+				featureTypes.set(feature.name, feature.type);
+				if(feature.type === 'e') {
+					featureValues.set(feature.name, Object.keys(feature.values));
+					featureValuesTranslated.set(feature.name, Object.values(feature.values));
+				}
+			}
+		}
+	} else {
+		console.error(response);
+	}
 
 	// Enable editor buttons, if some have been rendered server-side
 	// noinspection JSUnresolvedVariable
@@ -540,6 +574,7 @@
 		valueElement.dataset.internalType = type;
 		valueElement.dataset.internalName = name;
 		valueElement.classList.add("value");
+		valueElement.classList.add("changed");
 		valueElement.id = id;
 		newElement.appendChild(valueElement);
 

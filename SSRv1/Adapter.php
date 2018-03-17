@@ -130,7 +130,7 @@ class Adapter implements AdapterInterface {
 		$querystring
 	) {
 		// TODO: cache ("expires" header + last-modified if HEAD request, maybe?)
-		return new Response(200, 'text/json', $engine->render('featuresList'));
+		return new Response(200, 'text/json', json_encode(FeaturePrinter::getAll()));
 	}
 
 	public static function go(Request $request): Response {

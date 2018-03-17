@@ -361,6 +361,12 @@ class FeaturePrinter {
 		throw new \InvalidArgumentException("Invalid SI prefix (value $prefix)");
 	}
 
+	public static function getAllFeatures() {
+		foreach(Feature::features as $name => $stuff) {
+
+		}
+	}
+
 	public static function getAll() {
 		$array = [];
 

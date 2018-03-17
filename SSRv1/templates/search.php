@@ -8,13 +8,13 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 
 <nav id="searcharea">
 	<nav id="searchbuttons">
-		<label>Filter by
+		<p>Filter by
 			<button data-for="search-control-code">Code</button
 			><button data-for="search-control-location">Location</button
 			><button data-for="search-control-features">Features</button
 			><button data-for="search-control-ancestor">Ancestor</button
 			><button data-for="search-control-sort">Sort</button>
-		</label>
+		</p>
 		<!--Use an URL parameter: <button>Depth</button>-->
 	</nav>
 	<!--<label><input type="checkbox" class="usecompactview" checked="checked">Usa ComputerView (se possibile)</label>-->
@@ -29,21 +29,11 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 		</div>
 		<div id="search-control-features" class="disabled">
 			<label class="searchby">Features:</label>
-			<div class="filter">
-				<div class="own features">
-
-				</div>
-				<div class="selector">
-				<label>Feature:
-					<select class="allfeatures">
-					</select></label>
-				<button>Add</button>
-				</div>
-			</div>
+			<div class="filter"><div class="own features"></div><div class="selector"><label>Feature:<select class="allfeatures"></select></label><button>Add</button></div></div>
 		</div>
 		<div id="search-control-ancestor" class="disabled">
 			<label class="searchby">Ancestor:</label>
-			<div class="filter">TODO</div>
+			<div class="filter"><div class="own features"></div><div class="selector"><label>Feature:<select class="allfeatures"></select></label><button>Add</button></div></div>
 		</div>
 		<div id="search-control-sort" class="disabled">
 			<label class="searchby" for="search-control-sort-input">Order by:</label>
@@ -57,10 +47,6 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 	<button id="searchbutton"><?=$searchId === null ? 'Search' : 'Refine'?></button>
 </nav>
 
-<script src="/features.js"></script>
-<script src="editor.js"></script>
-<script src="search.js"></script>
-
 <div class="results">
 
 	<?php
@@ -69,7 +55,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 			<p>Nothing found :(</p>
 		<?php else:
 			foreach($results as $item) {
-				$this->insert('item', ['item' => $item]);
+				$this->insert('item', ['item' => $item, 'recursion' => false, 'allowIncludes' => false]);
 			} ?>
 			<div class="pagination">TODO</div>
 		<?php
@@ -78,3 +64,6 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 	?>
 
 </div>
+
+<?php $this->insert('editor'); ?>
+<script src="/search.js"></script>

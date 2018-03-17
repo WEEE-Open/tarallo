@@ -21,7 +21,7 @@
 	<h1>T.A.R.A.L.L.O.</h1>
 	<p>Trabiccolo Amministrazione Rottami e Assistenza, Legalmente-noto-come L'inventario Opportuno</p>
 </header>
-<section id="view">
+<div id="view">
 	<?php if(isset($user) || $this->section('aftermenu')): ?>
 	<nav id="top">
 		<?php if(isset($user)):
@@ -33,7 +33,7 @@
 	<section id="content">
 		<?=$this->section('content')?>
 	</section>
-</section>
+</div>
 <?php if($itembuttons): ?>
 	<script src="/itembuttons.js"></script>
 <?php endif ?>
