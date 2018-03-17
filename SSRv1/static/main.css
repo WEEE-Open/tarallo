@@ -259,10 +259,6 @@ ul.breadcrumbs li:not(:first-child)::before {
 	padding: .3rem 0;
 }
 
-.features.editing , #searchcontrols > div > * {
-	padding: .1rem;
-}
-
 .item .features ul li .name, #searchcontrols > div .searchby {
 	max-width: 20em;
 	padding-right: 1em;
