@@ -59,7 +59,12 @@
 		if(!document.getElementById('search-control-location').classList.contains('disabled')) {
 			query.location = document.getElementById('search-control-location-input').value;
 		}
-		// TODO: features
+		if(!document.getElementById('search-control-features').classList.contains('disabled')) {
+			query.features = getSelectedFeatures('search-control-features');
+		}
+		if(!document.getElementById('search-control-ancestor').classList.contains('disabled')) {
+			query.ancestor = getSelectedFeatures('search-control-ancestor');
+		}
 		if(!document.getElementById('search-control-sort').classList.contains('disabled')) {
 			let orderby = document.getElementById('search-control-sort-input').value;
 			let direction = document.getElementById('search-control-sort-direction-input').value;
@@ -68,5 +73,37 @@
 		}
 
 		console.log(query);
+	}
+
+	function getSelectedFeatures(id) {
+		let result = [];
+		let featuresElements = document.getElementById(id).querySelectorAll('.features li');
+		for(let li of featuresElements) {
+			let value;
+			let element = li.getElementsByClassName('value')[0];
+			let name = element.dataset.internalName;
+			switch(element.dataset.internalType) {
+				case 'e':
+					value = element.value;
+					break;
+				case 'i':
+				case 'd':
+					value = element.dataset.internalValue;
+					break;
+				case 's':
+				default:
+					let paragraphs = element.getElementsByTagName('DIV');
+					let lines = [];
+					for(let paragraph of paragraphs) {
+						lines.push(paragraph.textContent);
+					}
+					value = lines.join('\n');
+			}
+
+			let comparison = li.querySelector('.comparison select').value;
+
+			result.push([name, comparison, value]);
+		}
+		return result;
 	}
 }());
