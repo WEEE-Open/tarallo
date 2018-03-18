@@ -185,7 +185,7 @@ final class ItemDAO extends DAO {
 				SELECT `Descendant` AS `Code`, GetParent(`Descendant`) AS Parent
 				FROM Tree
 				WHERE Ancestor = ?
-				AND Depth < ?
+				AND Depth <= ?
 				ORDER BY Depth ASC, Code ASC
 EOQ
 			);

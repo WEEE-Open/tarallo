@@ -125,6 +125,23 @@ class Item extends ItemFeatures implements \JsonSerializable {
 	}
 
 	/**
+	 * Get a feature, or null if none.
+	 * Uses combined features (item and product).
+	 *
+	 * @param string $name Feature name
+	 *
+	 * @return Feature|null
+	 */
+	public function getFeature(string $name) {
+		$features = $this->getCombinedFeatures();
+		if(isset($features[$name])) {
+			return $features[$name];
+		} else {
+			return null;
+		}
+	}
+
+	/**
 	 * Get product referenced by this item
 	 *
 	 * @return null|Product
@@ -151,11 +168,6 @@ class Item extends ItemFeatures implements \JsonSerializable {
 		//}
 
 		return $this;
-	}
-
-	// TODO: use a separate field, in future
-	public function isMovable() {
-		return !isset($this->features['soldered-in-place']);
 	}
 
 	/**

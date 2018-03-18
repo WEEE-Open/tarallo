@@ -16,6 +16,8 @@ use WEEEOpen\Tarallo\Server\HTTP\Response;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\ItemFeatures;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemLocationValidator;
+use WEEEOpen\Tarallo\Server\ItemNestingException;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
@@ -85,7 +87,8 @@ class Adapter implements AdapterInterface {
 			}
 		} catch(\InvalidArgumentException $e) {
 			if($e->getCode() === ItemDAO::EXCEPTION_CODE_GENERATE_ID) {
-				throw new InvalidPayloadParameterException('code', null, 'Cannot generate code for an item (missing "type"?)');
+				throw new InvalidPayloadParameterException('code', null,
+					'Cannot generate code for an item (missing "type"?)');
 			} else {
 				throw $e;
 			}
@@ -111,12 +114,39 @@ class Adapter implements AdapterInterface {
 		Validation::authorize($user);
 		Validation::validateIsString($payload);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+		$fix = isset($querystring['fix']) ? boolval($querystring['fix']) : false;
+		$validate = isset($querystring['validate']) ? boolval($querystring['validate']) : true; // TODO: this will probably be always true, unless it's ?validate=0
+
+		$item = new ItemIncomplete($id);
+		$parent = new ItemIncomplete($payload);
+
+		if($fix || $validate) {
+			// We'll need full items, not just ItemIncompletes!
+			$item = $db->itemDAO()->getItem($item, null, 0);
+			try {
+				$parent = $db->itemDAO()->getItem($parent, null, 1);
+			} catch(NotFoundException $e) {
+				throw new InvalidPayloadParameterException('*', $payload, "Parent item doesn't exist");
+			}
+		}
+
+		if($fix) {
+			$parent = ItemLocationValidator::reparent($item, $parent);
+		}
+
+		if($validate) {
+			try {
+				ItemLocationValidator::checkNesting($item, $parent);
+			} catch(ItemNestingException $e) {
+				throw new InvalidPayloadParameterException('*', $e->parentCode, $e->getMessage());
+			}
+		}
 
 		try {
-			$db->treeDAO()->moveItem(new ItemIncomplete($id), new ItemIncomplete($payload));
+			$db->treeDAO()->moveItem($item, $parent);
 		} catch(NotFoundException $e) {
 			if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
-				throw new InvalidPayloadParameterException('*', $payload, "Parent item doesn't exist");
+				throw new InvalidPayloadParameterException('*', $parent->getCode(), "Parent item doesn't exist");
 			} else {
 				throw $e;
 			}
@@ -165,8 +195,9 @@ class Adapter implements AdapterInterface {
 		}
 	}
 
-	public static function go(Request $request) : Response {
-		return self::goInternal($request->method, $request->path, $request->querystring, $request->payload)->asResponseInterface();
+	public static function go(Request $request): Response {
+		return self::goInternal($request->method, $request->path, $request->querystring,
+			$request->payload)->asResponseInterface();
 	}
 
 	/**
