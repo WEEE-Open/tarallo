@@ -195,6 +195,19 @@ class Adapter implements AdapterInterface {
 		}
 	}
 
+	public static function doSearch(User $user = null, Database $db, $parameters, $querystring, $payload) {
+		Validation::authorize($user);
+		Validation::validateArray($payload);
+		$id = isset($parameters['id']) ? (int) $parameters['id'] : null;
+
+		// TODO: if $id => (same user || authorize(level 0))
+
+		$search = SearchBuilder::ofArray($payload);
+		$resultId = $db->searchDAO()->search($search, $user, $id);
+
+		return $resultId;
+	}
+
 	public static function go(Request $request): Response {
 		return self::goInternal($request->method, $request->path, $request->querystring,
 			$request->payload)->asResponseInterface();
@@ -238,8 +251,8 @@ class Adapter implements AdapterInterface {
 				});
 			});
 
-			$r->post('/search', 'createSearch');
-			$r->patch('/search/{id}', 'refineSearch');
+			$r->post('/search', 'doSearch');
+			$r->patch('/search/{id}', 'doSearch');
 			$r->get('/search/{id}[/page/{page}]', 'getSearch');
 
 			$r->addGroup('/products', function(FastRoute\RouteCollector $r) {

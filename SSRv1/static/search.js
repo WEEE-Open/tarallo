@@ -1,8 +1,9 @@
 (function() {
 	"use strict";
 
+	let searchButton = document.getElementById('searchbutton');
 	document.getElementById('searchbuttons').addEventListener('click', buttonsClick);
-	document.getElementById('searchbutton').addEventListener('click', searchButtonClick);
+	searchButton.addEventListener('click', searchButtonClick);
 
 	for(let id of ['search-control-features', 'search-control-ancestor']) {
 		let controls = document.getElementById(id);
@@ -45,7 +46,7 @@
 		}
 	}
 
-	function searchButtonClick(ev) {
+	async function searchButtonClick(ev) {
 		let id = null;
 		if(ev.target.dataset.searchId) {
 			id = ev.target.dataset.searchId;
@@ -55,15 +56,27 @@
 
 		if(!document.getElementById('search-control-code').classList.contains('disabled')) {
 			query.code = document.getElementById('search-control-code-input').value;
+			if(query.code === '') {
+				delete query.code;
+			}
 		}
 		if(!document.getElementById('search-control-location').classList.contains('disabled')) {
 			query.location = document.getElementById('search-control-location-input').value;
+			if(query.location === '') {
+				delete query.location;
+			}
 		}
 		if(!document.getElementById('search-control-features').classList.contains('disabled')) {
 			query.features = getSelectedFeatures('search-control-features');
+			if(query.features.length <= 0) {
+				delete query.features;
+			}
 		}
 		if(!document.getElementById('search-control-ancestor').classList.contains('disabled')) {
 			query.ancestor = getSelectedFeatures('search-control-ancestor');
+			if(query.ancestor.length <= 0) {
+				delete query.ancestor;
+			}
 		}
 		if(!document.getElementById('search-control-sort').classList.contains('disabled')) {
 			let orderby = document.getElementById('search-control-sort-input').value;
@@ -72,7 +85,44 @@
 			query.sort[orderby] = direction;
 		}
 
-		console.log(query);
+		let uri, method;
+
+		if(id === null) {
+			uri = '/v1/search';
+			method = 'POST';
+		} else {
+			uri = '/v1/search/' + id;
+			method = 'PATCH';
+		}
+
+		searchButton.disabled = true;
+
+		try {
+			let response = await fetch(uri, {
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				method: method,
+				credentials: 'include',
+				body: JSON.stringify(query)
+			});
+
+			let result = await response.json();
+			let id = result.data;
+			goTo(id);
+		} finally {
+			searchButton.disabled = false;
+		}
+	}
+
+	function goTo(code = null, page = null) {
+		let query = window.location.search;
+		let hash = window.location.hash;
+
+		let idFragment = code === null ? '' : '/' + code;
+
+		window.location.href = '/search' + idFragment + query + hash;
 	}
 
 	function getSelectedFeatures(id) {

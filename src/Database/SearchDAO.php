@@ -69,7 +69,7 @@ final class SearchDAO extends DAO {
 
 	/**
 	 * @param Search $search Filters to be applied
-	 * @param User $user Search owner (current user)
+	 * @param User $user Search owner (current user), not used if refining a previous search
 	 * @param int|null $previousSearchId If supplied, previous results are filtered again
 	 *
 	 * @return int Search ID, previous or new
