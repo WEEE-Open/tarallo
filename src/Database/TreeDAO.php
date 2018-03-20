@@ -107,7 +107,7 @@ final class TreeDAO extends DAO {
 		}
 
 		if($this->removeFromTreeStatement === null) {
-			/* This is readable but doesn't work in MySQL:
+			/* This is readable but doesn't work in MySQL (TODO: implemented in MariaDB 10.3, replace query once it's out):
 			 *
 			 * DELETE * FROM Tree
 			 * WHERE DescendantID IN (
@@ -122,8 +122,11 @@ final class TreeDAO extends DAO {
             AND Pointless.Ancestor = ?;');
 		}
 
-		$this->removeFromTreeStatement->execute([$item->getCode()]);
-		$this->removeFromTreeStatement->closeCursor(); // TODO: needed?
+		try {
+			$this->removeFromTreeStatement->execute([$item->getCode()]);
+		} finally {
+			$this->removeFromTreeStatement->closeCursor(); // TODO: needed?
+		}
 	}
 
 	private $addItemAsRootStatement = null;
