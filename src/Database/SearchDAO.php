@@ -186,13 +186,10 @@ EOQ;
 		$everything = 'WHERE' . substr($everything, 3);
 
 		if($previousSearchId) {
-			// TODO: Remove the pointless join once MariaDB 10.3 is out, because it DOESN'T WORK, plain and simple, despite working in TreeDAO. The exact same thing.
 			$megaquery = /** @lang MySQL */
 				<<<EOQ
-DELETE These.*
-FROM SearchResult AS These, SearchResult AS Others
-WHERE Others.Item=These.Item AND Others.Search=These.Search
-AND Others.Search = :searchId AND Others.Item NOT IN (SELECT DISTINCT `Code` FROM Item $everything);
+DELETE FROM SearchResult
+WHERE Search = :searchId AND Item NOT IN (SELECT DISTINCT `Code` FROM Item $everything);
 EOQ;
 		} else {
 			// TODO: this was "FROM Item, ItemFeature": was that needed?
