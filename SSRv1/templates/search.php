@@ -64,9 +64,9 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 			} ?>
 			<div class="pagination"><?php if($page === 1): ?><!--
 					--><a class="disabled">← Previous</a><!--
-				<?php else: ?>
+				--><?php else: ?><!--
 					--><a href="<?php printf('/search/%d/page/%d', $searchId, $page - 1) ?>">← Previous</a><!--
-			<?php endif; for($i = 1; $i <= $pages; $i++): ?><!--
+			--><?php endif; for($i = 1; $i <= $pages; $i++): ?><!--
 				<?php if($i === $page): ?>
 					--><a class="disabled"><?= $i ?></a><!--
 				<?php else: ?>
