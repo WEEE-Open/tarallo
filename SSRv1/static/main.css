@@ -202,8 +202,15 @@ ul.breadcrumbs li:not(:first-child)::before {
 	padding: 0.5em;
 }
 
+#stats {
+	margin: .5em;
+	padding: .5em;
+	background-color: #333;
+	color: #eee;
+}
+
 .item, #searcharea {
-	margin: .5em .5em .5em .5em;
+	margin: .5em;
 }
 
 .item + .item {
@@ -331,17 +338,18 @@ ul.breadcrumbs li:not(:first-child)::before {
 }
 
 .pagination {
-	margin: 0 auto;
+	margin: 1.5em auto;
 	text-align: center;
 }
 
 .pagination a {
 	padding: 0.5em;
+	color: #333;
 }
 
-.pagination a:not(.disabled) {
-	text-decoration: underline;
-	cursor: pointer;
+.pagination a:visited {
+	padding: 0.5em;
+	color: #333;
 }
 
 .pagination a:not(.disabled):hover {

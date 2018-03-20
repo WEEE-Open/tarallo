@@ -1,8 +1,11 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 /** @var int|null $searchId */
-/** @var int $page */
-/** @var \WEEEOpen\Tarallo\Server\Item[]|null $results */
+/** @var int|null $page Current page (only if searchId is not null) */
+/** @var int|null $pages Total number of pages (only if searchId is not null) */
+/** @var int|null $total Total number of results (only if searchId is not null) */
+/** @var int|null $resultsPerPage Pretty self-explanatory (only if searchId is not null) */
+/** @var \WEEEOpen\Tarallo\Server\Item[]|null $results Items (only if searchId is not null) */
 $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => true]);
 ?>
 
@@ -46,7 +49,9 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 	</div>
 	<button id="searchbutton" <?= $searchId === null ?: 'data-search-id="'.$searchId.'"' ?>><?=$searchId === null ? 'Search' : 'Refine'?></button>
 </nav>
-
+<?php if(!empty($results)): ?>
+<div id="stats"><?= $total ?> results, showing <?= $resultsPerPage ?> (page <?= $page ?> of <?= $pages ?>).</div>
+<?php endif ?>
 <div class="results">
 
 	<?php
@@ -57,7 +62,21 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 			foreach($results as $item) {
 				$this->insert('item', ['item' => $item, 'recursion' => false, 'allowIncludes' => false]);
 			} ?>
-			<div class="pagination">TODO</div>
+			<div class="pagination"><?php if($page === 1): ?><!--
+					--><a class="disabled">← Previous</a><!--
+				<?php else: ?>
+					--><a href="<?php printf('/search/%d/page/%d', $searchId, $page - 1) ?>">← Previous</a><!--
+			<?php endif; for($i = 1; $i <= $pages; $i++): ?><!--
+				<?php if($i === $page): ?>
+					--><a class="disabled"><?= $i ?></a><!--
+				<?php else: ?>
+					--><a href="<?php printf('/search/%d/page/%d', $searchId, $i) ?>"><?= $i ?></a><!--
+				<?php endif ?>
+			<?php endfor; if($page === $pages): ?>
+					--><a class="disabled">Next →</a><!--
+				<?php else: ?>
+					--><a href="<?php printf('/search/%d/page/%d', $searchId, $page + 1) ?>">Next →</a><!--
+			<?php endif ?>--></div>
 		<?php
 		endif;
 	endif;

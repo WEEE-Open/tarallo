@@ -50,6 +50,31 @@ final class SearchDAO extends DAO {
 	}
 
 	/**
+	 * @param int $previousSearchId
+	 *
+	 * @return int
+	 */
+	public function getResultsCount(int $previousSearchId) {
+		$s = $this->getPDO()->prepare('SELECT ResultsCount FROM Search WHERE Code = ?;');
+		$result = $s->execute([$previousSearchId]);
+
+		if($result) {
+			try {
+				if($s->rowCount() === 0) {
+					throw new \LogicException("Search id $previousSearchId doesn't exist anymore");
+				}
+				$row = $s->fetch(\PDO::FETCH_NUM);
+
+				return (int) $row[0];
+			} finally {
+				$s->closeCursor();
+			}
+		} else {
+			throw new DatabaseException('Cannot count search results for unfathomable reasons');
+		}
+	}
+
+	/**
 	 * Begin searching. By obtaining an ID for this search, setting its expiration date, and the like.
 	 *
 	 * @param User $user

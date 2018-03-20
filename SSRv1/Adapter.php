@@ -105,14 +105,17 @@ class Adapter implements AdapterInterface {
 		if($id === null) {
 			$parameters = ['searchId' => null];
 		} else {
-			$results = $db->searchDAO()->getResults($id, $page, 10);
-			$pages = 4; // TODO: get the real number (also total number of results?)
+			$perPage = 10;
+			$results = $db->searchDAO()->getResults($id, $page, $perPage);
+			$total = $db->searchDAO()->getResultsCount($id);
+			$pages = (int) ceil($total / $perPage);
 			$parameters = [
 				'searchId'       => $id,
 				'page'           => $page,
-				'results'        => $results,
 				'pages'          => $pages,
-				'resultsPerPage' => 10
+				'total'          => $total,
+				'resultsPerPage' => $perPage,
+				'results'        => $results,
 			];
 		}
 
