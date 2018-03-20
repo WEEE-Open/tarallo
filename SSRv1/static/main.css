@@ -209,7 +209,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 	color: #eee;
 }
 
-.item, #searcharea {
+.item, #searcharea, #options {
 	margin: .5em;
 }
 
@@ -355,4 +355,8 @@ ul.breadcrumbs li:not(:first-child)::before {
 .pagination a:not(.disabled):hover {
 	background-color: #333;
 	color: #eee;
+}
+
+#options form label {
+	display: block;
 }

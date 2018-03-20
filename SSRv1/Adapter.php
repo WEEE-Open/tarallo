@@ -125,6 +125,23 @@ class Adapter implements AdapterInterface {
 		return new Response(200, 'text/html', $engine->render('search', $parameters));
 	}
 
+	private static function password(
+		User $user = null,
+		Database $db,
+		Engine $engine,
+		$parameters,
+		$querystring
+	): Response {
+		Validation::authorize($user);
+		if($querystring !== null) {
+			$password = Validation::validateHasString($querystring, 'password');
+			$confirm = Validation::validateHasString($querystring, 'confirm');
+			// TODO: actually change
+		}
+		// TODO: success/failure message
+		return new Response(200, 'text/html', $engine->render('password', []));
+	}
+
 	private static function getFeaturesJson(
 		User $user = null,
 		Database $db,
@@ -158,6 +175,7 @@ class Adapter implements AdapterInterface {
 			$r->get('/item/{id}/edit/{edit}', 'getItem');
 			$r->get('/add', 'addItem');
 			$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', 'search');
+			$r->addRoute(['GET', 'POST'], '/password', 'password');
 			$r->addRoute(['GET', 'POST'], '/login', 'login');
 		});
 
