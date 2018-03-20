@@ -54,9 +54,7 @@ if(isset($edit)) {
 <?php if(!$recursion): ?>
 <nav class="breadbox">
 	<ul class="breadcrumbs">
-		<?php foreach($item->getPath() as $piece): ?>
-			<li><a href="/item/<?=$this->u($piece)?>"><?=$this->e($piece)?></a></li>
-		<?php endforeach; ?>
+		<?php foreach($item->getPath() as $piece): ?><li><a href="/item/<?=$this->u($piece)?>"><?=$this->e($piece)?></a></li><?php endforeach; ?>
 	</ul>
 </nav>
 <?php endif ?>
