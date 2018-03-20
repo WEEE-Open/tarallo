@@ -109,9 +109,13 @@ final class SearchDAO extends DAO {
 			$id = self::newSearch($user);
 		} else {
 			$id = $previousSearchId;
+			$subqueries[] = /** @lang MySQL */
+				<<<EOQ
+				SELECT `Item`
+				FROM SearchResult
+				WHERE Search = :previous
+EOQ;
 		}
-
-		//$this->refresh($id);
 
 		if($search->searchFeatures !== null) {
 			foreach($search->searchFeatures as $triplet) {
@@ -181,17 +185,32 @@ EOQ;
 		// Replace first AND with WHERE
 		$everything = 'WHERE' . substr($everything, 3);
 
-		$megaquery = /** @lang MySQL */
-			<<<EOQ
-INSERT INTO SearchResult(Search, Item)
-SELECT DISTINCT :searchId, Item.`Code`
-FROM Item, ItemFeature
-$everything
-ORDER BY Item.`Code` ASC;
+		if($previousSearchId) {
+			// TODO: Remove the pointless join once MariaDB 10.3 is out, because it DOESN'T WORK, plain and simple, despite working in TreeDAO. The exact same thing.
+			$megaquery = /** @lang MySQL */
+				<<<EOQ
+DELETE These.*
+FROM SearchResult AS These, SearchResult AS Others
+WHERE Others.Item=These.Item AND Others.Search=These.Search
+AND Others.Search = :searchId AND Others.Item NOT IN (SELECT DISTINCT `Code` FROM Item $everything);
 EOQ;
+		} else {
+			// TODO: this was "FROM Item, ItemFeature": was that needed?
+			$megaquery = /** @lang MySQL */
+				<<<EOQ
+INSERT INTO SearchResult(Search, Item)
+SELECT DISTINCT :searchId, `Code`
+FROM Item
+$everything;
+EOQ;
+		}
 
 		$statement = $this->getPDO()->prepare($megaquery);
-		$statement->bindValue(":searchId", $id, \PDO::PARAM_INT);
+		$statement->bindValue(':searchId', $id, \PDO::PARAM_INT);
+
+		if($previousSearchId !== null) {
+			$statement->bindValue(':previous', $previousSearchId, \PDO::PARAM_INT);
+		}
 
 		$i = 0;
 		if($search->searchFeatures !== null) {
