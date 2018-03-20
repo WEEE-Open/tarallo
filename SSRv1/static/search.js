@@ -109,8 +109,12 @@
 			});
 
 			let result = await response.json();
-			let id = result.data;
-			goTo(id);
+			if(result.status === 'success') {
+				let id = result.data;
+				goTo(id);
+			} else {
+				console.log(result);
+			}
 		} finally {
 			searchButton.disabled = false;
 		}

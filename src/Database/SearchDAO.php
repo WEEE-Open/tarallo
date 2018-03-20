@@ -228,7 +228,7 @@ EOQ;
 
 	public function sortByCode(int $searchId) {
 		$query = /** @lang MySQL */
-			"SELECT `Item` FROM SearchResult WHERE Search = ? ORDER BY `Item` DESC;";
+			"SELECT `Item` FROM SearchResult WHERE Search = ? ORDER BY CHAR_LENGTH(`Item`) DESC, `Item` DESC;";
 		$sortedStatement = $this->getPDO()->prepare($query);
 
 		try {
@@ -247,7 +247,11 @@ EOQ;
 			return;
 		}
 
-		// TODO: move $updateStatement to a separate function and call it
+		$i = 0;
+		foreach($sorted as $result) {
+			$this->setItemOrder($searchId, $result['Item'], $i);
+			$i++;
+		}
 	}
 
 	public function sort(Search $search, int $searchId) {
@@ -288,9 +292,7 @@ EOQ;
 		self::unsort($searchId);
 
 		$miniquery = /** @lang MySQL */
-			"SELECT DISTINCT `Code` FROM ItemFeature WHERE `Code` IN (SELECT `Item` FROM SearchResult WHERE Search = ?) AND Feature = ? ORDER BY $column $ascdesc, `Code` DESC;";
-		$updatequery = /** @lang MySQL */
-			"UPDATE SearchResult SET `Order` = :pos WHERE Search = :sea AND Item = :cod";
+			"SELECT DISTINCT `Code` FROM ItemFeature WHERE `Code` IN (SELECT `Item` FROM SearchResult WHERE Search = ?) AND Feature = ? ORDER BY $column $ascdesc, CHAR_LENGTH(`Code`) DESC, `Code` DESC;";
 
 		$sortedStatement = $this->getPDO()->prepare($miniquery);
 		try {
@@ -309,24 +311,36 @@ EOQ;
 			return;
 		}
 
-		$updateStatement = $this->getPDO()->prepare($updatequery);
+		$i = 0;
+		foreach($sorted as $result) {
+			$this->setItemOrder($searchId, $result['Code'], $i);
+			$i++;
+		}
+	}
+
+	private $setItemOrderStatement = null;
+
+	/**
+	 * Set item position in the results table.
+	 *
+	 * @param int $searchId Search ID
+	 * @param string $code Item code
+	 * @param int $position Position in the results
+	 */
+	private function setItemOrder(int $searchId, string $code, int $position) {
+		if($this->setItemOrderStatement === null) {
+			$this->setItemOrderStatement = $this->getPDO()->prepare('UPDATE SearchResult SET `Order` = :pos WHERE Search = :sea AND Item = :cod');
+		}
+
 		try {
-			$updateStatement->bindValue(':sea', $searchId, \PDO::PARAM_INT);
-
-			$i = 0;
-			foreach($sorted as $result) {
-				$code = $result['Code'];
-				$updateStatement->bindValue(':pos', $i, \PDO::PARAM_INT);
-				$updateStatement->bindValue(':cod', $code, \PDO::PARAM_STR);
-				if(!$updateStatement->execute()) {
-					throw new DatabaseException("Cannot set item $code to position $i for unknown reasons");
-				}
-				$updateStatement->closeCursor();
-
-				$i++;
+			$this->setItemOrderStatement->bindValue(':sea', $searchId, \PDO::PARAM_INT);
+			$this->setItemOrderStatement->bindValue(':pos', $position, \PDO::PARAM_INT);
+			$this->setItemOrderStatement->bindValue(':cod', $code, \PDO::PARAM_STR);
+			if(!$this->setItemOrderStatement->execute()) {
+				throw new DatabaseException("Cannot set item $code to position $position for unknown reasons");
 			}
 		} finally {
-			$updateStatement->closeCursor();
+			$this->setItemOrderStatement->closeCursor();
 		}
 	}
 
