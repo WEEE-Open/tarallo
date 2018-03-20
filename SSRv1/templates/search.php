@@ -59,25 +59,11 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 		if(empty($results)): ?>
 			<p>Nothing found :(</p>
 		<?php else:
+			$this->insert('pagination', ['page' => $page, 'pages' => $pages, 'searchId' => $searchId]);
 			foreach($results as $item) {
 				$this->insert('item', ['item' => $item, 'recursion' => false, 'allowIncludes' => false]);
-			} ?>
-			<div class="pagination"><?php if($page === 1): ?><!--
-					--><a class="disabled">← Previous</a><!--
-				--><?php else: ?><!--
-					--><a href="<?php printf('/search/%d/page/%d', $searchId, $page - 1) ?>">← Previous</a><!--
-			--><?php endif; for($i = 1; $i <= $pages; $i++): ?><!--
-				<?php if($i === $page): ?>
-					--><a class="disabled"><?= $i ?></a><!--
-				<?php else: ?>
-					--><a href="<?php printf('/search/%d/page/%d', $searchId, $i) ?>"><?= $i ?></a><!--
-				<?php endif ?>
-			<?php endfor; if($page === $pages): ?>
-					--><a class="disabled">Next →</a><!--
-				<?php else: ?>
-					--><a href="<?php printf('/search/%d/page/%d', $searchId, $page + 1) ?>">Next →</a><!--
-			<?php endif ?>--></div>
-		<?php
+			}
+			$this->insert('pagination', ['page' => $page, 'pages' => $pages, 'searchId' => $searchId]);
 		endif;
 	endif;
 	?>
