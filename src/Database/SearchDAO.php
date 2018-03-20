@@ -97,6 +97,8 @@ final class SearchDAO extends DAO {
 	 * @param User $user Search owner (current user), not used if refining a previous search
 	 * @param int|null $previousSearchId If supplied, previous results are filtered again
 	 *
+	 * @TODO: actually refine (WHERE Code IN (SearchResults ...)) and ON DUPLICATE KEY IGNORE
+	 *
 	 * @return int Search ID, previous or new
 	 */
 	public function search(Search $search, User $user, $previousSearchId = null) {
