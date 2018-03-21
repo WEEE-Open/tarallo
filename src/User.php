@@ -54,14 +54,14 @@ class User {
 
 	public function setPassword(string $password, string $confirm) {
 		if(!$this->nullOrNonEmptyString($password)) {
-			throw new \InvalidArgumentException('Password must be a non-empty string');
+			throw new \InvalidArgumentException('Password must be a non-empty string', 5);
 		}
 		if($password !== $confirm) {
-			throw new \InvalidArgumentException('Password and confirm don\'t match');
+			throw new \InvalidArgumentException('Password and confirm don\'t match', 6);
 		}
 		// Not multibyte-safe: who cares.
 		if(strlen($password) < 8) {
-			throw new \InvalidArgumentException('Password too short');
+			throw new \InvalidArgumentException('Password too short', 7);
 		}
 
 		$this->password = $password;

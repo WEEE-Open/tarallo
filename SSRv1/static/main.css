@@ -84,10 +84,6 @@ nav#top nav#main {
 	margin-bottom: 0;
 }
 
-nav#top nav .message {
-	padding: .5em;
-}
-
 nav#main {
 	padding: 0;
 	white-space: nowrap;
@@ -137,6 +133,10 @@ nav#top nav.quick.open {
 .httperror strong {
 	font-weight: normal;
 	font-size: 30vw;
+}
+
+.message {
+	padding: .5em;
 }
 
 .info.message {

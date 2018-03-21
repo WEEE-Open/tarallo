@@ -133,13 +133,37 @@ class Adapter implements AdapterInterface {
 		$querystring
 	): Response {
 		Validation::authorize($user);
-		if($querystring !== null) {
+		if($querystring === null) {
+			$result = null;
+		} else {
+			$result = 'success';
 			$password = Validation::validateHasString($querystring, 'password');
 			$confirm = Validation::validateHasString($querystring, 'confirm');
-			// TODO: actually change
+			try {
+				$user->setPassword($password, $confirm);
+				$db->userDAO()->setPasswordFromUser($user->getUsername(), $user->getHash());
+			} catch(\InvalidArgumentException $e) {
+				switch($e->getCode()) {
+					case 5:
+						$result = 'empty';
+						break;
+					case 6:
+						$result = 'nomatch';
+						break;
+					case 7:
+						$result = 'short';
+						break;
+					default:
+						throw $e;
+				}
+			}
 		}
-		// TODO: success/failure message
-		return new Response(200, 'text/html', $engine->render('password', []));
+		if($result === null || $result === 'success') {
+			$status = 200;
+		} else {
+			$status = 400;
+		}
+		return new Response($status, 'text/html', $engine->render('password', ['result' => $result]));
 	}
 
 	private static function getFeaturesJson(
