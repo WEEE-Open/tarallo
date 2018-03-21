@@ -20,14 +20,19 @@ class SearchBuilder {
 	 */
 	public static function ofArray(array $input) {
 		$code = $input['code'] ?? null;
-		$location = $input['location'] ?? null;
 
-		if($location !== null) {
+		if(isset($input['locations'])) {
+			$locations = [];
 			try {
-				$location = [new ItemIncomplete($location)];
+				foreach($input['locations'] as $location) {
+					$locations[] = new ItemIncomplete($location);
+				}
+				unset($location);
 			} catch(\InvalidArgumentException $e) {
-				throw new InvalidPayloadParameterException('location', $location, $e->getMessage());
+				throw new InvalidPayloadParameterException('locations', $location, $e->getMessage());
 			}
+		} else {
+			$locations = null;
 		}
 
 		if(isset($input['features'])) {
@@ -60,7 +65,7 @@ class SearchBuilder {
 		}
 
 
-		return new Search($code, $features, $ancestor, $location, $sort);
+		return new Search($code, $features, $ancestor, $locations, $sort);
 	}
 
 	private static function getFeatures(array $stuff, string $field): array {

@@ -60,10 +60,11 @@
 				delete query.code;
 			}
 		}
+		// TODO: support multiple locations?
 		if(!document.getElementById('search-control-location').classList.contains('disabled')) {
-			query.location = document.getElementById('search-control-location-input').value;
-			if(query.location === '') {
-				delete query.location;
+			let location = document.getElementById('search-control-location-input').value;
+			if(location !== '') {
+				query.locations = [location];
 			}
 		}
 		if(!document.getElementById('search-control-features').classList.contains('disabled')) {
