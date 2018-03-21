@@ -61,7 +61,7 @@ final class SearchDAO extends DAO {
 		if($result) {
 			try {
 				if($s->rowCount() === 0) {
-					throw new \LogicException("Search id $previousSearchId doesn't exist anymore");
+					throw new \LogicException("Search id $previousSearchId doesn't exist");
 				}
 				$row = $s->fetch(\PDO::FETCH_NUM);
 
@@ -71,6 +71,30 @@ final class SearchDAO extends DAO {
 			}
 		} else {
 			throw new DatabaseException('Cannot count search results for unfathomable reasons');
+		}
+	}
+
+	/**
+	 * @param int $searchId
+	 *
+	 * @return string
+	 */
+	public function getOwnerUsername(int $searchId) {
+		$s = $this->getPDO()->prepare('SELECT Owner FROM Search WHERE Code = ?;');
+		$result = $s->execute([$searchId]);
+		if($result) {
+			try {
+				if($s->rowCount() === 0) {
+					throw new \LogicException("Search id $searchId doesn't exist");
+				}
+				$row = $s->fetch(\PDO::FETCH_NUM);
+
+				return $row[0];
+			} finally {
+				$s->closeCursor();
+			}
+		} else {
+			throw new DatabaseException('Cannot get search owner for unfathomable reasons');
 		}
 	}
 

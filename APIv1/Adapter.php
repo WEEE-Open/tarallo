@@ -200,7 +200,13 @@ class Adapter implements AdapterInterface {
 		Validation::validateArray($payload);
 		$id = isset($parameters['id']) ? (int) $parameters['id'] : null;
 
-		// TODO: if $id => (same user || authorize(level 0))
+		if($id) {
+			// Refreshing a search: must be owner or admin
+			$username = $db->searchDAO()->getOwnerUsername($id);
+			if($username !== $user->getUsername()) {
+				Validation::authorize($user, 0);
+			}
+		}
 
 		$search = SearchBuilder::ofArray($payload);
 		$resultId = $db->searchDAO()->search($search, $user, $id);
