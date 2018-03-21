@@ -1,7 +1,6 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use WEEEOpen\Tarallo\Server\InvalidParameterException;
 use WEEEOpen\Tarallo\Server\User;
 
 class UserTest extends TestCase {
@@ -29,7 +28,7 @@ class UserTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Server\User
 	 */
 	public function testEmptyUsername() {
-		$this->expectException(InvalidParameterException::class);
+		$this->expectException(InvalidArgumentException::class);
 		new User('', null, null);
 	}
 
@@ -37,7 +36,7 @@ class UserTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Server\User
 	 */
 	public function testNullUsername() {
-		$this->expectException(InvalidParameterException::class);
+		$this->expectException(InvalidArgumentException::class);
 		new User(null, null, null);
 	}
 
@@ -45,7 +44,7 @@ class UserTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Server\User
 	 */
 	public function testEmptyPasswordAndHash() {
-		$this->expectException(InvalidParameterException::class);
+		$this->expectException(InvalidArgumentException::class);
 		new User('asd', '', '');
 	}
 
@@ -62,7 +61,7 @@ class UserTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Server\User
 	 */
 	public function testWrongTypePassword() {
-		$this->expectException(InvalidParameterException::class);
+		$this->expectException(InvalidArgumentException::class);
 		new User('asd', ['foo' => 'bar'], null);
 	}
 
@@ -70,7 +69,7 @@ class UserTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Server\User
 	 */
 	public function testEmptyHash() {
-		$this->expectException(InvalidParameterException::class);
+		$this->expectException(InvalidArgumentException::class);
 		new User('asd', null, '');
 	}
 

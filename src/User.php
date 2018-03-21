@@ -14,20 +14,19 @@ class User {
 	 * @param null|string $password plaintext password
 	 * @param null|string $hash hashed password (from database)
 	 *
-	 * @throws InvalidParameterException for empty strings or things that aren't neither strings nor null
 	 * @throws \InvalidArgumentException when password and hash aren't null and don't match (code 72, chosen at random)
 	 */
 	public function __construct($username, $password = null, $hash = null) {
 		if(!is_string($username) || strlen($username) === 0) {
-			throw new InvalidParameterException('Username must be a non-empty string');
+			throw new \InvalidArgumentException('Username must be a non-empty string');
 		}
 
 		if(!$this->nullOrNonEmptyString($password)) {
-			throw new InvalidParameterException('Password must be null or a non-empty string');
+			throw new \InvalidArgumentException('Password must be null or a non-empty string');
 		}
 
 		if(!$this->nullOrNonEmptyString($hash)) {
-			throw new InvalidParameterException('Hash must be null or a non-empty string');
+			throw new \InvalidArgumentException('Hash must be null or a non-empty string');
 		}
 
 		if(is_string($password) && is_string($hash)) {
@@ -51,6 +50,22 @@ class User {
 
 	public function getUsername() {
 		return $this->username;
+	}
+
+	public function setPassword(string $password, string $confirm) {
+		if(!$this->nullOrNonEmptyString($password)) {
+			throw new \InvalidArgumentException('Password must be a non-empty string');
+		}
+		if($password !== $confirm) {
+			throw new \InvalidArgumentException('Password and confirm don\'t match');
+		}
+		// Not multibyte-safe: who cares.
+		if(strlen($password) < 8) {
+			throw new \InvalidArgumentException('Password too short');
+		}
+
+		$this->password = $password;
+		$this->hash = null;
 	}
 
 	/**

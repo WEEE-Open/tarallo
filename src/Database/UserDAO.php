@@ -44,6 +44,25 @@ final class UserDAO extends DAO {
 	}
 
 	/**
+	 * Set new password for a user.
+	 *
+	 * @param string $username
+	 * @param string $hash
+	 */
+	public function setPasswordFromUser(string $username, string $hash) {
+		try {
+			$s = $this->getPDO()->prepare('UPDATE `User` SET `Password` = :p WHERE `Name` = :n');
+			$s->bindValue(':p', $hash, \PDO::PARAM_STR);
+			$s->bindValue(':n', $username, \PDO::PARAM_STR);
+			if(!$s->execute()) {
+				throw new DatabaseException("Cannot update password for user $username for unknown reasons");
+			}
+		} finally {
+			$s->closeCursor();
+		}
+	}
+
+	/**
 	 * Log in a user, via username and password. Doesn't start any session!
 	 *
 	 * @param $username string username
