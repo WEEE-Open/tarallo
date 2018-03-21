@@ -78,6 +78,14 @@ class Adapter implements AdapterInterface {
 		return $response;
 	}
 
+	public static function logout(User $user = null, Database $db, $parameters, $querystring, $payload) {
+		Validation::authenticate($user);
+		Session::close($user, $db);
+
+		// È una citazione colta.
+		return new Response(200, 'text/html', '<center><h1>logout ok</h1><p>scritta centrata [cit.]</p></center>');
+	}
+
 	private static function getHome(
 		User $user = null,
 		Database $db,
@@ -163,6 +171,7 @@ class Adapter implements AdapterInterface {
 		} else {
 			$status = 400;
 		}
+
 		return new Response($status, 'text/html', $engine->render('password', ['result' => $result]));
 	}
 
@@ -191,6 +200,10 @@ class Adapter implements AdapterInterface {
 
 		// TODO: use cachedDispatcher
 		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
+			$r->addRoute(['GET', 'POST'], '/login', 'login');
+			$r->addRoute(['GET', 'POST'], '/password', 'password');
+			$r->get('/logout', 'logout');
+
 			$r->get('/', 'getHome');
 			$r->get('/features.json', 'getFeaturesJson');
 			$r->get('/home', 'getHome');
@@ -199,8 +212,6 @@ class Adapter implements AdapterInterface {
 			$r->get('/item/{id}/edit/{edit}', 'getItem');
 			$r->get('/add', 'addItem');
 			$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', 'search');
-			$r->addRoute(['GET', 'POST'], '/password', 'password');
-			$r->addRoute(['GET', 'POST'], '/login', 'login');
 		});
 
 		$route = $dispatcher->dispatch($method, $uri);

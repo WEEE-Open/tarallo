@@ -4,7 +4,7 @@
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 ?>
 <nav>
-	<span class="message">Logged in as <?= $user->getUsername() ?></span><button class="logout">Logout</button>
+	<span class="message">Logged in as <?= $user->getUsername() ?></span><button id="logout">Logout</button>
 </nav>
 <nav id="main">
 	<ul>

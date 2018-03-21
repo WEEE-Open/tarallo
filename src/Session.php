@@ -53,8 +53,8 @@ class Session {
 	}
 
 	private static function setContent($newContent, $expire) {
-		// TODO: check that "secure" works as expected
-		setcookie(self::COOKIE_NAME, $newContent, $expire, '', '', true, true);
+		// TODO: enable "secure" if we get a TLS certifcate for the test VM
+		setcookie(self::COOKIE_NAME, $newContent, $expire, '', '', false, true);
 	}
 
 	/**

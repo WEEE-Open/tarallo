@@ -6,6 +6,8 @@
 	let quickView = top.querySelector(".quick.view");
 	let quickMove = top.querySelector(".quick.move");
 
+	document.getElementById('logout').addEventListener('click', () => window.location.href = '/logout');
+
 	for(let message of quickMove.getElementsByClassName('message')) {
 		message.style.display = 'none';
 	}
