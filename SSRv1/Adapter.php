@@ -108,7 +108,8 @@ class Adapter implements AdapterInterface {
 		Validation::authorize($user);
 		$id = isset($parameters['id']) ? (int) $parameters['id'] : null;
 		$page = isset($parameters['page']) ? (int) $parameters['page'] : 1;
-		// TODO: the add/edit thing
+		$add = isset($parameters['add']) ? (string) $parameters['add'] : null;
+		$edit = isset($parameters['edit']) ? (string) $parameters['edit'] : null;
 
 		if($id === null) {
 			$parameters = ['searchId' => null];
@@ -125,10 +126,12 @@ class Adapter implements AdapterInterface {
 				'resultsPerPage' => $perPage,
 				'results'        => $results,
 			];
+			if($add !== null) {
+				$parameters['add'] = $add;
+			} else if($edit !== null) {
+				$parameters['edit'] = $edit;
+			}
 		}
-
-		// Example search:
-		//var_dump($db->searchDAO()->search(new Search('R%'), $user));
 
 		return new Response(200, 'text/html', $engine->render('search', $parameters));
 	}
@@ -212,6 +215,10 @@ class Adapter implements AdapterInterface {
 			$r->get('/item/{id}/edit/{edit}', 'getItem');
 			$r->get('/add', 'addItem');
 			$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', 'search');
+			$r->get('/search/{id:[0-9]+}/add/{add}', 'search');
+			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', 'search');
+			$r->get('/search/{id:[0-9]+}/edit/{edit}', 'search');
+			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', 'search');
 		});
 
 		$route = $dispatcher->dispatch($method, $uri);

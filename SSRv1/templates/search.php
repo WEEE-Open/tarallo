@@ -61,7 +61,13 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 		<?php else:
 			$this->insert('pagination', ['page' => $page, 'pages' => $pages, 'searchId' => $searchId]);
 			foreach($results as $item) {
-				$this->insert('item', ['item' => $item, 'recursion' => false, 'allowIncludes' => false]);
+				$parameters = ['item' => $item, 'recursion' => false, 'allowIncludes' => false];
+				if(isset($add)) {
+					$parameters['add'] = $add;
+				} else if(isset($edit)) {
+					$parameters['edit'] = $edit;
+				}
+				$this->insert('item', $parameters);
 			}
 			$this->insert('pagination', ['page' => $page, 'pages' => $pages, 'searchId' => $searchId]);
 		endif;
@@ -70,5 +76,8 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 
 </div>
 
+<?php if(isset($add) || isset($edit)): ?>
+<script>const activate = true;</script>
+<?php endif ?>
 <?php $this->insert('editor'); ?>
 <script src="/search.js"></script>
