@@ -47,7 +47,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 			</select></label></div>
 		</div>
 	</div>
-	<button id="searchbutton" <?= $searchId === null ?: 'data-search-id="'.$searchId.'"' ?><?=$searchId === null ?: ' disabled'?>><?=$searchId === null ? 'Search' : 'Refine (won\'t work until MariaDB 10.3 is released)'?></button>
+	<button id="searchbutton" <?= $searchId === null ?: 'data-search-id="'.$searchId.'"' ?>><?=$searchId === null ? 'Search' : 'Refine'?></button>
 </nav>
 <?php if(!empty($results)): ?>
 <div id="stats"><?= $total ?> results, showing <?= $resultsPerPage ?> (page <?= $page ?> of <?= $pages ?>).</div>

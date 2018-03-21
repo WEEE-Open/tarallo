@@ -109,12 +109,6 @@ final class SearchDAO extends DAO {
 			$id = self::newSearch($user);
 		} else {
 			$id = $previousSearchId;
-			$subqueries[] = /** @lang MySQL */
-				<<<EOQ
-				SELECT `Item`
-				FROM SearchResult
-				WHERE Search = :previous
-EOQ;
 		}
 
 		if($search->searchFeatures !== null) {
@@ -189,7 +183,7 @@ EOQ;
 			$megaquery = /** @lang MySQL */
 				<<<EOQ
 DELETE FROM SearchResult
-WHERE Search = :searchId AND Item NOT IN (SELECT DISTINCT `Code` FROM Item $everything);
+WHERE Search = :searchId AND Item NOT IN (SELECT `Code` FROM Item $everything);
 EOQ;
 		} else {
 			// TODO: this was "FROM Item, ItemFeature": was that needed?
@@ -204,10 +198,6 @@ EOQ;
 
 		$statement = $this->getPDO()->prepare($megaquery);
 		$statement->bindValue(':searchId', $id, \PDO::PARAM_INT);
-
-		if($previousSearchId !== null) {
-			$statement->bindValue(':previous', $previousSearchId, \PDO::PARAM_INT);
-		}
 
 		$i = 0;
 		if($search->searchFeatures !== null) {
