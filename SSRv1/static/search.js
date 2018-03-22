@@ -1,5 +1,10 @@
-(function() {
+(async function() {
 	"use strict";
+
+	// For comparison in feature selectors (used for searches only)
+	const operatorsStandard = new Map([['=', '='], ['<>', '≠']]);
+	const operatorsOrdering = new Map([['>', '>'], ['>=', '≥'], ['<=', '≤'], ['<', '<']]);
+	const operatorsPartial = new Map([['~', '≈'], ['!~', '≉']]);
 
 	let searchButton = document.getElementById('searchbutton');
 	document.getElementById('searchbuttons').addEventListener('click', buttonsClick);
@@ -37,13 +42,51 @@
 			return;
 		}
 
-		let newElement = newFeature(name, translatedName, pseudoId, null, true);
+		let newElement = newFeature(name, translatedName, pseudoId, null, getComparison);
 		featuresElement.appendChild(newElement);
 		// TODO: replace with 'input, .value' once I figure out how to move the cursor to the right (= get this code working: https://stackoverflow.com/a/3866442)
 		let input = newElement.querySelector('input');
 		if(input) {
 			input.focus();
 		}
+	}
+
+	/**
+	 * Get options from operators
+	 *
+	 * @param {Map<string,string>} operarators
+	 * @param {HTMLSelectElement} select
+	 */
+	function optionsFromOperators(operarators, select) {
+		for(let [operator, printable] of operarators) {
+			let option = document.createElement('option');
+			option.value = operator;
+			option.textContent = printable;
+			select.appendChild(option);
+		}
+	}
+
+	/**
+	 * Get comparison dropdown menu, for a specific feature
+	 *
+	 * @param {string} type - Feature type (s, i, d, e)
+	 */
+	function getComparison(type) {
+		let wrappingDiv = document.createElement('div');
+		wrappingDiv.classList.add("comparison");
+
+		let pointlessLabel = document.createElement('label');
+		wrappingDiv.appendChild(pointlessLabel);
+
+		let comparisonElement = document.createElement('select');
+		optionsFromOperators(operatorsStandard, comparisonElement);
+		if(type === 'i' || type === 'd') {
+			optionsFromOperators(operatorsOrdering, comparisonElement);
+		} else if(type === 's') {
+			optionsFromOperators(operatorsPartial, comparisonElement);
+		}
+
+		pointlessLabel.appendChild(comparisonElement);
 	}
 
 	async function searchButtonClick(ev) {
