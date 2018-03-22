@@ -8,6 +8,7 @@ MODIFIES SQL DATA
 	-- apparently. However many people on TEH INTERNETS say that anything other than a pure function is nonderministic,
 	-- so who knows! If the database crashes and burns, we'll know it wasn't actually deterministic.
 DETERMINISTIC
+SQL SECURITY INVOKER
 	BEGIN
 		DECLARE thePrefix varchar(20) CHARACTER SET 'utf8mb4'
 		COLLATE 'utf8mb4_unicode_ci';
@@ -47,6 +48,7 @@ DETERMINISTIC
 
 -- TODO: extend and use to log in?
 CREATE OR REPLACE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
+	SQL SECURITY INVOKER
 	BEGIN
 		SET @taralloAuditUsername = username;
 	END $$
@@ -55,8 +57,9 @@ CREATE OR REPLACE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8
 
 CREATE OR REPLACE FUNCTION GetParent(child varchar(100))
 	RETURNS varchar(100)
-READS SQL DATA
-DETERMINISTIC
+	READS SQL DATA
+	DETERMINISTIC
+	SQL SECURITY INVOKER
 	BEGIN
 		DECLARE found varchar(100);
 		SELECT Ancestor
@@ -68,6 +71,7 @@ DETERMINISTIC
 	END $$
 
 CREATE OR REPLACE PROCEDURE DetachSubtree(root varchar(100))
+	SQL SECURITY INVOKER
 	BEGIN
 		DELETE Tree.* FROM Tree, Tree AS Pointless
 		WHERE Tree.Descendant=Pointless.Descendant
@@ -163,6 +167,7 @@ CREATE OR REPLACE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
 
 -- Refresh expiration timestamp for a search. Already called by necessary triggers, call it when reading results or sorting, too.
 CREATE OR REPLACE PROCEDURE RefreshSearch(id bigint UNSIGNED)
+	SQL SECURITY INVOKER
 	BEGIN
 		UPDATE Search SET Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP) WHERE Code = id;
 	END $$
