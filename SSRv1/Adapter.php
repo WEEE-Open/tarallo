@@ -185,7 +185,9 @@ class Adapter implements AdapterInterface {
 		$parameters,
 		$querystring
 	) {
-		// TODO: cache ("expires" header + last-modified if HEAD request, maybe?)
+		session_cache_limiter('');
+		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 3600) . ' GMT');
+		header('Cache-Control	: max-age=3600');
 		return new Response(200, 'text/json', json_encode(FeaturePrinter::getAll()));
 	}
 
