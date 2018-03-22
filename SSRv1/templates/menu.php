@@ -12,7 +12,8 @@
 		><li><a href="/add">Add new</a></li
 		><li><a class="quick" data-toggle="view">View</a></li
 		><li><a class="quick" data-toggle="move">Move</a></li
-		><li><a href="/search">Search</a></li>
+		><li><a href="/search">Search</a></li
+		><li><a href="/password">Options</a></li>
 	</ul>
 </nav>
 <nav class="quick view">
