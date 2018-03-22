@@ -42,11 +42,13 @@ class Request {
 	}
 
 	public static function ofGlobals() {
-		if(isset($_SERVER['PATH_INFO'])) {
-			$path = urldecode($_SERVER['PATH_INFO']);
-		} else if(!isset($_SERVER['REQUEST_URI'])) {
-			// Direct request to index.php or whatever
-			$path = '';
+//		if(isset($_SERVER['PATH_INFO'])) {
+//			$path = urldecode($_SERVER['PATH_INFO']);
+//		} else if(!isset($_SERVER['REQUEST_URI'])) {
+//			// Direct request to index.php or whatever
+//			$path = '';
+		if(isset($_SERVER['REQUEST_URI'])) {
+			$path = urldecode($_SERVER['REQUEST_URI']);
 		} else {
 			throw new \LogicException('Cannot find PATH_INFO');
 		}
