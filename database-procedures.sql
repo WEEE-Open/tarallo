@@ -172,6 +172,7 @@ CREATE OR REPLACE PROCEDURE RefreshSearch(id bigint UNSIGNED)
 		UPDATE Search SET Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP) WHERE Code = id;
 	END $$
 
+-- Remove old searches. Search results are removed by ON DELETE CASCADE.
 CREATE EVENT `SearchCleanup`
 ON SCHEDULE EVERY '1' HOUR ON COMPLETION NOT PRESERVE
 ENABLE DO

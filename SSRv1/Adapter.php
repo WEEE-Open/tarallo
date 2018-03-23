@@ -93,7 +93,11 @@ class Adapter implements AdapterInterface {
 		$parameters,
 		$querystring
 	): Response {
-		Validation::authorize($user);
+		try {
+			Validation::authorize($user);
+		} catch(AuthenticationException $e) {
+			return new RedirectResponse(303, '/login');
+		}
 
 		return new Response(200, 'text/html', $engine->render('home'));
 	}
