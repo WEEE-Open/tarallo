@@ -537,7 +537,7 @@
 		nameElement.appendChild(labelElement);
 
 		if(getComparison !== null) {
-			newElement.appendChild(getComparison());
+			newElement.appendChild(getComparison(type));
 		}
 
 		let valueElement, div;

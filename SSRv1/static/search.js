@@ -70,6 +70,8 @@
 	 * Get comparison dropdown menu, for a specific feature
 	 *
 	 * @param {string} type - Feature type (s, i, d, e)
+	 *
+	 * @return {HTMLElement}
 	 */
 	function getComparison(type) {
 		let wrappingDiv = document.createElement('div');
@@ -87,6 +89,8 @@
 		}
 
 		pointlessLabel.appendChild(comparisonElement);
+
+		return wrappingDiv;
 	}
 
 	async function searchButtonClick(ev) {
