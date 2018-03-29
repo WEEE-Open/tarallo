@@ -186,8 +186,9 @@ final class ItemDAO extends DAO {
 				FROM Tree
 				WHERE Ancestor = ?
 				AND Depth <= ?
-				ORDER BY Depth ASC, Code ASC
+				ORDER BY Depth ASC, `Code` ASC
 EOQ
+				// Adding "CHAR_LENGTH(`Code`) ASC" to ORDER BY makes it sort items like "R54, C124, R252, R253"...
 			);
 		}
 
