@@ -48,7 +48,9 @@ class Request {
 //			// Direct request to index.php or whatever
 //			$path = '';
 		if(isset($_SERVER['REQUEST_URI'])) {
-			$path = urldecode($_SERVER['REQUEST_URI']);
+			$urlpieces = explode('?', $_SERVER['REQUEST_URI'], 2);
+			$path = urldecode($urlpieces[0]);
+			unset($urlpieces);
 		} else {
 			throw new \LogicException('Cannot find PATH_INFO');
 		}
