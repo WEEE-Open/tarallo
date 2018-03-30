@@ -43,5 +43,6 @@ if(!$innerrecursion && !$recursion) {
 	</section>
 </article>
 <?php if(!$recursion) {
+	?><script>const activate = true;</script><?php
 	$this->insert('editor');
 } ?>
