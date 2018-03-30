@@ -51,6 +51,17 @@ final class TreeDAO extends DAO {
 		if($newParent !== null) {
 			$this->setParent($newParent, $item);
 		}
+
+		$this->auditMove($item, $newParent);
+	}
+
+	private function auditMove(ItemIncomplete $item, ItemIncomplete $newParent = null) {
+		$s = $this->getPDO()->prepare('INSERT INTO Audit (Code, Other, `Change`, User) VALUES (?, ?, \'M\', @taralloAuditUsername);');
+		try {
+			$s->execute([$item->getCode(), $newParent === null ? null : $newParent->getCode()]);
+		} finally {
+			$s->closeCursor();
+		}
 	}
 
 	private $getPathToStatement = null;
