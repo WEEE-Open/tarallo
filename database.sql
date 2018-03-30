@@ -18,8 +18,6 @@ CREATE TABLE `Item` (
 	`Variant` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 	`Token` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
 	`DeletedAt` timestamp NULL DEFAULT NULL,
-	UNIQUE KEY (`Code`),
-	INDEX (`Code`),
 	INDEX (`DeletedAt`),
 	FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Products` (`Brand`, `Model`, `Variant`)
 		ON DELETE NO ACTION
@@ -86,13 +84,16 @@ CREATE TABLE `ItemFeature` (
 CREATE TABLE Audit (
 	`Code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Change` char(1) COLLATE utf8mb4_bin NOT NULL,
-	`Other` varchar(100) COLLATE utf8mb4_unicode_ci,
-	`Time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-		PRIMARY KEY (`Code`, `Change`, `Time`),
-		-- CHECK ((`Change` = 'C') OR (`Change` = 'R') OR (`Change` = 'U') OR (`Change` = 'D') OR (`Change` = 'M')), -- R is for Rename, actually
-		CHECK ((`Change` = 'M' AND `Other` IS NOT NULL) OR ((`Change` = 'R' OR `Change` = 'U' OR `Change` = 'D') AND `Other` IS NULL) OR `Change` = 'C'),
-	CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`),
-	CONSTRAINT FOREIGN KEY (`Other`) REFERENCES `Item` (`Code`)
+	`Other` varchar(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+	`Time` timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`User` varchar(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+	PRIMARY KEY (`Code`, `Time`, `Change`),
+	-- CHECK ((`Change` = 'C') OR (`Change` = 'R') OR (`Change` = 'U') OR (`Change` = 'D') OR (`Change` = 'M')), -- R is for Rename, actually
+	CHECK (((`Change` = 'M' OR `Change` = 'R') AND `Other` IS NOT NULL) OR
+		((`Change` = 'U' OR `Change` = 'D' OR `Change` = 'C') AND `Other` IS NULL))
+	-- CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	-- CONSTRAINT FOREIGN KEY (`Other`) REFERENCES `Item` (`Code`) ON UPDATE NO ACTION ON DELETE CASCADE,
+	-- CONSTRAINT FOREIGN KEY (`User`) REFERENCES `User` (`Name`)  ON UPDATE CASCADE ON DELETE CASCADE
 )
 	ENGINE = InnoDB
 	DEFAULT CHARSET = utf8mb4

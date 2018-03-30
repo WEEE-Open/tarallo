@@ -847,21 +847,24 @@
 						} else {
 							// "fail" with no data
 							onerror(response.status.toString() + ': unspecified validation error');
+							console.error(jsend);
 						}
 					} else {
 						// JSend error, or not a JSend response
 						onerror(response.status.toString() + ': ' + jsend.message ? jsend.message : '');
+						console.error(jsend);
 					}
 				}
 			} catch(e) {
 				// invalid JSON
 				onerror(e.message);
-				console.error(response.body);
+				console.error(response);
 			}
 		} else {
 			// not JSON
 			let text = await response.text();
 			onerror(response.status.toString() + ': ' + text);
+			console.error(response);
 		}
 	}
 

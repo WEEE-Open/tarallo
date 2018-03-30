@@ -191,6 +191,59 @@ CREATE OR REPLACE TRIGGER RemoveOldAuditEntries
 		DELETE FROM Audit WHERE Code = NEW.Code OR Other = NEW.Code;
 	END $$
 
+-- Add a 'C' entry to audit table
+CREATE OR REPLACE TRIGGER AuditCreateItem
+	AFTER INSERT
+	ON Item
+	FOR EACH ROW
+	BEGIN
+		DECLARE parent varchar(100);
+
+		SELECT Ancestor INTO parent
+		FROM Tree
+		WHERE Descendant = NEW.Code;
+
+		INSERT INTO Audit(Code, `Change`, Other, `User`)
+		VALUES(NEW.Code, 'C', NULL, @taralloAuditUsername);
+	END $$
+
+-- Add a 'R' entry to audit table
+CREATE OR REPLACE TRIGGER AuditCreateItem
+	AFTER UPDATE
+	ON Item
+	FOR EACH ROW
+	BEGIN
+		IF(NEW.Code <> OLD.Code) THEN
+			INSERT INTO Audit(Code, `Change`, Other, `User`)
+			VALUES(NEW.Code, 'R', OLD.Code, @taralloAuditUsername);
+		END IF;
+	END $$
+
+-- Add a 'D' entry to audit table
+CREATE OR REPLACE TRIGGER AuditDeleteItem
+	AFTER UPDATE
+	ON Item
+	FOR EACH ROW
+	BEGIN
+		IF(NEW.DeletedAt IS NOT NULL) THEN
+			INSERT INTO Audit(Code, `Change`, `User`)
+			VALUES(NEW.Code, 'D', @taralloAuditUsername);
+		END IF;
+	END $$
+
+-- Rename users in Audit table when renaming an account (to keep some kind of referential integrity)
+CREATE OR REPLACE TRIGGER AuditUserRename
+	AFTER UPDATE
+	ON `User`
+	FOR EACH ROW
+	BEGIN
+		IF(NEW.Name <> OLD.Name) THEN
+			UPDATE Audit
+			SET `User` = NEW.Name
+			WHERE `User` = OLD.Name
+		END IF;
+	END $$
+
 DELIMITER ;
 
 SET GLOBAL event_scheduler = ON;

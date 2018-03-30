@@ -80,6 +80,7 @@ final class FeatureDAO extends DAO {
 	private $featureTextStatement = null;
 	private $featureEnumStatement = null;
 	private $featureDoubleStatement = null;
+	private $featureAudit = null;
 
 	public function setFeatures(ItemFeatures $item) {
 		$features = $item->getFeatures();
@@ -101,6 +102,9 @@ final class FeatureDAO extends DAO {
 		}
 		if($this->featureDoubleStatement === null) {
 			$this->featureDoubleStatement = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `ValueDouble`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `ValueDouble`=:val2');
+		}
+		if($this->featureAudit === null) {
+			$this->featureAudit = $pdo->prepare('INSERT INTO Audit (Code, `Change`, User) VALUES (?, \'U\', @taralloAuditUsername)');
 		}
 
 		foreach($features as $feature) {
@@ -138,6 +142,14 @@ final class FeatureDAO extends DAO {
 			} finally {
 				$statement->closeCursor();
 			}
+		}
+
+		try {
+			if(!$this->featureAudit->execute([$item->getCode()])) {
+				throw new DatabaseException('Cannot add audit table entry for features update of ' . $item->getCode());
+			}
+		} finally {
+			$this->featureAudit->closeCursor();
 		}
 	}
 

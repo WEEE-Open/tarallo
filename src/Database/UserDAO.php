@@ -38,6 +38,8 @@ final class UserDAO extends DAO {
 			if(!$s->execute()) {
 				throw new DatabaseException("Cannot update session for user $username for unknown reasons");
 			}
+
+			$this->setAuditUsername($username);
 		} finally {
 			$s->closeCursor();
 		}
@@ -84,6 +86,7 @@ final class UserDAO extends DAO {
 			$user = $s->fetch(\PDO::FETCH_ASSOC);
 			$s->closeCursor();
 			try {
+				$this->setAuditUsername($username);
 				return new User($username, $password, $user['Password']);
 			} catch(\InvalidArgumentException $e) {
 				if($e->getCode() === 72) {
@@ -92,6 +95,23 @@ final class UserDAO extends DAO {
 					throw $e;
 				}
 			}
+		}
+	}
+
+	/**
+	 * Set the MySQL global variable taralloAuditUsername.
+	 *
+	 * @param $username
+	 */
+	private function setAuditUsername($username) {
+		try {
+			$s = $this->getPDO()->prepare(/** @lang MySQL */
+				'CALL SetUser(?)');
+			if(!$s->execute([$username])) {
+				throw new DatabaseException("Cannot set audit username for user $username for unknown reasons");
+			}
+		} finally {
+			$s->closeCursor();
 		}
 	}
 
