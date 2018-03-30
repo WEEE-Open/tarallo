@@ -240,7 +240,7 @@ CREATE OR REPLACE TRIGGER AuditUserRename
 		IF(NEW.Name <> OLD.Name) THEN
 			UPDATE Audit
 			SET `User` = NEW.Name
-			WHERE `User` = OLD.Name
+			WHERE `User` = OLD.Name;
 		END IF;
 	END $$
 
