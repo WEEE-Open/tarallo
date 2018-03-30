@@ -180,6 +180,17 @@ ENABLE DO
 	FROM Search
 	WHERE Expires < DATE_SUB(NOW(), INTERVAL 1 HOUR)$$
 
+-- Audit -----------------------------------------------------------------------
+
+-- If an item is permanently deleted its code may be reused, but there might still be previous audit table entires.
+CREATE OR REPLACE TRIGGER RemoveOldAuditEntries
+	BEFORE INSERT
+	ON Item
+	FOR EACH ROW
+	BEGIN
+		DELETE FROM Audit WHERE Code = NEW.Code OR Other = NEW.Code;
+	END $$
+
 DELIMITER ;
 
 SET GLOBAL event_scheduler = ON;

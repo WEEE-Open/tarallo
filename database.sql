@@ -89,8 +89,8 @@ CREATE TABLE Audit (
 	`Other` varchar(100) COLLATE utf8mb4_unicode_ci,
 	`Time` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
 		PRIMARY KEY (`Code`, `Change`, `Time`),
-		CHECK ((`Change` = 'C') OR (`Change` = 'R') OR (`Change` = 'U') OR (`Change` = 'D') OR (`Change` = 'M')), -- R is for Rename, actually
-		CHECK (Other IS NULL OR (Other IS NOT NULL AND `Change` = 'M')),
+		-- CHECK ((`Change` = 'C') OR (`Change` = 'R') OR (`Change` = 'U') OR (`Change` = 'D') OR (`Change` = 'M')), -- R is for Rename, actually
+		CHECK ((`Change` = 'M' AND `Other` IS NOT NULL) OR ((`Change` = 'R' OR `Change` = 'U' OR `Change` = 'D') AND `Other` IS NULL) OR `Change` = 'C'),
 	CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`),
 	CONSTRAINT FOREIGN KEY (`Other`) REFERENCES `Item` (`Code`)
 )
