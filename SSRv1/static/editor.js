@@ -70,7 +70,7 @@
 		}
 
 		// noinspection JSUnresolvedFunction
-		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack);
+		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack.bind(null, null));
 
 		// There may be more than one new item
 		for(let item of document.querySelectorAll('.item.editing')) {
