@@ -9,6 +9,10 @@ TRUNCATE `Feature`;
 INSERT INTO `Feature` (`Feature`, `Type`) VALUES
 	('brand', 0), -- Brand --
 	('model', 0), -- Model --
+	('family', 0), -- Model family --
+	('variant', 0), -- Variant --
+	('key-bios-setup', 0), -- Key to press for BIOS setup --
+	('key-boot-menu', 0), -- Key to press for boot menu --
 	('owner', 0), -- Owner --
 	('sn', 0), -- Serial number (s/n) --
 	('mac', 0), -- MAC address --

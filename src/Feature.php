@@ -12,6 +12,10 @@ class Feature {
 	const features = [
 		'brand' => self::STRING,
 		'model' => self::STRING,
+		'family' => self::STRING,
+		'variant' => self::STRING,
+		'key-bios-setup' => self::STRING,
+		'key-boot-menu' => self::STRING,
 		'owner' => self::STRING,
 		'sn' => self::STRING,
 		'mac' => self::STRING,
