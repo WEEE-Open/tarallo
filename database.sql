@@ -59,10 +59,10 @@ CREATE TABLE `ItemFeature` (
 	`ValueText` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 	`ValueDouble` double DEFAULT NULL,
 	PRIMARY KEY (`Code`, `Feature`),
-	INDEX `Feature` (`Feature`),
-	INDEX `Value1` (`Value`),
-	INDEX `Value2` (`ValueEnum`),
-	INDEX `Value3` (`ValueDouble`),
+	-- INDEX `Feature` (`Feature`), -- FOREIGN KEY is already an INDEX
+	INDEX `Value` (`Value`),
+	INDEX `ValueDouble` (`ValueDouble`),
+	-- INDEX `Value2` (`ValueEnum`), -- FOREIGN KEY is already an INDEX
 	CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`)
 		ON DELETE CASCADE
 		ON UPDATE CASCADE,
