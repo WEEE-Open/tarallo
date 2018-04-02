@@ -46,11 +46,56 @@ SQL SECURITY INVOKER
 
 	END $$
 
--- TODO: extend and use to log in?
+-- Pointless procedure to set a global variable (used by the audit triggers)
 CREATE OR REPLACE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
 	SQL SECURITY INVOKER
 	BEGIN
 		SET @taralloAuditUsername = username;
+	END $$
+
+-- Set the Item Brand, Model and Variant after an INSERT operation
+CREATE OR REPLACE TRIGGER ItemBMVInsert
+	AFTER INSERT
+	ON ItemFeature
+	FOR EACH ROW
+	BEGIN
+		IF(NEW.Feature = 'brand') THEN
+			UPDATE Item SET Brand = NEW.ValueText WHERE Code = NEW.Code;
+		ELSEIF(NEW.Feature = 'model') THEN
+			UPDATE Item SET Model = NEW.ValueText WHERE Code = NEW.Code;
+		ELSEIF(NEW.Feature = 'variant') THEN
+			UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
+		END IF;
+	END $$
+
+-- Set the Item Brand, Model and Variant after an UPDATE operation. If MySQL supported multiple events per trigger this would be less redundant...
+CREATE OR REPLACE TRIGGER ItemBMVUpdate
+	AFTER UPDATE
+	ON ItemFeature
+	FOR EACH ROW
+	BEGIN
+		IF(NEW.Feature = 'brand') THEN
+			UPDATE Item SET Brand = NEW.ValueText WHERE Code = NEW.Code;
+		ELSEIF(NEW.Feature = 'model') THEN
+			UPDATE Item SET Model = NEW.ValueText WHERE Code = NEW.Code;
+		ELSEIF(NEW.Feature = 'variant') THEN
+			UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
+		END IF;
+	END $$
+
+-- (Un)set the Item Brand, Model and Variant after a DELETE operation.
+CREATE OR REPLACE TRIGGER ItemBMVDelete
+	AFTER DELETE
+	ON ItemFeature
+	FOR EACH ROW
+	BEGIN
+		IF(OLD.Feature = 'brand') THEN
+			UPDATE Item SET Brand = NULL WHERE Code = OLD.Code;
+		ELSEIF(OLD.Feature = 'model') THEN
+			UPDATE Item SET Model = NULL WHERE Code = OLD.Code;
+		ELSEIF(OLD.Feature = 'variant') THEN
+			UPDATE Item SET Variant = NULL WHERE Code = OLD.Code;
+		END IF;
 	END $$
 
 -- Tree ------------------------------------------------------------------------
@@ -77,17 +122,6 @@ CREATE OR REPLACE PROCEDURE DetachSubtree(root varchar(100))
 		WHERE Tree.Descendant=Pointless.Descendant
 		AND Pointless.Ancestor = root;
 	END $$
-
--- Fires for each item, even when moving a subtree... maybe add a stored procedure for subtree moving?
--- CREATE OR REPLACE TRIGGER ItemMoveAudit
--- 	AFTER INSERT
--- 	ON Tree
--- 	FOR EACH ROW
--- 	BEGIN
--- 		IF(Depth = 0) THEN
--- 			INSERT INTO Audit(`Code`, `Change`, `Other`, `Time`) VALUES (NEW.Descendant, 'M', NEW.Ancestor, NOW());
--- 		END IF;
--- 	END $$
 
 -- Search ----------------------------------------------------------------------
 
