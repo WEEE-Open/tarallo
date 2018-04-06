@@ -209,7 +209,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 	color: #eee;
 }
 
-.item, #searcharea, #options {
+#content > *, .item {
 	margin: .5em;
 }
 

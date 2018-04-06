@@ -99,7 +99,9 @@ class Adapter implements AdapterInterface {
 			return new RedirectResponse(303, '/login');
 		}
 
-		return new Response(200, 'text/html', $engine->render('home'));
+		$locations = $db->statsDAO()->getLocationsByItems();
+
+		return new Response(200, 'text/html', $engine->render('home', ['locations' => $locations]));
 	}
 
 	private static function search(

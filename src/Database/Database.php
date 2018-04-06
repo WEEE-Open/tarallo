@@ -8,6 +8,7 @@ class Database {
 	private $userDAO = null;
 	private $itemDAO = null;
 	private $searchDAO = null;
+	private $statsDAO = null;
 	private $featureDAO = null;
 	private $treeDAO = null;
 	private $username;
@@ -83,6 +84,14 @@ class Database {
 		}
 
 		return $this->searchDAO;
+	}
+
+	public function statsDAO() {
+		if($this->statsDAO === null) {
+			$this->statsDAO = new StatsDAO($this, $this->callback);
+		}
+
+		return $this->statsDAO;
 	}
 
 	public function featureDAO() {
