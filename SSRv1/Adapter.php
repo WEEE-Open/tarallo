@@ -174,15 +174,16 @@ class Adapter implements AdapterInterface {
 			$password = Validation::validateHasString($querystring, 'password');
 			$confirm = Validation::validateHasString($querystring, 'confirm');
 			$username = isset($querystring['username']) ? (string) trim($querystring['username']) : null;
-			
-			if($username === null) {
+
+			$target = null;
+			if($username === null || $username === '') {
 				$target = $user;
 			} else {
 				Validation::authorize($user, 0);
 			}
 			
 			try {
-				if($username !== null) {
+				if($target === null) {
 					$target = new User($username, $password);
 				}
 				$target->setPassword($password, $confirm);
