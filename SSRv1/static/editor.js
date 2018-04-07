@@ -612,7 +612,9 @@
 		clone.querySelector('.addnew').addEventListener('click', addNewClick);
 		let item = clone.children[0];
 		let featuresElement = item.querySelector('.own.features.editing');
-		clone.querySelector('.addfeatures button').addEventListener('click', addFeatureClick.bind(null, clone.querySelector('.addfeatures select'), featuresElement, false));
+		let dropdown = clone.querySelector('.addfeatures .allfeatures');
+		dropdown.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
+		clone.querySelector('.addfeatures button').addEventListener('click', addFeatureClick.bind(null, dropdown, featuresElement, null));
 		return clone;
 	}
 

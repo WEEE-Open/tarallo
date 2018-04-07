@@ -61,7 +61,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 		<?php else:
 			$this->insert('pagination', ['page' => $page, 'pages' => $pages, 'searchId' => $searchId]);
 			foreach($results as $item) {
-				$parameters = ['item' => $item, 'recursion' => false, 'allowIncludes' => false];
+				$parameters = ['item' => $item, 'recursion' => false];
 				if(isset($add)) {
 					$parameters['add'] = $add;
 				} else if(isset($edit)) {

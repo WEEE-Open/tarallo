@@ -4,7 +4,6 @@
 /** @var string|null $add */
 /** @var string|null $edit */
 /** @var bool $recursion */
-/** @var bool $allowIncludes */
 $recursion = $recursion ?? false;
 $features = $item->getCombinedFeatures();
 $product = $item->getProduct();
@@ -31,7 +30,7 @@ $adding = false;
 $editing = false;
 $target = false;
 
-$nextItemParameters = ['recursion' => true, 'allowincludes' => $allowIncludes];
+$nextItemParameters = ['recursion' => true];
 if(isset($edit)) {
 	$nextItemParameters['edit'] = $edit;
 	$editing = true;
@@ -107,10 +106,8 @@ if(isset($edit)) {
 		?>
 	</section>
 </article>
-<?php if(($editing || $adding) && $target && $allowIncludes): ?>
+<?php if(($editing || $adding) && $target): ?>
 	<script>const activate = true;</script>
-	<?php if($allowIncludes):
-		$this->insert('editor');
-	endif;
+	<?php $this->insert('editor');
 endif;
 ?>
