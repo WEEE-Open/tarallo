@@ -209,22 +209,34 @@ ul.breadcrumbs li:not(:first-child)::before {
 	color: #eee;
 }
 
-.homestats {
+.statswrapper {
 	float: left;
 	margin: 1em 2em 1em 0;
 }
 
-.homestats > table {
+.statswrapper p {
+	margin: 0 0 1em 0;
+}
+
+.statswrapper > table {
 	border-collapse: collapse;
 }
 
-.homestats > table > thead {
+.statswrapper > table > thead {
 	background: #333;
 	color: #eee;
 }
 
-.homestats > table td {
+.statswrapper > table td {
 	padding: 0.25em 0.5em;
+}
+
+.statswrapper a {
+	color: #333;
+}
+
+.statswrapper a:visited {
+	color: #000;
 }
 
 #content > *, .item {

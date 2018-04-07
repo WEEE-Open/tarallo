@@ -53,4 +53,30 @@ ORDER BY Count DESC, SN ASC', \PDO::FETCH_ASSOC);
 
 		return $array;
 	}
+
+	public function getRecentlyAdded(int $howMany) {
+		$array = [];
+
+		$statement = $this->getPDO()->prepare('SELECT `Code`, UNIX_TIMESTAMP(`Time`) AS `Time`
+FROM Audit
+WHERE `Change` = \'C\'
+ORDER BY `Time` DESC, `Code` DESC
+LIMIT ?');
+
+		$result = $statement->execute([$howMany]);
+
+		if($result === false) {
+			throw new DatabaseException('Last added items query failed for no reason');
+		}
+
+		try {
+			foreach($statement as $row) {
+				$array[$row['Code']] = $row['Time'];
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $array;
+	}
 }

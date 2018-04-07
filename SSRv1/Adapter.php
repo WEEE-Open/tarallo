@@ -100,9 +100,25 @@ class Adapter implements AdapterInterface {
 		}
 
 		$locations = $db->statsDAO()->getLocationsByItems();
-		$serials = $db->statsDAO()->getDuplicateSerialsCount();
+		$recentlyAdded = $db->statsDAO()->getRecentlyAdded(25);
 
-		return new Response(200, 'text/html', $engine->render('home', ['locations' => $locations, 'serials' => $serials]));
+		return new Response(200, 'text/html', $engine->render('home', ['locations' => $locations, 'recentlyAdded' => $recentlyAdded]));
+	}
+
+	private static function getStats(
+		User $user = null,
+		Database $db,
+		Engine $engine,
+		$parameters,
+		$querystring
+	): Response {
+		Validation::authorize($user);
+
+		$locations = $db->statsDAO()->getLocationsByItems();
+		$serials = $db->statsDAO()->getDuplicateSerialsCount();
+		$recentlyAdded = $db->statsDAO()->getRecentlyAdded(40);
+
+		return new Response(200, 'text/html', $engine->render('stats', ['locations' => $locations, 'serials' => $serials, 'recentlyAdded' => $recentlyAdded]));
 	}
 
 	private static function search(
@@ -223,6 +239,7 @@ class Adapter implements AdapterInterface {
 			$r->get('/item/{id}/add/{add}', 'getItem');
 			$r->get('/item/{id}/edit/{edit}', 'getItem');
 			$r->get('/add', 'addItem');
+			$r->get('/stats', 'getStats');
 			$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', 'search');
 			$r->get('/search/{id:[0-9]+}/add/{add}', 'search');
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', 'search');
