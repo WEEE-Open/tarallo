@@ -40,7 +40,7 @@ class Feature {
 		'ethernet-ports-100m-n' => self::INTEGER,
 		'ethernet-ports-10base2-bnc-n' => self::INTEGER,
 		'ethernet-ports-10m-n' => self::INTEGER,
-		'hdd-odd-form-factor' => ['5.25' => true, '3.5' => true, '2.5-15mm' => true, '2.5-7mm' => true, '2.5-9.5mm' => true, 'm2' => true, 'm2.2' => true, 'laptop-odd-standard' => true, 'laptop-odd-slim' => true],
+		'hdd-odd-form-factor' => ['5.25' => true, '3.5' => true, '2.5-15mm' => true, '2.5-7mm' => true, '2.5-9.5mm' => true, 'm2' => true, 'm2.2' => true, 'laptop-odd-7mm' => true, 'laptop-odd-8.5mm' => true, 'laptop-odd-9.5mm' => true, 'laptop-odd-12.7mm' => true],
 		'ide-ports-n' => self::INTEGER,
 		'odd-type' => ['cd-r' => true, 'cd-rw' => true, 'dvd-r' => true, 'dvd-rw' => true, 'bd-r' => true, 'bd-rw' => true],
 		'pcie-power-pin-n' => self::INTEGER,
