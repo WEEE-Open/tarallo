@@ -4,7 +4,7 @@
 $this->layout('main', ['title' => 'Change password', 'user' => $user]);
 ?>
 <div id="options">
-	<form action="/password" method="POST">
+	<form action="/options" method="POST">
 		<?php if($result !== null):
 			switch($result):
 				case 'empty':
@@ -19,11 +19,17 @@ $this->layout('main', ['title' => 'Change password', 'user' => $user]);
 				case 'success':
 					?><p class="success message">Password changed successfully</p><?php
 					break;
+				case 'successnew':
+					?><p class="success message">User created successfully</p><?php
+					break;
 				default:
 					?><p class="error message">Unknown error</p><?php
 					break;
 			endswitch;
 		endif; ?>
+		<?php if($user->getLevel() <= 0): ?>
+		<label>Username: <input type="text" name="username" placeholder="<?=$user->getUsername()?>"></label>
+		<?php endif; ?>
 		<label>New password: <input type="password" name="password"></label>
 		<label>Confirm: <input type="password" name="confirm"></label>
 		<input type="submit" value="Submit">

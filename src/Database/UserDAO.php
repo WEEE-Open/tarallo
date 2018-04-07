@@ -2,12 +2,13 @@
 
 namespace WEEEOpen\Tarallo\Server\Database;
 
+use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\User;
 
 final class UserDAO extends DAO {
 
 	public function getUserFromSession($session) {
-		$s = $this->getPDO()->prepare('SELECT `Name`, `Password` FROM `User` WHERE `Session` = ? AND `SessionExpiry` > ? AND `Enabled` > 0');
+		$s = $this->getPDO()->prepare('SELECT `Name`, `Password` AS `Hash`, `Level` FROM `User` WHERE `Session` = ? AND `SessionExpiry` > ? AND `Enabled` > 0');
 		$s->execute([$session, time()]);
 		if($s->rowCount() > 1) {
 			$s->closeCursor();
@@ -20,7 +21,7 @@ final class UserDAO extends DAO {
 			$user = $s->fetch(\PDO::FETCH_ASSOC);
 			$s->closeCursor();
 
-			return new User($user['Name'], null, $user['Password']);
+			return new User($user['Name'], null, $user['Hash'], $user['Level']);
 		}
 	}
 
@@ -59,6 +60,28 @@ final class UserDAO extends DAO {
 			if(!$s->execute()) {
 				throw new DatabaseException("Cannot update password for user $username for unknown reasons");
 			}
+			if($s->rowCount() === 0) {
+				throw new NotFoundException(8);
+			}
+		} finally {
+			$s->closeCursor();
+		}
+	}
+	
+	/**
+	 * Create a user
+	 *
+	 * @param string $username
+	 * @param string $hash
+	 */
+	public function createUser(string $username, string $hash) {
+		try {
+			$s = $this->getPDO()->prepare('INSERT INTO `User`(`Name`, `Password`, `Enabled`) VALUES (:n, :p, 1)');
+			$s->bindValue(':n', $username, \PDO::PARAM_STR);
+			$s->bindValue(':p', $hash, \PDO::PARAM_STR);
+			if(!$s->execute()) {
+				throw new DatabaseException("Cannot create user $username");
+			}
 		} finally {
 			$s->closeCursor();
 		}
@@ -73,7 +96,7 @@ final class UserDAO extends DAO {
 	 * @return null|User User if found and password is valid, null otherwise
 	 */
 	public function getUserFromLogin($username, $password) {
-		$s = $this->getPDO()->prepare('SELECT Password FROM `User` WHERE `Name` = ? AND `Enabled` > 0');
+		$s = $this->getPDO()->prepare('SELECT `Password` AS `Hash`, `Level` FROM `User` WHERE `Name` = ? AND `Enabled` > 0');
 		$s->execute([$username]);
 		if($s->rowCount() > 1) {
 			$s->closeCursor();
@@ -87,7 +110,7 @@ final class UserDAO extends DAO {
 			$s->closeCursor();
 			try {
 				$this->setAuditUsername($username);
-				return new User($username, $password, $user['Password']);
+				return new User($username, $password, $user['Hash'], $user['Level']);
 			} catch(\InvalidArgumentException $e) {
 				if($e->getCode() === 72) {
 					return null;

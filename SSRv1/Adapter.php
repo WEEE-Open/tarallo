@@ -159,7 +159,7 @@ class Adapter implements AdapterInterface {
 		return new Response(200, 'text/html', $engine->render('search', $parameters));
 	}
 
-	private static function password(
+	private static function options(
 		User $user = null,
 		Database $db,
 		Engine $engine,
@@ -173,9 +173,20 @@ class Adapter implements AdapterInterface {
 			$result = 'success';
 			$password = Validation::validateHasString($querystring, 'password');
 			$confirm = Validation::validateHasString($querystring, 'confirm');
+			$username = isset($querystring['username']) ? (string) trim($querystring['username']) : null;
+			
+			if($username === null) {
+				$target = $user;
+			} else {
+				Validation::authorize($user, 0);
+			}
+			
 			try {
-				$user->setPassword($password, $confirm);
-				$db->userDAO()->setPasswordFromUser($user->getUsername(), $user->getHash());
+				if($username !== null) {
+					$target = new User($username, $password);
+				}
+				$target->setPassword($password, $confirm);
+				$db->userDAO()->setPasswordFromUser($target->getUsername(), $target->getHash());
 			} catch(\InvalidArgumentException $e) {
 				switch($e->getCode()) {
 					case 5:
@@ -190,15 +201,22 @@ class Adapter implements AdapterInterface {
 					default:
 						throw $e;
 				}
+			} catch(NotFoundException $e) {
+				if($e->getCode() === 8) {
+					$db->userDAO()->createUser($target->getUsername(), $target->getHash());
+					$result = 'successnew';
+				} else {
+					throw $e;
+				}
 			}
 		}
-		if($result === null || $result === 'success') {
+		if($result === null || $result === 'success' || $result === 'successnew') {
 			$status = 200;
 		} else {
 			$status = 400;
 		}
 
-		return new Response($status, 'text/html', $engine->render('password', ['result' => $result]));
+		return new Response($status, 'text/html', $engine->render('options', ['result' => $result]));
 	}
 
 	private static function getFeaturesJson(
@@ -208,6 +226,7 @@ class Adapter implements AdapterInterface {
 		$parameters,
 		$querystring
 	) {
+		// TODO: move to API?
 		session_cache_limiter('');
 		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 3600) . ' GMT');
 		header('Cache-Control	: max-age=3600');
@@ -229,7 +248,7 @@ class Adapter implements AdapterInterface {
 		// TODO: use cachedDispatcher
 		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
 			$r->addRoute(['GET', 'POST'], '/login', 'login');
-			$r->addRoute(['GET', 'POST'], '/password', 'password');
+			$r->addRoute(['GET', 'POST'], '/options', 'options');
 			$r->get('/logout', 'logout');
 
 			$r->get('/', 'getHome');

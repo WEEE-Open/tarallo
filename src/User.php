@@ -6,6 +6,7 @@ class User {
 	private $username;
 	private $password;
 	private $hash;
+	private $level;
 
 	/**
 	 * User constructor.
@@ -13,16 +14,17 @@ class User {
 	 * @param string $username username
 	 * @param null|string $password plaintext password
 	 * @param null|string $hash hashed password (from database)
+	 * @param int $level authorization level (0 = root, 3 = everyone else)
 	 *
 	 * @throws \InvalidArgumentException when password and hash aren't null and don't match (code 72, chosen at random)
 	 */
-	public function __construct($username, $password = null, $hash = null) {
+	public function __construct($username, $password = null, $hash = null, $level = 3) {
 		if(!is_string($username) || strlen($username) === 0) {
 			throw new \InvalidArgumentException('Username must be a non-empty string');
 		}
 
 		if(!$this->nullOrNonEmptyString($password)) {
-			throw new \InvalidArgumentException('Password must be null or a non-empty string');
+			throw new \InvalidArgumentException('Password must be null or a non-empty string', 5);
 		}
 
 		if(!$this->nullOrNonEmptyString($hash)) {
@@ -38,6 +40,7 @@ class User {
 		$this->username = $username;
 		$this->password = $password;
 		$this->hash = $hash;
+		$this->level = $level;
 	}
 
 	private static function password_verify($password, $hash) {
@@ -117,10 +120,9 @@ class User {
 	 * 0 = root, 3 = everyone else, like the ring 0 ... ring 3 thing,
 	 * just hope you don't find a buggy fork of Minix running at ring -3...
 	 *
-	 * @TODO implement
 	 * @return int
 	 */
 	public function getLevel() {
-		return 0;
+		return $this->level;
 	}
 }

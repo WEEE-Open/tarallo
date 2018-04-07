@@ -133,11 +133,11 @@ CREATE TABLE `User` (
 	`Password` text COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Session` char(32) COLLATE utf8mb4_bin,
 	`SessionExpiry` timestamp NOT NULL DEFAULT 0,
+	`Level` smallint DEFAULT 3,
 	`Enabled` boolean NOT NULL DEFAULT FALSE,
 	PRIMARY KEY (`Name`),
 	UNIQUE KEY (`Session`),
-	UNIQUE KEY (`Name`),
-	INDEX (`Name`)
+	CHECK (Level >= 0 AND Level <= 3)
 )
 	ENGINE = InnoDB
 	DEFAULT CHARSET = utf8mb4
