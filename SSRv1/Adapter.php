@@ -100,7 +100,7 @@ class Adapter implements AdapterInterface {
 		}
 
 		$locations = $db->statsDAO()->getLocationsByItems();
-		$recentlyAdded = $db->statsDAO()->getRecentlyAdded(25);
+		$recentlyAdded = $db->statsDAO()->getRecentlyAdded(max(20, count($locations)));
 
 		return new Response(200, 'text/html', $engine->render('home', ['locations' => $locations, 'recentlyAdded' => $recentlyAdded]));
 	}

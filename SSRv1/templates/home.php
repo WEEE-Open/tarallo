@@ -30,7 +30,7 @@ $this->layout('main', ['title' => 'Home', 'user' => $user]) ?>
 	<?php endif;
 	if(!empty($recentlyAdded)): ?>
 		<div class="statswrapper">
-			<p>Recently added items:</p>
+			<p>Last <?= count($recentlyAdded) ?> items added:</p>
 			<table class="home">
 				<thead>
 				<tr>
