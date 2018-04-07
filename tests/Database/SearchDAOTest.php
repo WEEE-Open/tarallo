@@ -108,7 +108,7 @@ class SearchDAOTest extends DatabaseTest {
 
 		$pc = $this->getSample();
 		/** @var Item[] $items */
-		foreach(['PC20', 'PC22', 'PC90', 'SCHIFOMACCHINA', 'PC55'] as $pos => $code) {
+		foreach(['PC90', 'PC22', 'PC20', 'SCHIFOMACCHINA', 'PC55'] as $pos => $code) {
 			$this->assertEquals($code, $items[$pos]->getCode(),
 				'Item in position ' . $pos . ' should be ' . $code . ' (it\'s ' . $items[$pos]->getCode() . ')');
 			$this->assertEquals($pc[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
@@ -152,11 +152,11 @@ class SearchDAOTest extends DatabaseTest {
 		$expected = [
 			0 =>
 				[
-					'code'     => 'PC20',
+					'code'     => 'PC90',
 					'features' =>
 						[
 							'brand'                   => 'Dill',
-							'color'                   => 'black',
+							'color'                   => 'grey',
 							'model'                   => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
 							'type'                    => 'case',
@@ -178,11 +178,11 @@ class SearchDAOTest extends DatabaseTest {
 				],
 			2 =>
 				[
-					'code'     => 'PC90',
+					'code'     => 'PC20',
 					'features' =>
 						[
 							'brand'                   => 'Dill',
-							'color'                   => 'grey',
+							'color'                   => 'black',
 							'model'                   => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
 							'type'                    => 'case',
@@ -269,7 +269,7 @@ class SearchDAOTest extends DatabaseTest {
 		$this->assertEquals(6, count($items), 'There should be 6 items');
 		/** @var Item[] $items */
 		// Sorting by code is not guaranteed, really...
-		foreach(['AMD42', 'AMD737', 'INTEL1', 'INTEL2', 'INTEL3', 'INTEL4'] as $pos => $code) {
+		foreach(['INTEL4', 'INTEL3', 'INTEL2', 'INTEL1', 'AMD737', 'AMD42'] as $pos => $code) {
 			$this->assertEquals($code, $items[$pos]->getCode(), "Item in position $pos should be $code");
 			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
@@ -283,7 +283,7 @@ class SearchDAOTest extends DatabaseTest {
 		$this->assertContainsOnly(Item::class, $itemsLike);
 		$this->assertEquals(4, count($itemsLike),
 			'There should be 4 items when using ~ (query should contain LIKE)');
-		foreach(['INTEL1', 'INTEL2', 'INTEL3', 'INTEL4'] as $pos => $code) {
+		foreach(['INTEL4', 'INTEL3', 'INTEL2', 'INTEL1'] as $pos => $code) {
 			$this->assertEquals($code, $itemsLike[$pos]->getCode(), "Item in position $pos should be $code");
 			$this->assertEquals($cpu[$code], $itemsLike[$pos], "Item $code should be unchanged");
 		}

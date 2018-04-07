@@ -200,7 +200,7 @@ CREATE OR REPLACE PROCEDURE RefreshSearch(id bigint UNSIGNED)
 	END $$
 
 -- Remove old searches. Search results are removed by ON DELETE CASCADE.
-CREATE EVENT `SearchCleanup`
+CREATE OR REPLACE EVENT `SearchCleanup`
 ON SCHEDULE EVERY '1' HOUR
 ON COMPLETION PRESERVE
 ENABLE DO
@@ -282,7 +282,7 @@ CREATE OR REPLACE TRIGGER AuditUserRename
 -- Users -----------------------------------------------------------------------
 
 -- Set expired sessions to NULL, just to make the table look nicer (it has no practical effect)
-CREATE EVENT `SessionCleanup`
+CREATE OR REPLACE EVENT `SessionCleanup`
 ON SCHEDULE EVERY '24' HOUR
 ON COMPLETION PRESERVE
 ENABLE DO
