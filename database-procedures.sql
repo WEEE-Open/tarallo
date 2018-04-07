@@ -46,13 +46,6 @@ SQL SECURITY INVOKER
 
 	END $$
 
--- Pointless procedure to set a global variable (used by the audit triggers)
-CREATE OR REPLACE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
-	SQL SECURITY INVOKER
-	BEGIN
-		SET @taralloAuditUsername = username;
-	END $$
-
 -- Set the Item Brand, Model and Variant after an INSERT operation
 CREATE OR REPLACE TRIGGER ItemBMVInsert
 	AFTER INSERT
@@ -208,13 +201,21 @@ CREATE OR REPLACE PROCEDURE RefreshSearch(id bigint UNSIGNED)
 
 -- Remove old searches. Search results are removed by ON DELETE CASCADE.
 CREATE EVENT `SearchCleanup`
-ON SCHEDULE EVERY '1' HOUR ON COMPLETION NOT PRESERVE
+ON SCHEDULE EVERY '1' HOUR
+ON COMPLETION PRESERVE
 ENABLE DO
 	DELETE
 	FROM Search
-	WHERE Expires < DATE_SUB(NOW(), INTERVAL 1 HOUR)$$
+	WHERE Expires < DATE_SUB(NOW(), INTERVAL 1 HOUR) $$
 
 -- Audit -----------------------------------------------------------------------
+
+-- Pointless procedure to set a global variable (used by the audit triggers)
+CREATE OR REPLACE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
+	SQL SECURITY INVOKER
+	BEGIN
+		SET @taralloAuditUsername = username;
+	END $$
 
 -- If an item is permanently deleted its code may be reused, but there might still be previous audit table entires.
 CREATE OR REPLACE TRIGGER RemoveOldAuditEntries
@@ -277,6 +278,19 @@ CREATE OR REPLACE TRIGGER AuditUserRename
 			WHERE `User` = OLD.Name;
 		END IF;
 	END $$
+
+-- Users -----------------------------------------------------------------------
+
+-- Set expired sessions to NULL, just to make the table look nicer (it has no practical effect)
+CREATE EVENT `SessionCleanup`
+ON SCHEDULE EVERY '24' HOUR
+ON COMPLETION PRESERVE
+ENABLE DO
+	UPDATE User
+	SET Session = NULL
+	WHERE SessionExpiry < NOW() $$
+
+-- SET GLOBAL -------------------------------------------------------------------
 
 SET GLOBAL event_scheduler = ON $$
 
