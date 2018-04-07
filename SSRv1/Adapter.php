@@ -100,8 +100,9 @@ class Adapter implements AdapterInterface {
 		}
 
 		$locations = $db->statsDAO()->getLocationsByItems();
+		$serials = $db->statsDAO()->getDuplicateSerialsCount();
 
-		return new Response(200, 'text/html', $engine->render('home', ['locations' => $locations]));
+		return new Response(200, 'text/html', $engine->render('home', ['locations' => $locations, 'serials' => $serials]));
 	}
 
 	private static function search(

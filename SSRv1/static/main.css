@@ -209,6 +209,24 @@ ul.breadcrumbs li:not(:first-child)::before {
 	color: #eee;
 }
 
+.homestats {
+	float: left;
+	margin: 1em 2em 1em 0;
+}
+
+.homestats > table {
+	border-collapse: collapse;
+}
+
+.homestats > table > thead {
+	background: #333;
+	color: #eee;
+}
+
+.homestats > table td {
+	padding: 0.25em 0.5em;
+}
+
 #content > *, .item {
 	margin: .5em;
 }

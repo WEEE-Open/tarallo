@@ -27,6 +27,30 @@ ORDER BY COUNT(*) DESC, Location ASC;', \PDO::FETCH_ASSOC);
 		}
 
 		return $array;
+	}
 
+	public function getDuplicateSerialsCount() {
+		$array = [];
+
+		$result = $this->getPDO()->query('SELECT ValueText AS SN, COUNT(*) AS Count
+FROM ItemFeature
+WHERE Feature = \'sn\'
+GROUP BY ValueText
+HAVING Count > 1
+ORDER BY Count DESC, SN ASC', \PDO::FETCH_ASSOC);
+
+		if($result === false) {
+			throw new DatabaseException('Duplicate serial numbers query failed for no reason');
+		}
+
+		try {
+			foreach($result as $row) {
+				$array[$row['SN']] = $row['Count'];
+			}
+		} finally {
+			$result->closeCursor();
+		}
+
+		return $array;
 	}
 }
