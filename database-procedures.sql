@@ -242,7 +242,7 @@ CREATE OR REPLACE TRIGGER AuditCreateItem
 	END $$
 
 -- Add a 'R' entry to audit table
-CREATE OR REPLACE TRIGGER AuditCreateItem
+CREATE OR REPLACE TRIGGER AuditRenameItem
 	AFTER UPDATE
 	ON Item
 	FOR EACH ROW
@@ -278,6 +278,6 @@ CREATE OR REPLACE TRIGGER AuditUserRename
 		END IF;
 	END $$
 
-DELIMITER ;
+SET GLOBAL event_scheduler = ON $$
 
-SET GLOBAL event_scheduler = ON;
+DELIMITER ;
