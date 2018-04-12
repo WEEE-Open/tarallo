@@ -199,6 +199,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'c32'), -- C32 --
 	('cpu-socket', 'g3'), -- G3 (rPGA988A) --
 	('cpu-socket', 'slot1'), -- Slot 1 --
+	('cpu-socket', 'super7'), -- Super 7 --
 	('cpu-socket', 'socket370'), -- 370 --
 	('cpu-socket', 'socket462a'), -- 462 (Socket A) -- A aka 462
 	('cpu-socket', 'socket423'), -- 423 --
@@ -325,21 +326,21 @@ TRUNCATE `Prefixes`;
 INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	-- 0 is "last successfully generated code", duplicates are skipped, so there's no problem if they overlap
 	('M', 0),
-	('B', 0),
-	('C', 0),
+	('B', 110),
+	('C', 120),
 	('SG', 0),
 	('R', 100),
-	('HDD', 0),
-	('ODD', 0),
+	('HDD', 190),
+	('ODD', 135),
 	('AD', 0),
 	('AR', 0),
-	('A', 0),
+	('A', 90),
 	('V', 0),
-	('FL', 0),
+	('FL', 60),
 	('SP', 0),
 	('SA', 0),
 	('W', 0),
 	('ADA', 0),
-	('NET', 0),
+	('NET', 20),
 	('T', 50),
-	('', 50);
+	('', 90);
