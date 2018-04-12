@@ -93,7 +93,7 @@ class FeaturePrinter {
 		'isa-sockets-n' => 'ISA',
 		'mini-pcie-sockets-n' => 'Mini PCI Express',
 		'mini-pci-sockets-n' => 'Mini PCI',
-		'brand-reseller' => 'Brand (reseller)',
+		'brand-manufacturer' => 'Brand (manufacturer)',
 		'psu-form-factor' => 'Form factor (PSU)',
 		'cib-old' => 'CIB (old)',
 		'integrated-graphics-brand' => 'Integrated graphics brand',

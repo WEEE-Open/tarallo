@@ -95,7 +95,7 @@ class Feature {
 		'isa-sockets-n' => self::INTEGER,
 		'mini-pcie-sockets-n' => self::INTEGER,
 		'mini-pci-sockets-n' => self::INTEGER,
-		'brand-reseller' => self::STRING,
+		'brand-manufacturer' => self::STRING,
 		'psu-form-factor' => ['atx' => true, 'cfx' => true, 'lfx' => true, 'sfx-lowprofile' => true, 'sfx-topfan' => true, 'sfx-topfan-reduceddepth' => true, 'sfx' => true, 'sfx-ps3' => true, 'sfx-l' => true, 'tfx' => true, 'flexatx' => true, 'proprietary' => true, 'eps' => true],
 		'cib-old' => self::STRING,
 		'integrated-graphics-brand' => self::STRING,

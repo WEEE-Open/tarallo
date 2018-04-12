@@ -92,7 +92,7 @@ INSERT INTO `Feature` (`Feature`, `Type`) VALUES
 	('isa-sockets-n', 1), -- ISA --
 	('mini-pcie-sockets-n', 1), -- Mini PCI Express --
 	('mini-pci-sockets-n', 1), -- Mini PCI --
-	('brand-reseller', 0), -- Brand (reseller) -- TODO: turn it the other way round, use "Brand (manufacturer)"
+	('brand-manufacturer', 0), -- Brand (manufacturer) --
 	('psu-form-factor', 2), -- Form factor (PSU) --
 	('cib-old', 0), -- CIB (old) --
 	('integrated-graphics-brand', 0), -- Integrated graphics brand -- TODO: replace with brand & model, once namespaced features are implemented
