@@ -19,9 +19,10 @@ CREATE TABLE `Item` (
 	`Token` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
 	`DeletedAt` timestamp NULL DEFAULT NULL,
 	INDEX (`DeletedAt`),
-	FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Products` (`Brand`, `Model`, `Variant`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE,
+	-- TODO: reenable later
+	-- FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Products` (`Brand`, `Model`, `Variant`)
+	--	ON DELETE NO ACTION
+	--	ON UPDATE CASCADE,
 	PRIMARY KEY (`Code`)
 )
 	ENGINE = InnoDB
