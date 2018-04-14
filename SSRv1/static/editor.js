@@ -910,13 +910,20 @@
 
 				// Dima Viditch is the only person in the universe that has figured this out: https://stackoverflow.com/a/16863913
 				// Nothing else worked. NOTHING.
-				let wrongSelection = window.getSelection();
-				let pointlessRange = document.createRange();
-				div.innerHTML = '\u00a0';
-				pointlessRange.selectNodeContents(div);
-				wrongSelection.removeAllRanges();
-				wrongSelection.addRange(pointlessRange);
-				document.execCommand('delete', false, null);
+				// ...on Firefox, at least. The code below, obtained via trial and error, seems to work on both Firefox and Chrome.
+				//let wrongSelection = window.getSelection();
+				//let pointlessRange = document.createRange();
+				//div.textContent = '?';
+				//pointlessRange.selectNodeContents(div);
+				//wrongSelection.removeAllRanges();
+				//wrongSelection.addRange(pointlessRange);
+				//document.execCommand('delete', false, null);
+
+				let sel = window.getSelection();
+				console.log(sel);
+				// First (and only) child is a text node...
+				sel.collapse(div.childNodes[0], 1);
+				console.log(sel);
 			}
 		}
 	}
