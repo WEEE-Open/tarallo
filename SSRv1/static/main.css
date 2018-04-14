@@ -92,7 +92,7 @@ nav#main {
 nav#main a {
 	color: inherit;
 	cursor: pointer;
-	padding: .5em;
+	padding: .5em .25em;
 	display: block;
 	text-decoration: none;
 	vertical-align: middle;
@@ -212,6 +212,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 .statswrapper {
 	float: left;
 	margin: 1em 2em 1em 0;
+	width: 100%;
 }
 
 .statswrapper p {
@@ -220,6 +221,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 
 .statswrapper > table {
 	border-collapse: collapse;
+	width: 100%;
 }
 
 .statswrapper > table > thead {
@@ -389,4 +391,18 @@ ul.breadcrumbs li:not(:first-child)::before {
 
 #options form label {
 	display: block;
+}
+
+@media only screen and (min-width: 500px) {
+	nav#main a {
+		padding: .5em;
+	}
+
+	.statswrapper {
+		width: auto;
+	}
+
+	.statswrapper > table {
+		width: auto;
+	}
 }
