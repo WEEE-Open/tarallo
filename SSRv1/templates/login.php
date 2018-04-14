@@ -9,7 +9,7 @@ $this->layout('main', ['title' => 'Login']) ?>
 	<form class="message" method="post" action="<?= $self ?>">
 		<label>Username: <input name="username" type="text"></label>
 		<label>Password: <input name="password" type="password"></label>
-		<input type="submit" value="VAI.">
+		<input type="submit" value="GO.">
 	</form>
 	<?php if(isset($failed) && $failed): ?>
 	<div class="error message">Wrong username or password</div>
