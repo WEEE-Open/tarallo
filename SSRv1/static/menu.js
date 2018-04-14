@@ -30,8 +30,10 @@
 		}
 
 		if(bar.classList.contains("open")) {
-			bar.classList.remove("open")
+			ev.target.classList.remove('selected');
+			bar.classList.remove("open");
 		} else {
+			ev.target.classList.add('selected');
 			bar.classList.add("open");
 			bar.querySelector('input').focus();
 		}
