@@ -75,6 +75,6 @@ class ItemLocationValidator {
 	}
 
 	private static function isExpansionCard($type) {
-		return strlen($type) > 5 && substr($type, -5) === '-card'
+		return strlen($type) > 5 && substr($type, -5) === '-card';
 	}
 }
