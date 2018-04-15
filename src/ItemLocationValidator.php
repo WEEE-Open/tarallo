@@ -23,7 +23,7 @@ class ItemLocationValidator {
 		$type = $type->value;
 		$parentType = $parentType->value;
 
-		if($type === 'cpu' || $type === 'ram') {
+		if($type === 'cpu' || $type === 'ram' || self::isExpansionCard($type)) {
 			if($parentType === 'case') {
 				foreach($parent->getContents() as $maybeMobo) {
 					$maybeType = $maybeMobo->getFeature('type');
@@ -61,9 +61,9 @@ class ItemLocationValidator {
 		if($type === 'case' && $parentType !== 'location') {
 			throw new ItemNestingException('Cases should be inside a location',
 				$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
-		} else if($type === 'ram' || $type === 'cpu') {
+		} else if($type === 'ram' || $type === 'cpu' || self::isExpansionCard($type)) {
 			if($parentType !== 'case' && $parentType !== 'location' && $parentType !== 'motherboard') {
-				throw new ItemNestingException('RAMs and CPUs should be inside a case, location or motherboard',
+				throw new ItemNestingException('RAMs, CPUs and expansion cards cards should be inside a case, location or motherboard',
 					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
 			}
 		} else {
@@ -72,5 +72,9 @@ class ItemLocationValidator {
 					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
 			}
 		}
+	}
+
+	private static function isExpansionCard($type) {
+		return strlen($type) > 5 && substr($type, -5) === '-card'
 	}
 }
