@@ -48,7 +48,7 @@ class TemplateUtilities implements ExtensionInterface {
 	}
 
 	/**
-	 * Wrap text into paragraphs ("p" tags), to be used in contenteditable elements
+	 * Wrap text into paragraphs ("div" tags), to be used in contenteditable elements
 	 *
 	 * @param string $html
 	 *
@@ -56,10 +56,11 @@ class TemplateUtilities implements ExtensionInterface {
 	 */
 	public function contentEditableWrap(string $html): string {
 		$paragraphed = '<div>' . str_replace(["\r\n", "\r", "\n"], '</div><div>', $html) . '</div>';
-		// According to the HTML spec, <p></p> should be ignored by browser.
-		// When inserting an empty line in a contenteditable element, Firefox adds <p><br></p>, so...
-		//return str_replace('<p></p>', '<p><br></p>', $paragraphed);
-		return $paragraphed;
+		// According to the HTML spec, <div></div> should be ignored by browser.
+		// Firefox used to insert <p><br></p> for empty lines, for <div>s it does absolutely nothing but still displays them, soooo...
+		return str_replace('<div></div>', '<div><br></div>', $paragraphed);
+		// Or replace with '' to remove empty lines: cool, huh?
+		//return $paragraphed;
 	}
 
 	/**

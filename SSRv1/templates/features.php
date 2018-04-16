@@ -10,7 +10,7 @@ if(count($features) > 0): ?>
 			<?php foreach($group as $feature): /** @var $feature \WEEEOpen\Tarallo\SSRv1\UltraFeature */ ?>
 				<li>
 					<div class="name"><?=$feature->name?></div>
-					<div class="value"><?=$this->e($feature->value)?></div>
+					<div class="value"><?=$this->contentEditableWrap($this->e($feature->value))?></div>
 				</li>
 			<?php endforeach; ?>
 		</ul>
