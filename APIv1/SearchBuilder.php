@@ -4,7 +4,6 @@ namespace WEEEOpen\Tarallo\APIv1;
 
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
-use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\Search;
 use WEEEOpen\Tarallo\Server\SearchTriplet;
@@ -78,7 +77,11 @@ class SearchBuilder {
 			if(count($triplet) != 3) {
 				throw new InvalidPayloadParameterException($field, count($triplet), "Triplet should contain 3 elements, not " . count($triplet));
 			}
-			$result[] = new SearchTriplet($triplet[0], $triplet[1], $triplet[2]);
+
+			// Create a Feature to convert strings to int/double. Then discard it and recreate it in SearchTriplet.
+			// It's a waste but happens with very few features each time, so it's not a major problem.
+			$feature = Feature::ofString($triplet[0], $triplet[2]);
+			$result[] = new SearchTriplet($triplet[0], $triplet[1], $feature->value);
 		}
 		return $result;
 	}
