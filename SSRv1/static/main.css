@@ -23,9 +23,7 @@ header#title h1 {
 }
 
 header#title p {
-	margin: 0.5rem 0 0 0;
-	font-size: small;
-	display: inline-block;
+	display: none;
 }
 
 input, button, select {
@@ -80,19 +78,24 @@ nav#top nav {
 	margin-bottom: .5em;
 }
 
-nav#top nav#main {
-	margin-bottom: 0;
-}
-
 nav#main {
+	margin-bottom: 0;
 	padding: 0;
 	white-space: nowrap;
+}
+
+nav#main > ul {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: flex-start;
+	align-items: stretch;
+	align-content: stretch;
 }
 
 nav#main a {
 	color: inherit;
 	cursor: pointer;
-	padding: .5em .25em;
+	padding: .5em;
 	display: block;
 	text-decoration: none;
 	vertical-align: middle;
@@ -394,8 +397,10 @@ ul.breadcrumbs li:not(:first-child)::before {
 }
 
 @media only screen and (min-width: 500px) {
-	nav#main a {
-		padding: .5em;
+	header#title p {
+		margin: 0.5rem 0 0 0;
+		font-size: small;
+		display: inline-block;
 	}
 
 	.statswrapper {
