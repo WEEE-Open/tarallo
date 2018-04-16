@@ -2,6 +2,7 @@
 
 namespace WEEEOpen\Tarallo\APIv1;
 
+use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
@@ -80,57 +81,5 @@ class SearchBuilder {
 			$result[] = new SearchTriplet($triplet[0], $triplet[1], $triplet[2]);
 		}
 		return $result;
-	}
-
-	/**
-	 * @see ofArray
-	 *
-	 * @param array $input Decoded JSON from the client
-	 * @param string|null $code Code for new item, if explicitly set
-	 * @param boolean $inner Used for recursion
-	 *
-	 * @return Item
-	 */
-	private static function ofArrayInternal(array $input, $code, $inner = false) {
-		try {
-			$item = new Item($code);
-		} catch(\InvalidArgumentException $e) {
-			throw new InvalidPayloadParameterException('*', $code, $e->getMessage());
-		}
-
-		if($inner && isset($input['parent'])) {
-			throw new InvalidPayloadParameterException('parent', $input['parent'],
-				'Cannot set parent for internal items');
-		}
-
-		if(isset($input['code'])) {
-			if($inner) {
-				$item->setCode($input['code']);
-			} else {
-				throw new InvalidPayloadParameterException('code', $input['code'],
-					'Cannot set code for head/root item this way, use the URI');
-			}
-		}
-
-		if(isset($input['features'])) {
-			try {
-				self::addFeatures($input['features'], $item);
-			} /** @noinspection PhpUndefinedClassInspection */ catch(\TypeError $e) {
-				throw new InvalidPayloadParameterException('features', '',
-					'Features must be an array, ' . gettype($input['features']) . ' given');
-			}
-		}
-
-		if(isset($input['contents'])) {
-			if(!is_array($input['contents'])) {
-				throw new InvalidPayloadParameterException('contents', '',
-					'Contents must be an array, ' . gettype($input['contents']) . ' given');
-			}
-			foreach($input['contents'] as $other) {
-				$item->addContent(self::ofArrayInternal($other, null, true));
-			}
-		}
-
-		return $item;
 	}
 }
