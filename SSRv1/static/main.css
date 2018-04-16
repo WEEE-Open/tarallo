@@ -273,7 +273,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 }
 
 .features section h3 {
-	margin: 0 0 .2em 0;
+	margin: 1em 0;
 	font-size: 100%;
 	font-weight: bold;
 	color: #333;
@@ -287,13 +287,10 @@ ul.breadcrumbs li:not(:first-child)::before {
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	display: table;
-	width: 100%;
 }
 
 .features ul li, #searchcontrols > div {
 	height: 100%;
-	display: table-row;
 }
 
 .features div {
@@ -301,21 +298,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 }
 
 .features ul li .name, #searchcontrols > div .searchby {
-	max-width: 20em;
-	padding-right: 1em;
 	color: #555;
-	text-align: right;
-	display: table-cell;
-	min-width: 10em;
-}
-
-.features ul li .value, #searchcontrols > div .filter {
-	display: table-cell;
-	width: 100%;
-}
-
-.features ul li .controls, .features ul li .comparison {
-	display: table-cell;
 }
 
 /* Don't do this, as it also removes the blinking cursor in contenteditable areas */
@@ -324,13 +307,31 @@ ul.breadcrumbs li:not(:first-child)::before {
 	/*text-shadow: 0 0 0 #000;*/
 /*}*/
 
+.features ul li .value {
+	margin-left: 1em;
+}
+
 .features ul li .value[contenteditable] {
 	border-bottom: 0.1em dotted #ccc;
+	margin-left: 0;
 }
 
 .features ul li .value div {
 	margin: 0 .2em;
 	padding: 0 .4em;
+}
+
+.features ul > li, #searchcontrols ul > li {
+	display: flex;
+	align-items: center;
+}
+
+.features ul > li > div, #searchcontrols ul > li > div {
+	flex-grow: 0;
+}
+
+.features ul > li > div.value, #searchcontrols ul > li > div.value {
+	flex-grow: 1;
 }
 
 .features.editing .changed {
@@ -408,5 +409,37 @@ ul.breadcrumbs li:not(:first-child)::before {
 
 	.statswrapper > table {
 		width: auto;
+	}
+
+	.features ul, #searchcontrols {
+		display: table;
+		width: 100%;
+	}
+
+	.features section h3 {
+		margin: 0 0 .2em 0;
+	}
+
+	.features ul li, #searchcontrols > div {
+		height: 100%;
+		display: table-row;
+	}
+
+	.features ul li .name, #searchcontrols > div .searchby {
+		max-width: 20em;
+		padding-right: 1em;
+		text-align: right;
+		display: table-cell;
+		min-width: 10em;
+	}
+
+	.features ul li .value, #searchcontrols > div .filter {
+		display: table-cell;
+		width: 100%;
+		margin-left: 0;
+	}
+
+	.features ul li .controls, .features ul li .comparison {
+		display: table-cell;
 	}
 }
