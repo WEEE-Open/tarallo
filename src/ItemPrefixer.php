@@ -60,8 +60,6 @@ class ItemPrefixer {
 			case 'wifi-card':
 			case 'bluetooth-card':
 				return 'W';
-			case 'adapter':
-				return 'ADA';
 			case 'modem-card':
 			case 'ethernet-card':
 			case 'network-switch':
