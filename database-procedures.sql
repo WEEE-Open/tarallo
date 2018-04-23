@@ -124,7 +124,7 @@ CREATE OR REPLACE TRIGGER ItemDeleteSearchIntegrity
 	ON Item
 	FOR EACH ROW
 	BEGIN
-		DELETE FROM SearchResult WHERE Code=OLD.Code;
+		DELETE FROM SearchResult WHERE Item=OLD.Code;
 	END $$
 
 -- Update item codes in search results, when changing code
@@ -135,7 +135,7 @@ CREATE OR REPLACE TRIGGER ItemUpdateSearchIntegrity
 	BEGIN
 		IF(NEW.Code <> OLD.Code) THEN
 			UPDATE SearchResult SET Code = NEW.Code
-			WHERE Code = OLD.Code;
+			WHERE Item = OLD.Code;
 		END IF;
 	END $$
 
