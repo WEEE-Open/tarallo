@@ -215,6 +215,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'socket754'), -- 754 --
 	('cpu-socket', 'socket940'), -- 940 --
 	('cpu-socket', 'socket939'), -- 939 --
+	('cpu-socket', 'ufc-bga956'), -- µFC-BGA956 --
 	('cpu-socket', 'lga775'), -- LGA775 (Socket T) --
 	('cpu-socket', 'lga771'), -- LGA771 (Socket J) --
 	('cpu-socket', 'lga1366'), -- LGA1366 (Socket B) --
