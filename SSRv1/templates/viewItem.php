@@ -4,5 +4,5 @@
 /** @var string|null $add */
 /** @var string|null $edit */
 /** @var bool|null $recursion */
-$this->layout('main', ['title' => $this->e($item->getCode()), 'user' => $user, 'itembuttons' => true]);
+$this->layout('main', ['title' => $item->getCode(), 'user' => $user, 'itembuttons' => true]);
 $this->insert('item', ['item' => $item, 'add' => $add, 'edit' => $edit, 'recursion' => false]);
