@@ -50,13 +50,7 @@ if(isset($edit)) {
 }
 ?>
 
-<?php if(!$recursion): ?>
-<nav class="breadbox">
-	<ul class="breadcrumbs">
-		<?php foreach($item->getPath() as $piece): ?><li><a href="/item/<?=$this->u($piece)?>"><?=$this->e($piece)?></a></li><?php endforeach; ?>
-	</ul>
-</nav>
-<?php endif ?>
+<?php if(!$recursion): $this->insert('breadcrumbs', ['item' => $item]); endif; ?>
 <article class="item <?=$recursion ? '' : 'root'?> <?=$working?> <?=$editing && $target ? 'head editing' : ''?>"
 		data-code="<?=$this->e($item->getCode())?>">
 	<header>
@@ -73,7 +67,7 @@ if(isset($edit)) {
 		<?php if($editing && $target): ?>
 			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><button class="delete">❌&nbsp;Delete</button>
 		<?php elseif(!$adding && !$editing): ?>
-			<button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button>
+			<button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button><button class="history">📖&nbsp;History</button>
 		<?php endif ?>
 	</nav>
 

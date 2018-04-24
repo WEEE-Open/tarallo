@@ -15,6 +15,10 @@
 			window.location.href = here + '/edit/' + encodeURIComponent(code) + query + hash;
 		} else if(ev.target.classList.contains("addinside")) {
 			window.location.href = here + '/add/' + encodeURIComponent(code) + query + hash;
+		} else if(ev.target.classList.contains("history")) {
+			window.location.href = '/history/' + encodeURIComponent(code) + query + hash;
+		} else if(ev.target.classList.contains("view")) {
+			window.location.href = '/item/' + encodeURIComponent(code) + query + hash;
 		}
 	}
 
