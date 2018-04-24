@@ -221,17 +221,17 @@ ul.breadcrumbs li:not(:first-child)::before {
 	margin: 0 0 1em 0;
 }
 
-.statswrapper > table {
+table {
 	border-collapse: collapse;
 	width: 100%;
 }
 
-.statswrapper > table > thead {
+table > thead {
 	background: #333;
 	color: #eee;
 }
 
-.statswrapper > table td {
+table td {
 	padding: 0.3em 0.5em;
 }
 

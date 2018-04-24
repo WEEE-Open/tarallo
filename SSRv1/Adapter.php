@@ -42,6 +42,23 @@ class Adapter implements AdapterInterface {
 		return new Response(200, 'text/html', $engine->render('viewItem', $renderParameters));
 	}
 
+	private static function getHistory(
+		User $user = null,
+		Database $db,
+		Engine $engine,
+		$parameters,
+		$querystring
+	): Response {
+		Validation::authorize($user);
+		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+		$count = isset($querystring['count']) ? (int) $querystring['count'] : 20;
+
+		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, 0);
+		$history = $db->statsDAO()->getHistory($item, $count);
+
+		return new Response(200, 'text/html', $engine->render('history', ['item' => $item, 'history' => $history]));
+	}
+
 	private static function addItem(
 		User $user = null,
 		Database $db,
@@ -100,7 +117,7 @@ class Adapter implements AdapterInterface {
 		}
 
 		$locations = $db->statsDAO()->getLocationsByItems();
-		$recentlyAdded = $db->statsDAO()->getRecentlyAdded(max(20, count($locations)));
+		$recentlyAdded = $db->statsDAO()->getRecentAuditByType('C', max(20, count($locations)));
 
 		return new Response(200, 'text/html', $engine->render('home', ['locations' => $locations, 'recentlyAdded' => $recentlyAdded]));
 	}
@@ -116,7 +133,7 @@ class Adapter implements AdapterInterface {
 
 		$locations = $db->statsDAO()->getLocationsByItems();
 		$serials = $db->statsDAO()->getDuplicateSerialsCount();
-		$recentlyAdded = $db->statsDAO()->getRecentlyAdded(40);
+		$recentlyAdded = $db->statsDAO()->getRecentAuditByType('C', 40);
 
 		return new Response(200, 'text/html', $engine->render('stats', ['locations' => $locations, 'serials' => $serials, 'recentlyAdded' => $recentlyAdded]));
 	}
@@ -256,6 +273,7 @@ class Adapter implements AdapterInterface {
 			$r->get('/features.json', 'getFeaturesJson');
 			$r->get('/home', 'getHome');
 			$r->get('/item/{id}', 'getItem');
+			$r->get('/history/{id}', 'getHistory');
 			$r->get('/item/{id}/add/{add}', 'getItem');
 			$r->get('/item/{id}/edit/{edit}', 'getItem');
 			$r->get('/add', 'addItem');
