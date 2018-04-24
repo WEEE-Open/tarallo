@@ -21,7 +21,7 @@ class UltraFeature {
 	 */
 	public function __construct(Feature $feature, string $language) {
 		$this->feature = $feature;
-		$this->value = FeaturePrinter::getFeatureValue($feature);
+		$this->value = FeaturePrinter::printableValue($feature);
 		$this->name = FeaturePrinter::printableName($feature);
 		$this->group = FeaturePrinter::getGroup($feature->name);
 	}

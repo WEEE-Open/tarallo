@@ -61,6 +61,12 @@ if(isset($edit)) {
 		data-code="<?=$this->e($item->getCode())?>">
 	<header>
 		<h2 id="code-<?=$this->e($item->getCode())?>"><?=$this->e($item->getCode())?></h2>
+		<?php $noticeFeature = $item->getFeature('restrictions'); if($noticeFeature !== null): ?>
+			<div class="info message">ℹ️&nbsp;<?= (new WEEEOpen\Tarallo\SSRv1\UltraFeature($noticeFeature, $lang ?? 'en'))->value; ?></div>
+		<?php unset($noticeFeature); endif;
+		$noticeFeature = $item->getFeature('check'); if($noticeFeature !== null): ?>
+			<div class="warning message">⚠️️&nbsp;<?= (new WEEEOpen\Tarallo\SSRv1\UltraFeature($noticeFeature, $lang ?? 'en'))->value; ?></div>
+		<?php unset($noticeFeature); endif; ?>
 	</header>
 
 	<nav class="itembuttons" data-for-item="<?=$this->e($item->getCode())?>">

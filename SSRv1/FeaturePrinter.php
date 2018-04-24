@@ -281,11 +281,9 @@ class FeaturePrinter {
 	 *
 	 * @param Feature $feature
 	 *
-	 * @todo rename to printableValue
-	 *
 	 * @return string Value to be show to the user
 	 */
-	public static function getFeatureValue(Feature $feature) {
+	public static function printableValue(Feature $feature) {
 		if($feature->type === Feature::INTEGER || $feature->type === Feature::DOUBLE) {
 			try {
 				return FeaturePrinter::prettyPrint($feature);
