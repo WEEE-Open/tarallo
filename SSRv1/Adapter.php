@@ -95,12 +95,11 @@ class Adapter implements AdapterInterface {
 		return $response;
 	}
 
-	public static function logout(User $user = null, Database $db, $parameters, $querystring, $payload) {
+	public static function logout(User $user = null, Database $db, Engine $engine, $parameters, $querystring) {
 		Validation::authenticate($user);
 		Session::close($user, $db);
 
-		// È una citazione colta.
-		return new Response(200, 'text/html', '<center><h1>logout ok</h1><p>scritta centrata [cit.]</p></center>');
+		return new Response(200, 'text/html', $engine->render('logout'));
 	}
 
 	private static function getHome(
