@@ -16,7 +16,7 @@ $this->layout('main', ['title' => 'Stats', 'user' => $user]) ?>
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($recentlyAdded as $code => $time): date_default_timezone_set('Europe/Rome'); ?>
+			<?php date_default_timezone_set('Europe/Rome'); foreach($recentlyAdded as $code => $time): ?>
 				<tr>
 					<td><a href="/item/<?=$code?>"><?=$code?></a></td>
 					<td><?=date('Y-m-d, H:i', $time)?></td>
