@@ -42,15 +42,9 @@ class Request {
 	}
 
 	public static function ofGlobals() {
-//		if(isset($_SERVER['PATH_INFO'])) {
-//			$path = urldecode($_SERVER['PATH_INFO']);
-//		} else if(!isset($_SERVER['REQUEST_URI'])) {
-//			// Direct request to index.php or whatever
-//			$path = '';
 		if(isset($_SERVER['REQUEST_URI'])) {
 			$urlpieces = explode('?', $_SERVER['REQUEST_URI'], 2);
 			$path = urldecode($urlpieces[0]);
-			unset($urlpieces);
 		} else {
 			throw new \LogicException('Cannot find PATH_INFO');
 		}
@@ -60,9 +54,17 @@ class Request {
 			if(empty($querystring)) {
 				$querystring = null;
 			}
+		} else if(count($urlpieces) > 1) {
+			// Or use "try_files $uri /index.php?$query_string;" in nginx
+			parse_str($urlpieces[1], $querystring);
+			if(empty($querystring)) {
+				$querystring = null;
+			}
 		} else {
 			$querystring = null;
 		}
+
+		unset($urlpieces);
 
 		if(isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] !== '') {
 			$contentType = self::reverseNegotiateContent($_SERVER['CONTENT_TYPE']);

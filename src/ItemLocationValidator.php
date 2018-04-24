@@ -23,8 +23,8 @@ class ItemLocationValidator {
 		$type = $type->value;
 		$parentType = $parentType->value;
 
-		if($type === 'cpu' || $type === 'ram' || self::isExpansionCard($type)) {
-			if($parentType === 'case') {
+		if($parentType === 'case') {
+			if($type === 'cpu' || $type === 'ram' || self::isExpansionCard($type)) {
 				foreach($parent->getContents() as $maybeMobo) {
 					$maybeType = $maybeMobo->getFeature('type');
 					if($maybeType !== null && $maybeType->value === 'motherboard') {

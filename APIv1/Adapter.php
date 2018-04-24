@@ -117,12 +117,11 @@ class Adapter implements AdapterInterface {
 		$fix = isset($querystring['fix']) ? boolval($querystring['fix']) : false;
 		$validate = isset($querystring['validate']) ? boolval($querystring['validate']) : true; // TODO: this will probably be always true, unless it's ?validate=0
 
-		$item = new ItemIncomplete($id);
+		// We'll need the full item in any case, not just an ItemIncomplete
+		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, 0);
 		$parent = new ItemIncomplete($payload);
 
 		if($fix || $validate) {
-			// We'll need full items, not just ItemIncompletes!
-			$item = $db->itemDAO()->getItem($item, null, 0);
 			try {
 				$parent = $db->itemDAO()->getItem($parent, null, 1);
 			} catch(NotFoundException $e) {
@@ -140,6 +139,11 @@ class Adapter implements AdapterInterface {
 			} catch(ItemNestingException $e) {
 				throw new InvalidPayloadParameterException('*', $e->parentCode, $e->getMessage());
 			}
+		}
+
+		$path = $item->getPath();
+		if(count($path) > 0 && $path[count($path) - 1]->getCode() === $parent->getCode()) {
+			return null;
 		}
 
 		try {

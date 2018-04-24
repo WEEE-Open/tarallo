@@ -91,8 +91,7 @@ class Item extends ItemFeatures implements \JsonSerializable {
 	 * Get full path to item.
 	 * Work for non-head items, too.
 	 *
-	 * @throws \InvalidArgumentException if distance is less than 1
-	 * @return ItemIncomplete[] first item is direct parent, second is parent's parent, ad so on
+	 * @return ItemIncomplete[] first item is the tree root, last item is direct parent
 	 */
 	public function getPath() {
 		$result = [];
