@@ -235,7 +235,6 @@
 		// noinspection JSUnresolvedVariable
 		let text = e.clipboardData.getData("text/plain");
 		document.execCommand("insertHTML", false, text);
-		console.log("IMMISSIONE!");
 	}
 
 	/**
@@ -554,13 +553,11 @@
 	 */
 	function setTypeClick(featuresElement, select) {
 		if(featuresElement.getElementsByTagName('LI').length > 1) {
-			console.log('Other features already added');
 			return;
 		}
 
 		let features;
 		let type = select.getElementsByTagName('SELECT')[0].value;
-		console.log(type);
 
 		switch(type) {
 			case 'case':
