@@ -226,6 +226,19 @@
 	}
 
 	/**
+	 * Remove formatting when pasting into contentEditable
+	 *
+	 * @param {Event} e
+	 */
+	function sanitizePaste(e) {
+		e.preventDefault();
+		// noinspection JSUnresolvedVariable
+		let text = e.clipboardData.getData("text/plain");
+		document.execCommand("insertHTML", false, text);
+		console.log("IMMISSIONE!");
+	}
+
+	/**
 	 * Show error messages.
 	 *
 	 * @param {string|null} templateName
@@ -669,6 +682,7 @@
 				valueElement.dataset.previousValue = '0';
 				valueElement.contentEditable = 'true';
 				valueElement.addEventListener('blur', numberChanged);
+				valueElement.addEventListener("paste", sanitizePaste);
 
 				div = document.createElement('div');
 				div.textContent = '0';
@@ -680,6 +694,7 @@
 				valueElement.dataset.previousValue = '';
 				valueElement.contentEditable = 'true';
 				valueElement.addEventListener('input', textChanged);
+				valueElement.addEventListener("paste", sanitizePaste);
 
 				div = document.createElement('div');
 				div.textContent = '?'; // empty <div>s break everything
