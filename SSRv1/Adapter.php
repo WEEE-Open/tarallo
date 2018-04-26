@@ -245,9 +245,9 @@ class Adapter implements AdapterInterface {
 	) {
 		// TODO: move to API?
 		session_cache_limiter('');
-		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 3600) . ' GMT');
-		header('Cache-Control	: max-age=3600');
-		return new Response(200, 'text/json', json_encode(FeaturePrinter::getAll()));
+		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 36000) . ' GMT');
+		header('Cache-Control	: max-age=36000');
+		return new Response(200, 'text/json', json_encode(FeaturePrinter::getAllFeatures()));
 	}
 
 	public static function go(Request $request): Response {

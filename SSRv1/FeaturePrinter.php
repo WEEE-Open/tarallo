@@ -364,12 +364,6 @@ class FeaturePrinter {
 	}
 
 	public static function getAllFeatures() {
-		foreach(Feature::features as $name => $stuff) {
-
-		}
-	}
-
-	public static function getAll() {
 		$array = [];
 
 		foreach(Feature::features as $name => $stuff) {
