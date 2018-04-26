@@ -6,6 +6,7 @@
 	// To generate unique IDs for features
 	let featureIdsCounter = 0;
 
+	let featureNames = new Map();
 	let featureTypes = new Map();
 	let featureValues = new Map();
 	let featureValuesTranslated = new Map();
@@ -30,6 +31,8 @@
 			let features = everything[group];
 			for(let feature of features) {
 				featureTypes.set(feature.name, feature.type);
+				// noinspection JSUnresolvedVariable
+				featureNames.set(feature.name, feature.printableName);
 				if(feature.type === 'e') {
 					featureValues.set(feature.name, Object.keys(feature.values));
 					featureValuesTranslated.set(feature.name, Object.values(feature.values));
@@ -486,7 +489,6 @@
 	 */
 	function addFeatureClick(select, featuresElement, deletedFeatures = null) {
 		let name = select.value;
-		let translatedName = select.options[select.selectedIndex].textContent;
 		let pseudoId = 'feature-edit-' + name;
 
 		let duplicates = featuresElement.getElementsByClassName(pseudoId);
@@ -496,15 +498,8 @@
 			return null;
 		}
 
-		let newElement = newFeature(name, translatedName, pseudoId, deletedFeatures);
+		let newElement = addNewFeature(name, pseudoId, featuresElement, deletedFeatures);
 
-		if(deletedFeatures !== null) {
-			// Undelete
-			deletedFeatures.delete(name);
-		}
-
-		// Insert
-		featuresElement.querySelector('.new ul').appendChild(newElement);
 		// TODO: replace with 'input, .value' once I figure out how to move the cursor to the right, or else the "line" div disappears spilling the text inside the outer div.
 		let input = newElement.querySelector('input');
 		if(input) {
@@ -513,15 +508,124 @@
 	}
 
 	/**
+	 * Add a new and editable feature element to the "own features" section
+	 *
+	 * @param {string} name - Feature name
+	 * @param {string} pseudoId - Unique element identifier (already confirmed to be unique), used as class
+	 * @param {HTMLElement} featuresElement - The "own features" element
+	 * @param {Set<string>|null} deletedFeatures - Deleted features set, can be null if not tracked
+	 */
+	function addNewFeature(name, pseudoId, featuresElement, deletedFeatures = null) {
+		let newElement = newFeature(name, pseudoId, deletedFeatures);
+
+		// If it's a new item and we're adding a type, attach this listener...
+		if(name === 'type' && deletedFeatures === null) {
+			newElement.getElementsByTagName('SELECT')[0].addEventListener('change', setTypeClick.bind(null, featuresElement, newElement))
+		}
+
+		// Remove from set of deleted features ("undelete"), if there's a set
+		if(deletedFeatures !== null) {
+			deletedFeatures.delete(name);
+		}
+
+		// Insert
+		featuresElement.querySelector('.new ul').appendChild(newElement);
+		return newElement;
+	}
+
+	/**
+	 * Add empty features according to object type, if nothing other than type has been added.
+	 *
+	 * @param {HTMLElement} featuresElement - The "own features" element
+	 * @param {HTMLSelectElement} select - The "select" that has been clicked, to get type
+	 */
+	function setTypeClick(featuresElement, select) {
+		if(featuresElement.getElementsByTagName('LI').length > 1) {
+			console.log('Other features already added');
+			return;
+		}
+
+		let features;
+		let type = select.getElementsByTagName('SELECT')[0].value;
+		console.log(type);
+
+		switch(type) {
+			case 'case':
+				features = ['cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code', 'brand', 'model', 'sn', 'usb-ports-n', 'working', 'motherboard-form-factor', 'psu-form-factor', 'power-connector', 'psu-volt', 'psu-ampere', 'arrival-batch', 'owner', 'color', 'software', 'notes'];
+				break;
+			case 'motherboard':
+				features = ['brand', 'model', 'sn', 'motherboard-form-factor', 'key-bios-setup', 'key-boot-menu', 'cpu-socket', 'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n', 'sata-ports-n', 'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n', 'usb-ports-n', 'firewire-ports-n', 'mini-firewire-ports-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand', 'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'working', 'color', 'owner', 'notes'];
+				break;
+			case 'cpu':
+				features = ['brand', 'model', 'variant', 'isa', 'frequency-hertz', 'cpu-socket', 'integrated-graphics-brand', 'integrated-graphics-model', 'working', 'owner'];
+				break;
+			case 'ram':
+				features = ['brand', 'model', 'sn', 'family', 'ram-type', 'ram-form-factor', 'frequency-hertz', 'capacity-byte', 'ram-ecc', 'working', 'color', 'owner', 'notes'];
+				break;
+			case 'hdd':
+				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'family', 'sata-ports-n', 'ide-ports-n', 'capacity-decibyte', 'hdd-odd-form-factor', 'spin-rate-rpm', 'ide-ports-n', 'mini-ide-ports-n', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n', 'scsi-db68-ports-n', 'data-erased', 'surface-scan', 'smart-data', 'working', 'owner'];
+				break;
+			case 'odd':
+				features = ['brand', 'model', 'family', 'sn', 'odd-type', 'ide-ports-n', 'jae-ports-n', 'sata-ports-n', 'hdd-odd-form-factor', 'color', 'working', 'owner'];
+				break;
+			case 'fdd':
+				features = ['brand', 'model', 'sn', 'color', 'working', 'owner'];
+				break;
+			case 'graphics-card':
+				features = ['brand', 'brand-manufacturer', 'model', 'capacity-byte', 'vga-ports-n', 'dvi-ports-n', 'dms-59-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'agp-sockets-n', 'pcie-sockets-n', 'pcie-power-pin-n', 'sn', 'color', 'working', 'owner'];
+				break;
+			case 'internal-psu':
+				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'power-rated-watt', 'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor', 'pcie-power-pin-n', 'sata-ports-n', 'color', 'working', 'owner'];
+				break;
+			case 'external-psu':
+				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'psu-volt', 'psu-ampere', 'working', 'owner', 'notes'];
+				break;
+			case 'network-card':
+				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n', 'mac', 'color', 'working', 'owner'];
+				break;
+			case 'audio-card':
+			case 'other-card':
+			case 'scsi-card':
+			case 'modem-card':
+			case 'wifi-card':
+			case 'bluetooth-card':
+			case 'tv-card':
+				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n', 'mini-pci-sockets-n', 'color', 'working', 'owner'];
+				break;
+			case 'network-switch':
+			case 'network-hub':
+			case 'modem-router':
+				features = ['brand', 'model', 'ethernet-ports-100m-n', 'power-connector', 'psu-volt', 'psu-ampere', 'color', 'working', 'owner', 'notes'];
+				break;
+			case 'keyboard':
+			case 'mouse':
+				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'ps2-ports-n', 'usb-ports-n', 'color', 'working', 'owner'];
+				break;
+			case 'monitor':
+				features = ['cib', 'cib-old', 'other-code', 'brand', 'model', 'sn', 'diagonal-inch', 'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n', 'usb-ports-n', 'power-connector', 'psu-volt', 'psu-ampere', 'working', 'notes'];
+				break;
+			case 'ports-bracket':
+				features = ['usb-ports-n', 'serial-ports-n', 'parallel-ports-n', 'firewire-ports-n', 'color', 'owner'];
+				break;
+			default:
+				features = ['brand', 'model', 'working', 'owner', 'notes'];
+				break;
+		}
+
+		for(let name of features) {
+			addNewFeature(name, 'feature-edit-' + name, featuresElement, null);
+		}
+	}
+
+	/**
 	 * Maybe a template would have been better...
 	 *
 	 * @param {string} name - Feature name
-	 * @param {string} translatedName - Human-readable feature name
-	 * @param {string} pseudoId - Unique element identifier (already checked to be unique), used as class
+	 * @param {string} pseudoId - Unique element identifier (already confirmed to be unique), used as class
 	 * @param {Set<string>|null} deletedFeatures - Deleted features set. Null if not tracked (for new items)
-	 * @param {function|null} getComparison - Get the comparison dropdown
+	 * @param {function|null} getComparison - Get the comparison dropdown (for searches)
 	 */
-	function newFeature(name, translatedName, pseudoId, deletedFeatures, getComparison = null) {
+	function newFeature(name, pseudoId, deletedFeatures, getComparison = null) {
 		// Needed for labels
 		let id = pseudoId + featureIdsCounter++;
 		let type = featureTypes.get(name);
@@ -533,7 +637,7 @@
 		newElement.appendChild(nameElement);
 		let labelElement = document.createElement("label");
 		labelElement.htmlFor = id;
-		labelElement.textContent = translatedName;
+		labelElement.textContent = featureNames.get(name);
 		nameElement.appendChild(labelElement);
 
 		if(getComparison !== null) {
@@ -920,10 +1024,8 @@
 				//document.execCommand('delete', false, null);
 
 				let sel = window.getSelection();
-				console.log(sel);
 				// First (and only) child is a text node...
 				sel.collapse(div.childNodes[0], 1);
-				console.log(sel);
 			}
 		}
 	}

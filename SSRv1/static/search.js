@@ -33,7 +33,6 @@
 
 	function addFeatureClick(select, featuresElement) {
 		let name = select.value;
-		let translatedName = select.options[select.selectedIndex].textContent;
 		let pseudoId = 'feature-edit-' + name;
 
 		let duplicates = featuresElement.getElementsByClassName(pseudoId);
@@ -42,7 +41,7 @@
 			return;
 		}
 
-		let newElement = newFeature(name, translatedName, pseudoId, null, getComparison);
+		let newElement = newFeature(name, pseudoId, null, getComparison);
 		featuresElement.appendChild(newElement);
 		// TODO: replace with 'input, .value' once I figure out how to move the cursor to the right (= get this code working: https://stackoverflow.com/a/3866442)
 		let input = newElement.querySelector('input');
