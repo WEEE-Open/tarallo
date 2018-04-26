@@ -247,7 +247,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('power-connector', 'other'), -- Other --
 	('power-connector', 'c13'), -- C13/C14 -- C13 is the plug and C14 the inlet but they're "paired"
 	('power-connector', 'c19'), -- C19/C20 --
-	('power-connector', 'barrel'), -- Barrel (standard) --
+	('power-connector', 'barrel'), -- Barrel --
 	('power-connector', 'miniusb'), -- Mini USB --
 	('power-connector', 'microusb'), -- Micro USB --
 	('power-connector', 'proprietary'), -- Proprietary --
