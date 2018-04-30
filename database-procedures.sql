@@ -232,14 +232,20 @@ CREATE OR REPLACE TRIGGER AuditCreateItem
 	ON Item
 	FOR EACH ROW
 	BEGIN
-		DECLARE parent varchar(100);
-
-		SELECT Ancestor INTO parent
-		FROM Tree
-		WHERE Descendant = NEW.Code;
-
 		INSERT INTO Audit(Code, `Change`, Other, `User`)
 		VALUES(NEW.Code, 'C', NULL, @taralloAuditUsername);
+	END $$
+
+-- Add an 'M' entry to audit table
+CREATE OR REPLACE TRIGGER AuditMoveItem
+	AFTER INSERT
+	ON Tree
+	FOR EACH ROW
+	BEGIN
+		IF(NEW.Depth = 1) THEN
+			INSERT INTO Audit(Code, `Change`, Other, `User`)
+			VALUES(NEW.Descendant, 'M', NEW.Ancestor, @taralloAuditUsername);
+		END IF;
 	END $$
 
 -- Add a 'R' entry to audit table
@@ -251,7 +257,7 @@ CREATE OR REPLACE TRIGGER AuditRenameItem
 		IF(NEW.Code <> OLD.Code) THEN
 			INSERT INTO Audit(Code, `Change`, Other, `User`)
 			VALUES(NEW.Code, 'R', OLD.Code, @taralloAuditUsername);
-		END IF;
+		END IF $$
 	END $$
 
 -- Add a 'D' entry to audit table
