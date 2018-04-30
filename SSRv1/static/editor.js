@@ -564,7 +564,7 @@
 				features = ['cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code', 'brand', 'model', 'sn', 'usb-ports-n', 'working', 'motherboard-form-factor', 'psu-form-factor', 'power-connector', 'psu-volt', 'psu-ampere', 'arrival-batch', 'owner', 'color', 'software', 'notes'];
 				break;
 			case 'motherboard':
-				features = ['brand', 'model', 'sn', 'motherboard-form-factor', 'key-bios-setup', 'key-boot-menu', 'cpu-socket', 'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n', 'sata-ports-n', 'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n', 'usb-ports-n', 'firewire-ports-n', 'mini-firewire-ports-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand', 'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'mini-jack-ports-n', 'working', 'color', 'owner', 'notes'];
+				features = ['brand', 'model', 'sn', 'motherboard-form-factor', 'key-bios-setup', 'key-boot-menu', 'cpu-socket', 'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n', 'sata-ports-n', 'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n', 'usb-ports-n', 'firewire-ports-n', 'mini-firewire-ports-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand', 'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'mini-jack-ports-n', 'psu-connector-cpu', 'psu-connector-motherboard', 'working', 'color', 'owner', 'notes'];
 				break;
 			case 'cpu':
 				features = ['brand', 'model', 'variant', 'core-n', 'isa', 'frequency-hertz', 'cpu-socket', 'integrated-graphics-brand', 'integrated-graphics-model', 'working', 'owner'];
@@ -584,7 +584,7 @@
 			case 'graphics-card':
 				features = ['brand', 'brand-manufacturer', 'model', 'capacity-byte', 'vga-ports-n', 'dvi-ports-n', 'dms-59-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'agp-sockets-n', 'pcie-sockets-n', 'pcie-power-pin-n', 'sn', 'color', 'working', 'owner'];
 				break;
-			case 'internal-psu':
+			case 'psu':
 				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'power-rated-watt', 'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor', 'pcie-power-pin-n', 'sata-ports-n', 'color', 'working', 'owner'];
 				break;
 			case 'external-psu':
