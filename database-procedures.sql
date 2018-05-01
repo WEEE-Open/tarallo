@@ -333,7 +333,7 @@ CREATE OR REPLACE TRIGGER ChangeFeatureType
 				UPDATE ItemFeature
 				SET ValueDouble = `Value`, `Value` = NULL
 				WHERE Feature = NEW.Feature;
-			ELIF(NEW.Type = 1 AND OLD.Type = 3) THEN
+			ELSEIF(NEW.Type = 1 AND OLD.Type = 3) THEN
 				UPDATE ItemFeature
 				SET `Value` = ValueDouble, ValueDouble = NULL
 				WHERE Feature = NEW.Feature;
