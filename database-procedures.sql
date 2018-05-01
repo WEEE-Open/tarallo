@@ -116,6 +116,41 @@ CREATE OR REPLACE PROCEDURE DetachSubtree(root varchar(100))
 		AND Pointless.Ancestor = root;
 	END $$
 
+-- Changing codes should be easy, right? It's just a matter of UPDATE on Item.Code and watching the magnificent cascade
+-- happen, right?
+-- WRONG! It spits out right in my face a "Cannot add or update a child row: a foreign key constraint fails" error.
+-- After deleting every single trigger, I concluded it doesn't come from one of these queries. What is it, then?
+-- Tree has two foreign keys, both pointing to Item.Code. The second one, no matter if it is Descendant or Ancestor, fails.
+-- The only "rational" explanation I could find is that MySQL/MariaDB forgets the second FK or tries to update it AFTER
+-- changing Code, for no apparent reason.
+-- But those FK do work, they prevent inserting rows pointing to nonexistant Items, I've tested that.
+-- They're also both ON UPDATE CASCADE and if I remove one FK the other does in fact cascade, they both do work if the
+-- other one is removed.
+-- I've tried setting them even to ON DELETE CASCADE, to NO ACTION, to RESTRICT (which is the same as NO ACTION), and
+-- obviously nothing worked.
+-- Well, BEFORE triggers should fire before FK constraints are checked, right? If I could manually shove the right code
+-- into the table... Nope, doesn't work, FK constraint fails.
+-- And so here we are: a downright scary SET FOREIGN_KEY_CHECKS = 0, but it gets set back to 1, this works, FKs are
+-- still there, referential integrity is preserved, the result seems correct, MariaDB doesn't complain, it's in a trigger
+-- so partial failures that leave FK checks disabled shouldn't be possible, let's just hope that transactions protect
+-- us from everything else.
+CREATE OR REPLACE TRIGGER CascadeItemCodeUpdateForReal
+	BEFORE UPDATE
+	ON Item
+	FOR EACH ROW
+	BEGIN
+		IF(NEW.Code <> OLD.Code) THEN
+			SET FOREIGN_KEY_CHECKS = 0;
+			UPDATE Tree
+			SET Ancestor=NEW.Code
+			WHERE Ancestor=OLD.Code;
+			UPDATE Tree
+			SET Descendant=NEW.Code
+			WHERE Descendant=OLD.Code;
+			SET FOREIGN_KEY_CHECKS = 1;
+		END IF;
+	END $$
+
 -- Search ----------------------------------------------------------------------
 
 -- Delete items from search results, when deleting from database
