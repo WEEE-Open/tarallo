@@ -875,10 +875,10 @@
 		let method, uri;
 		if(code) {
 			method = 'PUT';
-			uri = '/v1/items/' + encodeURIComponent(code);
+			uri = '/v1/items/' + encodeURIComponent(code) + '?fix';
 		} else {
 			method = 'POST';
-			uri = '/v1/items';
+			uri = '/v1/items?fix';
 		}
 
 		response = await fetch(uri, {

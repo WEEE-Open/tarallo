@@ -55,7 +55,7 @@
 				message.style.display = 'none';
 			}
 
-			let response = await fetch('/v1/items/' + encodeURIComponent(code) + '/parent?fix=1', {
+			let response = await fetch('/v1/items/' + encodeURIComponent(code) + '/parent?fix', {
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'

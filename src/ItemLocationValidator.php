@@ -7,7 +7,7 @@ class ItemLocationValidator {
 	/**
 	 * Correctly move RAMs and CPUs from cases to motherboards, if case contains a motherboard.
 	 *
-	 * @param Item $item The item being places
+	 * @param Item $item The item being placed
 	 * @param Item $parent Its location (case or anything else)
 	 *
 	 * @return Item Correct parent (given one or a motherboard)
@@ -38,14 +38,47 @@ class ItemLocationValidator {
 	}
 
 	/**
+	 * Reparent all items, recursively.
+	 *
+	 * @see reparent
+	 *
+	 * @param Item $item The root item being places
+	 * @param Item|null $parent Its location (case or anything else)
+	 *
+	 * @return Item|null Correct parent for root item or null if was null
+	 */
+	public static function reparentAll(Item $item, Item $parent = null) {
+		if($parent !== null) {
+			$parent = self::reparent($item, $parent);
+		}
+
+		$fixups = [];
+		foreach($item->getContents() as $subitem) {
+			$newParent = self::reparentAll($subitem, $item);
+			if($newParent !== $item) {
+				// Avoid changing arrays while foreachs are iterating over them
+				$fixups[] = [$subitem, $item, $newParent];
+			}
+		}
+
+		if(!empty($fixups)) {
+			foreach($fixups as $row) {
+				/** @var Item[] $row */
+				$row[1]->removeContent($row[0]);
+				$row[2]->addContent($row[0]);
+			}
+		}
+
+		return $parent;
+	}
+
+	/**
 	 * Check that item nesting makes sense (e.g. no CPUs inside HDDs)
 	 *
 	 * @param Item $item Item to be checked
 	 * @param Item $parent Its parent
 	 *
 	 * @throws ItemNestingException if items are invalidly nested
-	 *
-	 * @TODO use when creating new items, too
 	 */
 	public static function checkNesting(Item $item, Item $parent) {
 		$type = $item->getFeature('type');

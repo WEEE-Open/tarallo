@@ -76,14 +76,27 @@ class Adapter implements AdapterInterface {
 	public static function createItem(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		Validation::authorize($user);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+		$fix = isset($querystring['fix']) ? true : false;
 		$loopback = isset($parameters['loopback']) ? true : false;
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
+
+		if($fix && $parent instanceof ItemIncomplete) {
+			try {
+				$parent = $db->itemDAO()->getItem($parent, null, 1);
+			} catch(NotFoundException $e) {
+				throw new InvalidPayloadParameterException('parent', $parent->getCode(), 'Location doesn\'t exist');
+			}
+			ItemLocationValidator::reparentAll($item, $parent);
+		}
+
+		// TODO: also validate nesting
+
 		try {
 			$db->itemDAO()->addItem($item, $parent);
 		} catch(NotFoundException $e) {
 			if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
-				throw new InvalidPayloadParameterException('parent', $parent, 'Requested location doesn\'t exist');
+				throw new InvalidPayloadParameterException('parent', $parent->getCode(), 'Requested location doesn\'t exist');
 			}
 		} catch(\InvalidArgumentException $e) {
 			if($e->getCode() === ItemDAO::EXCEPTION_CODE_GENERATE_ID) {
@@ -114,8 +127,8 @@ class Adapter implements AdapterInterface {
 		Validation::authorize($user);
 		Validation::validateIsString($payload);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
-		$fix = isset($querystring['fix']) ? boolval($querystring['fix']) : false;
-		$validate = isset($querystring['validate']) ? boolval($querystring['validate']) : true; // TODO: this will probably be always true, unless it's ?validate=0
+		$fix = isset($querystring['fix']) ? true : false;
+		$validate = isset($querystring['novalidate']) ? false : true;
 
 		// We'll need the full item in any case, not just an ItemIncomplete
 		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, 0);

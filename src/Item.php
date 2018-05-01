@@ -169,6 +169,15 @@ class Item extends ItemFeatures implements \JsonSerializable {
 		return $this;
 	}
 
+	public function removeContent(Item $item) {
+		$key = array_search($item, $this->contents);
+		if($key === false) {
+			throw new \InvalidArgumentException('Cannot remove item ' . $item . ' from ' . $this . ': not here');
+		} else {
+			unset($this->contents[$key]);
+		}
+	}
+
 	/**
 	 * Get items located inside
 	 *
