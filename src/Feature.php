@@ -24,7 +24,7 @@ class Feature {
 		'capacity-byte' => self::INTEGER,
 		'frequency-hertz' => self::INTEGER,
 		'diameter-mm' => self::INTEGER,
-		'diagonal-inch' => self::INTEGER,
+		'diagonal-inch' => self::DOUBLE,
 		'isa' => ['x86-32' => true, 'x86-64' => true, 'ia-64' => true, 'arm' => true],
 		'color' => ['black' => true, 'white' => true, 'green' => true, 'yellow' => true, 'red' => true, 'blue' => true, 'grey' => true, 'darkgrey' => true, 'lightgrey' => true, 'pink' => true, 'transparent' => true, 'brown' => true, 'orange' => true, 'violet' => true, 'sip-brown' => true, 'lightblue' => true, 'yellowed' => true, 'transparent-dark' => true, 'golden' => true],
 		'motherboard-form-factor' => ['atx' => true, 'miniatx' => true, 'microatx' => true, 'miniitx' => true, 'proprietary' => true, 'btx' => true, 'microbtx' => true, 'nanobtx' => true, 'picobtx' => true, 'wtx' => true, 'flexatx' => true, 'proprietary-laptop' => true, 'eatx' => true],

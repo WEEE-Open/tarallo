@@ -257,7 +257,7 @@ CREATE OR REPLACE TRIGGER AuditRenameItem
 		IF(NEW.Code <> OLD.Code) THEN
 			INSERT INTO Audit(Code, `Change`, Other, `User`)
 			VALUES(NEW.Code, 'R', OLD.Code, @taralloAuditUsername);
-		END IF $$
+		END IF;
 	END $$
 
 -- Add a 'D' entry to audit table
@@ -282,6 +282,27 @@ CREATE OR REPLACE TRIGGER AuditUserRename
 			UPDATE Audit
 			SET `User` = NEW.Name
 			WHERE `User` = OLD.Name;
+		END IF;
+	END $$
+
+-- Features --------------------------------------------------------------------
+
+-- Painless conversion between integer and double features. Maybe.
+CREATE OR REPLACE TRIGGER ChangeFeatureType
+	AFTER UPDATE
+	ON Feature
+	FOR EACH ROW
+	BEGIN
+		IF(NEW.Feature = OLD.Feature) THEN
+			IF(NEW.Type = 3 AND OLD.Type = 1) THEN
+				UPDATE ItemFeature
+				SET ValueDouble = `Value`, `Value` = NULL
+				WHERE Feature = NEW.Feature;
+			ELIF(NEW.Type = 1 AND OLD.Type = 3) THEN
+				UPDATE ItemFeature
+				SET `Value` = ValueDouble, ValueDouble = NULL
+				WHERE Feature = NEW.Feature;
+			END IF;
 		END IF;
 	END $$
 

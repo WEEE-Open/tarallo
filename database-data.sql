@@ -21,7 +21,7 @@ INSERT INTO `Feature` (`Feature`, `Type`) VALUES
 	('capacity-byte', 1), -- Capacity --
 	('frequency-hertz', 1), -- Frequency --
 	('diameter-mm', 1), -- Diameter --
-	('diagonal-inch', 1), -- Diagonal --
+	('diagonal-inch', 3), -- Diagonal --
 	('isa', 2), -- Architecture --
 	('color', 2), -- Color --
 	('motherboard-form-factor', 2), -- Form factor (motherboard) --
