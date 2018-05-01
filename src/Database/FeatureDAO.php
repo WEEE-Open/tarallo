@@ -25,6 +25,43 @@ final class FeatureDAO extends DAO {
 		return $items;
 	}
 
+	/**
+	 * Get all items that have a certain value (exact match) for a feature.
+	 *
+	 * Currently works only for text features. Mostly useful to search by serial number, for
+	 * anything more complicated use SearchDAO facilities.
+	 *
+	 * @param Feature $feature Feature and value to search
+	 * @param int $limit Maximum number of results
+	 *
+	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
+	 */
+	public function getItemsByFeatures(Feature $feature, int $limit): array {
+		if($feature->type !== Feature::STRING) {
+			throw new \LogicException('Not implemented');
+		}
+
+		$statement = $this->getPDO()->prepare('SELECT Code FROM ItemFeature WHERE Feature = ? AND ValueText = ? LIMIT ?');
+		$statement->bindValue(1, $feature->name, \PDO::PARAM_STR);
+		$statement->bindValue(2, $feature->value, \PDO::PARAM_STR);
+		$statement->bindValue(3, $limit, \PDO::PARAM_INT);
+
+		$result = [];
+
+		try {
+			$statement->execute();
+			if($statement->rowCount() > 0) {
+				foreach($statement as $row) {
+					$result[] = new ItemIncomplete($row['Code']);
+				}
+				return $result;
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+		return $result;
+	}
+
 	private $getFeaturesStatement = null;
 
 	/**

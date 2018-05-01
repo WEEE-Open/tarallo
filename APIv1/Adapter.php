@@ -7,6 +7,7 @@ use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Database\DatabaseException;
 use WEEEOpen\Tarallo\Server\Database\ItemDAO;
 use WEEEOpen\Tarallo\Server\Database\TreeDAO;
+use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
@@ -71,6 +72,32 @@ class Adapter implements AdapterInterface {
 		} else {
 			return $db->itemDAO()->getItem(new ItemIncomplete($id), $token);
 		}
+	}
+
+	public static function getByFeature(User $user = null, Database $db, $parameters, $querystring, $payload) {
+		Validation::authorize($user);
+
+		$id = (string) $parameters['feature'];
+		$value = (string) $parameters['value'];
+		$limit = isset($querystring['limit']) ? (int) $querystring['limit'] : 5;
+
+		if($limit > 10) {
+			throw new InvalidPayloadParameterException('limit', $limit, 'Maximum number of results is 10');
+		} else if($limit < 1) {
+			throw new InvalidPayloadParameterException('limit', $limit, 'Limit < 1 doesn\'t make sense');
+		}
+
+		try {
+			if(Feature::getType($id) !== Feature::STRING) {
+				throw new InvalidPayloadParameterException('*', $id, "Only text features are supported, $id isn't");
+			}
+		} catch(\InvalidArgumentException $e) {
+			throw new InvalidPayloadParameterException('*', $value, $e->getMessage());
+		}
+
+		$feature = new Feature($id, $value);
+
+		return $db->featureDAO()->getItemsByFeatures($feature, $limit);
 	}
 
 	public static function createItem(User $user = null, Database $db, $parameters, $querystring, $payload) {
@@ -261,23 +288,28 @@ class Adapter implements AdapterInterface {
 					//$r->get('/parent', 'getItemParent');
 					$r->put('/parent', 'setItemParent');
 
+					// TODO: implement this
 					$r->get('/product', 'getItemProduct');
-					$r->put('/product', 'setItemProduct');
-					$r->delete('/product', 'deleteItemProduct');
+					//$r->put('/product', 'setItemProduct');
+					//$r->delete('/product', 'deleteItemProduct');
 
 					// Also useless, just get the item
 					// $r->get('/features', 'getItemFeatures');
 					$r->put('/features', 'setItemFeatures');
 					$r->patch('/features', 'updateItemFeatures');
 
-					$r->get('/contents', 'getItemContents');
+					// $r->get('/contents', 'getItemContents');
 				});
 			});
 
 			$r->post('/search', 'doSearch');
 			$r->patch('/search/{id}', 'doSearch');
+			// TODO: implement
 			$r->get('/search/{id}[/page/{page}]', 'getSearch');
 
+			$r->get('/features/{feature}/{value}', 'getByFeature');
+
+			// TODO: implement all these
 			$r->addGroup('/products', function(FastRoute\RouteCollector $r) {
 				$r->get('', 'getProduct');
 				$r->get('/{brand}[/{model}[/{variant}]]', 'getProduct');
@@ -286,12 +318,13 @@ class Adapter implements AdapterInterface {
 				$r->put('/{brand}/{model}/{variant}', 'createProduct');
 
 				$r->addGroup('/{brand}/{model}/{variant}', function(FastRoute\RouteCollector $r) {
-					$r->get('/features', 'getProductFeatures');
+					//$r->get('/features', 'getProductFeatures');
 					$r->post('/features', 'setProductFeatures');
 					$r->patch('/features', 'updateProductFeatures');
 				});
 			});
 
+			// TODO: implement this
 			$r->get('/logs[/page/{page}]', 'getLogs');
 
 			$r->get('/session', 'sessionWhoami');
