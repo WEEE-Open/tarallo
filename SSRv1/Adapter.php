@@ -243,7 +243,6 @@ class Adapter implements AdapterInterface {
 		$parameters,
 		$querystring
 	) {
-		// TODO: move to API?
 		session_cache_limiter('');
 		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 36000) . ' GMT');
 		header('Cache-Control	: max-age=36000');
