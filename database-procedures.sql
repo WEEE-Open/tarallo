@@ -5,8 +5,8 @@ CREATE OR REPLACE FUNCTION GenerateCode(currentPrefix varchar(20))
 MODIFIES SQL DATA
 	-- This means that in two identical databases, with the same values everywhere, the function produces the same
 	-- results, which is useful to know for replication. Setting to deterministic also enables some optimizations,
-	-- apparently. However many people on TEH INTERNETS say that anything other than a pure function is nonderministic,
-	-- so who knows! If the database crashes and burns, we'll know it wasn't actually deterministic.
+	-- apparently. However many people on TEH INTERNETS say that anything other than a pure function is not
+	-- deterministic, so who knows! If the database crashes and burns, we'll know it wasn't actually deterministic.
 DETERMINISTIC
 SQL SECURITY INVOKER
 	BEGIN
@@ -134,7 +134,7 @@ CREATE OR REPLACE TRIGGER ItemUpdateSearchIntegrity
 	FOR EACH ROW
 	BEGIN
 		IF(NEW.Code <> OLD.Code) THEN
-			UPDATE SearchResult SET Code = NEW.Code
+			UPDATE SearchResult SET Item = NEW.Code
 			WHERE Item = OLD.Code;
 		END IF;
 	END $$
