@@ -72,8 +72,8 @@ class ItemDAOTest extends DatabaseTest {
 
 		$deleteMe = new ItemIncomplete('PC42');
 		$db->itemDAO()->deleteItem($deleteMe);
-		$this->assertFalse($db->itemDAO()->itemAvailable($deleteMe), 'Item shouldn\'t be available');
-		$this->assertTrue($db->itemDAO()->itemRecoverable($deleteMe), 'Item should be recoverable');
+		$this->assertTrue($db->itemDAO()->itemExists($deleteMe), 'Item should still exist');
+		$this->assertFalse($db->itemDAO()->itemVisible($deleteMe), 'Item shouldn\'t be visible');
 		$this->expectException(NotFoundException::class);
 		$db->itemDAO()->getItem($deleteMe);
 	}
@@ -85,8 +85,8 @@ class ItemDAOTest extends DatabaseTest {
 		$db = $this->getDb();
 
 		$notHere = new ItemIncomplete('PC9001');
-		$this->assertFalse($db->itemDAO()->itemAvailable($notHere), 'Item shouldn\'t be available');
-		$this->assertFalse($db->itemDAO()->itemRecoverable($notHere), 'Item shouldn\'t be recoverable');
+		$this->assertFalse($db->itemDAO()->itemExists($notHere), 'Item shouldn\'t exist');
+		$this->assertFalse($db->itemDAO()->itemVisible($notHere), 'Item shouldn\'t be recoverable');
 		$this->expectException(NotFoundException::class);
 		$db->itemDAO()->getItem($notHere);
 	}

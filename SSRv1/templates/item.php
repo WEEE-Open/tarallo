@@ -3,6 +3,7 @@
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
 /** @var string|null $add */
 /** @var string|null $edit */
+/** @var bool $deleted */
 /** @var bool $recursion */
 $recursion = $recursion ?? false;
 $features = $item->getCombinedFeatures();
@@ -19,7 +20,7 @@ if(isset($features['working'])) {
 		case 'yes':
 		case 'no':
 		case 'maybe':
-			$working = "working $value";
+			$working = " working $value";
 			break;
 	}
 	unset($value);
@@ -51,7 +52,7 @@ if(isset($edit)) {
 ?>
 
 <?php if(!$recursion): $this->insert('breadcrumbs', ['item' => $item]); endif; ?>
-<article class="item <?=$recursion ? '' : 'root'?> <?=$working?> <?=$editing && $target ? 'head editing' : ''?>"
+<article class="item<?=$recursion ? '' : ' root'?><?=$working?><?=$editing && $target ? ' head editing' : ''?><?= $deleted ? ' deleted' : '' ?>"
 		data-code="<?=$this->e($item->getCode())?>">
 	<header>
 		<h2 id="code-<?=$this->e($item->getCode())?>"><?=$this->e($item->getCode())?></h2>
@@ -60,7 +61,10 @@ if(isset($edit)) {
 		<?php unset($noticeFeature); endif;
 		$noticeFeature = $item->getFeature('check'); if($noticeFeature !== null): ?>
 			<div class="warning message">⚠️️&nbsp;<?= (new WEEEOpen\Tarallo\SSRv1\UltraFeature($noticeFeature, $lang ?? 'en'))->value; ?></div>
-		<?php unset($noticeFeature); endif; ?>
+		<?php unset($noticeFeature); endif;
+		if($deleted): ?>
+			<div class="error message">❌️️&nbsp;This item has been deleted</div>
+		<?php endif; ?>
 	</header>
 
 	<nav class="itembuttons" data-for-item="<?=$this->e($item->getCode())?>">

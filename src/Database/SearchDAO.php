@@ -200,8 +200,11 @@ EOQ;
 			$everything .= "AND $codeSubquery";
 		}
 
-		// Replace first AND with WHERE
-		$everything = 'WHERE' . substr($everything, 3);
+		// Replace first AND with WHERE:
+		// $everything = 'WHERE' . substr($everything, 3);
+
+		// Or rather:
+		$everything = 'WHERE DeletedAt IS NULL ' . substr($everything, 3);
 
 		if($previousSearchId) {
 			$megaquery = /** @lang MySQL */
@@ -210,7 +213,6 @@ DELETE FROM SearchResult
 WHERE Search = :searchId AND Item NOT IN (SELECT `Code` FROM Item $everything);
 EOQ;
 		} else {
-			// TODO: this was "FROM Item, ItemFeature": was that needed?
 			$megaquery = /** @lang MySQL */
 				<<<EOQ
 INSERT INTO SearchResult(Search, Item)

@@ -1,15 +1,19 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
+/** @var bool $deleted */
 /** @var string[][] $history */
 $this->layout('main', ['title' => $item->getCode() . ' history', 'user' => $user, 'itembuttons' => true]);
 ?>
 
 <?php if(!$recursion): $this->insert('breadcrumbs', ['item' => $item]); endif; ?>
-<article class="item root"
+<article class="item root<?= $deleted ? ' deleted' : '' ?>"
 		data-code="<?=$this->e($item->getCode())?>">
 	<header>
 		<h2 id="code-<?=$this->e($item->getCode())?>"><?=$this->e($item->getCode())?></h2>
+		<?php if($deleted): ?>
+		<div class="error message">❌️️&nbsp;This item has been deleted</div>
+		<?php endif; ?>
 	</header>
 
 	<nav class="itembuttons" data-for-item="<?=$this->e($item->getCode())?>">

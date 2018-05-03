@@ -267,6 +267,10 @@ table td {
 	padding: 0.32em;
 }
 
+.deleted.item h2 {
+	text-line-through: single;
+}
+
 .new.item h2 {
 	font-size: large;
 	padding: 0.5rem;

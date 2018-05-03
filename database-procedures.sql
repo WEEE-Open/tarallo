@@ -91,6 +91,29 @@ CREATE OR REPLACE TRIGGER ItemBMVDelete
 		END IF;
 	END $$
 
+
+CREATE OR REPLACE TRIGGER ItemSetDeleted
+	BEFORE UPDATE
+	ON Item
+	FOR EACH ROW
+	BEGIN
+		DECLARE descendants bigint UNSIGNED;
+
+		IF(NEW.DeletedAt IS NOT NULL AND (OLD.DeletedAt IS NULL OR OLD.DeletedAt <> NEW.DeletedAt)) THEN
+			SELECT COUNT(*) INTO descendants
+			FROM Tree
+			WHERE Ancestor = OLD.Code
+			AND Depth > 1;
+
+			IF(descendants > 0) THEN
+				SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot delete an item while contains other items';
+			ELSE
+				DELETE FROM Tree WHERE Descendant = OLD.Code AND Depth > 0;
+				DELETE FROM SearchResult WHERE Item = OLD.Code;
+			END IF;
+		END IF;
+	END $$
+
 -- Tree ------------------------------------------------------------------------
 
 CREATE OR REPLACE FUNCTION GetParent(child varchar(100))
@@ -301,7 +324,7 @@ CREATE OR REPLACE TRIGGER AuditDeleteItem
 	ON Item
 	FOR EACH ROW
 	BEGIN
-		IF(NEW.DeletedAt IS NOT NULL) THEN
+		IF(NEW.DeletedAt IS NOT NULL AND (OLD.DeletedAt IS NULL OR OLD.DeletedAt <> NEW.DeletedAt)) THEN
 			INSERT INTO Audit(Code, `Change`, `User`)
 			VALUES(NEW.Code, 'D', @taralloAuditUsername);
 		END IF;

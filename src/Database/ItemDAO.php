@@ -99,33 +99,33 @@ final class ItemDAO extends DAO {
 	}
 
 	/**
-	 * True If item exists and is not marked as deleted, false otherwise.
+	 * True if item exists in any form (even if marked as deleted), false otherwise.
 	 *
 	 * @param ItemIncomplete $item
 	 *
 	 * @return bool
 	 * @throws NotFoundException If item doesn't exist in any form anywhere
 	 */
-	public function itemAvailable(ItemIncomplete $item) {
+	public function itemExists(ItemIncomplete $item) {
 		$deleted = $this->itemIsDeleted($item);
-		if($deleted === false) {
-			return true;
+		if($deleted === null) {
+			return false;
 		}
 
-		return false;
+		return true;
 	}
 
 	/**
-	 * True if item exists in the database and is marked as deleted, false otherwise
+	 * True if item is visibile (exists AND not marked as deleted), false otherwise (doesn't exist or is marked as deleted)
 	 *
 	 * @param ItemIncomplete $item
 	 *
 	 * @return bool
-	 * @see itemAvailable to check wether item is available or deleted (call only that method, not both!)
+	 * @see itemExists to check wether item exists at all or not
 	 */
-	public function itemRecoverable(ItemIncomplete $item) {
+	public function itemVisible(ItemIncomplete $item) {
 		$deleted = $this->itemIsDeleted($item);
-		if($deleted === true) {
+		if($deleted === false) {
 			return true;
 		}
 

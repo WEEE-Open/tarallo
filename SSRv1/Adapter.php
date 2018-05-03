@@ -31,7 +31,8 @@ class Adapter implements AdapterInterface {
 		$edit = isset($parameters['edit']) ? (string) $parameters['edit'] : null;
 		$add = isset($parameters['add']) ? (string) $parameters['add'] : null;
 
-		$renderParameters = ['item' => $db->itemDAO()->getItem(new ItemIncomplete($id))];
+		$item = $db->itemDAO()->getItem(new ItemIncomplete($id));
+		$renderParameters = ['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item)];
 		// These should be mutually exclusive
 		if($edit !== null) {
 			$renderParameters['edit'] = $edit;
@@ -56,7 +57,8 @@ class Adapter implements AdapterInterface {
 		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, 0);
 		$history = $db->statsDAO()->getHistory($item, $count);
 
-		return new Response(200, 'text/html', $engine->render('history', ['item' => $item, 'history' => $history]));
+		return new Response(200, 'text/html', $engine->render('history',
+			['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item), 'history' => $history]));
 	}
 
 	private static function addItem(
@@ -118,7 +120,8 @@ class Adapter implements AdapterInterface {
 		$locations = $db->statsDAO()->getLocationsByItems();
 		$recentlyAdded = $db->statsDAO()->getRecentAuditByType('C', max(20, count($locations)));
 
-		return new Response(200, 'text/html', $engine->render('home', ['locations' => $locations, 'recentlyAdded' => $recentlyAdded]));
+		return new Response(200, 'text/html',
+			$engine->render('home', ['locations' => $locations, 'recentlyAdded' => $recentlyAdded]));
 	}
 
 	private static function getStats(
@@ -134,7 +137,8 @@ class Adapter implements AdapterInterface {
 		$serials = $db->statsDAO()->getDuplicateSerialsCount();
 		$recentlyAdded = $db->statsDAO()->getRecentAuditByType('C', 40);
 
-		return new Response(200, 'text/html', $engine->render('stats', ['locations' => $locations, 'serials' => $serials, 'recentlyAdded' => $recentlyAdded]));
+		return new Response(200, 'text/html', $engine->render('stats',
+			['locations' => $locations, 'serials' => $serials, 'recentlyAdded' => $recentlyAdded]));
 	}
 
 	private static function search(
@@ -197,7 +201,7 @@ class Adapter implements AdapterInterface {
 			} else {
 				Validation::authorize($user, 0);
 			}
-			
+
 			try {
 				if($target === null) {
 					$target = new User($username, $password);
@@ -246,6 +250,7 @@ class Adapter implements AdapterInterface {
 		session_cache_limiter('');
 		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 36000) . ' GMT');
 		header('Cache-Control	: max-age=36000');
+
 		return new Response(200, 'text/json', json_encode(FeaturePrinter::getAllFeatures()));
 	}
 
