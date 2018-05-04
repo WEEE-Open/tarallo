@@ -204,7 +204,7 @@ EOQ;
 		// $everything = 'WHERE' . substr($everything, 3);
 
 		// Or rather:
-		$everything = 'WHERE DeletedAt IS NULL ' . substr($everything, 3);
+		$everything = 'WHERE DeletedAt IS NULL ' . $everything;
 
 		if($previousSearchId) {
 			$megaquery = /** @lang MySQL */
