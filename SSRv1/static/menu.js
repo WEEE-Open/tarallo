@@ -51,6 +51,7 @@
 		let code = inputs[0].value;
 		let parent = inputs[1].value;
 		if(code !== "" && parent !== "") {
+			inputs[0].setCustomValidity('');
 			for(let message of quickMove.getElementsByClassName('message')) {
 				message.style.display = 'none';
 			}
@@ -67,24 +68,43 @@
 
 			if(response.ok) {
 				quickMove.getElementsByClassName('success')[0].style.display = '';
-			} else {
-				let jsend;
-				try {
-					jsend = await response.json();
-				} catch(e) {
-					quickMove.getElementsByClassName('error')[0].style.display = '';
-					console.log(response);
-					throw e;
-				}
-				console.log(jsend);
-				if(jsend.status === 'fail') {
-					quickMove.getElementsByClassName('warning')[0].style.display = '';
-				} else {
-					quickMove.getElementsByClassName('error')[0].style.display = '';
-				}
+				quickMove.querySelector('.success.message a').href = '/item/' + encodeURIComponent(code);
+				return;
 			}
 
-			quickMove.querySelector('.success.message a').href = '/item/' + encodeURIComponent(code);
+			let warning = quickMove.getElementsByClassName('warning')[0];
+			let error = quickMove.getElementsByClassName('error')[0];
+
+			if(response.status === 404) {
+				warning.style.display = '';
+				warning.textContent = `Item ${code} doesn't exist`;
+				inputs[0].setCustomValidity(`Item ${code} doesn't exist`);
+				return;
+			}
+
+			let jsend;
+
+			try {
+				jsend = await response.json();
+			} catch(e) {
+				error.style.display = '';
+				console.log(response);
+				throw e;
+			}
+
+			console.log(jsend);
+
+			if(jsend.status === 'fail') {
+				warning.style.display = '';
+				if(typeof jsend.data['*'] === 'string') {
+					warning.textContent = jsend.data['*'];
+				} else {
+					warning.textContent = jsend.data.toString();
+				}
+				return;
+			}
+
+			quickMove.getElementsByClassName('error')[0].style.display = '';
 		}
 	});
 

@@ -141,6 +141,10 @@ nav#top nav.quick.open {
 	padding: .5em;
 }
 
+.message.long {
+	margin-top: .5em;
+}
+
 .info.message {
 	color: #00529B;
 	background-color: #BDE5F8;

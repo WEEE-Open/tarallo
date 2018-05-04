@@ -26,7 +26,7 @@
 	><label>into: <input class="to" type="text"></label
 	><button>Move</button
 	><span class="error message">Error</span
-	><span class="warning message">Fail</span
-	><span class="success message"><a href="#">Ok</a></span>
+	><span class="success message"><a href="#">Ok</a></span
+	><div class="warning message long">Fail</div>
 </nav>
 <script src="/menu.js"></script>
