@@ -105,6 +105,17 @@ class ItemLocationValidator {
 					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
 			}
 		}
+
+		if($type === 'cpu' && $parentType === 'motherboard') {
+			$socket1 = $item->getFeature('cpu-socket');
+			$socket2 = $parent->getFeature('cpu-socket');
+			if($socket1 !== null && $socket2 !== null) {
+				if($socket1->value !== $socket2->value) {
+					throw new ItemNestingException('Incompatible socket: CPU is ' . $socket1 . ', motherboard is ' . $socket2,
+						$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
+				}
+			}
+		}
 	}
 
 	private static function isExpansionCard($type) {
