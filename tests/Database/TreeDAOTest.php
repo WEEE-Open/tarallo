@@ -143,6 +143,8 @@ class TreeDAOTest extends DatabaseTest {
 		$this->assertInstanceOf(Item::class, $item);
 
 		// Move TI from TAVOLONE to ZonaBlu.
+		// TODO: HORRIBLE hack, do something else
+		sleep(2); // "Integrity constraint violation: 1062 Duplicate entry 'PCTI-2018-05-04 20:23:23-M' for key 'PRIMARY'", timestamps have seconds accuracy...
 		$db->treeDAO()->moveItem($ti, $zb);
 
 		$item = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));
