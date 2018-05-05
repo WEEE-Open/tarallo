@@ -26,7 +26,7 @@ use WEEEOpen\Tarallo\Server\User;
 
 class Adapter implements AdapterInterface {
 	public static function sessionWhoami(User $user = null, Database $db, $parameters, $querystring, $payload) {
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 
 		return ['username' => $user->getUsername()];
 	}
@@ -64,7 +64,7 @@ class Adapter implements AdapterInterface {
 		$token = isset($parameters['token']) ? (string) $parameters['token'] : null;
 
 		if($token === null) {
-			Validation::authorize($user);
+			Validation::authorize($user, 3);
 		}
 
 		if($id === null) {
@@ -75,7 +75,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	public static function getByFeature(User $user = null, Database $db, $parameters, $querystring, $payload) {
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 
 		$id = (string) $parameters['feature'];
 		$value = (string) $parameters['value'];
@@ -240,7 +240,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	public static function doSearch(User $user = null, Database $db, $parameters, $querystring, $payload) {
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 		Validation::validateArray($payload);
 		$id = isset($parameters['id']) ? (int) $parameters['id'] : null;
 
@@ -259,7 +259,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	public static function getLogs(User $user = null, Database $db, $parameters, $querystring, $payload) {
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 		$page = isset($parameters['page']) ? (int) $parameters['page'] : 1;
 		$length = isset($querystring['length']) ? (int) $querystring['length'] : 20;
 
@@ -277,7 +277,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	public static function getHistory(User $user = null, Database $db, $parameters, $querystring, $payload) {
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
 		$length = isset($querystring['length']) ? (int) $querystring['length'] : 20;
 		$item = new ItemIncomplete($id);

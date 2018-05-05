@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\Server\Database;
 class Database {
 	/** @var \PDO */
 	private $pdo = null;
+	private $auditDAO = null;
 	private $userDAO = null;
 	private $itemDAO = null;
 	private $searchDAO = null;
@@ -50,24 +51,12 @@ class Database {
 		}
 	}
 
-	public function disconnect() {
-		$this->pdo = null;
-		$this->userDAO = null;
-		$this->itemDAO = null;
-		$this->featureDAO = null;
-	}
-
-	public function __destruct() {
-		// aaaaaaand this is completely useless.
-		$this->disconnect();
-	}
-
 	public function auditDAO() {
-		if($this->statsDAO === null) {
-			$this->statsDAO = new AuditDAO($this, $this->callback);
+		if($this->auditDAO === null) {
+			$this->auditDAO = new AuditDAO($this, $this->callback);
 		}
 
-		return $this->statsDAO;
+		return $this->auditDAO;
 	}
 
 	public function userDAO() {

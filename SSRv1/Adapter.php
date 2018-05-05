@@ -26,7 +26,7 @@ class Adapter implements AdapterInterface {
 		$parameters,
 		$querystring
 	): Response {
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
 		$edit = isset($parameters['edit']) ? (string) $parameters['edit'] : null;
 		$add = isset($parameters['add']) ? (string) $parameters['add'] : null;
@@ -50,7 +50,7 @@ class Adapter implements AdapterInterface {
 		$parameters,
 		$querystring
 	): Response {
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
 		$count = isset($querystring['count']) ? (int) $querystring['count'] : 20;
 
@@ -112,7 +112,7 @@ class Adapter implements AdapterInterface {
 		$querystring
 	): Response {
 		try {
-			Validation::authorize($user);
+			Validation::authorize($user, 3);
 		} catch(AuthenticationException $e) {
 			return new RedirectResponse(303, '/login');
 		}
@@ -131,7 +131,7 @@ class Adapter implements AdapterInterface {
 		$parameters,
 		$querystring
 	): Response {
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 
 		$locations = $db->statsDAO()->getLocationsByItems();
 		$serials = $db->statsDAO()->getDuplicateSerialsCount();
@@ -148,7 +148,7 @@ class Adapter implements AdapterInterface {
 		$parameters,
 		$querystring
 	): Response {
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 		$id = isset($parameters['id']) ? (int) $parameters['id'] : null;
 		$page = isset($parameters['page']) ? (int) $parameters['page'] : 1;
 		$add = isset($parameters['add']) ? (string) $parameters['add'] : null;
@@ -186,7 +186,7 @@ class Adapter implements AdapterInterface {
 		$parameters,
 		$querystring
 	): Response {
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 		if($querystring === null) {
 			$result = null;
 		} else {

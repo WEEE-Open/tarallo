@@ -9,11 +9,11 @@ class Validation {
 	 * Check that an user is authorized (and authenticated too, or the entire thing won't make any sense)
 	 *
 	 * @param User|null $user Current, logged-in user. Or none if not authenticated.
-	 * @param int $level Permission level required
+	 * @param int $level Permission level required (default is "read/write")
 	 *
 	 * @see User::getLevel()
 	 */
-	public static function authorize(User $user = null, $level = 3) {
+	public static function authorize(User $user = null, $level = 2) {
 		self::authenticate($user);
 		if($user->getLevel() > $level) {
 			throw new AuthorizationException();

@@ -117,8 +117,14 @@ class User {
 
 	/**
 	 * Get authorization level for user.
-	 * 0 = root, 3 = everyone else, like the ring 0 ... ring 3 thing,
-	 * just hope you don't find a buggy fork of Minix running at ring -3...
+	 * 0 = root
+	 * 1 = currently unused
+	 * 2 = read/write access
+	 * 3 = read only access
+	 *
+	 * Kinda like the ring 0 ... ring 3 thing,
+	 * just hope you don't find a buggy fork
+	 * of Minix running at ring -3...
 	 *
 	 * @return int
 	 */
