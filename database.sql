@@ -134,7 +134,7 @@ CREATE TABLE `User` (
 	`Password` text COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Session` char(32) COLLATE utf8mb4_bin,
 	`SessionExpiry` timestamp NOT NULL DEFAULT 0,
-	`Level` smallint DEFAULT 3,
+	`Level` smallint DEFAULT 2,
 	`Enabled` boolean NOT NULL DEFAULT FALSE,
 	PRIMARY KEY (`Name`),
 	UNIQUE KEY (`Session`),
