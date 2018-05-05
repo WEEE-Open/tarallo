@@ -26,6 +26,8 @@ if(isset($features['working'])) {
 	unset($value);
 }
 
+$containsMore = count($item->getContents()) > 0;
+
 // Until proven guilty, er, true
 $adding = false;
 $editing = false;
@@ -69,7 +71,7 @@ if(isset($edit)) {
 
 	<nav class="itembuttons" data-for-item="<?=$this->e($item->getCode())?>">
 		<?php if($editing && $target): ?>
-			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><button class="delete">❌&nbsp;Delete</button>
+			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><?php if(!$containsMore): ?><button class="delete">❌&nbsp;Delete</button><?php endif ?>
 		<?php elseif(!$adding && !$editing): ?>
 			<button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button><button class="history">📖&nbsp;History</button>
 		<?php endif ?>

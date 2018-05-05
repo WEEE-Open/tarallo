@@ -70,6 +70,11 @@
 			deleteClickBound = deleteFeature.bind(null, deletedFeatures);
 			// noinspection JSUnresolvedFunction
 			itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveModified.bind(null, deletedFeatures));
+			let deleteButton = itemEditing.querySelector('.itembuttons .delete');
+			if(deleteButton) {
+				// noinspection JSUnresolvedFunction
+				deleteButton.addEventListener('click', deleteClick);
+			}
 		}
 
 		// noinspection JSUnresolvedFunction
@@ -895,6 +900,32 @@
 			await jsendMe(response, goBack, displayError.bind(null, null));
 		} finally {
 			toggleButtons(false);
+		}
+	}
+
+	async function deleteClick(ev) {
+		let code = ev.target.parentElement.dataset.forItem;
+		let go = confirm(`Delete item ${code}: are you sure? Really? REALLY?`);
+		if(go) {
+			toggleButtons(true);
+
+			let method, uri;
+			method = 'DELETE';
+			uri = '/v1/items/' + encodeURIComponent(code);
+
+			let response = await fetch(uri, {
+				headers: {
+					'Accept': 'application/json'
+				},
+				method: method,
+				credentials: 'include'
+			});
+
+			try {
+				await jsendMe(response, goBack, displayError.bind(null, null));
+			} finally {
+				toggleButtons(false);
+			}
 		}
 	}
 

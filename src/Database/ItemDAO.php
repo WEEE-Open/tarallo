@@ -57,11 +57,13 @@ final class ItemDAO extends DAO {
 	private $deleteItemStatement;
 
 	public function deleteItem(ItemIncomplete $item) {
+		if(!$this->itemVisible($item)) {
+			throw new NotFoundException();
+		}
+
 		if($this->deleteItemStatement === null) {
 			$this->deleteItemStatement = $this->getPDO()->prepare('UPDATE Item SET DeletedAt = NOW() WHERE `Code` = ?');
 		}
-
-		$this->database->treeDAO()->removeFromTree($item);
 
 		try {
 			$this->deleteItemStatement->execute([$item->getCode()]);
