@@ -37,10 +37,10 @@ $this->layout('main', ['title' => $item->getCode() . ' history', 'user' => $user
 				<tbody>
 				<?php date_default_timezone_set('Europe/Rome'); foreach($history as $row): ?>
 					<tr>
-						<td><?= $row['Change'] ?></td>
-						<td><?= $row['Other'] ?? '' ?></td>
-						<td><?=date('Y-m-d, H:i', $row['Time'])?></td>
-						<td><?= $row['User'] ?></td>
+						<td><?= $row['change'] ?></td>
+						<td><?= $row['other'] ?? '' ?></td>
+						<td><?=date('Y-m-d, H:i', $row['time'])?></td>
+						<td><?= $row['user'] ?></td>
 					</tr>
 				<?php endforeach ?>
 				</tbody>

@@ -62,6 +62,14 @@ class Database {
 		$this->disconnect();
 	}
 
+	public function auditDAO() {
+		if($this->statsDAO === null) {
+			$this->statsDAO = new AuditDAO($this, $this->callback);
+		}
+
+		return $this->statsDAO;
+	}
+
 	public function userDAO() {
 		if($this->userDAO === null) {
 			$this->userDAO = new UserDAO($this, $this->callback);

@@ -55,7 +55,7 @@ class Adapter implements AdapterInterface {
 		$count = isset($querystring['count']) ? (int) $querystring['count'] : 20;
 
 		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, 0);
-		$history = $db->statsDAO()->getHistory($item, $count);
+		$history = $db->auditDAO()->getHistory($item, $count);
 
 		return new Response(200, 'text/html', $engine->render('history',
 			['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item), 'history' => $history]));
@@ -118,7 +118,7 @@ class Adapter implements AdapterInterface {
 		}
 
 		$locations = $db->statsDAO()->getLocationsByItems();
-		$recentlyAdded = $db->statsDAO()->getRecentAuditByType('C', max(20, count($locations)));
+		$recentlyAdded = $db->auditDAO()->getRecentAuditByType('C', max(20, count($locations)));
 
 		return new Response(200, 'text/html',
 			$engine->render('home', ['locations' => $locations, 'recentlyAdded' => $recentlyAdded]));
@@ -135,7 +135,7 @@ class Adapter implements AdapterInterface {
 
 		$locations = $db->statsDAO()->getLocationsByItems();
 		$serials = $db->statsDAO()->getDuplicateSerialsCount();
-		$recentlyAdded = $db->statsDAO()->getRecentAuditByType('C', 40);
+		$recentlyAdded = $db->auditDAO()->getRecentAuditByType('C', 40);
 
 		return new Response(200, 'text/html', $engine->render('stats',
 			['locations' => $locations, 'serials' => $serials, 'recentlyAdded' => $recentlyAdded]));

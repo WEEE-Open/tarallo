@@ -104,7 +104,7 @@ class Adapter implements AdapterInterface {
 		Validation::authorize($user);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
 		$fix = isset($querystring['fix']) ? true : false;
-		$loopback = isset($parameters['loopback']) ? true : false;
+		$loopback = isset($querystring['loopback']) ? true : false;
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
 
@@ -203,7 +203,7 @@ class Adapter implements AdapterInterface {
 		Validation::authorize($user);
 		Validation::validateArray($payload);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
-		$loopback = isset($parameters['loopback']) ? true : false;
+		$loopback = isset($querystring['loopback']) ? true : false;
 
 		$item = new ItemFeatures($id);
 		// PUT => delete every feature, replace with new ones
@@ -222,7 +222,7 @@ class Adapter implements AdapterInterface {
 		Validation::authorize($user);
 		Validation::validateArray($payload);
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
-		$loopback = isset($parameters['loopback']) ? true : false;
+		$loopback = isset($querystring['loopback']) ? true : false;
 
 		$item = new ItemFeatures($id);
 		// PATCH => specify features to update and to delete, other are left as they are
@@ -258,6 +258,43 @@ class Adapter implements AdapterInterface {
 		return $resultId;
 	}
 
+	public static function getLogs(User $user = null, Database $db, $parameters, $querystring, $payload) {
+		Validation::authorize($user);
+		$page = isset($parameters['page']) ? (int) $parameters['page'] : 1;
+		$length = isset($querystring['length']) ? (int) $querystring['length'] : 20;
+
+		if($page < 1) {
+			throw new InvalidPayloadParameterException('page', $page, 'Pages start from 1');
+		}
+
+		if($length > 50) {
+			throw new InvalidPayloadParameterException('limit', $length, 'Maximum number of entries per page is 50');
+		} else if($length < 1) {
+			throw new InvalidPayloadParameterException('limit', $length, 'Length < 1 doesn\'t make sense');
+		}
+
+		return $db->auditDAO()->getRecentAudit($length, $page);
+	}
+
+	public static function getHistory(User $user = null, Database $db, $parameters, $querystring, $payload) {
+		Validation::authorize($user);
+		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+		$length = isset($querystring['length']) ? (int) $querystring['length'] : 20;
+		$item = new ItemIncomplete($id);
+
+		if(!$db->itemDAO()->itemExists($item)) {
+			throw new NotFoundException();
+		}
+
+		if($length > 50) {
+			throw new InvalidPayloadParameterException('limit', $length, 'Maximum number of entries is 50');
+		} else if($length < 1) {
+			throw new InvalidPayloadParameterException('limit', $length, 'Length < 1 doesn\'t make sense');
+		}
+
+		return $db->auditDAO()->getHistory($item, $length);
+	}
+
 	public static function go(Request $request): Response {
 		return self::goInternal($request->method, $request->path, $request->querystring,
 			$request->payload)->asResponseInterface();
@@ -281,6 +318,7 @@ class Adapter implements AdapterInterface {
 
 				$r->addGroup('/{id:[a-zA-Z0-9]+}', function(FastRoute\RouteCollector $r) {
 					$r->get('[/token/{token}]', 'getItem');
+					$r->get('/history', 'getHistory');
 					$r->put('', 'createItem');
 					$r->delete('', 'removeItem');
 
@@ -288,8 +326,7 @@ class Adapter implements AdapterInterface {
 					//$r->get('/parent', 'getItemParent');
 					$r->put('/parent', 'setItemParent');
 
-					// TODO: implement this
-					$r->get('/product', 'getItemProduct');
+					$r->get('/product', 'getItemProduct'); // TODO: implement
 					//$r->put('/product', 'setItemProduct');
 					//$r->delete('/product', 'deleteItemProduct');
 
@@ -304,27 +341,24 @@ class Adapter implements AdapterInterface {
 
 			$r->post('/search', 'doSearch');
 			$r->patch('/search/{id}', 'doSearch');
-			// TODO: implement
-			$r->get('/search/{id}[/page/{page}]', 'getSearch');
+			$r->get('/search/{id}[/page/{page}]', 'getSearch'); // TODO: implement
 
 			$r->get('/features/{feature}/{value}', 'getByFeature');
 
-			// TODO: implement all these
 			$r->addGroup('/products', function(FastRoute\RouteCollector $r) {
-				$r->get('', 'getProduct');
-				$r->get('/{brand}[/{model}[/{variant}]]', 'getProduct');
+				$r->get('', 'getProduct'); // TODO: implement
+				$r->get('/{brand}[/{model}[/{variant}]]', 'getProduct'); // TODO: implement
 
-				$r->post('/{brand}/{model}', 'createProduct');
-				$r->put('/{brand}/{model}/{variant}', 'createProduct');
+				$r->post('/{brand}/{model}', 'createProduct'); // TODO: implement
+				$r->put('/{brand}/{model}/{variant}', 'createProduct'); // TODO: implement
 
 				$r->addGroup('/{brand}/{model}/{variant}', function(FastRoute\RouteCollector $r) {
 					//$r->get('/features', 'getProductFeatures');
-					$r->post('/features', 'setProductFeatures');
-					$r->patch('/features', 'updateProductFeatures');
+					$r->post('/features', 'setProductFeatures'); // TODO: implement
+					$r->patch('/features', 'updateProductFeatures'); // TODO: implement
 				});
 			});
 
-			// TODO: implement this
 			$r->get('/logs[/page/{page}]', 'getLogs');
 
 			$r->get('/session', 'sessionWhoami');
