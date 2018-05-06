@@ -271,9 +271,8 @@ table td {
 	padding: 0.32em;
 }
 
-.deleted.item h2 {
+.deleted.item h2, .deleted.item .features {
 	text-decoration: line-through;
-	text-line-through: single;
 }
 
 .new.item h2 {
