@@ -230,6 +230,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('hdd-odd-form-factor', '5.25'), -- 5.25 in. --
 	('hdd-odd-form-factor', '3.5'), -- 3.5 in. -- max height 26.10 mm, SFF-8301 also specifies 17.80 and 42.00. These are probably 1/3H, 1/4H and 1/2H, respectively. Fractions of full height, which is around 80 mm.
 	('hdd-odd-form-factor', '2.5-15mm'), -- 2.5 in. (15 mm uncommon) -- second number is the height in millimeters (these are specified as 15 but most common sizes, for both bays and drives, are 7 mm and 9.5 mm: the more you know...)
+	('hdd-odd-form-factor', '2.5-9.5mm'), -- 2.5 in. (9.5 mm) --
 	('hdd-odd-form-factor', '2.5-7mm'), -- 2.5 in. (7 mm) --
 	('hdd-odd-form-factor', '1.8-9.5mm'), -- 1.8 in. (9.5 mm) --
 	('hdd-odd-form-factor', '1.8-8mm'), -- 1.8 in. (8 mm) --
