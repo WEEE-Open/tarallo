@@ -366,14 +366,7 @@ CREATE OR REPLACE TRIGGER ChangeFeatureType
 
 -- Users -----------------------------------------------------------------------
 
--- Set expired sessions to NULL, just to make the table look nicer (it has no practical effect)
-CREATE OR REPLACE EVENT `SessionCleanup`
-ON SCHEDULE EVERY '24' HOUR
-ON COMPLETION PRESERVE
-ENABLE DO
-	UPDATE User
-	SET Session = NULL
-	WHERE SessionExpiry < NOW() $$
+
 
 -- SET GLOBAL -------------------------------------------------------------------
 
