@@ -153,12 +153,13 @@ class Adapter implements AdapterInterface {
 		$page = isset($parameters['page']) ? (int) $parameters['page'] : 1;
 		$add = isset($parameters['add']) ? (string) $parameters['add'] : null;
 		$edit = isset($parameters['edit']) ? (string) $parameters['edit'] : null;
+		$depth = isset($querystring['depth']) ? (int) $querystring['depth'] : null;
 
 		if($id === null) {
 			$parameters = ['searchId' => null];
 		} else {
 			$perPage = 10;
-			$results = $db->searchDAO()->getResults($id, $page, $perPage);
+			$results = $db->searchDAO()->getResults($id, $page, $perPage, $depth);
 			$total = $db->searchDAO()->getResultsCount($id);
 			$pages = (int) ceil($total / $perPage);
 			$parameters = [

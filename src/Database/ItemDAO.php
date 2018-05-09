@@ -168,17 +168,17 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param ItemIncomplete $itemToGet
 	 * @param string|null $token
-	 * @param int $depth max depth
+	 * @param int|null $depth max depth
 	 *
 	 * @return Item
 	 */
-	public function getItem(ItemIncomplete $itemToGet, $token = null, $depth = 10) {
+	public function getItem(ItemIncomplete $itemToGet, $token = null, int $depth = null) {
 		if($token !== null && !$this->checkToken($itemToGet, $token)) {
 			throw new NotFoundException();
 		}
 
-		if(!is_int($depth)) {
-			throw new \InvalidArgumentException('Depth must be an integer, ' . gettype($token) . ' given');
+		if($depth === null) {
+			$depth = 10;
 		}
 
 		if($this->getItemStatement === null) {

@@ -441,7 +441,7 @@ EOQ;
 			$statement->bindValue(':cnt', $perPage, \PDO::PARAM_INT);
 			$statement->execute();
 			foreach($statement as $result) {
-				$items[] = $itemDAO->getItem(new ItemIncomplete($result['Item']), $depth);
+				$items[] = $itemDAO->getItem(new ItemIncomplete($result['Item']), null, $depth);
 			}
 		} finally {
 			$statement->closeCursor();
