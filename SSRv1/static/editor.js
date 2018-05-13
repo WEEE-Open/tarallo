@@ -50,15 +50,18 @@
 
 		let divs = document.querySelectorAll('.features.editing [contenteditable]');
 		let selects = document.querySelectorAll('.features.editing select');
+		/** divs and selects */
+		let values = document.querySelectorAll('.features.editing .value');
 		let deletes = document.querySelectorAll('.features.editing .delete');
 		let itemEditing = document.querySelector('.item.head.editing');
 		let isNew = itemEditing.classList.contains('new');
 
 		/** @type {Set<string>} */
 		let deletedFeatures;
-		let deleteClickBound;
+		let deleteClickBound, deleteKeyBound;
 		if(isNew) {
-			deleteClickBound = deleteFeature.bind(null, null);
+			deleteClickBound = deleteFeatureClick.bind(null, null);
+			deleteKeyBound = deleteFeatureKey.bind(null, null);
 			// noinspection JSUnresolvedFunction It's perfectly resolved, it's there, it exists
 			itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveNew);
 			// noinspection JSUnresolvedFunction
@@ -67,7 +70,8 @@
 			// itemEditing.querySelector('.itembuttons .removenew').addEventListener('click', removeNewClick);
 		} else {
 			deletedFeatures = new Set();
-			deleteClickBound = deleteFeature.bind(null, deletedFeatures);
+			deleteClickBound = deleteFeatureClick.bind(null, deletedFeatures);
+			deleteKeyBound = deleteFeatureKey.bind(null, deletedFeatures);
 			// noinspection JSUnresolvedFunction
 			itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveModified.bind(null, deletedFeatures));
 			let deleteButton = itemEditing.querySelector('.itembuttons .delete');
@@ -104,6 +108,10 @@
 		// Enable the "X" button next to features
 		for(let deleteButton of deletes) {
 			deleteButton.addEventListener('click', deleteClickBound);
+		}
+
+		for(let value of values) {
+			value.addEventListener('keydown', deleteKeyBound)
 		}
 
 		// Event listeners for string and numeric features
@@ -487,14 +495,43 @@
 	/**
 	 * Handle clicking the "X" button
 	 *
+	 * @param {string} name - feature name
+	 * @param {Set<string>|null} set - Deleted features, null if not tracking
+	 * @param {HTMLElement} row - Row to be deleted
+	 */
+	function deleteFeature(name, set, row) {
+		if(set !== null) {
+			set.add(name);
+			console.log(set);
+		}
+		row.remove();
+	}
+
+	/**
+	 * Handle clicking the "X" button
+	 *
 	 * @param {Set<string>|null} set - Deleted features, null if not tracking
 	 * @param ev Event
 	 */
-	function deleteFeature(set, ev) {
-		if(set !== null) {
-			set.add(ev.target.dataset.name);
+	function deleteFeatureClick(set, ev) {
+		deleteFeature(ev.target.dataset.name, set, ev.target.parentElement.parentElement);
+	}
+
+	/**
+	 * Handle a key combination alternative to the X button
+	 *
+	 * @param {Set<string>|null} set - Deleted features, null if not tracking
+	 * @param ev KeyboardEvent
+	 */
+	function deleteFeatureKey(set, ev) {
+		if(ev.ctrlKey && ev.key === 'Delete') {
+			ev.preventDefault();
+			let row = ev.target.parentElement;
+			if(row.nextElementSibling && row.nextElementSibling.tagName === 'LI') {
+				row.nextElementSibling.querySelector('.value').focus();
+			}
+			deleteFeature(ev.target.dataset.internalName, set, row);
 		}
-		ev.target.parentElement.parentElement.remove();
 	}
 
 	/**
@@ -722,7 +759,8 @@
 		deleteButton.classList.add('delete');
 		deleteButton.dataset.name = name;
 		deleteButton.textContent = '❌';
-		deleteButton.addEventListener('click', deleteFeature.bind(null, deletedFeatures));
+		deleteButton.addEventListener('click', deleteFeatureClick.bind(null, deletedFeatures));
+		valueElement.addEventListener('keydown', deleteFeatureKey.bind(null, deletedFeatures));
 		controlsElement.appendChild(deleteButton);
 
 		return newElement;
