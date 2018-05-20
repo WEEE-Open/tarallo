@@ -6,103 +6,104 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 SET NAMES utf8mb4;
 
 TRUNCATE `Feature`;
-INSERT INTO `Feature` (`Feature`, `Type`) VALUES
-	('brand', 0), -- Brand --
-	('model', 0), -- Model --
-	('family', 0), -- Model family --
-	('variant', 0), -- Variant --
-	('key-bios-setup', 0), -- Key to press for BIOS setup --
-	('key-boot-menu', 0), -- Key to press for boot menu --
-	('owner', 0), -- Owner --
-	('sn', 0), -- Serial number (s/n) --
-	('mac', 0), -- MAC address --
-	('type', 2), -- Type --
-	('working', 2), -- Working --
-	('capacity-byte', 1), -- Capacity --
-	('frequency-hertz', 1), -- Frequency --
-	('diameter-mm', 1), -- Diameter --
-	('diagonal-inch', 3), -- Diagonal --
-	('isa', 2), -- Architecture --
-	('color', 2), -- Color --
-	('motherboard-form-factor', 2), -- Form factor (motherboard) --
-	('notes', 0), -- Notes --
-	('agp-sockets-n', 1), -- AGP --
-	('arrival-batch', 0), -- Arrival batch --
-	('capacity-decibyte', 1), -- Capacity ("decimal" bytes) --
-	('cib', 0), -- CIB --
-	('core-n', 1), -- Cores --
-	('cpu-socket', 2), -- Socket (CPU) --
-	('dvi-ports-n', 1), -- DVI --
-	('ethernet-ports-1000m-n', 1), -- Ethernet (gigabit) --
-	('ethernet-ports-100m-n', 1), -- Ethernet (100M) --
-	('ethernet-ports-10base2-bnc-n', 1), -- Ethernet (10BASE2 BNC) --
-	('ethernet-ports-10m-n', 1), -- Ethernet (10M) --
-	('hdd-odd-form-factor', 2), -- Form factor (HDD/ODD) --
-	('ide-ports-n', 1), -- IDE/ATA --
-	('odd-type', 2), -- ODD capabilities --
-	('pcie-power-pin-n', 1), -- PCI Express power pins --
-	('pcie-sockets-n', 1), -- PCI Express --
-	('pci-sockets-n', 1), -- PCI --
-	('power-connector', 2), -- Power connector --
-	('power-idle-watt', 1), -- Power consumption (idle) --
-	('power-rated-watt', 1), -- Power (rated) --
-	('ps2-ports-n', 1), -- PS/2 --
-	('psu-ampere', 3), -- Power supply current --
-	('psu-connector-motherboard', 2), -- Power connector (motherboard) -- use sata-ports-n and pcie-power-pin-n for that stuff
-	('psu-volt', 3), -- Power supply voltage --
-	('ram-type', 2), -- RAM type --
-	('sata-ports-n', 1), -- SATA --
-	('software', 0), -- Software --
-	('usb-ports-n', 1), -- USB --
-	('usb-header-n', 1), -- USB (internal header) --
-	('internal-header-n', 1), -- Internal header --
-	('vga-ports-n', 1), -- VGA --
-	('os-license-code', 0), -- OS license code --
-	('os-license-version', 0), -- OS license version --
-	('power-idle-pfc', 0), -- PFC (idle) --
-	('firewire-ports-n', 1), -- Firewire --
-	('mini-firewire-ports-n', 1), -- Mini Firewire --
-	('serial-ports-n', 1), -- Serial (DE-9) -- Also known as RS-232 (which apparently is a standard that also works on DB-25 ports, so don't call them like that)
-	('parallel-ports-n', 1), -- Parallel --
-	('ram-form-factor', 2), -- Form factor (RAM) --
-	('weight-gram', 1), -- Weight --
-	('spin-rate-rpm', 1), -- Rotation speed -- "spin rate" sounded cooler, but myabe I should change it...
-	('dms-59-ports-n', 1), -- DMS-59 -- the weird DVI port which is actually 2 DVI ports in one
-	('check', 2), -- Needs to be checked --
-	('ram-ecc', 2), -- ECC --
-	('other-code', 0), -- Other code(s) --
-	('hdmi-ports-n', 1), -- HDMI --
-	('scsi-sca2-ports-n', 1), -- SCSI SCA2 (80 pin) --
-	('scsi-db68-ports-n', 1), -- SCSI DB68 (68 pin) --
-	('mini-ide-ports-n', 1), -- Mini IDE -- Laptop IDE
-	('data-erased', 2), -- Erased -- HDD entirely erased
-	('surface-scan', 2), -- Surface scan -- Running badblocks on HDDs
-	('smart-data', 2), -- S.M.A.R.T. data checked --
-	('wireless-receiver', 2), -- Wireless receiver --
-	('rj11-ports-n', 1), -- RJ11 (modem) --
-	('ethernet-ports-10base5-aui-n', 1), -- Ethernet (10BASE5 AUI) --
-	('midi-ports-n', 1), -- MIDI --
-	('mini-jack-ports-n', 1), -- Mini jack --
-	('rca-mono-ports-n', 1), -- RCA Mono --
-	('tv-out-ports-n', 1), -- TV-out --
-	('s-video-ports-n', 1), -- S-Video --
-	('s-video-7pin-ports-n', 1), -- S-Video (7 pin) --
-	('composite-video-ports-n', 1), -- Composite video --
-	('serial-db25-ports-n', 1), -- DB-25 -- larger kind of serial port
-	('isa-sockets-n', 1), -- ISA --
-	('mini-pcie-sockets-n', 1), -- Mini PCI Express --
-	('mini-pci-sockets-n', 1), -- Mini PCI --
-	('brand-manufacturer', 0), -- Brand (manufacturer) --
-	('psu-form-factor', 2), -- Form factor (PSU) --
-	('cib-old', 0), -- CIB (old) --
-	('integrated-graphics-brand', 0), -- Integrated graphics brand -- TODO: replace with brand & model, once namespaced features are implemented
-	('integrated-graphics-model', 0), -- Integrated graphics model --
-	('restrictions', 2), -- Restrictions --
-	('displayport-ports-n', 1), -- DisplayPort --
-	('pci-low-profile', 2), -- PCI low profile --
-	('psu-connector-cpu', 2), -- Power connector (CPU) --
-	('jae-ports-n', 1), -- JAE (50 pin laptop ODD) -- Old laptop ODDs use a 50-pin connector which is just an IDE with 10 pins for power, and it's apparently called JAE. Basically no information exist on this connector anywhere on the internet...
-	('game-ports-n', 1); -- Game port -- TODO: merge with midi-ports-n? Some of them may have only one function but nobody really cares anyway
+INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
+	('brand', 'commercial', 0), -- Brand --
+	('model', 'commercial', 0), -- Model --
+	('family', 'commercial', 0), -- Model family --
+	('variant', 'commercial', 0), -- Variant --
+	('key-bios-setup', 'software', 0), -- Key to press for BIOS setup --
+	('key-boot-menu', 'software', 0), -- Key to press for boot menu --
+	('owner', 'administrative', 0), -- Owner --
+	('sn', 'codes', 0), -- Serial number (s/n) --
+	('mac', 'codes', 0), -- MAC address --
+	('type', 'general', 2), -- Type --
+	('working', 'general', 2), -- Working --
+	('capacity-byte', 'features', 1), -- Capacity --
+	('frequency-hertz', 'features', 1), -- Frequency --
+	('diameter-mm', 'physical', 1), -- Diameter --
+	('diagonal-inch', 'physical', 3), -- Diagonal --
+	('isa', 'features', 2), -- Architecture --
+	('color', 'physical', 2), -- Color --
+	('motherboard-form-factor', 'physical', 2), -- Form factor (motherboard) --
+	('notes', 'general', 0), -- Notes --
+	('agp-sockets-n', 'sockets', 1), -- AGP --
+	('arrival-batch', 'administrative', 0), -- Arrival batch --
+	('capacity-decibyte', 'features', 1), -- Capacity ("decimal" bytes) --
+	('cib', 'administrative', 0), -- CIB --
+	('core-n', 'features', 1), -- Cores --
+	('cpu-socket', 'sockets', 2), -- Socket (CPU) --
+	('dvi-ports-n', 'ports', 1), -- DVI --
+	('ethernet-ports-1000m-n', 'ports', 1), -- Ethernet (gigabit) --
+	('ethernet-ports-100m-n', 'ports', 1), -- Ethernet (100M) --
+	('ethernet-ports-10base2-bnc-n', 'ports', 1), -- Ethernet (10BASE2 BNC) --
+	('ethernet-ports-10m-n', 'ports', 1), -- Ethernet (10M) --
+	('hdd-odd-form-factor', 'ports', 2), -- Form factor (HDD/ODD) --
+	('ide-ports-n', 'ports', 1), -- IDE/ATA --
+	('odd-type', 'features', 2), -- ODD capabilities --
+	('pcie-power-pin-n', 'powerconnectors', 1), -- PCI Express power pins --
+	('pcie-sockets-n', 'sockets', 1), -- PCI Express --
+	('pci-sockets-n', 'sockets', 1), -- PCI --
+	('power-connector', 'powerconnectors', 2), -- Power connector --
+	('power-idle-watt', 'power', 1), -- Power consumption (idle) --
+	('power-rated-watt', 'power', 1), -- Power (rated) --
+	('ps2-ports-n', 'ports', 1), -- PS/2 --
+	('psu-ampere', 'power', 3), -- Power supply current --
+	('psu-connector-motherboard', 'powerconnectors', 2), -- Power connector (motherboard) -- use sata-ports-n and pcie-power-pin-n for that stuff
+	('psu-volt', 'power', 3), -- Power supply voltage --
+	('ram-type', 'power', 2), -- RAM type --
+	('sata-ports-n', 'ports', 1), -- SATA --
+	('software', 'software', 0), -- Software (installed) --
+	('usb-ports-n', 'ports', 1), -- USB --
+	('usb-header-n', 'ports', 1), -- USB (internal header) --
+	('internal-header-n', 'ports', 1), -- Internal header --
+	('vga-ports-n', 'ports', 1), -- VGA --
+	('os-license-code', 'codes', 0), -- OS license code --
+	('os-license-version', 'codes', 0), -- OS license version --
+	('power-idle-pfc', 'power', 0), -- PFC (idle) --
+	('firewire-ports-n', 'ports', 1), -- Firewire --
+	('mini-firewire-ports-n', 'ports', 1), -- Mini Firewire --
+	('serial-ports-n', 'ports', 1), -- Serial (DE-9) -- Also known as RS-232 (which apparently is a standard that also works on DB-25 ports, so don't call them like that)
+	('parallel-ports-n', 'ports', 1), -- Parallel --
+	('ram-form-factor', 'physical', 2), -- Form factor (RAM) --
+	('weight-gram', 'physical', 1), -- Weight --
+	('spin-rate-rpm', 'features', 1), -- Rotation speed -- "spin rate" sounded cooler, but myabe I should change it...
+	('dms-59-ports-n', 'ports', 1), -- DMS-59 -- the weird DVI port which is actually 2 DVI ports in one
+	('check', 'general', 2), -- Needs to be checked --
+	('ram-ecc', 'features', 2), -- ECC --
+	('other-code', 'codes', 0), -- Other code(s) --
+	('hdmi-ports-n', 'ports', 1), -- HDMI --
+	('scsi-sca2-ports-n', 'ports', 1), -- SCSI SCA2 (80 pin) --
+	('scsi-db68-ports-n', 'ports', 1), -- SCSI DB68 (68 pin) --
+	('mini-ide-ports-n', 'ports', 1), -- Mini IDE -- Laptop IDE
+	('data-erased', 'hddprocedures', 2), -- Erased -- HDD entirely erased
+	('surface-scan', 'hddprocedures', 2), -- Surface scan -- Running badblocks on HDDs
+	('smart-data', 'hddprocedures', 2), -- S.M.A.R.T. data checked --
+	('wireless-receiver', 'features', 2), -- Wireless receiver --
+	('rj11-ports-n', 'ports', 1), -- RJ11 (modem) --
+	('ethernet-ports-10base5-aui-n', 'ports', 1), -- Ethernet (10BASE5 AUI) --
+	('midi-ports-n', 'ports', 1), -- MIDI --
+	('mini-jack-ports-n', 'ports', 1), -- Mini jack --
+	('rca-mono-ports-n', 'ports', 1), -- RCA Mono --
+	('tv-out-ports-n', 'ports', 1), -- TV-out --
+	('s-video-ports-n', 'ports', 1), -- S-Video --
+	('s-video-7pin-ports-n', 'ports', 1), -- S-Video (7 pin) --
+	('composite-video-ports-n', 'ports', 1), -- Composite video --
+	('serial-db25-ports-n', 'ports', 1), -- DB-25 -- larger kind of serial port
+	('isa-sockets-n', 'sockets', 1), -- ISA --
+	('mini-pcie-sockets-n', 'sockets', 1), -- Mini PCI Express --
+	('mini-pci-sockets-n', 'sockets', 1), -- Mini PCI --
+	('brand-manufacturer', 'commercial', 0), -- Brand (manufacturer) --
+	('psu-form-factor', 'physical', 2), -- Form factor (PSU) --
+	('cib-old', 'administrative', 0), -- CIB (old) --
+	('integrated-graphics-brand', 'features', 0), -- Integrated graphics brand -- TODO: replace with brand & model, once namespaced features are implemented
+	('integrated-graphics-model', 'features', 0), -- Integrated graphics model --
+	('restrictions', 'general', 2), -- Restrictions --
+	('displayport-ports-n', 'ports', 1), -- DisplayPort --
+	('pci-low-profile', 'features', 2), -- PCI low profile --
+	('psu-connector-cpu', 'powerconnectors', 2), -- Power connector (CPU) --
+	('sata-power-n', 'powerconnectors', 1), -- SATA power --
+	('jae-ports-n', 'ports', 1), -- JAE (50 pin laptop ODD) -- Old laptop ODDs use a 50-pin connector which is just an IDE with 10 pins for power, and it's apparently called JAE. Basically no information exist on this connector anywhere on the internet...
+	('game-ports-n', 'ports', 1); -- Game port -- TODO: merge with midi-ports-n? Some of them may have only one function but nobody really cares anyway
 
 TRUNCATE `FeatureEnum`;
 INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES

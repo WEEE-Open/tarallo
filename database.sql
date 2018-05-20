@@ -31,6 +31,7 @@ CREATE TABLE `Item` (
 
 CREATE TABLE `Feature` (
 	`Feature` varchar(40) COLLATE utf8mb4_bin NOT NULL,
+	`Group` varchar(100) COLLATE utf8mb4_bin NOT NULL,
 	`Type` int NOT NULL, -- 0 = text, 1 = number, 2 = "enum", 3 = double
 	PRIMARY KEY (`Feature`)
 )

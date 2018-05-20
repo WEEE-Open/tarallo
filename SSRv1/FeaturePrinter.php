@@ -53,7 +53,7 @@ class FeaturePrinter {
 		'psu-volt' => 'Power supply voltage',
 		'ram-type' => 'RAM type',
 		'sata-ports-n' => 'SATA',
-		'software' => 'Software',
+		'software' => 'Software (installed)',
 		'usb-ports-n' => 'USB',
 		'usb-header-n' => 'USB (internal header)',
 		'internal-header-n' => 'Internal header',
@@ -102,6 +102,7 @@ class FeaturePrinter {
 		'displayport-ports-n' => 'DisplayPort',
 		'pci-low-profile' => 'PCI low profile',
 		'psu-connector-cpu' => 'Power connector (CPU)',
+		'sata-power-n' => 'SATA power',
 		'jae-ports-n' => 'JAE (50 pin laptop ODD)',
 		'game-ports-n' => 'Game port',
 	];
@@ -306,23 +307,7 @@ class FeaturePrinter {
 	 * @return string Translated group name
 	 */
 	public static function getGroup(string $name): string {
-		if(strpos($name, '-ports-') > -1) {
-			return 'Ports';
-		} else if(strpos($name, '-sockets-') > -1) {
-			return 'Sockets';
-		} else if(strpos($name, 'power-') > -1) {
-			return 'Power';
-		} else if(strpos($name, 'psu-') > -1) {
-			return 'Power';
-		} else if(substr($name, -5) === '-code') {
-			return 'Codes';
-		} else if(substr($name, 0,3) === 'cib') {
-			return 'Codes';
-		} else if($name === 'os-license-version' || $name === 'sn') {
-			return 'Codes';
-		} else {
-			return 'Features';
-		}
+		// TODO: reimplement, return translated group name
 	}
 
 	/**
