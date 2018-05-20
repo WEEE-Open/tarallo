@@ -107,18 +107,41 @@ class ItemLocationValidator {
 		}
 
 		if($type === 'cpu' && $parentType === 'motherboard') {
-			$socket1 = $item->getFeature('cpu-socket');
-			$socket2 = $parent->getFeature('cpu-socket');
-			if($socket1 !== null && $socket2 !== null) {
-				if($socket1->value !== $socket2->value) {
-					throw new ItemNestingException('Incompatible socket: CPU is ' . $socket1 . ', motherboard is ' . $socket2,
+			if(!self::compareFeature($item, $parent, 'cpu-socket')) {
+				$itemValue = $item->getFeature('ram-form-factor');
+				$parentValue = $parent->getFeature('ram-form-factor');
+				throw new ItemNestingException("Incompatible socket: CPU is $itemValue, motherboard is $parentValue",
 						$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
-				}
+			}
+		}
+
+		if($type === 'ram' && $parentType === 'motherboard') {
+			if(!self::compareFeature($item, $parent, 'ram-form-factor')) {
+				$itemValue = $item->getFeature('ram-form-factor');
+				$parentValue = $parent->getFeature('ram-form-factor');
+				throw new ItemNestingException("Incompatible form factor: RAM is $itemValue, motherboard is $parentValue",
+					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
+			}
+			if(!self::compareFeature($item, $parent, 'ram-type')) {
+				$itemValue = $item->getFeature('ram-type');
+				$parentValue = $parent->getFeature('ram-type');
+				throw new ItemNestingException("Incompatible standard: RAM is $itemValue, motherboard is $parentValue",
+					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
 			}
 		}
 	}
 
 	private static function isExpansionCard($type) {
 		return strlen($type) > 5 && substr($type, -5) === '-card';
+	}
+
+	private static function compareFeature(Item $item, Item $parent, string $feature) {
+		$itemFeature = $item->getFeature($feature);
+		$parentFeature = $parent->getFeature($feature);
+		if($itemFeature !== null && $parentFeature !== null) {
+			return $itemFeature->value === $parentFeature->value;
+		}
+
+		return true;
 	}
 }
