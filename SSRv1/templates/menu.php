@@ -10,8 +10,8 @@
 	<ul>
 		<li><a href="/">Home</a></li
 		><li><a href="/add">New</a></li
-		><li><a class="quick" data-toggle="view">View</a></li
-		><li><a class="quick" data-toggle="move">Move</a></li
+		><li><a role="button" tabindex="0" class="quick" data-toggle="view">View</a></li
+		><li><a role="button" tabindex="0" class="quick" data-toggle="move">Move</a></li
 		><li><a href="/search">Search</a></li
 		><li><a href="/stats">Stats</a></li
 		><li><a href="/options">Options</a></li>

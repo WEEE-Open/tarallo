@@ -17,9 +17,29 @@
 		if(!ev.target.classList || !ev.target.classList.contains('quick')) {
 			return true;
 		}
-		// noinspection JSUnresolvedVariable
-		let toggle = ev.target.dataset.toggle;
+		toggleAdditionalControls(ev.target);
+	});
 
+	nav.addEventListener('keypress', ev => {
+		if (ev.key === " " || ev.key === "Enter") {
+			// noinspection JSUnresolvedVariable
+			if(!ev.target.classList || !ev.target.classList.contains('quick')) {
+				return true;
+			}
+			toggleAdditionalControls(ev.target);
+		}
+	});
+
+	/**
+	 * Show/hide additional menu controls
+	 *
+	 * @param {HTMLElement|EventTarget} target button
+	 * @return {boolean}
+	 */
+	function toggleAdditionalControls(target) {
+		let toggle = target.dataset.toggle;
+
+		// not in the "foo bar" sense
 		let bar;
 		if(toggle === 'move') {
 			bar = quickMove;
@@ -30,14 +50,14 @@
 		}
 
 		if(bar.classList.contains("open")) {
-			ev.target.classList.remove('selected');
+			target.classList.remove('selected');
 			bar.classList.remove("open");
 		} else {
-			ev.target.classList.add('selected');
+			target.classList.add('selected');
 			bar.classList.add("open");
 			bar.querySelector('input').focus();
 		}
-	});
+	}
 
 	quickView.querySelector('button').addEventListener('click', function() {
 		let code = quickView.querySelector('input').value;
