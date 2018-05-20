@@ -36,9 +36,11 @@ class Adapter implements AdapterInterface {
 		$renderParameters = ['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item)];
 		// These should be mutually exclusive
 		if($edit !== null) {
+			$renderParameters['add'] = null;
 			$renderParameters['edit'] = $edit;
 		} else if($add !== null) {
 			$renderParameters['add'] = $add;
+			$renderParameters['edit'] = null;
 		}
 
 		return new Response(200, 'text/html', $engine->render('viewItem', $renderParameters));

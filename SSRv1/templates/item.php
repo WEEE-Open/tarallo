@@ -33,7 +33,7 @@ $adding = false;
 $editing = false;
 $target = false;
 
-$nextItemParameters = ['recursion' => true];
+$nextItemParameters = ['recursion' => true, 'deleted' => false];
 if(isset($edit)) {
 	$nextItemParameters['edit'] = $edit;
 	$editing = true;
