@@ -632,7 +632,7 @@
 			case 'external-psu':
 				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'psu-volt', 'psu-ampere', 'working', 'owner', 'notes'];
 				break;
-			case 'network-card':
+			case 'ethernet-card':
 				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n', 'mac', 'color', 'working', 'owner'];
 				break;
 			case 'audio-card':
@@ -647,7 +647,7 @@
 			case 'network-switch':
 			case 'network-hub':
 			case 'modem-router':
-				features = ['brand', 'model', 'ethernet-ports-100m-n', 'power-connector', 'psu-volt', 'psu-ampere', 'color', 'working', 'owner', 'notes'];
+				features = ['brand', 'model', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n', 'power-connector', 'psu-volt', 'psu-ampere', 'color', 'working', 'owner', 'notes'];
 				break;
 			case 'keyboard':
 			case 'mouse':
