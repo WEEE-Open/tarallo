@@ -132,6 +132,11 @@ nav#top nav.quick.open {
 	padding: .5em;
 }
 
+nav#top nav.quick input {
+	margin-left: 0.5em;
+	margin-right: 0.5em;
+}
+
 .httperror strong {
 	font-weight: normal;
 	font-size: 30vw;

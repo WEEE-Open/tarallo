@@ -18,12 +18,12 @@
 	</ul>
 </nav>
 <nav class="quick view">
-	<label>Code: <input type="text"></label
+	<label>Code:<input type="text"></label
 	><button>View item</button>
 </nav>
 <nav class="quick move">
-	<label>Move item: <input class="from" type="text"></label
-	><label>into: <input class="to" type="text"></label
+	<label>Move item:<input class="from" type="text"></label
+	><label>into:<input class="to" type="text"></label
 	><button>Move</button
 	><span class="error message">Error</span
 	><span class="success message"><a href="#">Ok</a></span
