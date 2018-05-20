@@ -9,7 +9,6 @@ class Feature {
 	const ENUM = 2;
 	const DOUBLE = 3;
 
-	const GROUP_administrative = 0;
 	const GROUP_commercial = 1;
 	const GROUP_general = 2;
 	const GROUP_hddprocedures = 3;
@@ -20,7 +19,8 @@ class Feature {
 	const GROUP_power = 8;
 	const GROUP_powerconnectors = 9;
 	const GROUP_codes = 10;
-	const GROUP_software = 11;
+	const GROUP_administrative = 11;
+	const GROUP_software = 12;
 
 	// BEGIN GENERATED CODE
 	const features = [
@@ -316,6 +316,20 @@ class Feature {
 			throw new \InvalidArgumentException("Cannot get type for feature $name: doesn't exist");
 		}
 		return is_int(self::features[$name]) ? self::features[$name] : self::ENUM;
+	}
+
+	/**
+	 * Obtain group.
+	 *
+	 * @param string $name Feature name
+	 *
+	 * @return int
+	 */
+	public static function getGroup($name) {
+		if(!isset(self::groups[$name])) {
+			throw new \InvalidArgumentException("Cannot get group for feature $name: doesn't exist");
+		}
+		return self::groups[$name];
 	}
 
 	/**

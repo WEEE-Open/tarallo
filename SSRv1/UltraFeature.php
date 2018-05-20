@@ -23,6 +23,6 @@ class UltraFeature {
 		$this->feature = $feature;
 		$this->value = FeaturePrinter::printableValue($feature);
 		$this->name = FeaturePrinter::printableName($feature);
-		$this->group = FeaturePrinter::getGroup($feature->name);
+		$this->group = FeaturePrinter::printableGroup(Feature::getGroup($feature->name));
 	}
 }

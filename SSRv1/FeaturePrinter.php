@@ -132,6 +132,21 @@ class FeaturePrinter {
 	];
 	// END GENERATED CODE
 
+	const groupTranslations = [
+		Feature::GROUP_administrative => 'Administrative',
+		Feature::GROUP_commercial => 'Commercial',
+		Feature::GROUP_general => 'General',
+		Feature::GROUP_hddprocedures => 'HDD procedures',
+		Feature::GROUP_physical => 'Phyisical',
+		Feature::GROUP_features => 'Features',
+		Feature::GROUP_ports => 'Ports',
+		Feature::GROUP_sockets => 'Sockets',
+		Feature::GROUP_power => 'Power',
+		Feature::GROUP_powerconnectors => 'Power connectors',
+		Feature::GROUP_codes => 'Codes',
+		Feature::GROUP_software => 'Software'
+	];
+
 	public static function printableName(Feature $feature): string {
 		if(isset(self::features[$feature->name])) {
 			return self::features[$feature->name];
@@ -299,15 +314,14 @@ class FeaturePrinter {
 	}
 
 	/**
-	 * Group to which that feature belongs
+	 * Get printable group name
 	 *
-	 * @param string $name Feature name (untranslated)
-	 * @TODO: add a custom sorting function for groups, to use in uasort() and to place "Features" at the end (or at the beginning)
+	 * @param string $group Group name (untranslated)
 	 *
 	 * @return string Translated group name
 	 */
-	public static function getGroup(string $name): string {
-		// TODO: reimplement, return translated group name
+	public static function printableGroup(string $group): string {
+		return self::groupTranslations[$group];
 	}
 
 	/**
@@ -370,6 +384,8 @@ class FeaturePrinter {
 					break;
 			}
 
+			$group = Feature::getGroup($name);
+			// 'group' => FeaturePrinter::printableGroup($group)
 			$line = ['name' => $name, 'type' => $type, 'printableName' => self::features[$name]];
 			if($type === 'e') {
 				assert(isset($values));
@@ -377,7 +393,7 @@ class FeaturePrinter {
 					$line['values'][$enumValue] = self::printableEnumValue($name, $enumValue);
 				}
 			}
-			$array[self::getGroup($name)][] = $line;
+			$array[$group][] = $line;
 		}
 
 		return $array;

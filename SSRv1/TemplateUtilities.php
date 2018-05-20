@@ -25,19 +25,22 @@ class TemplateUtilities implements ExtensionInterface {
 	 * @param Feature[] $features
 	 *
 	 * @return string[][] Translated group name => [UltraFeature, UltraFeature, ...]
-	 *
-	 * @deprecated
 	 */
 	public function getPrintableFeatures(array $features) {
 		$groups = [];
+		$temp = [];
+
 		foreach($features as $feature) {
 			/** @noinspection PhpUndefinedMethodInspection It's there. */
 			$ultra = new UltraFeature($feature, $this->template->data()['lang'] ?? 'en');
-			$groups[$ultra->group][] = $ultra;
+			$temp[Feature::getGroup($feature->name)][] = $ultra;
 		}
-		ksort($groups);
-		foreach($groups as $name => &$group) {
-			usort($group, [TemplateUtilities::class, 'featureNameSort']);
+		unset($features);
+
+		ksort($temp);
+		foreach($temp as $group => &$features) {
+			usort($features, [TemplateUtilities::class, 'featureNameSort']);
+			$groups[FeaturePrinter::printableGroup($group)] = $features;
 		}
 
 		return $groups;
