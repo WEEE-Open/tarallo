@@ -28,7 +28,7 @@ if(count($features) > 0):
 					<?php break; case \WEEEOpen\Tarallo\Server\Feature::DOUBLE: ?>
 						<div class="value" data-internal-type="d" data-internal-name="<?= $ultra->feature->name ?>" data-internal-value="<?= $ultra->feature->value ?>" data-previous-value="<?= $ultra->feature->value ?>" data-initial-value="<?= $ultra->feature->value ?>" id="feature-edit-<?= $ultra->feature->name ?>" contenteditable="true"><?=$this->contentEditableWrap($this->e($ultra->value))?></div>
 					<?php endswitch; ?>
-						<div class="controls"><button data-name="<?= $ultra->feature->name ?>" class="delete">❌</button></div>
+						<div class="controls"><button data-name="<?= $ultra->feature->name ?>" class="delete" tabindex="-1">❌</button></div>
 				</li>
 			<?php endforeach; ?>
 		</ul>
