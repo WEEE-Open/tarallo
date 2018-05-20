@@ -30,8 +30,9 @@ class Adapter implements AdapterInterface {
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
 		$edit = isset($parameters['edit']) ? (string) $parameters['edit'] : null;
 		$add = isset($parameters['add']) ? (string) $parameters['add'] : null;
+		$depth = isset($querystring['depth']) ? (int) $querystring['depth'] : null;
 
-		$item = $db->itemDAO()->getItem(new ItemIncomplete($id));
+		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, $depth);
 		$renderParameters = ['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item)];
 		// These should be mutually exclusive
 		if($edit !== null) {

@@ -62,6 +62,7 @@ class Adapter implements AdapterInterface {
 	public static function getItem(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
 		$token = isset($parameters['token']) ? (string) $parameters['token'] : null;
+		$depth = isset($querystring['depth']) ? (int) $querystring['depth'] : null;
 
 		if($token === null) {
 			Validation::authorize($user, 3);
@@ -70,7 +71,7 @@ class Adapter implements AdapterInterface {
 		if($id === null) {
 			throw new \LogicException('Not implemented');
 		} else {
-			return $db->itemDAO()->getItem(new ItemIncomplete($id), $token);
+			return $db->itemDAO()->getItem(new ItemIncomplete($id), $token, $depth);
 		}
 	}
 
@@ -116,8 +117,6 @@ class Adapter implements AdapterInterface {
 			}
 			ItemLocationValidator::reparentAll($item, $parent);
 		}
-
-		// TODO: also validate nesting
 
 		try {
 			$db->itemDAO()->addItem($item, $parent);
