@@ -43,14 +43,14 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('pcie-power-pin-n', 'powerconnectors', 1), -- PCI Express power pins --
 	('pcie-sockets-n', 'sockets', 1), -- PCI Express --
 	('pci-sockets-n', 'sockets', 1), -- PCI --
-	('power-connector', 'powerconnectors', 2), -- Power connector --
+	('power-connector', 'powerconnectors', 2), -- Power connector (external) --
 	('power-idle-watt', 'power', 1), -- Power consumption (idle) --
 	('power-rated-watt', 'power', 1), -- Power (rated) --
 	('ps2-ports-n', 'ports', 1), -- PS/2 --
 	('psu-ampere', 'power', 3), -- Power supply current --
 	('psu-connector-motherboard', 'powerconnectors', 2), -- Power connector (motherboard) -- use sata-ports-n and pcie-power-pin-n for that stuff
 	('psu-volt', 'power', 3), -- Power supply voltage --
-	('ram-type', 'power', 2), -- RAM type --
+	('ram-type', 'features', 2), -- RAM type --
 	('sata-ports-n', 'ports', 1), -- SATA --
 	('software', 'software', 0), -- Software (installed) --
 	('usb-ports-n', 'ports', 1), -- USB --
@@ -142,7 +142,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('type', 'tv-card'), -- TV tuner card --
 	('working', 'no'), -- No --
 	('working', 'yes'), -- Yes --
-	('working', 'maybe'), -- Maybe (unclear) --
+	('working', 'maybe'), -- Sometimes or unclear --
 	('isa', 'x86-32'), -- x86 32 bit --
 	('isa', 'x86-64'), -- x86 64 bit --
 	('isa', 'ia-64'), -- IA-64 --

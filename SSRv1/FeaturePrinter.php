@@ -44,7 +44,7 @@ class FeaturePrinter {
 		'pcie-power-pin-n' => 'PCI Express power pins',
 		'pcie-sockets-n' => 'PCI Express',
 		'pci-sockets-n' => 'PCI',
-		'power-connector' => 'Power connector',
+		'power-connector' => 'Power connector (external)',
 		'power-idle-watt' => 'Power consumption (idle)',
 		'power-rated-watt' => 'Power (rated)',
 		'ps2-ports-n' => 'PS/2',
@@ -108,7 +108,7 @@ class FeaturePrinter {
 	];
 	const featuresEnum = [
 		'type' => ['location' => 'Location', 'case' => 'Case', 'motherboard' => 'Motherboard', 'cpu' => 'CPU', 'graphics-card' => 'Graphics card', 'ram' => 'RAM', 'hdd' => 'HDD', 'odd' => 'ODD', 'psu' => 'PSU', 'audio-card' => 'Audio card', 'ethernet-card' => 'Ethernet card', 'monitor' => 'Monitor', 'mouse' => 'Mouse', 'keyboard' => 'Keyboard', 'network-switch' => 'Network switch', 'network-hub' => 'Network hub', 'modem-router' => 'Modem/router', 'fdd' => 'FDD', 'ports-bracket' => 'Bracket with ports', 'other-card' => 'Other internal card', 'fan-controller' => 'Fan controller (rheobus)', 'modem-card' => 'Modem card', 'scsi-card' => 'SCSI card', 'wifi-card' => 'WiFi card', 'bluetooth-card' => 'Bluetooth card', 'external-psu' => 'External PSU', 'zip-drive' => 'ZIP drive', 'printer' => 'Printer', 'scanner' => 'Scanner', 'inventoried-object' => 'Other (with invetory sticker)', 'adapter' => 'Adapter', 'usbhub' => 'USB hub', 'tv-card' => 'TV tuner card'],
-		'working' => ['no' => 'No', 'yes' => 'Yes', 'maybe' => 'Maybe (unclear)'],
+		'working' => ['no' => 'No', 'yes' => 'Yes', 'maybe' => 'Sometimes or unclear'],
 		'isa' => ['x86-32' => 'x86 32 bit', 'x86-64' => 'x86 64 bit', 'ia-64' => 'IA-64', 'arm' => 'ARM'],
 		'color' => ['black' => 'Black', 'white' => 'White', 'green' => 'Green', 'yellow' => 'Yellow', 'red' => 'Red', 'blue' => 'Blue', 'grey' => 'Grey', 'darkgrey' => 'Dark grey', 'lightgrey' => 'Light grey', 'pink' => 'Pink', 'transparent' => 'Transparent', 'brown' => 'Brown', 'orange' => 'Orange', 'violet' => 'Violet', 'sip-brown' => 'SIP brown', 'lightblue' => 'Light blue', 'yellowed' => 'Yellowed', 'transparent-dark' => 'Transparent (dark)', 'golden' => 'Golden'],
 		'motherboard-form-factor' => ['atx' => 'ATX', 'miniatx' => 'Mini ATX (not standard)', 'microatx' => 'Micro ATX', 'miniitx' => 'Mini ITX', 'proprietary' => 'Proprietary (desktop)', 'btx' => 'BTX (slots ≤ 7)', 'microbtx' => 'Micro BTX (slots ≤ 4)', 'nanobtx' => 'Nano BTX (slots ≤ 2)', 'picobtx' => 'Pico BTX (slots ≤ 1)', 'wtx' => 'WTX', 'flexatx' => 'Flex ATX', 'proprietary-laptop' => 'Laptop', 'eatx' => 'Extended ATX'],

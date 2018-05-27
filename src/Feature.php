@@ -166,7 +166,7 @@ class Feature {
 		'psu-ampere' => self::GROUP_power,
 		'psu-connector-motherboard' => self::GROUP_powerconnectors,
 		'psu-volt' => self::GROUP_power,
-		'ram-type' => self::GROUP_power,
+		'ram-type' => self::GROUP_features,
 		'sata-ports-n' => self::GROUP_ports,
 		'software' => self::GROUP_software,
 		'usb-ports-n' => self::GROUP_ports,
