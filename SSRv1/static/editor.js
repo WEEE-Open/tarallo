@@ -642,7 +642,7 @@
 			case 'wifi-card':
 			case 'bluetooth-card':
 			case 'tv-card':
-				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n', 'mini-pci-sockets-n', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n', 'mini-pci-sockets-n', 'sn', 'color', 'working', 'owner'];
 				break;
 			case 'network-switch':
 			case 'network-hub':
