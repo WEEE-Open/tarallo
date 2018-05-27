@@ -759,6 +759,7 @@
 		deleteButton.classList.add('delete');
 		deleteButton.dataset.name = name;
 		deleteButton.textContent = '❌';
+		deleteButton.tabIndex = -1;
 		deleteButton.addEventListener('click', deleteFeatureClick.bind(null, deletedFeatures));
 		valueElement.addEventListener('keydown', deleteFeatureKey.bind(null, deletedFeatures));
 		controlsElement.appendChild(deleteButton);
