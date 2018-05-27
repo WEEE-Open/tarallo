@@ -37,7 +37,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('ethernet-ports-100m-n', 'ports', 1), -- Ethernet (100M) --
 	('ethernet-ports-10base2-bnc-n', 'ports', 1), -- Ethernet (10BASE2 BNC) --
 	('ethernet-ports-10m-n', 'ports', 1), -- Ethernet (10M) --
-	('hdd-odd-form-factor', 'ports', 2), -- Form factor (HDD/ODD) --
+	('hdd-odd-form-factor', 'physical', 2), -- Form factor (HDD/ODD) --
 	('ide-ports-n', 'ports', 1), -- IDE/ATA --
 	('odd-type', 'features', 2), -- ODD capabilities --
 	('pcie-power-pin-n', 'powerconnectors', 1), -- PCI Express power pins --

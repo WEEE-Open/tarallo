@@ -153,7 +153,7 @@ class Feature {
 		'ethernet-ports-100m-n' => self::GROUP_ports,
 		'ethernet-ports-10base2-bnc-n' => self::GROUP_ports,
 		'ethernet-ports-10m-n' => self::GROUP_ports,
-		'hdd-odd-form-factor' => self::GROUP_ports,
+		'hdd-odd-form-factor' => self::GROUP_physical,
 		'ide-ports-n' => self::GROUP_ports,
 		'odd-type' => self::GROUP_features,
 		'pcie-power-pin-n' => self::GROUP_powerconnectors,
