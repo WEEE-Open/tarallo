@@ -654,7 +654,7 @@
 				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'ps2-ports-n', 'usb-ports-n', 'color', 'working', 'owner'];
 				break;
 			case 'monitor':
-				features = ['cib', 'cib-old', 'other-code', 'brand', 'model', 'sn', 'diagonal-inch', 'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n', 'usb-ports-n', 'power-connector', 'psu-volt', 'psu-ampere', 'working', 'notes'];
+				features = ['cib', 'cib-old', 'other-code', 'brand', 'model', 'sn', 'diagonal-inch', 'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n', 'usb-ports-n', 'power-connector', 'psu-volt', 'psu-ampere', 'working', 'owner', 'notes'];
 				break;
 			case 'ports-bracket':
 				features = ['usb-ports-n', 'serial-ports-n', 'parallel-ports-n', 'firewire-ports-n', 'color', 'owner'];
