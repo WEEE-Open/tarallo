@@ -1,4 +1,10 @@
-.idea
+.idea/
+.vagrant/
 vendor/
-db.php
+build/
+utils/provision/playbook.retry
+*.log
+*.generated.js*
 *.mo
+db.php
+db-production.php

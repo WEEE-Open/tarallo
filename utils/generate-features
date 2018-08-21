@@ -1,0 +1,191 @@
+#!/usr/bin/php
+<?php
+//chdir(__DIR__);
+if($argc !== 2) {
+	echo 'Provide path to the "tarallo" directory and nothing else as an argument'.PHP_EOL;
+	exit(1);
+}
+
+$basedir = rtrim($argv[1], DIRECTORY_SEPARATOR);
+$data_filename = $basedir . DIRECTORY_SEPARATOR . 'database-data.sql';
+
+if(!is_file($data_filename)) {
+	echo "$data_filename is not a file";
+	exit(1);
+}
+
+$data = file_get_contents($data_filename);
+$lines = preg_split('/[\n\r]/', $data, -1, PREG_SPLIT_NO_EMPTY);
+$resultphp = "\t// BEGIN GENERATED CODE" . PHP_EOL . "\tconst features = [" . PHP_EOL;
+$resultphp2 = "\tconst groups = [" . PHP_EOL;
+$resultlocalized = "\t// BEGIN GENERATED CODE" . PHP_EOL . "\tconst features = [" . PHP_EOL;
+$resultlocalized2 = '';
+
+$block = 0;
+$features = [];
+echo 'Found ' . count($lines) . ' lines' . PHP_EOL;
+foreach($lines as $line) {
+	/** @noinspection SqlNoDataSourceInspection */
+	$wut = 'INSERT INTO `Feature`';
+	if(substr($line, 0, strlen($wut)) === $wut) {
+		$block = 1;
+		continue;
+	}
+	/** @noinspection SqlNoDataSourceInspection */
+	$wut = 'INSERT INTO `FeatureEnum`';
+	if(substr($line, 0, strlen($wut)) === $wut) {
+		$block = 2;
+		continue;
+	}
+	/** @noinspection SqlNoDataSourceInspection */
+	$wut = 'INSERT INTO `Prefixes`';
+	if(substr($line, 0, strlen($wut)) === $wut) {
+		$block = 3;
+		continue;
+	}
+	if($block === 0 || $block === 3) {
+		continue;
+	} else {
+		$boom = explode(',', $line);
+		if(count($boom) < 2) {
+			continue;
+		}
+		if(substr(trim($boom[0]), 0, 2) == '--') {
+			continue;
+		}
+		if($block === 1) {
+			$feature = $id = substr($boom[0], 3, strlen($boom[0]) - 4);
+			$group = substr($boom[1], 2, strlen($boom[1]) - 3);
+			$type = substr($boom[2], 1, 1);
+
+			$features[$id] = [];
+
+			switch($type) {
+				case '0':
+					$resultphp .= "\t\t'$feature' => self::STRING," . PHP_EOL;
+					break;
+				case '1':
+					$resultphp .= "\t\t'$feature' => self::INTEGER," . PHP_EOL;
+					break;
+				case '2':
+					$resultphp .= "\t\t'$feature' => [{REPLACE$id}]," . PHP_EOL;
+					break;
+				case '3':
+					$resultphp .= "\t\t'$feature' => self::DOUBLE," . PHP_EOL;
+					break;
+			}
+			$resultphp2 .= "\t\t'$feature' => self::GROUP_$group," . PHP_EOL;
+
+			// Last piece has less fragments since it ends with ; instead of ,
+			$thePiece = isset($boom[3]) ? $boom[3]: $boom[2];
+			$translationPieces = explode('--', $thePiece);
+			if(count($translationPieces) >= 2) {
+				$translation = trim($translationPieces[1]);
+			} else {
+				echo "Missing translation for $feature\n";
+				exit(1);
+			}
+
+			$resultlocalized .= "\t\t'$feature' => '$translation'," . PHP_EOL;
+
+			echo "Feature: $group->$feature:$type:$translation" . PHP_EOL;
+		} else if($block === 2) {
+			$id = substr($boom[0], 3, strlen($boom[0]) - 4);
+
+			if(count($boom) === 2) {
+				// Last piece
+				$value = explode(';', $boom[1])[0];
+				$value = substr($value, 2, strlen($value) - 4);
+			} else {
+				$value = substr($boom[1], 2, strlen($boom[1]) - 4);
+			}
+
+			$features[$id][] = $value;
+
+			$thePiece = isset($boom[2]) ? $boom[2] : $boom[1];
+			$translationPieces = explode('--', $thePiece);
+			if(count($translationPieces) >= 2) {
+				$translation = trim($translationPieces[1]);
+			} else {
+				echo "Missing translation for $id=$value\n";
+				exit(1);
+			}
+
+			$resultlocalized2 .= "\t\t'$id' => [{REPLACE$id}]," . PHP_EOL;
+			$featuresTranslated[$id][$value] = $translation;
+
+			echo "Value: $id:$value:$translation" . PHP_EOL;
+		} else {
+			echo 'Lolwut?' . PHP_EOL;
+		}
+	}
+}
+unset($id);
+unset($type);
+unset($block);
+unset($thePiece);
+unset($value);
+unset($translation);
+unset($translationPieces);
+
+foreach($features as $id => $values) {
+	//$arrayjs = '[';
+	$arrayphp = '';
+	foreach($values as $value) {
+		$arrayphp .= "'$value' => true, ";
+	}
+	$arrayphp = substr($arrayphp, 0, strlen($arrayphp) - 2); // trailing commas are valid in PHP, but this looks nicer
+	$resultphp = str_replace('{REPLACE' . $id . '}', $arrayphp, $resultphp);
+}
+assert(isset($featuresTranslated));
+foreach($featuresTranslated as $id => $values) {
+	$arrayphp = '';
+	foreach($values as $value => $translated) {
+		$arrayphp .= "'$value' => '$translated', ";
+	}
+	$arrayphp = substr($arrayphp, 0, strlen($arrayphp) - 2);
+	$resultlocalized2 = str_replace('{REPLACE' . $id . '}', $arrayphp, $resultlocalized2);
+}
+$resultlocalized2 = implode(PHP_EOL,array_unique(explode(PHP_EOL, $resultlocalized2)));
+
+$resultphp .= "\t];" . PHP_EOL . $resultphp2;
+$resultphp .= "\t];" . PHP_EOL . "\t// END GENERATED CODE";
+
+$resultlocalized .= "\t];" . PHP_EOL;
+$resultlocalized2 .= "\t];" . PHP_EOL . "\t// END GENERATED CODE";
+$resultlocalized = implode("\tconst featuresEnum = [\n", [$resultlocalized, $resultlocalized2]);
+unset($resultlocalized2);
+
+$php_filename = $basedir . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Feature.php';
+$php = file_get_contents($php_filename);
+
+$piecesphp = explode("\t// BEGIN GENERATED CODE" . PHP_EOL, $php, 2);
+if(count($piecesphp) < 2) {
+	echo "Cannot find // BEGIN GENERATED CODE (indented and followed by a newline in current platform format, which may be the problem) in $php_filename" . PHP_EOL;
+	exit(1);
+}
+
+$piecesphp2 = explode("\t// END GENERATED CODE", $php, 2);
+if(count($piecesphp2) < 2) {
+	echo "Cannot find indented // END GENERATED CODE in $php_filename" . PHP_EOL;
+	exit(1);
+}
+
+$localized_filename = $basedir . DIRECTORY_SEPARATOR . 'SSRv1' . DIRECTORY_SEPARATOR . 'FeaturePrinter.php';
+$localized = file_get_contents($localized_filename);
+
+$pieceslocalized = explode("\t// BEGIN GENERATED CODE" . PHP_EOL, $localized, 2);
+if(count($pieceslocalized) < 2) {
+	echo "Cannot find // BEGIN GENERATED CODE (indented and followed by a newline in current platform format, which may be the problem) in $localized_filename" . PHP_EOL;
+	exit(1);
+}
+
+$pieceslocalized2 = explode("\t// END GENERATED CODE", $localized, 2);
+if(count($pieceslocalized2) < 2) {
+	echo "Cannot find indented // END GENERATED CODE in $localized_filename" . PHP_EOL;
+	exit(1);
+}
+
+file_put_contents($php_filename, $piecesphp[0] . $resultphp . $piecesphp2[1]);
+file_put_contents($localized_filename, $pieceslocalized[0] . $resultlocalized . $pieceslocalized2[1]);
+echo "\nDone. Check these files and commit changes:\n* $php_filename\n* $localized_filename\n" . PHP_EOL;
