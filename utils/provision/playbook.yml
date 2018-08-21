@@ -1,0 +1,287 @@
+---
+- name: FAI COSE
+  hosts: all
+  become: true
+  become_user: root
+  vars:
+    mariadb_root_password: root
+    database_username: tarallo
+    database_password: thisisnottheproductionpassword
+    document_root: /var/www/html
+
+    nginx_yum_repo_enabled: false
+    nginx_remove_default_vhost: true
+    nginx_sendfile: "off"
+    nginx_vhosts:
+    # sendfile is broken in VirtualBox
+    - listen: "80 default_server"
+      server_name: "_"
+      index: "index.php"
+      root: "{{ document_root }}/server"
+      template: "{{ nginx_vhost_template }}"
+      filename: "tarallo-server.conf"
+      state: "present"
+      extra_parameters: |
+        location ~ \.(css|js)$ {
+          root {{ document_root }}/server/SSRv1/static;
+        }
+
+        location / {
+          include fastcgi_params;
+          try_files $uri /index.php =404;
+
+          fastcgi_param PATH_INFO $uri;
+          fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+          fastcgi_pass 127.0.0.1:9000;
+        }
+    - listen: "81 default_server"
+      server_name: "_"
+      root: "{{ document_root }}/admin"
+      template: "{{ nginx_vhost_template }}"
+      filename: "tarallo-admin.conf"
+      state: "present"
+      extra_parameters: |
+        location / {
+          autoindex on;
+          try_files $uri $uri/ =404;
+        }
+
+        location ~ \.php$ {
+          include fastcgi_params;
+          fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+          fastcgi_pass 127.0.0.1:9000;
+        }
+
+  roles:
+    - { role: goozbach.EPEL }
+    - { role: geerlingguy.nginx }
+
+  tasks:
+  - name: Create a directory for no reason
+    file: path=/home/vagrant/.phpstorm_helpers state=directory mode=0777
+
+  - name: Enable MariaDB repo
+    yum_repository:
+      name: mariadb
+      description: MariaDB
+      baseurl: http://yum.mariadb.org/10.2/centos7-amd64
+      gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
+      gpgcheck: yes
+      enabled: yes
+
+  # https://github.com/iuscommunity/automation-examples/blob/ansible/enable-ius.yml
+  - set_fact:
+      ius_distribution_abbrev: "{{ (ansible_distribution == 'CentOS') | ternary('centos', 'rhel') }}"
+
+  # TODO: understand if it's downloading the file every single time (yes it is)
+  # TODO: prevent it somehow
+  - name: Enable IUS repo
+    yum:
+      name: "https://{{ ius_distribution_abbrev }}{{ ansible_distribution_major_version }}.iuscommunity.org/ius-release.rpm"
+      state: present
+
+  - name: Install MariaDB 10.2 packages
+    yum: name={{ item }} state=installed
+    with_items:
+      - MariaDB-server
+      - MariaDB-client
+
+  - name: Enable and start MariaDB
+    service:
+      name: mariadb
+      enabled: yes
+      state: started
+
+  - name: Adds Python-MySQL to set MariaDB configuration
+    yum: name=MySQL-python state=present
+
+  - name: Set MariaDB root password
+    mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user=root password="{{ mariadb_root_password }}" state=present check_implicit_admin=yes
+
+  - name: Remove useless MariaDB root login
+    mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user=root host="{{ ansible_fqdn }}" state=absent check_implicit_admin=yes
+
+  - name: Set MariaDB root password from localhost
+    mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user=root password="{{ mariadb_root_password }}" host="localhost" check_implicit_admin=yes
+
+  - name: Set MariaDB root password from ::1
+    mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user=root password="{{ mariadb_root_password }}" host="::1" check_implicit_admin=yes
+
+  - name: Set MariaDB root password from 127.0.0.1
+    mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user=root password="{{ mariadb_root_password }}" host="127.0.0.1" check_implicit_admin=yes
+
+  - name: Deletes anonymous MariaDB user
+    mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user="" host_all=yes state=absent
+
+  - name: Removes MariaDB test database
+    mysql_db: login_user=root login_password="{{ mariadb_root_password }}" db=test state=absent
+
+  - name: Install PHP 7.0
+    yum: name={{ item }} state=installed
+    with_items:
+      - php70u-common
+      - php70u-fpm
+      - php70u-json
+      - php70u-mysqlnd
+      - php70u-opcache
+      - php70u-pdo
+
+  - name: Enable and start PHP-FPM
+    service:
+      name: php-fpm
+      enabled: yes
+      state: started
+
+    # Not really sure about mcrypt and unzip
+  - name: Install PHP developement dependencies
+    yum: name={{ item }} state=installed
+    with_items:
+      - php70u-pecl-xdebug
+      - php70u-mbstring
+      - php70u-dom
+      - php70u-mcrypt
+      - php70u-intl
+      - unzip
+
+  - name: Enable XDebug
+    template:
+      src: 15-xdebug.ini.j2
+      dest: "/etc/php.d/15-xdebug.ini"
+      owner: root
+      group: root
+
+  - name: Install Composer
+    script: composer.sh
+    args:
+      creates: /usr/local/bin/composer
+
+  - name: Install dependencies via Composer
+    become: false
+    composer:
+      command: install
+      optimize_autoloader: no
+      no_dev: no
+      working_dir: "{{ document_root }}/server"
+
+  #- name: Install nginx
+  #  yum: name=nginx state=installed
+
+  #- name: Enable and start nginx
+  #  service:
+  #    name: nginx
+  #    enabled: yes
+  #    state: started
+
+  - name: Create Adminer directory
+    file: path="{{ document_root }}/admin" state=directory mode=0775
+
+  - name: Download Adminer
+    get_url:
+      url: https://github.com/vrana/adminer/releases/download/v4.6.1/adminer-4.6.1-mysql-en.php
+      dest: "{{ document_root }}/admin/adminer.php"
+      mode: 0444
+
+  - name: REALLY remove the broken (!?) default example nginx conf
+    file: path="/etc/nginx/conf.d/example.com.conf" state=absent
+
+  - name: Disable (set to permissive, actually) SELinux BECAUSE VIRTUALBOX, THAT'S WHY
+    selinux: state=permissive policy=targeted
+
+  - name: Drop databases (because importing tables is not really idempotent)
+    mysql_db:
+      name: "{{ item }}"
+      login_user: root
+      login_password: "{{ mariadb_root_password }}"
+      state: absent
+    with_items:
+      - tarallo
+      - tarallo_test
+
+  - name: Create databases
+    mysql_db:
+      name: "{{ item }}"
+      encoding: utf8mb4
+      collation: utf8mb4_unicode_ci
+      login_user: root
+      login_password: "{{ mariadb_root_password }}"
+      state: present
+    with_items:
+      - tarallo
+      - tarallo_test
+
+  - name: Import tables
+    mysql_db:
+      name: "{{ item }}"
+      state: import
+      login_user: root
+      login_password: "{{ mariadb_root_password }}"
+      target: "{{ document_root }}/server/database.sql"
+    with_items:
+      - tarallo
+      - tarallo_test
+
+  - name: Import default data
+    mysql_db:
+      name: "{{ item }}"
+      state: import
+      login_user: root
+      login_password: "{{ mariadb_root_password }}"
+      target: "{{ document_root }}/server/database-data.sql"
+    with_items:
+      - tarallo
+      - tarallo_test
+
+  - name: Import procedures
+    mysql_db:
+      name: "{{ item }}"
+      state: import
+      login_user: root
+      login_password: "{{ mariadb_root_password }}"
+      target: "{{ document_root }}/server/database-procedures.sql"
+    with_items:
+      - tarallo
+      - tarallo_test
+
+  - name: Import sample data
+    mysql_db:
+      name: tarallo
+      state: import
+      login_user: root
+      login_password: "{{ mariadb_root_password }}"
+      target: "/data/sample-data.sql"
+
+  - name: Enable remote connections to MariaDB
+    template:
+      src: enable-remote-connection.conf.j2
+      dest: /etc/my.cnf.d/enable-remote-connection.conf
+
+  - name: Enable remote MariaDB root login
+    mysql_user:
+      login_user: root
+      login_password: "{{ mariadb_root_password }}"
+      user: root
+      password: "{{ mariadb_root_password }}"
+      host: "%"
+      priv: "*.*:ALL,GRANT"
+
+  - name: Create MariaDB user
+    mysql_user:
+      login_user: root
+      login_password: "{{ mariadb_root_password }}"
+      user: "{{ database_username }}"
+      password: "{{ database_password }}"
+      host: "localhost"
+      priv: "tarallo.*:ALL"
+
+  # This is not really the best way, I guess
+  - name: Restart MariaDB
+    service:
+      name: mysqld
+      state: restarted
+
+  - name: Enable tarallo to use database
+    template:
+      src: db.php.j2
+      dest: "{{ document_root }}/server/db.php"
+      owner: vagrant
+      group: vagrant
