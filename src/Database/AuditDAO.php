@@ -15,8 +15,6 @@ class AuditDAO extends DAO {
 	 * @return array
 	 */
 	public function getRecentAudit(int $perPage, int $page) {
-		$array = [];
-
 		$statement = $this->getPDO()->prepare('SELECT `Code` AS `code`, `Change` AS `change`, Other AS `other`, UNIX_TIMESTAMP(`Time`) AS `time`, `User` AS `user`
 FROM Audit
 ORDER BY `time` DESC, `code` DESC, `change`

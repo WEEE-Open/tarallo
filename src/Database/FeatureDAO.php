@@ -65,15 +65,15 @@ final class FeatureDAO extends DAO {
 				foreach($statement as $row) {
 					$result[] = new ItemIncomplete($row['Code']);
 				}
+
 				return $result;
 			}
 		} finally {
 			$statement->closeCursor();
 		}
+
 		return $result;
 	}
-
-	private $getFeaturesStatement = null;
 
 	/**
 	 * Add features to an item
@@ -101,34 +101,26 @@ final class FeatureDAO extends DAO {
 		 */
 
 		// TODO: default features
-		if($this->getFeaturesStatement === null) {
-			$this->getFeaturesStatement = $this->getPDO()->prepare('SELECT Feature, COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`
+		$statement = $this->getPDO()->prepare('SELECT Feature, COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`
             FROM ItemFeature
             WHERE `Code` = :cod;');
-		}
 
-		$this->getFeaturesStatement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
+		$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
 
 		try {
-			$this->getFeaturesStatement->execute();
-			if($this->getFeaturesStatement->rowCount() > 0) {
-				foreach($this->getFeaturesStatement as $row) {
+			$statement->execute();
+			if($statement->rowCount() > 0) {
+				foreach($statement as $row) {
 					/** @var Item[] $items */
 					$item->addFeature(Feature::ofString($row['Feature'], $row['Value']));
 				}
 			}
 		} finally {
-			$this->getFeaturesStatement->closeCursor();
+			$statement->closeCursor();
 		}
 
 		return $item;
 	}
-
-	private $featureNumberStatement = null;
-	private $featureTextStatement = null;
-	private $featureEnumStatement = null;
-	private $featureDoubleStatement = null;
-	private $featureAudit = null;
 
 	public function setFeatures(ItemFeatures $item) {
 		$features = $item->getFeatures();
@@ -139,21 +131,11 @@ final class FeatureDAO extends DAO {
 
 		$pdo = $this->getPDO();
 
-		if($this->featureNumberStatement === null) {
-			$this->featureNumberStatement = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `Value`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `Value`=:val2');
-		}
-		if($this->featureTextStatement === null) {
-			$this->featureTextStatement = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `ValueText`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `ValueText`=:val2');
-		}
-		if($this->featureEnumStatement === null) {
-			$this->featureEnumStatement = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `ValueEnum`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `ValueEnum`=:val2');
-		}
-		if($this->featureDoubleStatement === null) {
-			$this->featureDoubleStatement = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `ValueDouble`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `ValueDouble`=:val2');
-		}
-		if($this->featureAudit === null) {
-			$this->featureAudit = $pdo->prepare('INSERT INTO Audit (Code, `Change`, User) VALUES (?, \'U\', @taralloAuditUsername)');
-		}
+		$statementInt = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `Value`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `Value`=:val2');
+		$statementText = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `ValueText`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `ValueText`=:val2');
+		$statementEnum = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `ValueEnum`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `ValueEnum`=:val2');
+		$statementDouble = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `ValueDouble`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `ValueDouble`=:val2');
+		$statementAudit = $pdo->prepare('INSERT INTO Audit (`Code`, `Change`, `User`) VALUES (?, \'U\', @taralloAuditUsername)');
 
 		foreach($features as $feature) {
 			$name = $feature->name;
@@ -161,19 +143,19 @@ final class FeatureDAO extends DAO {
 			switch($feature->type) {
 				// was really tempted to use variable variables here...
 				case Feature::STRING:
-					$statement = $this->featureTextStatement;
+					$statement = $statementText;
 					$type = \PDO::PARAM_STR;
 					break;
 				case Feature::INTEGER:
-					$statement = $this->featureNumberStatement;
+					$statement = $statementInt;
 					$type = \PDO::PARAM_INT;
 					break;
 				case Feature::ENUM:
-					$statement = $this->featureEnumStatement;
+					$statement = $statementEnum;
 					$type = \PDO::PARAM_STR;
 					break;
 				case Feature::DOUBLE:
-					$statement = $this->featureDoubleStatement;
+					$statement = $statementDouble;
 					$type = \PDO::PARAM_STR;
 					break;
 				default:
@@ -193,15 +175,13 @@ final class FeatureDAO extends DAO {
 		}
 
 		try {
-			if(!$this->featureAudit->execute([$item->getCode()])) {
+			if(!$statementAudit->execute([$item->getCode()])) {
 				throw new DatabaseException('Cannot add audit table entry for features update of ' . $item->getCode());
 			}
 		} finally {
-			$this->featureAudit->closeCursor();
+			$statementAudit->closeCursor();
 		}
 	}
-
-	private $deleteFeatureStatement = null;
 
 	/**
 	 * Delete a single feature from an item
@@ -214,20 +194,17 @@ final class FeatureDAO extends DAO {
 			throw new \InvalidArgumentException('Name of feature to be deleted should be a string');
 		}
 
-		if($this->deleteFeatureStatement === null) {
-			$this->deleteFeatureStatement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ? AND `Feature`= ?');
-		}
+		$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ? AND `Feature`= ?');
 
 		try {
-			if(!$this->deleteFeatureStatement->execute([$item->getCode(), $feature])) {
+			if(!$statement->execute([$item->getCode(), $feature])) {
 				throw new DatabaseException("Cannot delete feature $feature from " . $item->getCode() . ' for unknown reasons');
 			}
 		} finally {
-			$this->deleteFeatureStatement->closeCursor();
+			$statement->closeCursor();
 		}
 	}
 
-	private $deleteFeaturesAllStatement = null;
 
 	/**
 	 * Delete all features from an item
@@ -235,16 +212,14 @@ final class FeatureDAO extends DAO {
 	 * @param ItemIncomplete $item
 	 */
 	public function deleteFeaturesAll(ItemIncomplete $item) {
-		if($this->deleteFeaturesAllStatement === null) {
-			$this->deleteFeaturesAllStatement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ?');
-		}
+		$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ?');
 
 		try {
-			if(!$this->deleteFeaturesAllStatement->execute([$item->getCode()])) {
+			if(!$statement->execute([$item->getCode()])) {
 				throw new DatabaseException('Cannot delete features from ' . $item->getCode() . ' for unknown reasons');
 			}
 		} finally {
-			$this->deleteFeaturesAllStatement->closeCursor();
+			$statement->closeCursor();
 		}
 	}
 
@@ -272,7 +247,7 @@ final class FeatureDAO extends DAO {
 
 		$result = [];
 		try {
-			if(!$statement->execute([$feature])) {
+			if(!$statement->execute([$feature, $limit])) {
 				throw new DatabaseException("Cannot search items with feature \"$feature\"");
 			}
 			if($statement->rowCount() > 0) {

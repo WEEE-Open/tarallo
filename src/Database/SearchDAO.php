@@ -291,6 +291,7 @@ EOQ;
 	public function sort(Search $search, int $searchId) {
 		if($search->sort === null) {
 			$this->sortByCode($searchId);
+
 			return;
 		}
 
@@ -300,6 +301,7 @@ EOQ;
 
 		if(empty($search->sort)) {
 			$this->sortByCode($searchId);
+
 			return;
 		}
 
@@ -399,8 +401,6 @@ EOQ;
 		}
 	}
 
-	private $getResultsStatement;
-
 	/**
 	 * Get results from a previous search, already sorted.
 	 *
@@ -426,12 +426,10 @@ EOQ;
 
 		$this->refresh($id);
 
-		if($this->getResultsStatement === null) {
-			$this->getResultsStatement = /** @lang MySQL */
-				'SELECT `Item` FROM SearchResult WHERE Search = :id ORDER BY `Order` ASC LIMIT :offs, :cnt';
-		}
+		$statement = /** @lang MySQL */
+			'SELECT `Item` FROM SearchResult WHERE Search = :id ORDER BY `Order` ASC LIMIT :offs, :cnt';
 
-		$statement = $this->getPDO()->prepare($this->getResultsStatement);
+		$statement = $this->getPDO()->prepare($statement);
 		$items = [];
 		$itemDAO = $this->database->itemDAO();
 

@@ -10,10 +10,8 @@ use WEEEOpen\Tarallo\Server\NotFoundException;
 final class ItemDAO extends DAO {
 	const EXCEPTION_CODE_GENERATE_ID = 3;
 
-	private $addItemStatement = null;
-
 	/**
-	 * Insert a single item into the database, then returns it by querying the database again.
+	 * Insert a single item into the database
 	 *
 	 * @param Item $item the item to be inserted
 	 * @param ItemIncomplete $parent parent item
@@ -29,18 +27,16 @@ final class ItemDAO extends DAO {
 			$item->setCode($code);
 		}
 
-		if($this->addItemStatement === null) {
-			$this->addItemStatement = $this->getPDO()->prepare('INSERT INTO Item (`Code`, Token) VALUES (:cod, :tok)');
-		}
+		$statement = $this->getPDO()->prepare('INSERT INTO Item (`Code`, Token) VALUES (:cod, :tok)');
 
 		try {
-			$this->addItemStatement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
-			$this->addItemStatement->bindValue(':tok', $item->token, \PDO::PARAM_STR);
-			if(!$this->addItemStatement->execute()) {
+			$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
+			$statement->bindValue(':tok', $item->token, \PDO::PARAM_STR);
+			if(!$statement->execute()) {
 				throw new DatabaseException('Cannot insert item ' . $item->getCode() . ' for unknown reasons');
 			}
 		} finally {
-			$this->addItemStatement->closeCursor();
+			$statement->closeCursor();
 		}
 
 		/** @var Item $item */
@@ -54,25 +50,19 @@ final class ItemDAO extends DAO {
 		}
 	}
 
-	private $deleteItemStatement;
-
 	public function deleteItem(ItemIncomplete $item) {
 		if(!$this->itemVisible($item)) {
 			throw new NotFoundException();
 		}
 
-		if($this->deleteItemStatement === null) {
-			$this->deleteItemStatement = $this->getPDO()->prepare('UPDATE Item SET DeletedAt = NOW() WHERE `Code` = ?');
-		}
+		$statement = $this->getPDO()->prepare('UPDATE Item SET DeletedAt = NOW() WHERE `Code` = ?');
 
 		try {
-			$this->deleteItemStatement->execute([$item->getCode()]);
+			$statement->execute([$item->getCode()]);
 		} finally {
-			$this->deleteItemStatement->closeCursor();
+			$statement->closeCursor();
 		}
 	}
-
-	private $itemIsDeletedStatement = null;
 
 	/**
 	 * Yes, it's kinda like the true/false/FileNotFound thing.
@@ -82,21 +72,19 @@ final class ItemDAO extends DAO {
 	 * @return bool|null tri-state: true if marked as deleted, false if not marked but exists, null if doesn't exist
 	 */
 	private function itemIsDeleted(ItemIncomplete $item) {
-		if($this->itemIsDeletedStatement === null) {
-			$this->itemIsDeletedStatement = $this->getPDO()->prepare('SELECT IF(DeletedAt IS NULL, FALSE, TRUE) FROM Item WHERE `Code` = :cod');
-		}
+		$statement = $this->getPDO()->prepare('SELECT IF(DeletedAt IS NULL, FALSE, TRUE) FROM Item WHERE `Code` = :cod');
 		try {
-			$this->itemIsDeletedStatement->execute([$item->getCode()]);
-			if($this->itemIsDeletedStatement->rowCount() === 0) {
+			$statement->execute([$item->getCode()]);
+			if($statement->rowCount() === 0) {
 				return null;
 			}
-			$result = $this->itemIsDeletedStatement->fetch(\PDO::FETCH_NUM);
+			$result = $statement->fetch(\PDO::FETCH_NUM);
 			$exists = (bool) $result[0];
 
 			return $exists;
 
 		} finally {
-			$this->itemIsDeletedStatement->closeCursor();
+			$statement->closeCursor();
 		}
 	}
 
@@ -118,7 +106,8 @@ final class ItemDAO extends DAO {
 	}
 
 	/**
-	 * True if item is visibile (exists AND not marked as deleted), false otherwise (doesn't exist or is marked as deleted)
+	 * True if item is visibile (exists AND not marked as deleted), false otherwise (doesn't exist or is marked as
+	 * deleted)
 	 *
 	 * @param ItemIncomplete $item
 	 *
@@ -134,8 +123,6 @@ final class ItemDAO extends DAO {
 		return false;
 	}
 
-	private $getNewCodeStatement = null;
-
 	/**
 	 * Get a new sequential code directly from database, for a given prefix
 	 *
@@ -144,24 +131,20 @@ final class ItemDAO extends DAO {
 	 * @return string
 	 */
 	private function getNewCode($prefix) {
-		if($this->getNewCodeStatement === null) {
-			$this->getNewCodeStatement = $this->getPDO()->prepare(/** @lang MySQL */
-				'SELECT GenerateCode(?)');
-		}
+		$statement = $this->getPDO()->prepare(/** @lang MySQL */
+			'SELECT GenerateCode(?)');
 		try {
-			$this->getNewCodeStatement->execute([$prefix]);
-			$code = $this->getNewCodeStatement->fetch(\PDO::FETCH_NUM)[0];
+			$statement->execute([$prefix]);
+			$code = $statement->fetch(\PDO::FETCH_NUM)[0];
 			if($code === null) {
 				throw new \LogicException("Cannot generate code for prefix $prefix, NULL returned");
 			}
 
 			return (string) $code;
 		} finally {
-			$this->getNewCodeStatement->closeCursor();
+			$statement->closeCursor();
 		}
 	}
-
-	private $getItemStatement = null;
 
 	/**
 	 * Get a single item (and its content)
@@ -181,18 +164,17 @@ final class ItemDAO extends DAO {
 			$depth = 10;
 		}
 
-		if($this->getItemStatement === null) {
-			// TODO: we can also select Depth here, may be useful to select depth = maxdepth + 1 and see if there are items inside and discard them, but it's slow and unefficient...
-			$this->getItemStatement = $this->getPDO()->prepare(<<<EOQ
-				SELECT `Descendant` AS `Code`, GetParent(`Descendant`) AS Parent
-				FROM Tree
-				WHERE Ancestor = ?
-				AND Depth <= ?
-				ORDER BY Depth ASC, `Code` ASC
+		// TODO: we can also select Depth here, may be useful to select depth = maxdepth + 1 and see if there are items inside and discard them, but it's slow and unefficient...
+		$statement = $this->getPDO()->prepare(<<<EOQ
+			SELECT `Descendant` AS `Code`, GetParent(`Descendant`) AS Parent
+			FROM Tree
+			WHERE Ancestor = ?
+			AND Depth <= ?
+			ORDER BY Depth ASC, `Code` ASC
 EOQ
-				// Adding "CHAR_LENGTH(`Code`) ASC" to ORDER BY makes it sort items like "R54, C124, R252, R253"...
-			);
-		}
+		// Adding "CHAR_LENGTH(`Code`) ASC" to ORDER BY makes it sort items like "R54, C124, R252, R253"...
+		);
+
 
 		/**
 		 * All items in this subtree, flattened
@@ -200,12 +182,12 @@ EOQ
 		$flat = [];
 
 		try {
-			if(!$this->getItemStatement->execute([$itemToGet->getCode(), $depth])) {
+			if(!$statement->execute([$itemToGet->getCode(), $depth])) {
 				throw new DatabaseException('Query failed for no reason');
 			}
 
 			// First Item is the head Item
-			if(($row = $this->getItemStatement->fetch(\PDO::FETCH_ASSOC)) === false) {
+			if(($row = $statement->fetch(\PDO::FETCH_ASSOC)) === false) {
 				throw new NotFoundException();
 			} else {
 				// Now we have the real code, with correct case (database is case-insensitive)
@@ -215,7 +197,7 @@ EOQ
 			}
 
 			// Other items
-			while(($row = $this->getItemStatement->fetch(\PDO::FETCH_ASSOC)) !== false) {
+			while(($row = $statement->fetch(\PDO::FETCH_ASSOC)) !== false) {
 				$parent = $flat[$row['Parent']];
 				if(!isset($parent)) {
 					throw new \LogicException('Broken tree: got ' . $row['Code'] . ' before its parent ' . $row['Parent']);
@@ -226,7 +208,7 @@ EOQ
 			$parent = null;
 			unset($parent);
 		} finally {
-			$this->getItemStatement->closeCursor();
+			$statement->closeCursor();
 		}
 		$this->database->treeDAO()->getPathTo($head);
 		$this->database->featureDAO()->getFeaturesAll($flat);

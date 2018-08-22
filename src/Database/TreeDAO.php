@@ -9,7 +9,7 @@ use WEEEOpen\Tarallo\Server\NotFoundException;
 final class TreeDAO extends DAO {
 	const EXCEPTION_CODE_PARENT = 1;
 	const EXCEPTION_CODE_CHILD = 2;
-	
+
 	/**
 	 * Add a new Item to the tree. Don't call if it's already in the tree.
 	 *
@@ -53,8 +53,6 @@ final class TreeDAO extends DAO {
 		}
 	}
 
-	private $getPathToStatement = null;
-
 	/**
 	 * Get path to an item and set it.
 	 * Item code must be not null, obviously.
@@ -73,16 +71,14 @@ final class TreeDAO extends DAO {
 	 * @return ItemIncomplete[] 0 is direct parent, 1 is parent's parent, and so on
 	 */
 	private function getPathToArray(ItemIncomplete $item) {
-		if($this->getPathToStatement === null) {
-			$this->getPathToStatement = $this->getPDO()->prepare('SELECT Ancestor FROM Tree WHERE Descendant = ? ORDER BY Depth DESC');
-		}
+		$statement = $this->getPDO()->prepare('SELECT Ancestor FROM Tree WHERE Descendant = ? ORDER BY Depth DESC');
 
 		try {
-			$this->getPathToStatement->execute([$item->getCode()]);
+			$statement->execute([$item->getCode()]);
 
 			$result = [];
 
-			while(($row = $this->getPathToStatement->fetch(\PDO::FETCH_ASSOC)) !== false) {
+			while(($row = $statement->fetch(\PDO::FETCH_ASSOC)) !== false) {
 				$result[] = new ItemIncomplete($row['Ancestor']);
 			}
 
@@ -95,41 +91,36 @@ final class TreeDAO extends DAO {
 
 			return $result;
 		} finally {
-			$this->getPathToStatement->closeCursor();
+			$statement->closeCursor();
 		}
 	}
-
-	private $removeFromTreeStatement = null;
 
 	public function removeFromTree(ItemIncomplete $item) {
 		if(!$this->database->itemDAO()->itemVisible($item)) {
 			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
 		}
 
-		if($this->removeFromTreeStatement === null) {
-			/* This is readable but doesn't work in MySQL (TODO: implemented in MariaDB 10.3, replace query once it's out):
-			 *
-			 * DELETE * FROM Tree
-			 * WHERE DescendantID IN (
-			 * SELECT DescendantID
-			 * FROM Tree
-			 * WHERE AncestorID = ?)
-			 *
-			 * This is incomprehensible (I can only HOPE it does the same job) but works in MySQL:
-			 */
-			$this->removeFromTreeStatement = $this->getPDO()->prepare('DELETE Tree.* FROM Tree, Tree AS Pointless
-            WHERE Tree.Descendant=Pointless.Descendant
-            AND Pointless.Ancestor = ?;');
-		}
+		/* This is readable but doesn't work in MySQL (TODO: implemented in MariaDB 10.3, replace query once it's out):
+		 *
+		 * DELETE * FROM Tree
+		 * WHERE DescendantID IN (
+		 * SELECT DescendantID
+		 * FROM Tree
+		 * WHERE AncestorID = ?)
+		 *
+		 * This is incomprehensible (I can only HOPE it does the same job) but works in MySQL:
+		 */
+		$statement = $this->getPDO()->prepare('DELETE Tree.* FROM Tree, Tree AS Pointless
+        WHERE Tree.Descendant=Pointless.Descendant
+        AND Pointless.Ancestor = ?;');
+
 
 		try {
-			$this->removeFromTreeStatement->execute([$item->getCode()]);
+			$statement->execute([$item->getCode()]);
 		} finally {
-			$this->removeFromTreeStatement->closeCursor(); // TODO: needed?
+			$statement->closeCursor(); // TODO: needed?
 		}
 	}
-
-	private $addItemAsRootStatement = null;
 
 	/**
 	 * Add an Item to Tree, considering it a root. Basically adds a row like (Item, Item, Depth = 0).
@@ -140,14 +131,11 @@ final class TreeDAO extends DAO {
 	 */
 	private function addItemAsRoot(ItemIncomplete $item) {
 		$pdo = $this->getPDO();
-		if($this->addItemAsRootStatement === null) {
-			$this->addItemAsRootStatement = $pdo->prepare('INSERT INTO Tree (Ancestor, Descendant, Depth) VALUES (?, ?, 0)');
-		}
+		$statement = $pdo->prepare('INSERT INTO Tree (Ancestor, Descendant, Depth) VALUES (?, ?, 0)');
 		$id = $item->getCode();
-		$this->addItemAsRootStatement->execute([$id, $id]);
+		$statement->execute([$id, $id]);
 	}
 
-	private $setParentStatement = null;
 
 	/**
 	 * addEdge, basically. It's better to use addToTree(), which in turn calls this function.
@@ -170,20 +158,16 @@ final class TreeDAO extends DAO {
 
 		$pdo = $this->getPDO();
 
-		if($this->setParentStatement === null) {
-			// This is the standard query for subtree insertion, just with a cartesian product which is actually a join, instead of a join. It's exactly the same thing.
-			$this->setParentStatement = $pdo->prepare('INSERT INTO Tree (Ancestor, Descendant, Depth)
-			SELECT ltree.Ancestor, rtree.Descendant, ltree.Depth+rtree.Depth+1
-			FROM Tree ltree, Tree rtree 
-			WHERE ltree.Descendant = :parent AND rtree.Ancestor = :new;');
-		}
+		// This is the standard query for subtree insertion, just with a cartesian product which is actually a join, instead of a join. It's exactly the same thing.
+		$statement = $pdo->prepare('INSERT INTO Tree (Ancestor, Descendant, Depth)
+		SELECT ltree.Ancestor, rtree.Descendant, ltree.Depth+rtree.Depth+1
+		FROM Tree ltree, Tree rtree 
+		WHERE ltree.Descendant = :parent AND rtree.Ancestor = :new;');
 
-		$this->setParentStatement->bindValue(':parent', $parentID, \PDO::PARAM_STR);
-		$this->setParentStatement->bindValue(':new', $childID, \PDO::PARAM_STR);
-		$this->setParentStatement->execute();
+		$statement->bindValue(':parent', $parentID, \PDO::PARAM_STR);
+		$statement->bindValue(':new', $childID, \PDO::PARAM_STR);
+		$statement->execute();
 	}
-
-	private $extractFromTreeStatement;
 
 	/**
 	 * Turn an Item into a root, preserving its subtree
@@ -191,17 +175,16 @@ final class TreeDAO extends DAO {
 	 * @param ItemIncomplete $item the item
 	 */
 	private function splitSubtree(ItemIncomplete $item) {
-		if($this->extractFromTreeStatement === null) {
-			// straight from Bill Karwin's post (https://www.percona.com/blog/2011/02/14/moving-subtrees-in-closure-table/)
-			// other solutions exist, but they don't work in MySQL BECAUSE MYSQL, THAT'S WHY.
-			$this->extractFromTreeStatement = $this->getPDO()->prepare('DELETE a.* FROM Tree AS a
-			JOIN Tree AS d ON a.Descendant = d.Descendant
-			LEFT JOIN Tree AS x
-			ON x.Ancestor = d.Ancestor AND x.Descendant = a.Ancestor
-			WHERE d.Ancestor = ? AND x.Ancestor IS NULL;');
-		}
+		// straight from Bill Karwin's post (https://www.percona.com/blog/2011/02/14/moving-subtrees-in-closure-table/)
+		// other solutions exist, but they don't work in MySQL BECAUSE MYSQL, THAT'S WHY.
+		$statement = $this->getPDO()->prepare('DELETE a.* FROM Tree AS a
+		JOIN Tree AS d ON a.Descendant = d.Descendant
+		LEFT JOIN Tree AS x
+		ON x.Ancestor = d.Ancestor AND x.Descendant = a.Ancestor
+		WHERE d.Ancestor = ? AND x.Ancestor IS NULL;');
 
-		$this->extractFromTreeStatement->bindValue(1, $item->getCode(), \PDO::PARAM_STR);
-		$this->extractFromTreeStatement->execute();
+
+		$statement->bindValue(1, $item->getCode(), \PDO::PARAM_STR);
+		$statement->execute();
 	}
 }
