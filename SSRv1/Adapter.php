@@ -156,7 +156,7 @@ class Adapter implements AdapterInterface {
 		$serials = $db->statsDAO()->getDuplicateSerialsCount();
 		$missingData = $db->featureDAO()->getItemsByFeatures(new Feature('check', 'missing-data'), 500);
 		// TODO: add a new 'lost' value for these, also remove useless 'check' values
-		$lost = $db->featureDAO()->getItemsByFeatures(new Feature('check', 'wrong-location'));
+		$lost = $db->featureDAO()->getItemsByFeatures(new Feature('check', 'wrong-location'), 100);
 
 		return new Response(200, 'text/html', $engine->render('stats::needAttention',
 			['serials' => $serials, 'missingData' => $missingData, 'lost' => $lost]));
