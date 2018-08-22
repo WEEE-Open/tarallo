@@ -17,6 +17,9 @@
   },
   "require": {
     "php": "^7.0",
+    "ext-json": "*",
+    "ext-mysqlnd": "*",
+    "ext-pdo": "*",
     "nikic/fast-route": "^1.2",
     "nannehuiges/jsend": "^2.1",
     "willdurand/negotiation": "^2.3",

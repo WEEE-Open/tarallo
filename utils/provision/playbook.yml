@@ -1,5 +1,5 @@
 ---
-- name: FAI COSE
+- name: Do things and stuff
   hosts: all
   become: true
   become_user: root
@@ -254,6 +254,14 @@
     template:
       src: enable-remote-connection.conf.j2
       dest: /etc/my.cnf.d/enable-remote-connection.conf
+
+  - name: Replace my.cnf since it's the only way to enable event scheduler
+    template:
+      src: my.cnf.j2
+      dest: /etc/my.cnf
+      owner: root
+      group: root
+      mode: 0644
 
   - name: Enable remote MariaDB root login
     mysql_user:

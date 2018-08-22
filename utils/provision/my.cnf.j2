@@ -1,0 +1,13 @@
+# {{ansible_managed}}
+
+# This has to be HERE, in my.cnf.
+# It gets ignored if it's elsewhere.
+# Yep, tried with [mysqld] and [server], it's simply ignored.
+# As if that line had never existed.
+[mysqld]
+event_scheduler=on
+
+# This has to be here to include other files, which can apprently specify every
+# conceivable option except "event_scheduler=on"
+[client-server]
+!includedir /etc/my.cnf.d
