@@ -9,7 +9,6 @@ vm:
 	ansible-galaxy install goozbach.EPEL
 	ansible-galaxy install geerlingguy.nginx
 	vagrant plugin install vagrant-vbguest
-	vagrant up
 
 # Maybe this should be an actual file target, maybe not
 .PHONY:
