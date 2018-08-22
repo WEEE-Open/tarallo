@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\SSRv1;
 use FastRoute;
 use League\Plates\Engine;
 use WEEEOpen\Tarallo\Server\Database\Database;
+use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
@@ -137,11 +138,28 @@ class Adapter implements AdapterInterface {
 		Validation::authorize($user, 3);
 
 		$locations = $db->statsDAO()->getLocationsByItems();
-		$serials = $db->statsDAO()->getDuplicateSerialsCount();
 		$recentlyAdded = $db->auditDAO()->getRecentAuditByType('C', 40);
 
-		return new Response(200, 'text/html', $engine->render('stats',
-			['locations' => $locations, 'serials' => $serials, 'recentlyAdded' => $recentlyAdded]));
+		return new Response(200, 'text/html', $engine->render('stats::main',
+			['locations' => $locations, 'recentlyAdded' => $recentlyAdded]));
+	}
+
+	private static function getStatsAttention(
+		User $user = null,
+		Database $db,
+		Engine $engine,
+		$parameters,
+		$querystring
+	): Response {
+		Validation::authorize($user, 3);
+
+		$serials = $db->statsDAO()->getDuplicateSerialsCount();
+		$missingData = $db->featureDAO()->getItemsByFeatures(new Feature('check', 'missing-data'), 500);
+		// TODO: add a new 'lost' value for these, also remove useless 'check' values
+		$lost = $db->featureDAO()->getItemsByFeatures(new Feature('check', 'wrong-location'));
+
+		return new Response(200, 'text/html', $engine->render('stats::needAttention',
+			['serials' => $serials, 'missingData' => $missingData, 'lost' => $lost]));
 	}
 
 	private static function search(
@@ -266,6 +284,7 @@ class Adapter implements AdapterInterface {
 		//Localizer::localize($request->language);
 
 		$engine = new Engine(__DIR__ . DIRECTORY_SEPARATOR . 'templates');
+		$engine->addFolder('stats', $engine->getDirectory() . DIRECTORY_SEPARATOR . 'stats');
 		$engine->addData(['lang' => $request->language]);
 		//$engine->loadExtension(new URI($request->path));
 		$engine->loadExtension(new TemplateUtilities());
@@ -284,12 +303,16 @@ class Adapter implements AdapterInterface {
 			$r->get('/item/{id}/add/{add}', 'getItem');
 			$r->get('/item/{id}/edit/{edit}', 'getItem');
 			$r->get('/add', 'addItem');
-			$r->get('/stats', 'getStats');
 			$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', 'search');
 			$r->get('/search/{id:[0-9]+}/add/{add}', 'search');
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', 'search');
 			$r->get('/search/{id:[0-9]+}/edit/{edit}', 'search');
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', 'search');
+
+			$r->addGroup('/stats', function(FastRoute\RouteCollector $r) {
+				$r->get('', 'getStats');
+				$r->get('/attention', 'getStatsAttention');
+			});
 		});
 
 		$route = $dispatcher->dispatch($method, $uri);

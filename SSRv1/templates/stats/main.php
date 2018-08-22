@@ -1,14 +1,15 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 /** @var int[] $locations */
-/** @var int[] $serials */
 /** @var int[] $recentlyAdded */
-$this->layout('main', ['title' => 'Stats', 'user' => $user]) ?>
+$this->layout('main', ['title' => 'Stats', 'user' => $user]);
+$this->insert('stats::menu', ['currentPage' => '']);
+?>
 
 <?php if(!empty($recentlyAdded)): ?>
 	<div class="statswrapper">
 		<p>Recently added items:</p>
-		<table class="home">
+		<table>
 			<thead>
 			<tr>
 				<td>Item</td>
@@ -47,24 +48,3 @@ $this->layout('main', ['title' => 'Stats', 'user' => $user]) ?>
 		</table>
 	</div>
 <?php endif; ?>
-<?php if(!empty($serials)): ?>
-	<div class="statswrapper">
-		<p>Duplicate serial numbers:</p>
-		<table class="home">
-			<thead>
-			<tr>
-				<td>Serial</td>
-				<td>Quantity</td>
-			</tr>
-			</thead>
-			<tbody>
-			<?php foreach($serials as $serial => $count): ?>
-				<tr>
-					<td><?=$serial?></td>
-					<td><?=$count?></td>
-				</tr>
-			<?php endforeach ?>
-			</tbody>
-		</table>
-	</div>
-<?php endif ?>

@@ -6,7 +6,7 @@
 <nav>
 	<span class="message">Logged in as <?= $user->getUsername() ?></span><button id="logout">Logout</button>
 </nav>
-<nav id="main">
+<nav id="main" class="menu">
 	<ul>
 		<li><a href="/">Home</a></li
 		><li><a href="/add">New</a></li

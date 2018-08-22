@@ -27,23 +27,34 @@ final class FeatureDAO extends DAO {
 
 	/**
 	 * Get all items that have a certain value (exact match) for a feature.
-	 *
-	 * Currently works only for text features. Mostly useful to search by serial number, for
-	 * anything more complicated use SearchDAO facilities.
+	 * For anything more complicated use SearchDAO facilities.
 	 *
 	 * @param Feature $feature Feature and value to search
 	 * @param int $limit Maximum number of results
 	 *
 	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
 	 */
-	public function getItemsByFeatures(Feature $feature, int $limit): array {
-		if($feature->type !== Feature::STRING) {
-			throw new \LogicException('Not implemented');
+	public function getItemsByFeatures(Feature $feature, int $limit = 100): array {
+		$pdo = $this->getPDO();
+		switch($feature->type) {
+			case Feature::STRING:
+				$statement = $pdo->prepare('SELECT `Code` FROM ItemFeature WHERE Feature = ? AND ValueText = ? LIMIT ?');
+				break;
+			case Feature::INTEGER:
+				$statement = $pdo->prepare('SELECT `Code` FROM ItemFeature WHERE Feature = ? AND `Value` = ? LIMIT ?');
+				break;
+			case Feature::ENUM:
+				$statement = $pdo->prepare('SELECT `Code` FROM ItemFeature WHERE Feature = ? AND ValueEnum = ? LIMIT ?');
+				break;
+			case Feature::DOUBLE:
+				$statement = $pdo->prepare('SELECT `Code` FROM ItemFeature WHERE Feature = ? AND ValueDouble = ? LIMIT ?');
+				break;
+			default:
+				throw new \LogicException('Unknown feature type ' . $feature->type . ' returned by getFeatureTypeFromName (should never happen unless a cosmic ray flips a bit somewhere)');
 		}
 
-		$statement = $this->getPDO()->prepare('SELECT Code FROM ItemFeature WHERE Feature = ? AND ValueText = ? LIMIT ?');
 		$statement->bindValue(1, $feature->name, \PDO::PARAM_STR);
-		$statement->bindValue(2, $feature->value, \PDO::PARAM_STR);
+		$statement->bindValue(2, $feature->value);
 		$statement->bindValue(3, $limit, \PDO::PARAM_INT);
 
 		$result = [];
@@ -235,5 +246,42 @@ final class FeatureDAO extends DAO {
 		} finally {
 			$this->deleteFeaturesAllStatement->closeCursor();
 		}
+	}
+
+	/**
+	 * Count how many items have each possible value for a feature
+	 *
+	 * e.g. with feature name = "color":
+	 * - red: 10
+	 * - yellow: 6
+	 * - grey: 4
+	 * and so on.
+	 *
+	 * If some (enum) values aren't assigned to an item they're not reported, actually,
+	 * so it's not really every possible value.
+	 *
+	 * @param string $feature Feature name
+	 * @param int $limit max number of rows to retrieve
+	 *
+	 * @return int[] value => count, sorted by count descending
+	 */
+	public function groupItemsByValue(string $feature, int $limit = 100): array {
+		$pdo = $this->getPDO();
+
+		$statement = $pdo->prepare('SELECT COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`, COUNT(*) as Quantity FROM ItemFeature WHERE Feature = ? LIMIT ?');
+
+		$result = [];
+		try {
+			if(!$statement->execute([$feature])) {
+				throw new DatabaseException("Cannot search items with feature \"$feature\"");
+			}
+			if($statement->rowCount() > 0) {
+				$result = $statement->fetchAll(\PDO::FETCH_NUM)[0];
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $result;
 	}
 }
