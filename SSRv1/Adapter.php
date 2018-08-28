@@ -21,7 +21,7 @@ use WEEEOpen\Tarallo\Server\User;
 
 class Adapter implements AdapterInterface {
 	private static function getItem(
-		User $user = null,
+		?User $user,
 		Database $db,
 		Engine $engine,
 		$parameters,
@@ -48,7 +48,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	private static function getHistory(
-		User $user = null,
+		?User $user,
 		Database $db,
 		Engine $engine,
 		$parameters,
@@ -66,7 +66,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	private static function addItem(
-		User $user = null,
+		?User $user,
 		Database $db,
 		Engine $engine,
 		$parameters,
@@ -78,7 +78,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	private static function login(
-		User $user = null,
+		?User $user,
 		Database $db,
 		Engine $engine,
 		$parameters,
@@ -101,7 +101,7 @@ class Adapter implements AdapterInterface {
 		return $response;
 	}
 
-	public static function logout(User $user = null, Database $db, Engine $engine, $parameters, $querystring) {
+	private static function logout(?User $user, Database $db, Engine $engine, $parameters, $querystring) {
 		Validation::authenticate($user);
 		Session::close($user, $db);
 
@@ -109,7 +109,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	private static function getHome(
-		User $user = null,
+		?User $user,
 		Database $db,
 		Engine $engine,
 		$parameters,
@@ -129,7 +129,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	private static function getStats(
-		User $user = null,
+		?User $user,
 		Database $db,
 		Engine $engine,
 		$parameters,
@@ -145,7 +145,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	private static function getStatsAttention(
-		User $user = null,
+		?User $user,
 		Database $db,
 		Engine $engine,
 		$parameters,
@@ -162,7 +162,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	private static function search(
-		User $user = null,
+		?User $user,
 		Database $db,
 		Engine $engine,
 		$parameters,
@@ -201,7 +201,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	private static function options(
-		User $user = null,
+		?User $user,
 		Database $db,
 		Engine $engine,
 		$parameters,
@@ -262,7 +262,7 @@ class Adapter implements AdapterInterface {
 	}
 
 	private static function getFeaturesJson(
-		User $user = null,
+		?User $user,
 		Database $db,
 		Engine $engine,
 		$parameters,

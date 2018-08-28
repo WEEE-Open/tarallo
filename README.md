@@ -10,15 +10,14 @@ Server in PHP e (My)SQL (anche se forse un NoSQL sarebbe stato più adatto) del 
 Install Vagrant and Ansible (it's required to provision the VM), then run:
 
 	make vm
-	vagrant up
 
-and it will install a Vagrant plugin and Ansible roles.  
+this will install a Vagrant plugin and Ansible roles.    
 If you want to do that manually check the `Makefile` to see what's needed, since
 all plugins go *outside of the project directory* (probably somewhere in your
 home directory).
 
-Once plugins are installed you can just run:
-
+Then do:
+	
 	vagrant up
 
 and you will get:
@@ -31,6 +30,7 @@ and you will get:
 * Adminer at `127.0.0.1:8081/adminer.php` for database inspection (user: root,
 password: root, server: localhost:3306)
 * Database accessible externally by root at `127.0.0.1:3307` (note the non-standard port)
+* phpinfo at `127.0.0.1:8081/phpinfo.php`
 
 If port gets changed from 8080 to anything else by Vagrant no manual adjustments
 should be necessary but this hasn't been tested.
@@ -72,8 +72,7 @@ last deployment.
 The schema is located in `database.sql`.
 
 `database-data.sql` contains some "static" data needed for the software to work.
-It can be edited, but you'll need to run `make features` or the
-`utils/generate-features` script afterwards.
+It can be edited, but you'll need to run `make features` afterwards.
 
 `database-procedures.sql` contains some procedures and triggers, all of these
 are needed for the entire thing to work.

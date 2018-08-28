@@ -56,6 +56,12 @@
     - { role: goozbach.EPEL }
     - { role: geerlingguy.nginx }
 
+  handlers:
+  - name: stop php-fpm
+    service:
+      name: php-fpm
+      state: stopped
+
   tasks:
   - name: Create a directory for no reason
     file: path=/home/vagrant/.phpstorm_helpers state=directory mode=0777
@@ -116,8 +122,8 @@
   - name: Removes MariaDB test database
     mysql_db: login_user=root login_password="{{ mariadb_root_password }}" db=test state=absent
 
-  - name: Install PHP 7.0
-    yum: name={{ item }} state=installed
+  - name: Uninstall old PHP 7.0 (if updating VM)
+    yum: name={{ item }} state=absent
     with_items:
       - php70u-common
       - php70u-fpm
@@ -125,6 +131,24 @@
       - php70u-mysqlnd
       - php70u-opcache
       - php70u-pdo
+      - php70u-pecl-xdebug
+      - php70u-mbstring
+      - php70u-dom
+      - php70u-mcrypt
+      - php70u-intl
+    notify:
+      - stop php-fpm
+
+  - name: Install PHP 7.2
+    yum: name={{ item }} state=installed
+    with_items:
+      - php72u-cli
+      - php72u-common
+      - php72u-fpm
+      - php72u-json
+      - php72u-mysqlnd
+      - php72u-opcache
+      - php72u-pdo
 
   - name: Enable and start PHP-FPM
     service:
@@ -132,15 +156,14 @@
       enabled: yes
       state: started
 
-    # Not really sure about mcrypt and unzip
+    # Not really sure about unzip
   - name: Install PHP developement dependencies
     yum: name={{ item }} state=installed
     with_items:
-      - php70u-pecl-xdebug
-      - php70u-mbstring
-      - php70u-dom
-      - php70u-mcrypt
-      - php70u-intl
+      - php72u-pecl-xdebug
+      - php72u-mbstring
+      - php72u-dom
+      - php72u-intl
       - unzip
 
   - name: Enable XDebug
@@ -174,6 +197,11 @@
 
   - name: Create Adminer directory
     file: path="{{ document_root }}/admin" state=directory mode=0775
+
+  - name: Add a phpinfo for good measure
+    template:
+      src: phpinfo.php.j2
+      dest: "{{ document_root }}/admin/phpinfo.php"
 
   - name: Download Adminer
     get_url:

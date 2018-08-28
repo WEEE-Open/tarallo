@@ -11,11 +11,11 @@
   },
   "config": {
     "platform": {
-      "php": "7.0.28"
+      "php": "7.2.8"
     }
   },
   "require": {
-    "php": "^7.0",
+    "php": "^7.1",
     "ext-json": "*",
     "ext-mysqlnd": "*",
     "ext-pdo": "*",
