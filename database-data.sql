@@ -204,11 +204,11 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'socket370'), -- 370 --
 	('cpu-socket', 'socket462a'), -- 462 (Socket A) -- A aka 462
 	('cpu-socket', 'socket423'), -- 423 --
-	('cpu-socket', 'socket478'), -- 478 (desktop; mPGA478B) --
+	('cpu-socket', 'socket478'), -- 478 (desktop, mPGA478B) --
 	-- There are 3 sockets with multiple names and each one is also called socket 479. And they have 478 pins. Mechanically identical, electrically incompatible.
-	('cpu-socket', 'socket479a'), -- 479 (mobile; mPGA478A) --
-	('cpu-socket', 'socket479c'), -- 479 (mobile; mPGA478C) --
-	('cpu-socket', 'socket479m'), -- 479 (mobile; socket M) --
+	('cpu-socket', 'socket479a'), -- 479 (mobile, mPGA478A) --
+	('cpu-socket', 'socket479c'), -- 479 (mobile, mPGA478C) --
+	('cpu-socket', 'socket479m'), -- 479 (mobile, socket M) --
 	('cpu-socket', 'socket495'), -- 495 --
 	('cpu-socket', 'socket603'), -- 603 --
 	('cpu-socket', 'socket604'), -- 604 --
@@ -320,8 +320,8 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('pci-low-profile', 'yes'), -- Yes (low profile only) --
 	('psu-connector-cpu', 'none'), -- None --
 	('psu-connector-cpu', '4pin'), -- 4 pin --
-	('psu-connector-cpu', '6pin-hp'), -- 6 pin (HP; 1 purple + 1 blue) -- 2 black, 2 yellow, 1 purple, 1 blue
-	('psu-connector-cpu', '6pin-hp-brown'), -- 6 pin (HP; 2 brown) -- 2 black, 2 yellow, 2 brown
+	('psu-connector-cpu', '6pin-hp'), -- 6 pin (HP, 1 purple + 1 blue) -- 2 black, 2 yellow, 1 purple, 1 blue
+	('psu-connector-cpu', '6pin-hp-brown'), -- 6 pin (HP, 2 brown) -- 2 black, 2 yellow, 2 brown
 	('psu-connector-cpu', '6pin'), -- 6 pin (other) --
 	('psu-connector-cpu', '8pin'), -- 8 pin --
 	('psu-connector-cpu', 'proprietary'); -- Proprietary --

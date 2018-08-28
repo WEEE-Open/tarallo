@@ -46,7 +46,7 @@ foreach($lines as $line) {
 	if($block === 0 || $block === 3) {
 		continue;
 	} else {
-		$boom = explode(',', $line);
+		$boom = explode(',', $line, 3);
 		if(count($boom) < 2) {
 			continue;
 		}
