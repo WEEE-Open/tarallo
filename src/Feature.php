@@ -9,6 +9,7 @@ class Feature {
 	const ENUM = 2;
 	const DOUBLE = 3;
 
+	// Change these numbers for a different sorting
 	const GROUP_commercial = 1;
 	const GROUP_general = 2;
 	const GROUP_hddprocedures = 3;
@@ -85,7 +86,7 @@ class Feature {
 		'weight-gram' => self::INTEGER,
 		'spin-rate-rpm' => self::INTEGER,
 		'dms-59-ports-n' => self::INTEGER,
-		'check' => ['missing-data' => true, 'wrong-data' => true, 'wrong-location' => true, 'wrong-content' => true, 'missing-content' => true, 'wrong-data-and-content' => true, 'wrong-location-and-data' => true],
+		'check' => ['missing-data' => true, 'lost' => true],
 		'ram-ecc' => ['no' => true, 'yes' => true],
 		'other-code' => self::STRING,
 		'hdmi-ports-n' => self::INTEGER,

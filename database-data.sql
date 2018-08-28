@@ -5,6 +5,9 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
 SET NAMES utf8mb4;
 
+-- The comments between -- and -- are actually parsed and used to generate human-readable names.
+-- The part after the second -- is just a plain comment.
+
 TRUNCATE `Feature`;
 INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('brand', 'commercial', 0), -- Brand --
@@ -276,15 +279,9 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('ram-form-factor', 'microdimm'), -- Micro DIMM --
 	('ram-form-factor', 'fbdimm'), -- FB-DIMM --
 	('check', 'missing-data'), -- Missing data --
-	('check', 'wrong-data'), -- Wrong data --
-	('check', 'wrong-location'), -- Wrong location/lost --
-	('check', 'wrong-content'), -- Wrong content --
-	('check', 'missing-content'), -- Missing content --
-	('check', 'wrong-data-and-content'), -- Wrong data and content --
-	('check', 'wrong-location-and-data'), -- Wrong location and data (and content) --
+	('check', 'lost'), -- Lost --
 	('ram-ecc', 'no'), -- No --
 	('ram-ecc', 'yes'), -- Yes --
-	-- (65, 0, 'no'), --  --
 	('data-erased', 'yes'), -- Yes️ -- Just don't add the feature if it hasn't been erased...
 	('surface-scan', 'fail'), -- Failed --
 	('surface-scan', 'pass'), -- Passed --
