@@ -51,11 +51,7 @@ class Controller {
 			->withAttribute('Template', 'viewItem')
 			->withAttribute('TemplateParameters', $renderParameters);
 
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $next ? $next($request, $response) : $response;
 	}
 
 	public static function getHistory(Request $request, Response $response, ?callable $next = null): Response {
@@ -81,13 +77,10 @@ class Controller {
 
 		$request = $request
 			->withAttribute('Template', 'history')
-			->withAttribute('TemplateParameters', ['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item), 'history' => $history]);
+			->withAttribute('TemplateParameters',
+				['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item), 'history' => $history]);
 
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $next ? $next($request, $response) : $response;
 	}
 
 	public static function addItem(Request $request, Response $response, ?callable $next = null): Response {
@@ -102,21 +95,14 @@ class Controller {
 			->withAttribute('Template', 'newItem')
 			->withAttribute('TemplateParameters', ['add' => true]);
 
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $next ? $next($request, $response) : $response;
 	}
 
 	public static function login(Request $request, Response $response, ?callable $next = null): Response {
 		$db = $request->getAttribute('Database');
-		$query = $request->getQueryParams();
 
-		if($query === null) {
-			$request = $request
-				->withAttribute('Template', 'login');
-		} else {
+		if($request->getMethod() === 'POST') {
+			$query = $request->getParsedBody();
 			$username = Validation::validateHasString($query, 'username');
 			$password = Validation::validateHasString($query, 'password');
 			$user = $db->userDAO()->getUserFromLogin($username, $password);
@@ -129,18 +115,19 @@ class Controller {
 					->withStatus(400);
 			} else {
 				Session::start($user, $db);
-				$response
+				$request = $request
+					->withAttribute('User', $user);
+				$response = $response
 					->withStatus(303)
 					->withoutHeader('Content-type')
 					->withHeader('Location', '/home');
 			}
+		} else {
+			$request = $request
+				->withAttribute('Template', 'login');
 		}
 
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $next ? $next($request, $response) : $response;
 	}
 
 	public static function logout(Request $request, Response $response, ?callable $next = null): Response {
@@ -153,11 +140,7 @@ class Controller {
 		$request = $request
 			->withAttribute('Template', 'logout');
 
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $next ? $next($request, $response) : $response;
 	}
 
 	public static function getHome(Request $request, Response $response, ?callable $next = null): Response {
@@ -167,10 +150,11 @@ class Controller {
 		try {
 			Validation::authorize($user, 3);
 		} catch(AuthenticationException $e) {
-			$response
+			$response = $response
 				->withStatus(303)
 				->withoutHeader('Content-type')
 				->withHeader('Location', '/login');
+			return $next ? $next($request, $response) : $response;
 		}
 
 		$request = $request
@@ -181,11 +165,7 @@ class Controller {
 					'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', max(20, count($locations)))
 				]);
 
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $next ? $next($request, $response) : $response;
 	}
 
 	public static function getStats(Request $request, Response $response, ?callable $next = null): Response {
@@ -218,11 +198,7 @@ class Controller {
 						]);
 		}
 
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $next ? $next($request, $response) : $response;
 	}
 
 	public static function search(Request $request, Response $response, ?callable $next = null): Response {
@@ -265,11 +241,7 @@ class Controller {
 			->withAttribute('Template', 'search')
 			->withAttribute('TemplateParameters', $templateParameters);
 
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $next ? $next($request, $response) : $response;
 	}
 
 	public static function options(Request $request, Response $response, ?callable $next = null): Response {
@@ -334,11 +306,7 @@ class Controller {
 			$response = $response->withStatus(400);
 		}
 
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $next ? $next($request, $response) : $response;
 	}
 
 	public static function getFeaturesJson(Request $request, Response $response, ?callable $next = null): Response {
@@ -350,11 +318,7 @@ class Controller {
 
 		$response->getBody()->write(json_encode(FeaturePrinter::getAllFeatures()));
 
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $next ? $next($request, $response) : $response;
 	}
 
 	public static function handle(Request $request): Response {
@@ -401,7 +365,7 @@ class Controller {
 
 		switch($route[0]) {
 			case FastRoute\Dispatcher::FOUND:
-				$queue = array_merge($queue, [Controller::class, 'doTransaction'], $route[1]);
+				$queue = array_merge($queue, [[Controller::class, 'doTransaction']], $route[1]);
 				$request = $request
 					->withAttribute('parameters', $route[2]);
 				$response = $response
@@ -428,7 +392,7 @@ class Controller {
 
 		unset($route);
 
-		$queue = array_merge($queue, [Controller::class, 'renderResponse']);
+		$queue = array_merge($queue, [[Controller::class, 'renderResponse']]);
 
 		//		if(!is_callable($callback)) {
 		//			echo 'Server error: cannot call "' . implode('::', $callback) . '" (SSR)';
@@ -470,15 +434,19 @@ class Controller {
 		$template = $request->getAttribute('Template');
 
 		if($request->getMethod() !== 'HEAD' && $template !== null) {
-			// TODO: remove addData, read attrbitues in templates directly
-			$request->getAttribute('TemplateEngine')->addData([
-				'user' => $request->getAttribute('User'),
-				'self' => $request->getUri()->getPath()
-			]);
-
 			/** @var Engine $engine */
 			$engine = $request->getAttribute('TemplateEngine');
-			$engine->render($template, $request->getAttribute('TemplateParameters', []));
+
+			// TODO: remove addData, read attrbitues in templates directly
+			$engine->addData([
+				'user'     => $request->getAttribute('User'),
+				'self'     => $request->getUri()->getPath(),
+				'request'  => $request,
+				'response' => $response
+			]);
+
+			$response->getBody()->rewind();
+			$response->getBody()->write($engine->render($template, $request->getAttribute('TemplateParameters', [])));
 		}
 
 		if($next) {
@@ -498,28 +466,28 @@ class Controller {
 				return $next($request, $response);
 			} catch(AuthenticationException $e) {
 				// One of these should be 401, but that requires a challenge header in the response...
-				$request
+				$request = $request
 					->withAttribute('Template', 'genericError')
 					->withAttribute('TemplateParameters', []);
-				$response
+				$response = $response
 					->withStatus(403);
 			} catch(AuthorizationException $e) {
-				$request
+				$request = $request
 					->withAttribute('Template', 'genericError')
 					->withAttribute('TemplateParameters', []);
-				$response
+				$response = $response
 					->withStatus(403);
 			} catch(NotFoundException $e) {
-				$request
+				$request = $request
 					->withAttribute('Template', 'notFound')
 					->withAttribute('TemplateParameters', []);
-				$response
+				$response = $response
 					->withStatus(404);
 			} catch(\Throwable $e) {
-				$request
+				$request = $request
 					->withAttribute('Template', 'genericError')
 					->withAttribute('TemplateParameters', ['reason' => $e->getMessage()]);
-				$response
+				$response = $response
 					->withStatus(500);
 			}
 

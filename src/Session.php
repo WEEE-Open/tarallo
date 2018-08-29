@@ -52,6 +52,15 @@ class Session {
 		return $str;
 	}
 
+	/**
+	 * Set the actual cookie
+	 *
+	 * @param $newContent
+	 * @param $expire
+	 *
+	 * @deprecated
+	 * @todo Use $response to set cookies somehow
+	 */
 	private static function setContent($newContent, $expire) {
 		// TODO: enable "secure" if we get a TLS certifcate for the test VM
 		setcookie(self::COOKIE_NAME, $newContent, $expire, '', '', false, true);

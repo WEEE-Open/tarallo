@@ -23,5 +23,31 @@ if(substr($request->getUri()->getPath(), 0, 5) === '/v1/') {
 	$response = SSRv1\Controller::handle($request);
 }
 
-// TODO: send response (in a better way, I mean)
-var_dump($response);
+// Code from this point onwards
+// partially taken from https://github.com/http-interop/response-sender/
+// Copyright (c) 2017 Woody Gilk
+
+$http_line = sprintf('HTTP/%s %s %s',
+	$response->getProtocolVersion(),
+	$response->getStatusCode(),
+	$response->getReasonPhrase()
+);
+
+header($http_line, true, $response->getStatusCode());
+
+foreach ($response->getHeaders() as $name => $values) {
+	foreach ($values as $value) {
+		header("$name: $value", false);
+	}
+}
+
+$stream = $response->getBody();
+if($stream !== null) {
+	if($stream->isSeekable()) {
+		$stream->rewind();
+	}
+
+	while(!$stream->eof()) {
+		echo $stream->read(1024 * 8);
+	}
+}
