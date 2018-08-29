@@ -3,6 +3,7 @@
 vendor/
 build/
 utils/provision/playbook.retry
+cachegrind.out.*
 *.log
 *.generated.js*
 *.mo
