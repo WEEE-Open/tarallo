@@ -4,14 +4,14 @@ namespace WEEEOpen\Tarallo\SSRv1;
 
 use FastRoute;
 use League\Plates\Engine;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Feature;
-use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
+use WEEEOpen\Tarallo\Server\HTTP\Middleware;
 use WEEEOpen\Tarallo\Server\HTTP\RedirectResponse;
-use WEEEOpen\Tarallo\Server\HTTP\Request;
-use WEEEOpen\Tarallo\Server\HTTP\Response;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\NotFoundException;
@@ -19,7 +19,7 @@ use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
 
 
-class Adapter implements AdapterInterface {
+class Controller implements Middleware {
 	private static function getItem(
 		?User $user,
 		Database $db,
@@ -268,25 +268,18 @@ class Adapter implements AdapterInterface {
 		$parameters,
 		$querystring
 	) {
-		session_cache_limiter('');
 		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 36000) . ' GMT');
 		header('Cache-Control	: max-age=36000');
+		//header('Last-Modified: ...');
 
 		return new Response(200, 'text/json', json_encode(FeaturePrinter::getAllFeatures()));
 	}
 
-	public static function go(Request $request): Response {
-		$method = $request->method;
-		$uri = $request->path;
-		$querystring = $request->querystring;
-
-		//Localizer::localize($request->language);
-
-		$engine = new Engine(__DIR__ . DIRECTORY_SEPARATOR . 'templates');
-		$engine->addFolder('stats', $engine->getDirectory() . DIRECTORY_SEPARATOR . 'stats');
-		$engine->addData(['lang' => $request->language]);
-		//$engine->loadExtension(new URI($request->path));
-		$engine->loadExtension(new TemplateUtilities());
+	public function __invoke(Request $request, Response $response, ?callable $next): Response {
+		// Maybe do this:
+		//$queue_before = [new RestoreSession];
+		// $r->addRoute(... [new ValidationStuff, new Login]);
+		//$queue_after = [new Render];
 
 		// TODO: use cachedDispatcher
 		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
@@ -310,7 +303,7 @@ class Adapter implements AdapterInterface {
 
 			$r->addGroup('/stats', function(FastRoute\RouteCollector $r) {
 				$r->get('', 'getStats');
-				$r->get('/attention', 'getStatsAttention');
+				$r->get('/{which}', 'getStats');
 			});
 		});
 
@@ -332,7 +325,7 @@ class Adapter implements AdapterInterface {
 			return new Response(500, 'text/plain; charset=utf-8', 'SSR Error: unknown router result');
 		}
 
-		$callback = [Adapter::class, $route[1]];
+		$callback = [Controller::class, $route[1]];
 		$parameters = $route[2];
 		unset($route);
 

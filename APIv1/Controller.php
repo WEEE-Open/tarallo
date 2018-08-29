@@ -24,7 +24,7 @@ use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
 
 
-class Adapter implements AdapterInterface {
+class Controller implements AdapterInterface {
 	public static function sessionWhoami(User $user = null, Database $db, $parameters, $querystring, $payload) {
 		Validation::authorize($user, 3);
 
@@ -294,7 +294,7 @@ class Adapter implements AdapterInterface {
 		return $db->auditDAO()->getHistory($item, $length);
 	}
 
-	public static function go(Request $request): Response {
+	public static function route(Request $request): Response {
 		return self::goInternal($request->method, $request->path, $request->querystring,
 			$request->payload)->asResponseInterface();
 	}
@@ -383,7 +383,7 @@ class Adapter implements AdapterInterface {
 			return JSend::ofError('Server error: unhandled router result');
 		}
 
-		$callback = [Adapter::class, $route[1]];
+		$callback = [Controller::class, $route[1]];
 		$parameters = $route[2];
 		unset($route);
 

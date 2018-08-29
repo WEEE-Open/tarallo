@@ -24,7 +24,7 @@ class Validation {
 	 * Check that user is a valid user.
 	 * You probably want authorize() instead, which also checks permission.
 	 *
-	 * @see Adapter::authorize()
+	 * @see Controller::authorize()
 	 *
 	 * @param User $user
 	 */

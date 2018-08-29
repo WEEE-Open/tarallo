@@ -5,8 +5,9 @@ namespace WEEEOpen\Tarallo\Server\HTTP;
 
 use Negotiation\LanguageNegotiator;
 use Negotiation\Negotiator;
+use Psr\Http\Message\RequestInterface;
 
-class Request {
+class Request implements RequestInterface {
 	public $host;
 	public $method;
 	public $path;
