@@ -94,7 +94,6 @@ final class ItemDAO extends DAO {
 	 * @param ItemIncomplete $item
 	 *
 	 * @return bool
-	 * @throws NotFoundException If item doesn't exist in any form anywhere
 	 */
 	public function itemExists(ItemIncomplete $item) {
 		$deleted = $this->itemIsDeleted($item);

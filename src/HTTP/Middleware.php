@@ -9,14 +9,14 @@ interface Middleware {
 	public function __invoke(
 		ServerRequestInterface $request,
 		ResponseInterface $response,
-		?callable $next
+		?callable $next = null
 	): ResponseInterface;
 
 	/*
 	public function __invoke(
 		ServerRequestInterface $request,
 		ResponseInterface $response,
-		?callable $next
+		?callable $next = null
 	): ResponseInterface {
 		// Do stuff
 

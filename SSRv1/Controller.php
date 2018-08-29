@@ -6,12 +6,14 @@ use FastRoute;
 use League\Plates\Engine;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Relay\RelayBuilder;
+use Slim\Http\Body;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
-use WEEEOpen\Tarallo\Server\HTTP\Middleware;
-use WEEEOpen\Tarallo\Server\HTTP\RedirectResponse;
+use WEEEOpen\Tarallo\Server\HTTP\DatabaseConnection;
+use WEEEOpen\Tarallo\Server\HTTP\LanguageNegotiatior;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\NotFoundException;
@@ -19,19 +21,20 @@ use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
 
 
-class Controller implements Middleware {
-	private static function getItem(
-		?User $user,
-		Database $db,
-		Engine $engine,
-		$parameters,
-		$querystring
-	): Response {
+class Controller {
+	public static function getItem(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+
 		Validation::authorize($user, 3);
-		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
-		$edit = isset($parameters['edit']) ? (string) $parameters['edit'] : null;
-		$add = isset($parameters['add']) ? (string) $parameters['add'] : null;
-		$depth = isset($querystring['depth']) ? (int) $querystring['depth'] : null;
+
+		$id = Validation::validateOptionalString($parameters, 'id', null);
+		$edit = Validation::validateOptionalString($parameters, 'edit', null);
+		$add = Validation::validateOptionalString($parameters, 'add', null);
+		$depth = Validation::validateOptionalInt($query, 'depth', 20);
 
 		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, $depth);
 		$renderParameters = ['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item)];
@@ -44,145 +47,206 @@ class Controller implements Middleware {
 			$renderParameters['edit'] = null;
 		}
 
-		return new Response(200, 'text/html', $engine->render('viewItem', $renderParameters));
-	}
+		$request = $request
+			->withAttribute('Template', 'viewItem')
+			->withAttribute('TemplateParameters', $renderParameters);
 
-	private static function getHistory(
-		?User $user,
-		Database $db,
-		Engine $engine,
-		$parameters,
-		$querystring
-	): Response {
-		Validation::authorize($user, 3);
-		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
-		$count = isset($querystring['count']) ? (int) $querystring['count'] : 20;
-
-		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, 0);
-		$history = $db->auditDAO()->getHistory($item, $count);
-
-		return new Response(200, 'text/html', $engine->render('history',
-			['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item), 'history' => $history]));
-	}
-
-	private static function addItem(
-		?User $user,
-		Database $db,
-		Engine $engine,
-		$parameters,
-		$querystring
-	): Response {
-		Validation::authorize($user);
-
-		return new Response(200, 'text/html', $engine->render('newItem', ['add' => true]));
-	}
-
-	private static function login(
-		?User $user,
-		Database $db,
-		Engine $engine,
-		$parameters,
-		$querystring
-	): Response {
-		if($querystring !== null) {
-			$username = Validation::validateHasString($querystring, 'username');
-			$password = Validation::validateHasString($querystring, 'password');
-			$user = $db->userDAO()->getUserFromLogin($username, $password);
-			if($user === null) {
-				$response = new Response(400, 'text/html', $engine->render('login', ['failed' => true]));
-			} else {
-				Session::start($user, $db);
-				$response = new RedirectResponse(303, '/home');
-			}
+		if($next) {
+			return $next($request, $response);
 		} else {
-			$response = new Response(200, 'text/html', $engine->render('login'));
+			return $response;
+		}
+	}
+
+	public static function getHistory(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+
+		Validation::authorize($user, 3);
+
+		$id = Validation::validateOptionalString($parameters, 'id', null);
+		$count = Validation::validateOptionalInt($query, 'count', 20);
+
+		// Full item needed to show breadcrumbs
+		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, 0);
+		if(!$db->itemDAO()->itemExists($item)) {
+			throw new NotFoundException();
 		}
 
-		return $response;
+		// TODO: place a limit on $count
+		$history = $db->auditDAO()->getHistory($item, $count);
+
+		$request = $request
+			->withAttribute('Template', 'history')
+			->withAttribute('TemplateParameters', ['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item), 'history' => $history]);
+
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
 	}
 
-	private static function logout(?User $user, Database $db, Engine $engine, $parameters, $querystring) {
+	public static function addItem(Request $request, Response $response, ?callable $next = null): Response {
+		// TODO: a ?template=some_other_id, to clone (with minor modifications) other items
+		//$db = $request->getAttribute('Database');
+		//$query = $request->getQueryParams();
+		$user = $request->getAttribute('User');
+
+		Validation::authorize($user);
+
+		$request = $request
+			->withAttribute('Template', 'newItem')
+			->withAttribute('TemplateParameters', ['add' => true]);
+
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
+	}
+
+	public static function login(Request $request, Response $response, ?callable $next = null): Response {
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+
+		if($query === null) {
+			$request = $request
+				->withAttribute('Template', 'login');
+		} else {
+			$username = Validation::validateHasString($query, 'username');
+			$password = Validation::validateHasString($query, 'password');
+			$user = $db->userDAO()->getUserFromLogin($username, $password);
+
+			if($user === null) {
+				$request = $request
+					->withAttribute('Template', 'login')
+					->withAttribute('TemplateParameters', ['failed' => true]);
+				$response = $response
+					->withStatus(400);
+			} else {
+				Session::start($user, $db);
+				$response
+					->withStatus(303)
+					->withoutHeader('Content-type')
+					->withHeader('Location', '/home');
+			}
+		}
+
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
+	}
+
+	public static function logout(Request $request, Response $response, ?callable $next = null): Response {
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+
 		Validation::authenticate($user);
 		Session::close($user, $db);
 
-		return new Response(200, 'text/html', $engine->render('logout'));
+		$request = $request
+			->withAttribute('Template', 'logout');
+
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
 	}
 
-	private static function getHome(
-		?User $user,
-		Database $db,
-		Engine $engine,
-		$parameters,
-		$querystring
-	): Response {
+	public static function getHome(Request $request, Response $response, ?callable $next = null): Response {
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+
 		try {
 			Validation::authorize($user, 3);
 		} catch(AuthenticationException $e) {
-			return new RedirectResponse(303, '/login');
+			$response
+				->withStatus(303)
+				->withoutHeader('Content-type')
+				->withHeader('Location', '/login');
 		}
 
-		$locations = $db->statsDAO()->getLocationsByItems();
-		$recentlyAdded = $db->auditDAO()->getRecentAuditByType('C', max(20, count($locations)));
+		$request = $request
+			->withAttribute('Template', 'home')
+			->withAttribute('TemplateParameters',
+				[
+					'locations'     => $locations = $db->statsDAO()->getLocationsByItems(),
+					'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', max(20, count($locations)))
+				]);
 
-		return new Response(200, 'text/html',
-			$engine->render('home', ['locations' => $locations, 'recentlyAdded' => $recentlyAdded]));
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
 	}
 
-	private static function getStats(
-		?User $user,
-		Database $db,
-		Engine $engine,
-		$parameters,
-		$querystring
-	): Response {
+	public static function getStats(Request $request, Response $response, ?callable $next = null): Response {
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', ['which' => null]);
+
 		Validation::authorize($user, 3);
 
-		$locations = $db->statsDAO()->getLocationsByItems();
-		$recentlyAdded = $db->auditDAO()->getRecentAuditByType('C', 40);
+		switch($parameters['which']) {
+			case '':
+			default:
+				$request = $request
+					->withAttribute('Template', 'stats::main')
+					->withAttribute('TemplateParameters',
+						[
+							'locations'     => $db->statsDAO()->getLocationsByItems(),
+							'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 40)
+						]);
+				break;
+			case 'attention':
+				$request = $request
+					->withAttribute('Template', 'stats::main')
+					->withAttribute('TemplateParameters',
+						[
+							'serials'     => $db->statsDAO()->getDuplicateSerialsCount(),
+							'missingData' => $db->featureDAO()->getItemsByFeatures(new Feature('check', 'missing-data'),
+								500),
+							'lost'        => $db->featureDAO()->getItemsByFeatures(new Feature('check', 'lost'), 100)
+						]);
+		}
 
-		return new Response(200, 'text/html', $engine->render('stats::main',
-			['locations' => $locations, 'recentlyAdded' => $recentlyAdded]));
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
 	}
 
-	private static function getStatsAttention(
-		?User $user,
-		Database $db,
-		Engine $engine,
-		$parameters,
-		$querystring
-	): Response {
+	public static function search(Request $request, Response $response, ?callable $next = null): Response {
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+		$query = $request->getQueryParams();
+
 		Validation::authorize($user, 3);
 
-		$serials = $db->statsDAO()->getDuplicateSerialsCount();
-		$missingData = $db->featureDAO()->getItemsByFeatures(new Feature('check', 'missing-data'), 500);
-		$lost = $db->featureDAO()->getItemsByFeatures(new Feature('check', 'lost'), 100);
-
-		return new Response(200, 'text/html', $engine->render('stats::needAttention',
-			['serials' => $serials, 'missingData' => $missingData, 'lost' => $lost]));
-	}
-
-	private static function search(
-		?User $user,
-		Database $db,
-		Engine $engine,
-		$parameters,
-		$querystring
-	): Response {
-		Validation::authorize($user, 3);
-		$id = isset($parameters['id']) ? (int) $parameters['id'] : null;
-		$page = isset($parameters['page']) ? (int) $parameters['page'] : 1;
-		$add = isset($parameters['add']) ? (string) $parameters['add'] : null;
-		$edit = isset($parameters['edit']) ? (string) $parameters['edit'] : null;
-		$depth = isset($querystring['depth']) ? (int) $querystring['depth'] : null;
+		$id = Validation::validateOptionalString($parameters, 'id', null);
+		$page = Validation::validateOptionalInt($parameters, 'page', 1);
+		$edit = Validation::validateOptionalString($parameters, 'edit', null);
+		$add = Validation::validateOptionalString($parameters, 'add', null);
+		$depth = Validation::validateOptionalInt($query, 'depth', 20);
 
 		if($id === null) {
-			$parameters = ['searchId' => null];
+			$templateParameters = ['searchId' => null];
 		} else {
 			$perPage = 10;
 			$results = $db->searchDAO()->getResults($id, $page, $perPage, $depth);
 			$total = $db->searchDAO()->getResultsCount($id);
 			$pages = (int) ceil($total / $perPage);
-			$parameters = [
+			$templateParameters = [
 				'searchId'       => $id,
 				'page'           => $page,
 				'pages'          => $pages,
@@ -191,30 +255,37 @@ class Controller implements Middleware {
 				'results'        => $results,
 			];
 			if($add !== null) {
-				$parameters['add'] = $add;
+				$templateParameters['add'] = $add;
 			} else if($edit !== null) {
-				$parameters['edit'] = $edit;
+				$templateParameters['edit'] = $edit;
 			}
 		}
 
-		return new Response(200, 'text/html', $engine->render('search', $parameters));
+		$request = $request
+			->withAttribute('Template', 'search')
+			->withAttribute('TemplateParameters', $templateParameters);
+
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
 	}
 
-	private static function options(
-		?User $user,
-		Database $db,
-		Engine $engine,
-		$parameters,
-		$querystring
-	): Response {
+	public static function options(Request $request, Response $response, ?callable $next = null): Response {
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$query = $request->getQueryParams();
+
 		Validation::authorize($user, 3);
-		if($querystring === null) {
+
+		if(empty($query)) {
 			$result = null;
 		} else {
 			$result = 'success';
-			$password = Validation::validateHasString($querystring, 'password');
-			$confirm = Validation::validateHasString($querystring, 'confirm');
-			$username = isset($querystring['username']) ? (string) trim($querystring['username']) : null;
+			$password = Validation::validateHasString($query, 'password');
+			$confirm = Validation::validateHasString($query, 'confirm');
+			$username = isset($query['username']) ? (string) trim($query['username']) : null;
 
 			$target = null;
 			if($username === null || $username === '') {
@@ -252,123 +323,210 @@ class Controller implements Middleware {
 				}
 			}
 		}
+
+		$request = $request
+			->withAttribute('Template', 'options')
+			->withAttribute('TemplateParameters', ['result' => $result]);
+
 		if($result === null || $result === 'success' || $result === 'successnew') {
-			$status = 200;
+			$response = $response->withStatus(200);
 		} else {
-			$status = 400;
+			$response = $response->withStatus(400);
 		}
 
-		return new Response($status, 'text/html', $engine->render('options', ['result' => $result]));
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
 	}
 
-	private static function getFeaturesJson(
-		?User $user,
-		Database $db,
-		Engine $engine,
-		$parameters,
-		$querystring
-	) {
-		header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 36000) . ' GMT');
-		header('Cache-Control	: max-age=36000');
-		//header('Last-Modified: ...');
+	public static function getFeaturesJson(Request $request, Response $response, ?callable $next = null): Response {
+		$response = $response
+			->withHeader('Content-Type', 'text/json')
+			->withHeader('Expires', gmdate('D, d M Y H:i:s', time() + 36000) . ' GMT')
+			->withHeader('Cache-Control', 'max-age=36000');
+		//->withHeader('Last-Modified', '...');
 
-		return new Response(200, 'text/json', json_encode(FeaturePrinter::getAllFeatures()));
+		$response->getBody()->write(json_encode(FeaturePrinter::getAllFeatures()));
+
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
 	}
 
-	public function __invoke(Request $request, Response $response, ?callable $next): Response {
-		// Maybe do this:
-		//$queue_before = [new RestoreSession];
-		// $r->addRoute(... [new ValidationStuff, new Login]);
-		//$queue_after = [new Render];
+	public static function handle(Request $request): Response {
+		$queue = [
+			new DatabaseConnection(),
+			new LanguageNegotiatior(),
+			new TemplateEngine(),
+			[Controller::class, 'handleExceptions']
+		];
+		$response = new \Slim\Http\Response();
+		$response = $response
+			->withHeader('Content-Type', 'text/html')
+			->withBody(new Body(fopen('php://memory', 'r+')));
 
 		// TODO: use cachedDispatcher
 		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
-			$r->addRoute(['GET', 'POST'], '/login', 'login');
-			$r->addRoute(['GET', 'POST'], '/options', 'options');
-			$r->get('/logout', 'logout');
+			// TODO: [new RateLimit(), [Controller::class, 'login']] or something like that
+			$r->addRoute(['GET', 'POST'], '/login', [[Controller::class, 'login']]);
+			$r->addRoute(['GET', 'POST'], '/options', [[Controller::class, 'options']]);
+			$r->get('/logout', [[Controller::class, 'logout']]);
 
-			$r->get('/', 'getHome');
-			$r->get('/features.json', 'getFeaturesJson');
-			$r->get('/home', 'getHome');
-			$r->get('/item/{id}', 'getItem');
-			$r->get('/history/{id}', 'getHistory');
-			$r->get('/item/{id}/add/{add}', 'getItem');
-			$r->get('/item/{id}/edit/{edit}', 'getItem');
-			$r->get('/add', 'addItem');
-			$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', 'search');
-			$r->get('/search/{id:[0-9]+}/add/{add}', 'search');
-			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', 'search');
-			$r->get('/search/{id:[0-9]+}/edit/{edit}', 'search');
-			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', 'search');
+			$r->get('/', [[Controller::class, 'getHome']]);
+			$r->get('', [[Controller::class, 'getHome']]);
+			$r->get('/features.json', [Controller::class, 'getFeaturesJson']);
+			$r->get('/home', [[Controller::class, 'getHome']]);
+			$r->get('/item/{id}', [[Controller::class, 'getItem']]);
+			$r->get('/history/{id}', [[Controller::class, 'getHistory']]);
+			$r->get('/item/{id}/add/{add}', [[Controller::class, 'getItem']]);
+			$r->get('/item/{id}/edit/{edit}', [[Controller::class, 'getItem']]);
+			$r->get('/add', [[Controller::class, 'addItem']]);
+			$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [[Controller::class, 'search']]);
+			$r->get('/search/{id:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
+			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
+			$r->get('/search/{id:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
+			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
 
 			$r->addGroup('/stats', function(FastRoute\RouteCollector $r) {
-				$r->get('', 'getStats');
-				$r->get('/{which}', 'getStats');
+				$r->get('', [[Controller::class, 'getStats']]);
+				$r->get('/{which}', [[Controller::class, 'getStats']]);
 			});
 		});
 
-		$route = $dispatcher->dispatch($method, $uri);
+		$route = $dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath());
 
-		if($route[0] === FastRoute\Dispatcher::NOT_FOUND) {
-			return new Response(404, $request->responseType, $engine->render('notFound'));
+		switch($route[0]) {
+			case FastRoute\Dispatcher::FOUND:
+				$queue = array_merge($queue, [Controller::class, 'doTransaction'], $route[1]);
+				$request = $request
+					->withAttribute('parameters', $route[2]);
+				$response = $response
+					->withStatus(200);
+				break;
+			case FastRoute\Dispatcher::NOT_FOUND:
+				$request = $request
+					->withAttribute('Template', 'notFound');
+				$response = $response->withStatus(404);
+				break;
+			case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
+				$request = $request
+					->withAttribute('Template', 'genericError');
+				$response = $response->withStatus(405)
+					->withHeader('Allow', implode(', ', $route[1]));
+				break;
+			default:
+				$request = $request
+					->withAttribute('Template', 'genericError')
+					->withAttribute('TemplateParameters', ['reason' => 'SSR Error: unknown router result']);
+				$response = $response->withStatus(500);
+				break;
 		}
 
-		if($route[0] === FastRoute\Dispatcher::METHOD_NOT_ALLOWED) {
-			http_response_code(405);
-			header('Allow: ' . implode(', ', $route[1]));
-			exit(); // TODO: return new Response instead of exiting
-		}
-
-		if($route[0] !== FastRoute\Dispatcher::FOUND) {
-			http_response_code(500);
-
-			return new Response(500, 'text/plain; charset=utf-8', 'SSR Error: unknown router result');
-		}
-
-		$callback = [Controller::class, $route[1]];
-		$parameters = $route[2];
 		unset($route);
 
-		if(!is_callable($callback)) {
-			echo 'Server error: cannot call "' . implode('::', $callback) . '" (SSR)';
-		}
+		$queue = array_merge($queue, [Controller::class, 'renderResponse']);
 
-		try {
-			$db = new Database(DB_USERNAME, DB_PASSWORD, DB_DSN);
-			$db->beginTransaction();
-			$user = Session::restore($db);
-			$db->commit();
-		} catch(\Exception $e) {
-			if(isset($db)) {
-				$db->rollback();
-			}
+		//		if(!is_callable($callback)) {
+		//			echo 'Server error: cannot call "' . implode('::', $callback) . '" (SSR)';
+		//		}
 
-			return new Response(500, 'text/plain; charset=utf-8', 'Server error: ' . $e->getMessage());
-		}
+		$relayBuilder = new RelayBuilder();
+		$relay = $relayBuilder->newInstance($queue);
 
-		// self is the routed path thingamajig
-		$engine->addData(['user' => $user, 'self' => $uri]);
-
-		try {
-			try {
-				$db->beginTransaction();
-				$result = call_user_func($callback, $user, $db, $engine, $parameters, $querystring);
-				$db->commit();
-			} catch(\Throwable $e) {
-				$db->rollback();
-				throw $e;
-			}
-		} catch(AuthenticationException $e) {
-			// One of these should be 401, but that requires a challenge header in the response...
-			return new Response(403, $request->responseType, $engine->render('notAuthenticated'));
-		} catch(AuthorizationException $e) {
-			return new Response(403, $request->responseType, $engine->render('notAuthorized'));
-		} catch(NotFoundException $e) {
-			return new Response(404, $request->responseType, $engine->render('notFound'));
-		} catch(\Throwable $e) {
-			return new Response(500, 'text/plain', 'Unhandled exception: ' . $e->getMessage());
-		}
-
-		return $result;
+		return $relay($request, $response);
 	}
+
+	public static function doTransaction(
+		Request $request,
+		Response $response,
+		?callable $next = null
+	): Response {
+		$db = $request->getAttribute('Database');
+		$db->beginTransaction();
+
+		try {
+			if($next) {
+				$response = $next($request, $response);
+			}
+			$db->commit();
+		} catch(\Throwable $e) {
+			$db->rollback();
+			/** @noinspection PhpUnhandledExceptionInspection */
+			throw $e;
+		}
+
+		return $response;
+	}
+
+	public static function renderResponse(
+		Request $request,
+		Response $response,
+		?callable $next = null
+	): Response {
+		$template = $request->getAttribute('Template');
+
+		if($request->getMethod() !== 'HEAD' && $template !== null) {
+			// TODO: remove addData, read attrbitues in templates directly
+			$request->getAttribute('TemplateEngine')->addData([
+				'user' => $request->getAttribute('User'),
+				'self' => $request->getUri()->getPath()
+			]);
+
+			/** @var Engine $engine */
+			$engine = $request->getAttribute('TemplateEngine');
+			$engine->render($template, $request->getAttribute('TemplateParameters', []));
+		}
+
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
+	}
+
+	public static function handleExceptions(
+		Request $request,
+		Response $response,
+		?callable $next = null
+	): Response {
+		if($next) {
+			try {
+				return $next($request, $response);
+			} catch(AuthenticationException $e) {
+				// One of these should be 401, but that requires a challenge header in the response...
+				$request
+					->withAttribute('Template', 'genericError')
+					->withAttribute('TemplateParameters', []);
+				$response
+					->withStatus(403);
+			} catch(AuthorizationException $e) {
+				$request
+					->withAttribute('Template', 'genericError')
+					->withAttribute('TemplateParameters', []);
+				$response
+					->withStatus(403);
+			} catch(NotFoundException $e) {
+				$request
+					->withAttribute('Template', 'notFound')
+					->withAttribute('TemplateParameters', []);
+				$response
+					->withStatus(404);
+			} catch(\Throwable $e) {
+				$request
+					->withAttribute('Template', 'genericError')
+					->withAttribute('TemplateParameters', ['reason' => $e->getMessage()]);
+				$response
+					->withStatus(500);
+			}
+
+			return self::renderResponse($request, $response);
+		} else {
+			return $response;
+		}
+	}
+
 }

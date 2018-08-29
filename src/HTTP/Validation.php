@@ -13,7 +13,7 @@ class Validation {
 	 *
 	 * @see User::getLevel()
 	 */
-	public static function authorize(User $user = null, $level = 2) {
+	public static function authorize(?User $user, $level = 2) {
 		self::authenticate($user);
 		if($user->getLevel() > $level) {
 			throw new AuthorizationException();
@@ -40,6 +40,8 @@ class Validation {
 	 * @param array $payload THE array
 	 * @param mixed $key Some key
 	 *
+	 * @throws InvalidPayloadParameterException if key is missing
+	 *
 	 * @return mixed Value for that key
 	 */
 	public static function validateHas(array $payload, $key) {
@@ -55,7 +57,9 @@ class Validation {
 	 * Or an int, which will be cast to a string because nobody cares.
 	 *
 	 * @param array $payload THE array
-	 * @param mixed $key Some key
+	 * @param string $key Some key
+	 *
+	 * @throws InvalidPayloadParameterException if key is missing or not a string
 	 *
 	 * @return string
 	 */
@@ -67,6 +71,44 @@ class Validation {
 			return (string) $value;
 		} else {
 			throw new InvalidPayloadParameterException($key, $value);
+		}
+	}
+
+	/**
+	 * Return string value form a key if it exists (being casted if not a string),
+	 * or supplied default value if it doesn't
+	 *
+	 * @param array $payload THE array
+	 * @param string $key Some key
+	 *
+	 * @param string|null $default Default value if there's no such key
+	 *
+	 * @return string|null Whatever the value is, or $default
+	 */
+	public static function validateOptionalString(array $payload, string $key, ?string $default = null) {
+		try {
+			return (string) self::validateHas($payload, $key);
+		} catch(InvalidPayloadParameterException $e) {
+			return $default;
+		}
+	}
+
+	/**
+	 * Return int value form a key if it exists (being casted if not a string),
+	 * or supplied default value if it doesn't
+	 *
+	 * @param array $payload THE array
+	 * @param string $key Some key
+	 *
+	 * @param int|null $default Default value if there's no such key
+	 *
+	 * @return int|null Whatever the value is, or $default
+	 */
+	public static function validateOptionalInt(array $payload, string $key, ?int $default = null) {
+		try {
+			return (int) self::validateHas($payload, $key);
+		} catch(InvalidPayloadParameterException $e) {
+			return $default;
 		}
 	}
 

@@ -5,11 +5,11 @@ namespace WEEEOpen\Tarallo\Server\HTTP;
 use Negotiation\LanguageNegotiator;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use WEEEOpen\Tarallo\Server\Database\Database;
+use WEEEOpen\Tarallo\Server\Database\DatabaseException;
+use WEEEOpen\Tarallo\Server\Session;
 
-// This isn't placed in SSRv1 because may be useful for APIs too, e.g. to distribute the giant features json with
-// machine-readable and human-readable names according to locale. But that might be part of the SSR despite being an
-// API, still undecided on that point.
-class LanguageNegotiatior implements Middleware {
+class DatabaseConnection implements Middleware {
 	public const en_US = 'en-US';
 	public const it_IT = 'it-IT';
 
@@ -18,10 +18,24 @@ class LanguageNegotiatior implements Middleware {
 		ResponseInterface $response,
 		?callable $next = null
 	): ResponseInterface {
-		$best = self::negotiateLanguage($request->getHeaderLine('Accept-Language'));
-		$request = $request->withAttribute('language', $best);
+		try {
+			$db = new Database(DB_USERNAME, DB_PASSWORD, DB_DSN);
+		} catch(DatabaseException $e) {
+			throw new DatabaseException('Cannot connect to database');
+		}
+
+		try {
+			$db->beginTransaction();
+			$user = Session::restore($db);
+			$db->commit();
+		} catch(\Exception $e) {
+			$db->rollback();
+			/** @noinspection PhpUnhandledExceptionInspection */
+			throw $e;
+		}
 
 		if ($next) {
+			$request = $request->withAttribute('Database', $db)->withAttribute('User', $user);
 			return $next($request, $response);
 		} else {
 			return $response;

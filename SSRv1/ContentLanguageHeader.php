@@ -9,7 +9,7 @@ class ContentLanguageHeader implements Middleware {
 	public function __invoke(
 		ServerRequestInterface $request,
 		ResponseInterface $response,
-		?callable $next
+		?callable $next = null
 	): ResponseInterface {
 		$language = $request->getAttribute('language', null);
 		if(is_string($language)) {
