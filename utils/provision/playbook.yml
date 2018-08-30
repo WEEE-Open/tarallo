@@ -61,6 +61,10 @@
     service:
       name: php-fpm
       state: stopped
+  - name: restart php-fpm
+    service:
+      name: php-fpm
+      state: restarted
 
   tasks:
   - name: Create a directory for no reason
@@ -172,6 +176,8 @@
       dest: "/etc/php.d/15-xdebug.ini"
       owner: root
       group: root
+    notify:
+      - restart php-fpm
 
   - name: Install Composer
     script: composer.sh

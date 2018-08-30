@@ -27,6 +27,8 @@ and you will get:
 (user: `asd`, password: `asd`, all users have password `asd`)
 * APIs at `127.0.0.1:8080/v1/` (also used internally by the HTML interface)
 * Xdebug enabled by default
+* Xdebug profiler enabled, start it via trigger (`?XDEBUG_PROFILE=1` or browser extensions),
+saves output to `xdebug` directory
 * Adminer at `127.0.0.1:8081/adminer.php` for database inspection (user: root,
 password: root, server: localhost:3306)
 * Database accessible externally by root at `127.0.0.1:3307` (note the non-standard port)
