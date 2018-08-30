@@ -467,7 +467,7 @@ class Controller {
 			} catch(AuthenticationException $e) {
 				// One of these should be 401, but that requires a challenge header in the response...
 				$request = $request
-					->withAttribute('Template', 'genericError')
+					->withAttribute('Template', 'notAuthenticated')
 					->withAttribute('TemplateParameters', []);
 				$response = $response
 					->withStatus(403);
