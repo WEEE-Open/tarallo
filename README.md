@@ -84,10 +84,11 @@ are needed for the entire thing to work.
 `src/Database/Feature.php` and some other files (`generate-features` tells you
 which ones when it's finished).
 
-Modified files should be manually reviewed and committed.
-
 The prefererred way to run this script is to use `make features` instead of
-calling it directly.
+calling it directly. This is a CLI script, you shouldn't upload it to a server
+or access it from the browser.
+
+Modified files should be manually reviewed and committed.
 
 ### Gettext
 
