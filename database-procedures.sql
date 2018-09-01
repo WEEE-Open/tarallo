@@ -264,6 +264,7 @@ ON COMPLETION PRESERVE
 ENABLE DO
 	DELETE
 	FROM Search
+	-- TODO: shouldn't this be Expires < NOW()?
 	WHERE Expires < DATE_SUB(NOW(), INTERVAL 1 HOUR) $$
 
 -- Audit -----------------------------------------------------------------------
@@ -283,6 +284,28 @@ CREATE OR REPLACE TRIGGER RemoveOldAuditEntries
 	BEGIN
 		DELETE FROM Audit WHERE Code = NEW.Code OR Other = NEW.Code;
 	END $$
+
+-- Add a 'C' entry to audit table
+CREATE OR REPLACE TRIGGER AuditDuplicateCreation
+	BEFORE INSERT
+	ON Audit
+	FOR EACH ROW
+BEGIN
+	DECLARE Duplicates bigint UNSIGNED;
+	IF (NEW.`Change` = 'C')
+		THEN
+
+		SELECT COUNT(*) INTO Duplicates
+		FROM Audit
+		WHERE Code = NEW.Code AND `Change` = 'C';
+
+		IF (Duplicates <> 0)
+			THEN
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Duplicate C Audit entry detected';
+			-- but can't tell you why since CONCAT() in any form is no a syntax error
+		END IF;
+	END IF;
+END $$
 
 -- Add a 'C' entry to audit table
 CREATE OR REPLACE TRIGGER AuditCreateItem
