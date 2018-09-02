@@ -36,25 +36,12 @@ final class FeatureDAO extends DAO {
 	 */
 	public function getItemsByFeatures(Feature $feature, int $limit = 100): array {
 		$pdo = $this->getPDO();
-		switch($feature->type) {
-			case Feature::STRING:
-				$statement = $pdo->prepare('SELECT `Code` FROM ItemFeature WHERE Feature = ? AND ValueText = ? LIMIT ?');
-				break;
-			case Feature::INTEGER:
-				$statement = $pdo->prepare('SELECT `Code` FROM ItemFeature WHERE Feature = ? AND `Value` = ? LIMIT ?');
-				break;
-			case Feature::ENUM:
-				$statement = $pdo->prepare('SELECT `Code` FROM ItemFeature WHERE Feature = ? AND ValueEnum = ? LIMIT ?');
-				break;
-			case Feature::DOUBLE:
-				$statement = $pdo->prepare('SELECT `Code` FROM ItemFeature WHERE Feature = ? AND ValueDouble = ? LIMIT ?');
-				break;
-			default:
-				throw new \LogicException('Unknown feature type ' . $feature->type . ' returned by getFeatureTypeFromName (should never happen unless a cosmic ray flips a bit somewhere)');
-		}
+		$column = Feature::getColumn($feature->type);
+		/** @noinspection SqlResolve */
+		$statement = $pdo->prepare("SELECT `Code` FROM ItemFeature WHERE Feature = ? AND `$column` = ? LIMIT ?");
 
 		$statement->bindValue(1, $feature->name, \PDO::PARAM_STR);
-		$statement->bindValue(2, $feature->value);
+		$statement->bindValue(2, $feature->value, Feature::getPDOType($feature->type));
 		$statement->bindValue(3, $limit, \PDO::PARAM_INT);
 
 		$result = [];
@@ -131,43 +118,25 @@ final class FeatureDAO extends DAO {
 
 		$pdo = $this->getPDO();
 
-		$statementInt = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `Value`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `Value`=:val2');
+
 		$statementText = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `ValueText`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `ValueText`=:val2');
 		$statementEnum = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `ValueEnum`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `ValueEnum`=:val2');
 		$statementDouble = $pdo->prepare('INSERT INTO ItemFeature (Feature, `Code`, `ValueDouble`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `ValueDouble`=:val2');
 		$statementAudit = $pdo->prepare('INSERT INTO Audit (`Code`, `Change`, `User`) VALUES (?, \'U\', @taralloAuditUsername)');
 
 		foreach($features as $feature) {
-			$name = $feature->name;
-			$value = $feature->value;
-			switch($feature->type) {
-				// was really tempted to use variable variables here...
-				case Feature::STRING:
-					$statement = $statementText;
-					$type = \PDO::PARAM_STR;
-					break;
-				case Feature::INTEGER:
-					$statement = $statementInt;
-					$type = \PDO::PARAM_INT;
-					break;
-				case Feature::ENUM:
-					$statement = $statementEnum;
-					$type = \PDO::PARAM_STR;
-					break;
-				case Feature::DOUBLE:
-					$statement = $statementDouble;
-					$type = \PDO::PARAM_STR;
-					break;
-				default:
-					throw new \LogicException('Unknown feature type ' . $feature->type . ' returned by getFeatureTypeFromName (should never happen unless a cosmic ray flips a bit somewhere)');
-			}
+			$column = Feature::getColumn($feature->type);
+			$type = Feature::getPDOType($feature->type);
+			/** @noinspection SqlResolve */
+			$statement = $pdo->prepare("INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2");
+
 			try {
-				$statement->bindValue(':feature', $name, \PDO::PARAM_STR);
+				$statement->bindValue(':feature', $feature->name, \PDO::PARAM_STR);
 				$statement->bindValue(':item', $item->getCode(), \PDO::PARAM_STR);
-				$statement->bindValue(':val', $value, $type);
-				$statement->bindValue(':val2', $value, $type);
+				$statement->bindValue(':val', $feature->value, $type);
+				$statement->bindValue(':val2', $feature->value, $type);
 				if(!$statement->execute()) {
-					throw new DatabaseException("Cannot add/upadate feature $name with value $value for item " . $item->getCode());
+					throw new DatabaseException("Cannot add/upadate feature $feature->name with value $feature->value for item " . $item->getCode());
 				}
 			} finally {
 				$statement->closeCursor();

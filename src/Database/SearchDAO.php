@@ -27,7 +27,7 @@ final class SearchDAO extends DAO {
 				break;
 			case Feature::INTEGER:
 			case Feature::DOUBLE:
-				$column = $feature->type === Feature::INTEGER ? 'Value' : 'ValueDouble';
+				$column = Feature::getColumn($feature->type);
 				switch($operator) {
 					case '>':
 					case '<':
@@ -308,22 +308,7 @@ EOQ;
 		reset($search->sort);
 		$featureName = key($search->sort);
 		$ascdesc = $search->sort[$featureName] === '+' ? 'ASC' : 'DESC';
-		switch(Feature::getType($featureName)) {
-			case Feature::STRING:
-				$column = 'ValueText';
-				break;
-			case Feature::INTEGER:
-				$column = 'Value';
-				break;
-			case Feature::ENUM:
-				$column = 'ValueEnum';
-				break;
-			case Feature::DOUBLE:
-				$column = 'ValueDouble';
-				break;
-			default:
-				throw new \LogicException("Cannot sort on $featureName: unknown type");
-		}
+		$column = Feature::getColumn(Feature::getType($featureName));
 
 		self::unsort($searchId);
 

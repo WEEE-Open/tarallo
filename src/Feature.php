@@ -312,11 +312,57 @@ class Feature {
 	 *
 	 * @return int
 	 */
-	public static function getType($name) {
+	public static function getType(string $name): int {
 		if(!isset(self::features[$name])) {
 			throw new \InvalidArgumentException("Cannot get type for feature $name: doesn't exist");
 		}
 		return is_int(self::features[$name]) ? self::features[$name] : self::ENUM;
+	}
+
+	/**
+	 * Obtain database column name (for the ItemFeature table)
+	 *
+	 * @param int $type Feature type
+	 * @see getType
+	 *
+	 * @return string Column name (e.g. ValueText)
+	 */
+	public static function getColumn(int $type): string {
+		switch($type) {
+			case Feature::STRING:
+				return 'ValueText';
+			case Feature::INTEGER:
+				return 'Value';
+			case Feature::ENUM:
+				return 'ValueEnum';
+			case Feature::DOUBLE:
+				return 'ValueDouble';
+			default:
+				throw new \LogicException('Unrecognized feature type in getColumn');
+		}
+	}
+
+	/**
+	 * Obtain \PDO::PARAM_... constant from feature name
+	 *
+	 * @param int $type Feature type
+	 * @see getType
+	 *
+	 * @return int Column name (e.g. ValueText)
+	 */
+	public static function getPDOType(int $type): int {
+		switch($type) {
+			case Feature::STRING:
+				return \PDO::PARAM_STR;
+			case Feature::INTEGER:
+				return \PDO::PARAM_INT;
+			case Feature::ENUM:
+				return \PDO::PARAM_STR;
+			case Feature::DOUBLE:
+				return \PDO::PARAM_STR;
+			default:
+				throw new \LogicException('Unrecognized feature type in getPDOType');
+		}
 	}
 
 	/**
