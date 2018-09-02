@@ -74,8 +74,7 @@ class ItemDAOTest extends DatabaseTest {
 		$db->itemDAO()->deleteItem($deleteMe);
 		$this->assertTrue($db->itemDAO()->itemExists($deleteMe), 'Item should still exist');
 		$this->assertFalse($db->itemDAO()->itemVisible($deleteMe), 'Item shouldn\'t be visible');
-		$this->expectException(NotFoundException::class);
-		$db->itemDAO()->getItem($deleteMe);
+		$this->assertInstanceOf(Item::class, $db->itemDAO()->getItem($deleteMe));
 	}
 
 	/**

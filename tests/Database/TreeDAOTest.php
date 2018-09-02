@@ -142,9 +142,12 @@ class TreeDAOTest extends DatabaseTest {
 		$item = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));
 		$this->assertInstanceOf(Item::class, $item);
 
+		// Hack of questionable quality to prevent:
+		// Integrity constraint violation: 1062 Duplicate entry 'PCTI-2018-05-04 20:23:23-M' for key 'PRIMARY'
+		// since timestamps have seconds accuracy
+		$this->getPdo()->query("UPDATE Audit SET `Time` = `Time` - 1 WHERE `Code` = 'PCTI' AND `Change` = 'M' ORDER BY `Time` DESC LIMIT 1");
+
 		// Move TI from TAVOLONE to ZonaBlu.
-		// TODO: HORRIBLE hack, do something else
-		sleep(2); // "Integrity constraint violation: 1062 Duplicate entry 'PCTI-2018-05-04 20:23:23-M' for key 'PRIMARY'", timestamps have seconds accuracy...
 		$db->treeDAO()->moveItem($ti, $zb);
 
 		$item = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));
