@@ -154,6 +154,7 @@ class Controller {
 				->withStatus(303)
 				->withoutHeader('Content-type')
 				->withHeader('Location', '/login');
+
 			return $next ? $next($request, $response) : $response;
 		}
 
@@ -169,6 +170,7 @@ class Controller {
 	}
 
 	public static function getStats(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
 		$parameters = $request->getAttribute('parameters', ['which' => null]);
@@ -177,18 +179,18 @@ class Controller {
 
 		switch($parameters['which']) {
 			case '':
-			default:
 				$request = $request
 					->withAttribute('Template', 'stats::main')
 					->withAttribute('TemplateParameters',
 						[
-							'locations'     => $db->statsDAO()->getLocationsByItems(),
-							'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 40)
+							'locations'        => $db->statsDAO()->getLocationsByItems(),
+							'recentlyAdded'    => $db->auditDAO()->getRecentAuditByType('C', 40),
+							'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 40),
 						]);
 				break;
 			case 'attention':
 				$request = $request
-					->withAttribute('Template', 'stats::main')
+					->withAttribute('Template', 'stats::needAttention')
 					->withAttribute('TemplateParameters',
 						[
 							'serials'     => $db->statsDAO()->getDuplicateSerialsCount(),
@@ -196,6 +198,28 @@ class Controller {
 								500),
 							'lost'        => $db->featureDAO()->getItemsByFeatures(new Feature('check', 'lost'), 100)
 						]);
+				break;
+			case 'cases':
+				// TODO: allow to select other locations and time spans
+				//$query = $request->getQueryParams();
+				$location = 'Polito'; // TODO: change default
+				//$from = new \DateTime('now - 1 year');
+				//$to = new \DateTime();
+
+				$request = $request
+					->withAttribute('Template', 'stats::cases')
+					->withAttribute('TemplateParameters',
+						[
+							'location'    => $location,
+							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
+							'mostRecent'  => $db->statsDAO()->getModifiedItems($location, true, 30),
+							'byOwner'     => [], // TODO: implement
+							'ready'       => [], // TODO: implement
+						]);
+				break;
+			default:
+				// TODO: if this gets used only for items (and the page suggesting items), change to something else
+				throw new NotFoundException();
 		}
 
 		return $next ? $next($request, $response) : $response;

@@ -2,6 +2,8 @@
 
 namespace WEEEOpen\Tarallo\Server\Database;
 
+use WEEEOpen\Tarallo\Server\Feature;
+
 final class StatsDAO extends DAO {
 	public function getLocationsByItems() {
 		$array = [];
@@ -49,6 +51,64 @@ ORDER BY Count DESC, SN ASC', \PDO::FETCH_ASSOC);
 			}
 		} finally {
 			$result->closeCursor();
+		}
+
+		return $array;
+	}
+
+	/**
+	 * Get most/least recently changed cases in a particular location, excluding in-use ones. This takes into account
+	 * all audit entries for all contained items.
+	 *
+	 * Any attempt to make the function more generic failed miserably or was escessively complex, but consider
+	 * that this is a very specific kind of stat to begin with...
+	 * @todo parametrize the "in-use" exclusion, maybe? So the "most recently modified" makes more sense
+	 * @todo try to parametrize the "type=case" filter
+	 *
+	 * @param string $location Where to look
+	 * @param bool $recent True for more recently modified items first, false for least recently modified
+	 * @param int $limit rows to return
+	 *
+	 * @return int[] code => timestamp
+	 */
+	public function getModifiedItems(string $location, bool $recent = true, int $limit = 100): array {
+		$array = [];
+
+		$query = "SELECT `Ancestor` AS `Item`, `Time`, UNIX_TIMESTAMP(MAX(`Time`)) AS `Last`
+FROM Audit
+JOIN Tree ON Tree.Descendant=Audit.Code
+	WHERE `Ancestor` IN (
+	SELECT Descendant
+	FROM Tree
+	WHERE Ancestor = :loc
+)
+AND `Ancestor` IN (
+	SELECT `Code`
+	FROM ItemFeature
+	WHERE Feature = 'type' AND `ValueEnum` = 'case'
+)
+AND `Ancestor` NOT IN (
+	SELECT `Code`
+	FROM ItemFeature
+	WHERE Feature = 'restrictions' AND `ValueEnum` = 'in-use'
+)
+GROUP BY `Ancestor`
+ORDER BY `Last` " . ($recent ? 'DESC' : 'ASC') . '
+LIMIT :lim';
+		$statement = $this->getPDO()->prepare($query);
+
+		$statement->bindValue(':loc', $location);
+		$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
+
+		try {
+			$success = $statement->execute();
+			assert($success);
+
+			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+				$array[$row['Item']] = $row['Last'];
+			}
+		} finally {
+			$statement->closeCursor();
 		}
 
 		return $array;

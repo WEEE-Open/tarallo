@@ -2,8 +2,10 @@
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 /** @var int[] $locations */
 /** @var int[] $recentlyAdded */
+/** @var int[] $recentlyModified */
 $this->layout('main', ['title' => 'Stats', 'user' => $user]);
 $this->insert('stats::menu', ['currentPage' => '']);
+date_default_timezone_set('Europe/Rome');
 ?>
 
 <?php if(!empty($recentlyAdded)): ?>
@@ -17,7 +19,28 @@ $this->insert('stats::menu', ['currentPage' => '']);
 			</tr>
 			</thead>
 			<tbody>
-			<?php date_default_timezone_set('Europe/Rome'); foreach($recentlyAdded as $code => $time): ?>
+			<?php foreach($recentlyAdded as $code => $time): ?>
+				<tr>
+					<td><a href="/item/<?=$code?>"><?=$code?></a></td>
+					<td><?=date('Y-m-d, H:i', $time)?></td>
+				</tr>
+			<?php endforeach ?>
+			</tbody>
+		</table>
+	</div>
+<?php endif ?>
+<?php if(!empty($recentlyAdded)): ?>
+	<div class="statswrapper">
+		<p>Recently modified items:</p>
+		<table>
+			<thead>
+			<tr>
+				<td>Item</td>
+				<td>Modified</td>
+			</tr>
+			</thead>
+			<tbody>
+			<?php foreach($recentlyAdded as $code => $time): ?>
 				<tr>
 					<td><a href="/item/<?=$code?>"><?=$code?></a></td>
 					<td><?=date('Y-m-d, H:i', $time)?></td>
