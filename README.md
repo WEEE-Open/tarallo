@@ -92,6 +92,17 @@ or access it from the browser.
 
 Modified files should be manually reviewed and committed.
 
+### Router cache
+
+To (re)build FastRoute cache, use:
+
+	make SSR-router-cache
+
+It's done automatically when using `make vm` or `make production`, but you'll
+need to run it manually when modyfing routes during developement.
+
+(TODO: add a parameter to avoid caching)
+
 ### Gettext
 
 There are a few references to that through the source code, but it's

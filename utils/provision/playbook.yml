@@ -179,6 +179,24 @@
     notify:
       - restart php-fpm
 
+  - name: Create router.cache file (SSR)
+    copy:
+      content: ""
+      dest: "{{ document_root }}/server/SSRv1/router.cache"
+      force: no
+      group: vagrant
+      owner: vagrant
+      mode: 0777
+
+  - name: Create router.cache file (API)
+    copy:
+      content: ""
+      dest: "{{ document_root }}/server/APIv1/router.cache"
+      force: no
+      group: vagrant
+      owner: vagrant
+      mode: 0777
+
   - name: Install Composer
     script: composer.sh
     args:
@@ -191,15 +209,6 @@
       optimize_autoloader: no
       no_dev: no
       working_dir: "{{ document_root }}/server"
-
-  #- name: Install nginx
-  #  yum: name=nginx state=installed
-
-  #- name: Enable and start nginx
-  #  service:
-  #    name: nginx
-  #    enabled: yes
-  #    state: started
 
   - name: Create Adminer directory
     file: path="{{ document_root }}/admin" state=directory mode=0775

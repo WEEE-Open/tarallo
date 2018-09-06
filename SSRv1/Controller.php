@@ -22,6 +22,8 @@ use WEEEOpen\Tarallo\Server\User;
 
 
 class Controller {
+	const cachefile = __DIR__ . '/router.cache';
+
 	public static function getItem(Request $request, Response $response, ?callable $next = null): Response {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
@@ -345,20 +347,8 @@ class Controller {
 		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function handle(Request $request): Response {
-		$queue = [
-			new DatabaseConnection(),
-			new LanguageNegotiatior(),
-			new TemplateEngine(),
-			[Controller::class, 'handleExceptions']
-		];
-		$response = new \Slim\Http\Response();
-		$response = $response
-			->withHeader('Content-Type', 'text/html')
-			->withBody(new Body(fopen('php://memory', 'r+')));
-
-		// TODO: use cachedDispatcher
-		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
+	public static function getDispatcher() {
+		return FastRoute\cachedDispatcher(function(FastRoute\RouteCollector $r) {
 			// TODO: [new RateLimit(), [Controller::class, 'login']] or something like that
 			$r->addRoute(['GET', 'POST'], '/login', [[Controller::class, 'login']]);
 			$r->addRoute(['GET', 'POST'], '/options', [[Controller::class, 'options']]);
@@ -383,9 +373,25 @@ class Controller {
 				$r->get('', [[Controller::class, 'getStats']]);
 				$r->get('/{which}', [[Controller::class, 'getStats']]);
 			});
-		});
+		}, [
+			'cacheFile'     => self::cachefile,
+			'cacheDisabled' => false,
+		]);
+	}
 
-		$route = $dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath());
+	public static function handle(Request $request): Response {
+		$queue = [
+			new DatabaseConnection(),
+			new LanguageNegotiatior(),
+			new TemplateEngine(),
+			[Controller::class, 'handleExceptions']
+		];
+		$response = new \Slim\Http\Response();
+		$response = $response
+			->withHeader('Content-Type', 'text/html')
+			->withBody(new Body(fopen('php://memory', 'r+')));
+
+		$route = self::getDispatcher()->dispatch($request->getMethod(), $request->getUri()->getPath());
 
 		switch($route[0]) {
 			case FastRoute\Dispatcher::FOUND:

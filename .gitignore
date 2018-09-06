@@ -8,5 +8,6 @@ utils/xdebug/
 *.log
 *.generated.js*
 *.mo
+router.cache
 db.php
 db-production.php
