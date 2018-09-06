@@ -179,24 +179,6 @@
     notify:
       - restart php-fpm
 
-  - name: Create router.cache file (SSR)
-    copy:
-      content: ""
-      dest: "{{ document_root }}/server/SSRv1/router.cache"
-      force: no
-      group: vagrant
-      owner: vagrant
-      mode: 0777
-
-  - name: Create router.cache file (API)
-    copy:
-      content: ""
-      dest: "{{ document_root }}/server/APIv1/router.cache"
-      force: no
-      group: vagrant
-      owner: vagrant
-      mode: 0777
-
   - name: Install Composer
     script: composer.sh
     args:

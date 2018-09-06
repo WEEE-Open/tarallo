@@ -1,0 +1,8 @@
+#!/usr/bin/php
+<?php
+
+namespace WEEEOpen\Tarallo;
+
+require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+
+SSRv1\Controller::getDispatcher();
