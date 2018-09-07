@@ -3,7 +3,6 @@
 namespace WEEEOpen\Tarallo;
 
 use Slim\Http\FactoryDefault;
-use Slim\Http\Response;
 use WEEEOpen\Tarallo\APIv1;
 use WEEEOpen\Tarallo\SSRv1;
 
@@ -25,7 +24,7 @@ if(substr($request->getUri()->getPath(), 0, 5) === '/v1/') {
 
 // Code from this point onwards
 // partially taken from https://github.com/http-interop/response-sender/
-// Copyright (c) 2017 Woody Gilk
+// Copyright (c) 2017 Woody Gilk, released under MIT license
 
 $http_line = sprintf('HTTP/%s %s %s',
 	$response->getProtocolVersion(),

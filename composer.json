@@ -21,7 +21,6 @@
     "ext-pdo": "*",
     "slim/http": "^0.1",
     "nikic/fast-route": "^1.2",
-    "nannehuiges/jsend": "^2.1",
     "willdurand/negotiation": "^2.3",
     "league/plates": "^3.3",
     "relay/relay": "~1.0",

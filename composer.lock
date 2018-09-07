@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "22c04831e7c7d12010da71033f3dd77c",
+    "content-hash": "6628b75064f9f2cd6178daf2f5367342",
     "packages": [
         {
             "name": "league/plates",
@@ -60,53 +60,6 @@
                 "views"
             ],
             "time": "2016-12-28T00:14:17+00:00"
-        },
-        {
-            "name": "nannehuiges/jsend",
-            "version": "v2.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/NanneHuiges/JSend.git",
-                "reference": "8a1a923056ae46bb63d3ffad7c884df75a4d3216"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/NanneHuiges/JSend/zipball/8a1a923056ae46bb63d3ffad7c884df75a4d3216",
-                "reference": "8a1a923056ae46bb63d3ffad7c884df75a4d3216",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.4.0"
-            },
-            "require-dev": {
-                "codeclimate/php-test-reporter": "dev-master",
-                "justinrainbow/json-schema": "~1.5",
-                "phpunit/phpunit": "~4.8"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "JSend": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Nanne Huiges",
-                    "email": "nanne@huiges.nl",
-                    "role": "Current maintainer"
-                }
-            ],
-            "description": "A simple PHP implementation of the JSend specification.",
-            "homepage": "https://github.com/NanneHuiges/jsend",
-            "keywords": [
-                "jsend",
-                "json"
-            ],
-            "time": "2015-12-24T10:13:23+00:00"
         },
         {
             "name": "nikic/fast-route",

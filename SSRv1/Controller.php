@@ -10,6 +10,7 @@ use Relay\RelayBuilder;
 use Slim\Http\Body;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Feature;
+use WEEEOpen\Tarallo\Server\HTTP\AbstractController;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\Server\HTTP\DatabaseConnection;
@@ -21,7 +22,7 @@ use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
 
 
-class Controller {
+class Controller extends AbstractController {
 	const cachefile = __DIR__ . '/router.cache';
 
 	public static function getItem(Request $request, Response $response, ?callable $next = null): Response {
@@ -347,7 +348,7 @@ class Controller {
 		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function getDispatcher() {
+	public static function getDispatcher(string $cachefile): FastRoute\Dispatcher {
 		return FastRoute\cachedDispatcher(function(FastRoute\RouteCollector $r) {
 			// TODO: [new RateLimit(), [Controller::class, 'login']] or something like that
 			$r->addRoute(['GET', 'POST'], '/login', [[Controller::class, 'login']]);
@@ -374,7 +375,7 @@ class Controller {
 				$r->get('/{which}', [[Controller::class, 'getStats']]);
 			});
 		}, [
-			'cacheFile'     => self::cachefile,
+			'cacheFile'     => $cachefile,
 			'cacheDisabled' => false,
 		]);
 	}
@@ -384,18 +385,19 @@ class Controller {
 			new DatabaseConnection(),
 			new LanguageNegotiatior(),
 			new TemplateEngine(),
-			[Controller::class, 'handleExceptions']
+			[self::class, 'handleExceptions']
 		];
+
 		$response = new \Slim\Http\Response();
 		$response = $response
 			->withHeader('Content-Type', 'text/html')
 			->withBody(new Body(fopen('php://memory', 'r+')));
 
-		$route = self::getDispatcher()->dispatch($request->getMethod(), $request->getUri()->getPath());
+		$route = self::route($request);
 
 		switch($route[0]) {
 			case FastRoute\Dispatcher::FOUND:
-				$queue = array_merge($queue, [[Controller::class, 'doTransaction']], $route[1]);
+				$queue = array_merge($queue, [[static::class, 'doTransaction']], $route[1]);
 				$request = $request
 					->withAttribute('parameters', $route[2]);
 				$response = $response
@@ -422,38 +424,12 @@ class Controller {
 
 		unset($route);
 
-		$queue = array_merge($queue, [[Controller::class, 'renderResponse']]);
-
-		//		if(!is_callable($callback)) {
-		//			echo 'Server error: cannot call "' . implode('::', $callback) . '" (SSR)';
-		//		}
+		$queue = array_merge($queue, [[static::class, 'renderResponse']]);
 
 		$relayBuilder = new RelayBuilder();
 		$relay = $relayBuilder->newInstance($queue);
 
 		return $relay($request, $response);
-	}
-
-	public static function doTransaction(
-		Request $request,
-		Response $response,
-		?callable $next = null
-	): Response {
-		$db = $request->getAttribute('Database');
-		$db->beginTransaction();
-
-		try {
-			if($next) {
-				$response = $next($request, $response);
-			}
-			$db->commit();
-		} catch(\Throwable $e) {
-			$db->rollback();
-			/** @noinspection PhpUnhandledExceptionInspection */
-			throw $e;
-		}
-
-		return $response;
 	}
 
 	public static function renderResponse(

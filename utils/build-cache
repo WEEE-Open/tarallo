@@ -5,4 +5,5 @@ namespace WEEEOpen\Tarallo;
 
 require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
-SSRv1\Controller::getDispatcher();
+SSRv1\Controller::getDispatcher('build' . DIRECTORY_SEPARATOR . SSRv1\Controller::cachefile);
+APIv1\Controller::getDispatcher('build' . DIRECTORY_SEPARATOR . APIv1\Controller::cachefile);

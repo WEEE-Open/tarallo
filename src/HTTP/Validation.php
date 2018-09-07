@@ -144,4 +144,8 @@ class Validation {
 			throw new InvalidPayloadParameterException('*', '', 'Empty string is not acceptable');
 		}
 	}
+
+	public static function Json(\Psr\Http\Message\StreamInterface $getBody) {
+
+	}
 }

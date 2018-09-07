@@ -3,17 +3,20 @@
 namespace WEEEOpen\Tarallo\APIv1;
 
 use FastRoute;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Relay\RelayBuilder;
+use Slim\Http\Body;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Database\DatabaseException;
 use WEEEOpen\Tarallo\Server\Database\ItemDAO;
 use WEEEOpen\Tarallo\Server\Database\TreeDAO;
 use WEEEOpen\Tarallo\Server\Feature;
-use WEEEOpen\Tarallo\Server\HTTP\AdapterInterface;
+use WEEEOpen\Tarallo\Server\HTTP\AbstractController;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
+use WEEEOpen\Tarallo\Server\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
-use WEEEOpen\Tarallo\Server\HTTP\Request;
-use WEEEOpen\Tarallo\Server\HTTP\Response;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\ItemFeatures;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
@@ -21,48 +24,79 @@ use WEEEOpen\Tarallo\Server\ItemLocationValidator;
 use WEEEOpen\Tarallo\Server\ItemNestingException;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
-use WEEEOpen\Tarallo\Server\User;
 
 
-class Controller implements AdapterInterface {
-	public static function sessionWhoami(User $user = null, Database $db, $parameters, $querystring, $payload) {
+class Controller extends AbstractController {
+	const cachefile = __DIR__ . '/router.cache';
+
+	public static function sessionWhoami(Request $request, Response $response, ?callable $next = null): Response {
+		$user = $request->getAttribute('User');
+
 		Validation::authorize($user, 3);
 
-		return ['username' => $user->getUsername()];
+		$request = $request
+			->withAttribute('Status', JSend::SUCCESS)
+			->withAttribute('Data', ['username' => $user->getUsername()]);
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function sessionStart(User $user = null, Database $db, $parameters, $querystring, $payload) {
-		Validation::validateArray($payload);
+	public static function sessionStart(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$payload = $request->getParsedBody();
+
 		$username = Validation::validateHasString($payload, 'username');
 		$password = Validation::validateHasString($payload, 'password');
+
 		$user = $db->userDAO()->getUserFromLogin($username, $password);
 		if($user === null) {
 			throw new InvalidPayloadParameterException('*', '', 'Wrong username or password');
 		}
 		Session::start($user, $db);
 
-		return null;
+		$response = $response
+			->withStatus(204);
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function sessionClose(User $user = null, Database $db, $parameters, $querystring, $payload) {
+	public static function sessionClose(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+
 		// If we ever add another level for e.g. banned users, this at least allows them to log out
 		Validation::authenticate($user);
 		Session::close($user, $db);
 
-		return null;
+		$response = $response
+			->withStatus(204);
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function sessionRefresh(User $user = null, Database $db, $parameters, $querystring, $payload) {
+	public static function sessionRefresh(Request $request, Response $response, ?callable $next = null): Response {
+		$user = $request->getAttribute('User');
+
 		// The refresh itself has already been done by Session::restore, sooooo...
 		Validation::authenticate($user);
 
-		return null;
+		$response = $response
+			->withStatus(204);
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function getItem(User $user = null, Database $db, $parameters, $querystring, $payload) {
-		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
-		$token = isset($parameters['token']) ? (string) $parameters['token'] : null;
-		$depth = isset($querystring['depth']) ? (int) $querystring['depth'] : null;
+	public static function getItem(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalString($parameters, 'id');
+		$token = Validation::validateOptionalString($parameters, 'token');
+		$depth = Validation::validateOptionalString($parameters, 'depth');
 
 		if($token === null) {
 			Validation::authorize($user, 3);
@@ -71,16 +105,28 @@ class Controller implements AdapterInterface {
 		if($id === null) {
 			throw new \LogicException('Not implemented');
 		} else {
-			return $db->itemDAO()->getItem(new ItemIncomplete($id), $token, $depth);
+			$data = $db->itemDAO()->getItem(new ItemIncomplete($id), $token, $depth);
+
+			$request = $request
+				->withAttribute('Data', $data);
+			$response = $response
+				->withStatus(200);
 		}
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function getByFeature(User $user = null, Database $db, $parameters, $querystring, $payload) {
+	public static function getByFeature(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+
 		Validation::authorize($user, 3);
 
 		$id = (string) $parameters['feature'];
 		$value = (string) $parameters['value'];
-		$limit = isset($querystring['limit']) ? (int) $querystring['limit'] : 5;
+		$limit = Validation::validateOptionalInt($parameters, 'limit', 5);
 
 		if($limit > 10) {
 			throw new InvalidPayloadParameterException('limit', $limit, 'Maximum number of results is 10');
@@ -98,17 +144,33 @@ class Controller implements AdapterInterface {
 
 		$feature = new Feature($id, $value);
 
-		return $db->featureDAO()->getItemsByFeatures($feature, $limit);
+		$data = $db->featureDAO()->getItemsByFeatures($feature, $limit);
+
+		$request = $request
+			->withAttribute('Data', $data);
+		$response = $response
+			->withStatus(200);
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function createItem(User $user = null, Database $db, $parameters, $querystring, $payload) {
+	public static function createItem(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$query = $request->getQueryParams();
+		$payload = $request->getParsedBody();
+		$parameters = $request->getAttribute('parameters', []);
+
 		Validation::authorize($user);
-		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
-		$fix = isset($querystring['fix']) ? true : false;
-		$loopback = isset($querystring['loopback']) ? true : false;
+
+		$id = Validation::validateOptionalString($parameters, 'id');
+		$fix = isset($query['fix']);
+		$loopback = isset($query['loopback']);
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
 
+		// Fixing nesting issues need the full parent item, which may not exist (but will be checked again later)
 		if($fix && $parent instanceof ItemIncomplete) {
 			try {
 				$parent = $db->itemDAO()->getItem($parent, null, 1);
@@ -122,7 +184,8 @@ class Controller implements AdapterInterface {
 			$db->itemDAO()->addItem($item, $parent);
 		} catch(NotFoundException $e) {
 			if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
-				throw new InvalidPayloadParameterException('parent', $parent->getCode(), 'Requested location doesn\'t exist');
+				throw new InvalidPayloadParameterException('parent', $parent->getCode(),
+					'Requested location doesn\'t exist');
 			}
 		} catch(\InvalidArgumentException $e) {
 			if($e->getCode() === ItemDAO::EXCEPTION_CODE_GENERATE_ID) {
@@ -133,33 +196,61 @@ class Controller implements AdapterInterface {
 			}
 		}
 
+		// TODO: this should probably return 201 sometimes
 		if($loopback) {
-			return $db->itemDAO()->getItem($item);
+			$request = $request
+				->withAttribute('Data', $db->itemDAO()->getItem($item));
+			$response = $response
+				->withStatus(200);
 		} else {
-			return $item->getCode();
+			$request = $request
+				->withAttribute('Data', $item->getCode());
+			$response = $response
+				->withStatus(200);
 		}
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function removeItem(User $user = null, Database $db, $parameters, $querystring, $payload) {
+	public static function removeItem(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+
 		Validation::authorize($user);
-		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
+
+		$id = Validation::validateOptionalString($parameters, 'id');
 
 		$db->itemDAO()->deleteItem(new ItemIncomplete($id));
 
-		return null;
+		$response = $response
+			->withStatus(204);
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function setItemParent(User $user = null, Database $db, $parameters, $querystring, $payload) {
+	public static function setItemParent(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$query = $request->getQueryParams();
+		$payload = $request->getParsedBody();
+		$parameters = $request->getAttribute('parameters', []);
+
 		Validation::authorize($user);
 		Validation::validateIsString($payload);
-		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
-		$fix = isset($querystring['fix']) ? true : false;
-		$validate = isset($querystring['novalidate']) ? false : true;
+
+		$id = Validation::validateOptionalString($parameters, 'id');
+		$fix = isset($query['fix']);
+		$validate = !isset($query['novalidate']);
 
 		// We'll need the full item in any case, not just an ItemIncomplete
 		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, 0);
+		$hadParent = count($item->getPath()) > 0;
 		$parent = new ItemIncomplete($payload);
 
+		// Also the parent, in these cases
 		if($fix || $validate) {
 			try {
 				$parent = $db->itemDAO()->getItem($parent, null, 1);
@@ -181,28 +272,45 @@ class Controller implements AdapterInterface {
 		}
 
 		$path = $item->getPath();
-		if(count($path) > 0 && $path[count($path) - 1]->getCode() === $parent->getCode()) {
-			return null;
-		}
 
-		try {
-			$db->treeDAO()->moveItem($item, $parent);
-		} catch(NotFoundException $e) {
-			if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
-				throw new InvalidPayloadParameterException('*', $parent->getCode(), "Parent item doesn't exist");
-			} else {
-				throw $e;
+		// If item was nowhere (now it's going somewhere) or it's not already in its final location (don't think too hard about this, really)
+		if(count($path) === 0 || $path[count($path) - 1]->getCode() !== $parent->getCode()) {
+			try {
+				// TODO: if fix&novalidate, parent may be in a DiFfErEnT CaSe than what it is in getPath...
+				$db->treeDAO()->moveItem($item, $parent);
+			} catch(NotFoundException $e) {
+				if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
+					throw new InvalidPayloadParameterException('*', $parent->getCode(), "Parent item doesn't exist");
+				} else {
+					throw $e;
+				}
 			}
 		}
 
-		return null;
+		if($hadParent) {
+			// Changed
+			$response = $response->withStatus(204);
+		} else {
+			// Created
+			$response = $response->withStatus(201);
+		}
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function setItemFeatures(User $user = null, Database $db, $parameters, $querystring, $payload) {
+	public static function setItemFeatures(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$query = $request->getQueryParams();
+		$payload = $request->getParsedBody();
+		$parameters = $request->getAttribute('parameters', []);
+
 		Validation::authorize($user);
 		Validation::validateArray($payload);
-		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
-		$loopback = isset($querystring['loopback']) ? true : false;
+
+		$id = Validation::validateOptionalString($parameters, 'id');
+		$loopback = isset($query['loopback']);
 
 		$item = new ItemFeatures($id);
 		// PUT => delete every feature, replace with new ones
@@ -210,41 +318,65 @@ class Controller implements AdapterInterface {
 		$db->featureDAO()->deleteFeaturesAll($item);
 		$db->featureDAO()->setFeatures($item);
 
+		// TODO: this should maybe return 201 sometimes
 		if($loopback) {
-			return $db->itemDAO()->getItem($item);
+			$request = $request->withAttribute('Data', $db->itemDAO()->getItem($item));
+			$response = $response->withStatus(200);
 		} else {
-			return null;
+			$response = $response->withStatus(204);
 		}
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function updateItemFeatures(User $user = null, Database $db, $parameters, $querystring, $payload) {
+	public static function updateItemFeatures(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$query = $request->getQueryParams();
+		$payload = $request->getParsedBody();
+		$parameters = $request->getAttribute('parameters', []);
+
 		Validation::authorize($user);
 		Validation::validateArray($payload);
-		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
-		$loopback = isset($querystring['loopback']) ? true : false;
+
+		$id = Validation::validateOptionalString($parameters, 'id');
+		$loopback = isset($query['loopback']);
 
 		$item = new ItemFeatures($id);
 		// PATCH => specify features to update and to delete, other are left as they are
 		$delete = ItemBuilder::addFeaturesDelta($payload, $item);
 		foreach($delete as $feature) {
+			// TODO: if no features are added, this will never add an audit entry...
 			$db->featureDAO()->deleteFeature($item, $feature);
 		}
 		$db->featureDAO()->setFeatures($item);
 
+		// TODO: this could meybe return 201 sometimes
 		if($loopback) {
-			return $db->itemDAO()->getItem($item);
+			$request = $request->withAttribute('Data', $db->itemDAO()->getItem($item));
+			$response = $response->withStatus(200);
 		} else {
-			return null;
+			$response = $response->withStatus(204);
 		}
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function doSearch(User $user = null, Database $db, $parameters, $querystring, $payload) {
+	public static function doSearch(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$payload = $request->getParsedBody();
+		$parameters = $request->getAttribute('parameters', []);
+
 		Validation::authorize($user, 3);
 		Validation::validateArray($payload);
-		$id = isset($parameters['id']) ? (int) $parameters['id'] : null;
+
+		$id = Validation::validateOptionalString($parameters, 'id');
 
 		if($id) {
-			// Refreshing a search: must be owner or admin
+			// Refining a search: must be owner or admin
 			$username = $db->searchDAO()->getOwnerUsername($id);
 			if($username !== $user->getUsername()) {
 				Validation::authorize($user, 0);
@@ -254,31 +386,61 @@ class Controller implements AdapterInterface {
 		$search = SearchBuilder::ofArray($payload);
 		$resultId = $db->searchDAO()->search($search, $user, $id);
 
-		return $resultId;
+		$request = $request
+			->withAttribute('Data', $resultId);
+		$response = $response
+			->withStatus(200);
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function getLogs(User $user = null, Database $db, $parameters, $querystring, $payload) {
+	public static function getLogs(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$query = $request->getQueryParams();
+		$payload = $request->getParsedBody();
+		$parameters = $request->getAttribute('parameters', []);
+
 		Validation::authorize($user, 3);
-		$page = isset($parameters['page']) ? (int) $parameters['page'] : 1;
-		$length = isset($querystring['length']) ? (int) $querystring['length'] : 20;
+		Validation::validateArray($payload);
+
+		$page = Validation::validateOptionalInt($parameters, 'page', 1);
+		$limit = Validation::validateOptionalInt($query, 'limit', 20);
 
 		if($page < 1) {
 			throw new InvalidPayloadParameterException('page', $page, 'Pages start from 1');
 		}
 
-		if($length > 50) {
-			throw new InvalidPayloadParameterException('limit', $length, 'Maximum number of entries per page is 50');
-		} else if($length < 1) {
-			throw new InvalidPayloadParameterException('limit', $length, 'Length < 1 doesn\'t make sense');
+		if($limit > 50) {
+			throw new InvalidPayloadParameterException('limit', $limit, 'Maximum number of entries per page is 50');
+		} else if($limit < 1) {
+			throw new InvalidPayloadParameterException('limit', $limit, 'Length < 1 doesn\'t make sense');
 		}
 
-		return $db->auditDAO()->getRecentAudit($length, $page);
+		$data = $db->auditDAO()->getRecentAudit($limit, $page);
+
+		$request = $request
+			->withAttribute('Data', $data);
+		$response = $response
+			->withStatus(200);
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function getHistory(User $user = null, Database $db, $parameters, $querystring, $payload) {
+	public static function getHistory(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$query = $request->getQueryParams();
+		$parameters = $request->getAttribute('parameters', []);
+
 		Validation::authorize($user, 3);
-		$id = isset($parameters['id']) ? (string) $parameters['id'] : null;
-		$length = isset($querystring['length']) ? (int) $querystring['length'] : 20;
+
+		$id = Validation::validateOptionalString($parameters, 'id');
+		// TODO: rename to limit?
+		$length = Validation::validateOptionalInt($query, 'length', 20);
+
 		$item = new ItemIncomplete($id);
 
 		if(!$db->itemDAO()->itemExists($item)) {
@@ -291,25 +453,18 @@ class Controller implements AdapterInterface {
 			throw new InvalidPayloadParameterException('limit', $length, 'Length < 1 doesn\'t make sense');
 		}
 
-		return $db->auditDAO()->getHistory($item, $length);
+		$data = $db->auditDAO()->getHistory($item, $length);
+
+		$request = $request
+			->withAttribute('Data', $data);
+		$response = $response
+			->withStatus(200);
+
+		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function route(Request $request): Response {
-		return self::goInternal($request->method, $request->path, $request->querystring,
-			$request->payload)->asResponseInterface();
-	}
-
-	/**
-	 * @param string $method HTTP method (GET, POST, ...)
-	 * @param string $uri URI, e.g. /items/PC42
-	 * @param string[]|null $querystring Parsed query string (?foo=bar is ["foo" => "bar"]), null if none
-	 * @param mixed|null $payload Request contents to be decoded, null if none
-	 *
-	 * @return JSend The JSend wrapper thinghy
-	 */
-	public static function goInternal($method, $uri, $querystring, $payload): JSend {
-		// TODO: use cachedDispatcher
-		$dispatcher = FastRoute\simpleDispatcher(function(FastRoute\RouteCollector $r) {
+	public static function getDispatcher(string $cachefile): FastRoute\Dispatcher {
+		return FastRoute\cachedDispatcher(function(FastRoute\RouteCollector $r) {
 
 			$r->addGroup('/items', function(FastRoute\RouteCollector $r) {
 				$r->get('', 'getItem');
@@ -364,86 +519,163 @@ class Controller implements AdapterInterface {
 			$r->post('/session', 'sessionStart');
 			$r->delete('/session', 'sessionClose');
 			$r->head('/session', 'sessionRefresh');
-		});
+		}, [
+			'cacheFile'     => $cachefile,
+			'cacheDisabled' => false,
+		]);
+	}
 
-		$route = $dispatcher->dispatch($method, $uri);
+	public static function handle(Request $request): Response {
+		$queue = [
+			new DatabaseConnection(),
+			[self::class, 'handleExceptions']
+		];
 
-		if($route[0] === FastRoute\Dispatcher::NOT_FOUND) {
-			http_response_code(404);
-			exit();
+		$response = new \Slim\Http\Response();
+		$response = $response
+			->withHeader('Content-Type', 'application/json')
+			->withBody(new Body(fopen('php://memory', 'r+')));
+
+		$route = self::route($request);
+
+		switch($route[0]) {
+			case FastRoute\Dispatcher::FOUND:
+				$queue = array_merge($queue, [[static::class, 'doTransaction']], $route[1]);
+				$request = $request
+					->withAttribute('parameters', $route[2]);
+				$response = $response
+					->withStatus(200);
+				break;
+			case FastRoute\Dispatcher::NOT_FOUND:
+				$request = $request
+					->withAttribute('Status', Jsend::FAIL)
+					->withAttribute('ErrorMessage', "API endpoint not found");
+				$response = $response->withStatus(404);
+				break;
+			case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
+				$allowed = implode(', ', $route[1]);
+				$request = $request
+					->withAttribute('Status', Jsend::FAIL)
+					->withAttribute('ErrorMessage', "Method not allowed for this endpoint, use one of: $allowed");
+				$response = $response->withStatus(405)
+					->withHeader('Allow', $allowed);
+				break;
+			default:
+				$request = $request
+					->withAttribute('Status', Jsend::ERROR)
+					->withAttribute('ErrorMessage', 'Unhandled router result');
+				$response = $response->withStatus(500);
+				break;
 		}
 
-		if($route[0] === FastRoute\Dispatcher::METHOD_NOT_ALLOWED) {
-			http_response_code(405);
-			header('Allow: ' . implode(', ', $route[1]));
-			exit();
-		}
-
-		if($route[0] !== FastRoute\Dispatcher::FOUND) {
-			return JSend::ofError('Server error: unhandled router result');
-		}
-
-		$callback = [Controller::class, $route[1]];
-		$parameters = $route[2];
 		unset($route);
 
-		if(!is_callable($callback)) {
-			return JSend::ofError('Server error: cannot call "' . implode('::', $callback) . '"');
-		}
+		$queue = array_merge($queue, [[static::class, 'renderResponse']]);
 
-		try {
-			$db = new Database(DB_USERNAME, DB_PASSWORD, DB_DSN);
-			$db->beginTransaction();
-			$user = Session::restore($db);
-			$db->commit();
-		} catch(\Exception $e) {
-			if(isset($db)) {
-				$db->rollback();
+		$relayBuilder = new RelayBuilder();
+		$relay = $relayBuilder->newInstance($queue);
+
+		return $relay($request, $response);
+
+	}
+
+	public static function renderResponse(
+		Request $request,
+		Response $response,
+		?callable $next = null
+	): Response {
+
+		$body = null;
+		if($request->getMethod() !== 'HEAD') {
+			$data = $request->getAttribute('Data');
+			switch($request->getAttribute('Status', null)) {
+
+				case JSend::SUCCESS:
+					$body = JSend::success($data);
+					break;
+				case JSend::ERROR:
+					$body = JSend::error($request->getAttribute('ErrorMessage'),
+						$request->getAttribute('ErrorCode'),
+						$data);
+					break;
+				case JSend::FAIL:
+					$body = JSend::fail($data);
+					break;
+				case null:
+					// Do nothing
+					break;
+				default:
+					$response = $response
+						->withStatus(500);
+					$body = JSend::error('Unhandled JSend response type, most probably a typo somewhere in the code');
 			}
-			http_response_code(500);
-
-			return JSend::ofError('Server error: ' . $e->getMessage());
 		}
 
-		if($payload !== null) {
-			$payload = json_decode($payload, true);
-			if(json_last_error() !== JSON_ERROR_NONE) {
-				return JSend::ofError('Cannot decode JSON request body');
-			}
+		if($body === null) {
+			$response->getBody()->close();
+		} else {
+			$response->getBody()->rewind();
+			$response->getBody()->write($body);
 		}
 
-		try {
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
+	}
+
+	public static function handleExceptions(
+		Request $request,
+		Response $response,
+		?callable $next = null
+	): Response {
+		if($next) {
 			try {
-				$db->beginTransaction();
-				$result = call_user_func($callback, $user, $db, $parameters, $querystring, $payload);
-				$db->commit();
+				return $next($request, $response);
+			} catch(AuthorizationException $e) {
+				$request = $request
+					->withAttribute('Status', Jsend::ERROR)
+					->withAttribute('ErrorMessage', 'Not authorized (insufficient permission)')
+					->withAttribute('ErrorCode', 'AUTH403');
+				$response = $response
+					->withStatus(403);
+			} catch(AuthenticationException $e) {
+				$request = $request
+					->withAttribute('Status', Jsend::ERROR)
+					->withAttribute('ErrorMessage', 'Not authenticated or session expired')
+					->withAttribute('ErrorCode', 'AUTH401')
+					->withAttribute('Data', ['notes' => 'Try POSTing to /session']);
+				// 401 requires a WWW authentication challenge in the response, so use 403 again
+				$response = $response
+					->withStatus(403);
+			} catch(InvalidPayloadParameterException $e) {
+				$request = $request
+					->withAttribute('Status', Jsend::FAIL)
+					->withAttribute('Data', [$e->getParameter() => $e->getReason()]);
+				$response = $response
+					->withStatus(400);
+			} catch(DatabaseException $e) {
+				$request = $request
+					->withAttribute('Status', Jsend::ERROR)
+					->withAttribute('ErrorMessage', 'Database error: ' . $e->getMessage());
+				$response = $response
+					->withStatus(500);
+			} catch(NotFoundException $e) {
+				$response = $response
+					->withStatus(404);
 			} catch(\Throwable $e) {
-				$db->rollback();
-				throw $e;
+				$request = $request
+					->withAttribute('Status', Jsend::ERROR)
+					->withAttribute('ErrorMessage', 'Unhandled exception :(')
+					->withAttribute('Data', ['message' => $e->getMessage(), 'code' => $e->getCode()]);
+				$response = $response
+					->withStatus(403);
 			}
-		} catch(AuthorizationException $e) {
-			return JSend::ofError('Not authorized (insufficient permission)', 'AUTH403', null, 403);
-		} catch(AuthenticationException $e) {
-			// 401 requires a WWW authentication challenge in the response, so use 403 again
-			return JSend::ofError('Not authenticated or session expired', 'AUTH401',
-				['notes' => 'Try POSTing to /session'], 403);
-		} catch(InvalidPayloadParameterException $e) {
-			return JSend::ofFail($e->getParameter(), $e->getReason());
-		} catch(DatabaseException $e) {
-			return JSend::ofError('Database error: ' . $e->getMessage());
-		} catch(NotFoundException $e) {
-			http_response_code(404);
-			exit();
-		} catch(\Throwable $e) {
-			return JSend::ofError('Unhandled exception :(', null,
-				['message' => $e->getMessage(), 'code' => $e->getCode()]);
-		}
 
-		try {
-			return JSend::ofSuccess($result);
-		} catch(\Exception $e) {
-			return JSend::ofError('Unhandled exception', null,
-				['message' => $e->getMessage(), 'code' => $e->getCode()]);
+			return self::renderResponse($request, $response);
+		} else {
+			return $response;
 		}
 	}
 }
