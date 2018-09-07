@@ -94,14 +94,13 @@ Modified files should be manually reviewed and committed.
 
 ### Router cache
 
-To (re)build FastRoute cache, use:
+To enable FastRoute cache, set `CACHE_ENABLED` to true in `db.php`.
 
-	make SSR-router-cache
+Caching probably won't work in developement, so you could enable it
+only in `db-production.php` (which `make` copies to `build/db.php`).
 
-It's done automatically when using `make vm` or `make production`, but you'll
-need to run it manually when modyfing routes during developement.
-
-(TODO: add a parameter to avoid caching)
+Cache files in `build` directory are generated automatically when
+running `make`.
 
 ### Gettext
 

@@ -521,7 +521,7 @@ class Controller extends AbstractController {
 			$r->head('/session', 'sessionRefresh');
 		}, [
 			'cacheFile'     => $cachefile,
-			'cacheDisabled' => false,
+			'cacheDisabled' => !CACHE_ENABLED,
 		]);
 	}
 

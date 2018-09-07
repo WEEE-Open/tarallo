@@ -376,7 +376,7 @@ class Controller extends AbstractController {
 			});
 		}, [
 			'cacheFile'     => $cachefile,
-			'cacheDisabled' => false,
+			'cacheDisabled' => !CACHE_ENABLED,
 		]);
 	}
 

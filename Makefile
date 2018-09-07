@@ -1,16 +1,15 @@
 default: production
 
 .PHONY:
-production: clean copies compose build/db.php
+production: clean copies cache compose build/db.php
 
 .PHONY:
-vm: SSR-router-cache
+vm:
 	composer install
 	ansible-galaxy install goozbach.EPEL
 	ansible-galaxy install geerlingguy.nginx
 	vagrant plugin install vagrant-vbguest
 
-# Maybe this should be an actual file target, maybe not
 .PHONY:
 features:
 	utils/generate-features "$(CURDIR)"
@@ -21,7 +20,7 @@ clean:
 	rm -rf build/*
 
 .PHONY:
-copies: SSR-router-cache
+copies:
 	cp "index.php" build/
 	cp composer.{json,lock} "build/"
 	cp -r "src/" "build/"
@@ -37,11 +36,11 @@ compose:
 	pushd build/ >/dev/null && composer install --no-dev -n --no-suggest --classmap-authoritative --optimize-autoloader && popd
 	rm -f "build/composer.json" "build/composer.lock"
 
-# Cannot be non-phony, or it will never rebuild the cache...
 .PHONY:
-SSR-router-cache:
-	test ! -f "SSRv1/router.cache" || rm SSRv1/router.cache
-	php utils/build-cache SSRv1
+cache:
+	test ! -f "build/SSRv1/router.cache" || rm build/SSRv1/router.cache
+	test ! -f "build/APIv1/router.cache" || rm build/APIv1/router.cache
+	php utils/build-cache build/
 
 build/db.php:
 ifneq ("$(wildcard db-production.php)","")
