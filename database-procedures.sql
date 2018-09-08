@@ -284,7 +284,7 @@ CREATE OR REPLACE TRIGGER RemoveOldAuditEntries
 		DELETE FROM Audit WHERE Code = NEW.Code OR Other = NEW.Code;
 	END $$
 
--- Add a 'C' entry to audit table
+-- Avoid duplicate C entries in Audit table
 CREATE OR REPLACE TRIGGER AuditDuplicateCreation
 	BEFORE INSERT
 	ON Audit
@@ -302,7 +302,6 @@ BEGIN
 			THEN
 			SET @msg = CONCAT('Duplicate C Audit entry for item ', NEW.Code);
 			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = @msg;
-			-- but can't tell you why since CONCAT() in any form is no a syntax error
 		END IF;
 	END IF;
 END $$
