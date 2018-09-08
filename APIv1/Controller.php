@@ -9,6 +9,7 @@ use Relay\RelayBuilder;
 use Slim\Http\Body;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Database\DatabaseException;
+use WEEEOpen\Tarallo\Server\Database\DuplicateItemCodeException;
 use WEEEOpen\Tarallo\Server\Database\ItemDAO;
 use WEEEOpen\Tarallo\Server\Database\TreeDAO;
 use WEEEOpen\Tarallo\Server\Feature;
@@ -108,6 +109,7 @@ class Controller extends AbstractController {
 			$data = $db->itemDAO()->getItem(new ItemIncomplete($id), $token, $depth);
 
 			$request = $request
+				->withAttribute('Status', JSend::SUCCESS)
 				->withAttribute('Data', $data);
 			$response = $response
 				->withStatus(200);
@@ -147,6 +149,7 @@ class Controller extends AbstractController {
 		$data = $db->featureDAO()->getItemsByFeatures($feature, $limit);
 
 		$request = $request
+			->withAttribute('Status', JSend::SUCCESS)
 			->withAttribute('Data', $data);
 		$response = $response
 			->withStatus(200);
@@ -182,10 +185,14 @@ class Controller extends AbstractController {
 
 		try {
 			$db->itemDAO()->addItem($item, $parent);
+		} catch(DuplicateItemCodeException $e) {
+			throw new InvalidPayloadParameterException('code', $e->duplicate, $e->getMessage());
 		} catch(NotFoundException $e) {
 			if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
 				throw new InvalidPayloadParameterException('parent', $parent->getCode(),
 					'Requested location doesn\'t exist');
+			} else {
+				throw $e;
 			}
 		} catch(\InvalidArgumentException $e) {
 			if($e->getCode() === ItemDAO::EXCEPTION_CODE_GENERATE_ID) {
@@ -199,11 +206,13 @@ class Controller extends AbstractController {
 		// TODO: this should probably return 201 sometimes
 		if($loopback) {
 			$request = $request
+				->withAttribute('Status', JSend::SUCCESS)
 				->withAttribute('Data', $db->itemDAO()->getItem($item));
 			$response = $response
 				->withStatus(200);
 		} else {
 			$request = $request
+				->withAttribute('Status', JSend::SUCCESS)
 				->withAttribute('Data', $item->getCode());
 			$response = $response
 				->withStatus(200);
@@ -320,7 +329,9 @@ class Controller extends AbstractController {
 
 		// TODO: this should maybe return 201 sometimes
 		if($loopback) {
-			$request = $request->withAttribute('Data', $db->itemDAO()->getItem($item));
+			$request = $request
+				->withAttribute('Status', JSend::SUCCESS)
+				->withAttribute('Data', $db->itemDAO()->getItem($item));
 			$response = $response->withStatus(200);
 		} else {
 			$response = $response->withStatus(204);
@@ -347,14 +358,21 @@ class Controller extends AbstractController {
 		// PATCH => specify features to update and to delete, other are left as they are
 		$delete = ItemBuilder::addFeaturesDelta($payload, $item);
 		foreach($delete as $feature) {
-			// TODO: if no features are added, this will never add an audit entry...
 			$db->featureDAO()->deleteFeature($item, $feature);
 		}
-		$db->featureDAO()->setFeatures($item);
+		$changed = $db->featureDAO()->setFeatures($item);
+
+		// setFeatures generates an audit entry if anything changed, deleteFeature never does
+		// so we may need to generate it manually
+		if(!$changed && count($delete) > 0) {
+			$db->featureDAO()->addAuditEntry($item);
+		}
 
 		// TODO: this could meybe return 201 sometimes
 		if($loopback) {
-			$request = $request->withAttribute('Data', $db->itemDAO()->getItem($item));
+			$request = $request
+				->withAttribute('Status', JSend::SUCCESS)
+				->withAttribute('Data', $db->itemDAO()->getItem($item));
 			$response = $response->withStatus(200);
 		} else {
 			$response = $response->withStatus(204);
@@ -387,6 +405,7 @@ class Controller extends AbstractController {
 		$resultId = $db->searchDAO()->search($search, $user, $id);
 
 		$request = $request
+			->withAttribute('Status', JSend::SUCCESS)
 			->withAttribute('Data', $resultId);
 		$response = $response
 			->withStatus(200);
@@ -399,11 +418,9 @@ class Controller extends AbstractController {
 		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
 		$query = $request->getQueryParams();
-		$payload = $request->getParsedBody();
 		$parameters = $request->getAttribute('parameters', []);
 
 		Validation::authorize($user, 3);
-		Validation::validateArray($payload);
 
 		$page = Validation::validateOptionalInt($parameters, 'page', 1);
 		$limit = Validation::validateOptionalInt($query, 'limit', 20);
@@ -412,15 +429,16 @@ class Controller extends AbstractController {
 			throw new InvalidPayloadParameterException('page', $page, 'Pages start from 1');
 		}
 
-		if($limit > 50) {
-			throw new InvalidPayloadParameterException('limit', $limit, 'Maximum number of entries per page is 50');
-		} else if($limit < 1) {
+		if($limit < 1) {
 			throw new InvalidPayloadParameterException('limit', $limit, 'Length < 1 doesn\'t make sense');
+		} else if($limit > 50) {
+			throw new InvalidPayloadParameterException('limit', $limit, 'Maximum number of entries per page is 50');
 		}
 
 		$data = $db->auditDAO()->getRecentAudit($limit, $page);
 
 		$request = $request
+			->withAttribute('Status', JSend::SUCCESS)
 			->withAttribute('Data', $data);
 		$response = $response
 			->withStatus(200);
@@ -456,6 +474,7 @@ class Controller extends AbstractController {
 		$data = $db->auditDAO()->getHistory($item, $length);
 
 		$request = $request
+			->withAttribute('Status', JSend::SUCCESS)
 			->withAttribute('Data', $data);
 		$response = $response
 			->withStatus(200);
@@ -466,59 +485,62 @@ class Controller extends AbstractController {
 	public static function getDispatcher(string $cachefile): FastRoute\Dispatcher {
 		return FastRoute\cachedDispatcher(function(FastRoute\RouteCollector $r) {
 
-			$r->addGroup('/items', function(FastRoute\RouteCollector $r) {
-				$r->get('', 'getItem');
-				$r->post('', 'createItem');
+			$r->addGroup('/v1', function(FastRoute\RouteCollector $r) {
+				$r->addGroup('/items', function(FastRoute\RouteCollector $r) {
+					$r->get('', [[Controller::class, 'getItem']]);
+					$r->post('', [[Controller::class, 'createItem']]);
 
-				$r->addGroup('/{id:[a-zA-Z0-9]+}', function(FastRoute\RouteCollector $r) {
-					$r->get('[/token/{token}]', 'getItem');
-					$r->get('/history', 'getHistory');
-					$r->put('', 'createItem');
-					$r->delete('', 'removeItem');
+					$r->addGroup('/{id:[a-zA-Z0-9]+}', function(FastRoute\RouteCollector $r) {
+						$r->get('[/token/{token}]', [[Controller::class, 'getItem']]);
+						$r->get('/history', [[Controller::class, 'getHistory']]);
+						$r->put('', [[Controller::class, 'createItem']]);
+						$r->delete('', [[Controller::class, 'removeItem']]);
 
-					// Useless
-					//$r->get('/parent', 'getItemParent');
-					$r->put('/parent', 'setItemParent');
+						// Useless
+						//$r->get('/parent',  [[Controller::class, 'getItemParent']]);
+						$r->put('/parent', [[Controller::class, 'setItemParent']]);
 
-					$r->get('/product', 'getItemProduct'); // TODO: implement
-					//$r->put('/product', 'setItemProduct');
-					//$r->delete('/product', 'deleteItemProduct');
+						$r->get('/product', [[Controller::class, 'getItemProduct']]); // TODO: implement
+						//$r->put('/product',  [[Controller::class, 'setItemProduct']]);
+						//$r->delete('/product',  [[Controller::class, 'deleteItemProduct']]);
 
-					// Also useless, just get the item
-					// $r->get('/features', 'getItemFeatures');
-					$r->put('/features', 'setItemFeatures');
-					$r->patch('/features', 'updateItemFeatures');
+						// Also useless, just get the item
+						// $r->get('/features',  [[Controller::class, 'getItemFeatures']]);
+						$r->put('/features', [[Controller::class, 'setItemFeatures']]);
+						$r->patch('/features', [[Controller::class, 'updateItemFeatures']]);
 
-					// $r->get('/contents', 'getItemContents');
+						// $r->get('/contents',  [[Controller::class, 'getItemContents']]);
+					});
 				});
-			});
 
-			$r->post('/search', 'doSearch');
-			$r->patch('/search/{id}', 'doSearch');
-			$r->get('/search/{id}[/page/{page}]', 'getSearch'); // TODO: implement
+				$r->post('/search', [[Controller::class, 'doSearch']]);
+				$r->patch('/search/{id}', [[Controller::class, 'doSearch']]);
+				$r->get('/search/{id}[/page/{page}]', [[Controller::class, 'getSearch']]); // TODO: implement
 
-			$r->get('/features/{feature}/{value}', 'getByFeature');
+				$r->get('/features/{feature}/{value}', [[Controller::class, 'getByFeature']]);
 
-			$r->addGroup('/products', function(FastRoute\RouteCollector $r) {
-				$r->get('', 'getProduct'); // TODO: implement
-				$r->get('/{brand}[/{model}[/{variant}]]', 'getProduct'); // TODO: implement
+				$r->addGroup('/products', function(FastRoute\RouteCollector $r) {
+					$r->get('', [[Controller::class, 'getProduct']]); // TODO: implement
+					$r->get('/{brand}[/{model}[/{variant}]]', [[Controller::class, 'getProduct']]); // TODO: implement
 
-				$r->post('/{brand}/{model}', 'createProduct'); // TODO: implement
-				$r->put('/{brand}/{model}/{variant}', 'createProduct'); // TODO: implement
+					$r->post('/{brand}/{model}', [[Controller::class, 'createProduct']]); // TODO: implement
+					$r->put('/{brand}/{model}/{variant}', [[Controller::class, 'createProduct']]); // TODO: implement
 
-				$r->addGroup('/{brand}/{model}/{variant}', function(FastRoute\RouteCollector $r) {
-					//$r->get('/features', 'getProductFeatures');
-					$r->post('/features', 'setProductFeatures'); // TODO: implement
-					$r->patch('/features', 'updateProductFeatures'); // TODO: implement
+					$r->addGroup('/{brand}/{model}/{variant}', function(FastRoute\RouteCollector $r) {
+						//$r->get('/features',  [[Controller::class, 'getProductFeatures']]);
+						$r->post('/features', [[Controller::class, 'setProductFeatures']]); // TODO: implement
+						$r->patch('/features', [[Controller::class, 'updateProductFeatures']]); // TODO: implement
+					});
 				});
+
+				$r->get('/logs[/page/{page}]', [[Controller::class, 'getLogs']]);
+
+				$r->get('/session', [[Controller::class, 'sessionWhoami']]);
+				$r->post('/session', [[Controller::class, 'sessionStart']]);
+				$r->delete('/session', [[Controller::class, 'sessionClose']]);
+				$r->head('/session', [[Controller::class, 'sessionRefresh']]);
+
 			});
-
-			$r->get('/logs[/page/{page}]', 'getLogs');
-
-			$r->get('/session', 'sessionWhoami');
-			$r->post('/session', 'sessionStart');
-			$r->delete('/session', 'sessionClose');
-			$r->head('/session', 'sessionRefresh');
 		}, [
 			'cacheFile'     => $cachefile,
 			'cacheDisabled' => !CACHE_ENABLED,
@@ -528,7 +550,7 @@ class Controller extends AbstractController {
 	public static function handle(Request $request): Response {
 		$queue = [
 			new DatabaseConnection(),
-			[self::class, 'handleExceptions']
+			[static::class, 'handleExceptions']
 		];
 
 		$response = new \Slim\Http\Response();
@@ -536,7 +558,7 @@ class Controller extends AbstractController {
 			->withHeader('Content-Type', 'application/json')
 			->withBody(new Body(fopen('php://memory', 'r+')));
 
-		$route = self::route($request);
+		$route = static::route($request);
 
 		switch($route[0]) {
 			case FastRoute\Dispatcher::FOUND:
@@ -548,21 +570,21 @@ class Controller extends AbstractController {
 				break;
 			case FastRoute\Dispatcher::NOT_FOUND:
 				$request = $request
-					->withAttribute('Status', Jsend::FAIL)
+					->withAttribute('Status', JSend::FAIL)
 					->withAttribute('ErrorMessage', "API endpoint not found");
 				$response = $response->withStatus(404);
 				break;
 			case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
 				$allowed = implode(', ', $route[1]);
 				$request = $request
-					->withAttribute('Status', Jsend::FAIL)
+					->withAttribute('Status', JSend::FAIL)
 					->withAttribute('ErrorMessage', "Method not allowed for this endpoint, use one of: $allowed");
 				$response = $response->withStatus(405)
 					->withHeader('Allow', $allowed);
 				break;
 			default:
 				$request = $request
-					->withAttribute('Status', Jsend::ERROR)
+					->withAttribute('Status', JSend::ERROR)
 					->withAttribute('ErrorMessage', 'Unhandled router result');
 				$response = $response->withStatus(500);
 				break;
@@ -635,14 +657,14 @@ class Controller extends AbstractController {
 				return $next($request, $response);
 			} catch(AuthorizationException $e) {
 				$request = $request
-					->withAttribute('Status', Jsend::ERROR)
+					->withAttribute('Status', JSend::ERROR)
 					->withAttribute('ErrorMessage', 'Not authorized (insufficient permission)')
 					->withAttribute('ErrorCode', 'AUTH403');
 				$response = $response
 					->withStatus(403);
 			} catch(AuthenticationException $e) {
 				$request = $request
-					->withAttribute('Status', Jsend::ERROR)
+					->withAttribute('Status', JSend::ERROR)
 					->withAttribute('ErrorMessage', 'Not authenticated or session expired')
 					->withAttribute('ErrorCode', 'AUTH401')
 					->withAttribute('Data', ['notes' => 'Try POSTing to /session']);
@@ -651,13 +673,13 @@ class Controller extends AbstractController {
 					->withStatus(403);
 			} catch(InvalidPayloadParameterException $e) {
 				$request = $request
-					->withAttribute('Status', Jsend::FAIL)
+					->withAttribute('Status', JSend::FAIL)
 					->withAttribute('Data', [$e->getParameter() => $e->getReason()]);
 				$response = $response
 					->withStatus(400);
 			} catch(DatabaseException $e) {
 				$request = $request
-					->withAttribute('Status', Jsend::ERROR)
+					->withAttribute('Status', JSend::ERROR)
 					->withAttribute('ErrorMessage', 'Database error: ' . $e->getMessage());
 				$response = $response
 					->withStatus(500);
@@ -666,14 +688,14 @@ class Controller extends AbstractController {
 					->withStatus(404);
 			} catch(\Throwable $e) {
 				$request = $request
-					->withAttribute('Status', Jsend::ERROR)
+					->withAttribute('Status', JSend::ERROR)
 					->withAttribute('ErrorMessage', 'Unhandled exception :(')
 					->withAttribute('Data', ['message' => $e->getMessage(), 'code' => $e->getCode()]);
 				$response = $response
-					->withStatus(403);
+					->withStatus(500);
 			}
 
-			return self::renderResponse($request, $response);
+			return static::renderResponse($request, $response);
 		} else {
 			return $response;
 		}

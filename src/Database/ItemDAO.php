@@ -15,6 +15,8 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param Item $item the item to be inserted
 	 * @param ItemIncomplete $parent parent item
+	 *
+	 * @throws DuplicateItemCodeException If any item with same code already exists
 	 */
 	public function addItem(Item $item, ItemIncomplete $parent = null) {
 		if(!$item->hasCode()) {
@@ -34,6 +36,12 @@ final class ItemDAO extends DAO {
 			$statement->bindValue(':tok', $item->token, \PDO::PARAM_STR);
 			if(!$statement->execute()) {
 				throw new DatabaseException('Cannot insert item ' . $item->getCode() . ' for unknown reasons');
+			}
+		} catch(\PDOException $e) {
+			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1062) {
+				throw new DuplicateItemCodeException($item->getCode());
+			} else {
+				throw $e;
 			}
 		} finally {
 			$statement->closeCursor();

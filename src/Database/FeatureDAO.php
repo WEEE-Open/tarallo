@@ -109,22 +109,42 @@ final class FeatureDAO extends DAO {
 		return $item;
 	}
 
-	public function setFeatures(ItemFeatures $item) {
+	/**
+	 * Add a U audit entry for the specified item.
+	 *
+	 * @param ItemIncomplete $item
+	 */
+	public function addAuditEntry(ItemIncomplete $item) {
+		$statementAudit = $this->getPDO()->prepare('INSERT INTO Audit (`Code`, `Change`, `User`) VALUES (?, \'U\', @taralloAuditUsername)');
+
+		try {
+			$success = $statementAudit->execute([$item->getCode()]);
+			assert($success, 'add audit table entry for features update of ' . $item->getCode());
+		} finally {
+			$statementAudit->closeCursor();
+		}
+	}
+
+	/**
+	 * Set item features.
+	 *
+	 * @param ItemFeatures $item
+	 *
+	 * @return bool True if anything actually changed (and an U audit entry was generated), false otherwise.
+	 * @TODO: it would be cool if changing a feature to the value it already has still didn't generate an entry...
+	 */
+	public function setFeatures(ItemFeatures $item): bool {
 		$features = $item->getFeatures();
 
 		if(empty($features)) {
-			return;
+			return false;
 		}
-
-		$pdo = $this->getPDO();
-
-		$statementAudit = $pdo->prepare('INSERT INTO Audit (`Code`, `Change`, `User`) VALUES (?, \'U\', @taralloAuditUsername)');
 
 		foreach($features as $feature) {
 			$column = Feature::getColumn($feature->type);
 			$type = Feature::getPDOType($feature->type);
 			/** @noinspection SqlResolve */
-			$statement = $pdo->prepare("INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2");
+			$statement = $this->getPDO()->prepare("INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2");
 
 			try {
 				$statement->bindValue(':feature', $feature->name, \PDO::PARAM_STR);
@@ -139,17 +159,12 @@ final class FeatureDAO extends DAO {
 			}
 		}
 
-		try {
-			if(!$statementAudit->execute([$item->getCode()])) {
-				throw new DatabaseException('Cannot add audit table entry for features update of ' . $item->getCode());
-			}
-		} finally {
-			$statementAudit->closeCursor();
-		}
+		$this->addAuditEntry($item);
+		return true;
 	}
 
 	/**
-	 * Delete a single feature from an item
+	 * Delete a single feature from an item. This generates no audit entries, BTW.
 	 *
 	 * @param ItemFeatures $item
 	 * @param string $feature

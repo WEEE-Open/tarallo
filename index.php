@@ -16,7 +16,7 @@ require 'db.php';
 
 $request = (new FactoryDefault)->makeRequest($_SERVER);
 
-if(substr($request->getUri()->getPath(), 0, 5) === '/v1/') {
+if(substr($request->getUri()->getPath(), 0, 4) === '/v1/') {
 	$response = APIv1\Controller::handle($request);
 } else {
 	$response = SSRv1\Controller::handle($request);
