@@ -179,6 +179,14 @@
     notify:
       - restart php-fpm
 
+  - name: Enable assertions (developement only)
+    lineinfile:
+      dest: /etc/php.ini
+      regexp: '^zend\.assertions\s*='
+      line: "zend.assertions = 1"
+    notify:
+    - restart php-fpm
+
   - name: Install Composer
     script: composer.sh
     args:
