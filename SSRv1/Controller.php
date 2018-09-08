@@ -236,7 +236,7 @@ class Controller extends AbstractController {
 
 		Validation::authorize($user, 3);
 
-		$id = Validation::validateOptionalString($parameters, 'id', null);
+		$id = Validation::validateOptionalInt($parameters, 'id', null);
 		$page = Validation::validateOptionalInt($parameters, 'page', 1);
 		$edit = Validation::validateOptionalString($parameters, 'edit', null);
 		$add = Validation::validateOptionalString($parameters, 'add', null);
