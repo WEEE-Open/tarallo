@@ -244,7 +244,7 @@ class Controller extends AbstractController {
 		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
 		$query = $request->getQueryParams();
-		$payload = $request->getParsedBody();
+		$payload = json_decode($request->getBody()->getContents(), true);
 		$parameters = $request->getAttribute('parameters', []);
 
 		Validation::authorize($user);
@@ -256,52 +256,56 @@ class Controller extends AbstractController {
 
 		// We'll need the full item in any case, not just an ItemIncomplete
 		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, 0);
-		$hadParent = count($item->getPath()) > 0;
-		$parent = new ItemIncomplete($payload);
+		$oldParent = $item->getParent();
+		$newParent = new ItemIncomplete($payload);
 
 		// Also the parent, in these cases
 		if($fix || $validate) {
 			try {
-				$parent = $db->itemDAO()->getItem($parent, null, 1);
+				$newParent = $db->itemDAO()->getItem($newParent, null, 1);
 			} catch(NotFoundException $e) {
 				throw new InvalidPayloadParameterException('*', $payload, "Parent item doesn't exist");
 			}
 		}
 
 		if($fix) {
-			$parent = ItemLocationValidator::reparent($item, $parent);
+			$newParent = ItemLocationValidator::reparent($item, $newParent);
 		}
 
 		if($validate) {
 			try {
-				ItemLocationValidator::checkNesting($item, $parent);
+				ItemLocationValidator::checkNesting($item, $newParent);
 			} catch(ItemNestingException $e) {
 				throw new InvalidPayloadParameterException('*', $e->parentCode, $e->getMessage());
 			}
 		}
 
-		$path = $item->getPath();
+		if($newParent === null) {
+			throw new \LogicException('Moving to "null" is not implemented, move an item into itself to make it a root');
+		}
 
-		// If item was nowhere (now it's going somewhere) or it's not already in its final location (don't think too hard about this, really)
-		if(count($path) === 0 || $path[count($path) - 1]->getCode() !== $parent->getCode()) {
+		$moved = false;
+		// if $newParent === null will ever be supported, add a check here
+		// if(from nowhere to somewhere || from somewhere to somewhere else (including itself, which removes parent))
+		if(($oldParent === null && $newParent->compareCode($item) !== 0) || ($oldParent !== null && $newParent->compareCode($oldParent) !== 0)) {
 			try {
-				// TODO: if fix&novalidate, parent may be in a DiFfErEnT CaSe than what it is in getPath...
-				$db->treeDAO()->moveItem($item, $parent);
+				$db->treeDAO()->moveItem($item, $newParent);
 			} catch(NotFoundException $e) {
 				if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
-					throw new InvalidPayloadParameterException('*', $parent->getCode(), "Parent item doesn't exist");
+					throw new InvalidPayloadParameterException('*', $newParent->getCode(), "Parent item doesn't exist");
 				} else {
 					throw $e;
 				}
 			}
+			$moved = true;
 		}
 
-		if($hadParent) {
-			// Changed
-			$response = $response->withStatus(204);
-		} else {
+		if($moved && $oldParent === null && $newParent !== null) {
 			// Created
 			$response = $response->withStatus(201);
+		} else {
+			// Moved or done nothing
+			$response = $response->withStatus(204);
 		}
 
 		return $next ? $next($request, $response) : $response;

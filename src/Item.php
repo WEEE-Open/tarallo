@@ -108,6 +108,19 @@ class Item extends ItemFeatures implements \JsonSerializable {
 	}
 
 	/**
+	 * Get parent of this item (or null if none)
+	 *
+	 * @return null|ItemIncomplete
+	 */
+	public function getParent(): ?ItemIncomplete {
+		$path = $this->getPath();
+		if(count($path) === 0) {
+			return null;
+		}
+		return $path[count($path) - 1];
+	}
+
+	/**
 	 * Get features and default features, all in one.
 	 * Some features may override default features.
 	 *

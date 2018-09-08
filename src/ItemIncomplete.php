@@ -36,6 +36,10 @@ class ItemIncomplete implements \JsonSerializable {
 		return $this->code;
 	}
 
+	public function compareCode(ItemIncomplete $other) {
+		return strcasecmp($this->getCode(), $other->getCode());
+	}
+
 	public function jsonSerialize() {
 		return $this->getCode();
 	}
