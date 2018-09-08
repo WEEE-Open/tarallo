@@ -18,6 +18,7 @@ if(isset($copy)) {
 }
 
 // to display new inner items, set their $recursion and $innerrecursion to true
+// .head is the beginning of the edit/new subtree, .root is the root of the entire tree
 ?>
 
 <article class="item new editing <?=$recursion ? '' : 'root'?> <?=$innerrecursion ? '' : 'head'?>">

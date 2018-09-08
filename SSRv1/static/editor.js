@@ -80,6 +80,12 @@
 				deleteButton.addEventListener('click', deleteClick);
 			}
 		}
+		// Page may contain some non-head new items open for editing.
+		// This happens mostly (possibly only) when cloning another item.
+		// And we need to activate their buttons...
+		for(let clone of itemEditing.querySelectorAll('.item.new.editing:not(head)')) {
+			enableNewItemButtons(clone);
+		}
 
 		// noinspection JSUnresolvedFunction
 		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack.bind(null, null));
@@ -767,12 +773,24 @@
 		return newElement;
 	}
 
+	/**
+	 * Enable the "More" and "Delete" buttons for new items (that don't exist on the server yet)
+	 *
+	 * @param item
+	 */
+	function enableNewItemButtons(item) {
+		item.querySelector('.removenew').addEventListener('click', removeNewClick);
+		item.querySelector('.addnew').addEventListener('click', addNewClick);
+	}
+
+	/**
+	 * Create a new blank item
+	 *
+	 * @return {Node}
+	 */
 	function newItem() {
 		let clone = document.importNode(document.getElementById('new-item-template').content, true);
-		// noinspection JSUnresolvedFunction PHPStorm decided that addEventListener doesn't exist, that's it. The end. There's nothing to do about that, other than littering every file with noinspection.
-		clone.querySelector('.removenew').addEventListener('click', removeNewClick);
-		// noinspection JSUnresolvedFunction
-		clone.querySelector('.addnew').addEventListener('click', addNewClick);
+		enableNewItemButtons(clone);
 		let item = clone.children[0];
 		let featuresElement = item.querySelector('.own.features.editing');
 		let dropdown = clone.querySelector('.addfeatures .allfeatures');
