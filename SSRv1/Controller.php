@@ -357,7 +357,7 @@ class Controller extends AbstractController {
 
 			$r->get('/', [[Controller::class, 'getHome']]);
 			$r->get('', [[Controller::class, 'getHome']]);
-			$r->get('/features.json', [Controller::class, 'getFeaturesJson']);
+			$r->get('/features.json', [[Controller::class, 'getFeaturesJson']]);
 			$r->get('/home', [[Controller::class, 'getHome']]);
 			$r->get('/item/{id}', [[Controller::class, 'getItem']]);
 			$r->get('/history/{id}', [[Controller::class, 'getHistory']]);
