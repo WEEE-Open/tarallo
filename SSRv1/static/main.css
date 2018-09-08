@@ -168,6 +168,11 @@ nav#top nav.quick input {
 	background-color: #FFBABA;
 }
 
+.code {
+	font-family: "Fira Mono", monospace;
+	font-weight: bold;
+}
+
 .breadbox {
 	margin: .5em .5em 0 .5em;
 }

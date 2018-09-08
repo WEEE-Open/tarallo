@@ -87,16 +87,22 @@ class Controller extends AbstractController {
 	}
 
 	public static function addItem(Request $request, Response $response, ?callable $next = null): Response {
-		// TODO: a ?template=some_other_id, to clone (with minor modifications) other items
-		//$db = $request->getAttribute('Database');
-		//$query = $request->getQueryParams();
+		$query = $request->getQueryParams();
 		$user = $request->getAttribute('User');
 
 		Validation::authorize($user);
 
+		$from = Validation::validateOptionalString($query, 'copy', null);
+
+		if($from !== null) {
+			/** @var Database $db */
+			$db = $request->getAttribute('Database');
+			$from = $db->itemDAO()->getItem(new ItemIncomplete($from));
+		}
+
 		$request = $request
 			->withAttribute('Template', 'newItem')
-			->withAttribute('TemplateParameters', ['add' => true]);
+			->withAttribute('TemplateParameters', ['add' => true, 'copy' => $from]);
 
 		return $next ? $next($request, $response) : $response;
 	}
