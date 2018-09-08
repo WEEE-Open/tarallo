@@ -264,8 +264,7 @@ ON COMPLETION PRESERVE
 ENABLE DO
 	DELETE
 	FROM Search
-	-- TODO: shouldn't this be Expires < NOW()?
-	WHERE Expires < DATE_SUB(NOW(), INTERVAL 1 HOUR) $$
+	WHERE Expires < NOW() $$
 
 -- Audit -----------------------------------------------------------------------
 
@@ -301,7 +300,8 @@ BEGIN
 
 		IF (Duplicates <> 0)
 			THEN
-			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Duplicate C Audit entry detected';
+			SET @msg = CONCAT('Duplicate C Audit entry for item ', NEW.Code);
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = @msg;
 			-- but can't tell you why since CONCAT() in any form is no a syntax error
 		END IF;
 	END IF;
