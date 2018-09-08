@@ -372,7 +372,7 @@ class Controller extends AbstractController {
 			$db->featureDAO()->addAuditEntry($item);
 		}
 
-		// TODO: this could meybe return 201 sometimes
+		// TODO: this could maybe return 201 sometimes
 		if($loopback) {
 			$request = $request
 				->withAttribute('Status', JSend::SUCCESS)

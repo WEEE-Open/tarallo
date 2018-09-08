@@ -1019,7 +1019,12 @@
 	}
 
 	async function jsendMe(response, onsuccess, onerror) {
+		// TODO: 204 shouldn't contain Content-Type, but does...
 		if(response.headers.get("content-type").indexOf("application/json") > -1) {
+			if(response.status === 204) {
+				onsuccess(null);
+				return;
+			}
 			try {
 				let jsend = await response.json();
 				if(response.ok && jsend.status === 'success') {
