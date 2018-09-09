@@ -231,7 +231,11 @@ class Controller extends AbstractController {
 
 		$id = Validation::validateOptionalString($parameters, 'id');
 
-		$db->itemDAO()->deleteItem(new ItemIncomplete($id));
+		try {
+			$db->itemDAO()->deleteItem(new ItemIncomplete($id));
+		} catch(NotFoundException $ignored) {
+
+		}
 
 		$response = $response
 			->withStatus(204);

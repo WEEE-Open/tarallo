@@ -58,6 +58,11 @@ final class ItemDAO extends DAO {
 		}
 	}
 
+	/**
+	 * Soft-delete an item (mark as deleted to make invisible, detach from tree)
+	 *
+	 * @param ItemIncomplete $item
+	 */
 	public function deleteItem(ItemIncomplete $item) {
 		if(!$this->itemVisible($item)) {
 			throw new NotFoundException();
