@@ -19,6 +19,8 @@
 			window.location.href = '/history/' + encodeURIComponent(code) + query + hash;
 		} else if(ev.target.classList.contains("view")) {
 			window.location.href = '/item/' + encodeURIComponent(code) + query + hash;
+		} else if(ev.target.classList.contains("clone")) {
+			window.location.href = '/add?copy=' + encodeURIComponent(code) + query + hash;
 		}
 	}
 
