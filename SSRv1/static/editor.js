@@ -508,7 +508,6 @@
 	function deleteFeature(name, set, row) {
 		if(set !== null) {
 			set.add(name);
-			console.log(set);
 		}
 		row.remove();
 	}
@@ -952,6 +951,7 @@
 			credentials: 'include',
 			body: JSON.stringify(request)
 		});
+		console.log(request);
 
 		try {
 			await jsendMe(response, goBack, displayError.bind(null, null));
