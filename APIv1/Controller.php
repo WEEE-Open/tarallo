@@ -557,6 +557,7 @@ class Controller extends AbstractController {
 
 	public static function handle(Request $request): Response {
 		$queue = [
+			[static::class, 'isJson'],
 			new DatabaseConnection(),
 			[static::class, 'handleExceptions']
 		];
@@ -646,6 +647,31 @@ class Controller extends AbstractController {
 		} else {
 			$response->getBody()->rewind();
 			$response->getBody()->write($body);
+		}
+
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
+	}
+
+	public static function isJson(
+		Request $request,
+		Response $response,
+		?callable $next = null
+	): Response {
+		$method = $request->getMethod();
+		if($method === 'POST' || $method === 'PUT' || $method === 'PATCH') {
+			/** @noinspection PhpUndefinedMethodInspection it exists. */
+			if(explode(';', $request->getContentType(), 2)[0] !== 'application/json') {
+				$response = $response
+					->withStatus(415)
+					->withHeader('Content-Type', 'text/plain');
+				$response->getBody()->rewind();
+				$response->getBody()->write('Request must contain JSON, check your Content-Type');
+				return $response;
+			}
 		}
 
 		if($next) {
