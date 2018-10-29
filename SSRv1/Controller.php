@@ -111,9 +111,9 @@ class Controller extends AbstractController {
 		$db = $request->getAttribute('Database');
 
 		if($request->getMethod() === 'POST') {
-			$query = $request->getParsedBody();
-			$username = Validation::validateHasString($query, 'username');
-			$password = Validation::validateHasString($query, 'password');
+			$body = $request->getParsedBody();
+			$username = Validation::validateHasString($body, 'username');
+			$password = Validation::validateHasString($body, 'password');
 			$user = $db->userDAO()->getUserFromLogin($username, $password);
 
 			if($user === null) {
@@ -280,17 +280,17 @@ class Controller extends AbstractController {
 	public static function options(Request $request, Response $response, ?callable $next = null): Response {
 		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
-		$query = $request->getQueryParams();
+		$body = $request->getParsedBody();
 
 		Validation::authorize($user, 3);
 
-		if(empty($query)) {
+		if(empty($body)) {
 			$result = null;
 		} else {
 			$result = 'success';
-			$password = Validation::validateHasString($query, 'password');
-			$confirm = Validation::validateHasString($query, 'confirm');
-			$username = isset($query['username']) ? (string) trim($query['username']) : null;
+			$password = Validation::validateHasString($body, 'password');
+			$confirm = Validation::validateHasString($body, 'confirm');
+			$username = isset($body['username']) ? (string) trim($body['username']) : null;
 
 			$target = null;
 			if($username === null || $username === '') {
