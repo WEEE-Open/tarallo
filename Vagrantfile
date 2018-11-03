@@ -21,10 +21,18 @@ Vagrant.configure("2") do |config|
     v.name = "tarallo"
   end
 
-  config.vm.provision "ansible" do |ansible|
+  if Vagrant::Util::Platform.windows? then
+    config.vm.synced_folder "./utils/provision", "/provision",
+	  :owner => 'vagrant',
+	  :group => 'vagrant',
+	  :mount_options => ['dmode=775', 'fmode=775']
+	config.vm.provision :shell, :inline => "/provision/windows-host.sh"
+  else
+    config.vm.provision "ansible" do |ansible|
 	  #ansible.verbose = "v"
 	  ansible.compatibility_mode = "2.0"
 	  ansible.playbook = "utils/provision/playbook.yml"
+    end
   end
 
 end

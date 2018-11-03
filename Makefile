@@ -5,7 +5,6 @@ production: clean copies cache compose build/db.php
 
 .PHONY:
 vm:
-	composer install
 	ansible-galaxy install goozbach.EPEL
 	ansible-galaxy install geerlingguy.nginx
 	vagrant plugin install vagrant-vbguest
