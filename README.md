@@ -7,14 +7,18 @@ Server in PHP e (My)SQL (anche se forse un NoSQL sarebbe stato più adatto) del 
 
 ### Developement
 
-Install Vagrant and Ansible (it's required to provision the VM), then run:
+Install Vagrant and Ansible and run:
 
 	make vm
 
-this will install a Vagrant plugin and Ansible roles.    
+this will install a Vagrant plugin and Ansible roles.
+    
 If you want to do that manually check the `Makefile` to see what's needed, since
 all plugins go *outside of the project directory* (probably somewhere in your
 home directory).
+
+**If you're running Windows** you won't be able to run Ansible, see the
+"Developing on Windows" section below.
 
 Then do:
 	
@@ -44,6 +48,17 @@ PHPUnit tests.
 The `vagrant-vbguest` plugin is required because the default CentOS 7 image lacks
 VirtualBox additions, needed for folder sharing. CentOS was chosen since that's
 what we're using on the production server.
+
+#### Developing on Windows
+
+You'll need to install Vagrant and the vagrant-vbguest plugin:
+`vagrant plugin install vagrant-vbguest`.
+
+Then do `vagrant up`. Vagrant should recognize that you're on Windows
+and run `utils/provision/windows-host.sh` : it will install Ansible
+and its plugins *inside* the virtual machine and provision it.
+
+This appears to work but hasn't been tested thoroughly, so be warned.
 
 ### Production
 

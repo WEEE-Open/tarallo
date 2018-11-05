@@ -91,10 +91,11 @@
       state: present
 
   - name: Install MariaDB 10.2 packages
-    yum: name={{ item }} state=installed
-    with_items:
-      - MariaDB-server
-      - MariaDB-client
+    yum:
+      state: installed
+      name:
+        - MariaDB-server
+        - MariaDB-client
 
   - name: Enable and start MariaDB
     service:
@@ -127,32 +128,34 @@
     mysql_db: login_user=root login_password="{{ mariadb_root_password }}" db=test state=absent
 
   - name: Uninstall old PHP 7.0 (if updating VM)
-    yum: name={{ item }} state=absent
-    with_items:
-      - php70u-common
-      - php70u-fpm
-      - php70u-json
-      - php70u-mysqlnd
-      - php70u-opcache
-      - php70u-pdo
-      - php70u-pecl-xdebug
-      - php70u-mbstring
-      - php70u-dom
-      - php70u-mcrypt
-      - php70u-intl
+    yum:
+      state: absent
+      name:
+        - php70u-common
+        - php70u-fpm
+        - php70u-json
+        - php70u-mysqlnd
+        - php70u-opcache
+        - php70u-pdo
+        - php70u-pecl-xdebug
+        - php70u-mbstring
+        - php70u-dom
+        - php70u-mcrypt
+        - php70u-intl
     notify:
       - stop php-fpm
 
   - name: Install PHP 7.2
-    yum: name={{ item }} state=installed
-    with_items:
-      - php72u-cli
-      - php72u-common
-      - php72u-fpm
-      - php72u-json
-      - php72u-mysqlnd
-      - php72u-opcache
-      - php72u-pdo
+    yum:
+      state: installed
+      name:
+        - php72u-cli
+        - php72u-common
+        - php72u-fpm
+        - php72u-json
+        - php72u-mysqlnd
+        - php72u-opcache
+        - php72u-pdo
 
   - name: Enable and start PHP-FPM
     service:
@@ -162,13 +165,14 @@
 
     # Not really sure about unzip
   - name: Install PHP developement dependencies
-    yum: name={{ item }} state=installed
-    with_items:
-      - php72u-pecl-xdebug
-      - php72u-mbstring
-      - php72u-dom
-      - php72u-intl
-      - unzip
+    yum:
+      state: installed
+      name:
+        - php72u-pecl-xdebug
+        - php72u-mbstring
+        - php72u-dom
+        - php72u-intl
+        - unzip
 
   - name: Enable XDebug
     template:
