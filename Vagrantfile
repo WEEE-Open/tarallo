@@ -5,13 +5,14 @@ Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
   config.vm.hostname = "tarallo"
 
-  config.vm.synced_folder ".", "/vagrant", disabled: true
-  config.vm.synced_folder "./utils/data", "/data"
-  config.vm.synced_folder ".", "/var/www/html/server"
-  config.vm.synced_folder "./utils/xdebug", "/xdebug",
-    :owner => 'php-fpm',
-    :group => 'php-fpm',
-    :mount_options => ['dmode=775', 'fmode=664']
+  config.vm.synced_folder ".", "/vagrant", disabled: true, SharedFoldersEnableSymlinksCreate: false
+  config.vm.synced_folder "./utils/data", "/data", SharedFoldersEnableSymlinksCreate: false
+  config.vm.synced_folder ".", "/var/www/html/server", SharedFoldersEnableSymlinksCreate: false
+  config.vm.synced_folder "./utils/xdebug", "/xdebug", SharedFoldersEnableSymlinksCreate: false,
+    #:owner => 'nobody',
+    #:group => 'nobody',
+    :mount_options => ['dmode=777', 'fmode=666']
+    # or use 775, 664 and user/group php-fpm, but that user doesn't exist before provisioning...
 
   config.vm.network "forwarded_port", guest: 80, host: 8080, host_ip: "127.0.0.1"
   config.vm.network "forwarded_port", guest: 81, host: 8081, host_ip: "127.0.0.1"
