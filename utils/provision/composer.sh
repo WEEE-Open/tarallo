@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/sh
 
 # Taken from here, with minor modifications: https://getcomposer.org/doc/faqs/how-to-install-composer-programmatically.md
 # Copyrighted by whoever owns the copyright, apparently licensed under MIT license
