@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # http://www.thisprogrammingthing.com/2015/using-ansible-with-vagrant-and-windows/
 if [[ ! -f /usr/bin/ansible-playbook ]]; then
