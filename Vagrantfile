@@ -28,11 +28,12 @@ Vagrant.configure("2") do |config|
     v.name = "tarallo"
   end
 
+  # This works only if Windows uses SMB...
   if Vagrant::Util::Platform.windows? then
     config.vm.synced_folder "./utils/provision", "/provision",
 	  :owner => 'vagrant',
 	  :group => 'vagrant',
-	  :mount_options => ['dmode=775', 'fmode=775']
+	  :mount_options => ['dir_mode=0775,file_mode=0775']
 	config.vm.provision :shell, :inline => "/provision/windows-host.sh"
   else
     config.vm.provision "ansible" do |ansible|
