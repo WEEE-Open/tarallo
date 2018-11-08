@@ -328,5 +328,6 @@
     template:
       src: db.php.j2
       dest: "{{ document_root }}/server/db.php"
-      owner: vagrant
-      group: vagrant
+      # This fails since it's a Virtualbox/SMB/whatever share and permissions and owners aren't supported, apparently
+      # owner: vagrant
+      # group: vagrant
