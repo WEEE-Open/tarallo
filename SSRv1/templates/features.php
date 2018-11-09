@@ -9,7 +9,7 @@ if(count($features) > 0): ?>
 		<ul>
 			<?php foreach($group as $feature): /** @var $feature \WEEEOpen\Tarallo\SSRv1\UltraFeature */ ?>
 				<li>
-					<div class="name"><?=$feature->name?></div>
+					<div class="name"><span><?=$feature->name /* The span is a <label> in edit mode, we need an element here in view mode for css to work */?></span></div>
 					<div class="value"><?=$this->contentEditableWrap($this->e($feature->value))?></div>
 				</li>
 			<?php endforeach; ?>

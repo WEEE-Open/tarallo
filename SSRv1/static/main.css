@@ -300,8 +300,13 @@ table td {
 }
 
 .features section h3 {
-	margin: 1em 0;
+	margin: 0.5rem;
 	font-size: 100%;
+	font-weight: bold;
+	color: #333;
+}
+
+label.searchby {
 	font-weight: bold;
 	color: #333;
 }
@@ -316,53 +321,91 @@ table td {
 	padding: 0;
 }
 
-.features ul li, #searchcontrols > div {
-	height: 100%;
-}
-
-.features div {
-	padding: .3rem 0;
-}
-
-.features ul li .name, #searchcontrols > div .searchby {
-	color: #555;
-}
-
 /* Don't do this, as it also removes the blinking cursor in contenteditable areas */
 /*.features ul li .value:-moz-focusring {*/
 	/*color: transparent;*/
 	/*text-shadow: 0 0 0 #000;*/
 /*}*/
 
-.features ul li .value {
-	margin-left: 1em;
+.features.editing .value, #searchcontrols .value {
+	border: 1px solid transparent;
+	background: #f7f7f7;
 }
 
-.features ul li .value[contenteditable] {
-	border-bottom: 0.1em dotted #ccc;
-	margin-left: 0;
+.features ul > li {
+	display: grid;
+	grid-template-rows: auto auto;
+	grid-template-columns: auto 2rem;
+	justify-content: stretch;
+	align-content: space-between;
+	justify-items: stretch;
+	align-items: stretch;
+	width: 100%;
+	margin-bottom: 0.5rem;
 }
 
-.features ul li .value div {
-	margin: 0 .2em;
-	padding: 0 .4em;
+.features ul > li select {
+	margin: 0;
 }
 
-.features ul > li, #searchcontrols ul > li {
+.features ul > li > .name {
+	grid-row: 1;
+	grid-column: 1 / span 2;
+	color: #555;
+	margin-top: 0.5rem;
+	margin-bottom: 0.2rem;
+}
+
+.features ul > li > .comparison {
+	grid-row: 2;
+	grid-column: -4;
+	display: flex;
+	align-items: center;
+	justify-content: end;
+}
+
+.features ul > li > .value {
+	grid-row: 2;
+	grid-column: -3;
+}
+
+.features ul > li > .controls {
+	grid-row: 2;
+	grid-column: -2;
 	display: flex;
 	align-items: center;
 }
 
-.features ul > li > div, #searchcontrols ul > li > div {
-	flex-grow: 0;
+.features:not(.editing) ul > li > .value {
+	grid-column: -3 / span 2;
 }
 
-.features ul > li > div.value, #searchcontrols ul > li > div.value {
-	flex-grow: 1;
+.features ul > li > .name > *, .features ul > li > .value > div {
+	padding: .5rem;
+}
+
+.features ul > li > .name > * {
+	text-align: right;
+}
+
+#searchcontrols > div {
+	margin: 1rem;
+}
+
+#searchcontrols .features ul > li {
+	grid-template-columns: 4rem auto 2rem;
+}
+
+#searchcontrols .features ul > li > .name {
+	grid-column: 1 / span 3;
+}
+
+#searchcontrols .features ul > li > .value {
+	grid-column: -3; /* overrides .features:not(.editing) ul > li > .value */
 }
 
 .features.editing .changed {
-	border: .1em dotted red !important;
+	border-color: #ccc;
 }
 
 .item.working.yes /*> header > h2*/ {
@@ -425,9 +468,22 @@ table td {
 	display: block;
 }
 
+@media only screen and (min-width: 400px) {
+	.itembuttons {
+		flex-direction: row;
+		justify-content: space-around;
+		flex-wrap: wrap;
+	}
+
+	.itembuttons.secondary {
+		justify-content: flex-end;
+	}
+}
+
 @media only screen and (min-width: 30em) {
 	.itembuttons {
 		flex-direction: row;
+		flex-wrap: nowrap;
 		float: right;
 	}
 
@@ -450,36 +506,54 @@ table td {
 	.statswrapper > table {
 		width: auto;
 	}
+}
 
-	.features ul, #searchcontrols {
-		display: table;
-		width: 100%;
+@media only screen and (min-width: 34rem) {
+
+	.features ul > li {
+		grid-template-rows: auto;
+		grid-template-columns: 10rem auto 2rem;
+		margin-bottom: 0;
 	}
 
-	.features section h3 {
-		margin: 0 0 .2em 0;
+	.features.editing ul > li, #searchcontrols .features ul > li {
+		margin-bottom: 0.4em;
 	}
 
-	.features ul li, #searchcontrols > div {
-		height: 100%;
-		display: table-row;
+	.features ul > li > .name {
+		grid-row: 1;
+		grid-column: 1;
+		margin-top: 0;
+		margin-bottom: 0;
+		display: flex;
+		align-items: center;
+		flex-direction: row-reverse;
 	}
 
-	.features ul li .name, #searchcontrols > div .searchby {
-		max-width: 20em;
-		padding-right: 1em;
-		text-align: right;
-		display: table-cell;
-		min-width: 10em;
+	.features ul > li > .value {
+		grid-row: 1;
+		grid-column: 2;
 	}
 
-	.features ul li .value, #searchcontrols > div .filter {
-		display: table-cell;
-		width: 100%;
-		margin-left: 0;
+	.features ul > li > .comparison {
+		grid-row: 1;
+		justify-content: center;
 	}
 
-	.features ul li .controls, .features ul li .comparison {
-		display: table-cell;
+	.features ul > li > .controls {
+		grid-row: 1;
+		grid-column: -2;
+	}
+
+	#searchcontrols .features ul > li {
+		grid-template-columns: 10rem 4rem auto 2rem;
+	}
+
+	#searchcontrols .features ul > li > .name {
+		grid-column: 1;
+	}
+
+	#searchcontrols .features ul > li > .value {
+		grid-column: -3;
 	}
 }
