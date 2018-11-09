@@ -217,19 +217,20 @@ class Controller extends AbstractController {
 			}
 		}
 
-		// TODO: this should probably return 201 sometimes
 		if($loopback) {
 			$request = $request
 				->withAttribute('Status', JSend::SUCCESS)
 				->withAttribute('Data', $db->itemDAO()->getItem($item));
 			$response = $response
-				->withStatus(200);
+				->withHeader('Location', '/v1/items/' . urlencode($item->getCode()))
+				->withStatus(201);
 		} else {
 			$request = $request
 				->withAttribute('Status', JSend::SUCCESS)
 				->withAttribute('Data', $item->getCode());
 			$response = $response
-				->withStatus(200);
+				->withHeader('Location', '/v1/items/' . urlencode($item->getCode()))
+				->withStatus(201);
 		}
 
 		return $next ? $next($request, $response) : $response;
