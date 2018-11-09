@@ -465,7 +465,7 @@
 		if(i === 0) {
 			throw new Error('string-start-nan');
 		}
-		let number = parseFloat(string.substr(0, 0 + i));
+		let number = parseFloat(string.substr(0, i));
 		if(isNaN(number)) {
 			throw new Error('string-parse-nan')
 		}
