@@ -936,10 +936,10 @@
 		let method, uri;
 		if(code) {
 			method = 'PUT';
-			uri = '/v1/items/' + encodeURIComponent(code) + '?fix';
+			uri = '/v1/items/' + encodeURIComponent(code);
 		} else {
 			method = 'POST';
-			uri = '/v1/items?fix';
+			uri = '/v1/items';
 		}
 
 		response = await fetch(uri, {

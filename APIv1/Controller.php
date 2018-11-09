@@ -19,6 +19,7 @@ use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\Server\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
+use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemFeatures;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\ItemLocationValidator;
@@ -168,19 +169,32 @@ class Controller extends AbstractController {
 		Validation::authorize($user);
 
 		$id = Validation::validateOptionalString($parameters, 'id');
-		$fix = isset($query['fix']);
+		$fix = !isset($query['nofix']);
+		$validate = !isset($query['novalidate']);
 		$loopback = isset($query['loopback']);
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
 
-		// Fixing nesting issues need the full parent item, which may not exist (but will be checked again later)
-		if($fix && $parent instanceof ItemIncomplete) {
+		// Validation and fixup requires the full parent item, which may not exist.
+		// Since this part is optional, its existence will be checked again later
+		if($parent instanceof ItemIncomplete && ($fix || $validate)) {
 			try {
 				$parent = $db->itemDAO()->getItem($parent, null, 1);
 			} catch(NotFoundException $e) {
 				throw new InvalidPayloadParameterException('parent', $parent->getCode(), 'Location doesn\'t exist');
 			}
-			ItemLocationValidator::reparentAll($item, $parent);
+		}
+
+		if($fix && $parent instanceof Item) {
+			$parent = ItemLocationValidator::reparentAll($item, $parent);
+		}
+
+		if($validate && $parent instanceof Item) {
+			try {
+				ItemLocationValidator::checkNesting($item, $parent);
+			} catch(ItemNestingException $e) {
+				throw new InvalidPayloadParameterException('*', $e->parentCode, $e->getMessage());
+			}
 		}
 
 		try {
@@ -255,7 +269,7 @@ class Controller extends AbstractController {
 		Validation::validateIsString($payload);
 
 		$id = Validation::validateOptionalString($parameters, 'id');
-		$fix = isset($query['fix']);
+		$fix = !isset($query['nofix']);
 		$validate = !isset($query['novalidate']);
 
 		// We'll need the full item in any case, not just an ItemIncomplete
