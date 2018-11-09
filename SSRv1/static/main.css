@@ -388,7 +388,9 @@ table td {
 }
 
 .itembuttons {
-	float: right;
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-end;
 }
 
 .inside > div > .item {
@@ -421,6 +423,17 @@ table td {
 
 #options form label {
 	display: block;
+}
+
+@media only screen and (min-width: 30em) {
+	.itembuttons {
+		flex-direction: row;
+		float: right;
+	}
+
+	.itembuttons.secondary {
+		float: none;
+	}
 }
 
 @media only screen and (min-width: 500px) {

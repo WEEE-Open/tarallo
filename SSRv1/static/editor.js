@@ -62,17 +62,16 @@
 		if(isNew) {
 			deleteClickBound = deleteFeatureClick.bind(null, null);
 			deleteKeyBound = deleteFeatureKey.bind(null, null);
-			// noinspection JSUnresolvedFunction It's perfectly resolved, it's there, it exists
 			itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveNew);
-			// noinspection JSUnresolvedFunction
-			itemEditing.querySelector('.itembuttons .addnew').addEventListener('click', addNewClick);
+			for(let el of itemEditing.querySelectorAll('.itembuttons .addnew')) {
+				el.addEventListener('click', addNewClick);
+			}
 			// Root "new item" cannot be deleted, just cancel the entire operation
 			// itemEditing.querySelector('.itembuttons .removenew').addEventListener('click', removeNewClick);
 		} else {
 			deletedFeatures = new Set();
 			deleteClickBound = deleteFeatureClick.bind(null, deletedFeatures);
 			deleteKeyBound = deleteFeatureKey.bind(null, deletedFeatures);
-			// noinspection JSUnresolvedFunction
 			itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveModified.bind(null, deletedFeatures));
 			let deleteButton = itemEditing.querySelector('.itembuttons .delete');
 			if(deleteButton) {
@@ -87,10 +86,8 @@
 			enableNewItemButtons(clone);
 		}
 
-		// noinspection JSUnresolvedFunction
 		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack.bind(null, null));
 
-		// There may be more than one new item
 		for(let item of document.querySelectorAll('.item.editing')) {
 			let featuresElement;
 
@@ -779,7 +776,9 @@
 	 */
 	function enableNewItemButtons(item) {
 		item.querySelector('.removenew').addEventListener('click', removeNewClick);
-		item.querySelector('.addnew').addEventListener('click', addNewClick);
+		for(let el of item.querySelectorAll('.addnew')) {
+			el.addEventListener('click', addNewClick);
+		}
 	}
 
 	/**

@@ -59,6 +59,10 @@ if(isset($copy)) {
 			}
 		?>
 	</section>
+
+	<nav class="itembuttons secondary">
+		<button class="addnew">🆕&nbsp;More</button>
+	</nav>
 </article>
 <?php if(!$recursion) {
 	?><script>const activate = true;</script><?php
