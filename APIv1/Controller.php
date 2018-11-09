@@ -26,6 +26,7 @@ use WEEEOpen\Tarallo\Server\ItemLocationValidator;
 use WEEEOpen\Tarallo\Server\ItemNestingException;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
+use WEEEOpen\Tarallo\Server\ValidationException;
 
 
 class Controller extends AbstractController {
@@ -189,11 +190,19 @@ class Controller extends AbstractController {
 			$parent = ItemLocationValidator::reparentAll($item, $parent);
 		}
 
-		if($validate && $parent instanceof Item) {
-			try {
-				ItemLocationValidator::checkNesting($item, $parent);
-			} catch(ItemNestingException $e) {
-				throw new InvalidPayloadParameterException('*', $e->parentCode, $e->getMessage());
+		if($validate) {
+			if($parent instanceof Item) {
+				try {
+					ItemLocationValidator::checkNesting($item, $parent);
+				} catch(ItemNestingException $e) {
+					throw new InvalidPayloadParameterException('parent', $e->parentCode, $e->getMessage());
+				}
+			} else {
+				try {
+					ItemLocationValidator::checkRoot($item);
+				} catch(ValidationException $e) {
+					throw new InvalidPayloadParameterException('location', null, $e->getMessage());
+				}
 			}
 		}
 
