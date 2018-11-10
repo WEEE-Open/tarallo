@@ -14,7 +14,7 @@ if(isset($copy)) {
 	$subitems = $copy->getContents();
 } else {
 	$subitems = [];
-	$features = [];
+	$features = [new \WEEEOpen\Tarallo\Server\Feature('type', 'adapter')];
 }
 
 // to display new inner items, set their $recursion and $innerrecursion to true

@@ -2,6 +2,7 @@
 	"use strict";
 
 	window.newFeature = newFeature;
+	window.focusFeatureValueInput = focusFeatureValueInput;
 
 	// To generate unique IDs for features
 	let featureIdsCounter = 0;
@@ -48,20 +49,13 @@
 	if(typeof activate === 'boolean' && activate) {
 		document.execCommand('defaultParagraphSeparator', false, 'div');
 
-		let divs = document.querySelectorAll('.features.editing [contenteditable]');
-		let selects = document.querySelectorAll('.features.editing select');
-		/** divs and selects */
-		let values = document.querySelectorAll('.features.editing .value');
-		let deletes = document.querySelectorAll('.features.editing .delete');
 		let itemEditing = document.querySelector('.item.head.editing');
 		let isNew = itemEditing.classList.contains('new');
 
 		/** @type {Set<string>} */
 		let deletedFeatures;
-		let deleteClickBound, deleteKeyBound;
 		if(isNew) {
-			deleteClickBound = deleteFeatureClick.bind(null, null);
-			deleteKeyBound = deleteFeatureKey.bind(null, null);
+			deletedFeatures = null;
 			itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveNew);
 			for(let el of itemEditing.querySelectorAll('.itembuttons .addnew')) {
 				el.addEventListener('click', addNewClick);
@@ -70,8 +64,6 @@
 			// itemEditing.querySelector('.itembuttons .removenew').addEventListener('click', removeNewClick);
 		} else {
 			deletedFeatures = new Set();
-			deleteClickBound = deleteFeatureClick.bind(null, deletedFeatures);
-			deleteKeyBound = deleteFeatureKey.bind(null, deletedFeatures);
 			itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveModified.bind(null, deletedFeatures));
 			let deleteButton = itemEditing.querySelector('.itembuttons .delete');
 			if(deleteButton) {
@@ -89,36 +81,65 @@
 		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack.bind(null, null));
 
 		for(let item of document.querySelectorAll('.item.editing')) {
-			let featuresElement;
+			let featuresElement = null;
+			let addFeaturesElement = null;
 
-			// Find own features
+			// Find own features.
+			// Cannot use querySelector et al or it may descend into other items, since the page structure is recursive
 			for(let el of item.children) {
 				if(el.classList.contains('own') && el.classList.contains('features')) {
 					featuresElement = el;
-					break;
+					if(addFeaturesElement !== null) {
+						// Terminate search as soon as both are found (in any order)
+						break;
+					}
+				} else if(el.classList.contains('addfeatures')) {
+					addFeaturesElement = el;
+					if(featuresElement !== null) {
+						break;
+					}
 				}
 			}
 
 			// Find "add" button and add listener
-			for(let el of item.children) {
-				if(el.classList.contains('addfeatures')) {
-					el.querySelector('button').addEventListener('click', addFeatureClick.bind(null, el.querySelector('select'), featuresElement, deletedFeatures));
-					break;
-				}
+			if(addFeaturesElement) {
+				let addFeatureButton = addFeaturesElement.querySelector('button');
+				addFeatureButton.addEventListener('click', addFeatureClick.bind(null, addFeaturesElement.querySelector('select'), featuresElement, deletedFeatures));
 			}
+
+			enableFeatureHandlers(featuresElement);
 		}
+	}
+
+	/**
+	 * Enable all buttons, handlers, events, whatever in the .feature area.
+	 *
+	 * @param {HTMLElement} featuresElement
+	 * @param {Set|null} deletedFeatures
+	 */
+	function enableFeatureHandlers(featuresElement, deletedFeatures = null) {
+		// Find the default "type" feature and add a listener
+		let type = featuresElement.querySelector('.feature-edit-type');
+		if(type) {
+			type.getElementsByTagName('SELECT')[0].addEventListener('change', setTypeClick.bind(null, featuresElement, type))
+		}
+
+		let handler;
 
 		// Enable the "X" button next to features
-		for(let deleteButton of deletes) {
-			deleteButton.addEventListener('click', deleteClickBound);
+		handler = deleteFeatureClick.bind(null, deletedFeatures);
+		for(let deleteButton of featuresElement.querySelectorAll('.delete')) {
+			deleteButton.addEventListener('click', handler);
 		}
 
-		for(let value of values) {
-			value.addEventListener('keydown', deleteKeyBound)
+		// Enable key combinations for the "X" button
+		handler = deleteFeatureKey.bind(null, deletedFeatures);
+		for(let value of featuresElement.querySelectorAll('.value')) {
+			value.addEventListener('keydown', handler)
 		}
 
 		// Event listeners for string and numeric features
-		for(let div of divs) {
+		for(let div of featuresElement.querySelectorAll('[contenteditable]')) {
 			if(div.dataset.internalType === 's') {
 				div.addEventListener('input', textChanged);
 			} else {
@@ -127,7 +148,7 @@
 		}
 
 		// For enum features
-		for(let select of selects) {
+		for(let select of featuresElement.querySelectorAll('select')) {
 			select.addEventListener('change', selectChanged);
 		}
 	}
@@ -527,7 +548,6 @@
 	 */
 	function deleteFeatureKey(set, ev) {
 		let pressed = (ev.ctrlKey && ev.key === 'Delete') || (ev.altKey && ev.key === 'x');
-		console.log(ev);
 		if(pressed) {
 			ev.preventDefault();
 			let row = ev.target.parentElement;
@@ -547,24 +567,44 @@
 	 */
 	function addFeatureClick(select, featuresElement, deletedFeatures = null) {
 		let name = select.value;
+		addFeature(featuresElement, name, deletedFeatures);
+	}
+
+	/**
+	 * Add a feature, or focus it if it already exists.
+	 *
+	 * @param {HTMLElement} featuresElement - The "own features" element
+	 * @param {string} name - Feature name
+	 * @param {Set<string>|null} deletedFeatures - Deleted features set, can be null if not tracked
+	 */
+	function addFeature(featuresElement, name, deletedFeatures = null) {
 		let pseudoId = 'feature-edit-' + name;
 
 		let duplicates = featuresElement.getElementsByClassName(pseudoId);
 		if(duplicates.length > 0) {
 			// There should be only one, hopefully
-			duplicates[0].querySelector('.value').focus();
-			return null;
+			focusFeatureValueInput(duplicates[0]);
+			return;
 		}
 
 		let newElement = addNewFeature(name, pseudoId, featuresElement, deletedFeatures);
 
-		let input = newElement.querySelector('select');
+		focusFeatureValueInput(newElement);
+	}
+
+	/**
+	 * Focus the value (select or div) of a feature input.
+	 *
+	 * @param {Node|HTMLElement} element
+	 */
+	function focusFeatureValueInput(element) {
+		let input = element.querySelector('select.value');
 		if(input) {
 			input.focus();
 			return;
 		}
 
-		input = newElement.querySelector('.value div');
+		input = element.querySelector('.value div');
 		if(input) {
 			const selection = window.getSelection();
 			const range = document.createRange();
@@ -575,7 +615,8 @@
 	}
 
 	/**
-	 * Add a new and editable feature element to the "own features" section
+	 * Add a new and editable feature element to the "own features" section.
+	 * This attaches event listeners that are suitable for edit mode but not for search, so beware.
 	 *
 	 * @param {string} name - Feature name
 	 * @param {string} pseudoId - Unique element identifier (already confirmed to be unique), used as class
@@ -604,15 +645,15 @@
 	 * Add empty features according to object type, if nothing other than type has been added.
 	 *
 	 * @param {HTMLElement} featuresElement - The "own features" element
-	 * @param {HTMLSelectElement} select - The "select" that has been clicked, to get type
+	 * @param {HTMLSelectElement} featureElement - The feature element itself, to get type
 	 */
-	function setTypeClick(featuresElement, select) {
+	function setTypeClick(featuresElement, featureElement) {
 		if(featuresElement.getElementsByTagName('LI').length > 1) {
 			return;
 		}
 
 		let features;
-		let type = select.getElementsByTagName('SELECT')[0].value;
+		let type = featureElement.getElementsByTagName('SELECT')[0].value;
 
 		switch(type) {
 			case 'case':
@@ -803,8 +844,10 @@
 		let item = clone.children[0];
 		let featuresElement = item.querySelector('.own.features.editing');
 		let dropdown = clone.querySelector('.addfeatures .allfeatures');
+		let type = clone.querySelector('.feature-edit-type');
 		dropdown.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
 		clone.querySelector('.addfeatures button').addEventListener('click', addFeatureClick.bind(null, dropdown, featuresElement, null));
+		type.querySelector('select').addEventListener('change', setTypeClick.bind(null, featuresElement, type));
 		return clone;
 	}
 
