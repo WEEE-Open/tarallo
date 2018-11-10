@@ -107,14 +107,14 @@
 				addFeatureButton.addEventListener('click', addFeatureClick.bind(null, addFeaturesElement.querySelector('select'), featuresElement, deletedFeatures));
 			}
 
-			enableFeatureHandlers(featuresElement);
+			enableFeatureHandlers(featuresElement, deletedFeatures);
 		}
 	}
 
 	/**
 	 * Enable all buttons, handlers, events, whatever in the .feature area.
 	 *
-	 * @param {HTMLElement} featuresElement
+	 * @param {Element} featuresElement
 	 * @param {Set|null} deletedFeatures
 	 */
 	function enableFeatureHandlers(featuresElement, deletedFeatures = null) {
@@ -637,7 +637,8 @@
 		}
 
 		// Insert
-		featuresElement.querySelector('.new ul').appendChild(newElement);
+		console.log(featuresElement);
+		featuresElement.querySelector('.newfeatures ul').appendChild(newElement);
 		return newElement;
 	}
 
@@ -822,7 +823,7 @@
 	}
 
 	/**
-	 * Enable the "More" and "Delete" buttons for new items (that don't exist on the server yet)
+	 * Enable the "More" and "Delete" buttons for new items
 	 *
 	 * @param item
 	 */
@@ -848,6 +849,7 @@
 		dropdown.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
 		clone.querySelector('.addfeatures button').addEventListener('click', addFeatureClick.bind(null, dropdown, featuresElement, null));
 		type.querySelector('select').addEventListener('change', setTypeClick.bind(null, featuresElement, type));
+		enableFeatureHandlers(featuresElement, null);
 		return clone;
 	}
 
