@@ -89,12 +89,12 @@
 		wrappingDiv.appendChild(pointlessLabel);
 
 		let comparisonElement = document.createElement('select');
-		optionsFromOperators(operatorsStandard, comparisonElement);
 		if(type === 'i' || type === 'd') {
 			optionsFromOperators(operatorsOrdering, comparisonElement);
 		} else if(type === 's') {
 			optionsFromOperators(operatorsPartial, comparisonElement);
 		}
+		optionsFromOperators(operatorsStandard, comparisonElement);
 
 		pointlessLabel.appendChild(comparisonElement);
 
@@ -181,8 +181,9 @@
 		let hash = window.location.hash;
 
 		let idFragment = code === null ? '' : '/' + code;
+		let pageFragment = page === null ? '' : '/page/' + page;
 
-		window.location.href = '/search' + idFragment + query + hash;
+		window.location.href = '/search' + idFragment + pageFragment + query + hash;
 	}
 
 	function getSelectedFeatures(id) {
