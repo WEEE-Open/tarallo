@@ -556,10 +556,19 @@
 
 		let newElement = addNewFeature(name, pseudoId, featuresElement, deletedFeatures);
 
-		// TODO: replace with 'input, .value' once I figure out how to move the cursor to the right, or else the "line" div disappears spilling the text inside the outer div.
-		let input = newElement.querySelector('input');
+		let input = newElement.querySelector('select');
 		if(input) {
 			input.focus();
+			return;
+		}
+
+		input = newElement.querySelector('.value div');
+		if(input) {
+			const selection = window.getSelection();
+			const range = document.createRange();
+			range.selectNodeContents(input);
+			selection.removeAllRanges();
+			selection.addRange(range);
 		}
 	}
 
