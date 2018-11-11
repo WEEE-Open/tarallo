@@ -113,4 +113,33 @@ LIMIT :lim';
 
 		return $array;
 	}
+
+	public function getCountByFeature(string $feature){
+        $array = [];
+
+        $query = "SELECT ValueText, COUNT(*) AS Quanti
+FROM ItemFeature
+WHERE Feature = '" . $feature . "'
+AND Code IN (
+  SELECT Code
+  FROM ItemFeature
+  WHERE Feature = 'type' AND `ValueEnum` = 'case'
+)
+GROUP BY ValueText
+ORDER BY Quanti DESC";
+
+        $statement = $this->getPDO()->prepare($query);
+
+        try {
+            $success = $statement->execute();
+            assert($success);
+            while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+                $array[$row['ValueText']] = $row['Quanti'];
+            }
+        } finally {
+            $statement->closeCursor();
+        }
+
+        return $array;
+    }
 }
