@@ -123,7 +123,6 @@ LIMIT :lim';
 
 		$type = Feature::getColumn($filter->type);
 
-        
         $query = "SELECT ValueText, COUNT(*) AS Quanti
 FROM ItemFeature
 WHERE Feature = '" . $feature . "'
