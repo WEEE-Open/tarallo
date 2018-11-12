@@ -4,7 +4,7 @@
 if [[ ! -f /usr/bin/ansible-playbook ]]; then
     yum install -y ansible
 fi
-
+	
 ansible-galaxy install goozbach.EPEL
 ansible-galaxy install geerlingguy.nginx
 
