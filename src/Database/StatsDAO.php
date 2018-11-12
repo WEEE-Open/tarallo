@@ -115,7 +115,10 @@ LIMIT :lim';
 	}
 
 	public function getCountByFeature(string $feature){
-        $array = [];
+        if(Feature::getType($feature) != Feature::STRING)
+            throw new \LogicException('Feature must be a ValueText type');
+
+	    $array = [];
 
         $query = "SELECT ValueText, COUNT(*) AS Quanti
 FROM ItemFeature
