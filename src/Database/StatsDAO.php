@@ -1,9 +1,13 @@
 <?php
+
 namespace WEEEOpen\Tarallo\Server\Database;
+
 use WEEEOpen\Tarallo\Server\Feature;
+
 final class StatsDAO extends DAO {
     public function getLocationsByItems() {
         $array = [];
+
         $result = $this->getPDO()->query('SELECT `Code` AS Location, COUNT(*) - 1 AS Descendants
 FROM ItemFeature, Tree
 WHERE ItemFeature.Code = Tree.Ancestor
@@ -11,9 +15,11 @@ AND ItemFeature.Feature = \'type\'
 AND ItemFeature.ValueEnum = \'location\'
 GROUP BY Tree.Ancestor
 ORDER BY COUNT(*) DESC, Location ASC;', \PDO::FETCH_ASSOC);
+
         if($result === false) {
             throw new DatabaseException('Available locations query failed for no reason');
         }
+
         try {
             foreach($result as $row) {
                 $array[$row['Location']] = $row['Descendants'];
@@ -21,19 +27,24 @@ ORDER BY COUNT(*) DESC, Location ASC;', \PDO::FETCH_ASSOC);
         } finally {
             $result->closeCursor();
         }
+
         return $array;
     }
+
     public function getDuplicateSerialsCount() {
         $array = [];
+
         $result = $this->getPDO()->query('SELECT ValueText AS SN, COUNT(*) AS Count
 FROM ItemFeature
 WHERE Feature = \'sn\'
 GROUP BY ValueText
 HAVING Count > 1
 ORDER BY Count DESC, SN ASC', \PDO::FETCH_ASSOC);
+
         if($result === false) {
             throw new DatabaseException('Duplicate serial numbers query failed for no reason');
         }
+
         try {
             foreach($result as $row) {
                 $array[$row['SN']] = $row['Count'];
@@ -41,8 +52,10 @@ ORDER BY Count DESC, SN ASC', \PDO::FETCH_ASSOC);
         } finally {
             $result->closeCursor();
         }
+
         return $array;
     }
+
     /**
      * Get most/least recently changed cases in a particular location, excluding in-use ones. This takes into account
      * all audit entries for all contained items.
@@ -60,6 +73,7 @@ ORDER BY Count DESC, SN ASC', \PDO::FETCH_ASSOC);
      */
     public function getModifiedItems(string $location, bool $recent = true, int $limit = 100): array {
         $array = [];
+
         $query = "SELECT `Ancestor` AS `Item`, `Time`, UNIX_TIMESTAMP(MAX(`Time`)) AS `Last`
 FROM Audit
 JOIN Tree ON Tree.Descendant=Audit.Code
@@ -82,19 +96,24 @@ GROUP BY `Ancestor`
 ORDER BY `Last` " . ($recent ? 'DESC' : 'ASC') . '
 LIMIT :lim';
         $statement = $this->getPDO()->prepare($query);
+
         $statement->bindValue(':loc', $location);
         $statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
+
         try {
             $success = $statement->execute();
             assert($success);
+
             while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
                 $array[$row['Item']] = $row['Last'];
             }
         } finally {
             $statement->closeCursor();
         }
+
         return $array;
     }
+
     public function getCountByFeature(string $feature, Feature $filter){
         if(Feature::getType($feature) != Feature::STRING)
             throw new \LogicException('Feature must be a ValueText type');
