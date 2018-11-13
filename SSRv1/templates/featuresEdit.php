@@ -37,7 +37,7 @@ if(count($features) > 0):
 	endforeach;
 endif;
 ?>
-<section class="new">
+<section class="newfeatures">
 	<h3>New features</h3>
 	<ul></ul>
 </section>

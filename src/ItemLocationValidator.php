@@ -131,6 +131,23 @@ class ItemLocationValidator {
 		}
 	}
 
+	/**
+	 * Check that an item could be a root item (no parent)
+	 *
+	 * @param Item $item Item to be checked
+	 *
+	 * @throws ValidationException
+	 */
+	public static function checkRoot(Item $item) {
+		$type = $item->getFeature('type');
+		if($type === null) {
+			return;
+		}
+		if($type !== 'location') {
+			throw new ValidationException('Set a location for this item or mark it as a location itself, this type cannot be a root item');
+		}
+	}
+
 	private static function isExpansionCard($type) {
 		return strlen($type) > 5 && substr($type, -5) === '-card';
 	}

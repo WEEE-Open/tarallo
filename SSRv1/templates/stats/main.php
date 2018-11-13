@@ -29,7 +29,7 @@ date_default_timezone_set('Europe/Rome');
 		</table>
 	</div>
 <?php endif ?>
-<?php if(!empty($recentlyAdded)): ?>
+<?php if(!empty($recentlyModified)): ?>
 	<div class="statswrapper">
 		<p>Recently modified items:</p>
 		<table>
@@ -40,7 +40,7 @@ date_default_timezone_set('Europe/Rome');
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($recentlyAdded as $code => $time): ?>
+			<?php foreach($recentlyModified as $code => $time): ?>
 				<tr>
 					<td><a href="/item/<?=$code?>"><?=$code?></a></td>
 					<td><?=date('Y-m-d, H:i', $time)?></td>

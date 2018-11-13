@@ -19,12 +19,14 @@ use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\Server\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
+use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemFeatures;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\ItemLocationValidator;
 use WEEEOpen\Tarallo\Server\ItemNestingException;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
+use WEEEOpen\Tarallo\Server\ValidationException;
 
 
 class Controller extends AbstractController {
@@ -168,19 +170,40 @@ class Controller extends AbstractController {
 		Validation::authorize($user);
 
 		$id = Validation::validateOptionalString($parameters, 'id');
-		$fix = isset($query['fix']);
+		$fix = !isset($query['nofix']);
+		$validate = !isset($query['novalidate']);
 		$loopback = isset($query['loopback']);
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
 
-		// Fixing nesting issues need the full parent item, which may not exist (but will be checked again later)
-		if($fix && $parent instanceof ItemIncomplete) {
+		// Validation and fixup requires the full parent item, which may not exist.
+		// Since this part is optional, its existence will be checked again later
+		if($parent instanceof ItemIncomplete && ($fix || $validate)) {
 			try {
 				$parent = $db->itemDAO()->getItem($parent, null, 1);
 			} catch(NotFoundException $e) {
 				throw new InvalidPayloadParameterException('parent', $parent->getCode(), 'Location doesn\'t exist');
 			}
-			ItemLocationValidator::reparentAll($item, $parent);
+		}
+
+		if($fix && $parent instanceof Item) {
+			$parent = ItemLocationValidator::reparentAll($item, $parent);
+		}
+
+		if($validate) {
+			if($parent instanceof Item) {
+				try {
+					ItemLocationValidator::checkNesting($item, $parent);
+				} catch(ItemNestingException $e) {
+					throw new InvalidPayloadParameterException('parent', $e->parentCode, $e->getMessage());
+				}
+			} else {
+				try {
+					ItemLocationValidator::checkRoot($item);
+				} catch(ValidationException $e) {
+					throw new InvalidPayloadParameterException('location', null, $e->getMessage());
+				}
+			}
 		}
 
 		try {
@@ -203,19 +226,20 @@ class Controller extends AbstractController {
 			}
 		}
 
-		// TODO: this should probably return 201 sometimes
 		if($loopback) {
 			$request = $request
 				->withAttribute('Status', JSend::SUCCESS)
 				->withAttribute('Data', $db->itemDAO()->getItem($item));
 			$response = $response
-				->withStatus(200);
+				->withHeader('Location', '/v1/items/' . urlencode($item->getCode()))
+				->withStatus(201);
 		} else {
 			$request = $request
 				->withAttribute('Status', JSend::SUCCESS)
 				->withAttribute('Data', $item->getCode());
 			$response = $response
-				->withStatus(200);
+				->withHeader('Location', '/v1/items/' . urlencode($item->getCode()))
+				->withStatus(201);
 		}
 
 		return $next ? $next($request, $response) : $response;
@@ -255,7 +279,7 @@ class Controller extends AbstractController {
 		Validation::validateIsString($payload);
 
 		$id = Validation::validateOptionalString($parameters, 'id');
-		$fix = isset($query['fix']);
+		$fix = !isset($query['nofix']);
 		$validate = !isset($query['novalidate']);
 
 		// We'll need the full item in any case, not just an ItemIncomplete
