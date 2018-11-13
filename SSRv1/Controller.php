@@ -222,7 +222,7 @@ class Controller extends AbstractController {
 							'location'    => $location,
 							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
 							'mostRecent'  => $db->statsDAO()->getModifiedItems($location, true, 30),
-							'byOwner'     => $db->statsDAO()->getCountByFeature("owner"),
+							'byOwner'     => $db->statsDAO()->getCountByFeature("owner", new Feature("type", "case")),
 							'ready'       => [], // TODO: implement
 						]);
 				break;

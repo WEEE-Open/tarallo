@@ -114,11 +114,15 @@ LIMIT :lim';
 		return $array;
 	}
 
-	public function getCountByFeature(string $feature){
+	public function getCountByFeature(string $feature, Feature $filter){
         if(Feature::getType($feature) != Feature::STRING)
             throw new \LogicException('Feature must be a ValueText type');
 
 	    $array = [];
+
+         $name = $filter->name;
+         $type = Feature::getColumn($filter->type);
+         $value = $filter->value;
 
         $query = "SELECT ValueText, COUNT(*) AS Quanti
 FROM ItemFeature
@@ -126,7 +130,7 @@ WHERE Feature = '" . $feature . "'
 AND Code IN (
   SELECT Code
   FROM ItemFeature
-  WHERE Feature = 'type' AND `ValueEnum` = 'case'
+  WHERE Feature = '" . $name ."' AND `" . $type . "` = '" . $value . "' -- TODO: parametrize $name and $value
 )
 GROUP BY ValueText
 ORDER BY Quanti DESC";
