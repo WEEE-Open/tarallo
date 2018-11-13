@@ -122,7 +122,6 @@ LIMIT :lim';
 
          $name = $filter->name;
          $type = Feature::getColumn($filter->type);
-         $value = $filter->value;
 
         $query = "SELECT ValueText, COUNT(*) AS Quanti
 FROM ItemFeature
@@ -130,12 +129,17 @@ WHERE Feature = '" . $feature . "'
 AND Code IN (
   SELECT Code
   FROM ItemFeature
-  WHERE Feature = '" . $name ."' AND `" . $type . "` = '" . $value . "' -- TODO: parametrize $name and $value
+  WHERE Feature = ':nam' AND `" . $type . "` = ':val' -- TODO: parametrize $name and $value
 )
 GROUP BY ValueText
 ORDER BY Quanti DESC";
 
         $statement = $this->getPDO()->prepare($query);
+		
+	$pdoType = $filter->value === Feature::INTEGER ? \PDO::PARAM_INT : \PDO::PARAM_STR;
+	
+	$statement->bindValue(':val', $ilter->value, $pdoType);
+	$statement->bindValue(':nam', $name, \PDO::PARAM_STR);
 
         try {
             $success = $statement->execute();
