@@ -29,7 +29,7 @@ date_default_timezone_set('Europe/Rome');
 		</table>
 	</div>
 <?php endif ?>
-<?php if(!empty($recentlyAdded)): ?>
+<?php if(!empty($recentlyModified)): ?>
 	<div class="statswrapper">
 		<p>Recently modified items:</p>
 		<table>
