@@ -31,30 +31,39 @@
 		document.getElementById(id).classList.toggle('disabled');
 	}
 
-	function addFeatureClick(select, featuresElement) {
+	function addFeatureClick(select, featuresElement, deletedFeatures = null) {
 		let name = select.value;
+		addFeature(featuresElement, name, deletedFeatures);
+	}
+
+	/**
+	 * Add a feature, or focus it if it already exists.
+	 *
+	 * @param {HTMLElement} featuresElement - The "own features" element
+	 * @param {string} name - Feature name
+	 * @param {Set<string>|null} deletedFeatures - Deleted features set, can be null if not tracked
+	 */
+	function addFeature(featuresElement, name, deletedFeatures = null) {
 		let pseudoId = 'feature-edit-' + name;
 
 		let duplicates = featuresElement.getElementsByClassName(pseudoId);
 		if(duplicates.length > 0) {
-			duplicates[0].querySelector('.value').focus();
+			// There should be only one, hopefully
+			focusFeatureValueInput(duplicates[0]);
 			return;
 		}
 
 		let newElement = newFeature(name, pseudoId, null, getComparison);
 		featuresElement.appendChild(newElement);
-		// TODO: replace with 'input, .value' once I figure out how to move the cursor to the right (= get this code working: https://stackoverflow.com/a/3866442)
-		let input = newElement.querySelector('input');
-		if(input) {
-			input.focus();
-		}
+
+		focusFeatureValueInput(newElement);
 	}
 
 	/**
 	 * Get options from operators
 	 *
 	 * @param {Map<string,string>} operarators
-	 * @param {HTMLSelectElement} select
+	 * @param {HTMLSelectElement|HTMLElement} select - It's a select but PHPStorm doesn't seem to understand that
 	 */
 	function optionsFromOperators(operarators, select) {
 		for(let [operator, printable] of operarators) {
@@ -80,12 +89,12 @@
 		wrappingDiv.appendChild(pointlessLabel);
 
 		let comparisonElement = document.createElement('select');
-		optionsFromOperators(operatorsStandard, comparisonElement);
 		if(type === 'i' || type === 'd') {
 			optionsFromOperators(operatorsOrdering, comparisonElement);
 		} else if(type === 's') {
 			optionsFromOperators(operatorsPartial, comparisonElement);
 		}
+		optionsFromOperators(operatorsStandard, comparisonElement);
 
 		pointlessLabel.appendChild(comparisonElement);
 
@@ -172,8 +181,9 @@
 		let hash = window.location.hash;
 
 		let idFragment = code === null ? '' : '/' + code;
+		let pageFragment = page === null ? '' : '/page/' + page;
 
-		window.location.href = '/search' + idFragment + query + hash;
+		window.location.href = '/search' + idFragment + pageFragment + query + hash;
 	}
 
 	function getSelectedFeatures(id) {

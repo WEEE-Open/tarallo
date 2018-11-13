@@ -130,7 +130,7 @@ WHERE Feature = '" . $feature . "'
 AND Code IN (
   SELECT Code
   FROM ItemFeature
-  WHERE Feature = '" . $name ."' AND `" . $type . "` = '" . $value . "'
+  WHERE Feature = '" . $name ."' AND `" . $type . "` = '" . $value . "' -- TODO: parametrize $name and $value
 )
 GROUP BY ValueText
 ORDER BY Quanti DESC";
