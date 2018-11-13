@@ -98,18 +98,22 @@ LIMIT :lim';
     public function getCountByFeature(string $feature, Feature $filter){
         if(Feature::getType($feature) != Feature::STRING)
             throw new \LogicException('Feature must be a ValueText type');
+
         $array = [];
+
         $type = Feature::getColumn($filter->type);
+
         $query = "SELECT ValueText, COUNT(*) AS Quanti
 FROM ItemFeature
 WHERE Feature = '" . $feature . "'
 AND Code IN (
   SELECT Code
   FROM ItemFeature
-  WHERE Feature = ':nam' AND `" . $type . "` = ':val'
+  WHERE Feature = :nam AND `" . $type . "` = :val
 )
 GROUP BY ValueText
 ORDER BY Quanti DESC";
+
         $statement = $this->getPDO()->prepare($query);
 
         $pdoType = $filter->value === Feature::INTEGER ? \PDO::PARAM_INT : \PDO::PARAM_STR;
