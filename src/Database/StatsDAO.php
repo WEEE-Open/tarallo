@@ -134,27 +134,22 @@ AND Code IN (
 GROUP BY ValueText
 ORDER BY Quanti DESC";
 
-        $statement = $this->getPDO()->prepare($query);
-		
-	$pdoType = $filter->value === Feature::INTEGER ? \PDO::PARAM_INT : \PDO::PARAM_STR;
-	
-	$statement->bindValue(':val', $ilter->value, $pdoType);
-	$statement->bindValue(':nam', $name, \PDO::PARAM_STR);
+		$statement = $this->getPDO()->prepare($query);
 
-        $pdoType = $filter->value === Feature::INTEGER ? \PDO::PARAM_INT : \PDO::PARAM_STR;
+		$pdoType = $filter->value === Feature::INTEGER ? \PDO::PARAM_INT : \PDO::PARAM_STR;
 
-        $statement->bindValue(':val', $filter->value, $pdoType);
-        $statement->bindValue(':nam', $filter->name, \PDO::PARAM_STR);
-        try {
-            $success = $statement->execute();
-            assert($success);
-            while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-                $array[$row['ValueText']] = $row['Quanti'];
-            }
-        } finally {
-            $statement->closeCursor();
-        }
+		$statement->bindValue(':val', $filter->value, $pdoType);
+		$statement->bindValue(':nam', $filter->name, \PDO::PARAM_STR);
+		try {
+			$success = $statement->execute();
+			assert($success);
+			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+				$array[$row['ValueText']] = $row['Quanti'];
+			}
+		} finally {
+			$statement->closeCursor();
+		}
 
-        return $array;
-    }
+		return $array;
+	}
 }
