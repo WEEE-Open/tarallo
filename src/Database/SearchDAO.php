@@ -350,7 +350,8 @@ EOQ;
 	 */
 	private function setItemOrder(int $searchId, string $code, int $position) {
 		if($this->setItemOrderStatement === null) {
-			$this->setItemOrderStatement = $this->getPDO()->prepare('UPDATE SearchResult SET `Order` = :pos WHERE Search = :sea AND Item = :cod');
+			$this->setItemOrderStatement = $this->getPDO()
+				->prepare('UPDATE SearchResult SET `Order` = :pos WHERE Search = :sea AND Item = :cod');
 		}
 
 		try {

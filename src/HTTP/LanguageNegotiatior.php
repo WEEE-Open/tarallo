@@ -13,15 +13,12 @@ class LanguageNegotiatior implements Middleware {
 	public const en_US = 'en-US';
 	public const it_IT = 'it-IT';
 
-	public function __invoke(
-		ServerRequestInterface $request,
-		ResponseInterface $response,
-		?callable $next = null
-	): ResponseInterface {
+	public function __invoke(ServerRequestInterface $request, ResponseInterface $response,
+		?callable $next = null): ResponseInterface {
 		$best = self::negotiateLanguage($request->getHeaderLine('Accept-Language'));
 		$request = $request->withAttribute('language', $best);
 
-		if ($next) {
+		if($next) {
 			return $next($request, $response);
 		} else {
 			return $response;

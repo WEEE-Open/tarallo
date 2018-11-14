@@ -45,7 +45,7 @@ class Session {
 	 */
 	private static function newIdentifier() {
 		$str = '';
-		for($i = 0; $i < 32; $i ++) {
+		for($i = 0; $i < 32; $i++) {
 			$str .= self::KEYSPACE[random_int(0, self::KEYSPACE_STRLEN - 1)];
 		}
 

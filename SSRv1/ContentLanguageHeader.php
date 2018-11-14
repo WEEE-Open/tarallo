@@ -6,11 +6,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
 class ContentLanguageHeader implements Middleware {
-	public function __invoke(
-		ServerRequestInterface $request,
-		ResponseInterface $response,
-		?callable $next = null
-	): ResponseInterface {
+	public function __invoke(ServerRequestInterface $request, ResponseInterface $response,
+		?callable $next = null): ResponseInterface {
 		$language = $request->getAttribute('language', null);
 		if(is_string($language)) {
 			$response = $response->withHeader('Content-Language', $request->getAttribute('language'));

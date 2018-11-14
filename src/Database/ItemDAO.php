@@ -85,7 +85,8 @@ final class ItemDAO extends DAO {
 	 * @return bool|null tri-state: true if marked as deleted, false if not marked but exists, null if doesn't exist
 	 */
 	private function itemIsDeleted(ItemIncomplete $item) {
-		$statement = $this->getPDO()->prepare('SELECT IF(DeletedAt IS NULL, FALSE, TRUE) FROM Item WHERE `Code` = :cod');
+		$statement = $this->getPDO()
+			->prepare('SELECT IF(DeletedAt IS NULL, FALSE, TRUE) FROM Item WHERE `Code` = :cod');
 		try {
 			$statement->execute([$item->getCode()]);
 			if($statement->rowCount() === 0) {

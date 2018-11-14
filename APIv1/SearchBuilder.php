@@ -72,10 +72,12 @@ class SearchBuilder {
 		$result = [];
 		foreach($stuff as $triplet) {
 			if(!is_array($triplet)) {
-				throw new InvalidPayloadParameterException($field, (string) $triplet, "Elements of $field should be arrays, not " . gettype($triplet));
+				throw new InvalidPayloadParameterException($field, (string) $triplet,
+					"Elements of $field should be arrays, not " . gettype($triplet));
 			}
 			if(count($triplet) != 3) {
-				throw new InvalidPayloadParameterException($field, count($triplet), "Triplet should contain 3 elements, not " . count($triplet));
+				throw new InvalidPayloadParameterException($field, count($triplet),
+					"Triplet should contain 3 elements, not " . count($triplet));
 			}
 
 			// Create a Feature to convert strings to int/double. Then discard it and recreate it in SearchTriplet.

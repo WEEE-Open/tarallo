@@ -115,7 +115,8 @@ final class FeatureDAO extends DAO {
 	 * @param ItemIncomplete $item
 	 */
 	public function addAuditEntry(ItemIncomplete $item) {
-		$statementAudit = $this->getPDO()->prepare('INSERT INTO Audit (`Code`, `Change`, `User`) VALUES (?, \'U\', @taralloAuditUsername)');
+		$statementAudit = $this->getPDO()
+			->prepare('INSERT INTO Audit (`Code`, `Change`, `User`) VALUES (?, \'U\', @taralloAuditUsername)');
 
 		try {
 			$success = $statementAudit->execute([$item->getCode()]);
@@ -144,7 +145,8 @@ final class FeatureDAO extends DAO {
 			$column = Feature::getColumn($feature->type);
 			$type = Feature::getPDOType($feature->type);
 			/** @noinspection SqlResolve */
-			$statement = $this->getPDO()->prepare("INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2");
+			$statement = $this->getPDO()
+				->prepare("INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2");
 
 			try {
 				$statement->bindValue(':feature', $feature->name, \PDO::PARAM_STR);

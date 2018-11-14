@@ -12,7 +12,7 @@ class SearchTriplet {
 
 	public function __construct($key, $compare, $value) {
 		$this->feature = new Feature($key, $value);
-		
+
 		if(in_array($compare, self::separatorsPartial)) {
 			self::checkCanPartialMatch($this->feature);
 		} else if(in_array($compare, self::separatorsOrdering)) {

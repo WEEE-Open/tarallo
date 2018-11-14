@@ -8,7 +8,8 @@ use WEEEOpen\Tarallo\Server\User;
 final class UserDAO extends DAO {
 
 	public function getUserFromSession($session) {
-		$s = $this->getPDO()->prepare('SELECT `Name`, `Password` AS `Hash`, `Level` FROM `User` WHERE `Session` = ? AND `SessionExpiry` > NOW() AND `Enabled` > 0');
+		$s = $this->getPDO()
+			->prepare('SELECT `Name`, `Password` AS `Hash`, `Level` FROM `User` WHERE `Session` = ? AND `SessionExpiry` > NOW() AND `Enabled` > 0');
 		$s->execute([$session]);
 		if($s->rowCount() > 1) {
 			$s->closeCursor();
@@ -33,7 +34,8 @@ final class UserDAO extends DAO {
 	 */
 	public function setSessionFromUser($username, $session) {
 		try {
-			$s = $this->getPDO()->prepare('UPDATE `User` SET `Session` = :s, SessionExpiry = TIMESTAMPADD(HOUR, 6, NOW()) WHERE `Name` = :n AND `Enabled` > 0');
+			$s = $this->getPDO()
+				->prepare('UPDATE `User` SET `Session` = :s, SessionExpiry = TIMESTAMPADD(HOUR, 6, NOW()) WHERE `Name` = :n AND `Enabled` > 0');
 			$s->bindValue(':s', $session, $session === null ? \PDO::PARAM_NULL : \PDO::PARAM_STR);
 			$s->bindValue(':n', $username, \PDO::PARAM_STR);
 			if(!$s->execute()) {
@@ -67,7 +69,7 @@ final class UserDAO extends DAO {
 			$s->closeCursor();
 		}
 	}
-	
+
 	/**
 	 * Create a user
 	 *
@@ -96,7 +98,8 @@ final class UserDAO extends DAO {
 	 * @return null|User User if found and password is valid, null otherwise
 	 */
 	public function getUserFromLogin($username, $password) {
-		$s = $this->getPDO()->prepare('SELECT `Password` AS `Hash`, `Level` FROM `User` WHERE `Name` = ? AND `Enabled` > 0');
+		$s = $this->getPDO()
+			->prepare('SELECT `Password` AS `Hash`, `Level` FROM `User` WHERE `Name` = ? AND `Enabled` > 0');
 		$s->execute([$username]);
 		if($s->rowCount() > 1) {
 			$s->closeCursor();

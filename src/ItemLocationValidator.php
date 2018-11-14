@@ -111,7 +111,7 @@ class ItemLocationValidator {
 				$itemValue = $item->getFeature('ram-form-factor');
 				$parentValue = $parent->getFeature('ram-form-factor');
 				throw new ItemNestingException("Incompatible socket: CPU is $itemValue, motherboard is $parentValue",
-						$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
+					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
 			}
 		}
 

@@ -19,13 +19,8 @@ class Search {
 	 * @param ItemIncomplete[]|null $locations Only descendants of these items will be searched
 	 * @param string[]|null $sorts Map (associative array) from feature name to order (+ or -)
 	 */
-	public function __construct(
-		$code = null,
-		array $features = null,
-		array $ancestors = null,
-		array $locations = null,
-		array $sorts = null
-	) {
+	public function __construct($code = null, array $features = null, array $ancestors = null, array $locations = null,
+		array $sorts = null) {
 		$this->filter($code, $features, $ancestors, $locations);
 		$this->sort($sorts);
 	}
@@ -81,12 +76,8 @@ class Search {
 	 * @param SearchTriplet[]|null $ancestors
 	 * @param ItemIncomplete[]|null $locations
 	 */
-	private static function validateGlobally(
-		$code,
-		array $features = null,
-		array $ancestors = null,
-		array $locations = null
-	) {
+	private static function validateGlobally($code, array $features = null, array $ancestors = null,
+		array $locations = null) {
 		$searchSomething = false;
 
 		if($code !== null) {

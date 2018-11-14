@@ -9,17 +9,10 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 abstract class AbstractController {
 	const cachefile = '';
 
-	abstract public static function handleExceptions(
-		Request $request,
-		Response $response,
-		?callable $next = null
-	): Response;
+	abstract public static function handleExceptions(Request $request, Response $response,
+		?callable $next = null): Response;
 
-	public static function doTransaction(
-		Request $request,
-		Response $response,
-		?callable $next = null
-	): Response {
+	public static function doTransaction(Request $request, Response $response, ?callable $next = null): Response {
 		$db = $request->getAttribute('Database');
 		$db->beginTransaction();
 
@@ -42,7 +35,6 @@ abstract class AbstractController {
 	abstract public static function handle(Request $request): Response;
 
 	public static function route(Request $request): array {
-		return static::getDispatcher(static::cachefile)
-			->dispatch($request->getMethod(), $request->getUri()->getPath());
+		return static::getDispatcher(static::cachefile)->dispatch($request->getMethod(), $request->getUri()->getPath());
 	}
 }
