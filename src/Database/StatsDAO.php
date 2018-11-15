@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\Server\Database;
 
 use WEEEOpen\Tarallo\Server\Feature;
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
 
 final class StatsDAO extends DAO {
 	public function getLocationsByItems() {
@@ -16,9 +17,7 @@ AND ItemFeature.ValueEnum = \'location\'
 GROUP BY Tree.Ancestor
 ORDER BY COUNT(*) DESC, Location ASC;', \PDO::FETCH_ASSOC);
 
-		if($result === false) {
-			throw new DatabaseException('Available locations query failed for no reason');
-		}
+		assert($result, 'available locations');
 
 		try {
 			foreach($result as $row) {
@@ -41,9 +40,7 @@ GROUP BY ValueText
 HAVING Count > 1
 ORDER BY Count DESC, SN ASC', \PDO::FETCH_ASSOC);
 
-		if($result === false) {
-			throw new DatabaseException('Duplicate serial numbers query failed for no reason');
-		}
+		assert($result, 'duplicate serial numbers');
 
 		try {
 			foreach($result as $row) {
@@ -65,13 +62,13 @@ ORDER BY Count DESC, SN ASC', \PDO::FETCH_ASSOC);
 	 * @todo parametrize the "in-use" exclusion, maybe? So the "most recently modified" makes more sense
 	 * @todo try to parametrize the "type=case" filter
 	 *
-	 * @param string $location Where to look
+	 * @param ItemIncomplete $location Where to look
 	 * @param bool $recent True for more recently modified items first, false for least recently modified
 	 * @param int $limit rows to return
 	 *
 	 * @return int[] code => timestamp
 	 */
-	public function getModifiedItems(string $location, bool $recent = true, int $limit = 100): array {
+	public function getModifiedItems(ItemIncomplete $location, bool $recent = true, int $limit = 100): array {
 		$array = [];
 
 		$query = "SELECT `Ancestor` AS `Item`, `Time`, UNIX_TIMESTAMP(MAX(`Time`)) AS `Last`
@@ -97,7 +94,7 @@ ORDER BY `Last` " . ($recent ? 'DESC' : 'ASC') . '
 LIMIT :lim';
 		$statement = $this->getPDO()->prepare($query);
 
-		$statement->bindValue(':loc', $location);
+		$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
 		$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
 
 		try {
@@ -114,7 +111,7 @@ LIMIT :lim';
 		return $array;
 	}
 
-	public function getCountByFeature(string $feature, Feature $filter) {
+	public function getCountByFeature(ItemIncomplete $location, string $feature, Feature $filter) {
 		Feature::validateFeatureName($feature);
 
 		$array = [];
@@ -129,6 +126,11 @@ AND `Code` IN (
   FROM ItemFeature
   WHERE Feature = :nam AND `" . $type . "` = :val
 )
+AND `Code` IN (
+  SELECT Descendant
+  FROM Tree
+  WHERE Ancestor = :loc
+)
 GROUP BY ValueText
 ORDER BY Quantity DESC";
 
@@ -138,11 +140,12 @@ ORDER BY Quantity DESC";
 
 		$statement->bindValue(':val', $filter->value, $pdoType);
 		$statement->bindValue(':nam', $filter->name, \PDO::PARAM_STR);
+		$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
 		try {
 			$success = $statement->execute();
 			assert($success);
 			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-				$array[$row['ValueText']] = $row['Quanti'];
+				$array[$row['ValueText']] = $row['Quantity'];
 			}
 		} finally {
 			$statement->closeCursor();

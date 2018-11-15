@@ -38,9 +38,8 @@ final class UserDAO extends DAO {
 				->prepare('UPDATE `User` SET `Session` = :s, SessionExpiry = TIMESTAMPADD(HOUR, 6, NOW()) WHERE `Name` = :n AND `Enabled` > 0');
 			$s->bindValue(':s', $session, $session === null ? \PDO::PARAM_NULL : \PDO::PARAM_STR);
 			$s->bindValue(':n', $username, \PDO::PARAM_STR);
-			if(!$s->execute()) {
-				throw new DatabaseException("Cannot update session for user $username for unknown reasons");
-			}
+			$result = $s->execute();
+			assert($result, 'set session from user');
 
 			$this->setAuditUsername($username);
 		} finally {
@@ -59,9 +58,8 @@ final class UserDAO extends DAO {
 			$s = $this->getPDO()->prepare('UPDATE `User` SET `Password` = :p WHERE `Name` = :n');
 			$s->bindValue(':p', $hash, \PDO::PARAM_STR);
 			$s->bindValue(':n', $username, \PDO::PARAM_STR);
-			if(!$s->execute()) {
-				throw new DatabaseException("Cannot update password for user $username for unknown reasons");
-			}
+			$result = $s->execute();
+			assert($result, 'update password hash');
 			if($s->rowCount() === 0) {
 				throw new NotFoundException(8);
 			}
@@ -81,9 +79,8 @@ final class UserDAO extends DAO {
 			$s = $this->getPDO()->prepare('INSERT INTO `User`(`Name`, `Password`, `Enabled`) VALUES (:n, :p, 1)');
 			$s->bindValue(':n', $username, \PDO::PARAM_STR);
 			$s->bindValue(':p', $hash, \PDO::PARAM_STR);
-			if(!$s->execute()) {
-				throw new DatabaseException("Cannot create user $username");
-			}
+			$result = $s->execute();
+			assert($result, "create user");
 		} finally {
 			$s->closeCursor();
 		}
@@ -133,9 +130,8 @@ final class UserDAO extends DAO {
 		try {
 			$s = $this->getPDO()->prepare(/** @lang MySQL */
 				'CALL SetUser(?)');
-			if(!$s->execute([$username])) {
-				throw new DatabaseException("Cannot set audit username for user $username for unknown reasons");
-			}
+			$result = $s->execute([$username]);
+			assert($result, 'set audit username');
 		} finally {
 			$s->closeCursor();
 		}

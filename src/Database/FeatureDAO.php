@@ -153,9 +153,8 @@ final class FeatureDAO extends DAO {
 				$statement->bindValue(':item', $item->getCode(), \PDO::PARAM_STR);
 				$statement->bindValue(':val', $feature->value, $type);
 				$statement->bindValue(':val2', $feature->value, $type);
-				if(!$statement->execute()) {
-					throw new DatabaseException("Cannot add/upadate feature $feature->name with value $feature->value for item " . $item->getCode());
-				}
+				$result = $statement->execute();
+				assert($result, 'set feature');
 			} finally {
 				$statement->closeCursor();
 			}
@@ -179,9 +178,8 @@ final class FeatureDAO extends DAO {
 		$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ? AND `Feature`= ?');
 
 		try {
-			if(!$statement->execute([$item->getCode(), $feature])) {
-				throw new DatabaseException("Cannot delete feature $feature from " . $item->getCode() . ' for unknown reasons');
-			}
+			$result = $statement->execute([$item->getCode(), $feature]);
+			assert($result, 'delete feature');
 		} finally {
 			$statement->closeCursor();
 		}
@@ -197,9 +195,8 @@ final class FeatureDAO extends DAO {
 		$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ?');
 
 		try {
-			if(!$statement->execute([$item->getCode()])) {
-				throw new DatabaseException('Cannot delete features from ' . $item->getCode() . ' for unknown reasons');
-			}
+			$result = $statement->execute([$item->getCode()]);
+			assert($result, 'delete all features');
 		} finally {
 			$statement->closeCursor();
 		}
@@ -229,9 +226,8 @@ final class FeatureDAO extends DAO {
 
 		$result = [];
 		try {
-			if(!$statement->execute([$feature, $limit])) {
-				throw new DatabaseException("Cannot search items with feature \"$feature\"");
-			}
+			$result = $statement->execute([$feature, $limit]);
+			assert($result, "group items by value");
 			if($statement->rowCount() > 0) {
 				$result = $statement->fetchAll(\PDO::FETCH_NUM)[0];
 			}

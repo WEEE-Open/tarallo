@@ -57,20 +57,17 @@ final class SearchDAO extends DAO {
 	public function getResultsCount(int $previousSearchId) {
 		$s = $this->getPDO()->prepare('SELECT ResultsCount FROM Search WHERE Code = ?;');
 		$result = $s->execute([$previousSearchId]);
+		assert($result, 'get results count');
 
-		if($result) {
-			try {
-				if($s->rowCount() === 0) {
-					throw new \LogicException("Search id $previousSearchId doesn't exist");
-				}
-				$row = $s->fetch(\PDO::FETCH_NUM);
-
-				return (int) $row[0];
-			} finally {
-				$s->closeCursor();
+		try {
+			if($s->rowCount() === 0) {
+				throw new \LogicException("Search id $previousSearchId doesn't exist");
 			}
-		} else {
-			throw new DatabaseException('Cannot count search results for unfathomable reasons');
+			$row = $s->fetch(\PDO::FETCH_NUM);
+
+			return (int) $row[0];
+		} finally {
+			$s->closeCursor();
 		}
 	}
 
@@ -82,19 +79,16 @@ final class SearchDAO extends DAO {
 	public function getOwnerUsername(int $searchId) {
 		$s = $this->getPDO()->prepare('SELECT Owner FROM Search WHERE Code = ?;');
 		$result = $s->execute([$searchId]);
-		if($result) {
-			try {
-				if($s->rowCount() === 0) {
-					throw new \LogicException("Search id $searchId doesn't exist");
-				}
-				$row = $s->fetch(\PDO::FETCH_NUM);
-
-				return $row[0];
-			} finally {
-				$s->closeCursor();
+		assert($result, 'get search owner username');
+		try {
+			if($s->rowCount() === 0) {
+				throw new \LogicException("Search id $searchId doesn't exist");
 			}
-		} else {
-			throw new DatabaseException('Cannot get search owner for unfathomable reasons');
+			$row = $s->fetch(\PDO::FETCH_NUM);
+
+			return $row[0];
+		} finally {
+			$s->closeCursor();
 		}
 	}
 
@@ -108,12 +102,8 @@ final class SearchDAO extends DAO {
 	private function newSearch(User $user) {
 		$s = $this->getPDO()->prepare('INSERT INTO Search(`Owner`) VALUES (?)');
 		$result = $s->execute([$user->getUsername()]);
-
-		if($result) {
-			return (int) $this->getPDO()->lastInsertId();
-		} else {
-			throw new DatabaseException('Cannot start search for unfathomable reasons');
-		}
+		assert($result, 'start search');
+		return (int) $this->getPDO()->lastInsertId();
 	}
 
 	/**
@@ -251,9 +241,8 @@ EOQ;
 		if($search->searchCode !== null) {
 			$statement->bindValue(":cs", $search->searchCode);
 		}
-		if(!$statement->execute()) {
-			throw new DatabaseException('Cannot execute search for unknown reasons');
-		}
+		$result = $statement->execute();
+		assert($result, 'execute search');
 
 		$this->sort($search, $id);
 
@@ -266,9 +255,9 @@ EOQ;
 		$sortedStatement = $this->getPDO()->prepare($query);
 
 		try {
-			if(!$sortedStatement->execute([$searchId])) {
-				throw new DatabaseException('Sorting with codes failed for no apparent reason');
-			}
+			$result = $sortedStatement->execute([$searchId]);
+			assert($result, 'sorting with codes');
+
 			$sorted = $sortedStatement->fetchAll(\PDO::FETCH_ASSOC);
 		} finally {
 			$sortedStatement->closeCursor();
@@ -317,9 +306,9 @@ EOQ;
 
 		$sortedStatement = $this->getPDO()->prepare($miniquery);
 		try {
-			if(!$sortedStatement->execute([$searchId, $featureName])) {
-				throw new DatabaseException('Sorting failed for no apparent reason');
-			}
+			$result = $sortedStatement->execute([$searchId, $featureName]);
+			assert($result, 'sorting results');
+
 			$sorted = $sortedStatement->fetchAll(\PDO::FETCH_ASSOC);
 		} finally {
 			$sortedStatement->closeCursor();
@@ -358,9 +347,8 @@ EOQ;
 			$this->setItemOrderStatement->bindValue(':sea', $searchId, \PDO::PARAM_INT);
 			$this->setItemOrderStatement->bindValue(':pos', $position, \PDO::PARAM_INT);
 			$this->setItemOrderStatement->bindValue(':cod', $code, \PDO::PARAM_STR);
-			if(!$this->setItemOrderStatement->execute()) {
-				throw new DatabaseException("Cannot set item $code to position $position for unknown reasons");
-			}
+			$result = $this->setItemOrderStatement->execute();
+			assert($result, 'move item in search result to position');
 		} finally {
 			$this->setItemOrderStatement->closeCursor();
 		}
@@ -379,9 +367,8 @@ EOQ;
 		$statement = $this->getPDO()->prepare('UPDATE SearchResult SET `Order` = NULL WHERE Search = ?');
 
 		try {
-			if(!$statement->execute([$searchId])) {
-				throw new DatabaseException("Cannot 'unsort' search $searchId for unknown reasons");
-			}
+			$result = $statement->execute([$searchId]);
+			assert($result, 'unsort search');
 		} finally {
 			$statement->closeCursor();
 		}
@@ -447,8 +434,6 @@ EOQ;
 		// ID is an int, no riks of SQL injection...
 		$result = $this->getPDO()->exec("CALL RefreshSearch($id)");
 		// may be 0 for number of affected rows, or false on failure
-		if($result === false) {
-			throw new DatabaseException('Cannot update expiration date for search ' . $id);
-		}
+		assert($result, 'update expiration date for search');
 	}
 }

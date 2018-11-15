@@ -34,9 +34,8 @@ final class ItemDAO extends DAO {
 		try {
 			$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
 			$statement->bindValue(':tok', $item->token, \PDO::PARAM_STR);
-			if(!$statement->execute()) {
-				throw new DatabaseException('Cannot insert item ' . $item->getCode() . ' for unknown reasons');
-			}
+			$result = $statement->execute();
+			assert($result, 'insert item');
 		} catch(\PDOException $e) {
 			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1062) {
 				throw new DuplicateItemCodeException($item->getCode());
@@ -195,9 +194,8 @@ EOQ
 		$flat = [];
 
 		try {
-			if(!$statement->execute([$itemToGet->getCode(), $depth])) {
-				throw new DatabaseException('Query failed for no reason');
-			}
+			$result = $statement->execute([$itemToGet->getCode(), $depth]);
+			assert($result, 'get root item (in a subtree)');
 
 			// First Item is the head Item
 			if(($row = $statement->fetch(\PDO::FETCH_ASSOC)) === false) {
