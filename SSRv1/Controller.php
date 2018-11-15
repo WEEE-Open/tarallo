@@ -211,7 +211,7 @@ class Controller extends AbstractController {
 			case 'cases':
 				// TODO: allow to select other locations and time spans
 				//$query = $request->getQueryParams();
-				$location = 'Polito'; // TODO: change default
+				$location = new ItemIncomplete('Polito'); // TODO: change default
 				//$from = new \DateTime('now - 1 year');
 				//$to = new \DateTime();
 
@@ -219,11 +219,11 @@ class Controller extends AbstractController {
 					->withAttribute('Template', 'stats::cases')
 					->withAttribute('TemplateParameters',
 						[
-							'location'    => $location,
+							'location'    => $location->getCode(),
 							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
 							'mostRecent'  => $db->statsDAO()->getModifiedItems($location, true, 30),
-							'byOwner'     => $db->statsDAO()->getCountByFeature("owner", new Feature("type", "case")),
-							'ready'       => $db->statsDAO()->getCountByFeature("restrictions", new Feature("restrictions", "ready")),
+							'byOwner'     => $db->statsDAO()->getCountByFeature($location, 'owner', new Feature('type', 'case')),
+							'ready'       => $db->featureDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), 100),
 						]);
 				break;
 			default:
