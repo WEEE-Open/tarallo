@@ -296,7 +296,7 @@ class Feature {
 	 *
 	 * @param string $name
 	 */
-	private static function validateFeatureName($name) {
+	public static function validateFeatureName($name) {
 		if(!is_string($name)) {
 			throw new \InvalidArgumentException('Feature name must be a string, ' . gettype($name) . ' given');
 		}

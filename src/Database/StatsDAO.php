@@ -115,9 +115,7 @@ LIMIT :lim';
 	}
 
 	public function getCountByFeature(string $feature, Feature $filter) {
-		if(Feature::getType($feature) != Feature::STRING) {
-			throw new \LogicException('Feature must be a ValueText type');
-		}
+		Feature::validateFeatureName($feature);
 
 		$array = [];
 
