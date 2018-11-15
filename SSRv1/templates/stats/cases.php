@@ -12,6 +12,16 @@ date_default_timezone_set('Europe/Rome');
 
 <p>All stats refer to <?=$location?> only</p>
 
+<?php if(!empty($ready)): ?>
+    <div class="statswrapper large">
+        <p>Ready computers:</p>
+        <div>
+			<?php foreach($ready as $item): ?>
+                <a href="/item/<?=$item?>"><?=$item?></a>
+			<?php endforeach ?>
+        </div>
+    </div>
+<?php endif ?>
 <?php if(!empty($leastRecent)): ?>
 	<div class="statswrapper">
 		<p>30 computers where no work has been done in a long time:</p>
@@ -73,15 +83,5 @@ date_default_timezone_set('Europe/Rome');
 			<?php endforeach ?>
 			</tbody>
 		</table>
-	</div>
-<?php endif ?>
-<?php if(!empty($ready)): ?>
-	<div class="statswrapper">
-		<p>Ready computers:</p>
-		<div>
-			<?php foreach($ready as $item): ?>
-				<a href="/item/<?=$item?>"><?=$item?></a>
-			<?php endforeach ?>
-		</div>
 	</div>
 <?php endif ?>

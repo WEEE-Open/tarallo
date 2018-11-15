@@ -226,9 +226,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 }
 
 .statswrapper {
-	float: left;
 	margin: 1em 2em 1em 0;
-	width: 100%;
 }
 
 .statswrapper p {
@@ -500,7 +498,12 @@ label.searchby {
 	}
 
 	.statswrapper {
+		float: left;
 		width: auto;
+	}
+
+	.statswrapper.large {
+		width: 100%;
 	}
 
 	.statswrapper > table {
