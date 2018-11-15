@@ -203,9 +203,9 @@ class Controller extends AbstractController {
 					->withAttribute('TemplateParameters',
 						[
 							'serials'     => $db->statsDAO()->getDuplicateSerialsCount(),
-							'missingData' => $db->featureDAO()->getItemsByFeatures(new Feature('check', 'missing-data'),
+							'missingData' => $db->featureDAO()->getItemsByFeatures(new Feature('check', 'missing-data'), null,
 								500),
-							'lost'        => $db->featureDAO()->getItemsByFeatures(new Feature('check', 'lost'), 100)
+							'lost'        => $db->featureDAO()->getItemsByFeatures(new Feature('check', 'lost'), null, 100)
 						]);
 				break;
 			case 'cases':
@@ -223,7 +223,7 @@ class Controller extends AbstractController {
 							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
 							'mostRecent'  => $db->statsDAO()->getModifiedItems($location, true, 30),
 							'byOwner'     => $db->statsDAO()->getCountByFeature($location, 'owner', new Feature('type', 'case')),
-							'ready'       => $db->featureDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), 100),
+							'ready'       => $db->featureDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), $location, 100),
 						]);
 				break;
 			default:

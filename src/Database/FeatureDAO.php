@@ -31,18 +31,36 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @param Feature $feature Feature and value to search
 	 * @param int $limit Maximum number of results
+	 * @param null|ItemIncomplete $location
 	 *
 	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
 	 */
-	public function getItemsByFeatures(Feature $feature, int $limit = 100): array {
+	public function getItemsByFeatures(Feature $feature, ?ItemIncomplete $location = null, int $limit = 100): array {
 		$pdo = $this->getPDO();
 		$column = Feature::getColumn($feature->type);
-		/** @noinspection SqlResolve */
-		$statement = $pdo->prepare("SELECT `Code` FROM ItemFeature WHERE Feature = ? AND `$column` = ? LIMIT ?");
 
-		$statement->bindValue(1, $feature->name, \PDO::PARAM_STR);
-		$statement->bindValue(2, $feature->value, Feature::getPDOType($feature->type));
-		$statement->bindValue(3, $limit, \PDO::PARAM_INT);
+		if($location !== null) {
+			// TODO: move this stuff to a function, it's used everywhere...
+			$also = 'AND `Code` IN (SELECT Descendant FROM Tree WHERE Ancestor = :loc)';
+		} else {
+			$also = '';
+		}
+
+		/** @noinspection SqlResolve */
+		$query = "SELECT `Code`
+FROM ItemFeature
+WHERE Feature = :feat
+AND `$column` = :val
+$also
+LIMIT :lim";
+		$statement = $pdo->prepare($query);
+
+		$statement->bindValue(':feat', $feature->name, \PDO::PARAM_STR);
+		$statement->bindValue(':val', $feature->value, Feature::getPDOType($feature->type));
+		$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
+		if($location !== null) {
+			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
+		}
 
 		$result = [];
 

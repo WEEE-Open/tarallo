@@ -148,7 +148,7 @@ class Controller extends AbstractController {
 
 		$feature = new Feature($id, $value);
 
-		$data = $db->featureDAO()->getItemsByFeatures($feature, $limit);
+		$data = $db->featureDAO()->getItemsByFeatures($feature, null, $limit);
 
 		$request = $request
 			->withAttribute('Status', JSend::SUCCESS)
