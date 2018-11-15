@@ -121,16 +121,16 @@ LIMIT :lim';
 
 		$type = Feature::getColumn($filter->type);
 
-        $query = "SELECT ValueText, COUNT(*) AS Quanti
+        $query = "SELECT ValueText, COUNT(*) AS Quantity
 FROM ItemFeature
 WHERE Feature = '" . $feature . "'
-AND Code IN (
+AND `Code` IN (
   SELECT Code
   FROM ItemFeature
   WHERE Feature = :nam AND `" . $type . "` = :val
 )
 GROUP BY ValueText
-ORDER BY Quanti DESC";
+ORDER BY Quantity DESC";
 
 		$statement = $this->getPDO()->prepare($query);
 
