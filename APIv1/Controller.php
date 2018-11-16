@@ -389,18 +389,16 @@ class Controller extends AbstractController {
 		$item = new ItemFeatures($id);
 		// PATCH => specify features to update and to delete, other are left as they are
 		$delete = ItemBuilder::addFeaturesDelta($payload, $item);
-		foreach($delete as $feature) {
-			$db->featureDAO()->deleteFeature($item, $feature);
-		}
+
+		$deleted = $db->featureDAO()->deleteFeature($item, $delete);
 		$changed = $db->featureDAO()->setFeatures($item);
 
 		// setFeatures generates an audit entry if anything changed, deleteFeature never does
 		// so we may need to generate it manually
-		if(!$changed && count($delete) > 0) {
+		if(!$changed && $deleted) {
 			$db->featureDAO()->addAuditEntry($item);
 		}
 
-		// TODO: this could maybe return 201 sometimes
 		if($loopback) {
 			$request = $request
 				->withAttribute('Status', JSend::SUCCESS)

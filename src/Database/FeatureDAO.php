@@ -186,21 +186,27 @@ LIMIT :lim";
 	 * Delete a single feature from an item. This generates no audit entries, BTW.
 	 *
 	 * @param ItemFeatures $item
-	 * @param string $feature
+	 * @param string[] $features
+	 * @return bool True if anything was deleted
 	 */
-	public function deleteFeature(ItemFeatures $item, $feature) {
-		if(!is_string($feature)) {
-			throw new \InvalidArgumentException('Name of feature to be deleted should be a string');
+	public function deleteFeature(ItemFeatures $item, array $features) {
+		if(empty($features)) {
+			return false;
 		}
-
 		$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ? AND `Feature`= ?');
-
 		try {
-			$result = $statement->execute([$item->getCode(), $feature]);
-			assert($result, 'delete feature');
+			foreach($features as $feature) {
+				if(!is_string($feature)) {
+					throw new \InvalidArgumentException('Name of feature to be deleted should be a string');
+				}
+
+				$result = $statement->execute([$item->getCode(), $feature]);
+				assert($result, 'delete feature');
+			}
 		} finally {
 			$statement->closeCursor();
 		}
+		return true;
 	}
 
 
@@ -218,41 +224,5 @@ LIMIT :lim";
 		} finally {
 			$statement->closeCursor();
 		}
-	}
-
-	/**
-	 * Count how many items have each possible value for a feature
-	 *
-	 * e.g. with feature name = "color":
-	 * - red: 10
-	 * - yellow: 6
-	 * - grey: 4
-	 * and so on.
-	 *
-	 * If some (enum) values aren't assigned to an item they're not reported, actually,
-	 * so it's not really every possible value.
-	 *
-	 * @param string $feature Feature name
-	 * @param int $limit max number of rows to retrieve
-	 *
-	 * @return int[] value => count, sorted by count descending
-	 */
-	public function groupItemsByValue(string $feature, int $limit = 100): array {
-		$pdo = $this->getPDO();
-
-		$statement = $pdo->prepare('SELECT COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`, COUNT(*) as Quantity FROM ItemFeature WHERE Feature = ? LIMIT ?');
-
-		$result = [];
-		try {
-			$result = $statement->execute([$feature, $limit]);
-			assert($result, "group items by value");
-			if($statement->rowCount() > 0) {
-				$result = $statement->fetchAll(\PDO::FETCH_NUM)[0];
-			}
-		} finally {
-			$statement->closeCursor();
-		}
-
-		return $result;
 	}
 }
