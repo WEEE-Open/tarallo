@@ -7,7 +7,7 @@ Server in PHP e (My)SQL (anche se forse un NoSQL sarebbe stato più adatto) del 
 
 ### Developement
 
-Install Vagrant and Ansible and run:
+Install [Vagrant](http://vagrantup.com/) and [Ansible](http://ansible.com/) and run:
 
 	make vm
 

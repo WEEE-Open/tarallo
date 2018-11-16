@@ -3,7 +3,8 @@
 vendor/
 build/
 utils/provision/playbook.retry
-utils/xdebug/
+utils/xdebug/*
+!utils/xdebug/
 !utils/xdebug/readme.txt
 *.log
 *.generated.js*
