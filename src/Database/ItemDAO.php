@@ -35,7 +35,7 @@ final class ItemDAO extends DAO {
 			$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
 			$statement->bindValue(':tok', $item->token, \PDO::PARAM_STR);
 			$result = $statement->execute();
-			assert($result, 'insert item');
+			assert($result !== false, 'insert item');
 		} catch(\PDOException $e) {
 			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1062) {
 				throw new DuplicateItemCodeException($item->getCode());
@@ -195,7 +195,7 @@ EOQ
 
 		try {
 			$result = $statement->execute([$itemToGet->getCode(), $depth]);
-			assert($result, 'get root item (in a subtree)');
+			assert($result !== false, 'get root item (in a subtree)');
 
 			// First Item is the head Item
 			if(($row = $statement->fetch(\PDO::FETCH_ASSOC)) === false) {

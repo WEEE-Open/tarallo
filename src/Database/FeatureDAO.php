@@ -26,61 +26,6 @@ final class FeatureDAO extends DAO {
 	}
 
 	/**
-	 * Get all items that have a certain value (exact match) for a feature.
-	 * For anything more complicated use SearchDAO facilities.
-	 *
-	 * @param Feature $feature Feature and value to search
-	 * @param int $limit Maximum number of results
-	 * @param null|ItemIncomplete $location
-	 *
-	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
-	 */
-	public function getItemsByFeatures(Feature $feature, ?ItemIncomplete $location = null, int $limit = 100): array {
-		$pdo = $this->getPDO();
-		$column = Feature::getColumn($feature->type);
-
-		if($location !== null) {
-			// TODO: move this stuff to a function, it's used everywhere...
-			$also = 'AND `Code` IN (SELECT Descendant FROM Tree WHERE Ancestor = :loc)';
-		} else {
-			$also = '';
-		}
-
-		/** @noinspection SqlResolve */
-		$query = "SELECT `Code`
-FROM ItemFeature
-WHERE Feature = :feat
-AND `$column` = :val
-$also
-LIMIT :lim";
-		$statement = $pdo->prepare($query);
-
-		$statement->bindValue(':feat', $feature->name, \PDO::PARAM_STR);
-		$statement->bindValue(':val', $feature->value, Feature::getPDOType($feature->type));
-		$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
-		if($location !== null) {
-			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
-		}
-
-		$result = [];
-
-		try {
-			$statement->execute();
-			if($statement->rowCount() > 0) {
-				foreach($statement as $row) {
-					$result[] = new ItemIncomplete($row['Code']);
-				}
-
-				return $result;
-			}
-		} finally {
-			$statement->closeCursor();
-		}
-
-		return $result;
-	}
-
-	/**
 	 * Add features to an item
 	 *
 	 * @param ItemFeatures $item
@@ -172,7 +117,7 @@ LIMIT :lim";
 				$statement->bindValue(':val', $feature->value, $type);
 				$statement->bindValue(':val2', $feature->value, $type);
 				$result = $statement->execute();
-				assert($result, 'set feature');
+				assert($result !== false, 'set feature');
 			} finally {
 				$statement->closeCursor();
 			}
@@ -201,7 +146,7 @@ LIMIT :lim";
 				}
 
 				$result = $statement->execute([$item->getCode(), $feature]);
-				assert($result, 'delete feature');
+				assert($result !== false, 'delete feature');
 			}
 		} finally {
 			$statement->closeCursor();
@@ -220,7 +165,7 @@ LIMIT :lim";
 
 		try {
 			$result = $statement->execute([$item->getCode()]);
-			assert($result, 'delete all features');
+			assert($result !== false, 'delete all features');
 		} finally {
 			$statement->closeCursor();
 		}

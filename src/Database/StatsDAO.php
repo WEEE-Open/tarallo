@@ -6,6 +6,41 @@ use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 
 final class StatsDAO extends DAO {
+	/**
+	 * Get an AND for a WHERE clause that filters items by their location.
+	 * Bind :loc to the location.
+	 *
+	 * @param null|ItemIncomplete $location , if null returns an empty string
+	 * @return string part of a query
+	 */
+	private static function filterLocation(?ItemIncomplete $location) {
+		if($location === null) {
+			return '';
+		}
+
+		return 'AND `Code` IN (
+SELECT Descendant
+FROM Tree
+WHERE Ancestor = :loc
+)';
+	}
+
+	/**
+	 * Get an AND for a WHERE clause that ignores deleted items.
+	 *
+	 * @return string part of a query
+	 */
+	private static function filterDeleted() {
+		return 'AND `Code` NOT IN (SELECT `Code` FROM `Item` WHERE DeletedAt IS NOT NULL)';
+	}
+
+	/**
+	 * Get a list of all locations, ordered by number of items inside each one.
+	 * Ignores deleted items as they aren't placed anywhere.
+	 * No filtering by location because that doesn't make sense.
+	 *
+	 * @return array
+	 */
 	public function getLocationsByItems() {
 		$array = [];
 
@@ -17,7 +52,7 @@ AND ItemFeature.ValueEnum = \'location\'
 GROUP BY Tree.Ancestor
 ORDER BY COUNT(*) DESC, Location ASC;', \PDO::FETCH_ASSOC);
 
-		assert($result, 'available locations');
+		assert($result !== false, 'available locations');
 
 		try {
 			foreach($result as $row) {
@@ -30,6 +65,13 @@ ORDER BY COUNT(*) DESC, Location ASC;', \PDO::FETCH_ASSOC);
 		return $array;
 	}
 
+	/**
+	 * Count duplicate serial numbers.
+	 * Considers deleted items too, because yes.
+	 * No filtering by location because that doesn't make sense.
+	 *
+	 * @return array
+	 */
 	public function getDuplicateSerialsCount() {
 		$array = [];
 
@@ -40,7 +82,7 @@ GROUP BY ValueText
 HAVING Count > 1
 ORDER BY Count DESC, SN ASC', \PDO::FETCH_ASSOC);
 
-		assert($result, 'duplicate serial numbers');
+		assert($result !== false, 'duplicate serial numbers');
 
 		try {
 			foreach($result as $row) {
@@ -56,6 +98,7 @@ ORDER BY Count DESC, SN ASC', \PDO::FETCH_ASSOC);
 	/**
 	 * Get most/least recently changed cases in a particular location, excluding in-use ones. This takes into account
 	 * all audit entries for all contained items.
+	 * Deleted items are ignored since they aren't in any location.
 	 *
 	 * Any attempt to make the function more generic failed miserably or was escessively complex, but consider
 	 * that this is a very specific kind of stat to begin with...
@@ -111,46 +154,112 @@ LIMIT :lim';
 		return $array;
 	}
 
-	public function getCountByFeature(ItemIncomplete $location, string $feature, Feature $filter) {
+	/**
+	 * Count how many items have each possible value for a feature
+	 *
+	 * e.g. with feature name = "color":
+	 * - red: 10
+	 * - yellow: 6
+	 * - grey: 4
+	 * and so on.
+	 *
+	 * If some (enum) values aren't assigned to an item they're not reported, actually,
+	 * so it's not really every possible value.
+	 *
+	 * @param string $feature Feature name
+	 * @param Feature $filter
+	 * @param ItemIncomplete $location
+	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
+	 * @return int[] value => count, sorted by count descending
+	 */
+	public function getCountByFeature(string $feature, Feature $filter, ?ItemIncomplete $location = null, bool $deleted = false) {
 		Feature::validateFeatureName($feature);
 
 		$array = [];
 
-		$type = Feature::getColumn($filter->type);
+		$locationFilter = self::filterLocation($location);
+		$deletedFilter = $deleted ? '' : self::filterDeleted();
 
-        $query = "SELECT ValueText, COUNT(*) AS Quantity
+        $query = "SELECT COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) as Val, COUNT(*) AS Quantity
 FROM ItemFeature
-WHERE Feature = '" . $feature . "'
+WHERE Feature = :feat
 AND `Code` IN (
-  SELECT Code
+  SELECT `Code`
   FROM ItemFeature
-  WHERE Feature = :nam AND `" . $type . "` = :val
+  WHERE Feature = :nam AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = :val
 )
-AND `Code` IN (
-  SELECT Descendant
-  FROM Tree
-  WHERE Ancestor = :loc
-)
+$locationFilter
+$deletedFilter
 GROUP BY ValueText
 ORDER BY Quantity DESC";
 
 		$statement = $this->getPDO()->prepare($query);
 
-		$pdoType = $filter->value === Feature::INTEGER ? \PDO::PARAM_INT : \PDO::PARAM_STR;
-
-		$statement->bindValue(':val', $filter->value, $pdoType);
+		$statement->bindValue(':feat', $feature, \PDO::PARAM_STR);
+		$statement->bindValue(':val', $filter->value);
 		$statement->bindValue(':nam', $filter->name, \PDO::PARAM_STR);
-		$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
+		if($location !== null) {
+			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
+		}
+
 		try {
 			$success = $statement->execute();
-			assert($success);
+			assert($success, 'count by feature');
 			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-				$array[$row['ValueText']] = $row['Quantity'];
+				$array[$row['Val']] = $row['Quantity'];
 			}
 		} finally {
 			$statement->closeCursor();
 		}
 
 		return $array;
+	}
+
+	/**
+	 * Get all items that have a certain value (exact match) for a feature.
+	 * For anything more complicated use SearchDAO facilities.
+	 *
+	 * @param Feature $feature Feature and value to search
+	 * @param int $limit Maximum number of results
+	 * @param null|ItemIncomplete $location
+	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
+	 *
+	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
+	 */
+	public function getItemsByFeatures(Feature $feature, ?ItemIncomplete $location = null, int $limit = 100, bool $deleted = false): array {
+		$pdo = $this->getPDO();
+		$locationFilter = self::filterLocation($location);
+		$deletedFilter = $deleted ? '' : self::filterDeleted();
+
+		/** @noinspection SqlResolve */
+		$query = "SELECT `Code`
+FROM ItemFeature
+WHERE Feature = :feat
+AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = :val
+$locationFilter
+$deletedFilter
+LIMIT :lim";
+		$statement = $pdo->prepare($query);
+
+		$statement->bindValue(':feat', $feature->name, \PDO::PARAM_STR);
+		$statement->bindValue(':val', $feature->value);
+		$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
+		if($location !== null) {
+			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
+		}
+
+		$result = [];
+
+		try {
+			$success = $statement->execute();
+			assert($success, 'get items by features');
+			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+				$result[] = new ItemIncomplete($row['Code']);
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $result;
 	}
 }

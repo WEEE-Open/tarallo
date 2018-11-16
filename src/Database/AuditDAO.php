@@ -25,7 +25,7 @@ LIMIT :offs, :cnt');
 			$statement->bindValue(':cnt', $perPage, \PDO::PARAM_INT);
 
 			$result = $statement->execute();
-			assert($result, 'get audit');
+			assert($result !== false, 'get audit');
 
 			return $statement->fetchAll(\PDO::FETCH_ASSOC);
 		} finally {
@@ -51,7 +51,7 @@ ORDER BY `Time` DESC, `Code` DESC
 LIMIT ?');
 
 		$result = $statement->execute([$type, $howMany]);
-		assert($result,'get audit by type');
+		assert($result !== false, 'get audit by type');
 
 		try {
 			foreach($statement as $row) {
@@ -80,7 +80,7 @@ ORDER BY `Time` DESC, `Change` DESC
 LIMIT ?');
 
 		$result = $statement->execute([$item->getCode(), $howMany]);
-		assert($result, 'get history');
+		assert($result !== false, 'get history');
 
 		try {
 			// TODO: a class rather than returning giant associative arrays, maybe...

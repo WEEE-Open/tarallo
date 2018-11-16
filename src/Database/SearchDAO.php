@@ -57,7 +57,7 @@ final class SearchDAO extends DAO {
 	public function getResultsCount(int $previousSearchId) {
 		$s = $this->getPDO()->prepare('SELECT ResultsCount FROM Search WHERE Code = ?;');
 		$result = $s->execute([$previousSearchId]);
-		assert($result, 'get results count');
+		assert($result !== false, 'get results count');
 
 		try {
 			if($s->rowCount() === 0) {
@@ -79,7 +79,7 @@ final class SearchDAO extends DAO {
 	public function getOwnerUsername(int $searchId) {
 		$s = $this->getPDO()->prepare('SELECT Owner FROM Search WHERE Code = ?;');
 		$result = $s->execute([$searchId]);
-		assert($result, 'get search owner username');
+		assert($result !== false, 'get search owner username');
 		try {
 			if($s->rowCount() === 0) {
 				throw new \LogicException("Search id $searchId doesn't exist");
@@ -102,7 +102,7 @@ final class SearchDAO extends DAO {
 	private function newSearch(User $user) {
 		$s = $this->getPDO()->prepare('INSERT INTO Search(`Owner`) VALUES (?)');
 		$result = $s->execute([$user->getUsername()]);
-		assert($result, 'start search');
+		assert($result !== false, 'start search');
 		return (int) $this->getPDO()->lastInsertId();
 	}
 
@@ -242,7 +242,7 @@ EOQ;
 			$statement->bindValue(":cs", $search->searchCode);
 		}
 		$result = $statement->execute();
-		assert($result, 'execute search');
+		assert($result !== false, 'execute search');
 
 		$this->sort($search, $id);
 
@@ -256,7 +256,7 @@ EOQ;
 
 		try {
 			$result = $sortedStatement->execute([$searchId]);
-			assert($result, 'sorting with codes');
+			assert($result !== false, 'sorting with codes');
 
 			$sorted = $sortedStatement->fetchAll(\PDO::FETCH_ASSOC);
 		} finally {
@@ -307,7 +307,7 @@ EOQ;
 		$sortedStatement = $this->getPDO()->prepare($miniquery);
 		try {
 			$result = $sortedStatement->execute([$searchId, $featureName]);
-			assert($result, 'sorting results');
+			assert($result !== false, 'sorting results');
 
 			$sorted = $sortedStatement->fetchAll(\PDO::FETCH_ASSOC);
 		} finally {
@@ -348,7 +348,7 @@ EOQ;
 			$this->setItemOrderStatement->bindValue(':pos', $position, \PDO::PARAM_INT);
 			$this->setItemOrderStatement->bindValue(':cod', $code, \PDO::PARAM_STR);
 			$result = $this->setItemOrderStatement->execute();
-			assert($result, 'move item in search result to position');
+			assert($result !== false, 'move item in search result to position');
 		} finally {
 			$this->setItemOrderStatement->closeCursor();
 		}
@@ -368,7 +368,7 @@ EOQ;
 
 		try {
 			$result = $statement->execute([$searchId]);
-			assert($result, 'unsort search');
+			assert($result !== false, 'unsort search');
 		} finally {
 			$statement->closeCursor();
 		}
@@ -427,13 +427,10 @@ EOQ;
 	 *
 	 * @param int $id
 	 */
-	private function refresh($id) {
-		if(!is_int($id)) {
-			throw new \InvalidArgumentException('Search ID to refresh should be an integer');
-		}
+	private function refresh(int $id) {
 		// ID is an int, no riks of SQL injection...
 		$result = $this->getPDO()->exec("CALL RefreshSearch($id)");
 		// may be 0 for number of affected rows, or false on failure
-		assert($result, 'update expiration date for search');
+		assert($result !== false, 'update expiration date for search');
 	}
 }

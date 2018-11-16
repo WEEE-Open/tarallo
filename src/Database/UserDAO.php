@@ -39,7 +39,7 @@ final class UserDAO extends DAO {
 			$s->bindValue(':s', $session, $session === null ? \PDO::PARAM_NULL : \PDO::PARAM_STR);
 			$s->bindValue(':n', $username, \PDO::PARAM_STR);
 			$result = $s->execute();
-			assert($result, 'set session from user');
+			assert($result !== false, 'set session from user');
 
 			$this->setAuditUsername($username);
 		} finally {
@@ -59,7 +59,7 @@ final class UserDAO extends DAO {
 			$s->bindValue(':p', $hash, \PDO::PARAM_STR);
 			$s->bindValue(':n', $username, \PDO::PARAM_STR);
 			$result = $s->execute();
-			assert($result, 'update password hash');
+			assert($result !== false, 'update password hash');
 			if($s->rowCount() === 0) {
 				throw new NotFoundException(8);
 			}
@@ -80,7 +80,7 @@ final class UserDAO extends DAO {
 			$s->bindValue(':n', $username, \PDO::PARAM_STR);
 			$s->bindValue(':p', $hash, \PDO::PARAM_STR);
 			$result = $s->execute();
-			assert($result, "create user");
+			assert($result !== false, "create user");
 		} finally {
 			$s->closeCursor();
 		}
@@ -131,7 +131,7 @@ final class UserDAO extends DAO {
 			$s = $this->getPDO()->prepare(/** @lang MySQL */
 				'CALL SetUser(?)');
 			$result = $s->execute([$username]);
-			assert($result, 'set audit username');
+			assert($result !== false, 'set audit username');
 		} finally {
 			$s->closeCursor();
 		}
