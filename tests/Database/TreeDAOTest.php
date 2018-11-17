@@ -145,7 +145,7 @@ class TreeDAOTest extends DatabaseTest {
 		// Hack of questionable quality to prevent:
 		// Integrity constraint violation: 1062 Duplicate entry 'PCTI-2018-05-04 20:23:23-M' for key 'PRIMARY'
 		// since timestamps have seconds accuracy
-		$this->getPdo()->query("UPDATE Audit SET `Time` = `Time` - 1 WHERE `Code` = 'PCTI' AND `Change` = 'M' ORDER BY `Time` DESC LIMIT 1");
+		$this->getPdo()->query("UPDATE Audit SET `Time` = DATE_SUB(`Time`, INTERVAL 1 SECOND) WHERE `Code` = 'PCTI' AND `Change` = 'M' ORDER BY `Time` DESC LIMIT 1");
 
 		// Move TI from TAVOLONE to ZonaBlu.
 		$db->treeDAO()->moveItem($ti, $zb);
