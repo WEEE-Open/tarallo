@@ -2,10 +2,12 @@
 
 namespace WEEEOpen\Tarallo\Server\Test\Database;
 
+use WEEEOpen\Tarallo\Server\Database\DuplicateItemCodeException;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\NotFoundException;
+use WEEEOpen\Tarallo\Server\ValidationException;
 
 class ItemDAOTest extends DatabaseTest {
 	/**
@@ -71,10 +73,56 @@ class ItemDAOTest extends DatabaseTest {
 		$db->itemDAO()->addItem($case);
 
 		$deleteMe = new ItemIncomplete('PC42');
+
+		$this->assertTrue($db->itemDAO()->itemExists($deleteMe), 'Item should exist before deletion');
+		$this->assertTrue($db->itemDAO()->itemVisible($deleteMe), 'Item shouldn be visible before deletion');
+		$this->assertNull($db->itemDAO()->itemDeletedAt($deleteMe), 'Item shouldn\'t have been deleted');
+		$beforeTime = new \DateTime();
+
+		$db->itemDAO()->deleteItem($deleteMe);
+
+		$this->assertTrue($db->itemDAO()->itemExists($deleteMe), 'Item should still exist');
+		$this->assertFalse($db->itemDAO()->itemVisible($deleteMe), 'Item shouldn\'t be visible');
+		$afterTime = new \DateTime($db->itemDAO()->itemDeletedAt($deleteMe), new \DateTimeZone('UTC'));
+		$this->assertGreaterThanOrEqual(0, $afterTime->getTimestamp() - $beforeTime->getTimestamp(), 'Item should have a valid deletion date');
+		$this->assertInstanceOf(Item::class, $db->itemDAO()->getItem($deleteMe));
+	}
+
+	public function testDeleteItemTwice() {
+		$db = $this->getDb();
+		$case = new Item('PC42');
+		$db->itemDAO()->addItem($case);
+
+		$deleteMe = new ItemIncomplete('PC42');
 		$db->itemDAO()->deleteItem($deleteMe);
 		$this->assertTrue($db->itemDAO()->itemExists($deleteMe), 'Item should still exist');
 		$this->assertFalse($db->itemDAO()->itemVisible($deleteMe), 'Item shouldn\'t be visible');
-		$this->assertInstanceOf(Item::class, $db->itemDAO()->getItem($deleteMe));
+
+		$this->expectException(NotFoundException::class);
+		$db->itemDAO()->deleteItem($deleteMe);
+	}
+
+	public function testDeleteItemWithContents() {
+		$db = $this->getDb();
+		$case = new Item('PC42');
+		$mobo = new Item('MOBO42');
+		$case->addContent($mobo);
+		$db->itemDAO()->addItem($case);
+
+		$deleteMe = new ItemIncomplete('PC42');
+
+		$this->expectException(ValidationException::class);
+		$db->itemDAO()->deleteItem($deleteMe);
+	}
+
+	public function testDuplicateCode() {
+		$db = $this->getDb();
+		$case = new Item('PC42');
+		$db->itemDAO()->addItem($case);
+
+		$case = new Item('PC42');
+		$this->expectException(DuplicateItemCodeException::class);
+		$db->itemDAO()->addItem($case);
 	}
 
 	/**
@@ -86,6 +134,7 @@ class ItemDAOTest extends DatabaseTest {
 		$notHere = new ItemIncomplete('PC9001');
 		$this->assertFalse($db->itemDAO()->itemExists($notHere), 'Item shouldn\'t exist');
 		$this->assertFalse($db->itemDAO()->itemVisible($notHere), 'Item shouldn\'t be recoverable');
+		$this->assertNull($db->itemDAO()->itemDeletedAt($notHere), 'Item shouldn\'t be marked as deleted');
 		$this->expectException(NotFoundException::class);
 		$db->itemDAO()->getItem($notHere);
 	}

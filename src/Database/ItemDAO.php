@@ -74,8 +74,8 @@ final class ItemDAO extends DAO {
 		try {
 			$statement->execute([$item->getCode()]);
 		} catch(\PDOException $e) {
-			if($e->getCode() === '45000') {
-				throw new ValidationException('Cannot delete an item that contains other items', 5);
+			if($e->getCode() === '45000' && $statement->errorInfo()[2] === 'Cannot delete an item while contains other items') {
+				throw new ValidationException('Cannot delete an item while contains other items', 5);
 			}
 			throw $e;
 		} finally {
@@ -114,8 +114,9 @@ final class ItemDAO extends DAO {
 	 * @param ItemIncomplete $item
 	 *
 	 * @return bool
+	 * @see itemVisible to see if item is visible or marked as deleted
 	 */
-	public function itemExists(ItemIncomplete $item) {
+	public function itemExists(ItemIncomplete $item): bool {
 		$deleted = $this->itemIsDeleted($item);
 		if($deleted === null) {
 			return false;
@@ -133,13 +134,34 @@ final class ItemDAO extends DAO {
 	 * @return bool
 	 * @see itemExists to check wether item exists at all or not
 	 */
-	public function itemVisible(ItemIncomplete $item) {
+	public function itemVisible(ItemIncomplete $item): bool {
 		$deleted = $this->itemIsDeleted($item);
 		if($deleted === false) {
 			return true;
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get deletion date for an item, null if not deleted or doesn't exist
+	 *
+	 * @param ItemIncomplete $item
+	 * @return null|string
+	 */
+	public function itemDeletedAt(ItemIncomplete $item) {
+		$statement = $this->getPDO()->prepare('SELECT DeletedAt FROM Item WHERE `Code` = ?');
+		try {
+			$statement->execute([$item->getCode()]);
+			if($statement->rowCount() === 0) {
+				return null;
+			}
+			$result = $statement->fetch(\PDO::FETCH_NUM);
+
+			return $result[0];
+		} finally {
+			$statement->closeCursor();
+		}
 	}
 
 	/**
