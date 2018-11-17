@@ -301,7 +301,7 @@ class Controller extends AbstractController {
 
 			try {
 				if($target === null) {
-					$target = new User($username, $password);
+					$target = new User($username, $password, null, 2);
 				}
 				$target->setPassword($password, $confirm);
 				$db->userDAO()->setPasswordFromUser($target->getUsername(), $target->getHash());
@@ -477,12 +477,12 @@ class Controller extends AbstractController {
 			try {
 				return $next($request, $response);
 			} catch(AuthenticationException $e) {
-				// One of these should be 401, but that requires a challenge header in the response...
 				$request = $request
 					->withAttribute('Template', 'notAuthenticated')
 					->withAttribute('TemplateParameters', []);
 				$response = $response
-					->withStatus(403);
+					->withStatus(401)
+					->withHeader('WWW-Authenticate', 'login');
 			} catch(AuthorizationException $e) {
 				$request = $request
 					->withAttribute('Template', 'genericError')

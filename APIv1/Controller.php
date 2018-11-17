@@ -54,7 +54,7 @@ class Controller extends AbstractController {
 
 		$user = $db->userDAO()->getUserFromLogin($username, $password);
 		if($user === null) {
-			throw new InvalidPayloadParameterException('*', '', 'Wrong username or password');
+			throw new AuthenticationException('Wrong username or password');
 		}
 		Session::start($user, $db);
 
@@ -734,12 +734,12 @@ class Controller extends AbstractController {
 			} catch(AuthenticationException $e) {
 				$request = $request
 					->withAttribute('Status', JSend::ERROR)
-					->withAttribute('ErrorMessage', 'Not authenticated or session expired')
+					->withAttribute('ErrorMessage', $e->getMessage())
 					->withAttribute('ErrorCode', 'AUTH401')
 					->withAttribute('Data', ['notes' => 'Try POSTing to /session']);
-				// 401 requires a WWW authentication challenge in the response, so use 403 again
 				$response = $response
-					->withStatus(403);
+					->withStatus(401)
+					->withHeader('WWW-Authenticate', 'login');
 			} catch(InvalidPayloadParameterException $e) {
 				$request = $request
 					->withAttribute('Status', JSend::FAIL)

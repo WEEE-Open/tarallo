@@ -14,11 +14,11 @@ class User {
 	 * @param string $username username
 	 * @param null|string $password plaintext password
 	 * @param null|string $hash hashed password (from database)
-	 * @param int $level authorization level (0 = root, 3 = everyone else)
+	 * @param int $level authorization level (0 = root, 2 = everyone else, 3 = read only)
 	 *
 	 * @throws \InvalidArgumentException when password and hash aren't null and don't match (code 72, chosen at random)
 	 */
-	public function __construct($username, $password = null, $hash = null, $level = 3) {
+	public function __construct($username, ?string $password = null, ?string $hash = null, int $level = 2) {
 		if(!is_string($username) || strlen($username) === 0) {
 			throw new \InvalidArgumentException('Username must be a non-empty string');
 		}

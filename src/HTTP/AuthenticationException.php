@@ -3,7 +3,7 @@
 namespace WEEEOpen\Tarallo\Server\HTTP;
 
 class AuthenticationException extends \RuntimeException {
-	public function __construct() {
-		parent::__construct('Authentication required');
+	public function __construct($message = 'Not authenticated or session expired') {
+		parent::__construct($message);
 	}
 }

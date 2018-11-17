@@ -5,7 +5,7 @@ namespace WEEEOpen\Tarallo\Server;
 use WEEEOpen\Tarallo\Server\Database\Database;
 
 class Session {
-	const COOKIE_NAME = 'session';
+	const COOKIE_NAME = 'tsession';
 	const KEYSPACE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
 	const KEYSPACE_STRLEN = 64;
 
