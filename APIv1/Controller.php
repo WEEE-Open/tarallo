@@ -268,14 +268,17 @@ class Controller extends AbstractController {
 
 		$id = Validation::validateOptionalString($parameters, 'id');
 
+		$responseCode = 204;
 		try {
 			$db->itemDAO()->deleteItem(new ItemIncomplete($id));
 		} catch(NotFoundException $ignored) {
-
+			$responseCode = 404;
+		} catch(ValidationException $e) {
+			throw new InvalidPayloadParameterException('*', $id, $e->getMessage());
 		}
 
 		$response = $response
-			->withStatus(204);
+			->withStatus($responseCode);
 
 		return $next ? $next($request, $response) : $response;
 	}

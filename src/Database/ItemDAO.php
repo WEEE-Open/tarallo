@@ -6,6 +6,7 @@ use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\ItemPrefixer;
 use WEEEOpen\Tarallo\Server\NotFoundException;
+use WEEEOpen\Tarallo\Server\ValidationException;
 
 final class ItemDAO extends DAO {
 	const EXCEPTION_CODE_GENERATE_ID = 3;
@@ -61,6 +62,7 @@ final class ItemDAO extends DAO {
 	 * Soft-delete an item (mark as deleted to make invisible, detach from tree)
 	 *
 	 * @param ItemIncomplete $item
+	 * @throws ValidationException if item contains other items (cannot be deleted)
 	 */
 	public function deleteItem(ItemIncomplete $item) {
 		if(!$this->itemVisible($item)) {
@@ -71,6 +73,11 @@ final class ItemDAO extends DAO {
 
 		try {
 			$statement->execute([$item->getCode()]);
+		} catch(\PDOException $e) {
+			if($e->getCode() === '45000') {
+				throw new ValidationException('Cannot delete an item that contains other items', 5);
+			}
+			throw $e;
 		} finally {
 			$statement->closeCursor();
 		}
