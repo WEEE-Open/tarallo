@@ -165,6 +165,24 @@ final class ItemDAO extends DAO {
 	}
 
 	/**
+	 * Undo soft deletion of an item. It will turn into a root item, wether you want that or not: place it somewhere
+	 * right after that.
+	 *
+	 * @param ItemIncomplete $item
+	 */
+	public function undelete(ItemIncomplete $item) {
+		$statement = $this->getPDO()->prepare('UPDATE Item SET DeletedAt = NULL WHERE `Code` = ?');
+		try {
+			$statement->execute([$item->getCode()]);
+			if($statement->rowCount() === 0) {
+				throw new NotFoundException();
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
 	 * Get a new sequential code directly from database, for a given prefix
 	 *
 	 * @param string $prefix

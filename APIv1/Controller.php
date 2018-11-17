@@ -165,6 +165,43 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
+
+	public static function restoreItemParent(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$query = $request->getQueryParams();
+		$payload = json_decode($request->getBody()->getContents(), true);
+		$parameters = $request->getAttribute('parameters', []);
+
+		Validation::authorize($user);
+
+		// Could allow restoring items as roots by not calling self::moveWithValidation at all, BTW...
+		Validation::validateIsString($payload);
+		$id = Validation::validateHasString($parameters, 'id');
+		$fix = !isset($query['nofix']);
+		$validate = !isset($query['novalidate']);
+
+		$item = Validation::newItemIncomplete($id);
+		try {
+			$newParent = new ItemIncomplete($payload);
+		} catch(ValidationException $e) {
+			throw new InvalidPayloadParameterException('*', $payload, 'Location does not exist');
+		}
+
+		$db->itemDAO()->undelete($item);
+		$created = self::moveWithValidation($db, $item, $newParent, $fix, $validate);
+
+		if($created) {
+			$response = $response->withStatus(201);
+		} else {
+			// Moved or done nothing
+			$response = $response->withStatus(204);
+		}
+
+		return $next ? $next($request, $response) : $response;
+	}
+
 	public static function getByFeature(Request $request, Response $response, ?callable $next = null): Response {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
@@ -324,23 +361,42 @@ class Controller extends AbstractController {
 		$parameters = $request->getAttribute('parameters', []);
 
 		Validation::authorize($user);
-		Validation::validateIsString($payload);
 
-		$id = Validation::validateOptionalString($parameters, 'id');
+		Validation::validateIsString($payload);
+		$id = Validation::validateHasString($parameters, 'id');
 		$fix = !isset($query['nofix']);
 		$validate = !isset($query['novalidate']);
 
+		$item = Validation::newItemIncomplete($id);
+		try {
+			$newParent = new ItemIncomplete($payload);
+		} catch(ValidationException $e) {
+			throw new InvalidPayloadParameterException('*', $payload, 'Location does not exist');
+		}
+
+		$created = self::moveWithValidation($db, $item, $newParent, $fix, $validate);
+
+		if($created) {
+			$response = $response->withStatus(201);
+		} else {
+			// Moved or done nothing
+			$response = $response->withStatus(204);
+		}
+
+		return $next ? $next($request, $response) : $response;
+	}
+
+	private static function moveWithValidation(Database $db, ItemIncomplete $what, ItemIncomplete $newParent, bool $fix, bool $validate): bool {
 		// We'll need the full item in any case, not just an ItemIncomplete
-		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, 0);
+		$item = $db->itemDAO()->getItem($what, null, 0);
 		$oldParent = $item->getParent();
-		$newParent = new ItemIncomplete($payload);
 
 		// Also the parent, in these cases
 		if($fix || $validate) {
 			try {
 				$newParent = $db->itemDAO()->getItem($newParent, null, 1);
 			} catch(NotFoundException $e) {
-				throw new InvalidPayloadParameterException('*', $payload, "Parent item doesn't exist");
+				throw new InvalidPayloadParameterException('*', $newParent->getCode(), "Parent item doesn't exist");
 			}
 		}
 
@@ -366,6 +422,7 @@ class Controller extends AbstractController {
 		if(($oldParent === null && $newParent->compareCode($item) !== 0) || ($oldParent !== null && $newParent->compareCode($oldParent) !== 0)) {
 			try {
 				$db->treeDAO()->moveItem($item, $newParent);
+				$moved = true;
 			} catch(NotFoundException $e) {
 				if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
 					throw new InvalidPayloadParameterException('*', $newParent->getCode(), "Parent item doesn't exist");
@@ -373,19 +430,10 @@ class Controller extends AbstractController {
 					throw $e;
 				}
 			}
-			$moved = true;
 		}
 
-		if($moved && $oldParent === null && $newParent !== null) {
-			// Created
-			$response = $response->withStatus(201);
-		} else {
-			// Moved or done nothing
-			$response = $response->withStatus(204);
-		}
-
-		return $next ? $next($request, $response) : $response;
-	}
+		return $oldParent === null && $moved ? true : false;
+ 	}
 
 	public static function setItemFeatures(Request $request, Response $response, ?callable $next = null): Response {
 		/** @var Database $db */

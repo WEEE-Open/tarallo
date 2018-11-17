@@ -88,6 +88,9 @@ class ItemDAOTest extends DatabaseTest {
 		$this->assertInstanceOf(Item::class, $db->itemDAO()->getItem($deleteMe));
 	}
 
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 */
 	public function testDeleteItemTwice() {
 		$db = $this->getDb();
 		$case = new Item('PC42');
@@ -102,6 +105,9 @@ class ItemDAOTest extends DatabaseTest {
 		$db->itemDAO()->deleteItem($deleteMe);
 	}
 
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 */
 	public function testDeleteItemWithContents() {
 		$db = $this->getDb();
 		$case = new Item('PC42');
@@ -115,6 +121,67 @@ class ItemDAOTest extends DatabaseTest {
 		$db->itemDAO()->deleteItem($deleteMe);
 	}
 
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 */
+	public function testUndelete() {
+		$db = $this->getDb();
+		$case = new Item('PC42');
+		$mobo = new Item('MOBO42');
+		$case->addContent($mobo);
+		$mobo->addFeature(new Feature('color', 'green'));
+		$db->itemDAO()->addItem($case);
+
+		$saveMe = new ItemIncomplete('MOBO42');
+		$db->itemDAO()->deleteItem($saveMe);
+
+		$db->itemDAO()->undelete($saveMe);
+
+		$this->assertTrue($db->itemDAO()->itemExists($saveMe), 'Item should still exist');
+		$this->assertTrue($db->itemDAO()->itemVisible($saveMe), 'Item should be visible');
+		$this->assertNull($db->itemDAO()->itemDeletedAt($saveMe), 'Item shouldn\'t have a deletion date');
+
+		$recovered = $db->itemDAO()->getItem($saveMe);
+		$this->assertInstanceOf(Item::class, $recovered, 'Can grab item from database');
+		$this->assertEmpty($recovered->getPath(), 'Item isn\'t placed anywhere');
+		$this->assertEquals(1, count($recovered->getFeatures()), 'Item contains the same number of features it contained before');
+
+		// Prevent integrity constraint violations due to duplicate audit entries...
+		$this->getPdo()->query("UPDATE Audit SET `Time` = DATE_SUB(`Time`, INTERVAL 1 SECOND) WHERE `Code` = 'MOBO42' AND `Change` = 'M' ORDER BY `Time` DESC LIMIT 1");
+		$db->treeDAO()->moveItem($saveMe, $case);
+		$recovered = $db->itemDAO()->getItem($saveMe);
+		$this->assertEquals(1, count($recovered->getPath()), 'Item can be moved somewhere');
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 */
+	public function testUndeleteExistingItem() {
+		$db = $this->getDb();
+		$case = new Item('PC42');
+		$db->itemDAO()->addItem($case);
+
+		$deleteMe = new ItemIncomplete('PC42');
+		$this->expectException(NotFoundException::class);
+		$db->itemDAO()->undelete($deleteMe);
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 */
+	public function testUndeleteNonExistingItem() {
+		$db = $this->getDb();
+		$case = new Item('PC42');
+		$db->itemDAO()->addItem($case);
+
+		$deleteMe = new ItemIncomplete('NOTEXISTING');
+		$this->expectException(NotFoundException::class);
+		$db->itemDAO()->undelete($deleteMe);
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
+	 */
 	public function testDuplicateCode() {
 		$db = $this->getDb();
 		$case = new Item('PC42');

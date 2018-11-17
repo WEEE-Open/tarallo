@@ -2,7 +2,10 @@
 
 namespace WEEEOpen\Tarallo\Server\HTTP;
 
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\User;
+use WEEEOpen\Tarallo\Server\ValidationException;
 
 class Validation {
 	/**
@@ -145,7 +148,22 @@ class Validation {
 		}
 	}
 
-	public static function Json(\Psr\Http\Message\StreamInterface $getBody) {
-
+	/**
+	 * Return a new ItemIncomplete or throw a NotFoundException if code is invalid
+	 *
+	 * @TODO: use this everywhere (even when the parameter item is invalid? That's not a 404...), or replace the thrown exception and remove upstream exception handlers from the pipeline.
+	 *
+	 * @param string $code
+	 * @return ItemIncomplete
+	 */
+	public static function newItemIncomplete(string $code) {
+		try {
+			return new ItemIncomplete($code);
+		} catch(ValidationException $e) {
+			if($e->getCode() === 5) {
+				throw new NotFoundException();
+			}
+			throw $e;
+		}
 	}
 }
