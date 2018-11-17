@@ -103,7 +103,7 @@ CREATE OR REPLACE TRIGGER ItemSetDeleted
 			SELECT COUNT(*) INTO descendants
 			FROM Tree
 			WHERE Ancestor = OLD.Code
-			AND Depth > 1;
+			AND Depth > 0;
 
 			IF(descendants > 0) THEN
 				SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot delete an item while contains other items';
