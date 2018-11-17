@@ -108,7 +108,20 @@ class Controller extends AbstractController {
 		if($id === null) {
 			throw new \LogicException('Not implemented');
 		} else {
-			$data = $db->itemDAO()->getItem(new ItemIncomplete($id), $token, $depth);
+			try {
+				$item = new ItemIncomplete($id);
+			} catch(ValidationException $e) {
+				if($e->getCode() === 3) {
+					throw new NotFoundException();
+				} else {
+					throw $e;
+				}
+			}
+
+			if(!$db->itemDAO()->itemVisible($item)) {
+				throw new NotFoundException();
+			}
+			$data = $db->itemDAO()->getItem($item, $token, $depth);
 
 			$request = $request
 				->withAttribute('Status', JSend::SUCCESS)
@@ -520,7 +533,7 @@ class Controller extends AbstractController {
 					$r->get('', [[Controller::class, 'getItem']]);
 					$r->post('', [[Controller::class, 'createItem']]);
 
-					$r->addGroup('/{id:[a-zA-Z0-9]+}', function(FastRoute\RouteCollector $r) {
+					$r->addGroup('/{id}', function(FastRoute\RouteCollector $r) {
 						$r->get('[/token/{token}]', [[Controller::class, 'getItem']]);
 						$r->get('/history', [[Controller::class, 'getHistory']]);
 						$r->put('', [[Controller::class, 'createItem']]);

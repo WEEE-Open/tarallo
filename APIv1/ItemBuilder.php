@@ -7,6 +7,7 @@ use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemFeatures;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ValidationException;
 
 class ItemBuilder {
 	/**
@@ -24,8 +25,12 @@ class ItemBuilder {
 		if(isset($input['parent'])) {
 			try {
 				$parent = new ItemIncomplete($input['parent']);
-			} catch(\InvalidArgumentException $e) {
-				throw new InvalidPayloadParameterException('parent', $input['parent'], 'Parent: ' . $e->getMessage());
+			} catch(ValidationException $e) {
+				if($e->getCode() === 3) {
+					throw new InvalidPayloadParameterException('parent', $input['parent'], 'Parent: ' . $e->getMessage());
+				} else {
+					throw $e;
+				}
 			}
 		} else {
 			$parent = null;
@@ -46,8 +51,12 @@ class ItemBuilder {
 	private static function ofArrayInternal(array $input, $code, $inner = false) {
 		try {
 			$item = new Item($code);
-		} catch(\InvalidArgumentException $e) {
-			throw new InvalidPayloadParameterException('*', $code, $e->getMessage());
+		} catch(ValidationException $e) {
+			if($e->getCode() === 3) {
+				throw new InvalidPayloadParameterException('*', $code, $e->getMessage());
+			} else {
+				throw $e;
+			}
 		}
 
 		if($inner && isset($input['parent'])) {

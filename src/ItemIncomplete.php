@@ -28,7 +28,7 @@ class ItemIncomplete implements \JsonSerializable {
 			$valid = preg_match('/^[a-zA-Z0-9]+$/', $code);
 		}
 		if(!$valid) {
-			throw new \InvalidArgumentException("Code must be alphanumeric, '$code' isn't");
+			throw new ValidationException("Code must be alphanumeric, '$code' isn't", 3);
 		}
 	}
 
