@@ -133,6 +133,38 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
+	public static function getDeletedItem(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateHasString($parameters, 'id');
+
+		Validation::authorize($user, 3);
+
+		try {
+			$item = new ItemIncomplete($id);
+		} catch(ValidationException $e) {
+			throw new NotFoundException();
+		}
+
+		$deleted = $db->itemDAO()->itemDeletedAt($item);
+
+		if($deleted === null) {
+			throw new NotFoundException();
+		} else {
+			$data = (new \DateTime($deleted, new \DateTimeZone('UTC')))->format('c');
+			$request = $request
+				->withAttribute('Status', JSend::SUCCESS)
+				->withAttribute('Data', $data);
+			$response = $response
+				->withStatus(200);
+		}
+
+		return $next ? $next($request, $response) : $response;
+	}
+
 	public static function getByFeature(Request $request, Response $response, ?callable $next = null): Response {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
@@ -546,7 +578,7 @@ class Controller extends AbstractController {
 						//$r->get('/parent',  [[Controller::class, 'getItemParent']]);
 						$r->put('/parent', [[Controller::class, 'setItemParent']]);
 
-						$r->get('/product', [[Controller::class, 'getItemProduct']]); // TODO: implement
+						//$r->get('/product', [[Controller::class, 'getItemProduct']]);
 						//$r->put('/product',  [[Controller::class, 'setItemProduct']]);
 						//$r->delete('/product',  [[Controller::class, 'deleteItemProduct']]);
 
@@ -556,6 +588,13 @@ class Controller extends AbstractController {
 						$r->patch('/features', [[Controller::class, 'updateItemFeatures']]);
 
 						// $r->get('/contents',  [[Controller::class, 'getItemContents']]);
+					});
+				});
+				$r->addGroup('/deleted', function(FastRoute\RouteCollector $r) {
+					$r->addGroup('/{id}', function(FastRoute\RouteCollector $r) {
+						$r->get('', [[Controller::class, 'getDeletedItem']]);
+						$r->put('/parent', [[Controller::class, 'restoreItemParent']]);
+						// TODO: this $r->delete('', [[Controller::class, 'removeItemPermanently']]);
 					});
 				});
 
