@@ -85,3 +85,24 @@ date_default_timezone_set('Europe/Rome');
 		</table>
 	</div>
 <?php endif ?>
+<?php if(!empty($byMobo)): ?>
+    <div class="statswrapper">
+        <p>Motherboard by form factor:</p>
+        <table>
+            <thead>
+            <tr>
+                <td>Form factor</td>
+                <td>Count</td>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach($byMobo as $type => $count): ?>
+                <tr>
+                    <td><?=$type?></td>
+                    <td><?=$count?></td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+        </table>
+    </div>
+<?php endif ?>

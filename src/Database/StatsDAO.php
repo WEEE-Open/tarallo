@@ -190,7 +190,7 @@ AND `Code` IN (
 )
 $locationFilter
 $deletedFilter
-GROUP BY ValueText
+GROUP BY Val
 ORDER BY Quantity DESC";
 
 		$statement = $this->getPDO()->prepare($query);

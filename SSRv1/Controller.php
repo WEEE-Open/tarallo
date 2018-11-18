@@ -223,6 +223,7 @@ class Controller extends AbstractController {
 							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
 							'mostRecent'  => $db->statsDAO()->getModifiedItems($location, true, 30),
 							'byOwner'     => $db->statsDAO()->getCountByFeature('owner', new Feature('type', 'case'), $location),
+							'byMobo'      => $db->statsDAO()->getCountByFeature('motherboard-form-factor', new Feature('type', 'case'), $location),
 							'ready'       => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), $location, 100),
 						]);
 				break;
