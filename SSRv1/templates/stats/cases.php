@@ -87,7 +87,7 @@ date_default_timezone_set('Europe/Rome');
 <?php endif ?>
 <?php if(!empty($byMobo)): ?>
     <div class="statswrapper">
-        <p>Motherboard by form factor:</p>
+        <p>Cases by motherboard form factor:</p>
         <table>
             <thead>
             <tr>
