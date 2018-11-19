@@ -112,7 +112,7 @@ class Feature {
 		'mini-pci-sockets-n' => self::INTEGER,
 		'brand-manufacturer' => self::STRING,
 		'psu-form-factor' => ['atx' => true, 'cfx' => true, 'lfx' => true, 'sfx-lowprofile' => true, 'sfx-topfan' => true, 'sfx-topfan-reduceddepth' => true, 'sfx' => true, 'sfx-ps3' => true, 'sfx-l' => true, 'tfx' => true, 'flexatx' => true, 'proprietary' => true, 'eps' => true],
-		'psu-rails-most-power' => ['12 V' => true, '5 V' => true, 'balanced' => true],
+		'psu-rails-most-power' => ['12v' => true, '5v' => true, 'balanced' => true],
 		'cib-old' => self::STRING,
 		'integrated-graphics-brand' => self::STRING,
 		'integrated-graphics-model' => self::STRING,

@@ -127,7 +127,7 @@ class FeaturePrinter {
 		'smart-data' => ['fail' => 'Failed', 'old' => 'Old', 'ok' => 'Ok'],
 		'wireless-receiver' => ['inside' => 'Inside the peripheral', 'near' => 'Near the peripheral', 'missing' => 'Missing'],
 		'psu-form-factor' => ['atx' => 'ATX', 'cfx' => 'CFX', 'lfx' => 'LFX', 'sfx-lowprofile' => 'SFX Low Profile', 'sfx-topfan' => 'SFX Topfan', 'sfx-topfan-reduceddepth' => 'SFX Topfan reduced depth', 'sfx' => 'SFX', 'sfx-ps3' => 'SFX PS3', 'sfx-l' => 'SFX-L', 'tfx' => 'TFX', 'flexatx' => 'Flex ATX', 'proprietary' => 'Proprietary', 'eps' => 'EPS'],
-		'psu-rails-most-power' => ['12 V' => '12 V (modern)', '5 V' => '5 V (old)', 'balanced' => 'Equal balance between 5 and 12 V'],
+		'psu-rails-most-power' => ['12v' => '12 V (modern)', '5v' => '5 V (old)', 'balanced' => 'Equal balance between 5 and 12 V'],
 		'restrictions' => ['loan' => 'Loaned (to be returned)', 'in-use' => 'In use', 'bought' => 'Bought', 'training' => 'Training/demonstrations', 'ready' => 'Ready', 'other' => 'Other (cannot be donated)'],
 		'pci-low-profile' => ['no' => 'No', 'possibile' => 'Possible (no bracket)', 'dual' => 'Yes (both brackets)', 'yes' => 'Yes (low profile only)'],
 		'psu-connector-cpu' => ['none' => 'None', '4pin' => '4 pin', '6pin-hp' => '6 pin (HP, 1 purple + 1 blue)', '6pin-hp-brown' => '6 pin (HP, 2 brown)', '6pin' => '6 pin (other)', '8pin' => '8 pin', 'proprietary' => 'Proprietary'],

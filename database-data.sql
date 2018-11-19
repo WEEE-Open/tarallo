@@ -306,8 +306,8 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('psu-form-factor', 'flexatx'), -- Flex ATX --
 	('psu-form-factor', 'proprietary'), -- Proprietary --
 	('psu-form-factor', 'eps'), -- EPS --
-	('psu-rails-most-power', '12 V'), -- 12 V (modern) --
-	('psu-rails-most-power', '5 V'), -- 5 V (old) --
+	('psu-rails-most-power', '12v'), -- 12 V (modern) --
+	('psu-rails-most-power', '5v'), -- 5 V (old) --
 	('psu-rails-most-power', 'balanced'), -- Equal balance between 5 and 12 V --
 	('restrictions', 'loan'), -- Loaned (to be returned) -- borrowed items that should be returned to owner, can't be donated
 	('restrictions', 'in-use'), -- In use -- items that shouldn't be donated right now because we're using them (e.g. switch, pc used for invetory management, server)
