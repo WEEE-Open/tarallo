@@ -182,9 +182,11 @@ class Controller extends AbstractController {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
+		$query = $request->getQueryParams();
 		$parameters = $request->getAttribute('parameters', ['which' => null]);
 
 		Validation::authorize($user, 3);
+		$startDate = Validation::validateOptionalString($query, 'StartDate');
 
 		switch($parameters['which']) {
 			case '':
@@ -214,6 +216,10 @@ class Controller extends AbstractController {
 				$location = new ItemIncomplete('Polito'); // TODO: change default
 				//$from = new \DateTime('now - 1 year');
 				//$to = new \DateTime();
+				if(is_string($startDate))
+				    $date = new \DateTime($startDate);
+				else
+				    $date = null;
 
 				$request = $request
 					->withAttribute('Template', 'stats::cases')
@@ -225,6 +231,7 @@ class Controller extends AbstractController {
 							'byOwner'     => $db->statsDAO()->getCountByFeature('owner', new Feature('type', 'case'), $location),
 							'byMobo'      => $db->statsDAO()->getCountByFeature('motherboard-form-factor', new Feature('type', 'case'), $location),
 							'ready'       => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), $location, 100),
+						    'byDate'      => $db->statsDAO()->getCountByDate($date),
 						]);
 				break;
 			default:

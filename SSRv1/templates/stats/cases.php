@@ -107,9 +107,30 @@ date_default_timezone_set('Europe/Rome');
     </div>
 <?php endif ?>
 	<div class="statswrapper">
-			<p>Select a date</p>
-			<form action="main.php" method="GET">
-				<input type="date" name="StartDate">
-				<input type="submit" value="Search">			
-			</form>
+		<p>Select a date</p>
+		<form action="" method="GET">
+			<input type="date" name="StartDate">
+			<input type="submit" value="Search">			
+		</form>
 	</div>
+<?php if(!empty($byDate)): ?>
+    <div class="statswrapper">
+        <p>Owner by date:</p>
+        <table>
+            <thead>
+            <tr>
+                <td>Owner</td>
+                <td>Count</td>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach($byDate as $owner => $count): ?>
+                <tr>
+                    <td><?=$owner?></td>
+                    <td><?=$count?></td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+        </table>
+    </div>
+<?php endif ?>
