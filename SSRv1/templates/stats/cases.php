@@ -106,3 +106,10 @@ date_default_timezone_set('Europe/Rome');
         </table>
     </div>
 <?php endif ?>
+	<div class="statswrapper">
+			<p>Select a date</p>
+			<form action="main.php" method="GET">
+				<input type="date" name="StartDate">
+				<input type="submit" value="Search">			
+			</form>
+	</div>
