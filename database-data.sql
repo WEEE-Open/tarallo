@@ -97,6 +97,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('mini-pci-sockets-n', 'sockets', 1), -- Mini PCI --
 	('brand-manufacturer', 'commercial', 0), -- Brand (manufacturer) --
 	('psu-form-factor', 'physical', 2), -- Form factor (PSU) --
+	('psu-rails-most-power', 'power', 2), -- Rails with most power --
 	('cib-old', 'administrative', 0), -- CIB (old) --
 	('integrated-graphics-brand', 'features', 0), -- Integrated graphics brand -- TODO: replace with brand & model, once namespaced features are implemented
 	('integrated-graphics-model', 'features', 0), -- Integrated graphics model --
@@ -305,6 +306,9 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('psu-form-factor', 'flexatx'), -- Flex ATX --
 	('psu-form-factor', 'proprietary'), -- Proprietary --
 	('psu-form-factor', 'eps'), -- EPS --
+	('psu-rails-most-power', '12 V'), -- 12 V (modern) --
+	('psu-rails-most-power', '5 V'), -- 5 V (old) --
+	('psu-rails-most-power', 'balanced'), -- Equal balance between 5 and 12 V --
 	('restrictions', 'loan'), -- Loaned (to be returned) -- borrowed items that should be returned to owner, can't be donated
 	('restrictions', 'in-use'), -- In use -- items that shouldn't be donated right now because we're using them (e.g. switch, pc used for invetory management, server)
 	('restrictions', 'bought'), -- Bought -- items bought with funds from our annual budget, can't be donated at all ever

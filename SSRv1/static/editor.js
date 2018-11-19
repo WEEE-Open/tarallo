@@ -682,7 +682,7 @@
 				features = ['brand', 'brand-manufacturer', 'model', 'capacity-byte', 'vga-ports-n', 'dvi-ports-n', 'dms-59-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'agp-sockets-n', 'pcie-sockets-n', 'pcie-power-pin-n', 'sn', 'color', 'working', 'owner'];
 				break;
 			case 'psu':
-				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'power-rated-watt', 'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor', 'pcie-power-pin-n', 'sata-ports-n', 'color', 'working', 'owner'];
+				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'power-rated-watt', 'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor', 'psu-rails-most-power', 'pcie-power-pin-n', 'sata-ports-n', 'color', 'working', 'owner'];
 				break;
 			case 'external-psu':
 				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'psu-volt', 'psu-ampere', 'working', 'owner', 'notes'];
