@@ -267,21 +267,23 @@ LIMIT :lim";
         
         if($date == null)
             return [];
-        
+
+        $string = $date->format("Y-m-d");
         $pdo = $this->getPDO();
         
         $query="SELECT ValueText, COUNT(*) as Quantity
         FROM ItemFeature I, Audit A
         WHERE I.code = A.code
         AND I.Feature = 'owner'
-        AND Time > ':dat'
+        AND Time > :dat
         GROUP BY ValueText
         ORDER BY Quantity DESC";
         
         $statement = $pdo->prepare($query);
         
-        $statement->bindValue(':dat', $date);
-        
+        $statement->bindValue(':dat', $string, \PDO::PARAM_STR);
+
+
         $result = [];
         
         try {
