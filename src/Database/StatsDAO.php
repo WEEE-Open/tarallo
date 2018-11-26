@@ -280,7 +280,7 @@ LIMIT :lim";
         ORDER BY Quantity DESC";
         
         $statement = $pdo->prepare($query);
-        
+
         $statement->bindValue(':dat', $string, \PDO::PARAM_STR);
 
 
