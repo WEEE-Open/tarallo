@@ -186,7 +186,6 @@ class Controller extends AbstractController {
 		$parameters = $request->getAttribute('parameters', ['which' => null]);
 
 		Validation::authorize($user, 3);
-		$startDate = Validation::validateOptionalString($query, 'StartDate');
 
 		switch($parameters['which']) {
 			case '':
@@ -211,27 +210,23 @@ class Controller extends AbstractController {
 						]);
 				break;
 			case 'cases':
-				// TODO: allow to select other locations and time spans
-				//$query = $request->getQueryParams();
-				$location = new ItemIncomplete('Polito'); // TODO: change default
-				//$from = new \DateTime('now - 1 year');
-				//$to = new \DateTime();
-				if(is_string($startDate))
-				    $date = new \DateTime($startDate);
-				else
-				    $date = null;
+				$startDate = Validation::validateOptionalString($query, 'from', 'now - 1 year');
+				$startDate = new \DateTime($startDate, new \DateTimeZone('Europe/Rome'));
+				$location = Validation::validateOptionalString($query, 'where', 'LabFis4');
+				$location = new ItemIncomplete($location);
 
 				$request = $request
 					->withAttribute('Template', 'stats::cases')
 					->withAttribute('TemplateParameters',
 						[
 							'location'    => $location->getCode(),
+							'startDate'   => $startDate,
 							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
 							'mostRecent'  => $db->statsDAO()->getModifiedItems($location, true, 30),
 							'byOwner'     => $db->statsDAO()->getCountByFeature('owner', new Feature('type', 'case'), $location),
 							'byMobo'      => $db->statsDAO()->getCountByFeature('motherboard-form-factor', new Feature('type', 'case'), $location),
 							'ready'       => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), $location, 100),
-						    'byDate'      => $db->statsDAO()->getCountByDate($date),
+							'byDate'      => $db->statsDAO()->getCountByDate($startDate),
 						]);
 				break;
 			default:

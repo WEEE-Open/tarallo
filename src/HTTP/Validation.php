@@ -79,7 +79,7 @@ class Validation {
 
 	/**
 	 * Return string value form a key if it exists (being casted if not a string),
-	 * or supplied default value if it doesn't
+	 * or supplied default value if it doesn't. Empty string is considered invalid.
 	 *
 	 * @param array $payload THE array
 	 * @param string $key Some key
@@ -90,7 +90,12 @@ class Validation {
 	 */
 	public static function validateOptionalString(array $payload, string $key, ?string $default = null) {
 		try {
-			return (string) self::validateHas($payload, $key);
+			$string = (string) self::validateHas($payload, $key);
+			if($string === '') {
+				return $default;
+			} else {
+				return $string;
+			}
 		} catch(InvalidPayloadParameterException $e) {
 			return $default;
 		}

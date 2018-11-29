@@ -25,4 +25,8 @@ class UltraFeature {
 		$this->name = FeaturePrinter::printableName($feature);
 		$this->group = FeaturePrinter::printableGroup(Feature::getGroup($feature->name));
 	}
+
+	public static function printableValue(Feature $feature, string $language) {
+		return FeaturePrinter::printableValue($feature);
+	}
 }
