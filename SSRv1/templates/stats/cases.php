@@ -10,16 +10,15 @@ $this->layout('main', ['title' => 'Stats', 'user' => $user]);
 $this->insert('stats::menu', ['currentPage' => 'cases']);
 date_default_timezone_set('Europe/Rome');
 ?>
-
-	<p>All stats refer to <?=$location?> only</p>
-	<div class="statswrapper large">
-		<form action="" method="GET">
-			<label>Start date<input type="date" name="from"></label>
-			<label>Location<input type="text" name="where"></label>
-			<input type="submit" value="Search">
-		</form>
-	</div>
-
+<p>All stats refer to <?=$location?> only</p>
+<div class="statsheader">
+	<form action="" method="GET">
+		<label>Start date<input type="date" name="from"></label>
+		<label>Location<input type="text" name="where"></label>
+		<input type="submit" value="Search">
+	</form>
+</div>
+<div class="statswrapperwrapper">
 <?php if(!empty($ready)): ?>
 	<div class="statswrapper large">
 		<p>Ready computers:</p>
@@ -135,3 +134,4 @@ date_default_timezone_set('Europe/Rome');
 		</table>
 	</div>
 <?php endif ?>
+</div>

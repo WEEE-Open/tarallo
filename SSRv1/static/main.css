@@ -218,25 +218,6 @@ ul.breadcrumbs li:not(:first-child)::before {
 	padding: 0.5em;
 }
 
-#stats {
-	margin: .5em;
-	padding: .5em;
-	background-color: #333;
-	color: #eee;
-}
-
-.statswrapper {
-	margin: 1em 2em 1em 0;
-}
-
-.statswrapper p {
-	margin: 0 0 1em 0;
-}
-
-.statswrapper div {
-	line-height: 1.5em;
-}
-
 table {
 	border-collapse: collapse;
 	width: 100%;
@@ -438,6 +419,30 @@ label.searchby {
 	margin-bottom: 1em;
 }
 
+#stats {
+	margin: .5em;
+	padding: .5em;
+	background-color: #333;
+	color: #eee;
+}
+
+.statswrapper {
+	width: calc(100% - 1em);
+	margin-bottom: 2em;
+}
+
+.statsheader {
+	margin-bottom: 1em !important;
+}
+
+.statswrapper p {
+	margin: 0 0 1em 0;
+}
+
+.statswrapper div {
+	line-height: 1.5em;
+}
+
 #searchcontrols .disabled {
 	display: none;
 }
@@ -496,18 +501,28 @@ label.searchby {
 		font-size: small;
 		display: inline-block;
 	}
+}
+
+@media only screen and (min-width: 54em) {
+
+	.statswrapperwrapper {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: stretch;
+	}
 
 	.statswrapper {
-		float: left;
-		width: auto;
+		width: 24em;
+		margin-right: 2em;
 	}
 
 	.statswrapper.large {
-		width: 100%;
+		width: auto;
 	}
 
 	.statswrapper > table {
-		width: auto;
+		width: 100%;
 	}
 }
 
