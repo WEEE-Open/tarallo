@@ -22,6 +22,13 @@ date_default_timezone_set('Europe/Rome');
         </div>
     </div>
 <?php endif ?>
+    <div class="statswrapper large">
+        <p>Select a date</p>
+        <form action="" method="GET">
+            <input type="date" name="StartDate">
+            <input type="submit" value="Search">
+        </form>
+    </div>
 <?php if(!empty($leastRecent)): ?>
 	<div class="statswrapper">
 		<p>30 computers where no work has been done in a long time:</p>
@@ -106,13 +113,6 @@ date_default_timezone_set('Europe/Rome');
         </table>
     </div>
 <?php endif ?>
-	<div class="statswrapper">
-		<p>Select a date</p>
-		<form action="" method="GET">
-			<input type="date" name="StartDate">
-			<input type="submit" value="Search">			
-		</form>
-	</div>
 <?php if(!empty($byDate)): ?>
     <div class="statswrapper">
         <p>Owner by date:</p>
