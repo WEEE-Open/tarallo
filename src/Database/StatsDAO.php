@@ -10,7 +10,7 @@ final class StatsDAO extends DAO {
 	 * Get an AND for a WHERE clause that filters items by their location.
 	 * Bind :loc to the location.
 	 *
-	 * @param null|ItemIncomplete $location , if null returns an empty string
+	 * @param null|ItemIncomplete $location if null returns an empty string
 	 * @return string part of a query
 	 */
 	private static function filterLocation(?ItemIncomplete $location) {
@@ -22,6 +22,26 @@ final class StatsDAO extends DAO {
 SELECT Descendant
 FROM Tree
 WHERE Ancestor = :loc
+)';
+	}
+
+	/**
+	 * Get an AND for a WHERE clause that filters items by creation date (later than the specified one).
+	 * Bind :timestamp to the unix timestamp.
+	 *
+	 * @param null|\DateTime $creation if null returns an empty string
+	 * @return string part of a query
+	 */
+	private static function filterCreated(?\DateTime $creation) {
+		if($creation === null) {
+			return '';
+		}
+
+		return 'AND `Code` NOT IN (
+SELECT `Code`
+FROM Audit
+WHERE `Change` = "C"
+AND `Time` < FROM_UNIXTIME(:timestamp)
 )';
 	}
 
@@ -177,16 +197,18 @@ LIMIT :lim';
 	 * @param string $feature Feature name
 	 * @param Feature $filter
 	 * @param ItemIncomplete $location
+	 * @param null|\DateTime $creation creation date (starts from here)
 	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
 	 * @return int[] value => count, sorted by count descending
 	 */
-	public function getCountByFeature(string $feature, Feature $filter, ?ItemIncomplete $location = null, bool $deleted = false) {
+	public function getCountByFeature(string $feature, Feature $filter, ?ItemIncomplete $location = null, ?\DateTime $creation = null, bool $deleted = false) {
 		Feature::validateFeatureName($feature);
 
 		$array = [];
 
 		$locationFilter = self::filterLocation($location);
 		$deletedFilter = $deleted ? '' : self::filterDeleted();
+		$createdFilter = self::filterCreated($creation);
 
         $query = "SELECT COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) as Val, COUNT(*) AS Quantity
 FROM ItemFeature
@@ -198,6 +220,7 @@ AND `Code` IN (
 )
 $locationFilter
 $deletedFilter
+$createdFilter
 GROUP BY Val
 ORDER BY Quantity DESC";
 
@@ -208,6 +231,9 @@ ORDER BY Quantity DESC";
 		$statement->bindValue(':nam', $filter->name, \PDO::PARAM_STR);
 		if($location !== null) {
 			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
+		}
+		if($creation !== null) {
+			$statement->bindValue(':timestamp', $creation->getTimestamp(), \PDO::PARAM_INT);
 		}
 
 		try {
@@ -230,14 +256,16 @@ ORDER BY Quantity DESC";
 	 * @param Feature $feature Feature and value to search
 	 * @param int $limit Maximum number of results
 	 * @param null|ItemIncomplete $location
+	 * @param null|\DateTime $creation creation date (starts from here)
 	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
 	 *
 	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
 	 */
-	public function getItemsByFeatures(Feature $feature, ?ItemIncomplete $location = null, int $limit = 100, bool $deleted = false): array {
+	public function getItemsByFeatures(Feature $feature, ?ItemIncomplete $location = null, int $limit = 100, ?\DateTime $creation = null, bool $deleted = false): array {
 		$pdo = $this->getPDO();
 		$locationFilter = self::filterLocation($location);
 		$deletedFilter = $deleted ? '' : self::filterDeleted();
+		$createdFilter = self::filterCreated($creation);
 
 		/** @noinspection SqlResolve */
 		$query = "SELECT `Code`
@@ -246,6 +274,7 @@ WHERE Feature = :feat
 AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = :val
 $locationFilter
 $deletedFilter
+$createdFilter
 LIMIT :lim";
 		$statement = $pdo->prepare($query);
 
@@ -254,6 +283,9 @@ LIMIT :lim";
 		$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
 		if($location !== null) {
 			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
+		}
+		if($creation !== null) {
+			$statement->bindValue(':timestamp', $creation->getTimestamp(), \PDO::PARAM_INT);
 		}
 
 		$result = [];
@@ -270,41 +302,4 @@ LIMIT :lim";
 
 		return $result;
 	}
-	
-    public function getCountByDate(?\DateTime $date) {
-        
-        if($date == null)
-            return [];
-
-        $string = $date->format("Y-m-d");
-        $pdo = $this->getPDO();
-        
-        $query="SELECT ValueText, COUNT(*) as Quantity
-        FROM ItemFeature I, Audit A
-        WHERE I.code = A.code
-        AND I.Feature = 'owner'
-        AND Time > :dat
-        GROUP BY ValueText
-        ORDER BY Quantity DESC";
-        
-        $statement = $pdo->prepare($query);
-
-        $statement->bindValue(':dat', $string, \PDO::PARAM_STR);
-
-
-        $result = [];
-        
-        try {
-            $success = $statement->execute();
-            assert($success, 'get owner by date');
-            while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-                $result[$row['ValueText']] = $row['Quantity'];
-            }
-        } finally {
-            $statement->closeCursor();
-        }
-        
-        return $result;
-        
-    }
 }

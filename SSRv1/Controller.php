@@ -210,9 +210,15 @@ class Controller extends AbstractController {
 						]);
 				break;
 			case 'cases':
-				$startDate = Validation::validateOptionalString($query, 'from', 'now - 1 year', null);
+				// a nice default value: 'now - 1 year'
+				$startDateDefault = '2016-01-01';
+				$startDate = Validation::validateOptionalString($query, 'from', $startDateDefault, null);
+				$startDateSet = $startDate !== $startDateDefault;
 				$startDate = new \DateTime($startDate, new \DateTimeZone('Europe/Rome'));
-				$location = Validation::validateOptionalString($query, 'where', 'LabFis4', null);
+
+				$locationDefault = 'LabFis4';
+				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
+				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemIncomplete($location);
 
 				$request = $request
@@ -220,13 +226,14 @@ class Controller extends AbstractController {
 					->withAttribute('TemplateParameters',
 						[
 							'location'    => $location === null ? null : $location->getCode(),
+							'locationSet' => $locationSet,
 							'startDate'   => $startDate,
+							'startDateSet'=> $startDateSet,
 							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
 							'mostRecent'  => $db->statsDAO()->getModifiedItems($location, true, 30),
-							'byOwner'     => $db->statsDAO()->getCountByFeature('owner', new Feature('type', 'case'), $location),
-							'byMobo'      => $db->statsDAO()->getCountByFeature('motherboard-form-factor', new Feature('type', 'case'), $location),
+							'byOwner'     => $db->statsDAO()->getCountByFeature('owner', new Feature('type', 'case'), $location, $startDate),
+							'byMobo'      => $db->statsDAO()->getCountByFeature('motherboard-form-factor', new Feature('type', 'case'), $location, $startDate),
 							'ready'       => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), $location, 100),
-							'byDate'      => $db->statsDAO()->getCountByDate($startDate),
 						]);
 				break;
 			default:
