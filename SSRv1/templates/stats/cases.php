@@ -22,6 +22,13 @@ date_default_timezone_set('Europe/Rome');
         </div>
     </div>
 <?php endif ?>
+    <div class="statswrapper large">
+        <p>Select a date</p>
+        <form action="" method="GET">
+            <input type="date" name="StartDate">
+            <input type="submit" value="Search">
+        </form>
+    </div>
 <?php if(!empty($leastRecent)): ?>
 	<div class="statswrapper">
 		<p>30 computers where no work has been done in a long time:</p>
@@ -99,6 +106,27 @@ date_default_timezone_set('Europe/Rome');
             <?php foreach($byMobo as $type => $count): ?>
                 <tr>
                     <td><?=$type?></td>
+                    <td><?=$count?></td>
+                </tr>
+            <?php endforeach ?>
+            </tbody>
+        </table>
+    </div>
+<?php endif ?>
+<?php if(!empty($byDate)): ?>
+    <div class="statswrapper">
+        <p>Owner by date:</p>
+        <table>
+            <thead>
+            <tr>
+                <td>Owner</td>
+                <td>Count</td>
+            </tr>
+            </thead>
+            <tbody>
+            <?php foreach($byDate as $owner => $count): ?>
+                <tr>
+                    <td><?=$owner?></td>
                     <td><?=$count?></td>
                 </tr>
             <?php endforeach ?>

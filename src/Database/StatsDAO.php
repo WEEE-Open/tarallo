@@ -262,4 +262,41 @@ LIMIT :lim";
 
 		return $result;
 	}
+	
+    public function getCountByDate(?\DateTime $date) {
+        
+        if($date == null)
+            return [];
+
+        $string = $date->format("Y-m-d");
+        $pdo = $this->getPDO();
+        
+        $query="SELECT ValueText, COUNT(*) as Quantity
+        FROM ItemFeature I, Audit A
+        WHERE I.code = A.code
+        AND I.Feature = 'owner'
+        AND Time > :dat
+        GROUP BY ValueText
+        ORDER BY Quantity DESC";
+        
+        $statement = $pdo->prepare($query);
+
+        $statement->bindValue(':dat', $string, \PDO::PARAM_STR);
+
+
+        $result = [];
+        
+        try {
+            $success = $statement->execute();
+            assert($success, 'get owner by date');
+            while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+                $result[$row['ValueText']] = $row['Quantity'];
+            }
+        } finally {
+            $statement->closeCursor();
+        }
+        
+        return $result;
+        
+    }
 }
