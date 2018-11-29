@@ -7,6 +7,7 @@ $this->layout('main', ['title' => 'Home', 'user' => $user]) ?>
 <article>
 	<h2>Hi</h2>
 	<p>This is a temporary home page. Here are some stats.</p>
+	<div class="statswrapperwrapper">
 	<?php if(!empty($locations)): ?>
 		<div class="statswrapper">
 			<p>Available locations:</p>
@@ -49,4 +50,5 @@ $this->layout('main', ['title' => 'Home', 'user' => $user]) ?>
 			</table>
 		</div>
 	<?php endif ?>
+	</div>
 </article>

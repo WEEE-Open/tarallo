@@ -427,7 +427,7 @@ label.searchby {
 }
 
 .statswrapper {
-	width: calc(100% - 1em);
+	width: auto;
 	margin-bottom: 2em;
 }
 

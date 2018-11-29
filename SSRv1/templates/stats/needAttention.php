@@ -7,8 +7,9 @@ $this->layout('main', ['title' => 'Stats: items that need attention', 'user' => 
 $this->insert('stats::menu', ['currentPage' => 'attention']);
 ?>
 
+<div class="statswrapperwrapper">
 <?php if(!empty($lost)): ?>
-	<div class="statswrapper">
+	<div class="statswrapper large">
 		<p>Most wanted, aka lost items (<?=count($lost)?>, max 100):</p>
 		<div>
 			<?php foreach($lost as $item): ?>
@@ -19,7 +20,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 <?php endif ?>
 
 <?php if(!empty($missingData)): ?>
-	<div class="statswrapper">
+	<div class="statswrapper large">
 		<p>Items with missing data (<?=count($missingData)?>, max 500):</p>
 		<div>
 			<?php foreach($missingData as $item): ?>
@@ -50,4 +51,4 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 		</table>
 	</div>
 <?php endif ?>
-
+</div>

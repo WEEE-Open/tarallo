@@ -8,6 +8,7 @@ $this->insert('stats::menu', ['currentPage' => '']);
 date_default_timezone_set('Europe/Rome');
 ?>
 
+<div class="statswrapperwrapper">
 <?php if(!empty($recentlyAdded)): ?>
 	<div class="statswrapper">
 		<p>Recently added items:</p>
@@ -71,3 +72,4 @@ date_default_timezone_set('Europe/Rome');
 		</table>
 	</div>
 <?php endif; ?>
+</div>
