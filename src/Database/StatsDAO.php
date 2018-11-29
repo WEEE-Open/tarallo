@@ -105,28 +105,34 @@ ORDER BY Count DESC, SN ASC', \PDO::FETCH_ASSOC);
 	 * @todo parametrize the "in-use" exclusion, maybe? So the "most recently modified" makes more sense
 	 * @todo try to parametrize the "type=case" filter
 	 *
-	 * @param ItemIncomplete $location Where to look
+	 * @param ItemIncomplete $location Where to look, null to search everywhere
 	 * @param bool $recent True for more recently modified items first, false for least recently modified
 	 * @param int $limit rows to return
 	 *
 	 * @return int[] code => timestamp
 	 */
-	public function getModifiedItems(ItemIncomplete $location, bool $recent = true, int $limit = 100): array {
+	public function getModifiedItems(?ItemIncomplete $location, bool $recent = true, int $limit = 100): array {
 		$array = [];
+
+		if($location !== null) {
+			$locationPart = 'AND `Ancestor` IN (
+	SELECT Descendant
+	FROM Tree
+	WHERE Ancestor = :loc
+)';
+		} else {
+			$locationPart = '';
+		}
 
 		$query = "SELECT `Ancestor` AS `Item`, `Time`, UNIX_TIMESTAMP(MAX(`Time`)) AS `Last`
 FROM Audit
 JOIN Tree ON Tree.Descendant=Audit.Code
-	WHERE `Ancestor` IN (
-	SELECT Descendant
-	FROM Tree
-	WHERE Ancestor = :loc
-)
-AND `Ancestor` IN (
+WHERE `Ancestor` IN (
 	SELECT `Code`
 	FROM ItemFeature
 	WHERE Feature = 'type' AND `ValueEnum` = 'case'
 )
+$locationPart
 AND `Ancestor` NOT IN (
 	SELECT `Code`
 	FROM ItemFeature
@@ -137,7 +143,9 @@ ORDER BY `Last` " . ($recent ? 'DESC' : 'ASC') . '
 LIMIT :lim';
 		$statement = $this->getPDO()->prepare($query);
 
-		$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
+		if($location !== null) {
+			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
+		}
 		$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
 
 		try {

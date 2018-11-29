@@ -1,6 +1,7 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 /** @var string $location */
+/** @var string $locationDefault */
 /** @var int[] $leastRecent */
 /** @var int[] $mostRecent */
 /** @var int[] $byOwner */
@@ -10,12 +11,23 @@ $this->layout('main', ['title' => 'Stats', 'user' => $user]);
 $this->insert('stats::menu', ['currentPage' => 'cases']);
 date_default_timezone_set('Europe/Rome');
 ?>
-<p>All stats refer to <?=$location?> only</p>
+<?php if($location === null): ?>
+	<p>All stats refer <em>every possible location</em></p>
+<?php else: ?>
+	<p>All stats refer to <em><?=$location?></em> only</p>
+<?php endif; ?>
 <div class="statsheader">
 	<form action="" method="GET">
 		<label>Start date<input type="date" name="from"></label>
-		<label>Location<input type="text" name="where"></label>
-		<input type="submit" value="Search">
+		<?php if($location !== null && $location !== $locationDefault): ?><input type="hidden" name="where" value="<?= $this->e($location) ?>"><?php endif; ?>
+		<input type="submit" value="Filter">
+	</form>
+</div>
+<div class="statsheader">
+	<form action="" method="GET">
+		<label>Location<input type="text" name="where" placeholder="<?= $this->e($location ?? '') ?>"></label>
+		<?php if($startDate !== null): ?><input type="hidden" name="from" value="<?= $startDate->format('Y-m-s') ?>"><?php endif; ?>
+		<input type="submit" value="Filter">
 	</form>
 </div>
 <div class="statswrapperwrapper">

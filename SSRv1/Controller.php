@@ -210,16 +210,16 @@ class Controller extends AbstractController {
 						]);
 				break;
 			case 'cases':
-				$startDate = Validation::validateOptionalString($query, 'from', 'now - 1 year');
+				$startDate = Validation::validateOptionalString($query, 'from', 'now - 1 year', null);
 				$startDate = new \DateTime($startDate, new \DateTimeZone('Europe/Rome'));
-				$location = Validation::validateOptionalString($query, 'where', 'LabFis4');
-				$location = new ItemIncomplete($location);
+				$location = Validation::validateOptionalString($query, 'where', 'LabFis4', null);
+				$location = $location === null ? null : new ItemIncomplete($location);
 
 				$request = $request
 					->withAttribute('Template', 'stats::cases')
 					->withAttribute('TemplateParameters',
 						[
-							'location'    => $location->getCode(),
+							'location'    => $location === null ? null : $location->getCode(),
 							'startDate'   => $startDate,
 							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
 							'mostRecent'  => $db->statsDAO()->getModifiedItems($location, true, 30),

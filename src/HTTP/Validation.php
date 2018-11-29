@@ -83,16 +83,15 @@ class Validation {
 	 *
 	 * @param array $payload THE array
 	 * @param string $key Some key
-	 *
-	 * @param string|null $default Default value if there's no such key
-	 *
+	 * @param null|string $default Default value if there's no such key
+	 * @param null|string $emptyString What to do when you get an empty string (default: return it)
 	 * @return string|null Whatever the value is, or $default
 	 */
-	public static function validateOptionalString(array $payload, string $key, ?string $default = null) {
+	public static function validateOptionalString(array $payload, string $key, ?string $default = null, ?string $emptyString = '') {
 		try {
 			$string = (string) self::validateHas($payload, $key);
 			if($string === '') {
-				return $default;
+				return $emptyString;
 			} else {
 				return $string;
 			}
