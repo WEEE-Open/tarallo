@@ -5,15 +5,15 @@ Vagrant.configure("2") do |config|
   config.vm.box = "centos/7"
   config.vm.hostname = "tarallo"
 
-  config.vm.synced_folder ".", "/vagrant", disabled: true, SharedFoldersEnableSymlinksCreate: false
-  config.vm.synced_folder "./utils/data", "/data", SharedFoldersEnableSymlinksCreate: false
-  config.vm.synced_folder ".", "/var/www/html/server", SharedFoldersEnableSymlinksCreate: false
+  config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.synced_folder "./utils/data", "/data"
+  config.vm.synced_folder ".", "/var/www/html/server"
 
   if Vagrant::Util::Platform.windows? then
-    config.vm.synced_folder "./utils/xdebug", "/xdebug", SharedFoldersEnableSymlinksCreate: false, type: "smb",
+    config.vm.synced_folder "./utils/xdebug", "/xdebug", type: "smb",
       :mount_options => ['dir_mode=0777,file_mode=0666']
   else
-    config.vm.synced_folder "./utils/xdebug", "/xdebug", SharedFoldersEnableSymlinksCreate: false,
+    config.vm.synced_folder "./utils/xdebug", "/xdebug",
       #:owner => 'nobody',
       #:group => 'nobody',
       :mount_options => ['dmode=777', 'fmode=666']
