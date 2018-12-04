@@ -6,8 +6,14 @@ Vagrant.configure("2") do |config|
   config.vm.hostname = "tarallo"
 
   config.vm.synced_folder ".", "/vagrant", disabled: true
-  config.vm.synced_folder "./utils/data", "/data"
-  config.vm.synced_folder ".", "/var/www/html/server"
+	
+  if Vagrant::Util::Platform.windows? then
+    config.vm.synced_folder "./utils/data", "/data", type: "smb"
+    config.vm.synced_folder ".", "/var/www/html/server", type: "smb"
+  else
+    config.vm.synced_folder "./utils/data", "/data"
+    config.vm.synced_folder ".", "/var/www/html/server"
+  end
 
   if Vagrant::Util::Platform.windows? then
     config.vm.synced_folder "./utils/xdebug", "/xdebug", type: "smb",
