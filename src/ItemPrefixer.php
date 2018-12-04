@@ -33,8 +33,16 @@ class ItemPrefixer {
 			case 'ram':
 				return 'R';
 			case 'hdd':
-				// Yes, this is too long. Maybe we'll change it to H in the future.
-				return 'HDD';
+				if(self::hasAny('sata-ports-n', $features)) {
+					return 'S';
+				} elseif(self::hasAny('ide-ports-n', $features) || self::hasAny('mini-ide-ports-n', $features)) {
+					return 'H';
+				} elseif(self::hasAny('scsi-sca2-ports-n', $features) || self::hasAny('scsi-db68-ports-n', $features)) {
+					return 'SC';
+				} else {
+					throw new \InvalidArgumentException('No or unknown hard drive connector, cannot generate a code');
+				}
+				//return 'HDD';
 			case 'odd':
 				return 'ODD';
 			case 'psu':
@@ -71,6 +79,16 @@ class ItemPrefixer {
 			default:
 				throw new \InvalidArgumentException('No prefix found for type ' . $features['type']);
 		}
+	}
+
+	private static function hasAny(string $name, array $features): bool {
+		$type = Feature::getType($name);
+		if($type === Feature::INTEGER || $type === Feature::DOUBLE) {
+			return isset($features[$name]) && $features[$name]->value > 0;
+		} else {
+			return isset($features[$name]);
+		}
+
 	}
 
 	private static function is($name, $value, $features) {
