@@ -12,6 +12,8 @@
 	let featureValues = new Map();
 	let featureValuesTranslated = new Map();
 
+	let fadingErrors = new Map();
+
 	for(let select of document.querySelectorAll('.allfeatures')) {
 		select.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
 	}
@@ -214,6 +216,10 @@
 	 * @param ev Event
 	 */
 	function numberChanged(ev) {
+		let feature = ev.target.parentElement;
+		if(feature.classList.contains("haserror") && !feature.classList.contains("fading")) {
+			fadeOutInlineErrors(feature);
+		}
 		fixDiv(ev.target);
 		let value = ev.target.textContent;
 		let unit;
@@ -244,11 +250,17 @@
 		} catch(e) {
 			// rollback
 			ev.target.dataset.internalValue = ev.target.dataset.previousValue;
-			ev.target.getElementsByTagName('DIV')[0].textContent = valueToPrintable(unit, parseInt(ev.target.dataset.previousValue));
+			if(ev.target.dataset.previousValue === '') {
+				ev.target.getElementsByTagName('DIV')[0].textContent = '';
+			} else {
+				ev.target.getElementsByTagName('DIV')[0].textContent = valueToPrintable(unit, parseInt(ev.target.dataset.previousValue));
+			}
 			// Display error message
-			let displayed = displayError(e.message);
-			if(!displayed) {
-				throw e;
+			if(!(ev.target.dataset.previousValue === '' && e.message === 'empty-input')) {
+				let displayed = displayInlineError(feature, e.message);
+				if (!displayed) {
+					throw e;
+				}
 			}
 		}
 		// New elements don't have an initial value
@@ -275,10 +287,66 @@
 	}
 
 	/**
+	 * Show error messages near wrong features in editor mode.
+	 *
+	 * @param {HTMLElement} feature the feature li element. Error message will be appended here.
+	 * @param {string|null} templateName Error identifier, used to get the correct template
+	 */
+	function displayInlineError(feature, templateName = null) {
+		let templateThingThatShouldExist;
+		if(templateName === null) {
+			templateThingThatShouldExist = document.getElementById('feature-edit-template-generic-error');
+		} else {
+			templateThingThatShouldExist = document.getElementById('feature-edit-template-' + templateName);
+			if(templateThingThatShouldExist === null) {
+				// Unhandled exception!
+				return false;
+			}
+		}
+		removeInlineErrors(feature);
+		let template = document.importNode(templateThingThatShouldExist.content, true);
+		feature.appendChild(template);
+		feature.classList.add("haserror");
+		return true;
+	}
+
+	/**
+	 * Remove all error messages from a feature.
+	 *
+	 * @param {HTMLElement} feature the feature li element. Error message will be appended here.
+	 * @see displayInlineError
+	 */
+	function removeInlineErrors(feature) {
+		let timeout = fadingErrors.get(feature);
+		if(timeout !== null) {
+			clearTimeout(timeout);
+			fadingErrors.delete(feature);
+		}
+		feature.classList.remove("haserror");
+		feature.classList.remove("fading");
+		for(let error of feature.querySelectorAll('.error.description')) {
+			feature.removeChild(error);
+		}
+	}
+
+	/**
+	 * Remove all error messages from a feature after a timeout, with a fade effect.
+	 *
+	 * @param {HTMLElement} feature the feature li element. Error message will be appended here.
+	 * @see displayInlineError
+	 */
+	function fadeOutInlineErrors(feature) {
+		feature.classList.add("fading");
+		let timeout = setTimeout(removeInlineErrors.bind(null, feature), 2000);
+		fadingErrors.set(feature, timeout);
+	}
+
+	/**
 	 * Show error messages.
 	 *
 	 * @param {string|null} templateName
 	 * @param {string|null} message
+	 * @deprecated
 	 */
 	function displayError(templateName = null, message = null) {
 		let templateThingThatShouldExist;
@@ -758,6 +826,12 @@
 		switch(type) {
 			case 'e':
 				valueElement = document.createElement('select');
+				let defaultOption = document.createElement('option');
+				defaultOption.value = "";
+				defaultOption.disabled = "disabled";
+				defaultOption.selected = "selected";
+                valueElement.appendChild(defaultOption);
+
 				let options = featureValues.get(name);
 				let optionsTranslated = featureValuesTranslated.get(name);
 				let optionsArray = [];
@@ -775,16 +849,17 @@
 			case 'i':
 			case 'd':
 				valueElement = document.createElement('div');
-				valueElement.dataset.internalValue = '0';
-				valueElement.dataset.previousValue = '0';
+				valueElement.dataset.internalValue = '';
+				valueElement.dataset.previousValue = '';
 				valueElement.contentEditable = 'true';
 				valueElement.addEventListener('blur', numberChanged);
 				valueElement.addEventListener("paste", sanitizePaste);
 
 				div = document.createElement('div');
-				div.textContent = '0';
+				div.textContent = '';
 				valueElement.appendChild(div);
 				break;
+			case 's':
 			default:
 				valueElement = document.createElement('div');
 				valueElement.dataset.internalValue = ''; // Actually unused
@@ -794,7 +869,7 @@
 				valueElement.addEventListener("paste", sanitizePaste);
 
 				div = document.createElement('div');
-				div.textContent = '?'; // empty <div>s break everything
+				//div.textContent = '?'; // empty <div>s break everything // not anymore apparently? 2018-12-05
 				valueElement.appendChild(div);
 				break;
 		}

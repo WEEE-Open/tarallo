@@ -387,6 +387,28 @@ label.searchby {
 	border-color: #ccc;
 }
 
+.features.editing .haserror .value {
+	color: #D8000C;
+}
+
+.features.editing .haserror .error.description {
+	color: #D8000C;
+	background-color: #FFBABA;
+	padding: .5em;
+	grid-column: 2 / -1;
+	grid-row: -1;
+	margin-top: 0.4em;
+}
+
+.features.editing .haserror.fading .error.description {
+	opacity: 0;
+	transition: opacity 2s ease-in;
+}
+
+.value option.default {
+	display: none;
+}
+
 .item.working.yes /*> header > h2*/ {
 	/*border-color: #4F8A10;*/
 	border-color: #DFF2BF;
@@ -525,7 +547,7 @@ label.searchby {
 @media only screen and (min-width: 34rem) {
 
 	.features ul > li {
-		grid-template-rows: auto;
+		grid-template-rows: auto auto auto;
 		grid-template-columns: 10rem auto 2rem;
 		margin-bottom: 0;
 	}
