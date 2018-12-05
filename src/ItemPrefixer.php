@@ -33,11 +33,11 @@ class ItemPrefixer {
 			case 'ram':
 				return 'R';
 			case 'hdd':
-				if(self::hasAny('sata-ports-n', $features)) {
+				if(self::has('sata-ports-n', $features)) {
 					return 'S';
-				} elseif(self::hasAny('ide-ports-n', $features) || self::hasAny('mini-ide-ports-n', $features)) {
+				} elseif(self::has('ide-ports-n', $features) || self::has('mini-ide-ports-n', $features)) {
 					return 'H';
-				} elseif(self::hasAny('scsi-sca2-ports-n', $features) || self::hasAny('scsi-db68-ports-n', $features)) {
+				} elseif(self::has('scsi-sca2-ports-n', $features) || self::has('scsi-db68-ports-n', $features)) {
 					return 'SC';
 				} else {
 					throw new \InvalidArgumentException('No or unknown hard drive connector, cannot generate a code');
@@ -49,8 +49,6 @@ class ItemPrefixer {
 			case 'external-psu':
 				if(self::is('power-connector', 'da-2', $features)) {
 					return 'AD';
-				} else if(self::is('working', 'no', $features)) {
-					return 'AR';
 				}
 				return 'A';
 			case 'monitor':
@@ -81,14 +79,13 @@ class ItemPrefixer {
 		}
 	}
 
-	private static function hasAny(string $name, array $features): bool {
+	private static function has(string $name, array $features): bool {
 		$type = Feature::getType($name);
 		if($type === Feature::INTEGER || $type === Feature::DOUBLE) {
 			return isset($features[$name]) && $features[$name]->value > 0;
 		} else {
 			return isset($features[$name]);
 		}
-
 	}
 
 	private static function is($name, $value, $features) {
