@@ -344,30 +344,28 @@
 	/**
 	 * Show error messages.
 	 *
-	 * @param {string|null} templateName
 	 * @param {string|null} message
 	 * @deprecated
 	 */
-	function displayError(templateName = null, message = null) {
+	function displayError(message = null) {
 		let templateThingThatShouldExist;
-		if(templateName === null) {
-			templateThingThatShouldExist = document.getElementById('feature-edit-template-generic-error');
-		} else {
-			templateThingThatShouldExist = document.getElementById('feature-edit-template-' + templateName);
-			if(templateThingThatShouldExist === null) {
-				// Unhandled exception!
-				return false;
-			}
-		}
+		templateThingThatShouldExist = document.getElementById('feature-edit-template-generic-error');
+
 		let template = document.importNode(templateThingThatShouldExist.content, true);
 		let element = template.children[0];
 		element.id = 'feature-edit-last-error';
-		element.getElementsByTagName('BUTTON')[0].addEventListener('click', removeError.bind(null, element));
 
 		if(message !== null) {
 			// firstChild is a text node
 			element.firstChild.textContent = message;
 		}
+
+		// Quick and dirty fix to get the same element as before (template was changed)
+		let button = document.createElement('button');
+		button.textContent = 'OK';
+		button.addEventListener('click', removeError.bind(null, element));
+		element.appendChild(button);
+		element.classList.add("message");
 
 		let last = document.getElementById('feature-edit-last-error');
 		if(last) {
@@ -1084,7 +1082,7 @@
 		console.log(request);
 
 		try {
-			await jsendMe(response, goBack, displayError.bind(null, null));
+			await jsendMe(response, goBack, displayError.bind(null));
 		} finally {
 			toggleButtons(false);
 		}
@@ -1109,7 +1107,7 @@
 			});
 
 			try {
-				await jsendMe(response, goBack, displayError.bind(null, null));
+				await jsendMe(response, goBack, displayError.bind(null));
 			} finally {
 				toggleButtons(false);
 			}
@@ -1149,7 +1147,7 @@
 		});
 
 		try {
-			await jsendMe(response, goBack, displayError.bind(null, null));
+			await jsendMe(response, goBack, displayError.bind(null));
 		} finally {
 			toggleButtons(false);
 		}
