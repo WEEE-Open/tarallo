@@ -90,13 +90,13 @@ CREATE TABLE Audit (
 	`Time` timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	`User` varchar(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 	PRIMARY KEY (`Code`, `Time`, `Change`),
+	CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`)
+		ON DELETE CASCADE
+		ON UPDATE CASCADE,
 	INDEX (`Change`),
 	-- CHECK ((`Change` = 'C') OR (`Change` = 'R') OR (`Change` = 'U') OR (`Change` = 'D') OR (`Change` = 'M')), -- R is for Rename, actually
 	CHECK (((`Change` = 'M' OR `Change` = 'R') AND `Other` IS NOT NULL) OR
 		((`Change` = 'U' OR `Change` = 'D' OR `Change` = 'C') AND `Other` IS NULL))
-	-- CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`) ON UPDATE NO ACTION ON DELETE CASCADE,
-	-- CONSTRAINT FOREIGN KEY (`Other`) REFERENCES `Item` (`Code`) ON UPDATE NO ACTION ON DELETE CASCADE,
-	-- CONSTRAINT FOREIGN KEY (`User`) REFERENCES `User` (`Name`)  ON UPDATE CASCADE ON DELETE CASCADE
 )
 	ENGINE = InnoDB
 	DEFAULT CHARSET = utf8mb4

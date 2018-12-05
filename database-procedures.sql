@@ -176,27 +176,6 @@ CREATE OR REPLACE TRIGGER CascadeItemCodeUpdateForReal
 
 -- Search ----------------------------------------------------------------------
 
--- Delete items from search results, when deleting from database
-CREATE OR REPLACE TRIGGER ItemDeleteSearchIntegrity
-	AFTER DELETE
-	ON Item
-	FOR EACH ROW
-	BEGIN
-		DELETE FROM SearchResult WHERE Item=OLD.Code;
-	END $$
-
--- Update item codes in search results, when changing code
-CREATE OR REPLACE TRIGGER ItemUpdateSearchIntegrity
-	AFTER UPDATE
-	ON Item
-	FOR EACH ROW
-	BEGIN
-		IF(NEW.Code <> OLD.Code) THEN
-			UPDATE SearchResult SET Item = NEW.Code
-			WHERE Item = OLD.Code;
-		END IF;
-	END $$
-
 -- Update results counter when deleting a search result
 CREATE OR REPLACE TRIGGER SearchResultsDelete
 	AFTER DELETE
@@ -328,15 +307,20 @@ CREATE OR REPLACE TRIGGER AuditMoveItem
 		END IF;
 	END $$
 
--- Add a 'R' entry to audit table
+-- Add a 'R' entry to audit table and rename "other" entries
+-- Also update Code because MySQL doesn't care about the foreign key
 CREATE OR REPLACE TRIGGER AuditRenameItem
 	AFTER UPDATE
 	ON Item
 	FOR EACH ROW
 	BEGIN
 		IF(NEW.Code <> OLD.Code) THEN
-			INSERT INTO Audit(Code, `Change`, Other, `User`)
-			VALUES(NEW.Code, 'R', OLD.Code, @taralloAuditUsername);
+      UPDATE Audit SET `Code` = NEW.Code
+      WHERE `Code` = OLD.Code;
+      UPDATE Audit SET `Other` = NEW.Code
+      WHERE `Other` = OLD.Code;
+      INSERT INTO Audit(Code, `Change`, Other, `User`)
+      VALUES(NEW.Code, 'R', OLD.Code, @taralloAuditUsername);
 		END IF;
 	END $$
 
