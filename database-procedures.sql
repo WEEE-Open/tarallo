@@ -1,3 +1,8 @@
+-- Remove deleted triggers
+DROP TRIGGER IF EXISTS RemoveOldAuditEntries;
+DROP TRIGGER IF EXISTS ItemDeleteSearchIntegrity;
+DROP TRIGGER IF EXISTS ItemUpdateSearchIntegrity;
+
 DELIMITER $$
 -- Now we're getting real.
 CREATE OR REPLACE FUNCTION GenerateCode(currentPrefix varchar(20))
@@ -254,15 +259,6 @@ CREATE OR REPLACE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8
 		SET @taralloAuditUsername = username;
 	END $$
 
--- If an item is permanently deleted its code may be reused, but there might still be previous audit table entires.
-CREATE OR REPLACE TRIGGER RemoveOldAuditEntries
-	BEFORE INSERT
-	ON Item
-	FOR EACH ROW
-	BEGIN
-		DELETE FROM Audit WHERE Code = NEW.Code OR Other = NEW.Code;
-	END $$
-
 -- Avoid duplicate C entries in Audit table
 CREATE OR REPLACE TRIGGER AuditDuplicateCreation
 	BEFORE INSERT
@@ -309,6 +305,8 @@ CREATE OR REPLACE TRIGGER AuditMoveItem
 
 -- Add a 'R' entry to audit table and rename "other" entries
 -- Also update Code because MySQL doesn't care about the foreign key
+-- (Probably due to the "SET FOREIGN_KEY_CHECKS = 0;" in the other trigger,
+-- but it goes back to 1, so what's going on?)
 CREATE OR REPLACE TRIGGER AuditRenameItem
 	AFTER UPDATE
 	ON Item
