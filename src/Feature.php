@@ -272,18 +272,27 @@ class Feature {
 	 */
 	public static function ofString($name, $value) {
 		self::validateFeatureName($name);
+		if($value === '') {
+			throw new \InvalidArgumentException("Feature $name cannot be an empty string");
+		}
 		switch(Feature::getType($name)) {
 			case Feature::INTEGER:
 				if(!is_numeric($value)) {
 					throw new \InvalidArgumentException("Cannot cast feature $name to integer: $value is not numeric");
 				}
 				$value = (int) $value;
+				if($value === 0) {
+					throw new \InvalidArgumentException("Feature $name = 0 has no meaning");
+				}
 				break;
 			case Feature::DOUBLE:
 				if(!is_numeric($value)) {
 					throw new \InvalidArgumentException("Cannot cast feature $name to double: $value is not numeric");
 				}
 				$value = (double) $value;
+				if($value === 0) {
+					throw new \InvalidArgumentException("Feature $name = 0 has no meaning");
+				}
 				break;
 		}
 		return new self($name, $value);
