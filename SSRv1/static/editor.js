@@ -770,10 +770,12 @@
 			case 'other-card':
 			case 'scsi-card':
 			case 'modem-card':
-			case 'wifi-card':
-			case 'bluetooth-card':
 			case 'tv-card':
-				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n', 'mini-pci-sockets-n', 'sn', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color', 'working', 'owner'];
+				break;
+			case 'bluetooth-card':
+			case 'wifi-card':
+				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n', 'mini-pci-sockets-n', 'mac', 'sn', 'color', 'working', 'owner'];
 				break;
 			case 'network-switch':
 			case 'network-hub':
