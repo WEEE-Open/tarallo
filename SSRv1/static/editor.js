@@ -534,11 +534,16 @@
 		/** @type {string} */
 		let string = input.trim();
 		if(string === "") {
-			throw new Error("empty-input")
-		} else if(unit === 'n') {
+			throw new Error("empty-input");
+		}
+		if(unit === 'n') {
 			let number = parseInt(input);
-			if(isNaN(number) || number < 0) {
-				throw new Error("negative-input")
+			if(isNaN(number)) {
+				throw new Error("string-parse-nan");
+			} else if(number < 0) {
+				throw new Error("negative-input");
+			} else if(number === 0) {
+				throw new Error("meaningless-zero");
 			} else {
 				return number;
 			}
@@ -555,6 +560,8 @@
 		let number = parseFloat(string.substr(0, i));
 		if(isNaN(number)) {
 			throw new Error('string-parse-nan')
+		} else if(number === 0) {
+			throw new Error("meaningless-zero");
 		}
 		let exp = 0;
 		if(unit === 'mm') {

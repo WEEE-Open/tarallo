@@ -5,7 +5,7 @@
 	<div class="error description">Value outside range of known SI prefixes</div>
 </template>
 <template id="feature-edit-template-empty-input">
-	<div class="error description">Empty field not allowed</div>
+	<div class="error description">Value cannot be empty</div>
 </template>
 <template id="feature-edit-template-negative-input">
 	<div class="error description">Negative values not allowed</div>
@@ -14,7 +14,10 @@
 	<div class="error description">Value must begin with a positive number</div>
 </template>
 <template id="feature-edit-template-string-parse-nan">
-	<div class="error description">Value must contain a number</div>
+	<div class="error description">Value must be a number</div>
+</template>
+<template id="feature-edit-template-meaningless-zero">
+	<div class="error description">Zero has no meaning here, remove this feature if there's none of that</div>
 </template>
 <template id="feature-edit-template-generic-error">
 	<div class="error description">Error</div>
