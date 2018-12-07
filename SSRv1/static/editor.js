@@ -178,7 +178,9 @@
 	 * @TODO: adding and removing newlines should count as "changed", but it's absurdly difficult to detect, apparently...
 	 */
 	function textChanged(ev) {
+		let feature = ev.target.parentElement;
 		fixDiv(ev.target);
+		fadeOutInlineErrors(feature);
 		// Newly added element
 		if(!ev.target.dataset.initialValue) {
 			return;
@@ -199,6 +201,8 @@
 	 * @param ev Event
 	 */
 	function selectChanged(ev) {
+		let feature = ev.target.parentElement;
+		fadeOutInlineErrors(feature);
 		// New elements don't have an initial value
 		if(!ev.target.dataset.initialValue) {
 			return;
@@ -217,10 +221,8 @@
 	 */
 	function numberChanged(ev) {
 		let feature = ev.target.parentElement;
-		if(feature.classList.contains("haserror") && !feature.classList.contains("fading")) {
-			fadeOutInlineErrors(feature);
-		}
 		fixDiv(ev.target);
+		fadeOutInlineErrors(feature);
 		let value = ev.target.textContent;
 		let unit;
 		if(ev.target.dataset.unit) {
@@ -336,9 +338,11 @@
 	 * @see displayInlineError
 	 */
 	function fadeOutInlineErrors(feature) {
-		feature.classList.add("fading");
-		let timeout = setTimeout(removeInlineErrors.bind(null, feature), 2000);
-		fadingErrors.set(feature, timeout);
+		if(feature.classList.contains("haserror") && !feature.classList.contains("fading")) {
+			feature.classList.add("fading");
+			let timeout = setTimeout(removeInlineErrors.bind(null, feature), 2000);
+			fadingErrors.set(feature, timeout);
+		}
 	}
 
 	/**
@@ -710,7 +714,6 @@
 		}
 
 		// Insert
-		console.log(featuresElement);
 		featuresElement.querySelector('.newfeatures ul').appendChild(newElement);
 		return newElement;
 	}
@@ -836,6 +839,7 @@
 				defaultOption.disabled = "disabled";
 				defaultOption.selected = "selected";
                 valueElement.appendChild(defaultOption);
+                valueElement.addEventListener("change", selectChanged);
 
 				let options = featureValues.get(name);
 				let optionsTranslated = featureValuesTranslated.get(name);
@@ -965,13 +969,15 @@
 		let counter = 0;
 
 		for(let element of changed) {
+			let feature = element.parentElement;
+			let value;
 			switch(element.dataset.internalType) {
 				case 'e':
-					delta[element.dataset.internalName] = element.value;
+					value = element.value;
 					break;
 				case 'i':
 				case 'd':
-					delta[element.dataset.internalName] = element.dataset.internalValue;
+					value = element.dataset.internalValue;
 					break;
 				case 's':
 				default:
@@ -980,13 +986,27 @@
 					for(let paragraph of paragraphs) {
 						lines.push(paragraph.textContent);
 					}
-					delta[element.dataset.internalName] = lines.join('\n');
+					value = lines.join('\n');
 			}
+			if(value === "") {
+				throw new EmptyFeatureValueError(feature);
+			}
+			delta[element.dataset.internalName] = value;
 			counter++;
 		}
 
 		return counter;
 	}
+
+	class EmptyFeatureValueError extends Error {
+		constructor(feature, message = "Empty value") {
+			// noinspection JSCheckFunctionSignatures
+			super(message);
+			this.feature = feature;
+			this.name = "EmptyFeatureValueError";
+		}
+	}
+
 
 	/**
 	 * Get new features (changeset) recursively, for a (sub)tree of new items
@@ -1037,7 +1057,16 @@
 		let delta = {};
 		let contents = [];
 
-		counter = getNewFeaturesRecursively(root, delta, contents);
+		try {
+			counter = getNewFeaturesRecursively(root, delta, contents);
+		} catch(e) {
+			if(e instanceof EmptyFeatureValueError) {
+				displayInlineError(e.feature, "empty-input");
+				return;
+			} else {
+				throw e;
+			}
+		}
 
 		if(counter <= 0) {
 			return;
@@ -1058,7 +1087,7 @@
 			if(parent) {
 				request.parent = parent;
 			} else {
-				displayError(null, 'Internal error: cannot find location');
+				displayError('Internal error: cannot find location');
 				return;
 			}
 		}
@@ -1086,7 +1115,6 @@
 			credentials: 'include',
 			body: JSON.stringify(request)
 		});
-		console.log(request);
 
 		try {
 			await jsendMe(response, goBack, displayError.bind(null));
@@ -1128,7 +1156,16 @@
 		let counter;
 		let delta = {};
 
-		counter = getChangedFeatures(document.querySelector('.item.head.editing .features.own.editing'), delta);
+		try {
+			counter = getChangedFeatures(document.querySelector('.item.head.editing .features.own.editing'), delta);
+		} catch(e) {
+			if(e instanceof EmptyFeatureValueError) {
+				displayInlineError(e.feature, "empty-input");
+				return;
+			} else {
+				throw e;
+			}
+		}
 
 		for(let deleted of deletedFeatures) {
 			delta[deleted] = null;
