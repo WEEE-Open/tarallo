@@ -64,13 +64,18 @@ AND `Time` < FROM_UNIXTIME(:timestamp)
 	public function getLocationsByItems() {
 		$array = [];
 
-		$result = $this->getPDO()->query('SELECT `Code` AS Location, COUNT(*) - 1 AS Descendants
+		$result = $this->getPDO()->query(/** @lang MySQL */
+			<<<'EOQ'
+SELECT `Code` AS Location, COUNT(*) - 1 AS Descendants
 FROM ItemFeature, Tree
 WHERE ItemFeature.Code = Tree.Ancestor
-AND ItemFeature.Feature = \'type\'
-AND ItemFeature.ValueEnum = \'location\'
+AND ItemFeature.Feature = 'type'
+AND ItemFeature.ValueEnum = 'location'
+AND `Code` NOT IN (SELECT `Code` FROM Item WHERE DeletedAt IS NOT NULL)
 GROUP BY Tree.Ancestor
-ORDER BY COUNT(*) DESC, Location ASC;', \PDO::FETCH_ASSOC);
+ORDER BY COUNT(*) DESC, Location ASC;
+EOQ
+, \PDO::FETCH_ASSOC);
 
 		assert($result !== false, 'available locations');
 
