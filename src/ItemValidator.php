@@ -35,15 +35,12 @@ class ItemValidator {
 	 * @return Item Correct parent (given one or a motherboard)
 	 */
 	private static function reparent(Item $item, Item $parent): Item {
-		$type = $item->getFeature('type');
-		$parentType = $parent->getFeature('type');
+		$type = self::getOrNull($item, 'type');
+		$parentType = self::getOrNull($parent, 'type');
 
 		if($type === null || $parentType == null) {
 			return $parent;
 		}
-
-		$type = $type->value;
-		$parentType = $parentType->value;
 
 		if($parentType === 'case') {
 			if($type === 'cpu' || $type === 'ram' || self::isExpansionCard($type)) {
@@ -93,13 +90,12 @@ class ItemValidator {
 	}
 
 	private static function moveFeaturesAll(Item $item) {
-		$type = $item->getFeature('type');
+		$type = self::getOrNull($item, 'type');
 
 		if($type !== null) {
-			$type = $type->value;
 			if($type === 'case') {
-				$ff = $item->getFeature('motherboard-form-factor');
-				if($ff !== null && $ff->value === 'proprietary-laptop') {
+				$ff = self::getOrNull($item, 'motherboard-form-factor');
+				if($ff === 'proprietary-laptop') {
 					if(self::has($item, 'usb-ports-n')) {
 						$mobo = self::findMobo($item);
 						if(!self::has($mobo, 'usb-ports-n')) {
@@ -126,13 +122,11 @@ class ItemValidator {
 	 * @TODO: make this thing work for PATCH requests... Or don't?
 	 */
 	public static function validateFeatures(Item $item) {
-		$type = $item->getFeature('type');
+		$type = self::getOrNull($item, 'type');
 		if($type !== null) {
-			$type = $type->value;
-			$ff = $item->getFeature('motherboard-form-factor');
-			$ff = $ff !== null ? $ff->value : null;
 			if($type === 'case') {
-				switch($ff) {
+				$motherboardFF = self::getOrNull($item, 'motherboard-form-factor');
+				switch($motherboardFF) {
 					case 'proprietary-laptop':
 						// It's a laptop, reject features that make sense only in desktops.
 						if(self::has($item, 'usb-ports-n')) {
@@ -198,15 +192,12 @@ class ItemValidator {
 	 * @throws ItemNestingException if items are invalidly nested
 	 */
 	private static function checkNesting(Item $item, ?Item $parent): void {
-		$type = $item->getFeature('type');
-		$parentType = $parent->getFeature('type');
+		$type = self::getOrNull($item, 'type');
+		$parentType = self::getOrNull($parent, 'type');
 
 		if($type === null || $parentType == null) {
 			return;
 		}
-
-		$type = $type->value;
-		$parentType = $parentType->value;
 
 		if($type === 'case' && $parentType !== 'location') {
 			throw new ItemNestingException('Cases should be inside a location',
@@ -260,11 +251,8 @@ class ItemValidator {
 	 * @throws ValidationException
 	 */
 	public static function checkRoot(Item $item) {
-		$type = $item->getFeature('type');
-		if($type === null) {
-			return;
-		}
-		if($type->value !== 'location') {
+		$type = self::getOrNull($item, 'type');
+		if($type !== null && $type !== 'location') {
 			throw new ValidationException('Set a location for this item or mark it as a location itself, this type cannot be a root item');
 		}
 	}
@@ -273,11 +261,21 @@ class ItemValidator {
 		return strlen($type) > 5 && substr($type, -5) === '-card';
 	}
 
+	/**
+	 * Check feature for "equality", or rather compatibility.
+	 * If one is null (doesn't exist), they're considered compatible (failsafe), even though they're different
+	 *
+	 * @param Item $item
+	 * @param Item $parent
+	 * @param string $feature
+	 * @return bool If the feature is the same or one of them is null
+	 */
 	private static function compareFeature(Item $item, Item $parent, string $feature) {
-		$itemFeature = $item->getFeature($feature);
-		$parentFeature = $parent->getFeature($feature);
+		$itemFeature = self::getOrNull($item, $feature);
+		$parentFeature = self::getOrNull($parent, $feature);
+
 		if($itemFeature !== null && $parentFeature !== null) {
-			return $itemFeature->value === $parentFeature->value;
+			return $itemFeature === $parentFeature;
 		}
 
 		return true;
@@ -289,6 +287,15 @@ class ItemValidator {
 		return $item->getFeature($feature) !== null;
 	}
 
+	private static function getOrNull(Item $item, string $featureName) {
+		$feature = $item->getFeature($featureName);
+		if($feature === null) {
+			return null;
+		} else {
+			return $feature->value;
+		}
+	}
+
 	/**
 	 * Find motherboard inside an item (possibly a case).
 	 * Search is only one level deep.
@@ -298,8 +305,7 @@ class ItemValidator {
 	 */
 	private static function findMobo(Item $item) {
 		foreach($item->getContents() as $maybeMobo) {
-			$maybeType = $maybeMobo->getFeature('type');
-			if($maybeType !== null && $maybeType->value === 'motherboard') {
+			if(self::getOrNull($maybeMobo, 'type') === 'motherboard') {
 				return $maybeMobo;
 			}
 		}
