@@ -3,9 +3,10 @@ DROP TRIGGER IF EXISTS RemoveOldAuditEntries;
 DROP TRIGGER IF EXISTS ItemDeleteSearchIntegrity;
 DROP TRIGGER IF EXISTS ItemUpdateSearchIntegrity;
 
-DELIMITER $$
 -- Now we're getting real.
-CREATE OR REPLACE FUNCTION GenerateCode(currentPrefix varchar(20))
+DROP FUNCTION IF EXISTS GenerateCode;
+DELIMITER $$
+CREATE FUNCTION GenerateCode(currentPrefix varchar(20))
 	RETURNS varchar(190)
 MODIFIES SQL DATA
 	-- This means that in two identical databases, with the same values everywhere, the function produces the same
@@ -25,7 +26,8 @@ SQL SECURITY INVOKER
 		SELECT Prefix, `Integer`
 		INTO thePrefix, theInteger
 		FROM Prefixes
-		WHERE Prefix = currentPrefix;
+		WHERE Prefix = currentPrefix
+		FOR UPDATE;
 
 		IF (thePrefix IS NOT NULL)
 		THEN
@@ -50,9 +52,12 @@ SQL SECURITY INVOKER
 		END IF;
 
 	END $$
+DELIMITER ;
 
 -- Set the Item Brand, Model and Variant after an INSERT operation
-CREATE OR REPLACE TRIGGER ItemBMVInsert
+DROP TRIGGER IF EXISTS ItemBMVInsert;
+DELIMITER $$
+CREATE TRIGGER ItemBMVInsert
 	AFTER INSERT
 	ON ItemFeature
 	FOR EACH ROW
@@ -65,9 +70,12 @@ CREATE OR REPLACE TRIGGER ItemBMVInsert
 			UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
 		END IF;
 	END $$
+DELIMITER ;
 
 -- Set the Item Brand, Model and Variant after an UPDATE operation. If MySQL supported multiple events per trigger this would be less redundant...
-CREATE OR REPLACE TRIGGER ItemBMVUpdate
+DROP TRIGGER IF EXISTS ItemBMVUpdate;
+DELIMITER $$
+CREATE TRIGGER ItemBMVUpdate
 	AFTER UPDATE
 	ON ItemFeature
 	FOR EACH ROW
@@ -80,9 +88,12 @@ CREATE OR REPLACE TRIGGER ItemBMVUpdate
 			UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
 		END IF;
 	END $$
+DELIMITER ;
 
 -- (Un)set the Item Brand, Model and Variant after a DELETE operation.
-CREATE OR REPLACE TRIGGER ItemBMVDelete
+DROP TRIGGER IF EXISTS ItemBMVDelete;
+DELIMITER $$
+CREATE TRIGGER ItemBMVDelete
 	AFTER DELETE
 	ON ItemFeature
 	FOR EACH ROW
@@ -95,9 +106,12 @@ CREATE OR REPLACE TRIGGER ItemBMVDelete
 			UPDATE Item SET Variant = NULL WHERE Code = OLD.Code;
 		END IF;
 	END $$
+DELIMITER ;
 
 
-CREATE OR REPLACE TRIGGER ItemSetDeleted
+DROP TRIGGER IF EXISTS ItemSetDeleted;
+DELIMITER $$
+CREATE TRIGGER ItemSetDeleted
 	BEFORE UPDATE
 	ON Item
 	FOR EACH ROW
@@ -118,10 +132,13 @@ CREATE OR REPLACE TRIGGER ItemSetDeleted
 			END IF;
 		END IF;
 	END $$
+DELIMITER ;
 
 -- Tree ------------------------------------------------------------------------
 
-CREATE OR REPLACE FUNCTION GetParent(child varchar(100))
+DROP FUNCTION IF EXISTS GetParent;
+DELIMITER $$
+CREATE FUNCTION GetParent(child varchar(100))
 	RETURNS varchar(100)
 	READS SQL DATA
 	DETERMINISTIC
@@ -135,14 +152,18 @@ CREATE OR REPLACE FUNCTION GetParent(child varchar(100))
 			AND Depth = 1;
 		RETURN found;
 	END $$
+DELIMITER ;
 
-CREATE OR REPLACE PROCEDURE DetachSubtree(root varchar(100))
+DROP PROCEDURE IF EXISTS DetachSubtree;
+DELIMITER $$
+CREATE PROCEDURE DetachSubtree(root varchar(100))
 	SQL SECURITY INVOKER
 	BEGIN
 		DELETE Tree.* FROM Tree, Tree AS Pointless
 		WHERE Tree.Descendant=Pointless.Descendant
 		AND Pointless.Ancestor = root;
 	END $$
+DELIMITER ;
 
 -- Changing codes should be easy, right? It's just a matter of UPDATE on Item.Code and watching the magnificent cascade
 -- happen, right?
@@ -162,7 +183,9 @@ CREATE OR REPLACE PROCEDURE DetachSubtree(root varchar(100))
 -- still there, referential integrity is preserved, the result seems correct, MariaDB doesn't complain, it's in a trigger
 -- so partial failures that leave FK checks disabled shouldn't be possible, let's just hope that transactions protect
 -- us from everything else.
-CREATE OR REPLACE TRIGGER CascadeItemCodeUpdateForReal
+DROP TRIGGER IF EXISTS CascadeItemCodeUpdateForReal;
+DELIMITER $$
+CREATE TRIGGER CascadeItemCodeUpdateForReal
 	BEFORE UPDATE
 	ON Item
 	FOR EACH ROW
@@ -178,11 +201,14 @@ CREATE OR REPLACE TRIGGER CascadeItemCodeUpdateForReal
 			SET FOREIGN_KEY_CHECKS = 1;
 		END IF;
 	END $$
+DELIMITER ;
 
 -- Search ----------------------------------------------------------------------
 
 -- Update results counter when deleting a search result
-CREATE OR REPLACE TRIGGER SearchResultsDelete
+DROP TRIGGER IF EXISTS SearchResultsDelete;
+DELIMITER $$
+CREATE TRIGGER SearchResultsDelete
 	AFTER DELETE
 	ON SearchResult
 	FOR EACH ROW -- MySQL doesn't have statement-level triggers. Excellent piece of software, I must say.
@@ -192,9 +218,12 @@ CREATE OR REPLACE TRIGGER SearchResultsDelete
 		SET ResultsCount = ResultsCount - 1
 		WHERE Code = OLD.Search;
 	END $$
+DELIMITER ;
 
 -- Update results counter when "renaming" a search (which should never happen, but still...)
-CREATE OR REPLACE TRIGGER SearchResultsUpdate
+DROP TRIGGER IF EXISTS SearchResultsUpdate;
+DELIMITER $$
+CREATE TRIGGER SearchResultsUpdate
 	AFTER UPDATE -- Also can't specify UPDATE of what.
 	ON SearchResult
 	FOR EACH ROW
@@ -212,9 +241,12 @@ CREATE OR REPLACE TRIGGER SearchResultsUpdate
 			WHERE Code = OLD.Search;
 		END IF;
 	END $$
+DELIMITER ;
 
 -- Update results counter when inserting new search results
-CREATE OR REPLACE TRIGGER SearchResultsInsert
+DROP TRIGGER IF EXISTS SearchResultsInsert;
+DELIMITER $$
+CREATE TRIGGER SearchResultsInsert
 	AFTER INSERT
 	ON SearchResult
 	FOR EACH ROW -- This may kill performance...
@@ -224,43 +256,58 @@ CREATE OR REPLACE TRIGGER SearchResultsInsert
 		SET ResultsCount = ResultsCount + 1
 		WHERE Code = NEW.Search;
 	END $$
+DELIMITER ;
 
 -- Set default value for search expiration timestamp, just insert NULL and the trigger will do the rest
-CREATE OR REPLACE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
+DROP TRIGGER IF EXISTS SetRealSearchResultTimestampBecauseMySQLCant;
+DELIMITER $$
+CREATE TRIGGER SetRealSearchResultTimestampBecauseMySQLCant
 	BEFORE INSERT
 	ON Search
 	FOR EACH ROW
 	BEGIN
 		SET NEW.Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP);
 	END $$
+DELIMITER ;
 
 -- Refresh expiration timestamp for a search. Already called by necessary triggers, call it when reading results or sorting, too.
-CREATE OR REPLACE PROCEDURE RefreshSearch(id bigint UNSIGNED)
+DROP PROCEDURE IF EXISTS RefreshSearch;
+DELIMITER $$
+CREATE PROCEDURE RefreshSearch(id bigint UNSIGNED)
 	SQL SECURITY INVOKER
 	BEGIN
 		UPDATE Search SET Expires = TIMESTAMPADD(HOUR, 6, CURRENT_TIMESTAMP) WHERE Code = id;
 	END $$
+DELIMITER ;
 
 -- Remove old searches. Search results are removed by ON DELETE CASCADE.
-CREATE OR REPLACE EVENT `SearchCleanup`
+DROP EVENT IF EXISTS `SearchCleanup`;
+DELIMITER $$
+CREATE EVENT `SearchCleanup`
 ON SCHEDULE EVERY '1' HOUR
 ON COMPLETION PRESERVE
 ENABLE DO
 	DELETE
 	FROM Search
 	WHERE Expires < NOW() $$
+DELIMITER ;
 
 -- Audit -----------------------------------------------------------------------
 
 -- Pointless procedure to set a global variable (used by the audit triggers)
-CREATE OR REPLACE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
+DROP PROCEDURE IF EXISTS SetUser;
+DELIMITER $$
+CREATE PROCEDURE SetUser(IN username varchar(100) CHARACTER SET 'utf8mb4')
 	SQL SECURITY INVOKER
 	BEGIN
 		SET @taralloAuditUsername = username;
 	END $$
+DELIMITER ;
 
 -- Avoid duplicate C entries in Audit table
-CREATE OR REPLACE TRIGGER AuditDuplicateCreation
+DROP TRIGGER IF EXISTS AuditDuplicateCreation;
+DELIMITER $$
+CREATE TRIGGER AuditDuplicateCreation
 	BEFORE INSERT
 	ON Audit
 	FOR EACH ROW
@@ -282,7 +329,9 @@ BEGIN
 END $$
 
 -- Add a 'C' entry to audit table
-CREATE OR REPLACE TRIGGER AuditCreateItem
+DROP TRIGGER IF EXISTS AuditCreateItem;
+DELIMITER $$
+CREATE TRIGGER AuditCreateItem
 	AFTER INSERT
 	ON Item
 	FOR EACH ROW
@@ -290,9 +339,12 @@ CREATE OR REPLACE TRIGGER AuditCreateItem
 		INSERT INTO Audit(Code, `Change`, Other, `User`)
 		VALUES(NEW.Code, 'C', NULL, @taralloAuditUsername);
 	END $$
+DELIMITER ;
 
 -- Add an 'M' entry to audit table
-CREATE OR REPLACE TRIGGER AuditMoveItem
+DROP TRIGGER IF EXISTS AuditMoveItem;
+DELIMITER $$
+CREATE TRIGGER AuditMoveItem
 	AFTER INSERT
 	ON Tree
 	FOR EACH ROW
@@ -302,12 +354,15 @@ CREATE OR REPLACE TRIGGER AuditMoveItem
 			VALUES(NEW.Descendant, 'M', NEW.Ancestor, @taralloAuditUsername);
 		END IF;
 	END $$
+DELIMITER ;
 
 -- Add a 'R' entry to audit table and rename "other" entries
 -- Also update Code because MySQL doesn't care about the foreign key
 -- (Probably due to the "SET FOREIGN_KEY_CHECKS = 0;" in the other trigger,
 -- but it goes back to 1, so what's going on?)
-CREATE OR REPLACE TRIGGER AuditRenameItem
+DROP TRIGGER IF EXISTS AuditRenameItem;
+DELIMITER $$
+CREATE TRIGGER AuditRenameItem
 	AFTER UPDATE
 	ON Item
 	FOR EACH ROW
@@ -321,9 +376,12 @@ CREATE OR REPLACE TRIGGER AuditRenameItem
       VALUES(NEW.Code, 'R', OLD.Code, @taralloAuditUsername);
 		END IF;
 	END $$
+DELIMITER ;
 
 -- Add a 'D' entry to audit table
-CREATE OR REPLACE TRIGGER AuditDeleteItem
+DROP TRIGGER IF EXISTS AuditDeleteItem;
+DELIMITER $$
+CREATE TRIGGER AuditDeleteItem
 	AFTER UPDATE
 	ON Item
 	FOR EACH ROW
@@ -333,9 +391,12 @@ CREATE OR REPLACE TRIGGER AuditDeleteItem
 			VALUES(NEW.Code, 'D', @taralloAuditUsername);
 		END IF;
 	END $$
+DELIMITER ;
 
 -- Rename users in Audit table when renaming an account (to keep some kind of referential integrity)
-CREATE OR REPLACE TRIGGER AuditUserRename
+DROP TRIGGER IF EXISTS AuditUserRename;
+DELIMITER $$
+CREATE TRIGGER AuditUserRename
 	AFTER UPDATE
 	ON `User`
 	FOR EACH ROW
@@ -346,11 +407,14 @@ CREATE OR REPLACE TRIGGER AuditUserRename
 			WHERE `User` = OLD.Name;
 		END IF;
 	END $$
+DELIMITER ;
 
 -- Features --------------------------------------------------------------------
 
 -- Painless conversion between integer and double features. Maybe.
-CREATE OR REPLACE TRIGGER ChangeFeatureType
+DROP TRIGGER IF EXISTS ChangeFeatureType;
+DELIMITER $$
+CREATE TRIGGER ChangeFeatureType
 	AFTER UPDATE
 	ON Feature
 	FOR EACH ROW
@@ -367,6 +431,7 @@ CREATE OR REPLACE TRIGGER ChangeFeatureType
 			END IF;
 		END IF;
 	END $$
+DELIMITER ;
 
 -- Users -----------------------------------------------------------------------
 
@@ -374,6 +439,4 @@ CREATE OR REPLACE TRIGGER ChangeFeatureType
 
 -- SET GLOBAL -------------------------------------------------------------------
 
-SET GLOBAL event_scheduler = ON $$
-
-DELIMITER ;
+SET GLOBAL event_scheduler = ON;
