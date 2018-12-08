@@ -25,6 +25,15 @@ class ItemFeatures extends ItemIncomplete {
 	}
 
 	/**
+	 * Experimental method, may be removed, do not rely on it (yet)
+	 *
+	 * @param string $featureName
+	 */
+	public function removeFeature(string $featureName) {
+		unset($this->features[$featureName]);
+	}
+
+	/**
 	 * @param string $name
 	 *
 	 * @return $this

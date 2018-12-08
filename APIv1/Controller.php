@@ -22,7 +22,7 @@ use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemFeatures;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
-use WEEEOpen\Tarallo\Server\ItemLocationValidator;
+use WEEEOpen\Tarallo\Server\ItemValidator;
 use WEEEOpen\Tarallo\Server\ItemNestingException;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
@@ -258,7 +258,7 @@ class Controller extends AbstractController {
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
 
-		// Validation and fixup requires the full parent item, which may not exist.
+		// Validation and fixupLocation requires the full parent item, which may not exist.
 		// Since this part is optional, its existence will be checked again later
 		if($parent instanceof ItemIncomplete && ($fix || $validate)) {
 			try {
@@ -268,23 +268,25 @@ class Controller extends AbstractController {
 			}
 		}
 
-		if($fix && $parent instanceof Item) {
-			$parent = ItemLocationValidator::reparentAll($item, $parent);
+		if($fix) {
+			$parent = ItemValidator::fixupLocation($item, $parent);
+			ItemValidator::fixupFeatures($item);
 		}
 
 		if($validate) {
-			if($parent instanceof Item) {
-				try {
-					ItemLocationValidator::checkNesting($item, $parent);
-				} catch(ItemNestingException $e) {
-					throw new InvalidPayloadParameterException('parent', $e->parentCode, $e->getMessage());
-				}
-			} else {
-				try {
-					ItemLocationValidator::checkRoot($item);
-				} catch(ValidationException $e) {
-					throw new InvalidPayloadParameterException('location', null, $e->getMessage());
-				}
+			try {
+				ItemValidator::validateLocation($item, $parent);
+			} catch(ItemNestingException $e) {
+				throw new InvalidPayloadParameterException('parent', $e->parentCode, $e->getMessage());
+			} catch(ValidationException $e) {
+				throw new InvalidPayloadParameterException('location', null, $e->getMessage());
+			}
+			try {
+				ItemValidator::validateFeatures($item);
+			} catch(ValidationException $e) {
+				// Yyyyep, JSEnd "fail"s are basically unusable in the real world.
+				// This stuff really needs to go.
+				throw new InvalidPayloadParameterException('*', '*', $e->getMessage());
 			}
 		}
 
@@ -401,12 +403,12 @@ class Controller extends AbstractController {
 		}
 
 		if($fix) {
-			$newParent = ItemLocationValidator::reparent($item, $newParent);
+			$newParent = ItemValidator::fixupLocation($item, $newParent);
 		}
 
 		if($validate) {
 			try {
-				ItemLocationValidator::checkNesting($item, $newParent);
+				ItemValidator::validateLocation($item, $newParent);
 			} catch(ItemNestingException $e) {
 				throw new InvalidPayloadParameterException('*', $e->parentCode, $e->getMessage());
 			}
