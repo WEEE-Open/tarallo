@@ -236,6 +236,17 @@ class Controller extends AbstractController {
 							'ready'       => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), $location, 100),
 						]);
 				break;
+            case 'rams':
+                $request = $request
+                    ->withAttribute('Template', 'stats::rams')
+                    ->withAttribute('TemplateParameters',
+                        [
+                            'byStandard'  => $db->statsDAO()->getCountByFeature('ram-type', new Feature('type', 'ram')),
+                            'byFormFactor'=> $db->statsDAO()->getCountByFeature('ram-form-factor', new Feature('type', 'ram')),
+                            'bySize'      => $db->statsDAO()->getCountByFeature('capacity-byte', new Feature('type', 'ram')),
+                            'working'     => $db->statsDAO()->getItemsByFeatures(new Feature('working', 'no')),
+                        ]);
+                break;
 			default:
 				// TODO: if this gets used only for items (and the page suggesting items), change to something else
 				throw new NotFoundException();
