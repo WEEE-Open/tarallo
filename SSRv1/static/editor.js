@@ -144,6 +144,7 @@
 		for(let div of featuresElement.querySelectorAll('[contenteditable]')) {
 			if(div.dataset.internalType === 's') {
 				div.addEventListener('input', textChanged);
+				div.addEventListener('paste', sanitizePaste);
 			} else {
 				div.addEventListener('blur', numberChanged);
 			}
@@ -1283,11 +1284,16 @@
 
 	/**
 	 * Add divs that disappear randomly from contentEditable elements
+	 * and fixes other stochastic events since browser apparently
+	 * and hopelessly bork contentEditable in some subtle and innovative
+	 * way with each minor release.
 	 *
 	 * @param {HTMLElement} element
 	 */
 	function fixDiv(element) {
+		//console.log("Type type type!");
 		for(let node of element.childNodes) {
+			//console.log(node);
 			if(node.nodeType === 3) {
 				let div = document.createElement('div');
 				div.textContent = node.textContent;
@@ -1307,7 +1313,10 @@
 
 				let sel = window.getSelection();
 				// First (and only) child is a text node...
-				sel.collapse(div.childNodes[0], 1);
+				sel.collapse(div.childNodes[0], div.childNodes[0].textContent.length);
+			} else if(!node.hasChildNodes()) {
+				// Solitary <br> that escaped a <div> (happens somewhat randomly when deleting text): nuke it
+				element.removeChild(node);
 			}
 		}
 	}
