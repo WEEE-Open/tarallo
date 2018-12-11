@@ -402,7 +402,7 @@ label.searchby {
 
 .features.editing .haserror.fading .error.description {
 	opacity: 0;
-	transition: opacity 2s ease-in;
+	transition: opacity 1400ms ease-in;
 }
 
 .value option.default {

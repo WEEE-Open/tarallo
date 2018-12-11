@@ -143,8 +143,8 @@
 		// Event listeners for string and numeric features
 		for(let div of featuresElement.querySelectorAll('[contenteditable]')) {
 			if(div.dataset.internalType === 's') {
-				div.addEventListener('input', textChanged);
 				div.addEventListener('paste', sanitizePaste);
+				div.addEventListener('input', textChanged);
 			} else {
 				div.addEventListener('blur', numberChanged);
 			}
@@ -253,10 +253,17 @@
 		} catch(e) {
 			// rollback
 			ev.target.dataset.internalValue = ev.target.dataset.previousValue;
+			// Remove content
+			while(ev.target.firstChild) {
+				ev.target.removeChild(ev.target.firstChild);
+			}
+			// Add previous content
+			let div = document.createElement("div");
+			ev.target.appendChild(div);
 			if(ev.target.dataset.previousValue === '') {
-				ev.target.getElementsByTagName('DIV')[0].textContent = '';
+				div.textContent = '';
 			} else {
-				ev.target.getElementsByTagName('DIV')[0].textContent = valueToPrintable(unit, parseInt(ev.target.dataset.previousValue));
+				div.textContent = valueToPrintable(unit, parseInt(ev.target.dataset.previousValue));
 			}
 			// Display error message
 			if(!(ev.target.dataset.previousValue === '' && e.message === 'empty-input')) {
@@ -280,13 +287,22 @@
 	/**
 	 * Remove formatting when pasting into contentEditable
 	 *
-	 * @param {Event} e
+	 * @param ev Event
 	 */
-	function sanitizePaste(e) {
-		e.preventDefault();
+	function sanitizePaste(ev) {
+		ev.preventDefault();
 		// noinspection JSUnresolvedVariable
-		let text = e.clipboardData.getData("text/plain");
+		let text = ev.clipboardData.getData("text/plain");
 		document.execCommand("insertHTML", false, text);
+		console.log("paste into:");
+		console.log(ev.target);
+		console.log("paste this:");
+		console.log(text);
+		if(ev.target.classList.contains("value")) {
+			fixDiv(ev.target);
+		} else {
+			fixDiv(ev.target.parentElement);
+		}
 	}
 
 	/**
@@ -341,7 +357,7 @@
 	function fadeOutInlineErrors(feature) {
 		if(feature.classList.contains("haserror") && !feature.classList.contains("fading")) {
 			feature.classList.add("fading");
-			let timeout = setTimeout(removeInlineErrors.bind(null, feature), 2000);
+			let timeout = setTimeout(removeInlineErrors.bind(null, feature), 1400);
 			fadingErrors.set(feature, timeout);
 		}
 	}
@@ -877,8 +893,8 @@
 				valueElement.dataset.internalValue = ''; // Actually unused
 				valueElement.dataset.previousValue = '';
 				valueElement.contentEditable = 'true';
+				valueElement.addEventListener('paste', sanitizePaste);
 				valueElement.addEventListener('input', textChanged);
-				valueElement.addEventListener("paste", sanitizePaste);
 
 				div = document.createElement('div');
 				//div.textContent = '?'; // empty <div>s break everything // not anymore apparently? 2018-12-05
