@@ -187,6 +187,17 @@ class Controller extends AbstractController {
 
 		Validation::authorize($user, 3);
 
+        // a nice default value: 'now - 1 year'
+        $startDateDefault = '2016-01-01';
+        $startDate = Validation::validateOptionalString($query, 'from', $startDateDefault, null);
+        $startDateSet = $startDate !== $startDateDefault;
+        $startDate = new \DateTime($startDate, new \DateTimeZone('Europe/Rome'));
+
+        $locationDefault = 'LabFis4';
+        $location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
+        $locationSet = $location !== $locationDefault;
+        $location = $location === null ? null : new ItemIncomplete($location);
+
 		switch($parameters['which']) {
 			case '':
 				$request = $request
@@ -210,16 +221,6 @@ class Controller extends AbstractController {
 						]);
 				break;
 			case 'cases':
-				// a nice default value: 'now - 1 year'
-				$startDateDefault = '2016-01-01';
-				$startDate = Validation::validateOptionalString($query, 'from', $startDateDefault, null);
-				$startDateSet = $startDate !== $startDateDefault;
-				$startDate = new \DateTime($startDate, new \DateTimeZone('Europe/Rome'));
-
-				$locationDefault = 'LabFis4';
-				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
-				$locationSet = $location !== $locationDefault;
-				$location = $location === null ? null : new ItemIncomplete($location);
 
 				$request = $request
 					->withAttribute('Template', 'stats::cases')
@@ -237,14 +238,19 @@ class Controller extends AbstractController {
 						]);
 				break;
             case 'rams':
+
                 $request = $request
                     ->withAttribute('Template', 'stats::rams')
                     ->withAttribute('TemplateParameters',
                         [
+                            'location'    => $location === null ? null : $location->getCode(),
+                            'locationSet' => $locationSet,
+                            'startDate'   => $startDate,
+                            'startDateSet'=> $startDateSet,
                             'byStandard'  => $db->statsDAO()->getCountByFeature('ram-type', new Feature('type', 'ram')),
                             'byFormFactor'=> $db->statsDAO()->getCountByFeature('ram-form-factor', new Feature('type', 'ram')),
                             'bySize'      => $db->statsDAO()->getCountByFeature('capacity-byte', new Feature('type', 'ram')),
-                            'working'     => $db->statsDAO()->getItemsByFeatures(new Feature('working', 'no')),
+                            // (not) 'working'     => $db->statsDAO()->getItemsByFeatures(new Feature('working', '')),
                         ]);
                 break;
 			default:

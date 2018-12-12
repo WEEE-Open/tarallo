@@ -272,7 +272,7 @@ ORDER BY Quantity DESC";
 		$deletedFilter = $deleted ? '' : self::filterDeleted();
 		$createdFilter = self::filterCreated($creation);
 
-		/** @noinspection SqlResolve */
+            /** @noinspection SqlResolve */
 		$query = "SELECT `Code`
 FROM ItemFeature
 WHERE Feature = :feat
