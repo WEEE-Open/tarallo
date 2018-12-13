@@ -248,7 +248,7 @@ class Controller extends AbstractController {
                             'startDate'   => $startDate,
                             'startDateSet'=> $startDateSet,
                             'byFeature'   => $db->statsDAO()->getRamStats(),
-                            'bySize'      => $db->statsDAO()->getCountByFeature('capacity-byte', new Feature('type', 'ram')),
+                            'bySize'      => $db->statsDAO()->getCountByFeature('capacity-byte', new Feature('type', 'ram'), $location, $startDate),
                             'working'     => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'working', $location, 200, $startDate),
                         ]);
                 break;
