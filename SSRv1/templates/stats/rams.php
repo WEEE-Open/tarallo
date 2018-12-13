@@ -9,42 +9,25 @@ $this->insert('stats::menu', ['currentPage' => 'rams']);
 $this->insert('stats::header', ['location' => $location, 'locationSet' => $locationSet, 'startDate' => $startDate, 'startDateSet' => $startDateSet]);
 ?>
 <div class="statswrapperwrapper">
-    <?php if(!empty($byStandard)): ?>
+    <?php if(!empty($byFeature)): ?>
         <div class="statswrapper">
             <p>Rams by type</p>
             <table>
                 <thead>
                 <tr>
                     <td>Type</td>
-                    <td>Count</td>
-                </tr>
-                </thead>
-                <tbody>
-                <?php foreach($byStandard as $type => $count): ?>
-                    <tr>
-                        <td><?=WEEEOpen\Tarallo\SSRv1\UltraFeature::printableValue(new \WEEEOpen\Tarallo\Server\Feature('ram-type', $type), $lang ?? 'en')?></td>
-                        <td><?=$count?></td>
-                    </tr>
-                <?php endforeach ?>
-                </tbody>
-            </table>
-        </div>
-    <?php endif ?>
-    <?php if(!empty($byFormFactor)): ?>
-        <div class="statswrapper">
-            <p>Rams by form factor</p>
-            <table>
-                <thead>
-                <tr>
                     <td>Form Factor</td>
+                    <td>Frequency</td>
                     <td>Count</td>
                 </tr>
                 </thead>
                 <tbody>
-                <?php foreach($byFormFactor as $formFactor => $count): ?>
+                <?php foreach($byFeature as $row): ?>
                     <tr>
-                        <td><?=WEEEOpen\Tarallo\SSRv1\UltraFeature::printableValue(new \WEEEOpen\Tarallo\Server\Feature('ram-form-factor', $formFactor), $lang ?? 'en')?></td>
-                        <td><?=$count?></td>
+                        <td><?=WEEEOpen\Tarallo\SSRv1\UltraFeature::printableValue(new \WEEEOpen\Tarallo\Server\Feature('ram-type', $row['Type']), $lang ?? 'en')?></td>
+                        <td><?=WEEEOpen\Tarallo\SSRv1\UltraFeature::printableValue(new \WEEEOpen\Tarallo\Server\Feature('ram-form-factor', $row['FormFactor']), $lang ?? 'en')?></td>
+                        <td><?=WEEEOpen\Tarallo\SSRv1\UltraFeature::printableValue(new \WEEEOpen\Tarallo\Server\Feature('frequency-hertz', $row['Frequency']), $lang ?? 'en')?></td>
+                        <td><?=$row['Quantity']?></td>
                     </tr>
                 <?php endforeach ?>
                 </tbody>
@@ -74,21 +57,12 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
     <?php endif ?>
     <?php if(!empty($working)): ?>
         <div class="statswrapper large">
-            <p>Working Rams</p>
-            <table>
-                <thead>
-                <tr>
-                    <td>Ram</td>
-                </tr>
-                </thead>
-                <tbody>
-                <?php foreach($working as $code): ?>
-                    <tr>
-                        <td><a href="/item/<?=$code?>"><?=$code?></a></td>
-                    </tr>
+            <p>Untested rams (<?=count($working)?>, max 200):</p>
+            <div>
+                <?php foreach($working as $item): ?>
+                    <a href="/item/<?=$item?>"><?=$item?></a>
                 <?php endforeach ?>
-                </tbody>
-            </table>
+            </div>
         </div>
     <?php endif ?>
 </div>
