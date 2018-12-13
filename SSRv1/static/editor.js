@@ -294,10 +294,6 @@
 		// noinspection JSUnresolvedVariable
 		let text = ev.clipboardData.getData("text/plain");
 		document.execCommand("insertHTML", false, text);
-		console.log("paste into:");
-		console.log(ev.target);
-		console.log("paste this:");
-		console.log(text);
 		if(ev.target.classList.contains("value")) {
 			fixDiv(ev.target);
 		} else {
