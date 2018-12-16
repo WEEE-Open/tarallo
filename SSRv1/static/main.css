@@ -461,6 +461,10 @@ label.searchby {
 	margin: 0 0 1em 0;
 }
 
+.statswrapper table + p {
+	margin-top: 1em;
+}
+
 .statswrapper div {
 	line-height: 1.5em;
 }

@@ -7,7 +7,10 @@
 /** @var array[] $byType */
 /** @var array[] $bySize */
 /** @var int[] $byType */
-/** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $noworking */
+/** @var int[] $byFormFactor */
+/** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $noWorking */
+/** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $noFrequency */
+/** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $noSize */
 /** @var bool $allowDateSelection */
 $this->layout('main', ['title' => 'Stats: RAMs', 'user' => $user]);
 $this->insert('stats::menu', ['currentPage' => 'rams']);
@@ -32,25 +35,45 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 
 ?>
 <div class="statswrapperwrapper">
-	<?php if(!empty($byType)): ?>
+	<?php if(!empty($byType) || !empty($byFormFactor)): ?>
 		<div class="statswrapper">
-			<p>RAMs by type/standard:</p>
-			<table>
-				<thead>
-				<tr>
-					<td>Type</td>
-					<td>Count</td>
-				</tr>
-				</thead>
-				<tbody>
-				<?php foreach($byType as $type => $count): ?>
+			<?php if(!empty($byType)): ?>
+				<p>RAMs by type/standard:</p>
+				<table>
+					<thead>
 					<tr>
-						<td><?=$this->printFeature('ram-type', $type, $lang ?? 'en')?></td>
-						<td><?=$count?></td>
+						<td>Type</td>
+						<td>Count</td>
 					</tr>
-				<?php endforeach ?>
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+					<?php foreach($byType as $type => $count): ?>
+						<tr>
+							<td><?=$this->printFeature('ram-type', $type, $lang ?? 'en')?></td>
+							<td><?=$count?></td>
+						</tr>
+					<?php endforeach ?>
+					</tbody>
+				</table>
+			<?php endif; if(!empty($byType)): ?>
+				<p>RAMs by form factor:</p>
+				<table>
+					<thead>
+					<tr>
+						<td>Type</td>
+						<td>Count</td>
+					</tr>
+					</thead>
+					<tbody>
+					<?php foreach($byFormFactor as $type => $count): ?>
+						<tr>
+							<td><?=$this->printFeature('ram-form-factor', $type, $lang ?? 'en')?></td>
+							<td><?=$count?></td>
+						</tr>
+					<?php endforeach ?>
+					</tbody>
+				</table>
+			<?php endif; ?>
 		</div>
 	<?php endif ?>
 	<?php if(!empty($byFeature)): ?>
@@ -127,11 +150,31 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 			</table>
 		</div>
 	<?php endif ?>
-	<?php if(!empty($noworking)): ?>
+	<?php if(!empty($noWorking)): ?>
 		<div class="statswrapper large">
-			<p>Untested rams (<?=count($noworking)?>, max 200):</p>
+			<p>Untested RAMs (<?=count($noWorking)?>, max 200):</p>
 			<div>
-				<?php foreach($noworking as $item): ?>
+				<?php foreach($noWorking as $item): ?>
+					<a href="/item/<?=$item?>"><?=$item?></a>
+				<?php endforeach ?>
+			</div>
+		</div>
+	<?php endif ?>
+	<?php if(!empty($noFrequency)): ?>
+		<div class="statswrapper large">
+			<p>RAMs with unknown frequency (<?=count($noFrequency)?>, max 200):</p>
+			<div>
+				<?php foreach($noFrequency as $item): ?>
+					<a href="/item/<?=$item?>"><?=$item?></a>
+				<?php endforeach ?>
+			</div>
+		</div>
+	<?php endif ?>
+	<?php if(!empty($noSize)): ?>
+		<div class="statswrapper large">
+			<p>RAMs with unknown size (<?=count($noSize)?>, max 200):</p>
+			<div>
+				<?php foreach($noSize as $item): ?>
 					<a href="/item/<?=$item?>"><?=$item?></a>
 				<?php endforeach ?>
 			</div>

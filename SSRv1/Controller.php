@@ -255,9 +255,12 @@ class Controller extends AbstractController {
 							'startDate'   => $startDate,
 							'startDateSet'=> $startDateSet,
 							'byType'      => $db->statsDAO()->getCountByFeature('ram-type', new Feature('type', 'ram'), $location),
+							'byFormFactor'=> $db->statsDAO()->getCountByFeature('ram-form-factor', new Feature('type', 'ram'), $location),
 							'byFeature'   => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), ['ram-type', 'ram-form-factor', 'frequency-hertz'], $location),
 							'bySize'	  => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), ['ram-type', 'ram-form-factor', 'capacity-byte'], $location),
-							'noworking'   => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'working', $location, 200),
+							'noWorking'   => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'working', $location, 200),
+							'noFrequency'   => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'frequency-hertz', $location, 200),
+							'noSize'   => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'capacity-byte', $location, 200),
 						]);
 				break;
 
