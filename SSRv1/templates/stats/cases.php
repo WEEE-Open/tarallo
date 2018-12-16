@@ -8,7 +8,7 @@
 /** @var DateTime $startDate */
 /** @var bool $startDateSet */
 /** @var string[] $ready */
-$this->layout('main', ['title' => 'Stats', 'user' => $user]);
+$this->layout('main', ['title' => 'Stats: cases (computers)', 'user' => $user]);
 $this->insert('stats::menu', ['currentPage' => 'cases']);
 date_default_timezone_set('Europe/Rome');
 $this->insert('stats::header', ['location' => $location, 'locationSet' => $locationSet, 'startDate' => $startDate, 'startDateSet' => $startDateSet]);
@@ -100,7 +100,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 			<tbody>
 			<?php foreach($byMobo as $type => $count): ?>
 				<tr>
-					<td><?=WEEEOpen\Tarallo\SSRv1\UltraFeature::printableValue(new \WEEEOpen\Tarallo\Server\Feature('motherboard-form-factor', $type), $lang ?? 'en')?></td>
+					<td><?=$this->printFeature('motherboard-form-factor', $type, $lang ?? 'en')?></td>
 					<td><?=$count?></td>
 				</tr>
 			<?php endforeach ?>

@@ -16,6 +16,7 @@ class TemplateUtilities implements ExtensionInterface {
 	public function register(Engine $engine) {
 		$engine->registerFunction('u', 'rawurlencode');
 		$engine->registerFunction('getPrintableFeatures', [$this, 'getPrintableFeatures']);
+		$engine->registerFunction('printFeature', [$this, 'printFeature']);
 		$engine->registerFunction('contentEditableWrap', [$this, 'contentEditableWrap']);
 		$engine->registerFunction('getOptions', [$this, 'getOptions']);
 		$engine->registerFunction('asTextContent', [$this, 'asTextContent']);
@@ -48,6 +49,20 @@ class TemplateUtilities implements ExtensionInterface {
 
 	private static function featureNameSort(UltraFeature $a, UltraFeature $b) {
 		return $a->name <=> $b->name;
+	}
+
+	/**
+	 * Print a single feature, if you have its parts (useful for statistics).
+	 * Use UltraFeature::printableValue directly if you have the entire feature.
+	 *
+	 * @see UltraFeature::printableValue
+	 * @param string $feature Feature name
+	 * @param int|double|string $value Feature value
+	 * @param string|null $lang Page language code
+	 * @return string nice printable value
+	 */
+	public function printFeature(string $feature, $value, ?string $lang): string {
+		return UltraFeature::printableValue(new Feature($feature, $value), $lang ?? 'en');
 	}
 
 	/**

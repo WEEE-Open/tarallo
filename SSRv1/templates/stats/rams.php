@@ -8,7 +8,7 @@
 /** @var int[] $bySize */
 /** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $noworking */
 /** @var bool $allowDateSelection */
-$this->layout('main', ['title' => 'Rams Stats', 'user' => $user]);
+$this->layout('main', ['title' => 'Stats: RAMs', 'user' => $user]);
 $this->insert('stats::menu', ['currentPage' => 'rams']);
 $this->insert('stats::header', [
 	'location' => $location,
@@ -33,12 +33,9 @@ $this->insert('stats::header', [
 				<tbody>
 				<?php foreach($byFeature as $row): ?>
 					<tr>
-						<td><?=WEEEOpen\Tarallo\SSRv1\UltraFeature::printableValue(new \WEEEOpen\Tarallo\Server\Feature('ram-type',
-								$row['Type']), $lang ?? 'en')?></td>
-						<td><?=WEEEOpen\Tarallo\SSRv1\UltraFeature::printableValue(new \WEEEOpen\Tarallo\Server\Feature('ram-form-factor',
-								$row['FormFactor']), $lang ?? 'en')?></td>
-						<td><?=WEEEOpen\Tarallo\SSRv1\UltraFeature::printableValue(new \WEEEOpen\Tarallo\Server\Feature('frequency-hertz',
-								$row['Frequency']), $lang ?? 'en')?></td>
+						<td><?=$this->printFeature('ram-type', $row['Type'], $lang ?? 'en')?></td>
+						<td><?=$this->printFeature('ram-form-factor', $row['FormFactor'], $lang ?? 'en')?></td>
+						<td><?=$this->printFeature('frequency-hertz', $row['Frequency'], $lang ?? 'en')?></td>
 						<td><?=$row['Quantity']?></td>
 					</tr>
 				<?php endforeach ?>
@@ -59,8 +56,7 @@ $this->insert('stats::header', [
 				<tbody>
 				<?php foreach($bySize as $size => $count): ?>
 					<tr>
-						<td><?=WEEEOpen\Tarallo\SSRv1\UltraFeature::printableValue(new \WEEEOpen\Tarallo\Server\Feature('capacity-byte',
-								$size), $lang ?? 'en')?></td>
+						<td><?=$this->printFeature('capacity-byte', $size, $lang ?? 'en')?></td>
 						<td><?=$count?></td>
 					</tr>
 				<?php endforeach ?>
