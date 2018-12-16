@@ -55,7 +55,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 	<?php endif ?>
 	<?php if(!empty($byFeature)): ?>
 		<div class="statswrapper">
-			<p>Rams by type and frequency</p>
+			<p>RAMs by type and frequency</p>
 			<table>
 				<thead>
 				<tr>
@@ -92,7 +92,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 	<?php endif; ?>
 	<?php if(!empty($bySize)): ?>
 		<div class="statswrapper">
-			<p>Rams by type and size</p>
+			<p>RAMs by type and size</p>
 			<table>
 				<thead>
 				<tr>
