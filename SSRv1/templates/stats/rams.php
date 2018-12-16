@@ -4,8 +4,9 @@
 /** @var bool $locationSet */
 /** @var DateTime $startDate */
 /** @var bool $startDateSet */
-/** @var string[][] $byType */
-/** @var int[] $bySize */
+/** @var array[] $byType */
+/** @var array[] $bySize */
+/** @var int[] $byType */
 /** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $noworking */
 /** @var bool $allowDateSelection */
 $this->layout('main', ['title' => 'Stats: RAMs', 'user' => $user]);
@@ -16,11 +17,45 @@ $this->insert('stats::header', [
 	/*'startDate' => $startDate, 'startDateSet' => $startDateSet,*/
 	'allowDateSelection' => false
 ]);
+
+$rollupTd = function(array $row, string $feature, &$emptyCounter) {
+	if($row[$feature] === null) {
+		$emptyCounter++;
+		return '<td class="empty"></td>';
+	} else {
+		$printable = $this->printFeature($feature, $row[$feature], $lang ?? 'en');
+		return "<td>$printable</td>";
+	}
+};
+
+
+
 ?>
 <div class="statswrapperwrapper">
+	<?php if(!empty($byType)): ?>
+		<div class="statswrapper">
+			<p>RAMs by type/standard:</p>
+			<table>
+				<thead>
+				<tr>
+					<td>Type</td>
+					<td>Count</td>
+				</tr>
+				</thead>
+				<tbody>
+				<?php foreach($byType as $type => $count): ?>
+					<tr>
+						<td><?=$this->printFeature('ram-type', $type, $lang ?? 'en')?></td>
+						<td><?=$count?></td>
+					</tr>
+				<?php endforeach ?>
+				</tbody>
+			</table>
+		</div>
+	<?php endif ?>
 	<?php if(!empty($byFeature)): ?>
 		<div class="statswrapper">
-			<p>Rams by type</p>
+			<p>Rams by type and frequency</p>
 			<table>
 				<thead>
 				<tr>
@@ -31,35 +66,63 @@ $this->insert('stats::header', [
 				</tr>
 				</thead>
 				<tbody>
-				<?php foreach($byFeature as $row): ?>
-					<tr>
-						<td><?=$this->printFeature('ram-type', $row['Type'], $lang ?? 'en')?></td>
-						<td><?=$this->printFeature('ram-form-factor', $row['FormFactor'], $lang ?? 'en')?></td>
-						<td><?=$this->printFeature('frequency-hertz', $row['Frequency'], $lang ?? 'en')?></td>
-						<td><?=$row['Quantity']?></td>
-					</tr>
-				<?php endforeach ?>
+				<?php foreach($byFeature as $row):
+					// We need to count empty cells before printing the td...
+					$counter = 0;
+					$td = $rollupTd($row, 'ram-type', $counter);
+					$td .= $rollupTd($row, 'ram-form-factor', $counter);
+					$td .= $rollupTd($row, 'frequency-hertz', $counter);
+					$td .= "<td>${row['Quantity']}</td>";
+
+					if($counter > 0):
+						if($counter === 3):
+							$last = 'last';
+						else:
+							$last = '';
+						endif;
+						echo "<tr class=\"total $last\">$td</tr>";
+					else:
+						echo "<tr>$td</tr>";
+					endif;
+
+				endforeach; ?>
 				</tbody>
 			</table>
 		</div>
-	<?php endif ?>
+	<?php endif; ?>
 	<?php if(!empty($bySize)): ?>
 		<div class="statswrapper">
-			<p>Rams by size</p>
+			<p>Rams by type and size</p>
 			<table>
 				<thead>
 				<tr>
-					<td>Size</td>
+					<td>Type</td>
+					<td>Form Factor</td>
+					<td>Capacity</td>
 					<td>Count</td>
 				</tr>
 				</thead>
 				<tbody>
-				<?php foreach($bySize as $size => $count): ?>
-					<tr>
-						<td><?=$this->printFeature('capacity-byte', $size, $lang ?? 'en')?></td>
-						<td><?=$count?></td>
-					</tr>
-				<?php endforeach ?>
+				<?php foreach($bySize as $row):
+					// We need to count empty cells before printing the td...
+					$counter = 0;
+					$td = $rollupTd($row, 'ram-type', $counter);
+					$td .= $rollupTd($row, 'ram-form-factor', $counter);
+					$td .= $rollupTd($row, 'capacity-byte', $counter);
+					$td .= "<td>${row['Quantity']}</td>";
+
+					if($counter > 0):
+						if($counter === 3):
+							$last = 'last';
+						else:
+							$last = '';
+						endif;
+						echo "<tr class=\"total $last\">$td</tr>";
+					else:
+						echo "<tr>$td</tr>";
+					endif;
+
+				endforeach; ?>
 				</tbody>
 			</table>
 		</div>

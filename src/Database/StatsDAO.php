@@ -11,18 +11,23 @@ final class StatsDAO extends DAO {
 	 * Bind :loc to the location.
 	 *
 	 * @param null|ItemIncomplete $location if null returns an empty string
+	 * @param string $alias Table alias, if you're doing "SELECT ItemFeatures AS alias", empty string if none
 	 * @return string part of a query
 	 */
-	private static function filterLocation(?ItemIncomplete $location) {
+	private static function filterLocation(?ItemIncomplete $location, string $alias = '') {
 		if($location === null) {
 			return '';
 		}
 
-		return 'AND `Code` IN (
+		if($alias !== '') {
+			$alias .= '.';
+		}
+
+		return "AND $alias`Code` IN (
 SELECT Descendant
 FROM Tree
 WHERE Ancestor = :loc
-)';
+)";
 	}
 
 	/**
@@ -30,28 +35,39 @@ WHERE Ancestor = :loc
 	 * Bind :timestamp to the unix timestamp.
 	 *
 	 * @param null|\DateTime $creation if null returns an empty string
+	 * @param string $alias Table alias, if you're doing "SELECT ItemFeatures AS alias", empty string if none
 	 * @return string part of a query
 	 */
-	private static function filterCreated(?\DateTime $creation) {
+	private static function filterCreated(?\DateTime $creation, string $alias = '') {
 		if($creation === null) {
 			return '';
 		}
 
-		return 'AND `Code` NOT IN (
+		if($alias !== '') {
+			$alias .= '.';
+		}
+
+		return "AND $alias`Code` NOT IN (
 SELECT `Code`
 FROM Audit
-WHERE `Change` = "C"
+WHERE `Change` = \"C\"
 AND `Time` < FROM_UNIXTIME(:timestamp)
-)';
+)";
 	}
 
 	/**
 	 * Get an AND for a WHERE clause that ignores deleted items.
 	 *
+	 * @param string $alias Table alias, if you're doing "SELECT ItemFeatures AS alias", empty string if none
+	 *
 	 * @return string part of a query
 	 */
-	private static function filterDeleted() {
-		return 'AND `Code` NOT IN (SELECT `Code` FROM `Item` WHERE DeletedAt IS NOT NULL)';
+	private static function filterDeleted(string $alias = '') {
+		if($alias !== '') {
+			$alias .= '.';
+		}
+
+		return "AND $alias`Code` NOT IN (SELECT `Code` FROM `Item` WHERE DeletedAt IS NOT NULL)";
 	}
 
 	/**
@@ -309,8 +325,7 @@ LIMIT :lim";
 	}
 
 	/**
-	 * Get all items that have a certain value (exact match) for a feature.
-	 * For anything more complicated use SearchDAO facilities.
+	 * Get all items that don't have a feature at all.
 	 *
 	 * @param Feature $filter feature that should be there
 	 * (to at least set item type, you'll need it unless you want to receive the entire database, basically...)
@@ -369,33 +384,121 @@ LIMIT :lim";
 		return $result;
 	}
 
-	public function getRamStats(): array {
+	/**
+	 * Get all items that have a certain value (exact match) for a feature.
+	 * For anything more complicated use SearchDAO facilities.
+	 *
+	 * @param Feature $filter feature that should be there (use to select item type, maybe?)
+	 * @param string[] $features
+	 * @param null|ItemIncomplete $location
+	 * @param null|\DateTime $creation creation date (starts from here)
+	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
+	 *
+	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
+	 */
+	public function getRollupCountByFeature(Feature $filter, array $features, ?ItemIncomplete $location = null, ?\DateTime $creation = null, bool $deleted = false): array {
+		/*
+		 * This was a nice and readable query that rolls up (with a series of join(t)s, manco a farlo apposta...) the
+		 * RAMs. To make it generic it became almost unreadable, but the final result should be somewhat like this...
+		 *
+		 * SELECT a.ValueEnum AS Type,
+		 * b.ValueEnum AS FormFactor,
+		 * c.Value AS Frequency,
+		 * COUNT(*) AS Quantity
+		 * FROM ItemFeature AS a
+		 * JOIN ItemFeature AS b ON a.Code=b.Code
+		 * JOIN ItemFeature AS c ON b.Code=c.Code
+		 * WHERE a.Feature = 'ram-type'
+		 *   AND b.feature = 'ram-form-factor'
+		 *   AND c.Feature = 'frequency-hertz'
+		 *   AND a.Code IN (
+		 *     SELECT Code
+		 *     FROM ItemFeature
+		 *     WHERE Feature = 'type'
+		 *     AND ValueEnum = 'ram'
+		 * )
+		 * GROUP BY Type, FormFactor, Frequency WITH ROLLUP;
+		 */
+		if(empty($features)) {
+			throw new \LogicException('Nothing roll up in');
+		}
+		// Remove any manually set array keys, since these will go into te query without any sanitizations.
+		// This guarantees there are only numbers.
+		$features = array_values($features);
 
-		$query = "SELECT a.ValueEnum AS Type, b.ValueEnum AS FormFactor, c.Value AS Frequency, COUNT(*) AS Quantity
-FROM ItemFeature AS a
-JOIN ItemFeature AS b ON a.Code=b.Code
-JOIN ItemFeature AS c ON b.Code=c.Code
-WHERE a.Feature = 'ram-type'
-  AND b.feature = 'ram-form-factor'
-  AND c.Feature = 'frequency-hertz'
-  AND a.Code IN (
-    SELECT `Code`
-    FROM ItemFeature
-    WHERE Feature = 'type'
-    AND ValueEnum = 'ram'
-)
-GROUP BY Type, FormFactor, Frequency
-ORDER BY Type, FormFactor, Frequency";
+		$locationFilter = self::filterLocation($location, 'f0');
+		$deletedFilter = $deleted ? '' : self::filterDeleted('f0');
+		$createdFilter = self::filterCreated($creation, 'f0');
 
+		$select = 'SELECT ';
+		$from = 'FROM ItemFeature AS f0 '; // $f0 is guaranteed to exist, since the array is not empty
+		$where = 'WHERE f0.`Code` IN (
+  SELECT `Code`
+  FROM ItemFeature
+  WHERE Feature = :nam AND COALESCE(ValueEnum, `Value`, ValueText, ValueDouble) = :val
+) ';
+		// Will produce e.g. `ram-type`,`ram-form-factor`,`frequency-hertz`
+		$group = implode("`,`", $features);
+		$group = "`$group`";
+
+		foreach($features as $i => $feature) {
+			$select .= "COALESCE(f$i.ValueEnum, f$i.`Value`, f$i.ValueText, f$i.ValueDouble) AS `$feature`, ";
+			if($i > 0) {
+				$from .= " JOIN ItemFeature AS f$i ON f0.Code=f$i.Code";
+			}
+			$where .= " AND f$i.`Feature` = :fname$i";
+		}
+		$select .= 'COUNT(*) AS Quantity';
+
+		$query = "$select
+$from
+$where
+$locationFilter
+$deletedFilter
+$createdFilter
+GROUP BY $group WITH ROLLUP";
 		$statement = $this->getPDO()->prepare($query);
+
+		foreach($features as $i => $feature) {
+			$statement->bindValue(":fname$i", $feature);
+		}
+		$statement->bindValue(':nam', $filter->name, \PDO::PARAM_STR);
+		$statement->bindValue(':val', $filter->value);
+		if($location !== null) {
+			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
+		}
+		if($creation !== null) {
+			$statement->bindValue(':timestamp', $creation->getTimestamp(), \PDO::PARAM_INT);
+		}
 
 		try {
 			$success = $statement->execute();
-			assert($success, 'get dem RAMs');
-			return $statement->fetchAll(\PDO::FETCH_ASSOC) ;
+			assert($success, 'get rollup count');
+			$result = $statement->fetchAll(\PDO::FETCH_ASSOC);
+			// Cast integers to integers, doubles to doubles... basically ignore this part and imagine that MySQL
+			// returns the correct type even with COALESCE
+			$cast = [];
+			foreach($features as $feature) {
+				if(Feature::getType($feature) === Feature::INTEGER || Feature::getType($feature) === Feature::DOUBLE) {
+					$cast[] = $feature;
+				}
+			}
+			if(!empty($cast)) {
+				foreach($result as &$row) {
+					foreach($cast as $feature) {
+						if($row[$feature] !== null) {
+							if(Feature::getType($feature) === Feature::INTEGER) {
+								$row[$feature] = (int) $row[$feature];
+							} else if(Feature::getType($feature) === Feature::DOUBLE) {
+								$row[$feature] = (double) $row[$feature];
+							}
+						}
+					}
+				}
+			}
+			return $result;
 		} finally {
 			$statement->closeCursor();
 		}
-
 	}
 }

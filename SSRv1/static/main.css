@@ -223,13 +223,17 @@ table {
 	width: 100%;
 }
 
-table > thead {
+table > thead, .statswrapper table .total.last {
 	background: #333;
 	color: #eee;
 }
 
 table td {
 	padding: 0.3em 0.5em;
+}
+
+.statswrapper table .total {
+	background-color: #eee;
 }
 
 .statswrapper a {
