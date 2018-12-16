@@ -215,7 +215,7 @@ LIMIT :lim';
 		$deletedFilter = $deleted ? '' : self::filterDeleted();
 		$createdFilter = self::filterCreated($creation);
 
-        $query = "SELECT COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) as Val, COUNT(*) AS Quantity
+		$query = "SELECT COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) as Val, COUNT(*) AS Quantity
 FROM ItemFeature
 WHERE Feature = :feat
 AND `Code` IN (
@@ -306,5 +306,82 @@ LIMIT :lim";
 		}
 
 		return $result;
+	}
+
+	public function getItemByNotFeature(Feature $filter, string $notFeature, ?ItemIncomplete $location = null, int $limit = 100, ?\DateTime $creation = null, bool $deleted = false): array {
+
+		$locationFilter = self::filterLocation($location);
+		$deletedFilter = $deleted ? '' : self::filterDeleted();
+		$createdFilter = self::filterCreated($creation);
+
+		$query = "SELECT Code 
+FROM ItemFeature 
+WHERE Feature = :type 
+AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = :val
+$locationFilter
+$deletedFilter
+$createdFilter
+AND Code NOT IN ( 
+SELECT Code 
+FROM ItemFeature 
+WHERE Feature = :notF
+)
+LIMIT :lim";
+		$statement = $this->getPDO()->prepare($query);
+
+		$statement->bindValue(':type', $filter->name, \PDO::PARAM_STR);
+		$statement->bindValue(':val', $filter->value);
+		$statement->bindValue(':notF', $notFeature, \PDO::PARAM_STR);
+		$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
+		if($location !== null) {
+			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
+		}
+		if($creation !== null) {
+			$statement->bindValue(':timestamp', $creation->getTimestamp(), \PDO::PARAM_INT);
+		}
+
+		$result = [];
+
+		try {
+			$success = $statement->execute();
+			assert($success, 'get items by NOT features');
+			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+				$result[] = new ItemIncomplete($row['Code']);
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $result;
+	}
+
+	public function getRamStats(): array {
+
+		$query = "SELECT a.ValueEnum AS Type, b.ValueEnum AS FormFactor, c.Value AS Frequency, COUNT(*) AS Quantity
+FROM ItemFeature AS a
+JOIN ItemFeature AS b ON a.Code=b.Code
+JOIN ItemFeature AS c ON b.Code=c.Code
+WHERE a.Feature = 'ram-type'
+  AND b.feature = 'ram-form-factor'
+  AND c.Feature = 'frequency-hertz'
+  AND a.Code IN (
+    SELECT Code
+    FROM ItemFeature
+    WHERE Feature = 'type'
+    AND ValueEnum = 'ram'
+)
+GROUP BY Type, FormFactor, Frequency
+ORDER BY Type, FormFactor, Frequency";
+
+		$statement = $this->getPDO()->prepare($query);
+
+		try {
+			$success = $statement->execute();
+			assert($success, 'get dem RAMs');
+			return $statement->fetchAll(\PDO::FETCH_ASSOC) ;
+		} finally {
+			$statement->closeCursor();
+		}
+
 	}
 }

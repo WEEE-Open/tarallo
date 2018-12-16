@@ -187,6 +187,17 @@ class Controller extends AbstractController {
 
 		Validation::authorize($user, 3);
 
+        // a nice default value: 'now - 1 year'
+        $startDateDefault = '2016-01-01';
+        $startDate = Validation::validateOptionalString($query, 'from', $startDateDefault, null);
+        $startDateSet = $startDate !== $startDateDefault;
+        $startDate = new \DateTime($startDate, new \DateTimeZone('Europe/Rome'));
+
+        $locationDefault = 'LabFis4';
+        $location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
+        $locationSet = $location !== $locationDefault;
+        $location = $location === null ? null : new ItemIncomplete($location);
+
 		switch($parameters['which']) {
 			case '':
 				$request = $request
@@ -210,16 +221,6 @@ class Controller extends AbstractController {
 						]);
 				break;
 			case 'cases':
-				// a nice default value: 'now - 1 year'
-				$startDateDefault = '2016-01-01';
-				$startDate = Validation::validateOptionalString($query, 'from', $startDateDefault, null);
-				$startDateSet = $startDate !== $startDateDefault;
-				$startDate = new \DateTime($startDate, new \DateTimeZone('Europe/Rome'));
-
-				$locationDefault = 'LabFis4';
-				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
-				$locationSet = $location !== $locationDefault;
-				$location = $location === null ? null : new ItemIncomplete($location);
 
 				$request = $request
 					->withAttribute('Template', 'stats::cases')
@@ -236,6 +237,21 @@ class Controller extends AbstractController {
 							'ready'       => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), $location, 100),
 						]);
 				break;
+            case 'rams':
+
+                $request = $request
+                    ->withAttribute('Template', 'stats::rams')
+                    ->withAttribute('TemplateParameters',
+                        [
+                            'location'    => $location === null ? null : $location->getCode(),
+                            'locationSet' => $locationSet,
+                            'startDate'   => $startDate,
+                            'startDateSet'=> $startDateSet,
+                            'byFeature'   => $db->statsDAO()->getRamStats(),
+                            'bySize'      => $db->statsDAO()->getCountByFeature('capacity-byte', new Feature('type', 'ram'), $location, $startDate),
+                            'working'     => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'working', $location, 200, $startDate),
+                        ]);
+                break;
 			default:
 				// TODO: if this gets used only for items (and the page suggesting items), change to something else
 				throw new NotFoundException();
