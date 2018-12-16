@@ -308,6 +308,20 @@ LIMIT :lim";
 		return $result;
 	}
 
+	/**
+	 * Get all items that have a certain value (exact match) for a feature.
+	 * For anything more complicated use SearchDAO facilities.
+	 *
+	 * @param Feature $filter feature that should be there
+	 * (to at least set item type, you'll need it unless you want to receive the entire database, basically...)
+	 * @param string $notFeature Feature that should not be present at all
+	 * @param null|ItemIncomplete $location
+	 * @param int $limit Maximum number of results
+	 * @param null|\DateTime $creation creation date (starts from here)
+	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
+	 *
+	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
+	 */
 	public function getItemByNotFeature(Feature $filter, string $notFeature, ?ItemIncomplete $location = null, int $limit = 100, ?\DateTime $creation = null, bool $deleted = false): array {
 
 		$locationFilter = self::filterLocation($location);
@@ -322,7 +336,7 @@ $locationFilter
 $deletedFilter
 $createdFilter
 AND Code NOT IN ( 
-SELECT Code 
+SELECT `Code` 
 FROM ItemFeature 
 WHERE Feature = :notF
 )
@@ -365,7 +379,7 @@ WHERE a.Feature = 'ram-type'
   AND b.feature = 'ram-form-factor'
   AND c.Feature = 'frequency-hertz'
   AND a.Code IN (
-    SELECT Code
+    SELECT `Code`
     FROM ItemFeature
     WHERE Feature = 'type'
     AND ValueEnum = 'ram'

@@ -78,7 +78,7 @@ class Validation {
 	}
 
 	/**
-	 * Return string value form a key if it exists (being casted if not a string),
+	 * Return string value from a key if it exists (being casted if not a string),
 	 * or supplied default value if it doesn't. Empty string is considered invalid.
 	 *
 	 * @param array $payload THE array

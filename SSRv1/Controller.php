@@ -171,7 +171,7 @@ class Controller extends AbstractController {
 			->withAttribute('Template', 'home')
 			->withAttribute('TemplateParameters',
 				[
-					'locations'     => $locations = $db->statsDAO()->getLocationsByItems(),
+					'locations'	 => $locations = $db->statsDAO()->getLocationsByItems(),
 					'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', max(20, count($locations)))
 				]);
 
@@ -187,16 +187,12 @@ class Controller extends AbstractController {
 
 		Validation::authorize($user, 3);
 
-        // a nice default value: 'now - 1 year'
-        $startDateDefault = '2016-01-01';
-        $startDate = Validation::validateOptionalString($query, 'from', $startDateDefault, null);
-        $startDateSet = $startDate !== $startDateDefault;
-        $startDate = new \DateTime($startDate, new \DateTimeZone('Europe/Rome'));
-
-        $locationDefault = 'LabFis4';
-        $location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
-        $locationSet = $location !== $locationDefault;
-        $location = $location === null ? null : new ItemIncomplete($location);
+		// a nice default value: 'now - 1 year'
+		$startDateDefault = '2016-01-01';
+		$startDate = Validation::validateOptionalString($query, 'from', $startDateDefault, null);
+		$startDateSet = $startDate !== $startDateDefault;
+		/** @noinspection PhpUnhandledExceptionInspection */
+		$startDate = new \DateTime($startDate, new \DateTimeZone('Europe/Rome'));
 
 		switch($parameters['which']) {
 			case '':
@@ -204,54 +200,66 @@ class Controller extends AbstractController {
 					->withAttribute('Template', 'stats::main')
 					->withAttribute('TemplateParameters',
 						[
-							'locations'        => $db->statsDAO()->getLocationsByItems(),
-							'recentlyAdded'    => $db->auditDAO()->getRecentAuditByType('C', 40),
+							'locations'		=> $db->statsDAO()->getLocationsByItems(),
+							'recentlyAdded'	=> $db->auditDAO()->getRecentAuditByType('C', 40),
 							'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 40),
 						]);
 				break;
+
 			case 'attention':
 				$request = $request
 					->withAttribute('Template', 'stats::needAttention')
 					->withAttribute('TemplateParameters',
 						[
-							'serials'     => $db->statsDAO()->getDuplicateSerialsCount(),
+							'serials'	  => $db->statsDAO()->getDuplicateSerialsCount(),
 							'missingData' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'missing-data'), null,
 								500),
-							'lost'        => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'lost'), null, 100)
+							'lost'		  => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'lost'), null, 100)
 						]);
 				break;
+
 			case 'cases':
+				$locationDefault = 'LabFis4';
+				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
+				$locationSet = $location !== $locationDefault;
+				$location = $location === null ? null : new ItemIncomplete($location);
 
 				$request = $request
 					->withAttribute('Template', 'stats::cases')
+					->withAttribute('TemplateParameters',
+						[
+							'location'	  => $location === null ? null : $location->getCode(),
+							'locationSet' => $locationSet,
+							'startDate'   => $startDate,
+							'startDateSet'=> $startDateSet,
+							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
+							'mostRecent'  => $db->statsDAO()->getModifiedItems($location, true, 30),
+							'byOwner'	  => $db->statsDAO()->getCountByFeature('owner', new Feature('type', 'case'), $location, $startDate),
+							'byMobo'	  => $db->statsDAO()->getCountByFeature('motherboard-form-factor', new Feature('type', 'case'), $location, $startDate),
+							'ready'	      => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), $location, 100),
+						]);
+				break;
+
+			case 'rams':
+				$locationDefault = 'Rambox';
+				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
+				$locationSet = $location !== $locationDefault;
+				$location = $location === null ? null : new ItemIncomplete($location);
+
+				$request = $request
+					->withAttribute('Template', 'stats::rams')
 					->withAttribute('TemplateParameters',
 						[
 							'location'    => $location === null ? null : $location->getCode(),
 							'locationSet' => $locationSet,
 							'startDate'   => $startDate,
 							'startDateSet'=> $startDateSet,
-							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
-							'mostRecent'  => $db->statsDAO()->getModifiedItems($location, true, 30),
-							'byOwner'     => $db->statsDAO()->getCountByFeature('owner', new Feature('type', 'case'), $location, $startDate),
-							'byMobo'      => $db->statsDAO()->getCountByFeature('motherboard-form-factor', new Feature('type', 'case'), $location, $startDate),
-							'ready'       => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), $location, 100),
+							'byFeature'   => $db->statsDAO()->getRamStats(),
+							'bySize'	  => $db->statsDAO()->getCountByFeature('capacity-byte', new Feature('type', 'ram'), $location, null),
+							'noworking'   => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'working', $location, 200, null),
 						]);
 				break;
-            case 'rams':
 
-                $request = $request
-                    ->withAttribute('Template', 'stats::rams')
-                    ->withAttribute('TemplateParameters',
-                        [
-                            'location'    => $location === null ? null : $location->getCode(),
-                            'locationSet' => $locationSet,
-                            'startDate'   => $startDate,
-                            'startDateSet'=> $startDateSet,
-                            'byFeature'   => $db->statsDAO()->getRamStats(),
-                            'bySize'      => $db->statsDAO()->getCountByFeature('capacity-byte', new Feature('type', 'ram'), $location, $startDate),
-                            'working'     => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'working', $location, 200, $startDate),
-                        ]);
-                break;
 			default:
 				// TODO: if this gets used only for items (and the page suggesting items), change to something else
 				throw new NotFoundException();
@@ -282,12 +290,12 @@ class Controller extends AbstractController {
 			$total = $db->searchDAO()->getResultsCount($id);
 			$pages = (int) ceil($total / $perPage);
 			$templateParameters = [
-				'searchId'       => $id,
-				'page'           => $page,
-				'pages'          => $pages,
-				'total'          => $total,
+				'searchId'	   => $id,
+				'page'		   => $page,
+				'pages'		  => $pages,
+				'total'		  => $total,
 				'resultsPerPage' => $perPage,
-				'results'        => $results,
+				'results'		=> $results,
 			];
 			if($add !== null) {
 				$templateParameters['add'] = $add;
@@ -407,7 +415,7 @@ class Controller extends AbstractController {
 				$r->get('/{which}', [[Controller::class, 'getStats']]);
 			});
 		}, [
-			'cacheFile'     => $cachefile,
+			'cacheFile'	 => $cachefile,
 			'cacheDisabled' => !CACHE_ENABLED,
 		]);
 	}
@@ -477,8 +485,8 @@ class Controller extends AbstractController {
 
 			// TODO: remove addData, read attrbitues in templates directly
 			$engine->addData([
-				'user'     => $request->getAttribute('User'),
-				'self'     => $request->getUri()->getPath(),
+				'user'	 => $request->getAttribute('User'),
+				'self'	 => $request->getUri()->getPath(),
 				'request'  => $request,
 				'response' => $response
 			]);

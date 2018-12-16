@@ -532,11 +532,10 @@ label.searchby {
 
 	.statswrapper {
 		width: 24em;
-		margin-right: 2em;
 	}
 
 	.statswrapper.large {
-		width: auto;
+		width: 100%;
 	}
 
 	.statswrapper > table {
