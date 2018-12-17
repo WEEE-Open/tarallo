@@ -4,10 +4,11 @@
 /** @var bool $locationSet */
 /** @var DateTime $startDate */
 /** @var bool $startDateSet */
-/** @var array[] $byType */
-/** @var array[] $bySize */
+/** @var array[] $byTypeFrequency */
+/** @var array[] $byTypeSize */
 /** @var int[] $byType */
 /** @var int[] $byFormFactor */
+/** @var int[] $bySize */
 /** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $noWorking */
 /** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $noFrequency */
 /** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $noSize */
@@ -55,7 +56,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 					<?php endforeach ?>
 					</tbody>
 				</table>
-			<?php endif; if(!empty($byType)): ?>
+			<?php endif; if(!empty($byFormFactor)): ?>
 				<p>RAMs by form factor:</p>
 				<table>
 					<thead>
@@ -73,10 +74,28 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 					<?php endforeach ?>
 					</tbody>
 				</table>
+			<?php endif; if(!empty($bySize)): ?>
+				<p>RAMs by size:</p>
+				<table>
+					<thead>
+					<tr>
+						<td>Type</td>
+						<td>Count</td>
+					</tr>
+					</thead>
+					<tbody>
+					<?php foreach($bySize as $type => $count): ?>
+						<tr>
+							<td><?=$this->printFeature('capacity-byte', $type, $lang ?? 'en')?></td>
+							<td><?=$count?></td>
+						</tr>
+					<?php endforeach ?>
+					</tbody>
+				</table>
 			<?php endif; ?>
 		</div>
 	<?php endif ?>
-	<?php if(!empty($byFeature)): ?>
+	<?php if(!empty($byTypeFrequency)): ?>
 		<div class="statswrapper">
 			<p>RAMs by type and frequency</p>
 			<table>
@@ -89,7 +108,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 				</tr>
 				</thead>
 				<tbody>
-				<?php foreach($byFeature as $row):
+				<?php foreach($byTypeFrequency as $row):
 					// We need to count empty cells before printing the td...
 					$counter = 0;
 					$td = $rollupTd($row, 'ram-type', $counter);
@@ -113,7 +132,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 			</table>
 		</div>
 	<?php endif; ?>
-	<?php if(!empty($bySize)): ?>
+	<?php if(!empty($byTypeSize)): ?>
 		<div class="statswrapper">
 			<p>RAMs by type and size</p>
 			<table>
@@ -126,7 +145,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 				</tr>
 				</thead>
 				<tbody>
-				<?php foreach($bySize as $row):
+				<?php foreach($byTypeSize as $row):
 					// We need to count empty cells before printing the td...
 					$counter = 0;
 					$td = $rollupTd($row, 'ram-type', $counter);
