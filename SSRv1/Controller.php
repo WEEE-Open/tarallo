@@ -211,9 +211,8 @@ class Controller extends AbstractController {
 					->withAttribute('Template', 'stats::needAttention')
 					->withAttribute('TemplateParameters',
 						[
-							'serials'	  => $db->statsDAO()->getDuplicateSerialsCount(),
-							'missingData' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'missing-data'), null,
-								500),
+							'serials'	  => $db->statsDAO()->getCountByFeature('sn', null, null, null, false, 2),
+							'missingData' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'missing-data'), null, 500),
 							'lost'		  => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'lost'), null, 100)
 						]);
 				break;

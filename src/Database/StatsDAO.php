@@ -107,36 +107,6 @@ EOQ
 	}
 
 	/**
-	 * Count duplicate serial numbers.
-	 * Considers deleted items too, because yes.
-	 * No filtering by location because that doesn't make sense.
-	 *
-	 * @return array
-	 */
-	public function getDuplicateSerialsCount() {
-		$array = [];
-
-		$result = $this->getPDO()->query('SELECT ValueText AS SN, COUNT(*) AS Count
-FROM ItemFeature
-WHERE Feature = \'sn\'
-GROUP BY ValueText
-HAVING Count > 1
-ORDER BY Count DESC, SN ASC', \PDO::FETCH_ASSOC);
-
-		assert($result !== false, 'duplicate serial numbers');
-
-		try {
-			foreach($result as $row) {
-				$array[$row['SN']] = $row['Count'];
-			}
-		} finally {
-			$result->closeCursor();
-		}
-
-		return $array;
-	}
-
-	/**
 	 * Get most/least recently changed cases in a particular location, excluding in-use ones. This takes into account
 	 * all audit entries for all contained items.
 	 * Deleted items are ignored since they aren't in any location.
@@ -210,19 +180,21 @@ LIMIT :lim';
 	 * - red: 10
 	 * - yellow: 6
 	 * - grey: 4
-	 * and so on.
+	 * - ...and so on.
 	 *
 	 * If some (enum) values aren't assigned to an item they're not reported, actually,
 	 * so it's not really every possible value.
 	 *
 	 * @param string $feature Feature name
-	 * @param Feature $filter
-	 * @param ItemIncomplete $location
-	 * @param null|\DateTime $creation creation date (starts from here)
+	 * @param Feature|null $filter Feature that must match, useful to select items by type
+	 * @param ItemIncomplete $location Consider only this subtree
+	 * @param null|\DateTime $creation Creation date (starts from here)
 	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
+	 * @param int $cutoff Report features only if count is greater than (or equal to) this number,
+	 * useful for text features with lots of possible values
 	 * @return int[] value => count, sorted by count descending
 	 */
-	public function getCountByFeature(string $feature, Feature $filter, ?ItemIncomplete $location = null, ?\DateTime $creation = null, bool $deleted = false) {
+	public function getCountByFeature(string $feature, ?Feature $filter, ?ItemIncomplete $location = null, ?\DateTime $creation = null, bool $deleted = false, int $cutoff = 1) {
 		Feature::validateFeatureName($feature);
 
 		$array = [];
@@ -230,26 +202,35 @@ LIMIT :lim';
 		$locationFilter = self::filterLocation($location);
 		$deletedFilter = $deleted ? '' : self::filterDeleted();
 		$createdFilter = self::filterCreated($creation);
+		if($filter === null) {
+			$featureFilter = '';
+		} else {
+			$featureFilter = 'AND `Code` IN (
+  SELECT `Code`
+  FROM ItemFeature
+  WHERE Feature = :filtername AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = :filtervalue
+)';
+		}
 
 		$query = "SELECT COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) as Val, COUNT(*) AS Quantity
 FROM ItemFeature
 WHERE Feature = :feat
-AND `Code` IN (
-  SELECT `Code`
-  FROM ItemFeature
-  WHERE Feature = :nam AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = :val
-)
+$featureFilter
 $locationFilter
 $deletedFilter
 $createdFilter
 GROUP BY Val
-ORDER BY Quantity DESC";
+HAVING Quantity >= :cutoff
+ORDER BY Quantity DESC, Val ASC";
 
 		$statement = $this->getPDO()->prepare($query);
 
 		$statement->bindValue(':feat', $feature, \PDO::PARAM_STR);
-		$statement->bindValue(':val', $filter->value);
-		$statement->bindValue(':nam', $filter->name, \PDO::PARAM_STR);
+		$statement->bindValue(':cutoff', $cutoff, \PDO::PARAM_INT);
+		if($filter !== null) {
+			$statement->bindValue(':filtername', $filter->name, \PDO::PARAM_STR);
+			$statement->bindValue(':filtervalue', $filter->value);
+		}
 		if($location !== null) {
 			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
 		}
@@ -282,7 +263,7 @@ ORDER BY Quantity DESC";
 	 *
 	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
 	 */
-	public function getItemsByFeatures(Feature $feature, ?ItemIncomplete $location = null, int $limit = 100, ?\DateTime $creation = null, bool $deleted = false): array {
+	public function getItemsByFeatures(Feature $feature, ?ItemIncomplete $location = null, ?int $limit = null, ?\DateTime $creation = null, bool $deleted = false): array {
 		$pdo = $this->getPDO();
 		$locationFilter = self::filterLocation($location);
 		$deletedFilter = $deleted ? '' : self::filterDeleted();
