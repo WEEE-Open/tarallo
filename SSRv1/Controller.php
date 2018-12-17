@@ -171,7 +171,7 @@ class Controller extends AbstractController {
 			->withAttribute('Template', 'home')
 			->withAttribute('TemplateParameters',
 				[
-					'locations'	 => $locations = $db->statsDAO()->getLocationsByItems(),
+					'locations' => $locations = $db->statsDAO()->getLocationsByItems(),
 					'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', max(20, count($locations)))
 				]);
 
@@ -200,7 +200,7 @@ class Controller extends AbstractController {
 					->withAttribute('Template', 'stats::main')
 					->withAttribute('TemplateParameters',
 						[
-							'locations'		=> $db->statsDAO()->getLocationsByItems(),
+							'locations' => $db->statsDAO()->getLocationsByItems(),
 							'recentlyAdded'	=> $db->auditDAO()->getRecentAuditByType('C', 40),
 							'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 40),
 						]);
@@ -211,9 +211,9 @@ class Controller extends AbstractController {
 					->withAttribute('Template', 'stats::needAttention')
 					->withAttribute('TemplateParameters',
 						[
-							'serials'	  => $db->statsDAO()->getCountByFeature('sn', null, null, null, false, 2),
+							'serials' => $db->statsDAO()->getCountByFeature('sn', null, null, null, false, 2),
 							'missingData' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'missing-data'), null, 500),
-							'lost'		  => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'lost'), null, 100)
+							'lost' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'lost'), null, 100)
 						]);
 				break;
 
@@ -227,15 +227,15 @@ class Controller extends AbstractController {
 					->withAttribute('Template', 'stats::cases')
 					->withAttribute('TemplateParameters',
 						[
-							'location'	  => $location === null ? null : $location->getCode(),
+							'location' => $location === null ? null : $location->getCode(),
 							'locationSet' => $locationSet,
-							'startDate'   => $startDate,
+							'startDate' => $startDate,
 							'startDateSet'=> $startDateSet,
 							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
-							'mostRecent'  => $db->statsDAO()->getModifiedItems($location, true, 30),
-							'byOwner'	  => $db->statsDAO()->getCountByFeature('owner', new Feature('type', 'case'), $location, $startDate),
-							'byMobo'	  => $db->statsDAO()->getCountByFeature('motherboard-form-factor', new Feature('type', 'case'), $location, $startDate),
-							'ready'	      => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), $location, 100),
+							'mostRecent' => $db->statsDAO()->getModifiedItems($location, true, 30),
+							'byOwner' => $db->statsDAO()->getCountByFeature('owner', new Feature('type', 'case'), $location, $startDate),
+							'byMobo' => $db->statsDAO()->getCountByFeature('motherboard-form-factor', new Feature('type', 'case'), $location, $startDate),
+							'ready' => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), $location, 100),
 						]);
 				break;
 
@@ -249,17 +249,17 @@ class Controller extends AbstractController {
 					->withAttribute('Template', 'stats::rams')
 					->withAttribute('TemplateParameters',
 						[
-							'location'    => $location === null ? null : $location->getCode(),
+							'location' => $location === null ? null : $location->getCode(),
 							'locationSet' => $locationSet,
-							'startDate'   => $startDate,
+							'startDate' => $startDate,
 							'startDateSet'=> $startDateSet,
-							'byType'      => $db->statsDAO()->getCountByFeature('ram-type', new Feature('type', 'ram'), $location),
+							'byType' => $db->statsDAO()->getCountByFeature('ram-type', new Feature('type', 'ram'), $location),
 							'byFormFactor'=> $db->statsDAO()->getCountByFeature('ram-form-factor', new Feature('type', 'ram'), $location),
-							'byFeature'   => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), ['ram-type', 'ram-form-factor', 'frequency-hertz'], $location),
-							'bySize'	  => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), ['ram-type', 'ram-form-factor', 'capacity-byte'], $location),
-							'noWorking'   => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'working', $location, 200),
-							'noFrequency'   => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'frequency-hertz', $location, 200),
-							'noSize'   => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'capacity-byte', $location, 200),
+							'byFeature' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), ['ram-type', 'ram-form-factor', 'frequency-hertz'], $location),
+							'bySize' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), ['ram-type', 'ram-form-factor', 'capacity-byte'], $location),
+							'noWorking' => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'working', $location, 200),
+							'noFrequency' => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'frequency-hertz', $location, 200),
+							'noSize' => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'capacity-byte', $location, 200),
 						]);
 				break;
 
@@ -293,12 +293,12 @@ class Controller extends AbstractController {
 			$total = $db->searchDAO()->getResultsCount($id);
 			$pages = (int) ceil($total / $perPage);
 			$templateParameters = [
-				'searchId'	   => $id,
-				'page'		   => $page,
-				'pages'		  => $pages,
-				'total'		  => $total,
+				'searchId' => $id,
+				'page' => $page,
+				'pages' => $pages,
+				'total' => $total,
 				'resultsPerPage' => $perPage,
-				'results'		=> $results,
+				'results' => $results,
 			];
 			if($add !== null) {
 				$templateParameters['add'] = $add;
@@ -418,7 +418,7 @@ class Controller extends AbstractController {
 				$r->get('/{which}', [[Controller::class, 'getStats']]);
 			});
 		}, [
-			'cacheFile'	 => $cachefile,
+			'cacheFile' => $cachefile,
 			'cacheDisabled' => !CACHE_ENABLED,
 		]);
 	}
@@ -488,9 +488,9 @@ class Controller extends AbstractController {
 
 			// TODO: remove addData, read attrbitues in templates directly
 			$engine->addData([
-				'user'	 => $request->getAttribute('User'),
-				'self'	 => $request->getUri()->getPath(),
-				'request'  => $request,
+				'user' => $request->getAttribute('User'),
+				'self' => $request->getUri()->getPath(),
+				'request' => $request,
 				'response' => $response
 			]);
 
