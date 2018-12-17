@@ -418,12 +418,14 @@ LIMIT :lim";
   FROM ItemFeature
   WHERE Feature = :nam AND COALESCE(ValueEnum, `Value`, ValueText, ValueDouble) = :val
 ) ';
-		// Will produce e.g. `ram-type`,`ram-form-factor`,`frequency-hertz`
-		$group = implode("`,`", $features);
-		$group = "`$group`";
+		// Will produce e.g. `ram-type` ASC,`ram-form-factor` ASC,`frequency-hertz` ASC
+		$group = implode("` ASC,`", $features);
+		$group = "`$group` ASC";
 
 		foreach($features as $i => $feature) {
-			$select .= "COALESCE(f$i.ValueEnum, f$i.`Value`, f$i.ValueText, f$i.ValueDouble) AS `$feature`, ";
+			// Can't do it with coalesce, numeric features end up in wrong order...
+			$column = Feature::getColumn(Feature::getType($feature));
+			$select .= "f$i.$column AS `$feature`, ";
 			if($i > 0) {
 				$from .= " JOIN ItemFeature AS f$i ON f0.Code=f$i.Code";
 			}
