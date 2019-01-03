@@ -366,16 +366,15 @@ LIMIT :lim";
 	}
 
 	/**
-	 * Get all items that have a certain value (exact match) for a feature.
-	 * For anything more complicated use SearchDAO facilities.
+	 * Count all items by feature values, for any number of features, with rollup (partial results)
 	 *
-	 * @param Feature $filter feature that should be there (use to select item type, maybe?)
-	 * @param string[] $features
-	 * @param null|ItemIncomplete $location
+	 * @param Feature $filter feature that should be there (use to select item type, possibly)
+	 * @param string[] $features which columns you want in the results table. Order is preserved.
+	 * @param null|ItemIncomplete $location Only consider items in this location
 	 * @param null|\DateTime $creation creation date (starts from here)
 	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
 	 *
-	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
+	 * @return array[] Array of rows, as returned by the database: for N features there are N columns with feature values, the a count column at the end.
 	 */
 	public function getRollupCountByFeature(Feature $filter, array $features, ?ItemIncomplete $location = null, ?\DateTime $creation = null, bool $deleted = false): array {
 		/*
