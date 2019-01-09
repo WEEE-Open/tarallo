@@ -79,7 +79,10 @@ class Validation {
 
 	/**
 	 * Return string value from a key if it exists (being casted if not a string),
-	 * or supplied default value if it doesn't. Empty string is considered invalid.
+	 * or supplied default value (default null) if it doesn't.
+	 * Empty string is considered invalid.
+	 *
+	 * TODO: where is the empty string used? Is it valid or not, actually?
 	 *
 	 * @param array $payload THE array
 	 * @param string $key Some key
