@@ -26,6 +26,8 @@ abstract class DAO {
 	 * @param array $array array of values that will be inserted/selected from database. This is used to count the
 	 * query parameters(?) and keys are appended to the prefix.
 	 *
+	 * @deprecated
+	 * @codeCoverageIgnore
 	 * @return string|bool resulting string, or a random "false" if substr somehow fails.
 	 */
 	protected static function multipleIn($prefix, $array) {

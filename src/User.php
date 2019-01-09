@@ -18,8 +18,8 @@ class User {
 	 *
 	 * @throws \InvalidArgumentException when password and hash aren't null and don't match (code 72, chosen at random)
 	 */
-	public function __construct($username, ?string $password = null, ?string $hash = null, int $level = 2) {
-		if(!is_string($username) || strlen($username) === 0) {
+	public function __construct(string $username, ?string $password = null, ?string $hash = null, int $level = 2) {
+		if(strlen($username) === 0) {
 			throw new \InvalidArgumentException('Username must be a non-empty string');
 		}
 

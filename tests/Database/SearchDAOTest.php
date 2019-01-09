@@ -85,29 +85,45 @@ class SearchDAOTest extends DatabaseTest {
 		$items = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(4, count($items), 'There should be only 4 items');
-
-
 	}
 
-
-	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
-	 */
 	public function testItemSearchRefinement() {
 		$db = $this->getDb();
 		$this->loadSample($db);
 
 		$id = $db->searchDAO()->search(new Search('PC%'), new User('asd'));
-		$idRefined = $db->searchDAO()->search(new Search(null, null, null, null, ['brand' => '+']), new User('asd'), $id);
+		$idRefined = $db->searchDAO()->search(new Search('%0'), new User('asd'), $id);
+		$this->assertEquals($id, $idRefined, "Search id shouldn't change");
+
+		$items = $db->searchDAO()->getResults($id, 1, 100);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(2, count($items), 'There should be only 2 items');
+
+		$idRefined = $db->searchDAO()->search(new Search('notacode'), new User('asd'), $id);
+		$this->assertEquals($id, $idRefined, "Search id shouldn't change, again");
+
+		$items = $db->searchDAO()->getResults($id, 1, 100);
+		$this->assertEquals(0, count($items), 'There should be no results now');
+	}
+
+		/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
+	 */
+	public function testItemSearchRefinementSorting() {
+		$db = $this->getDb();
+		$this->loadSample($db);
+
+		$id = $db->searchDAO()->search(new Search('PC%'), new User('asd'));
+		$idRefined = $db->searchDAO()->search(new Search(null, null, null, null, ['brand' => '-']), new User('asd'), $id);
 		$this->assertEquals($id, $idRefined, "Search id shouldn't change");
 
 		$items = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(4, count($items), 'There should be only 4 items (nothing was lost while sorting)');
-		$this->assertEquals('TI', $items[0]->getFeature('brand'), "Sorting is correct");
-		$this->assertEquals('Dill', $items[1]->getFeature('brand'), "Sorting is correct");
-		$this->assertEquals('Dill', $items[2]->getFeature('brand'), "Sorting is correct");
-		$this->assertEquals('Dill', $items[3]->getFeature('brand'), "Sorting is correct");
+		$this->assertEquals('TI', $items[0]->getFeature('brand')->value, "Sorting is correct");
+		$this->assertEquals('Dill', $items[1]->getFeature('brand')->value, "Sorting is correct");
+		$this->assertEquals('Dill', $items[2]->getFeature('brand')->value, "Sorting is correct");
+		$this->assertEquals('Dill', $items[3]->getFeature('brand')->value, "Sorting is correct");
 	}
 
 	public function testSearchSortingOnly() {

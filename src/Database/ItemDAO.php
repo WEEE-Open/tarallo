@@ -282,11 +282,7 @@ EOQ
 	 *
 	 * @return bool true if possible, false if wrong token or item doesn't exist
 	 */
-	private function checkToken(ItemIncomplete $item, $token) {
-		if(!is_string($token)) {
-			throw new \InvalidArgumentException('Token must be a string, ' . gettype($token) . ' given');
-		}
-
+	private function checkToken(ItemIncomplete $item, string $token) {
 		$tokenquery = $this->getPDO()->prepare(<<<EOQ
 			SELECT IF(COUNT(*) > 0, TRUE, FALSE)
 			FROM Item

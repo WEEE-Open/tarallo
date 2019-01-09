@@ -368,11 +368,7 @@ EOQ;
 	 *
 	 * @param int $searchId
 	 */
-	private function unsort($searchId) {
-		if(!is_int($searchId)) {
-			throw new \InvalidArgumentException('Search ID must be an integer');
-		}
-
+	private function unsort(int $searchId) {
 		$statement = $this->getPDO()->prepare('UPDATE SearchResult SET `Order` = NULL WHERE Search = ?');
 
 		try {
@@ -393,19 +389,7 @@ EOQ;
 	 *
 	 * @return Item[]
 	 */
-	public function getResults($id, $page, $perPage, $depth = null) {
-		if(!is_int($id)) {
-			throw new \InvalidArgumentException('Search ID must be an integer');
-		}
-
-		if(!is_int($page)) {
-			throw new \InvalidArgumentException('Page number must be an integer');
-		}
-
-		if(!is_int($perPage)) {
-			throw new \InvalidArgumentException('"Items per page" must be an integer');
-		}
-
+	public function getResults(int $id, int $page, int $perPage, ?int $depth = null) {
 		$this->refresh($id);
 
 		$statement = /** @lang MySQL */
