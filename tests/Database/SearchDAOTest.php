@@ -89,6 +89,33 @@ class SearchDAOTest extends DatabaseTest {
 
 	}
 
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
+	 */
+	public function testItemSearchRefinement() {
+		$db = $this->getDb();
+		$this->loadSample($db);
+
+		$id = $db->searchDAO()->search(new Search('PC%'), new User('asd'));
+		$idRefined = $db->searchDAO()->search(new Search(null, null, null, null, ['brand' => '+']), new User('asd'), $id);
+		$this->assertEquals($id, $idRefined, "Search id shouldn't change");
+
+		$items = $db->searchDAO()->getResults($id, 1, 100);
+		$this->assertContainsOnly(Item::class, $items);
+		$this->assertEquals(4, count($items), 'There should be only 4 items (nothing was lost while sorting)');
+		$this->assertEquals('TI', $items[0]->getFeature('brand'), "Sorting is correct");
+		$this->assertEquals('Dill', $items[1]->getFeature('brand'), "Sorting is correct");
+		$this->assertEquals('Dill', $items[2]->getFeature('brand'), "Sorting is correct");
+		$this->assertEquals('Dill', $items[3]->getFeature('brand'), "Sorting is correct");
+	}
+
+	public function testSearchSortingOnly() {
+		$db = $this->getDb();
+		$this->expectException(\InvalidArgumentException::class);
+		$db->searchDAO()->search(new Search(null, null, null, null, ['brand' => '+']), new User('asd'));
+	}
+
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 */

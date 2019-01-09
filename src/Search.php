@@ -11,6 +11,7 @@ class Search {
 	public $searchAncestors;
 	public $searchLocations;
 	public $sort;
+	private $sortOnly = false;
 
 	/**
 	 * @param string|null $code Filter by code (% and _ are allowed, % is appended at the end anyway)
@@ -19,14 +20,14 @@ class Search {
 	 * @param ItemIncomplete[]|null $locations Only descendants of these items will be searched
 	 * @param string[]|null $sorts Map (associative array) from feature name to order (+ or -)
 	 */
-	public function __construct($code = null, array $features = null, array $ancestors = null, array $locations = null,
+	public function __construct(string $code = null, array $features = null, array $ancestors = null, array $locations = null,
 		array $sorts = null) {
 		$this->filter($code, $features, $ancestors, $locations);
 		$this->sort($sorts);
+		$this->validate();
 	}
 
-	private function filter($code = null, array $features = null, array $ancestors = null, array $locations = null) {
-		$this->validateGlobally($code, $features, $ancestors, $locations);
+	private function filter(string $code = null, array $features = null, array $ancestors = null, array $locations = null) {
 		$this->searchCode = $code;
 		$this->searchFeatures = $features;
 		$this->searchAncestors = $ancestors;
@@ -37,12 +38,10 @@ class Search {
 	 * Set search code
 	 *
 	 * @param int $code
+	 * @deprecated
 	 */
-	public function setCode($code) {
+	public function setCode(int $code) {
 		if($this->code === null) {
-			if(!is_int($code)) {
-				throw new \InvalidArgumentException('Search code must be an integer');
-			}
 			$this->code = $code;
 		} else {
 			throw new \LogicException('Cannot set search code twice');
@@ -51,6 +50,7 @@ class Search {
 
 	/**
 	 * @return string|null
+	 * @deprecated
 	 */
 	public function getCode() {
 		return $this->code;
@@ -60,47 +60,55 @@ class Search {
 	 * @param string[]|null $sorts Map (associative array) from feature name to order (+ or -)
 	 */
 	private function sort(array $sorts = null) {
-		if($sorts !== null && count($sorts) > 1) {
-			throw new \InvalidArgumentException('Sorting by more than one field is currently unsupported');
+		if($sorts !== null) {
+			if(count($sorts) > 1) {
+				throw new \InvalidArgumentException( 'Sorting by more than one field is currently unsupported' );
+			} else if(count($sorts) === 0) {
+				$sorts = null;
+			}
 		}
 		$this->sort = $sorts;
+	}
+
+	/**
+	 * If this search should only be applied as a refinement to another search since it contains only a sorting thing
+	 *
+	 * @return bool
+	 */
+	public function isSortOnly(): bool {
+		return $this->sortOnly;
 	}
 
 	/**
 	 * Validate that there's something to search, so the search in its entirety makes sense
 	 *
 	 * @see filter
-	 *
-	 * @param string|null $code
-	 * @param SearchTriplet[]|null $features
-	 * @param SearchTriplet[]|null $ancestors
-	 * @param ItemIncomplete[]|null $locations
 	 */
-	private static function validateGlobally($code, array $features = null, array $ancestors = null,
-		array $locations = null) {
+	private function validate() {
 		$searchSomething = false;
 
-		if($code !== null) {
-			if(!is_string($code)) {
-				throw new \InvalidArgumentException('Code filter should be a string or null, ' . gettype($code) . ' given');
-			}
+		if($this->searchCode !== null) {
 			$searchSomething = true;
 		}
 
-		if($features !== null) {
+		if($this->searchFeatures !== null) {
 			$searchSomething = true;
 		}
 
-		if($ancestors !== null) {
+		if($this->searchAncestors !== null) {
 			$searchSomething = true;
 		}
 
-		if($locations !== null) {
+		if($this->searchLocations !== null) {
 			$searchSomething = true;
 		}
 
 		if(!$searchSomething) {
-			throw new \InvalidArgumentException('Nothing to search');
+			if($this->sort === null) {
+				throw new \InvalidArgumentException( 'Nothing to search' );
+			} else {
+				$this->sortOnly = true;
+			}
 		}
 	}
 }

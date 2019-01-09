@@ -111,13 +111,22 @@ final class SearchDAO extends DAO {
 	 * @param User $user Search owner (current user), not used if refining a previous search
 	 * @param int|null $previousSearchId If supplied, previous results are filtered again
 	 *
-	 * @TODO: actually refine (WHERE Code IN (SearchResults ...)) and ON DUPLICATE KEY IGNORE
-	 *
 	 * @return int Search ID, previous or new
+	 *
+	 * @TODO break up this function in smaller parts, it's huuuuuge
 	 */
 	public function search(Search $search, User $user, $previousSearchId = null) {
 		$i = 0;
 		$subqueries = [];
+
+		if($search->isSortOnly()) {
+			if($previousSearchId === null) {
+				throw new \InvalidArgumentException("Sorting only is not allowed for a new search");
+			} else {
+				$this->sort($search, $previousSearchId);
+				return $previousSearchId;
+			}
+		}
 
 		if($previousSearchId === null) {
 			$id = self::newSearch($user);
