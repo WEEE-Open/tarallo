@@ -118,6 +118,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('type', 'graphics-card'), -- Graphics card --
 	('type', 'ram'), -- RAM --
 	('type', 'hdd'), -- HDD --
+	('type', 'ssd'), -- SSD --
 	('type', 'odd'), -- ODD --
 	('type', 'psu'), -- PSU --
 	('type', 'audio-card'), -- Audio card --

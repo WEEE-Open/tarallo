@@ -34,7 +34,7 @@ class Feature {
 		'owner' => self::STRING,
 		'sn' => self::STRING,
 		'mac' => self::STRING,
-		'type' => ['location' => true, 'case' => true, 'motherboard' => true, 'cpu' => true, 'graphics-card' => true, 'ram' => true, 'hdd' => true, 'odd' => true, 'psu' => true, 'audio-card' => true, 'ethernet-card' => true, 'monitor' => true, 'mouse' => true, 'keyboard' => true, 'network-switch' => true, 'network-hub' => true, 'modem-router' => true, 'fdd' => true, 'ports-bracket' => true, 'other-card' => true, 'fan-controller' => true, 'modem-card' => true, 'scsi-card' => true, 'wifi-card' => true, 'bluetooth-card' => true, 'external-psu' => true, 'zip-drive' => true, 'printer' => true, 'scanner' => true, 'inventoried-object' => true, 'adapter' => true, 'usbhub' => true, 'tv-card' => true],
+		'type' => ['location' => true, 'case' => true, 'motherboard' => true, 'cpu' => true, 'graphics-card' => true, 'ram' => true, 'hdd' => true, 'ssd' => true, 'odd' => true, 'psu' => true, 'audio-card' => true, 'ethernet-card' => true, 'monitor' => true, 'mouse' => true, 'keyboard' => true, 'network-switch' => true, 'network-hub' => true, 'modem-router' => true, 'fdd' => true, 'ports-bracket' => true, 'other-card' => true, 'fan-controller' => true, 'modem-card' => true, 'scsi-card' => true, 'wifi-card' => true, 'bluetooth-card' => true, 'external-psu' => true, 'zip-drive' => true, 'printer' => true, 'scanner' => true, 'inventoried-object' => true, 'adapter' => true, 'usbhub' => true, 'tv-card' => true],
 		'working' => ['no' => true, 'yes' => true, 'maybe' => true],
 		'capacity-byte' => self::INTEGER,
 		'frequency-hertz' => self::INTEGER,
