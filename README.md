@@ -78,9 +78,9 @@ Copy `db-example.php` to `build/db.php` and edit it to suit your needs.
 Or you could name it `db-production.php` and place it in the main directory:
 when running `make` again, it will be copied to `build/db.php`.
 
-Also remember to import `database.sql`, `database-data.sql` and
-`database-procedures.sql` in the production database, if they've changed from
-last deployment.
+If this is the first deployment you'll need to import `database.sql`, `database-data.sql` and
+`database-procedures.sql` manually in the production database, if it is an update you may need
+to run the update script: use `php update.php` on the server.
 
 ## More details
 
