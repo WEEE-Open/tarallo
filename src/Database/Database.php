@@ -102,6 +102,10 @@ class Database {
 		return $this->treeDAO;
 	}
 
+	public function updater() {
+		return new Updater($this, $this->callback);
+	}
+
 	/**
 	 * @see \PDO::beginTransaction()
 	 */

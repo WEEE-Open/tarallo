@@ -174,3 +174,14 @@ CREATE TABLE `SearchResult` (
 	ENGINE = InnoDB
 	DEFAULT CHARSET = utf8mb4
 	COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `Configuration` (
+  `Key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Value` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+	PRIMARY KEY (`Key`)
+)
+	ENGINE = InnoDB
+	DEFAULT CHARSET = utf8mb4
+	COLLATE = utf8mb4_unicode_ci;
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 1);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 1);
