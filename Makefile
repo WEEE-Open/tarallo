@@ -21,6 +21,7 @@ clean:
 .PHONY:
 copies:
 	cp "index.php" build/
+	cp "update.php" build/
 	cp composer.{json,lock} "build/"
 	cp -r "src/" "build/"
 	cp -r "APIv1/" "build/"
