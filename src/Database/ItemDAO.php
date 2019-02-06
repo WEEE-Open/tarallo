@@ -308,18 +308,22 @@ EOQ
 	 * Get extra data: deletion date and lost date for an item.
 	 *
 	 * @param Item $head
+	 * @throws \Exception
 	 */
 	private function getExtraData(Item &$head) {
 		// TODO: race conditions with other queries?
-		$statement = $this->getPDO()->prepare('SELECT DeletedAt, LostAt FROM Item WHERE `Code` = ?');
+		$statement = $this->getPDO()->prepare('SELECT UNIX_TIMESTAMP(DeletedAt), UNIX_TIMESTAMP(LostAt) FROM Item WHERE `Code` = ?');
 		try {
 			$statement->execute([$head->getCode()]);
 			if($statement->rowCount() === 0) {
-				return null;
+				throw new \LogicException('Item disappeared during a query');
 			}
 			$result = $statement->fetch(\PDO::FETCH_ASSOC);
 			if($result['DeletedAt'] !== null) {
-				$head->setDeletedAt();
+				$head->setDeletedAt(new \DateTime($result['DeletedAt']));
+			}
+			if($result['LostAt'] !== null) {
+				$head->setLostAt(new \DateTime($result['LostAt']));
 			}
 		} finally {
 			$statement->closeCursor();

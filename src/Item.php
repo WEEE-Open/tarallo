@@ -236,4 +236,21 @@ class Item extends ItemFeatures implements \JsonSerializable {
 			return parent::getCode();
 		}
 	}
+
+	// TODO: consider the builder pattern as an alternative
+	public function setDeletedAt(\DateTime $when) {
+		$this->deletedAt = $when;
+	}
+
+	public function setLostAt(\DateTime $when) {
+		$this->lostAt = $when;
+	}
+
+	public function getDeletedAt() {
+		return $this->deletedAt;
+	}
+
+	public function getLostAt() {
+		return $this->lostAt;
+	}
 }
