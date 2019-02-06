@@ -41,6 +41,10 @@ cache:
 	test ! -f "build/APIv1/router.cache" || rm build/APIv1/router.cache
 	php utils/build-cache build/
 
+.PHONY:
+dbupdate:
+    vagrant provision --provision-with db_update,test_db_update
+
 build/db.php:
 ifneq ("$(wildcard db-production.php)","")
 	cp db-production.php build/db.php

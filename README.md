@@ -45,6 +45,12 @@ There are two databases: `tarallo`, which is the one used by the interface and
 the APIs, and `tarallo_test`, which is populated and used only when running
 PHPUnit tests.
 
+If you're upgrading from a previous version, run `vagrant provision --provision-with db_update,test_db_update`
+(or `make dbupdate` which does the same thing) to run the schema update script, both on the development
+and test database.  
+If the VM is not running, just start it, no other commands required: the update script runs
+automatically on each boot.
+
 The `vagrant-vbguest` plugin is required because the default CentOS 7 image lacks
 VirtualBox additions, needed for folder sharing. CentOS was chosen since that's
 what we're using on the production server.
