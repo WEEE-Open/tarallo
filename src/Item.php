@@ -13,7 +13,9 @@ class Item extends ItemFeatures implements \JsonSerializable {
 	protected $contents = [];
 	private $location = [];
 	protected $product = null;
-	public $token = null;
+	public $token = null; // TODO: change to protected sometimes in the future (this is for adding items with a token, not selecting items with a token)
+	protected $deletedAt = null;
+	protected $lostAt = null;
 
 	/**
 	 * Create an Item
@@ -214,6 +216,12 @@ class Item extends ItemFeatures implements \JsonSerializable {
 		}
 		if(!empty($this->location)) {
 			$array['location'] = $this->getPath();
+		}
+		if($this->deletedAt !== null) {
+			$array['deleted_at'] = $this->deletedAt;
+		}
+		if($this->lostAt !== null) {
+			$array['lost_at'] = $this->deletedAt;
 		}
 
 		return $array;

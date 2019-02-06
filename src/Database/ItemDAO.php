@@ -148,6 +148,7 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param ItemIncomplete $item
 	 * @return null|string
+	 * @deprecated
 	 */
 	public function itemDeletedAt(ItemIncomplete $item) {
 		$statement = $this->getPDO()->prepare('SELECT DeletedAt FROM Item WHERE `Code` = ?');
@@ -270,6 +271,7 @@ EOQ
 		}
 		$this->database->treeDAO()->getPathTo($head);
 		$this->database->featureDAO()->getFeaturesAll($flat);
+		$this->getExtraData($head);
 
 		return $head;
 	}
@@ -300,5 +302,28 @@ EOQ
 		} finally {
 			$tokenquery->closeCursor();
 		}
+	}
+
+	/**
+	 * Get extra data: deletion date and lost date for an item.
+	 *
+	 * @param Item $head
+	 */
+	private function getExtraData(Item &$head) {
+		// TODO: race conditions with other queries?
+		$statement = $this->getPDO()->prepare('SELECT DeletedAt, LostAt FROM Item WHERE `Code` = ?');
+		try {
+			$statement->execute([$head->getCode()]);
+			if($statement->rowCount() === 0) {
+				return null;
+			}
+			$result = $statement->fetch(\PDO::FETCH_ASSOC);
+			if($result['DeletedAt'] !== null) {
+				$head->setDeletedAt();
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+
 	}
 }
