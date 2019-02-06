@@ -116,15 +116,8 @@ CREATE TRIGGER ItemSetDeleted
 	ON Item
 	FOR EACH ROW
 	BEGIN
-		DECLARE descendants bigint UNSIGNED;
-
 		IF(NEW.DeletedAt IS NOT NULL AND (OLD.DeletedAt IS NULL OR OLD.DeletedAt <> NEW.DeletedAt)) THEN
-			SELECT COUNT(*) INTO descendants
-			FROM Tree
-			WHERE Ancestor = OLD.Code
-			AND Depth > 0;
-
-			IF(descendants > 0) THEN
+			IF(CountDescendants(OLD.Code) > 0) THEN
 				SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot delete an item while contains other items';
 			ELSE
 				DELETE FROM Tree WHERE Descendant = OLD.Code AND Depth > 0;
@@ -132,6 +125,23 @@ CREATE TRIGGER ItemSetDeleted
 			END IF;
 		END IF;
 	END $$
+DELIMITER ;
+
+DROP TRIGGER IF EXISTS ItemSetLost;
+DELIMITER $$
+CREATE TRIGGER ItemSetLost
+	BEFORE UPDATE
+	ON Item
+	FOR EACH ROW
+BEGIN
+	IF(NEW.LostAt IS NOT NULL AND (OLD.LostAt IS NULL OR OLD.LostAt <> NEW.LostAt)) THEN
+		IF(CountDescendants(OLD.Code) > 0) THEN
+			SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Cannot mark an item as lost while it contains other items';
+		ELSE
+			DELETE FROM Tree WHERE Descendant = OLD.Code AND Depth > 0;
+		END IF;
+	END IF;
+END $$
 DELIMITER ;
 
 -- Tree ------------------------------------------------------------------------
@@ -151,6 +161,23 @@ CREATE FUNCTION GetParent(child varchar(100))
 		WHERE Descendant = child
 			AND Depth = 1;
 		RETURN found;
+	END $$
+DELIMITER ;
+
+DROP FUNCTION IF EXISTS CountDescendants;
+DELIMITER $$
+CREATE FUNCTION CountDescendants(item varchar(100))
+	RETURNS bigint UNSIGNED
+	READS SQL DATA
+	DETERMINISTIC
+	SQL SECURITY INVOKER
+	BEGIN
+		DECLARE descendants bigint UNSIGNED;
+	  SELECT COUNT(*) INTO descendants
+		FROM Tree
+		WHERE Ancestor = item
+		AND Depth > 0;
+		RETURN descendants;
 	END $$
 DELIMITER ;
 
@@ -391,6 +418,21 @@ CREATE TRIGGER AuditDeleteItem
 			VALUES(NEW.Code, 'D', @taralloAuditUsername);
 		END IF;
 	END $$
+DELIMITER ;
+
+-- Add a 'L' entry to audit table
+DROP TRIGGER IF EXISTS AuditLostItem;
+DELIMITER $$
+CREATE TRIGGER AuditLostItem
+  AFTER UPDATE
+  ON Item
+  FOR EACH ROW
+BEGIN
+  IF(NEW.LostAt IS NOT NULL AND (OLD.LostAt IS NULL OR OLD.LostAt <> NEW.LostAt)) THEN
+    INSERT INTO Audit(Code, `Change`, `User`)
+    VALUES(NEW.Code, 'L', @taralloAuditUsername);
+  END IF;
+END $$
 DELIMITER ;
 
 -- Rename users in Audit table when renaming an account (to keep some kind of referential integrity)

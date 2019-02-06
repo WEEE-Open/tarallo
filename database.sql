@@ -18,7 +18,9 @@ CREATE TABLE `Item` (
 	`Variant` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 	`Token` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
 	`DeletedAt` timestamp NULL DEFAULT NULL,
+	`LostAt` timestamp NULL DEFAULT NULL,
 	INDEX (`DeletedAt`),
+	INDEX (`LostAt`),
 	-- TODO: reenable later
 	-- FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Products` (`Brand`, `Model`, `Variant`)
 	--	ON DELETE NO ACTION
@@ -94,9 +96,11 @@ CREATE TABLE Audit (
 		ON DELETE CASCADE
 		ON UPDATE CASCADE,
 	INDEX (`Change`),
-	-- CHECK ((`Change` = 'C') OR (`Change` = 'R') OR (`Change` = 'U') OR (`Change` = 'D') OR (`Change` = 'M')), -- R is for Rename, actually
-	CHECK (((`Change` = 'M' OR `Change` = 'R') AND `Other` IS NOT NULL) OR
-		((`Change` = 'U' OR `Change` = 'D' OR `Change` = 'C') AND `Other` IS NULL))
+	CONSTRAINT check_change
+		CHECK (
+			(`Change` IN ('M', 'R') AND `Other` IS NOT NULL) OR
+			(`Change` IN ('C', 'U', 'D', 'L') AND `Other` IS NULL)
+		)
 )
 	ENGINE = InnoDB
 	DEFAULT CHARSET = utf8mb4
