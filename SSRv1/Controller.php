@@ -315,6 +315,7 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
+
 	public static function options(Request $request, Response $response, ?callable $next = null): Response {
 		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
