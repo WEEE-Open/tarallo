@@ -382,6 +382,7 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
+<<<<<<< HEAD
     public static function moveAll(Request $request, Response $response, ?callable $next = null): Response {
         $db = $request->getAttribute('Database');
         $body = $request->getParsedBody();
@@ -416,6 +417,21 @@ class Controller extends AbstractController {
 	    return $next ? $next($request, $response) : $response;
     }
 
+=======
+
+    public static function moveAll(Request $request, Response $response, ?callable $next = null): Response {
+        $db = $request->getAttribute('Database');
+        $user = $request->getAttribute('User');
+        $body = $request->getParsedBody();
+        if(!empty($body)){
+        	$oggetti = isset($body['items']) ? (string) trim($body['items']) : null;
+        }
+        $request = $request->withAttribute('Template', 'moveAll')
+	        ->withAttribute('TemplateParameters', ['oggetti' => $oggetti]);
+        return $next ? $next($request, $response) : $response;
+    }
+    
+>>>>>>> Changed some stuff
 	public static function getFeaturesJson(Request $request, Response $response, ?callable $next = null): Response {
 		$response = $response
 			->withHeader('Content-Type', 'text/json')
@@ -449,7 +465,11 @@ class Controller extends AbstractController {
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
+<<<<<<< HEAD
             $r->addRoute(['GET', 'POST'], '/moveAll', [[Controller::class, 'moveAll']]);
+=======
+			$r->addRoute(['GET', 'POST'], '/moveAll', [[Controller::class, 'moveAll']]);
+>>>>>>> Changed some stuff
 
 			$r->addGroup('/stats', function(FastRoute\RouteCollector $r) {
 				$r->get('', [[Controller::class, 'getStats']]);
