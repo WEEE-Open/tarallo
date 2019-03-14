@@ -384,7 +384,12 @@ class Controller extends AbstractController {
     public static function moveAll(Request $request, Response $response, ?callable $next = null): Response {
         $db = $request->getAttribute('Database');
         $user = $request->getAttribute('User');
-        $request = $request->withAttribute('Template', 'moveAll');
+        $body = $request->getParsedBody();
+        if(!empty($body)){
+        	$oggetti = isset($body['items']) ? (string) trim($body['items']) : null;
+        }
+        $request = $request->withAttribute('Template', 'moveAll')
+	        ->withAttribute('TemplateParameters', ['oggetti' => $oggetti]);
         return $next ? $next($request, $response) : $response;
     }
 
@@ -421,7 +426,7 @@ class Controller extends AbstractController {
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
-            $r->get('/moveAll', [[Controller::class, 'moveAll']]);
+            $r->addRoute(['GET', 'POST'], '/moveAll', [[Controller::class, 'moveAll']]);
 
 			$r->addGroup('/stats', function(FastRoute\RouteCollector $r) {
 				$r->get('', [[Controller::class, 'getStats']]);
