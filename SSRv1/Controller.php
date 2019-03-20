@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Relay\RelayBuilder;
 use Slim\Http\Body;
 use WEEEOpen\Tarallo\Server\Database\Database;
+use WEEEOpen\Tarallo\Server\Database\TreeDAO;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\AbstractController;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
@@ -385,11 +386,26 @@ class Controller extends AbstractController {
         $db = $request->getAttribute('Database');
         $user = $request->getAttribute('User');
         $body = $request->getParsedBody();
-        if(!empty($body)){
-        	$oggetti = isset($body['items']) ? (string) trim($body['items']) : null;
+        if(!empty($body)) {
+        	$oggetti = isset($body['items']) ? (string)trim($body['items']) : null;
+	        $location = Validation::validateHasString($body, 'where');
+	        $array = explode(",", $oggetti);
+	        foreach($array as $oggetto){
+		        if($location === "") {
+			        $param = explode(":", $oggetto);
+			        if(count($param) != 2)
+				        throw new \LogicException("Fomato non valido");
+			        $oggetto = $param[0];
+			        $location = $param[1];
+		        }
+		        try {
+		        TreeDAO::moveWithValidation($db, new ItemIncomplete($oggetto), new ItemIncomplete($location), true, true);
+		        } catch (Exception $e){
+					throw new Exception($e->getMessage());
+				}
+	        }
         }
-        $request = $request->withAttribute('Template', 'moveAll')
-	        ->withAttribute('TemplateParameters', ['oggetti' => $oggetti]);
+        $request = $request->withAttribute('Template', 'moveAll');
         return $next ? $next($request, $response) : $response;
     }
     
