@@ -44,7 +44,7 @@ cache:
 
 .PHONY:
 dbupdate:
-    vagrant provision --provision-with db_update,test_db_update
+	vagrant provision --provision-with db_update,test_db_update
 
 build/db.php:
 ifneq ("$(wildcard db-production.php)","")
