@@ -327,6 +327,7 @@ BEGIN
 		END IF;
 	END IF;
 END $$
+DELIMITER ;
 
 -- Add a 'C' entry to audit table
 DROP TRIGGER IF EXISTS AuditCreateItem;
