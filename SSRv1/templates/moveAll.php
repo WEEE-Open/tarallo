@@ -7,7 +7,6 @@ $this->layout('main', ['title' => 'Move Items', 'user' => $user]);
     <textarea name="items">Lista degli oggetti</textarea>
     <input type="file" name="Fitems">
     <input type="submit">
+    <input type="text" name="where">
+
 </form>
-<?php if(!empty($oggetti))
-	echo $oggetti;
-?>
