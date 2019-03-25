@@ -6,6 +6,7 @@ use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemFeatures;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\NotFoundException;
 
 
 final class FeatureDAO extends DAO {
@@ -78,14 +79,21 @@ final class FeatureDAO extends DAO {
 	 * @param ItemIncomplete $item
 	 */
 	public function addAuditEntry(ItemIncomplete $item) {
-		$statementAudit = $this->getPDO()
+		$statement = $this->getPDO()
 			->prepare('INSERT INTO Audit (`Code`, `Change`, `User`) VALUES (?, \'U\', @taralloAuditUsername)');
 
 		try {
-			$success = $statementAudit->execute([$item->getCode()]);
+			$success = $statement->execute([$item->getCode()]);
 			assert($success, 'add audit table entry for features update of ' . $item->getCode());
+		} catch(\PDOException $e) {
+			// Foreign key constraint fails = item does not exist (deleteFeatures cannot check that it doesn't,
+			// but still tries to add an audit entry)
+			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1452) {
+				throw new NotFoundException();
+			}
+			throw $e;
 		} finally {
-			$statementAudit->closeCursor();
+			$statement->closeCursor();
 		}
 	}
 
@@ -118,6 +126,16 @@ final class FeatureDAO extends DAO {
 				$statement->bindValue(':val2', $feature->value, $type);
 				$result = $statement->execute();
 				assert($result !== false, 'set feature');
+			} catch(\PDOException $e) {
+				// This error has ever been witnessed when master-master replication breaks, but apparently it's used
+				// to signify that there's no foreign key target thing for the primary key other thing.
+				// That is: inserting/updating a row for an item that doesn't exist.
+				if($e->getCode() === 'HY000'
+					&& $statement->errorInfo()[1] === 1032
+					&& $statement->errorInfo()[2] === 'Can\'t find record in \'ItemFeature\'') {
+					throw new NotFoundException();
+				}
+				throw $e;
 			} finally {
 				$statement->closeCursor();
 			}
@@ -138,6 +156,7 @@ final class FeatureDAO extends DAO {
 		if(empty($features)) {
 			return false;
 		}
+		// This never fails, ever for items that don't exist
 		$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ? AND `Feature`= ?');
 		try {
 			foreach($features as $feature) {

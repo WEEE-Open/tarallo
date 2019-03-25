@@ -40,9 +40,8 @@ final class ItemDAO extends DAO {
 		} catch(\PDOException $e) {
 			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1062) {
 				throw new DuplicateItemCodeException($item->getCode());
-			} else {
-				throw $e;
 			}
+			throw $e;
 		} finally {
 			$statement->closeCursor();
 		}
@@ -148,7 +147,7 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param ItemIncomplete $item
 	 * @return null|string
-	 * @deprecated use getExtraData instead (which is private, so it's not a direct replacement and this stuff needs more thought)
+	 * @deprecated use getExtraData instead (which is private, so it's not a direct replacement and this stuff needs more thought: maybe move the LostAt and DeletedAt stuff to ItemIncomplete since they're optional and can exist for any item?)
 	 */
 	public function itemDeletedAt(ItemIncomplete $item) {
 		$statement = $this->getPDO()->prepare('SELECT DeletedAt FROM Item WHERE `Code` = ?');
