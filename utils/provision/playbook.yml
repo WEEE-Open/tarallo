@@ -121,8 +121,9 @@
   - name: Set MariaDB root password from 127.0.0.1
     mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user=root password="{{ mariadb_root_password }}" host="127.0.0.1" check_implicit_admin=yes
 
-  - name: Deletes anonymous MariaDB user
-    mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user="" host_all=yes state=absent
+  # Doens't work for unknown reasons on Ansible 2.5.x, works again on 2.7 but whatever
+  #- name: Deletes anonymous MariaDB user
+  #  mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user="" host_all=yes state=absent
 
   - name: Removes MariaDB test database
     mysql_db: login_user=root login_password="{{ mariadb_root_password }}" db=test state=absent
