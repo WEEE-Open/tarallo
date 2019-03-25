@@ -89,7 +89,7 @@ CREATE TABLE Audit (
 	`Code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Change` char(1) COLLATE utf8mb4_bin NOT NULL,
 	`Other` varchar(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-	`Time` timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	`Time` timestamp(6) DEFAULT NOW(6) NOT NULL,
 	`User` varchar(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 	PRIMARY KEY (`Code`, `Time`, `Change`),
 	CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`)
@@ -187,5 +187,5 @@ CREATE TABLE `Configuration` (
 	ENGINE = InnoDB
 	DEFAULT CHARSET = utf8mb4
 	COLLATE = utf8mb4_unicode_ci;
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 1);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 4);
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 1);

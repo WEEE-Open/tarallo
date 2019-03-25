@@ -138,6 +138,10 @@ ADD CONSTRAINT check_change
 	)
 EOQ
 					);
+					break;
+				case 3:
+					$this->exec('ALTER TABLE `Audit` CHANGE `Time` `Time` timestamp(6) NOT NULL DEFAULT now(6) AFTER `Other`;');
+					break;
 			}
 			$this->schemaVersion++;
 		}
