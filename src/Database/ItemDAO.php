@@ -148,7 +148,7 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param ItemIncomplete $item
 	 * @return null|string
-	 * @deprecated
+	 * @deprecated use getExtraData instead (which is private, so it's not a direct replacement and this stuff needs more thought)
 	 */
 	public function itemDeletedAt(ItemIncomplete $item) {
 		$statement = $this->getPDO()->prepare('SELECT DeletedAt FROM Item WHERE `Code` = ?');
@@ -308,7 +308,6 @@ EOQ
 	 * Get extra data: deletion date and lost date for an item.
 	 *
 	 * @param Item $head
-	 * @throws \Exception
 	 */
 	private function getExtraData(Item &$head) {
 		// TODO: race conditions with other queries?
@@ -319,11 +318,15 @@ EOQ
 				throw new \LogicException('Item disappeared during a query');
 			}
 			$result = $statement->fetch(\PDO::FETCH_ASSOC);
-			if($result['DeletedAt'] !== null) {
-				$head->setDeletedAt(new \DateTime($result['DeletedAt']));
-			}
-			if($result['LostAt'] !== null) {
-				$head->setLostAt(new \DateTime($result['LostAt']));
+			try {
+				if($result['DeletedAt'] !== null) {
+					$head->setDeletedAt(new \DateTime($result['DeletedAt']));
+				}
+				if($result['LostAt'] !== null) {
+					$head->setLostAt(new \DateTime($result['LostAt']));
+				}
+			} catch(\Exception $e) {
+				throw new \LogicException("Cannot create datetime", 0, $e);
 			}
 		} finally {
 			$statement->closeCursor();
