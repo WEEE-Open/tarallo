@@ -312,7 +312,7 @@ EOQ
 	 */
 	private function getExtraData(Item &$head) {
 		// TODO: race conditions with other queries?
-		$statement = $this->getPDO()->prepare('SELECT UNIX_TIMESTAMP(DeletedAt), UNIX_TIMESTAMP(LostAt) FROM Item WHERE `Code` = ?');
+		$statement = $this->getPDO()->prepare('SELECT UNIX_TIMESTAMP(DeletedAt) AS DeletedAt, UNIX_TIMESTAMP(LostAt) AS LostAt FROM Item WHERE `Code` = ?');
 		try {
 			$statement->execute([$head->getCode()]);
 			if($statement->rowCount() === 0) {
