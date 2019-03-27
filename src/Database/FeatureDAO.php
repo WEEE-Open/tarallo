@@ -132,7 +132,13 @@ final class FeatureDAO extends DAO {
 				// That is: inserting/updating a row for an item that doesn't exist.
 				if($e->getCode() === 'HY000'
 					&& $statement->errorInfo()[1] === 1032
-					&& $statement->errorInfo()[2] === 'Can\'t find record in \'ItemFeature\'') {
+					&& $statement->errorInfo()[2] === 'Can\'t find record in \'ItemFeature\''
+				) {
+					throw new NotFoundException();
+				} elseif($e->getCode() === '23000'
+				         && $statement->errorInfo()[0] === '23000'
+				         && $statement->errorInfo()[1] === 1452
+				) {
 					throw new NotFoundException();
 				}
 				throw $e;
