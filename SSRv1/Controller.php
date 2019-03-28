@@ -382,7 +382,6 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
-<<<<<<< HEAD
     public static function moveAll(Request $request, Response $response, ?callable $next = null): Response {
         $db = $request->getAttribute('Database');
         $body = $request->getParsedBody();
@@ -417,43 +416,6 @@ class Controller extends AbstractController {
 	    return $next ? $next($request, $response) : $response;
     }
 
-=======
-
-    public static function moveAll(Request $request, Response $response, ?callable $next = null): Response {
-        $db = $request->getAttribute('Database');
-        $user = $request->getAttribute('User');
-        $body = $request->getParsedBody();
-        if(!empty($_FILES)) {
-	        $file = $_FILES['Fitems'];
-	        if(file_get_contents($file['tmp_name']) === false)
-	        	throw new \LogicException("Errore nell' apertura del file");
-	        else
-	        	$items = file_get_contents($file['tmp_name']);
-        } else
-	        $items = isset($body['items']) ? (string)trim($body['items']) : null;
-	    if(isset($body['where']))
-		    $location = Validation::validateHasString($body, 'where');
-        $array = explode(",", $items);
-        foreach($array as $oggetto) {
-	        if($location === "") {
-		        $param = explode(":", $oggetto);
-		        if(count($param) != 2)
-			        throw new \LogicException("Formato non valido");
-		        $oggetto = $param[0];
-		        $location = $param[1];
-	        }
-	        try {
-		        TreeDAO::moveWithValidation($db, new ItemIncomplete($oggetto), new ItemIncomplete($location), true, true);
-	        } catch(Exception $e) {
-		        throw new Exception($e->getMessage());
-	        }
-        }
-        $request = $request->withAttribute('Template', 'moveAll')
-	        ->withAttribute('TemplateParameters', ['lmao' => $print]);
-	    return $next ? $next($request, $response) : $response;
-    }
-    
->>>>>>> Changed some stuff
 	public static function getFeaturesJson(Request $request, Response $response, ?callable $next = null): Response {
 		$response = $response
 			->withHeader('Content-Type', 'text/json')
@@ -487,11 +449,7 @@ class Controller extends AbstractController {
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
-<<<<<<< HEAD
             $r->addRoute(['GET', 'POST'], '/moveAll', [[Controller::class, 'moveAll']]);
-=======
-			$r->addRoute(['GET', 'POST'], '/moveAll', [[Controller::class, 'moveAll']]);
->>>>>>> Changed some stuff
 
 			$r->addGroup('/stats', function(FastRoute\RouteCollector $r) {
 				$r->get('', [[Controller::class, 'getStats']]);
