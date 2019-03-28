@@ -384,7 +384,6 @@ class Controller extends AbstractController {
 
     public static function moveAll(Request $request, Response $response, ?callable $next = null): Response {
         $db = $request->getAttribute('Database');
-        $user = $request->getAttribute('User');
         $body = $request->getParsedBody();
         if(!empty($_FILES)) {
 	        $file = $_FILES['Fitems'];
@@ -411,8 +410,7 @@ class Controller extends AbstractController {
 		        throw new Exception($e->getMessage());
 	        }
         }
-        $request = $request->withAttribute('Template', 'moveAll')
-	        ->withAttribute('TemplateParameters', ['lmao' => $print]);
+        $request = $request->withAttribute('Template', 'moveAll');
 	    return $next ? $next($request, $response) : $response;
     }
 
