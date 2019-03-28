@@ -9,5 +9,7 @@ $this->layout('main', ['title' => 'Move Items', 'user' => $user]);
     <input type="text" name="where">
     <input type="submit">
     <input type="text" name="where">
-
 </form>
+<?php
+echo $lmao;
+?>
