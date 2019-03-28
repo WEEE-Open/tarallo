@@ -6,9 +6,6 @@ $this->layout('main', ['title' => 'Move Items', 'user' => $user]);
 <form action="\moveAll" method="POST" enctype="multipart/form-data">
     <textarea name="items">Lista degli oggetti</textarea>
     <input type="file" name="Fitems">
-    <input type="submit">
     <input type="text" name="where">
+    <input type="submit">
 </form>
-<?php
-echo $lmao;
-?>
