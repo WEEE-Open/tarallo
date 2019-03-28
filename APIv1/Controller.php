@@ -398,7 +398,7 @@ class Controller extends AbstractController {
 			try {
 				$newParent = $db->itemDAO()->getItem($newParent, null, 1);
 			} catch(NotFoundException $e) {
-				throw new InvalidPayloadParameterException('*', $newParent->getCode(), "Parent item doesn't exist");
+				throw new NotFoundException(TreeDAO::EXCEPTION_CODE_PARENT, "Parent item doesn't exist");
 			}
 		}
 
@@ -427,7 +427,7 @@ class Controller extends AbstractController {
 				$moved = true;
 			} catch(NotFoundException $e) {
 				if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
-					throw new InvalidPayloadParameterException('*', $newParent->getCode(), "Parent item doesn't exist");
+					throw new NotFoundException(TreeDAO::EXCEPTION_CODE_PARENT, "Parent item doesn't exist");
 				} else {
 					throw $e;
 				}
@@ -845,6 +845,10 @@ class Controller extends AbstractController {
 				$response = $response
 					->withStatus(500);
 			} catch(NotFoundException $e) {
+				$request = $request
+					->withAttribute('Status', JSend::ERROR)
+					->withAttribute('ErrorMessage', $e->getMessage())
+					->withAttribute('ErrorCode', $e->getCode());
 				$response = $response
 					->withStatus(404);
 			} catch(\Throwable $e) {

@@ -7,8 +7,9 @@ class NotFoundException extends \RuntimeException {
 	 * NotFoundException constructor.
 	 *
 	 * @param int $code
+	 * @param null $message
 	 */
-	public function __construct($code = 0) {
-		parent::__construct('Not found/no results', $code);
+	public function __construct($code = 0, $message = null) {
+		parent::__construct($message ?? 'Not found/no results', $code);
 	}
 }
