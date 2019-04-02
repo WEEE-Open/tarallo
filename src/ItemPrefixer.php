@@ -33,6 +33,7 @@ class ItemPrefixer {
 			case 'ram':
 				return 'R';
 			case 'hdd':
+			case 'ssd':
 				if(self::has('sata-ports-n', $features)) {
 					return 'S';
 				} elseif(self::has('ide-ports-n', $features) || self::has('mini-ide-ports-n', $features)) {
@@ -42,7 +43,6 @@ class ItemPrefixer {
 				} else {
 					throw new \InvalidArgumentException('No or unknown hard drive connector, cannot generate a code');
 				}
-				//return 'HDD';
 			case 'odd':
 				return 'ODD';
 			case 'psu':
