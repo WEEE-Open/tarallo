@@ -387,10 +387,10 @@ class Controller extends AbstractController {
         $body = $request->getParsedBody();
         if(!empty($_FILES['Fitems']['tmp_name'])) {
 	        $file = $_FILES['Fitems'];
-	        if(file_get_contents($file['tmp_name']) === false)
+	        $items = file_get_contents($file['tmp_name']);
+	        if($items === false)
 	        	throw new \LogicException("Errore nell' apertura del file");
-	        else
-	        	$items = file_get_contents($file['tmp_name']);
+	        $items = trim($items);
         } else
 	        $items = $body['items'] !== "Lista degli oggetti" ? (string)trim($body['items']) : null;
         if(!empty($items)) {
