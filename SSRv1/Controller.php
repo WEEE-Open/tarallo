@@ -385,33 +385,32 @@ class Controller extends AbstractController {
     public static function moveAll(Request $request, Response $response, ?callable $next = null): Response {
         $db = $request->getAttribute('Database');
         $body = $request->getParsedBody();
-        if(!empty($_FILES['Fitems']['tmp_name'])) {
+        if(!empty($_FILES)) {
 	        $file = $_FILES['Fitems'];
-	        $items = file_get_contents($file['tmp_name']);
-	        if($items === false)
+	        if(file_get_contents($file['tmp_name']) === false)
 	        	throw new \LogicException("Errore nell' apertura del file");
-	        $items = trim($items);
+	        else
+	        	$items = file_get_contents($file['tmp_name']);
         } else
-	        $items = $body['items'] !== "Lista degli oggetti" ? (string)trim($body['items']) : null;
-        if(!empty($items)) {
-	        $where = Validation::validateOptionalString($body, 'where');
-	        $array = explode(",", $items);
-	        foreach($array as $oggetto) {
-		        if($where === '') {
-			        $param = explode(":", $oggetto);
-			        if(count($param) != 2)
-				        throw new \LogicException("Formato non valido");
-			        $oggetto = $param[0];
-			        $location = $param[1];
-		        } else
-		        	$location = $where;
-		        try {
-			        TreeDAO::moveWithValidation($db, new ItemIncomplete($oggetto), new ItemIncomplete($location), true, true);
-		        } catch(Exception $e) {
-			        throw new Exception($e->getMessage());
-		        }
-	        }
-        }
+	        $items = isset($body['items']) ? (string)trim($body['items']) : null;
+	    if(isset($body['where']))
+		    $location = Validation::validateHasString($body, 'where');
+        $array = explode(",", $items);
+        if(empty($array))
+            foreach($array as $oggetto) {
+                if($location === "") {
+                    $param = explode(":", $oggetto);
+                    if(count($param) != 2)
+                        throw new \LogicException("Formato non valido");
+                    $oggetto = $param[0];
+                    $location = $param[1];
+                }
+                try {
+                    TreeDAO::moveWithValidation($db, new ItemIncomplete($oggetto), new ItemIncomplete($location), true, true);
+                } catch(Exception $e) {
+                    throw new Exception($e->getMessage());
+                }
+            }
         $request = $request->withAttribute('Template', 'moveAll');
 	    return $next ? $next($request, $response) : $response;
     }
