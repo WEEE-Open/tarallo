@@ -385,7 +385,7 @@ class Controller extends AbstractController {
     public static function moveAll(Request $request, Response $response, ?callable $next = null): Response {
         $db = $request->getAttribute('Database');
         $body = $request->getParsedBody();
-        if(!empty($_FILES['Fitems']['tmp_name'])) {
+        if(!empty($_FILES)) {
 	        $file = $_FILES['Fitems'];
             $items = file_get_contents($file['tmp_name']);
             if($items === false)
