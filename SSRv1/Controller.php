@@ -316,6 +316,7 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
+
 	public static function options(Request $request, Response $response, ?callable $next = null): Response {
 		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
@@ -381,7 +382,6 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
-
     public static function moveAll(Request $request, Response $response, ?callable $next = null): Response {
         $db = $request->getAttribute('Database');
         $body = $request->getParsedBody();
@@ -415,7 +415,7 @@ class Controller extends AbstractController {
         $request = $request->withAttribute('Template', 'moveAll');
 	    return $next ? $next($request, $response) : $response;
     }
-    
+
 	public static function getFeaturesJson(Request $request, Response $response, ?callable $next = null): Response {
 		$response = $response
 			->withHeader('Content-Type', 'text/json')
@@ -449,8 +449,7 @@ class Controller extends AbstractController {
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
-			$r->addRoute(['GET', 'POST'], '/moveAll', [[Controller::class, 'moveAll']]);
-
+            $r->addRoute(['GET', 'POST'], '/moveAll', [[Controller::class, 'moveAll']]);
 			$r->addGroup('/stats', function(FastRoute\RouteCollector $r) {
 				$r->get('', [[Controller::class, 'getStats']]);
 				$r->get('/{which}', [[Controller::class, 'getStats']]);
