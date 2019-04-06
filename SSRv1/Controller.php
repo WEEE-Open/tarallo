@@ -9,7 +9,6 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Relay\RelayBuilder;
 use Slim\Http\Body;
 use WEEEOpen\Tarallo\Server\Database\Database;
-use WEEEOpen\Tarallo\Server\Database\TreeDAO;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\AbstractController;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
@@ -315,7 +314,6 @@ class Controller extends AbstractController {
 
 		return $next ? $next($request, $response) : $response;
 	}
-
 
 	public static function options(Request $request, Response $response, ?callable $next = null): Response {
 		$db = $request->getAttribute('Database');
