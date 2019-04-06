@@ -388,48 +388,48 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
-    private static function moveWithValidation(Database $db, ItemIncomplete $what, ItemIncomplete $newParent, bool $fix, bool $validate): bool {
-        // We'll need the full item in any case, not just an ItemIncomplete
-        $item = $db->itemDAO()->getItem($what, null, 0);
-        $oldParent = $item->getParent();
-        // Also the parent, in these cases
-        if($fix || $validate) {
-            try {
-                $newParent = $db->itemDAO()->getItem($newParent, null, 1);
-            } catch(NotFoundException $e) {
-                throw new NotFoundException(TreeDAO::EXCEPTION_CODE_PARENT, "Parent item doesn't exist");
-            }
-        }
-        if($fix) {
-            $newParent = ItemValidator::fixupLocation($item, $newParent);
-        }
-        if($validate) {
-            try {
-                ItemValidator::validateLocation($item, $newParent);
-            } catch(ItemNestingException $e) {
-                throw new InvalidPayloadParameterException('*', $e->parentCode, $e->getMessage());
-            }
-        }
-        if($newParent === null) {
-            throw new \LogicException('Moving to "null" is not implemented, move an item into itself to make it a root');
-        }
-        $moved = false;
-        // if $newParent === null will ever be supported, add a check here
-        // if(from nowhere to somewhere || from somewhere to somewhere else (including itself, which removes parent))
-        if(($oldParent === null && $newParent->compareCode($item) !== 0) || ($oldParent !== null && $newParent->compareCode($oldParent) !== 0)) {
-            try {
-                $db->treeDAO()->moveItem($item, $newParent);
-                $moved = true;
-            } catch(NotFoundException $e) {
-                if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
-                    throw new NotFoundException(TreeDAO::EXCEPTION_CODE_PARENT, "Parent item doesn't exist");
-                } else {
-                    throw $e;
-                }
-            }
-        }
-        return $oldParent === null && $moved ? true : false;
-    }
+	private static function moveWithValidation(Database $db, ItemIncomplete $what, ItemIncomplete $newParent, bool $fix, bool $validate): bool {
+		// We'll need the full item in any case, not just an ItemIncomplete
+		$item = $db->itemDAO()->getItem($what, null, 0);
+		$oldParent = $item->getParent();
+		// Also the parent, in these cases
+		if($fix || $validate) {
+		    try {
+			$newParent = $db->itemDAO()->getItem($newParent, null, 1);
+		    } catch(NotFoundException $e) {
+			throw new NotFoundException(TreeDAO::EXCEPTION_CODE_PARENT, "Parent item doesn't exist");
+		    }
+		}
+		if($fix) {
+		    $newParent = ItemValidator::fixupLocation($item, $newParent);
+		}
+		if($validate) {
+		    try {
+			ItemValidator::validateLocation($item, $newParent);
+		    } catch(ItemNestingException $e) {
+			throw new InvalidPayloadParameterException('*', $e->parentCode, $e->getMessage());
+		    }
+		}
+		if($newParent === null) {
+		    throw new \LogicException('Moving to "null" is not implemented, move an item into itself to make it a root');
+		}
+		$moved = false;
+		// if $newParent === null will ever be supported, add a check here
+		// if(from nowhere to somewhere || from somewhere to somewhere else (including itself, which removes parent))
+		if(($oldParent === null && $newParent->compareCode($item) !== 0) || ($oldParent !== null && $newParent->compareCode($oldParent) !== 0)) {
+		    try {
+			$db->treeDAO()->moveItem($item, $newParent);
+			$moved = true;
+		    } catch(NotFoundException $e) {
+			if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
+			    throw new NotFoundException(TreeDAO::EXCEPTION_CODE_PARENT, "Parent item doesn't exist");
+			} else {
+			    throw $e;
+			}
+		    }
+		}
+		return $oldParent === null && $moved ? true : false;
+	}
 
 	public static function setItemFeatures(Request $request, Response $response, ?callable $next = null): Response {
 		/** @var Database $db */
