@@ -450,7 +450,6 @@ class Controller extends AbstractController {
 			$r->get('/search/{id:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
             $r->addRoute(['GET', 'POST'], '/moveAll', [[Controller::class, 'moveAll']]);
-
 			$r->addGroup('/stats', function(FastRoute\RouteCollector $r) {
 				$r->get('', [[Controller::class, 'getStats']]);
 				$r->get('/{which}', [[Controller::class, 'getStats']]);
