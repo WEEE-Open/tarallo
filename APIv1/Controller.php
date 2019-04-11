@@ -388,8 +388,7 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
-    public static function setItemFeatures(Request $request, Response $response, ?callable $next = null): Response
-    {
+	public static function setItemFeatures(Request $request, Response $response, ?callable $next = null): Response {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
