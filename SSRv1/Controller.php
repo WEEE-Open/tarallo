@@ -15,6 +15,7 @@ use WEEEOpen\Tarallo\Server\HTTP\AbstractController;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\Server\HTTP\DatabaseConnection;
+use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\HTTP\LanguageNegotiatior;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
@@ -202,7 +203,7 @@ class Controller extends AbstractController {
 					->withAttribute('TemplateParameters',
 						[
 							'locations' => $db->statsDAO()->getLocationsByItems(),
-							'recentlyAdded'	=> $db->auditDAO()->getRecentAuditByType('C', 40),
+							'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 40),
 							'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 40),
 						]);
 				break;
@@ -213,7 +214,8 @@ class Controller extends AbstractController {
 					->withAttribute('TemplateParameters',
 						[
 							'serials' => $db->statsDAO()->getCountByFeature('sn', null, null, null, false, 2),
-							'missingData' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'missing-data'), null, 500),
+							'missingData' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'missing-data'),
+								null, 500),
 							'lost' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'lost'), null, 100)
 						]);
 				break;
@@ -231,12 +233,16 @@ class Controller extends AbstractController {
 							'location' => $location === null ? null : $location->getCode(),
 							'locationSet' => $locationSet,
 							'startDate' => $startDate,
-							'startDateSet'=> $startDateSet,
+							'startDateSet' => $startDateSet,
 							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
 							'mostRecent' => $db->statsDAO()->getModifiedItems($location, true, 30),
-							'byOwner' => $db->statsDAO()->getCountByFeature('owner', new Feature('type', 'case'), $location, $startDate),
-							'byMobo' => $db->statsDAO()->getCountByFeature('motherboard-form-factor', new Feature('type', 'case'), $location, $startDate),
-							'ready' => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'), $location, 100),
+							'byOwner' => $db->statsDAO()
+								->getCountByFeature('owner', new Feature('type', 'case'), $location, $startDate),
+							'byMobo' => $db->statsDAO()
+								->getCountByFeature('motherboard-form-factor', new Feature('type', 'case'), $location,
+									$startDate),
+							'ready' => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'),
+								$location, 100),
 						]);
 				break;
 
@@ -253,15 +259,23 @@ class Controller extends AbstractController {
 							'location' => $location === null ? null : $location->getCode(),
 							'locationSet' => $locationSet,
 							'startDate' => $startDate,
-							'startDateSet'=> $startDateSet,
-							'byType' => $db->statsDAO()->getCountByFeature('ram-type', new Feature('type', 'ram'), $location),
-							'byFormFactor'=> $db->statsDAO()->getCountByFeature('ram-form-factor', new Feature('type', 'ram'), $location),
-							'bySize'=> $db->statsDAO()->getCountByFeature('capacity-byte', new Feature('type', 'ram'), $location),
-							'byTypeFrequency' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), ['ram-type', 'ram-form-factor', 'frequency-hertz'], $location),
-							'byTypeSize' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), ['ram-type', 'ram-form-factor', 'capacity-byte'], $location),
-							'noWorking' => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'working', $location, 200),
-							'noFrequency' => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'frequency-hertz', $location, 200),
-							'noSize' => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'capacity-byte', $location, 200),
+							'startDateSet' => $startDateSet,
+							'byType' => $db->statsDAO()
+								->getCountByFeature('ram-type', new Feature('type', 'ram'), $location),
+							'byFormFactor' => $db->statsDAO()
+								->getCountByFeature('ram-form-factor', new Feature('type', 'ram'), $location),
+							'bySize' => $db->statsDAO()
+								->getCountByFeature('capacity-byte', new Feature('type', 'ram'), $location),
+							'byTypeFrequency' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'),
+								['ram-type', 'ram-form-factor', 'frequency-hertz'], $location),
+							'byTypeSize' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'),
+								['ram-type', 'ram-form-factor', 'capacity-byte'], $location),
+							'noWorking' => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'working',
+								$location, 200),
+							'noFrequency' => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'),
+								'frequency-hertz', $location, 200),
+							'noSize' => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'),
+								'capacity-byte', $location, 200),
 						]);
 				break;
 
@@ -381,39 +395,54 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
-    public static function moveAll(Request $request, Response $response, ?callable $next = null): Response {
-        $db = $request->getAttribute('Database');
-        $body = $request->getParsedBody();
-        if(!empty($_FILES['Fitems']['tmp_name'])) {
-	        $file = $_FILES['Fitems'];
-            $items = file_get_contents($file['tmp_name']);
-            if($items === false)
-	        	throw new \LogicException("Errore nell' apertura del file");
-            $items = trim($items);
-        } else
-            $items = $body['items'] !== "Lista degli oggetti" ? (string)trim($body['items']) : null;
-        if(!empty($items)) {
-            $where = Validation::validateOptionalString($body, 'where');
-            $array = explode(",", $items);
-            foreach($array as $oggetto) {
-                if($where === '') {
-                    $param = explode(":", $oggetto);
-                    if(count($param) != 2)
-                        throw new \LogicException("Formato non valido");
-                    $oggetto = $param[0];
-                    $location = $param[1];
-                } else
-                    $location = $where;
-                try {
-                    TreeDAO::moveWithValidation($db, new ItemIncomplete($oggetto), new ItemIncomplete($location), true, true);
-                } catch(Exception $e) {
-                    throw new Exception($e->getMessage());
-                }
-            }
-        }
-        $request = $request->withAttribute('Template', 'moveAll');
-	    return $next ? $next($request, $response) : $response;
-    }
+	public static function bulk(Request $request, Response $response, ?callable $next = null): Response {
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$body = $request->getParsedBody();
+
+		Validation::authorize($user);
+
+		if($body === null) {
+			// Opened page, didn't submit anything yet
+			$items = null;
+		} else {
+			if(empty($_FILES['Fitems']['tmp_name'])) {
+				$items = (string) $body['items'];
+			} else {
+				$items = file_get_contents($_FILES['Fitems']['tmp_name']);
+				if($items === false) {
+					throw new \LogicException('Cannot open temporary file');
+				}
+			}
+		}
+
+		$error = null;
+		$moved = null;
+		$code = 200;
+		if($items != null) {
+			// Null if there's no value or an empty string
+			$where = Validation::validateOptionalString($body, 'where', null, null);
+			if($where !== null) {
+				$where = new ItemIncomplete($where);
+			}
+			try {
+				$moved = self::doBulkMove($items, $where, $db);
+			} catch(\Exception $e) {
+				$error = $e->getMessage();
+				if($e instanceof \InvalidArgumentException || $e instanceof InvalidPayloadParameterException) {
+					$code = 400;
+				} else {
+					$code = 500;
+				}
+			}
+		}
+		$request = $request
+			->withAttribute('Template', 'bulk')
+			->withAttribute('TemplateParameters', ['error' => $error, 'moved' => $moved]);
+		$response = $response
+			->withStatus($code);
+		return $next ? $next($request, $response) : $response;
+	}
 
 	public static function getFeaturesJson(Request $request, Response $response, ?callable $next = null): Response {
 		$response = $response
@@ -448,7 +477,7 @@ class Controller extends AbstractController {
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
-            $r->addRoute(['GET', 'POST'], '/moveAll', [[Controller::class, 'moveAll']]);
+			$r->addRoute(['GET', 'POST'], '/bulk', [[Controller::class, 'bulk']]);
 			$r->addGroup('/stats', function(FastRoute\RouteCollector $r) {
 				$r->get('', [[Controller::class, 'getStats']]);
 				$r->get('/{which}', [[Controller::class, 'getStats']]);
@@ -580,6 +609,53 @@ class Controller extends AbstractController {
 		} else {
 			return $response;
 		}
+	}
+
+	/**
+	 * Parse the file/input format for bulk move operations and do whatever's needed
+	 *
+	 * @param string $itemsList Items list, in string format
+	 * @param ItemIncomplete|null $defaultLocation Default location for items without a location in the list
+	 * @param Database $db Our dear database
+	 * @param bool $fix Perform fixup
+	 * @param bool $validate Perform validation
+	 * @return array [ string item => (string) its new location ]
+	 * @throws \InvalidArgumentException if syntax or logic of the inputs doesn't make sense
+	 * @throws \Exception whatever may surface from TreeDAO::moveWithValidation
+	 */
+	public static function doBulkMove(string $itemsList, ?ItemIncomplete $defaultLocation, Database $db, bool $fix = true, bool $validate = true): array {
+		$moved = [];
+		if(strpos($itemsList, ',') === false) {
+			$array = explode("\n", $itemsList);
+		} else {
+			$array = explode(',', $itemsList);
+		}
+
+		foreach($array as $line) {
+			$line = trim($line);
+			if($line === '') {
+				// Skip empty lines (trailing commas, two consecutive commas, etc...)
+				continue;
+			}
+			$lineExploded = explode(':', $line);
+			if(count($lineExploded) == 1) {
+				$item = new ItemIncomplete(trim($lineExploded[0]));
+				if($defaultLocation === null) {
+					throw new \InvalidArgumentException("No location provided for $line and no default location", 1);
+				} else {
+					$location = $defaultLocation;
+				}
+			} else if(count($lineExploded) == 2) {
+				$item = new ItemIncomplete(trim($lineExploded[0]));
+				$location = new ItemIncomplete(trim($lineExploded[1]));
+			} else {
+				throw new \InvalidArgumentException("Invalid format for \"$line\", too many separators (:)", 2);
+			}
+			// This may throw and leave the function
+			TreeDAO::moveWithValidation($db, $item, $location, $fix, $validate);
+			$moved[$item->getCode()] = $location->getCode();
+		}
+		return $moved;
 	}
 
 }

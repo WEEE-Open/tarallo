@@ -80,7 +80,7 @@ class Validation {
 	/**
 	 * Return string value from a key if it exists (being casted if not a string),
 	 * or supplied default value (default null) if it doesn't.
-	 * Empty string is considered invalid.
+	 * Empty string is considered valid, maybe? I don't know anymore
 	 *
 	 * TODO: where is the empty string used? Is it valid or not, actually?
 	 *
