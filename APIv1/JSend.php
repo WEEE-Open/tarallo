@@ -10,7 +10,7 @@ class JSend {
 	public static function error(string $message, $code = null, $data = null): string {
 		$result = [
 			'status' => 'error',
-			'message' => $message
+			'message' => $message,
 		];
 		if($code !== null) {
 			$result['code'] = $code;
@@ -22,16 +22,20 @@ class JSend {
 	}
 
 	public static function fail($data = null): string {
-		return json_encode([
-			'status' => 'fail',
-			'data' => $data
-		]);
+		return json_encode(
+			[
+				'status' => 'fail',
+				'data' => $data,
+			]
+		);
 	}
 
 	public static function success($data = null): string {
-		return json_encode([
-			'status' => 'success',
-			'data' => $data
-		]);
+		return json_encode(
+			[
+				'status' => 'success',
+				'data' => $data,
+			]
+		);
 	}
 }

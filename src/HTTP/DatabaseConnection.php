@@ -12,8 +12,11 @@ class DatabaseConnection implements Middleware {
 //	public const en_US = 'en-US';
 //	public const it_IT = 'it-IT';
 
-	public function __invoke(ServerRequestInterface $request, ResponseInterface $response,
-		?callable $next = null): ResponseInterface {
+	public function __invoke(
+		ServerRequestInterface $request,
+		ResponseInterface $response,
+		?callable $next = null
+	): ResponseInterface {
 		try {
 			$db = new Database(DB_USERNAME, DB_PASSWORD, DB_DSN);
 		} catch(DatabaseException $e) {

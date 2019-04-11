@@ -9,8 +9,11 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 abstract class AbstractController {
 	const cachefile = '';
 
-	abstract public static function handleExceptions(Request $request, Response $response,
-		?callable $next = null): Response;
+	abstract public static function handleExceptions(
+		Request $request,
+		Response $response,
+		?callable $next = null
+	): Response;
 
 	public static function doTransaction(Request $request, Response $response, ?callable $next = null): Response {
 		$db = $request->getAttribute('Database');

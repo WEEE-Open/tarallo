@@ -24,11 +24,11 @@ abstract class DatabaseTest extends TestCase {
 
 	protected function getPdo() {
 		return new \PDO('mysql:dbname=tarallo_test;host=localhost;charset=utf8mb4', 'root', 'root', [
-			\PDO::ATTR_ERRMODE            => \PDO::ERRMODE_EXCEPTION,
-			\PDO::ATTR_CASE               => \PDO::CASE_NATURAL,
+			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+			\PDO::ATTR_CASE => \PDO::CASE_NATURAL,
 			\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
 			// \PDO::ATTR_AUTOCOMMIT => false, // PHPUnit crashes and burns with autocommits disabled and, for some unfathomable reason, two SEPARATE, DISTINCT, UNIQUE PDO object will forcefully share the same connection to MySQL (apparently?), so there's no way to have a connection with autocommits and another one without.
-			\PDO::ATTR_EMULATE_PREPARES   => false,
+			\PDO::ATTR_EMULATE_PREPARES => false,
 		]);
 	}
 

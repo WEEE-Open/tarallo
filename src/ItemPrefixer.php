@@ -36,9 +36,9 @@ class ItemPrefixer {
 			case 'ssd':
 				if(self::has('sata-ports-n', $features)) {
 					return 'S';
-				} elseif(self::has('ide-ports-n', $features) || self::has('mini-ide-ports-n', $features)) {
+				} else if(self::has('ide-ports-n', $features) || self::has('mini-ide-ports-n', $features)) {
 					return 'H';
-				} elseif(self::has('scsi-sca2-ports-n', $features) || self::has('scsi-db68-ports-n', $features)) {
+				} else if(self::has('scsi-sca2-ports-n', $features) || self::has('scsi-db68-ports-n', $features)) {
 					return 'SC';
 				} else {
 					throw new \InvalidArgumentException('No or unknown hard drive connector, cannot generate a code');

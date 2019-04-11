@@ -15,10 +15,12 @@ class AuditDAO extends DAO {
 	 * @return array
 	 */
 	public function getRecentAudit(int $perPage, int $page) {
-		$statement = $this->getPDO()->prepare('SELECT `Code` AS `code`, `Change` AS `change`, Other AS `other`, UNIX_TIMESTAMP(`Time`) AS `time`, `User` AS `user`
+		$statement = $this->getPDO()->prepare(
+			'SELECT `Code` AS `code`, `Change` AS `change`, Other AS `other`, UNIX_TIMESTAMP(`Time`) AS `time`, `User` AS `user`
 FROM Audit
 ORDER BY `time` DESC, `code` DESC, `change`
-LIMIT :offs, :cnt');
+LIMIT :offs, :cnt'
+		);
 
 		try {
 			$statement->bindValue(':offs', ($page - 1) * $perPage, \PDO::PARAM_INT);
@@ -44,11 +46,13 @@ LIMIT :offs, :cnt');
 	public function getRecentAuditByType(string $type, int $howMany) {
 		$array = [];
 
-		$statement = $this->getPDO()->prepare('SELECT `Code`, UNIX_TIMESTAMP(`Time`) AS `Time`
+		$statement = $this->getPDO()->prepare(
+			'SELECT `Code`, UNIX_TIMESTAMP(`Time`) AS `Time`
 FROM Audit
 WHERE `Change` = ?
 ORDER BY `Time` DESC, `Code` DESC
-LIMIT ?');
+LIMIT ?'
+		);
 
 		$result = $statement->execute([$type, $howMany]);
 		assert($result !== false, 'get audit by type');
@@ -73,11 +77,13 @@ LIMIT ?');
 	 * @return array
 	 */
 	public function getHistory(ItemIncomplete $item, int $howMany) {
-		$statement = $this->getPDO()->prepare('SELECT `Change` as `change`, Other as other, UNIX_TIMESTAMP(`Time`) AS `time`, `User` as `user`
+		$statement = $this->getPDO()->prepare(
+			'SELECT `Change` as `change`, Other as other, UNIX_TIMESTAMP(`Time`) AS `time`, `User` as `user`
 FROM Audit
 WHERE `Code` = ?
 ORDER BY `Time` DESC, `Change` DESC
-LIMIT ?');
+LIMIT ?'
+		);
 
 		$result = $statement->execute([$item->getCode(), $howMany]);
 		assert($result !== false, 'get history');

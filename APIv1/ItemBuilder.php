@@ -27,7 +27,10 @@ class ItemBuilder {
 				$parent = new ItemIncomplete($input['parent']);
 			} catch(ValidationException $e) {
 				if($e->getCode() === 3) {
-					throw new InvalidPayloadParameterException('parent', $input['parent'], 'Parent: ' . $e->getMessage());
+					throw new InvalidPayloadParameterException(
+						'parent', $input['parent'],
+						'Parent: ' . $e->getMessage()
+					);
 				} else {
 					throw $e;
 				}
@@ -60,16 +63,20 @@ class ItemBuilder {
 		}
 
 		if($inner && isset($input['parent'])) {
-			throw new InvalidPayloadParameterException('parent', $input['parent'],
-				'Cannot set parent for internal items');
+			throw new InvalidPayloadParameterException(
+				'parent', $input['parent'],
+				'Cannot set parent for internal items'
+			);
 		}
 
 		if(isset($input['code'])) {
 			if($inner) {
 				$item->setCode($input['code']);
 			} else {
-				throw new InvalidPayloadParameterException('code', $input['code'],
-					'Cannot set code for head/root item this way, use the URI');
+				throw new InvalidPayloadParameterException(
+					'code', $input['code'],
+					'Cannot set code for head/root item this way, use the URI'
+				);
 			}
 		}
 
@@ -77,15 +84,19 @@ class ItemBuilder {
 			try {
 				self::addFeatures($input['features'], $item);
 			} /** @noinspection PhpUndefinedClassInspection */ catch(\TypeError $e) {
-				throw new InvalidPayloadParameterException('features', '',
-					'Features must be an array, ' . gettype($input['features']) . ' given');
+				throw new InvalidPayloadParameterException(
+					'features', '',
+					'Features must be an array, ' . gettype($input['features']) . ' given'
+				);
 			}
 		}
 
 		if(isset($input['contents'])) {
 			if(!is_array($input['contents'])) {
-				throw new InvalidPayloadParameterException('contents', '',
-					'Contents must be an array, ' . gettype($input['contents']) . ' given');
+				throw new InvalidPayloadParameterException(
+					'contents', '',
+					'Contents must be an array, ' . gettype($input['contents']) . ' given'
+				);
 			}
 			foreach($input['contents'] as $other) {
 				$item->addContent(self::ofArrayInternal($other, null, true));
@@ -108,8 +119,10 @@ class ItemBuilder {
 			try {
 				$item->addFeature(Feature::ofString($name, $value));
 			} catch(\Throwable $e) {
-				throw new InvalidPayloadParameterException(is_string($name) ? $name : '?', $value,
-					'Features: ' . $e->getMessage());
+				throw new InvalidPayloadParameterException(
+					is_string($name) ? $name : '?', $value,
+					'Features: ' . $e->getMessage()
+				);
 			}
 		}
 	}

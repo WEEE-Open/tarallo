@@ -10,6 +10,7 @@ class ItemValidator {
 	 *
 	 * @param Item $item The item being placed in a location
 	 * @param Item|null $parent The location
+	 *
 	 * @return Item|null Correct parent (or the given one if unchanged, or null if null was given)
 	 */
 	public static function fixupLocation(Item $item, ?Item $parent): ?Item {
@@ -130,25 +131,35 @@ class ItemValidator {
 					case 'proprietary-laptop':
 						// It's a laptop, reject features that make sense only in desktops.
 						if(self::has($item, 'usb-ports-n')) {
-							throw new ValidationException('A laptop does not have USB ports on the case, but on the motherboard only. Remove the "USB ports" feature from the case or change the motherboard form factor.');
+							throw new ValidationException(
+								'A laptop does not have USB ports on the case, but on the motherboard only. Remove the "USB ports" feature from the case or change the motherboard form factor.'
+							);
 						}
 						if(self::has($item, 'psu-form-factor')) {
 							if($item->getFeature('psu-form-factor') !== 'proprietary') {
 								// Well, it may contain a power supply, if it's something really old... but it won't be standard anyway.
-								throw new ValidationException('A laptop does not have a standard internal PSU. Remove the "PSU form factor" feature from the case or change the motherboard form factor.');
+								throw new ValidationException(
+									'A laptop does not have a standard internal PSU. Remove the "PSU form factor" feature from the case or change the motherboard form factor.'
+								);
 							}
 						}
 						break;
 					default:
 						// It's a desktop, reject features that make sense only in laptops
 						if(self::has($item, 'power-connector')) {
-							throw new ValidationException("A desktop computer case does not have any power connector. Remove that feature or change the motherboard form factor.");
+							throw new ValidationException(
+								"A desktop computer case does not have any power connector. Remove that feature or change the motherboard form factor."
+							);
 						}
 						if(self::has($item, 'psu-volt')) {
-							throw new ValidationException('A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply voltage" feature or change the motherboard form factor.');
+							throw new ValidationException(
+								'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply voltage" feature or change the motherboard form factor.'
+							);
 						}
 						if(self::has($item, 'psu-ampere')) {
-							throw new ValidationException('A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply current" feature or change the motherboard form factor.');
+							throw new ValidationException(
+								'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply current" feature or change the motherboard form factor.'
+							);
 						}
 						break;
 					case null:
@@ -200,17 +211,23 @@ class ItemValidator {
 		}
 
 		if($type === 'case' && $parentType !== 'location') {
-			throw new ItemNestingException('Cases should be inside a location',
-				$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
+			throw new ItemNestingException(
+				'Cases should be inside a location',
+				$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : ''
+			);
 		} else if($type === 'ram' || $type === 'cpu' || self::isExpansionCard($type)) {
 			if($parentType !== 'case' && $parentType !== 'location' && $parentType !== 'motherboard') {
-				throw new ItemNestingException('RAMs, CPUs and expansion cards cards should be inside a case, location or motherboard',
-					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
+				throw new ItemNestingException(
+					'RAMs, CPUs and expansion cards cards should be inside a case, location or motherboard',
+					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : ''
+				);
 			}
 		} else {
 			if($parentType !== 'case' && $parentType !== 'location') {
-				throw new ItemNestingException('Normal items can be placed only inside cases and locations',
-					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
+				throw new ItemNestingException(
+					'Normal items can be placed only inside cases and locations',
+					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : ''
+				);
 			}
 		}
 
@@ -218,8 +235,10 @@ class ItemValidator {
 			if(!self::compareFeature($item, $parent, 'cpu-socket')) {
 				$itemValue = $item->getFeature('cpu-socket');
 				$parentValue = $parent->getFeature('cpu-socket');
-				throw new ItemNestingException("Incompatible socket: CPU is $itemValue, motherboard is $parentValue",
-					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
+				throw new ItemNestingException(
+					"Incompatible socket: CPU is $itemValue, motherboard is $parentValue",
+					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : ''
+				);
 			}
 		}
 
@@ -227,14 +246,18 @@ class ItemValidator {
 			if(!self::compareFeature($item, $parent, 'ram-form-factor')) {
 				$itemValue = $item->getFeature('ram-form-factor');
 				$parentValue = $parent->getFeature('ram-form-factor');
-				throw new ItemNestingException("Incompatible form factor: RAM is $itemValue, motherboard is $parentValue",
-					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
+				throw new ItemNestingException(
+					"Incompatible form factor: RAM is $itemValue, motherboard is $parentValue",
+					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : ''
+				);
 			}
 			if(!self::compareFeature($item, $parent, 'ram-type')) {
 				$itemValue = $item->getFeature('ram-type');
 				$parentValue = $parent->getFeature('ram-type');
-				throw new ItemNestingException("Incompatible standard: RAM is $itemValue, motherboard is $parentValue",
-					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : '');
+				throw new ItemNestingException(
+					"Incompatible standard: RAM is $itemValue, motherboard is $parentValue",
+					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : ''
+				);
 			}
 		}
 
@@ -253,7 +276,9 @@ class ItemValidator {
 	public static function checkRoot(Item $item) {
 		$type = self::getOrNull($item, 'type');
 		if($type !== null && $type !== 'location') {
-			throw new ValidationException('Set a location for this item or mark it as a location itself, this type cannot be a root item');
+			throw new ValidationException(
+				'Set a location for this item or mark it as a location itself, this type cannot be a root item'
+			);
 		}
 	}
 
@@ -268,6 +293,7 @@ class ItemValidator {
 	 * @param Item $item
 	 * @param Item $parent
 	 * @param string $feature
+	 *
 	 * @return bool If the feature is the same or one of them is null
 	 */
 	private static function compareFeature(Item $item, Item $parent, string $feature) {
@@ -301,6 +327,7 @@ class ItemValidator {
 	 * Search is only one level deep.
 	 *
 	 * @param Item $item
+	 *
 	 * @return Item|null Motherboard, or null if not found
 	 */
 	private static function findMobo(Item $item) {

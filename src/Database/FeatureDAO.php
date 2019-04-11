@@ -52,9 +52,11 @@ final class FeatureDAO extends DAO {
 		 */
 
 		// TODO: default features
-		$statement = $this->getPDO()->prepare('SELECT Feature, COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`
+		$statement = $this->getPDO()->prepare(
+			'SELECT Feature, COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`
             FROM ItemFeature
-            WHERE `Code` = :cod;');
+            WHERE `Code` = :cod;'
+		);
 
 		$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
 
@@ -117,7 +119,9 @@ final class FeatureDAO extends DAO {
 			$type = Feature::getPDOType($feature->type);
 			/** @noinspection SqlResolve */
 			$statement = $this->getPDO()
-				->prepare("INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2");
+				->prepare(
+					"INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2"
+				);
 
 			try {
 				$statement->bindValue(':feature', $feature->name, \PDO::PARAM_STR);
@@ -135,9 +139,9 @@ final class FeatureDAO extends DAO {
 					&& $statement->errorInfo()[2] === 'Can\'t find record in \'ItemFeature\''
 				) {
 					throw new NotFoundException();
-				} elseif($e->getCode() === '23000'
-				         && $statement->errorInfo()[0] === '23000'
-				         && $statement->errorInfo()[1] === 1452
+				} else if($e->getCode() === '23000'
+					&& $statement->errorInfo()[0] === '23000'
+					&& $statement->errorInfo()[1] === 1452
 				) {
 					throw new NotFoundException();
 				}
@@ -156,6 +160,7 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @param ItemFeatures $item
 	 * @param string[] $features
+	 *
 	 * @return bool True if anything was deleted
 	 */
 	public function deleteFeature(ItemFeatures $item, array $features) {

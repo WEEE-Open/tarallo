@@ -40,7 +40,8 @@ class Updater extends DAO {
 		while($this->schemaVersion < $schema) {
 			switch($this->schemaVersion) {
 				case 0:
-					$this->exec(<<<EOQ
+					$this->exec(
+						<<<EOQ
 CREATE TABLE `Configuration` (
   `Key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
   `Value` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -59,7 +60,8 @@ EOQ
 					$this->exec("CREATE INDEX LostAt ON Item (LostAt)");
 					$this->exec("DROP TRIGGER IF EXISTS ItemSetDeleted");
 					$this->exec("DROP FUNCTION IF EXISTS CountDescendants");
-					$this->exec(<<<EOQ
+					$this->exec(
+						<<<EOQ
 CREATE FUNCTION CountDescendants(item varchar(100))
 	RETURNS bigint UNSIGNED
 	READS SQL DATA
@@ -75,7 +77,8 @@ CREATE FUNCTION CountDescendants(item varchar(100))
 	END
 EOQ
 					);
-					$this->exec(<<<EOQ
+					$this->exec(
+						<<<EOQ
 CREATE TRIGGER ItemSetDeleted
 	BEFORE UPDATE
 	ON Item
@@ -93,7 +96,8 @@ CREATE TRIGGER ItemSetDeleted
 EOQ
 					);
 					$this->exec("DROP TRIGGER IF EXISTS ItemSetLost");
-					$this->exec(<<<EOQ
+					$this->exec(
+						<<<EOQ
 CREATE TRIGGER ItemSetLost
 	BEFORE UPDATE
 	ON Item
@@ -112,7 +116,8 @@ EOQ
 					break;
 				case 2:
 					$this->exec("DROP TRIGGER IF EXISTS AuditLostItem");
-					$this->exec(<<<EOQ
+					$this->exec(
+						<<<EOQ
 CREATE TRIGGER AuditLostItem
   AFTER UPDATE
   ON Item
@@ -126,9 +131,12 @@ END
 EOQ
 					);
 					// Generated name for CHECK constraints, nice
-					$this->exec("# noinspection SqlResolve
-ALTER TABLE Audit DROP CONSTRAINT CONSTRAINT_1");
-					$this->exec(<<<EOQ
+					$this->exec(
+						"# noinspection SqlResolve
+ALTER TABLE Audit DROP CONSTRAINT CONSTRAINT_1"
+					);
+					$this->exec(
+						<<<EOQ
 # noinspection SqlResolve
 ALTER TABLE Audit
 ADD CONSTRAINT check_change
@@ -140,7 +148,9 @@ EOQ
 					);
 					break;
 				case 3:
-					$this->exec('ALTER TABLE `Audit` CHANGE `Time` `Time` timestamp(6) NOT NULL DEFAULT now(6) AFTER `Other`;');
+					$this->exec(
+						'ALTER TABLE `Audit` CHANGE `Time` `Time` timestamp(6) NOT NULL DEFAULT now(6) AFTER `Other`;'
+					);
 					break;
 			}
 			$this->schemaVersion++;

@@ -106,7 +106,7 @@ class SearchDAOTest extends DatabaseTest {
 		$this->assertEquals(0, count($items), 'There should be no results now');
 	}
 
-		/**
+	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
 	 */
 	public function testItemSearchRefinementSorting() {
@@ -114,7 +114,8 @@ class SearchDAOTest extends DatabaseTest {
 		$this->loadSample($db);
 
 		$id = $db->searchDAO()->search(new Search('PC%'), new User('asd'));
-		$idRefined = $db->searchDAO()->search(new Search(null, null, null, null, ['brand' => '-']), new User('asd'), $id);
+		$idRefined = $db->searchDAO()->search(new Search(null, null, null, null, ['brand' => '-']), new User('asd'),
+			$id);
 		$this->assertEquals($id, $idRefined, "Search id shouldn't change");
 
 		$items = $db->searchDAO()->getResults($id, 1, 100);
@@ -195,64 +196,64 @@ class SearchDAOTest extends DatabaseTest {
 		$expected = [
 			0 =>
 				[
-					'code'     => 'PC90',
+					'code' => 'PC90',
 					'features' =>
 						[
-							'brand'                   => 'Dill',
-							'color'                   => 'grey',
-							'model'                   => 'DI-360',
+							'brand' => 'Dill',
+							'color' => 'grey',
+							'model' => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
-							'type'                    => 'case',
-							'working'                 => 'yes',
+							'type' => 'case',
+							'working' => 'yes',
 						],
 				],
 			1 =>
 				[
-					'code'     => 'PC22',
+					'code' => 'PC22',
 					'features' =>
 						[
-							'brand'                   => 'Dill',
-							'color'                   => 'black',
-							'model'                   => 'DI-360',
+							'brand' => 'Dill',
+							'color' => 'black',
+							'model' => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
-							'type'                    => 'case',
-							'working'                 => 'yes',
+							'type' => 'case',
+							'working' => 'yes',
 						],
 				],
 			2 =>
 				[
-					'code'     => 'PC20',
+					'code' => 'PC20',
 					'features' =>
 						[
-							'brand'                   => 'Dill',
-							'color'                   => 'black',
-							'model'                   => 'DI-360',
+							'brand' => 'Dill',
+							'color' => 'black',
+							'model' => 'DI-360',
 							'motherboard-form-factor' => 'proprietary',
-							'type'                    => 'case',
-							'working'                 => 'yes',
+							'type' => 'case',
+							'working' => 'yes',
 						],
 				],
 			3 =>
 				[
-					'code'     => 'SCHIFOMACCHINA',
+					'code' => 'SCHIFOMACCHINA',
 					'features' =>
 						[
-							'brand'                   => 'eMac',
-							'color'                   => 'white',
-							'model'                   => 'EZ1600',
+							'brand' => 'eMac',
+							'color' => 'white',
+							'model' => 'EZ1600',
 							'motherboard-form-factor' => 'miniitx',
-							'type'                    => 'case',
+							'type' => 'case',
 						],
 				],
 			4 =>
 				[
-					'code'     => 'PC55',
+					'code' => 'PC55',
 					'features' =>
 						[
-							'brand'                   => 'TI',
-							'model'                   => 'GreyPC-\'98',
+							'brand' => 'TI',
+							'model' => 'GreyPC-\'98',
 							'motherboard-form-factor' => 'atx',
-							'type'                    => 'case',
+							'type' => 'case',
 						],
 				],
 		];

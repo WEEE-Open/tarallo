@@ -20,14 +20,24 @@ class Search {
 	 * @param ItemIncomplete[]|null $locations Only descendants of these items will be searched
 	 * @param string[]|null $sorts Map (associative array) from feature name to order (+ or -)
 	 */
-	public function __construct(string $code = null, array $features = null, array $ancestors = null, array $locations = null,
-		array $sorts = null) {
+	public function __construct(
+		string $code = null,
+		array $features = null,
+		array $ancestors = null,
+		array $locations = null,
+		array $sorts = null
+	) {
 		$this->filter($code, $features, $ancestors, $locations);
 		$this->sort($sorts);
 		$this->validate();
 	}
 
-	private function filter(string $code = null, array $features = null, array $ancestors = null, array $locations = null) {
+	private function filter(
+		string $code = null,
+		array $features = null,
+		array $ancestors = null,
+		array $locations = null
+	) {
 		$this->searchCode = $code;
 		$this->searchFeatures = $features;
 		$this->searchAncestors = $ancestors;
@@ -38,6 +48,7 @@ class Search {
 	 * Set search code
 	 *
 	 * @param int $code
+	 *
 	 * @deprecated
 	 */
 	public function setCode(int $code) {
@@ -62,7 +73,7 @@ class Search {
 	private function sort(array $sorts = null) {
 		if($sorts !== null) {
 			if(count($sorts) > 1) {
-				throw new \InvalidArgumentException( 'Sorting by more than one field is currently unsupported' );
+				throw new \InvalidArgumentException('Sorting by more than one field is currently unsupported');
 			} else if(count($sorts) === 0) {
 				$sorts = null;
 			}
@@ -105,7 +116,7 @@ class Search {
 
 		if(!$searchSomething) {
 			if($this->sort === null) {
-				throw new \InvalidArgumentException( 'Nothing to search' );
+				throw new \InvalidArgumentException('Nothing to search');
 			} else {
 				$this->sortOnly = true;
 			}
