@@ -319,10 +319,10 @@ EOQ
 			$result = $statement->fetch(\PDO::FETCH_ASSOC);
 			try {
 				if($result['DeletedAt'] !== null) {
-					$head->setDeletedAt(new \DateTime($result['DeletedAt']));
+					$head->setDeletedAt(\DateTime::createFromFormat( 'U', $result['DeletedAt']));
 				}
 				if($result['LostAt'] !== null) {
-					$head->setLostAt(new \DateTime($result['LostAt']));
+					$head->setLostAt(\DateTime::createFromFormat( 'U', $result['LostAt']));
 				}
 			} catch(\Exception $e) {
 				throw new \LogicException("Cannot create datetime", 0, $e);

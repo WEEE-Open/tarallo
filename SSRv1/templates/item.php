@@ -3,7 +3,7 @@
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
 /** @var string|null $add */
 /** @var string|null $edit */
-/** @var bool $deleted */
+/** @var \DateTime|null $deletedAt */
 /** @var bool $recursion */
 $recursion = $recursion ?? false;
 $features = $item->getCombinedFeatures();
@@ -33,7 +33,7 @@ $adding = false;
 $editing = false;
 $target = false;
 
-$nextItemParameters = ['recursion' => true, 'deleted' => false];
+$nextItemParameters = ['recursion' => true, 'deletedAt' => null];
 if(isset($edit)) {
 	$nextItemParameters['edit'] = $edit;
 	$editing = true;
@@ -54,7 +54,7 @@ if(isset($edit)) {
 ?>
 
 <?php if(!$recursion): $this->insert('breadcrumbs', ['item' => $item]); endif; ?>
-<article class="item<?=$recursion ? '' : ' root'?><?=$working?><?=$editing && $target ? ' head editing' : ''?><?= $deleted ? ' deleted' : '' ?>"
+<article class="item<?=$recursion ? '' : ' root'?><?=$working?><?=$editing && $target ? ' head editing' : ''?><?= $deletedAt === null ? '' : ' deleted' ?>"
 		data-code="<?=$this->e($item->getCode())?>">
 	<header>
 		<h2 id="code-<?=$this->e($item->getCode())?>"><?=$this->e($item->getCode())?></h2>
@@ -64,8 +64,8 @@ if(isset($edit)) {
 		$noticeFeature = $item->getFeature('check'); if($noticeFeature !== null): ?>
 			<div class="warning message">⚠️️&nbsp;<?= (new WEEEOpen\Tarallo\SSRv1\UltraFeature($noticeFeature, $lang ?? 'en'))->value; ?></div>
 		<?php unset($noticeFeature); endif;
-		if($deleted): ?>
-			<div class="error message">❌️️&nbsp;This item has been deleted</div>
+		if($deletedAt !== null): ?>
+			<div class="error message">❌️️&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 		<?php endif; ?>
 	</header>
 
@@ -73,7 +73,7 @@ if(isset($edit)) {
 		<?php if($editing && $target): ?>
 			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><?php if(!$containsMore): ?><button class="delete">❌&nbsp;Delete</button><?php endif ?>
 		<?php elseif(!$adding && !$editing): ?>
-			<?php if(!$deleted): ?><button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button><button class="clone">🔲&nbsp;Copy</button><?php endif ?><button class="history">📖&nbsp;History</button>
+			<?php if($deletedAt === null): ?><button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button><button class="clone">🔲&nbsp;Copy</button><?php endif ?><button class="history">📖&nbsp;History</button>
 		<?php endif ?>
 	</nav>
 

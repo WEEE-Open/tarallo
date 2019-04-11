@@ -3,6 +3,6 @@
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
 /** @var string|null $add */
 /** @var string|null $edit */
-/** @var bool $deleted */
+/** @var \DateTime|null $deletedAt */
 $this->layout('main', ['title' => $item->getCode(), 'user' => $user, 'itembuttons' => true]);
-$this->insert('item', ['item' => $item, 'add' => $add, 'edit' => $edit, 'deleted' => $deleted, 'recursion' => false]);
+$this->insert('item', ['item' => $item, 'add' => $add, 'edit' => $edit, 'deletedAt' => $deletedAt, 'recursion' => false]);

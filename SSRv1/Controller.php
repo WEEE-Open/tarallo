@@ -42,7 +42,7 @@ class Controller extends AbstractController {
 		$depth = Validation::validateOptionalInt($query, 'depth', 20);
 
 		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, $depth);
-		$renderParameters = ['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item)];
+		$renderParameters = ['item' => $item, 'deletedAt' => $item->getDeletedAt()];
 		// These should be mutually exclusive
 		if($edit !== null) {
 			$renderParameters['add'] = null;
