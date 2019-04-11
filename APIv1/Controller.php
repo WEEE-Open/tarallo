@@ -190,7 +190,7 @@ class Controller extends AbstractController {
 		}
 
 		$db->itemDAO()->undelete($item);
-        $created = TreeDAO::moveWithValidation($db, $item, $newParent, $fix, $validate);
+		$created = TreeDAO::moveWithValidation($db, $item, $newParent, $fix, $validate);
 
 		if($created) {
 			$response = $response->withStatus(201);
@@ -376,7 +376,7 @@ class Controller extends AbstractController {
 			throw new InvalidPayloadParameterException('*', $payload, 'Location does not exist');
 		}
 
-        $created = TreeDAO::moveWithValidation($db, $item, $newParent, $fix, $validate);
+		$created = TreeDAO::moveWithValidation($db, $item, $newParent, $fix, $validate);
 
 		if($created) {
 			$response = $response->withStatus(201);
