@@ -628,7 +628,7 @@ class Controller extends AbstractController {
 
 			});
 		}, [
-			'cacheFile'     => $cachefile,
+			'cacheFile' => $cachefile,
 			'cacheDisabled' => !CACHE_ENABLED,
 		]);
 	}
@@ -637,7 +637,7 @@ class Controller extends AbstractController {
 		$queue = [
 			[static::class, 'isJson'],
 			new DatabaseConnection(),
-			[static::class, 'handleExceptions']
+			[static::class, 'handleExceptions'],
 		];
 
 		$response = new \Slim\Http\Response();
