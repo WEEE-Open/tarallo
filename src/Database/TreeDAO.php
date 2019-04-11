@@ -83,7 +83,7 @@ final class TreeDAO extends DAO {
 	 *
 	 * @param ItemIncomplete $item Item to move
 	 * @param ItemIncomplete|null $newParent some existing Item as parent, NULL if parent should be removed (turn into
-	 *	 root Item)
+	 *     root Item)
 	 */
 	public function moveItem(ItemIncomplete $item, ItemIncomplete $newParent = null) {
 		if(!$this->database->itemDAO()->itemVisible($newParent)) {
@@ -158,8 +158,8 @@ final class TreeDAO extends DAO {
 		 * This is incomprehensible (I can only HOPE it does the same job) but works in MySQL:
 		 */
 		$statement = $this->getPDO()->prepare('DELETE Tree.* FROM Tree, Tree AS Pointless
-		WHERE Tree.Descendant=Pointless.Descendant
-		AND Pointless.Ancestor = ?;');
+        WHERE Tree.Descendant=Pointless.Descendant
+        AND Pointless.Ancestor = ?;');
 
 
 		try {
