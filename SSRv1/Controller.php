@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Relay\RelayBuilder;
 use Slim\Http\Body;
 use WEEEOpen\Tarallo\Server\Database\Database;
+use WEEEOpen\Tarallo\Server\Database\TreeDAO;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\AbstractController;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
@@ -380,6 +381,40 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
+    public static function moveAll(Request $request, Response $response, ?callable $next = null): Response {
+        $db = $request->getAttribute('Database');
+        $body = $request->getParsedBody();
+        if(!empty($_FILES['Fitems']['tmp_name'])) {
+	        $file = $_FILES['Fitems'];
+            $items = file_get_contents($file['tmp_name']);
+            if($items === false)
+	        	throw new \LogicException("Errore nell' apertura del file");
+            $items = trim($items);
+        } else
+            $items = $body['items'] !== "Lista degli oggetti" ? (string)trim($body['items']) : null;
+        if(!empty($items)) {
+            $where = Validation::validateOptionalString($body, 'where');
+            $array = explode(",", $items);
+            foreach($array as $oggetto) {
+                if($where === '') {
+                    $param = explode(":", $oggetto);
+                    if(count($param) != 2)
+                        throw new \LogicException("Formato non valido");
+                    $oggetto = $param[0];
+                    $location = $param[1];
+                } else
+                    $location = $where;
+                try {
+                    TreeDAO::moveWithValidation($db, new ItemIncomplete($oggetto), new ItemIncomplete($location), true, true);
+                } catch(Exception $e) {
+                    throw new Exception($e->getMessage());
+                }
+            }
+        }
+        $request = $request->withAttribute('Template', 'moveAll');
+	    return $next ? $next($request, $response) : $response;
+    }
+
 	public static function getFeaturesJson(Request $request, Response $response, ?callable $next = null): Response {
 		$response = $response
 			->withHeader('Content-Type', 'text/json')
@@ -413,7 +448,7 @@ class Controller extends AbstractController {
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
 			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
-
+            $r->addRoute(['GET', 'POST'], '/moveAll', [[Controller::class, 'moveAll']]);
 			$r->addGroup('/stats', function(FastRoute\RouteCollector $r) {
 				$r->get('', [[Controller::class, 'getStats']]);
 				$r->get('/{which}', [[Controller::class, 'getStats']]);
