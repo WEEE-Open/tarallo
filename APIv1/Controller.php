@@ -565,6 +565,26 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
+	public static function ItemsNotFeature(Request $request, Response $response, ?callable $next = null): Response {
+		$parameters = $request->getAttribute('parameters', []);
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('user');
+		Validation::authorize($user);
+
+		$feature = Validation::validateHasString($parameters, 'Feature');
+		$notFeature = Validation::validateHasString($parameters, 'notFeature');
+		$location = Validation::validateOptionalString($parameters, 'location');
+		$limit = Validation::validateOptionalInt($parameters, 'limit');
+		$creation = Validation::validateOptionalString($parameters, 'creation');
+		$deleted = isset($parameters['deleted']) ? $parameters['deleted'] : false;
+
+		$array = $db->StatsDAO()->getItemByNotFeature($feature, $notFeature, $location, $limit, $creation, $deleted);
+
+		$response = $response->withStatus(200);
+		$request->withAttribute();
+		return $next ? $next($request, $response) : $response;
+	}
+
 	public static function getDispatcher(string $cachefile): FastRoute\Dispatcher {
 		return FastRoute\cachedDispatcher(
 			function(FastRoute\RouteCollector $r) {
@@ -663,6 +683,17 @@ class Controller extends AbstractController {
 						$r->delete('/session', [[Controller::class, 'sessionClose']]);
 						$r->head('/session', [[Controller::class, 'sessionRefresh']]);
 
+						$r->addGroup(
+							'/stats',
+							function(FastRoute\RouteCollector $r) {
+								$r->addGroup(
+									'/getItemByNotFeature',
+									function(FastRoute\RouteCollector $r) {
+										$r->get('/{parameters}', [[Controller::class, 'ItemsNotFeature']]);
+									}
+								);
+							}
+						);
 					}
 				);
 			},
