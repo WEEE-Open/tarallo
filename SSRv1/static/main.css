@@ -212,12 +212,6 @@ ul.breadcrumbs li:not(:first-child)::before {
 	margin-right: 0.4em;
 }
 
-.setlocation {
-	/*color: #eee;*/
-	/*background-color: #333;*/
-	padding: 0.5em;
-}
-
 table {
 	border-collapse: collapse;
 	width: 100%;
@@ -395,7 +389,7 @@ label.searchby {
 	color: #D8000C;
 }
 
-.features.editing .haserror .error.description {
+.item.editing .error.description {
 	color: #D8000C;
 	background-color: #FFBABA;
 	padding: .5em;
@@ -404,7 +398,7 @@ label.searchby {
 	margin-top: 0.4em;
 }
 
-.features.editing .haserror.fading .error.description {
+.item.editing .fading .error.description {
 	opacity: 0;
 	transition: opacity 1400ms ease-in;
 }

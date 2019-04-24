@@ -37,7 +37,7 @@ if(isset($copy)) {
 
 
 	<?php if(!$innerrecursion && !$recursion): ?>
-		<div class="setlocation"><label>Location: <input id="newparent"></label></div>
+		<section class="setlocation"><label>Location: <input id="newparent"></label></section>
 	<?php endif ?>
 
 	<section class="own features editing">
