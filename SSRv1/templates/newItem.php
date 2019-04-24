@@ -12,9 +12,11 @@ if(!$innerrecursion && !$recursion) {
 if(isset($copy)) {
 	$features = $copy->getFeatures();
 	$subitems = $copy->getContents();
+	$featuresEmpty = [];
 } else {
 	$subitems = [];
-	$features = [new \WEEEOpen\Tarallo\Server\Feature('type', 'adapter')];
+	$features = [];
+	$featuresEmpty = ['type'];
 }
 
 // to display new inner items, set their $recursion and $innerrecursion to true
@@ -40,7 +42,7 @@ if(isset($copy)) {
 
 	<section class="own features editing">
 		<?php
-		$this->insert('featuresEdit', ['features' => $features]);
+		$this->insert('featuresEdit', ['features' => $features, 'featuresEmpty' => $featuresEmpty]);
 		?>
 	</section>
 
@@ -53,7 +55,7 @@ if(isset($copy)) {
 
 	<section class="subitems">
 		<?php
-			// Empty if not cloning
+			// Used when cloning, empty otherwise
 			foreach($subitems as $subitem) {
 				$this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'copy' => $subitem]);
 			}

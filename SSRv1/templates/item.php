@@ -59,10 +59,10 @@ if(isset($edit)) {
 	<header>
 		<h2 id="code-<?=$this->e($item->getCode())?>"><?=$this->e($item->getCode())?></h2>
 		<?php $noticeFeature = $item->getFeature('restrictions'); if($noticeFeature !== null): ?>
-			<div class="info message">ℹ️&nbsp;<?= (new WEEEOpen\Tarallo\SSRv1\UltraFeature($noticeFeature, $lang ?? 'en'))->value; ?></div>
+			<div class="info message">ℹ️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature($noticeFeature, $lang ?? 'en'))->value; ?></div>
 		<?php unset($noticeFeature); endif;
 		$noticeFeature = $item->getFeature('check'); if($noticeFeature !== null): ?>
-			<div class="warning message">⚠️️&nbsp;<?= (new WEEEOpen\Tarallo\SSRv1\UltraFeature($noticeFeature, $lang ?? 'en'))->value; ?></div>
+			<div class="warning message">⚠️️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature($noticeFeature, $lang ?? 'en'))->value; ?></div>
 		<?php unset($noticeFeature); endif;
 		if($deletedAt !== null): ?>
 			<div class="error message">❌️️&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>

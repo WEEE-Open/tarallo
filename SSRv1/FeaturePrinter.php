@@ -149,11 +149,17 @@ class FeaturePrinter {
 		Feature::GROUP_software => 'Software'
 	];
 
-	public static function printableName(Feature $feature): string {
-		if(isset(self::features[$feature->name])) {
-			return self::features[$feature->name];
+	/**
+	 * Get translated/printable name of a feature
+	 *
+	 * @param string $name Feature name
+	 * @return string Printable value, or the given name if not printable
+	 */
+	public static function printableName(string $name): string {
+		if(isset(self::features[$name])) {
+			return self::features[$name];
 		} else {
-			return $feature->name;
+			return $name;
 		}
 	}
 
