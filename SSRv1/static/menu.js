@@ -5,6 +5,8 @@
 	let top = document.getElementById('top');
 	let quickView = top.querySelector(".quick.view");
 	let quickMove = top.querySelector(".quick.move");
+	let quickMoveCode = quickMove.querySelectorAll('input')[0];
+	let quickMoveParent = quickMove.querySelectorAll('input')[1];
 
 	document.getElementById('logout').addEventListener('click', () => window.location.href = '/logout');
 
@@ -55,7 +57,12 @@
 		} else {
 			target.classList.add('selected');
 			bar.classList.add("open");
-			bar.querySelector('input').focus();
+			let input = bar.querySelector('input');
+			input.focus();
+			let inputLen = input.value.length;
+			if(inputLen > 0) {
+				input.setSelectionRange(inputLen, inputLen);
+			}
 		}
 	}
 
@@ -66,12 +73,17 @@
 		}
 	});
 
-	quickMove.querySelector('button').addEventListener('click', async () => {
-		let inputs = quickMove.querySelectorAll('input');
-		let code = inputs[0].value;
-		let parent = inputs[1].value;
+	quickMove.querySelector('button.swap').addEventListener('click', function() {
+		let temp = quickMoveCode.value;
+		quickMoveCode.value = quickMoveParent.value;
+		quickMoveParent.value = temp;
+	});
+
+	quickMove.querySelector('button.do').addEventListener('click', async () => {
+		let code = quickMoveCode.value;
+		let parent = quickMoveParent.value;
 		if(code !== "" && parent !== "") {
-			inputs[0].setCustomValidity('');
+			quickMoveCode.setCustomValidity('');
 			for(let message of quickMove.getElementsByClassName('message')) {
 				message.style.display = 'none';
 			}
@@ -98,7 +110,7 @@
 			if(response.status === 404) {
 				warning.style.display = '';
 				warning.textContent = `Item ${code} doesn't exist`;
-				inputs[0].setCustomValidity(`Item ${code} doesn't exist`);
+				quickMoveCode.setCustomValidity(`Item ${code} doesn't exist`);
 				return;
 			}
 
