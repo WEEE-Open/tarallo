@@ -129,14 +129,14 @@
 	});
 
 	quickView.addEventListener('keydown', function(e) {
-		if(e.keyCode === 13) {
+		if(e.key === "Enter") {
 			e.preventDefault();
 			quickView.getElementsByTagName('BUTTON')[0].click();
 		}
 	});
 
 	quickMove.addEventListener('keydown', function(e) {
-		if(e.keyCode === 13) {
+		if(e.key === "Enter") {
 			e.preventDefault();
 			quickMove.getElementsByTagName('BUTTON')[0].click();
 		}
