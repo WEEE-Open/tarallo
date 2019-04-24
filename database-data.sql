@@ -65,7 +65,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('vga-ports-n', 'ports', 1), -- VGA --
 	('os-license-code', 'codes', 0), -- OS license code --
 	('os-license-version', 'codes', 0), -- OS license version --
-	('power-idle-pfc', 'power', 0), -- PFC (idle) --
+	('power-idle-pfc', 'power', 3), -- PFC (idle) --
 	('firewire-ports-n', 'ports', 1), -- Firewire --
 	('mini-firewire-ports-n', 'ports', 1), -- Mini Firewire --
 	('serial-ports-n', 'ports', 1), -- Serial (DE-9) -- Also known as RS-232 (which apparently is a standard that also works on DB-25 ports, so don't call them like that)

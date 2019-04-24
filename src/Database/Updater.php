@@ -172,6 +172,11 @@ EOQ
 				case 1:
 					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('wwn', 'codes', 0), ('cib-qr', 'administrative', 0), ('ram-timings', 'features', 0)");
 					break;
+				case 2:
+					$this->exec("UPDATE `Feature` SET `Type` = 3 WHERE `Feature` = 'power-idle-pfc'");
+					// There's no trigger for this, but the Type change still goes through.
+					$this->exec("UPDATE `ItemFeature` SET `ValueDouble` = `ValueText`, `ValueText` = NULL WHERE `Feature` = 'power-idle-pfc'");
+					break;
 			}
 			$this->dataVersion++;
 		}
