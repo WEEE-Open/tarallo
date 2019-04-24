@@ -10,6 +10,7 @@ class FeaturePrinter {
 	const features = [
 		'brand' => 'Brand',
 		'model' => 'Model',
+		'internal-name' => 'Internal (code)name',
 		'family' => 'Model family',
 		'variant' => 'Variant',
 		'key-bios-setup' => 'Key to press for BIOS setup',

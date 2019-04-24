@@ -177,6 +177,9 @@ EOQ
 					// There's no trigger for this, but the Type change still goes through.
 					$this->exec("UPDATE `ItemFeature` SET `ValueDouble` = `ValueText`, `ValueText` = NULL WHERE `Feature` = 'power-idle-pfc'");
 					break;
+				case 4:
+					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('internal-name', 'commercial', 0)");
+					break;
 			}
 			$this->dataVersion++;
 		}

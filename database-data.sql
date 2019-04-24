@@ -12,6 +12,7 @@ TRUNCATE `Feature`;
 INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('brand', 'commercial', 0), -- Brand --
 	('model', 'commercial', 0), -- Model --
+	('internal-name', 'commercial', 0), -- Internal (code)name --
 	('family', 'commercial', 0), -- Model family --
 	('variant', 'commercial', 0), -- Variant --
 	('key-bios-setup', 'software', 0), -- Key to press for BIOS setup --

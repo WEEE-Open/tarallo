@@ -27,6 +27,7 @@ class Feature {
 	const features = [
 		'brand' => self::STRING,
 		'model' => self::STRING,
+		'internal-name' => self::STRING,
 		'family' => self::STRING,
 		'variant' => self::STRING,
 		'key-bios-setup' => self::STRING,
@@ -80,7 +81,7 @@ class Feature {
 		'vga-ports-n' => self::INTEGER,
 		'os-license-code' => self::STRING,
 		'os-license-version' => self::STRING,
-		'power-idle-pfc' => self::STRING,
+		'power-idle-pfc' => self::DOUBLE,
 		'firewire-ports-n' => self::INTEGER,
 		'mini-firewire-ports-n' => self::INTEGER,
 		'serial-ports-n' => self::INTEGER,
@@ -130,6 +131,7 @@ class Feature {
 	const groups = [
 		'brand' => self::GROUP_commercial,
 		'model' => self::GROUP_commercial,
+		'internal-name' => self::GROUP_commercial,
 		'family' => self::GROUP_commercial,
 		'variant' => self::GROUP_commercial,
 		'key-bios-setup' => self::GROUP_software,
