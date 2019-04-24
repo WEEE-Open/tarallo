@@ -2,8 +2,10 @@
 /** @var string $title */
 /** @var string $lang */
 /** @var boolean $itembuttons */
+/** @var string $moveDefaultFrom */
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 $itembuttons = $itembuttons ?? false;
+$moveDefaultFrom = $moveDefaultFrom ?? null;
 ?>
 <!doctype html>
 <html lang="<?= /* $lang */ 'en-US' ?>">
@@ -24,7 +26,7 @@ $itembuttons = $itembuttons ?? false;
 	<?php if(isset($user) || $this->section('aftermenu')): ?>
 	<nav id="top">
 		<?php if(isset($user)):
-			echo $this->fetch('menu');
+			echo $this->fetch('menu', ['moveDefaultFrom' => $moveDefaultFrom]);
 		endif ?>
 		<?= $this->section('aftermenu', '') ?>
 	</nav>
