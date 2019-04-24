@@ -15,15 +15,7 @@ $product = $item->getProduct();
 // duplicating information, increasing probability of introducing bugs?
 $working = '';
 if(isset($features['working'])) {
-	$value = $features['working']->value;
-	switch($value) {
-		case 'yes':
-		case 'no':
-		case 'maybe':
-			$working = " working $value";
-			break;
-	}
-	unset($value);
+	$working = ' working ' . $this->e($features['working']->value);
 }
 
 $containsMore = count($item->getContents()) > 0;
