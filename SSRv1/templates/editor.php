@@ -22,6 +22,9 @@
 <template id="feature-edit-template-generic-error">
 	<div class="error description">Error</div>
 </template>
+<template id="feature-edit-template-linked-error">
+    <div class="error description">Wrong value for a feature <a href="#first-error">here</a></div>
+</template>
 <template id="new-item-template">
 	<?php $this->insert('newItem', ['recursion' => true, 'innerrecursion' => true]) ?>
 </template>

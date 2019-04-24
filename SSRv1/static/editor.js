@@ -13,6 +13,7 @@
 	let featureValuesTranslated = new Map();
 
 	let fadingErrors = new Map();
+	let linkedErrors = new Map();
 
 	for(let select of document.querySelectorAll('.allfeatures')) {
 		select.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
@@ -306,8 +307,9 @@
 	 *
 	 * @param {HTMLElement} feature the feature li element. Error message will be appended here.
 	 * @param {string|null} templateName Error identifier, used to get the correct template
+	 * @param {Element} root Root item in edit page, to show a linked error at the top, too
 	 */
-	function displayInlineError(feature, templateName = null) {
+	function displayInlineError(feature, templateName = null, root = null, ) {
 		let templateThingThatShouldExist;
 		if(templateName === null) {
 			templateThingThatShouldExist = document.getElementById('feature-edit-template-generic-error');
@@ -319,9 +321,17 @@
 			}
 		}
 		removeInlineErrors(feature);
-		let template = document.importNode(templateThingThatShouldExist.content, true);
+		let template = document.importNode(templateThingThatShouldExist.content, true).firstElementChild;
 		feature.appendChild(template);
 		feature.classList.add("haserror");
+
+		if(root !== null) {
+			let linkedError = document.importNode(document.getElementById('feature-edit-template-linked-error').content, true).firstElementChild;
+			root.querySelector('.itembuttons').insertAdjacentElement('afterend', linkedError);
+			linkedErrors.set(template, linkedError);
+			feature.id = 'first-error';
+		}
+
 		return true;
 	}
 
@@ -341,6 +351,11 @@
 		feature.classList.remove("fading");
 		for(let error of feature.querySelectorAll('.error.description')) {
 			feature.removeChild(error);
+			let linked = linkedErrors.get(error);
+			if(typeof linked !== "undefined") {
+				// It's 2019, this function finally exists.
+				linked.remove();
+			}
 		}
 	}
 
@@ -1079,7 +1094,7 @@
 			counter = getNewFeaturesRecursively(root, delta, contents);
 		} catch(e) {
 			if(e instanceof EmptyFeatureValueError) {
-				displayInlineError(e.feature, "empty-input");
+				displayInlineError(e.feature, "empty-input", root);
 				return;
 			} else {
 				throw e;
@@ -1172,13 +1187,14 @@
 	 */
 	async function saveModified(deletedFeatures) {
 		let counter;
+		let root = document.querySelector('.head.item.editing');
 		let delta = {};
 
 		try {
-			counter = getChangedFeatures(document.querySelector('.item.head.editing .features.own.editing'), delta);
+			counter = getChangedFeatures(root.querySelector('.features.own.editing'), delta);
 		} catch(e) {
 			if(e instanceof EmptyFeatureValueError) {
-				displayInlineError(e.feature, "empty-input");
+				displayInlineError(e.feature, "empty-input", root);
 				return;
 			} else {
 				throw e;
