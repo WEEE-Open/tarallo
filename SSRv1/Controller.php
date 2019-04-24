@@ -82,8 +82,10 @@ class Controller extends AbstractController {
 
 		$request = $request
 			->withAttribute('Template', 'history')
-			->withAttribute('TemplateParameters',
-				['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item), 'history' => $history]);
+			->withAttribute(
+				'TemplateParameters',
+				['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item), 'history' => $history]
+			);
 
 		return $next ? $next($request, $response) : $response;
 	}
@@ -171,11 +173,13 @@ class Controller extends AbstractController {
 
 		$request = $request
 			->withAttribute('Template', 'home')
-			->withAttribute('TemplateParameters',
+			->withAttribute(
+				'TemplateParameters',
 				[
 					'locations' => $locations = $db->statsDAO()->getLocationsByItems(),
-					'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', max(20, count($locations)))
-				]);
+					'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', max(20, count($locations))),
+				]
+			);
 
 		return $next ? $next($request, $response) : $response;
 	}
@@ -200,24 +204,31 @@ class Controller extends AbstractController {
 			case '':
 				$request = $request
 					->withAttribute('Template', 'stats::main')
-					->withAttribute('TemplateParameters',
+					->withAttribute(
+						'TemplateParameters',
 						[
 							'locations' => $db->statsDAO()->getLocationsByItems(),
 							'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 40),
 							'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 40),
-						]);
+						]
+					);
 				break;
 
 			case 'attention':
 				$request = $request
 					->withAttribute('Template', 'stats::needAttention')
-					->withAttribute('TemplateParameters',
+					->withAttribute(
+						'TemplateParameters',
 						[
 							'serials' => $db->statsDAO()->getCountByFeature('sn', null, null, null, false, 2),
-							'missingData' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'missing-data'),
-								null, 500),
-							'lost' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'lost'), null, 100)
-						]);
+							'missingData' => $db->statsDAO()->getItemsByFeatures(
+								new Feature('check', 'missing-data'),
+								null,
+								500
+							),
+							'lost' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'lost'), null, 100),
+						]
+					);
 				break;
 
 			case 'cases':
@@ -228,7 +239,8 @@ class Controller extends AbstractController {
 
 				$request = $request
 					->withAttribute('Template', 'stats::cases')
-					->withAttribute('TemplateParameters',
+					->withAttribute(
+						'TemplateParameters',
 						[
 							'location' => $location === null ? null : $location->getCode(),
 							'locationSet' => $locationSet,
@@ -239,11 +251,19 @@ class Controller extends AbstractController {
 							'byOwner' => $db->statsDAO()
 								->getCountByFeature('owner', new Feature('type', 'case'), $location, $startDate),
 							'byMobo' => $db->statsDAO()
-								->getCountByFeature('motherboard-form-factor', new Feature('type', 'case'), $location,
-									$startDate),
-							'ready' => $db->statsDAO()->getItemsByFeatures(new Feature('restrictions', 'ready'),
-								$location, 100),
-						]);
+								->getCountByFeature(
+									'motherboard-form-factor',
+									new Feature('type', 'case'),
+									$location,
+									$startDate
+								),
+							'ready' => $db->statsDAO()->getItemsByFeatures(
+								new Feature('restrictions', 'ready'),
+								$location,
+								100
+							),
+						]
+					);
 				break;
 
 			case 'rams':
@@ -254,7 +274,8 @@ class Controller extends AbstractController {
 
 				$request = $request
 					->withAttribute('Template', 'stats::rams')
-					->withAttribute('TemplateParameters',
+					->withAttribute(
+						'TemplateParameters',
 						[
 							'location' => $location === null ? null : $location->getCode(),
 							'locationSet' => $locationSet,
@@ -266,17 +287,36 @@ class Controller extends AbstractController {
 								->getCountByFeature('ram-form-factor', new Feature('type', 'ram'), $location),
 							'bySize' => $db->statsDAO()
 								->getCountByFeature('capacity-byte', new Feature('type', 'ram'), $location),
-							'byTypeFrequency' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'),
-								['ram-type', 'ram-form-factor', 'frequency-hertz'], $location),
-							'byTypeSize' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'),
-								['ram-type', 'ram-form-factor', 'capacity-byte'], $location),
-							'noWorking' => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'), 'working',
-								$location, 200),
-							'noFrequency' => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'),
-								'frequency-hertz', $location, 200),
-							'noSize' => $db->statsDAO()->getItemByNotFeature(new Feature('type', 'ram'),
-								'capacity-byte', $location, 200),
-						]);
+							'byTypeFrequency' => $db->statsDAO()->getRollupCountByFeature(
+								new Feature('type', 'ram'),
+								['ram-type', 'ram-form-factor', 'frequency-hertz'],
+								$location
+							),
+							'byTypeSize' => $db->statsDAO()->getRollupCountByFeature(
+								new Feature('type', 'ram'),
+								['ram-type', 'ram-form-factor', 'capacity-byte'],
+								$location
+							),
+							'noWorking' => $db->statsDAO()->getItemByNotFeature(
+								new Feature('type', 'ram'),
+								'working',
+								$location,
+								200
+							),
+							'noFrequency' => $db->statsDAO()->getItemByNotFeature(
+								new Feature('type', 'ram'),
+								'frequency-hertz',
+								$location,
+								200
+							),
+							'noSize' => $db->statsDAO()->getItemByNotFeature(
+								new Feature('type', 'ram'),
+								'capacity-byte',
+								$location,
+								200
+							),
+						]
+					);
 				break;
 
 			default:
@@ -457,35 +497,41 @@ class Controller extends AbstractController {
 	}
 
 	public static function getDispatcher(string $cachefile): FastRoute\Dispatcher {
-		return FastRoute\cachedDispatcher(function(FastRoute\RouteCollector $r) {
-			// TODO: [new RateLimit(), [Controller::class, 'login']] or something like that
-			$r->addRoute(['GET', 'POST'], '/login', [[Controller::class, 'login']]);
-			$r->addRoute(['GET', 'POST'], '/options', [[Controller::class, 'options']]);
-			$r->get('/logout', [[Controller::class, 'logout']]);
+		return FastRoute\cachedDispatcher(
+			function(FastRoute\RouteCollector $r) {
+				// TODO: [new RateLimit(), [Controller::class, 'login']] or something like that
+				$r->addRoute(['GET', 'POST'], '/login', [[Controller::class, 'login']]);
+				$r->addRoute(['GET', 'POST'], '/options', [[Controller::class, 'options']]);
+				$r->get('/logout', [[Controller::class, 'logout']]);
 
-			$r->get('/', [[Controller::class, 'getHome']]);
-			$r->get('', [[Controller::class, 'getHome']]);
-			$r->get('/features.json', [[Controller::class, 'getFeaturesJson']]);
-			$r->get('/home', [[Controller::class, 'getHome']]);
-			$r->get('/item/{id}', [[Controller::class, 'getItem']]);
-			$r->get('/history/{id}', [[Controller::class, 'getHistory']]);
-			$r->get('/item/{id}/add/{add}', [[Controller::class, 'getItem']]);
-			$r->get('/item/{id}/edit/{edit}', [[Controller::class, 'getItem']]);
-			$r->get('/add', [[Controller::class, 'addItem']]);
-			$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [[Controller::class, 'search']]);
-			$r->get('/search/{id:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
-			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
-			$r->get('/search/{id:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
-			$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
-			$r->addRoute(['GET', 'POST'], '/bulk', [[Controller::class, 'bulk']]);
-			$r->addGroup('/stats', function(FastRoute\RouteCollector $r) {
-				$r->get('', [[Controller::class, 'getStats']]);
-				$r->get('/{which}', [[Controller::class, 'getStats']]);
-			});
-		}, [
-			'cacheFile' => $cachefile,
-			'cacheDisabled' => !CACHE_ENABLED,
-		]);
+				$r->get('/', [[Controller::class, 'getHome']]);
+				$r->get('', [[Controller::class, 'getHome']]);
+				$r->get('/features.json', [[Controller::class, 'getFeaturesJson']]);
+				$r->get('/home', [[Controller::class, 'getHome']]);
+				$r->get('/item/{id}', [[Controller::class, 'getItem']]);
+				$r->get('/history/{id}', [[Controller::class, 'getHistory']]);
+				$r->get('/item/{id}/add/{add}', [[Controller::class, 'getItem']]);
+				$r->get('/item/{id}/edit/{edit}', [[Controller::class, 'getItem']]);
+				$r->get('/add', [[Controller::class, 'addItem']]);
+				$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [[Controller::class, 'search']]);
+				$r->get('/search/{id:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
+				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
+				$r->get('/search/{id:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
+				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
+				$r->addRoute(['GET', 'POST'], '/bulk', [[Controller::class, 'bulk']]);
+				$r->addGroup(
+					'/stats',
+					function(FastRoute\RouteCollector $r) {
+						$r->get('', [[Controller::class, 'getStats']]);
+						$r->get('/{which}', [[Controller::class, 'getStats']]);
+					}
+				);
+			},
+			[
+				'cacheFile' => $cachefile,
+				'cacheDisabled' => !CACHE_ENABLED,
+			]
+		);
 	}
 
 	public static function handle(Request $request): Response {
@@ -493,7 +539,7 @@ class Controller extends AbstractController {
 			new DatabaseConnection(),
 			new LanguageNegotiatior(),
 			new TemplateEngine(),
-			[self::class, 'handleExceptions']
+			[self::class, 'handleExceptions'],
 		];
 
 		$response = new \Slim\Http\Response();
@@ -552,12 +598,14 @@ class Controller extends AbstractController {
 			$engine = $request->getAttribute('TemplateEngine');
 
 			// TODO: remove addData, read attrbitues in templates directly
-			$engine->addData([
-				'user' => $request->getAttribute('User'),
-				'self' => $request->getUri()->getPath(),
-				'request' => $request,
-				'response' => $response
-			]);
+			$engine->addData(
+				[
+					'user' => $request->getAttribute('User'),
+					'self' => $request->getUri()->getPath(),
+					'request' => $request,
+					'response' => $response,
+				]
+			);
 
 			$response->getBody()->rewind();
 			$response->getBody()->write($engine->render($template, $request->getAttribute('TemplateParameters', [])));
@@ -619,11 +667,18 @@ class Controller extends AbstractController {
 	 * @param Database $db Our dear database
 	 * @param bool $fix Perform fixup
 	 * @param bool $validate Perform validation
+	 *
 	 * @return array [ string item => (string) its new location ]
 	 * @throws \InvalidArgumentException if syntax or logic of the inputs doesn't make sense
 	 * @throws \Exception whatever may surface from TreeDAO::moveWithValidation
 	 */
-	public static function doBulkMove(string $itemsList, ?ItemIncomplete $defaultLocation, Database $db, bool $fix = true, bool $validate = true): array {
+	public static function doBulkMove(
+		string $itemsList,
+		?ItemIncomplete $defaultLocation,
+		Database $db,
+		bool $fix = true,
+		bool $validate = true
+	): array {
 		$moved = [];
 		if(strpos($itemsList, ',') === false) {
 			$array = explode("\n", $itemsList);

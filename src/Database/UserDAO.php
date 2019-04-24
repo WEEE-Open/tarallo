@@ -9,7 +9,9 @@ final class UserDAO extends DAO {
 
 	public function getUserFromSession($session) {
 		$s = $this->getPDO()
-			->prepare('SELECT `Name`, `Password` AS `Hash`, `Level` FROM `User` WHERE `Session` = ? AND `SessionExpiry` > NOW() AND `Enabled` > 0');
+			->prepare(
+				'SELECT `Name`, `Password` AS `Hash`, `Level` FROM `User` WHERE `Session` = ? AND `SessionExpiry` > NOW() AND `Enabled` > 0'
+			);
 		$s->execute([$session]);
 		if($s->rowCount() > 1) {
 			$s->closeCursor();
@@ -35,7 +37,9 @@ final class UserDAO extends DAO {
 	public function setSessionFromUser($username, $session) {
 		try {
 			$s = $this->getPDO()
-				->prepare('UPDATE `User` SET `Session` = :s, SessionExpiry = TIMESTAMPADD(HOUR, 6, NOW()) WHERE `Name` = :n AND `Enabled` > 0');
+				->prepare(
+					'UPDATE `User` SET `Session` = :s, SessionExpiry = TIMESTAMPADD(HOUR, 6, NOW()) WHERE `Name` = :n AND `Enabled` > 0'
+				);
 			$s->bindValue(':s', $session, $session === null ? \PDO::PARAM_NULL : \PDO::PARAM_STR);
 			$s->bindValue(':n', $username, \PDO::PARAM_STR);
 			$result = $s->execute();
@@ -100,7 +104,9 @@ final class UserDAO extends DAO {
 		$s->execute([$username]);
 		if($s->rowCount() > 1) {
 			$s->closeCursor();
-			throw new \LogicException('Duplicate username in database (should never happen altough MySQL doesn\'t allow TEXT fields to be UNIQUE, since that would be too easy and suitable for the current millennium)');
+			throw new \LogicException(
+				'Duplicate username in database (should never happen altough MySQL doesn\'t allow TEXT fields to be UNIQUE, since that would be too easy and suitable for the current millennium)'
+			);
 		} else if($s->rowCount() === 0) {
 			$s->closeCursor();
 
@@ -128,8 +134,10 @@ final class UserDAO extends DAO {
 	 */
 	private function setAuditUsername($username) {
 		try {
-			$s = $this->getPDO()->prepare(/** @lang MySQL */
-				'CALL SetUser(?)');
+			$s = $this->getPDO()->prepare(
+			/** @lang MySQL */
+				'CALL SetUser(?)'
+			);
 			$result = $s->execute([$username]);
 			assert($result !== false, 'set audit username');
 		} finally {

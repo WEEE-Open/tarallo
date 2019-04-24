@@ -334,6 +334,7 @@ class Feature {
 	 * Obtain database column name (for the ItemFeature table)
 	 *
 	 * @param int $type Feature type
+	 *
 	 * @see getType
 	 *
 	 * @return string Column name (e.g. ValueText)
@@ -357,6 +358,7 @@ class Feature {
 	 * Obtain \PDO::PARAM_... constant from feature name
 	 *
 	 * @param int $type Feature type
+	 *
 	 * @see getType
 	 *
 	 * @return int Column name (e.g. ValueText)
@@ -401,28 +403,40 @@ class Feature {
 		switch($type) {
 			case self::STRING:
 				if(!is_string($value)) {
-					throw new \InvalidArgumentException('Feature value for ' . $name . ' must be string, ' . gettype($value) . ' given');
+					throw new \InvalidArgumentException(
+						'Feature value for ' . $name . ' must be string, ' . gettype($value) . ' given'
+					);
 				}
 				break;
 			case self::INTEGER:
 				if(!is_int($value)) {
-					throw new \InvalidArgumentException('Feature value for ' . $name . ' must be integer, ' . gettype($value) . ' given');
+					throw new \InvalidArgumentException(
+						'Feature value for ' . $name . ' must be integer, ' . gettype($value) . ' given'
+					);
 				}
 				if($value < 0) {
-					throw new \InvalidArgumentException('Feature value for ' . $name . ' must be a positive integer, ' . $value . ' given');
+					throw new \InvalidArgumentException(
+						'Feature value for ' . $name . ' must be a positive integer, ' . $value . ' given'
+					);
 				}
 				break;
 			case self::DOUBLE:
 				if(!is_double($value)) {
-					throw new \InvalidArgumentException('Feature value for ' . $name . ' must be double, ' . gettype($value) . ' given');
+					throw new \InvalidArgumentException(
+						'Feature value for ' . $name . ' must be double, ' . gettype($value) . ' given'
+					);
 				}
 				if($value < 0) {
-					throw new \InvalidArgumentException('Feature value for ' . $name . ' must be a positive double, ' . $value . ' given');
+					throw new \InvalidArgumentException(
+						'Feature value for ' . $name . ' must be a positive double, ' . $value . ' given'
+					);
 				}
 				break;
 			case self::ENUM:
 				if(!isset(self::features[$name][$value])) {
-					throw new \InvalidArgumentException('Feature value for ' . $name . ' is not among acceptable ones: ' . $value . ' given');
+					throw new \InvalidArgumentException(
+						'Feature value for ' . $name . ' is not among acceptable ones: ' . $value . ' given'
+					);
 				}
 				break;
 			default:

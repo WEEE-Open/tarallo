@@ -88,9 +88,15 @@ class Validation {
 	 * @param string $key Some key
 	 * @param null|string $default Default value if there's no such key
 	 * @param null|string $emptyString What to do when you get an empty string (default: return it)
+	 *
 	 * @return string|null Whatever the value is, or $default
 	 */
-	public static function validateOptionalString(array $payload, string $key, ?string $default = null, ?string $emptyString = '') {
+	public static function validateOptionalString(
+		array $payload,
+		string $key,
+		?string $default = null,
+		?string $emptyString = ''
+	) {
 		try {
 			$string = (string) self::validateHas($payload, $key);
 			if($string === '') {
@@ -161,6 +167,7 @@ class Validation {
 	 * @TODO: use this everywhere (even when the parameter item is invalid? That's not a 404...), or replace the thrown exception and remove upstream exception handlers from the pipeline.
 	 *
 	 * @param string $code
+	 *
 	 * @return ItemIncomplete
 	 */
 	public static function newItemIncomplete(string $code) {

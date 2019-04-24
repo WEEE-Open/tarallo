@@ -146,7 +146,7 @@ class FeaturePrinter {
 		Feature::GROUP_power => 'Power',
 		Feature::GROUP_powerconnectors => 'Power connectors',
 		Feature::GROUP_codes => 'Codes',
-		Feature::GROUP_software => 'Software'
+		Feature::GROUP_software => 'Software',
 	];
 
 	/**

@@ -152,7 +152,8 @@ class ItemValidatorTest extends TestCase {
 
 		$box->addContent($ram)->addContent($mobo);
 		$unchanged = ItemValidator::fixupLocation($cpu, $box);
-		$this->assertEquals($box, $unchanged, 'Fixup shouldn\'t have changed parent, items don\'t move to random motherboards in random boxes');
+		$this->assertEquals($box, $unchanged,
+			'Fixup shouldn\'t have changed parent, items don\'t move to random motherboards in random boxes');
 		ItemValidator::validateLocation($cpu, $box);
 	}
 

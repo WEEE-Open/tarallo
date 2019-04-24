@@ -74,9 +74,11 @@ class TemplateUtilities implements ExtensionInterface {
 	 * Use UltraFeature::printableValue directly if you have the entire feature.
 	 *
 	 * @see UltraFeature::printableValue
+	 *
 	 * @param string $feature Feature name
 	 * @param int|double|string $value Feature value
 	 * @param string|null $lang Page language code
+	 *
 	 * @return string nice printable value
 	 */
 	public function printFeature(string $feature, $value, ?string $lang): string {

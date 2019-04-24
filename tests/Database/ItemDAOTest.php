@@ -84,7 +84,8 @@ class ItemDAOTest extends DatabaseTest {
 		$this->assertTrue($db->itemDAO()->itemExists($deleteMe), 'Item should still exist');
 		$this->assertFalse($db->itemDAO()->itemVisible($deleteMe), 'Item shouldn\'t be visible');
 		$afterTime = new \DateTime($db->itemDAO()->itemDeletedAt($deleteMe), new \DateTimeZone('UTC'));
-		$this->assertGreaterThanOrEqual(0, $afterTime->getTimestamp() - $beforeTime->getTimestamp(), 'Item should have a valid deletion date');
+		$this->assertGreaterThanOrEqual(0, $afterTime->getTimestamp() - $beforeTime->getTimestamp(),
+			'Item should have a valid deletion date');
 		$this->assertInstanceOf(Item::class, $db->itemDAO()->getItem($deleteMe));
 	}
 
@@ -144,10 +145,12 @@ class ItemDAOTest extends DatabaseTest {
 		$recovered = $db->itemDAO()->getItem($saveMe);
 		$this->assertInstanceOf(Item::class, $recovered, 'Can grab item from database');
 		$this->assertEmpty($recovered->getPath(), 'Item isn\'t placed anywhere');
-		$this->assertEquals(1, count($recovered->getFeatures()), 'Item contains the same number of features it contained before');
+		$this->assertEquals(1, count($recovered->getFeatures()),
+			'Item contains the same number of features it contained before');
 
 		// Prevent integrity constraint violations due to duplicate audit entries...
-		$this->getPdo()->query("UPDATE Audit SET `Time` = DATE_SUB(`Time`, INTERVAL 1 SECOND) WHERE `Code` = 'MOBO42' AND `Change` = 'M' ORDER BY `Time` DESC LIMIT 1");
+		$this->getPdo()
+			->query("UPDATE Audit SET `Time` = DATE_SUB(`Time`, INTERVAL 1 SECOND) WHERE `Code` = 'MOBO42' AND `Change` = 'M' ORDER BY `Time` DESC LIMIT 1");
 		$db->treeDAO()->moveItem($saveMe, $case);
 		$recovered = $db->itemDAO()->getItem($saveMe);
 		$this->assertEquals(1, count($recovered->getPath()), 'Item can be moved somewhere');

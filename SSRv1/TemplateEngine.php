@@ -9,8 +9,11 @@ use Psr\Http\Message\ServerRequestInterface;
 use WEEEOpen\Tarallo\Server\HTTP\Middleware;
 
 class TemplateEngine implements Middleware {
-	public function __invoke(ServerRequestInterface $request, ResponseInterface $response,
-		?callable $next = null): ResponseInterface {
+	public function __invoke(
+		ServerRequestInterface $request,
+		ResponseInterface $response,
+		?callable $next = null
+	): ResponseInterface {
 		// Change this path if you move this file elsewhere!
 		$engine = new Engine(__DIR__ . DIRECTORY_SEPARATOR . 'templates');
 		$engine->addFolder('stats', $engine->getDirectory() . DIRECTORY_SEPARATOR . 'stats');

@@ -45,7 +45,8 @@ class ItemBuilderTest extends TestCase {
 	 */
 	public function testInvalidFeaturesValue() {
 		$this->expectException(InvalidPayloadParameterException::class);
-		ItemBuilder::ofArray(['features' => ['motherboard-form-factor' => 'not a valid form factor']], 'PC42', $discarded);
+		ItemBuilder::ofArray(['features' => ['motherboard-form-factor' => 'not a valid form factor']], 'PC42',
+			$discarded);
 	}
 
 	/**

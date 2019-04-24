@@ -12,6 +12,7 @@ final class StatsDAO extends DAO {
 	 *
 	 * @param null|ItemIncomplete $location if null returns an empty string
 	 * @param string $alias Table alias, if you're doing "SELECT ItemFeatures AS alias", empty string if none
+	 *
 	 * @return string part of a query
 	 */
 	private static function filterLocation(?ItemIncomplete $location, string $alias = '') {
@@ -36,6 +37,7 @@ WHERE Ancestor = :loc
 	 *
 	 * @param null|\DateTime $creation if null returns an empty string
 	 * @param string $alias Table alias, if you're doing "SELECT ItemFeatures AS alias", empty string if none
+	 *
 	 * @return string part of a query
 	 */
 	private static function filterCreated(?\DateTime $creation, string $alias = '') {
@@ -80,7 +82,8 @@ AND `Time` < FROM_UNIXTIME(:timestamp)
 	public function getLocationsByItems() {
 		$array = [];
 
-		$result = $this->getPDO()->query(/** @lang MySQL */
+		$result = $this->getPDO()->query(
+		/** @lang MySQL */
 			<<<'EOQ'
 SELECT `Code` AS Location, COUNT(*) - 1 AS Descendants
 FROM ItemFeature, Tree
@@ -91,7 +94,9 @@ AND `Code` NOT IN (SELECT `Code` FROM Item WHERE DeletedAt IS NOT NULL)
 GROUP BY Tree.Ancestor
 ORDER BY COUNT(*) DESC, Location ASC;
 EOQ
-, \PDO::FETCH_ASSOC);
+			,
+			\PDO::FETCH_ASSOC
+		);
 
 		assert($result !== false, 'available locations');
 
@@ -192,9 +197,17 @@ LIMIT :lim';
 	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
 	 * @param int $cutoff Report features only if count is greater than (or equal to) this number,
 	 * useful for text features with lots of possible values
+	 *
 	 * @return int[] value => count, sorted by count descending
 	 */
-	public function getCountByFeature(string $feature, ?Feature $filter, ?ItemIncomplete $location = null, ?\DateTime $creation = null, bool $deleted = false, int $cutoff = 1) {
+	public function getCountByFeature(
+		string $feature,
+		?Feature $filter,
+		?ItemIncomplete $location = null,
+		?\DateTime $creation = null,
+		bool $deleted = false,
+		int $cutoff = 1
+	) {
 		Feature::validateFeatureName($feature);
 
 		$array = [];
@@ -263,7 +276,13 @@ ORDER BY Quantity DESC, Val ASC";
 	 *
 	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
 	 */
-	public function getItemsByFeatures(Feature $feature, ?ItemIncomplete $location = null, ?int $limit = null, ?\DateTime $creation = null, bool $deleted = false): array {
+	public function getItemsByFeatures(
+		Feature $feature,
+		?ItemIncomplete $location = null,
+		?int $limit = null,
+		?\DateTime $creation = null,
+		bool $deleted = false
+	): array {
 		$pdo = $this->getPDO();
 		$locationFilter = self::filterLocation($location);
 		$deletedFilter = $deleted ? '' : self::filterDeleted();
@@ -318,7 +337,14 @@ LIMIT :lim";
 	 *
 	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
 	 */
-	public function getItemByNotFeature(Feature $filter, string $notFeature, ?ItemIncomplete $location = null, int $limit = 100, ?\DateTime $creation = null, bool $deleted = false): array {
+	public function getItemByNotFeature(
+		Feature $filter,
+		string $notFeature,
+		?ItemIncomplete $location = null,
+		int $limit = 100,
+		?\DateTime $creation = null,
+		bool $deleted = false
+	): array {
 
 		$locationFilter = self::filterLocation($location);
 		$deletedFilter = $deleted ? '' : self::filterDeleted();
@@ -376,7 +402,13 @@ LIMIT :lim";
 	 *
 	 * @return array[] Array of rows, as returned by the database: for N features there are N columns with feature values, the a count column at the end.
 	 */
-	public function getRollupCountByFeature(Feature $filter, array $features, ?ItemIncomplete $location = null, ?\DateTime $creation = null, bool $deleted = false): array {
+	public function getRollupCountByFeature(
+		Feature $filter,
+		array $features,
+		?ItemIncomplete $location = null,
+		?\DateTime $creation = null,
+		bool $deleted = false
+	): array {
 		/*
 		 * This was a nice and readable query that rolls up (with a series of join(t)s, manco a farlo apposta...) the
 		 * RAMs. To make it generic it became almost unreadable, but the final result should be somewhat like this...

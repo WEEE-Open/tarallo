@@ -80,7 +80,9 @@ class User {
 	 */
 	public function getPassword() {
 		if($this->password === null) {
-			throw new \LogicException('Tried to read plaintext password when it\'s not available (try reading the hash instead)');
+			throw new \LogicException(
+				'Tried to read plaintext password when it\'s not available (try reading the hash instead)'
+			);
 		}
 
 		return $this->password;

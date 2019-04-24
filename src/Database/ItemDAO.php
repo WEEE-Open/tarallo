@@ -61,6 +61,7 @@ final class ItemDAO extends DAO {
 	 * Soft-delete an item (mark as deleted to make invisible, detach from tree)
 	 *
 	 * @param ItemIncomplete $item
+	 *
 	 * @throws ValidationException if item contains other items (cannot be deleted)
 	 */
 	public function deleteItem(ItemIncomplete $item) {
@@ -73,7 +74,8 @@ final class ItemDAO extends DAO {
 		try {
 			$statement->execute([$item->getCode()]);
 		} catch(\PDOException $e) {
-			if($e->getCode() === '45000' && $statement->errorInfo()[2] === 'Cannot delete an item while contains other items') {
+			if($e->getCode() === '45000' && $statement->errorInfo(
+				)[2] === 'Cannot delete an item while contains other items') {
 				throw new ValidationException('Cannot delete an item while contains other items', 5, $e);
 			}
 			throw $e;
@@ -146,6 +148,7 @@ final class ItemDAO extends DAO {
 	 * Get deletion date for an item, null if not deleted or doesn't exist
 	 *
 	 * @param ItemIncomplete $item
+	 *
 	 * @return null|string
 	 * @deprecated use getExtraData instead (which is private, so it's not a direct replacement and this stuff needs more thought: maybe move the LostAt and DeletedAt stuff to ItemIncomplete since they're optional and can exist for any item?)
 	 */
@@ -190,8 +193,10 @@ final class ItemDAO extends DAO {
 	 * @return string
 	 */
 	private function getNewCode($prefix) {
-		$statement = $this->getPDO()->prepare(/** @lang MySQL */
-			'SELECT GenerateCode(?)');
+		$statement = $this->getPDO()->prepare(
+		/** @lang MySQL */
+			'SELECT GenerateCode(?)'
+		);
 		try {
 			$statement->execute([$prefix]);
 			$code = $statement->fetch(\PDO::FETCH_NUM)[0];
@@ -224,7 +229,8 @@ final class ItemDAO extends DAO {
 		}
 
 		// TODO: we can also select Depth here, may be useful to select depth = maxdepth + 1 and see if there are items inside and discard them, but it's slow and unefficient...
-		$statement = $this->getPDO()->prepare(<<<EOQ
+		$statement = $this->getPDO()->prepare(
+			<<<EOQ
 			SELECT `Descendant` AS `Code`, GetParent(`Descendant`) AS Parent
 			FROM Tree
 			WHERE Ancestor = ?
@@ -258,7 +264,9 @@ EOQ
 			while(($row = $statement->fetch(\PDO::FETCH_ASSOC)) !== false) {
 				$parent = $flat[$row['Parent']];
 				if(!isset($parent)) {
-					throw new \LogicException('Broken tree: got ' . $row['Code'] . ' before its parent ' . $row['Parent']);
+					throw new \LogicException(
+						'Broken tree: got ' . $row['Code'] . ' before its parent ' . $row['Parent']
+					);
 				}
 				$current = $flat[$row['Code']] = new Item($row['Code']);
 				$parent->addContent($current);
@@ -284,7 +292,8 @@ EOQ
 	 * @return bool true if possible, false if wrong token or item doesn't exist
 	 */
 	private function checkToken(ItemIncomplete $item, string $token) {
-		$tokenquery = $this->getPDO()->prepare(<<<EOQ
+		$tokenquery = $this->getPDO()->prepare(
+			<<<EOQ
 			SELECT IF(COUNT(*) > 0, TRUE, FALSE)
 			FROM Item
 			WHERE `Code` = ? AND Token = ?
@@ -310,7 +319,10 @@ EOQ
 	 */
 	private function getExtraData(Item &$head) {
 		// TODO: race conditions with other queries?
-		$statement = $this->getPDO()->prepare('SELECT UNIX_TIMESTAMP(DeletedAt) AS DeletedAt, UNIX_TIMESTAMP(LostAt) AS LostAt FROM Item WHERE `Code` = ?');
+		$statement = $this->getPDO()
+			->prepare(
+				'SELECT UNIX_TIMESTAMP(DeletedAt) AS DeletedAt, UNIX_TIMESTAMP(LostAt) AS LostAt FROM Item WHERE `Code` = ?'
+			);
 		try {
 			$statement->execute([$head->getCode()]);
 			if($statement->rowCount() === 0) {
@@ -319,10 +331,10 @@ EOQ
 			$result = $statement->fetch(\PDO::FETCH_ASSOC);
 			try {
 				if($result['DeletedAt'] !== null) {
-					$head->setDeletedAt(\DateTime::createFromFormat( 'U', $result['DeletedAt']));
+					$head->setDeletedAt(\DateTime::createFromFormat('U', $result['DeletedAt']));
 				}
 				if($result['LostAt'] !== null) {
-					$head->setLostAt(\DateTime::createFromFormat( 'U', $result['LostAt']));
+					$head->setLostAt(\DateTime::createFromFormat('U', $result['LostAt']));
 				}
 			} catch(\Exception $e) {
 				throw new \LogicException("Cannot create datetime", 0, $e);

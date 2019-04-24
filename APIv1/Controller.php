@@ -296,15 +296,19 @@ class Controller extends AbstractController {
 			throw new InvalidPayloadParameterException('code', $e->duplicate, $e->getMessage());
 		} catch(NotFoundException $e) {
 			if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
-				throw new InvalidPayloadParameterException('parent', $parent->getCode(),
-					'Requested location doesn\'t exist');
+				throw new InvalidPayloadParameterException(
+					'parent', $parent->getCode(),
+					'Requested location doesn\'t exist'
+				);
 			} else {
 				throw $e;
 			}
 		} catch(\InvalidArgumentException $e) {
 			if($e->getCode() === ItemDAO::EXCEPTION_CODE_GENERATE_ID) {
-				throw new InvalidPayloadParameterException('code', null,
-					'Cannot generate code for an item (missing "type"?)');
+				throw new InvalidPayloadParameterException(
+					'code', null,
+					'Cannot generate code for an item (missing "type"?)'
+				);
 			} else {
 				throw $e;
 			}
@@ -561,83 +565,150 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
+	public static function ItemsNotFeature(Request $request, Response $response, ?callable $next = null): Response {
+		$parameters = $request->getAttribute('parameters', []);
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('user');
+		Validation::authorize($user);
+
+		$feature = Validation::validateHasString($parameters, 'Feature');
+		$notFeature = Validation::validateHasString($parameters, 'notFeature');
+		$location = Validation::validateOptionalString($parameters, 'location');
+		$limit = Validation::validateOptionalInt($parameters, 'limit');
+		$creation = Validation::validateOptionalString($parameters, 'creation');
+		$deleted = isset($parameters['deleted']) ? $parameters['deleted'] : false;
+
+		$array = $db->StatsDAO()->getItemByNotFeature($feature, $notFeature, $location, $limit, $creation, $deleted);
+
+		$response = $response->withStatus(200);
+		$request->withAttribute();
+		return $next ? $next($request, $response) : $response;
+	}
+
 	public static function getDispatcher(string $cachefile): FastRoute\Dispatcher {
-		return FastRoute\cachedDispatcher(function(FastRoute\RouteCollector $r) {
+		return FastRoute\cachedDispatcher(
+			function(FastRoute\RouteCollector $r) {
 
-			$r->addGroup('/v1', function(FastRoute\RouteCollector $r) {
-				$r->addGroup('/items', function(FastRoute\RouteCollector $r) {
-					$r->get('', [[Controller::class, 'getItem']]);
-					$r->post('', [[Controller::class, 'createItem']]);
+				$r->addGroup(
+					'/v1',
+					function(FastRoute\RouteCollector $r) {
+						$r->addGroup(
+							'/items',
+							function(FastRoute\RouteCollector $r) {
+								$r->get('', [[Controller::class, 'getItem']]);
+								$r->post('', [[Controller::class, 'createItem']]);
 
-					$r->addGroup('/{id}', function(FastRoute\RouteCollector $r) {
-						$r->get('[/token/{token}]', [[Controller::class, 'getItem']]);
-						$r->get('/history', [[Controller::class, 'getHistory']]);
-						$r->put('', [[Controller::class, 'createItem']]);
-						$r->delete('', [[Controller::class, 'removeItem']]);
+								$r->addGroup(
+									'/{id}',
+									function(FastRoute\RouteCollector $r) {
+										$r->get('[/token/{token}]', [[Controller::class, 'getItem']]);
+										$r->get('/history', [[Controller::class, 'getHistory']]);
+										$r->put('', [[Controller::class, 'createItem']]);
+										$r->delete('', [[Controller::class, 'removeItem']]);
 
-						// Useless
-						//$r->get('/parent',  [[Controller::class, 'getItemParent']]);
-						$r->put('/parent', [[Controller::class, 'setItemParent']]);
+										// Useless
+										//$r->get('/parent',  [[Controller::class, 'getItemParent']]);
+										$r->put('/parent', [[Controller::class, 'setItemParent']]);
 
-						//$r->get('/product', [[Controller::class, 'getItemProduct']]);
-						//$r->put('/product',  [[Controller::class, 'setItemProduct']]);
-						//$r->delete('/product',  [[Controller::class, 'deleteItemProduct']]);
+										//$r->get('/product', [[Controller::class, 'getItemProduct']]);
+										//$r->put('/product',  [[Controller::class, 'setItemProduct']]);
+										//$r->delete('/product',  [[Controller::class, 'deleteItemProduct']]);
 
-						// Also useless, just get the item
-						// $r->get('/features',  [[Controller::class, 'getItemFeatures']]);
-						$r->put('/features', [[Controller::class, 'setItemFeatures']]);
-						$r->patch('/features', [[Controller::class, 'updateItemFeatures']]);
+										// Also useless, just get the item
+										// $r->get('/features',  [[Controller::class, 'getItemFeatures']]);
+										$r->put('/features', [[Controller::class, 'setItemFeatures']]);
+										$r->patch('/features', [[Controller::class, 'updateItemFeatures']]);
 
-						// $r->get('/contents',  [[Controller::class, 'getItemContents']]);
-					});
-				});
-				$r->addGroup('/deleted', function(FastRoute\RouteCollector $r) {
-					$r->addGroup('/{id}', function(FastRoute\RouteCollector $r) {
-						$r->get('', [[Controller::class, 'getDeletedItem']]);
-						$r->put('/parent', [[Controller::class, 'restoreItemParent']]);
-						// TODO: this $r->delete('', [[Controller::class, 'removeItemPermanently']]);
-					});
-				});
+										// $r->get('/contents',  [[Controller::class, 'getItemContents']]);
+									}
+								);
+							}
+						);
+						$r->addGroup(
+							'/deleted',
+							function(FastRoute\RouteCollector $r) {
+								$r->addGroup(
+									'/{id}',
+									function(FastRoute\RouteCollector $r) {
+										$r->get('', [[Controller::class, 'getDeletedItem']]);
+										$r->put('/parent', [[Controller::class, 'restoreItemParent']]);
+										// TODO: this $r->delete('', [[Controller::class, 'removeItemPermanently']]);
+									}
+								);
+							}
+						);
 
-				$r->post('/search', [[Controller::class, 'doSearch']]);
-				$r->patch('/search/{id}', [[Controller::class, 'doSearch']]);
-				$r->get('/search/{id}[/page/{page}]', [[Controller::class, 'getSearch']]); // TODO: implement
+						$r->post('/search', [[Controller::class, 'doSearch']]);
+						$r->patch('/search/{id}', [[Controller::class, 'doSearch']]);
+						$r->get('/search/{id}[/page/{page}]', [[Controller::class, 'getSearch']]); // TODO: implement
 
-				$r->get('/features/{feature}/{value}', [[Controller::class, 'getByFeature']]);
+						$r->get('/features/{feature}/{value}', [[Controller::class, 'getByFeature']]);
 
-				$r->addGroup('/products', function(FastRoute\RouteCollector $r) {
-					$r->get('', [[Controller::class, 'getProduct']]); // TODO: implement
-					$r->get('/{brand}[/{model}[/{variant}]]', [[Controller::class, 'getProduct']]); // TODO: implement
+						$r->addGroup(
+							'/products',
+							function(FastRoute\RouteCollector $r) {
+								$r->get('', [[Controller::class, 'getProduct']]); // TODO: implement
+								$r->get(
+									'/{brand}[/{model}[/{variant}]]',
+									[[Controller::class, 'getProduct']]
+								); // TODO: implement
 
-					$r->post('/{brand}/{model}', [[Controller::class, 'createProduct']]); // TODO: implement
-					$r->put('/{brand}/{model}/{variant}', [[Controller::class, 'createProduct']]); // TODO: implement
+								$r->post('/{brand}/{model}', [[Controller::class, 'createProduct']]); // TODO: implement
+								$r->put(
+									'/{brand}/{model}/{variant}',
+									[[Controller::class, 'createProduct']]
+								); // TODO: implement
 
-					$r->addGroup('/{brand}/{model}/{variant}', function(FastRoute\RouteCollector $r) {
-						//$r->get('/features',  [[Controller::class, 'getProductFeatures']]);
-						$r->post('/features', [[Controller::class, 'setProductFeatures']]); // TODO: implement
-						$r->patch('/features', [[Controller::class, 'updateProductFeatures']]); // TODO: implement
-					});
-				});
+								$r->addGroup(
+									'/{brand}/{model}/{variant}',
+									function(FastRoute\RouteCollector $r) {
+										//$r->get('/features',  [[Controller::class, 'getProductFeatures']]);
+										$r->post(
+											'/features',
+											[[Controller::class, 'setProductFeatures']]
+										); // TODO: implement
+										$r->patch(
+											'/features',
+											[[Controller::class, 'updateProductFeatures']]
+										); // TODO: implement
+									}
+								);
+							}
+						);
 
-				$r->get('/logs[/page/{page}]', [[Controller::class, 'getLogs']]);
+						$r->get('/logs[/page/{page}]', [[Controller::class, 'getLogs']]);
 
-				$r->get('/session', [[Controller::class, 'sessionWhoami']]);
-				$r->post('/session', [[Controller::class, 'sessionStart']]);
-				$r->delete('/session', [[Controller::class, 'sessionClose']]);
-				$r->head('/session', [[Controller::class, 'sessionRefresh']]);
+						$r->get('/session', [[Controller::class, 'sessionWhoami']]);
+						$r->post('/session', [[Controller::class, 'sessionStart']]);
+						$r->delete('/session', [[Controller::class, 'sessionClose']]);
+						$r->head('/session', [[Controller::class, 'sessionRefresh']]);
 
-			});
-		}, [
-			'cacheFile'     => $cachefile,
-			'cacheDisabled' => !CACHE_ENABLED,
-		]);
+						$r->addGroup(
+							'/stats',
+							function(FastRoute\RouteCollector $r) {
+								$r->addGroup(
+									'/getItemByNotFeature',
+									function(FastRoute\RouteCollector $r) {
+										$r->get('/{parameters}', [[Controller::class, 'ItemsNotFeature']]);
+									}
+								);
+							}
+						);
+					}
+				);
+			},
+			[
+				'cacheFile' => $cachefile,
+				'cacheDisabled' => !CACHE_ENABLED,
+			]
+		);
 	}
 
 	public static function handle(Request $request): Response {
 		$queue = [
 			[static::class, 'isJson'],
 			new DatabaseConnection(),
-			[static::class, 'handleExceptions']
+			[static::class, 'handleExceptions'],
 		];
 
 		$response = new \Slim\Http\Response();
@@ -703,9 +774,11 @@ class Controller extends AbstractController {
 					$body = JSend::success($data);
 					break;
 				case JSend::ERROR:
-					$body = JSend::error($request->getAttribute('ErrorMessage'),
+					$body = JSend::error(
+						$request->getAttribute('ErrorMessage'),
 						$request->getAttribute('ErrorCode'),
-						$data);
+						$data
+					);
 					break;
 				case JSend::FAIL:
 					$body = JSend::fail($data);
