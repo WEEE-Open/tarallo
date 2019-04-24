@@ -169,6 +169,9 @@ EOQ
 				case 0:
 					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('type', 'ssd')");
 					break;
+				case 1:
+					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('wwn', 'codes', 0), ('cib-qr', 'administrative', 0), ('ram-timings', 'features', 0)");
+					break;
 			}
 			$this->dataVersion++;
 		}

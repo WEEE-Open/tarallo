@@ -18,6 +18,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('key-boot-menu', 'software', 0), -- Key to press for boot menu --
 	('owner', 'administrative', 0), -- Owner --
 	('sn', 'codes', 0), -- Serial number (s/n) --
+	('wwn', 'codes', 0), -- WWN --
 	('mac', 'codes', 0), -- MAC address --
 	('type', 'general', 2), -- Type --
 	('working', 'general', 2), -- Working --
@@ -32,7 +33,8 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('agp-sockets-n', 'sockets', 1), -- AGP --
 	('arrival-batch', 'administrative', 0), -- Arrival batch --
 	('capacity-decibyte', 'features', 1), -- Capacity ("decimal" bytes) --
-	('cib', 'administrative', 0), -- CIB --
+	('cib', 'administrative', 0), -- CIB (red border) --
+	('cib-qr', 'administrative', 0), -- CIB (QR code) --
 	('core-n', 'features', 1), -- Cores --
 	('cpu-socket', 'sockets', 2), -- Socket (CPU) --
 	('dvi-ports-n', 'ports', 1), -- DVI --
@@ -54,6 +56,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('psu-connector-motherboard', 'powerconnectors', 2), -- Power connector (motherboard) -- use sata-ports-n and pcie-power-pin-n for that stuff
 	('psu-volt', 'power', 3), -- Power supply voltage --
 	('ram-type', 'features', 2), -- RAM type --
+	('ram-timings', 'features', 0), -- RAM timings -- https://en.wikipedia.org/wiki/Memory_timings
 	('sata-ports-n', 'ports', 1), -- SATA --
 	('software', 'software', 0), -- Software (installed) --
 	('usb-ports-n', 'ports', 1), -- USB --
