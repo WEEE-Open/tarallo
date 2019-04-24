@@ -566,22 +566,36 @@ class Controller extends AbstractController {
 	}
 
 	public static function ItemsNotFeature(Request $request, Response $response, ?callable $next = null): Response {
-		$parameters = $request->getAttribute('parameters', []);
+		/** @var Database $db */
 		$db = $request->getAttribute('Database');
-		$user = $request->getAttribute('user');
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+
 		Validation::authorize($user);
 
-		$feature = Validation::validateHasString($parameters, 'Feature');
+//		Feature $filter,
+//		string $notFeature,
+//		?ItemIncomplete $location = null,
+//		int $limit = 100,
+//		?\DateTime $creation = null,
+//		bool $deleted = false
+		$feature = Validation::validateHasString($parameters, 'filter');
 		$notFeature = Validation::validateHasString($parameters, 'notFeature');
-		$location = Validation::validateOptionalString($parameters, 'location');
-		$limit = Validation::validateOptionalInt($parameters, 'limit');
-		$creation = Validation::validateOptionalString($parameters, 'creation');
-		$deleted = isset($parameters['deleted']) ? $parameters['deleted'] : false;
+		$location = Validation::validateOptionalString($parameters, 'location', null, null);
+		$limit = Validation::validateOptionalInt($parameters, 'limit', 100);
+		$creation = Validation::validateOptionalString($parameters, 'creation', null);
+		$deleted = boolval(Validation::validateOptionalString($parameters, 'creation', false));
+		//$deleted = isset($parameters['deleted']) ? $parameters['deleted'] : false;
 
-		$array = $db->StatsDAO()->getItemByNotFeature($feature, $notFeature, $location, $limit, $creation, $deleted);
+		$explosion = explode('=', $feature);
+		$array = $db->StatsDAO()->getItemByNotFeature(new Feature($explosion[0], $explosion[1]), $notFeature, new
+		ItemIncomplete($location), $limit, $creation === null ? null : new \DateTime($creation), $deleted);
 
-		$response = $response->withStatus(200);
-		$request->withAttribute();
+		$request = $request
+			->withAttribute('Status', JSend::SUCCESS)
+			->withAttribute('Data', $array);
+		$response = $response
+			->withStatus(200);
 		return $next ? $next($request, $response) : $response;
 	}
 
@@ -686,12 +700,13 @@ class Controller extends AbstractController {
 						$r->addGroup(
 							'/stats',
 							function(FastRoute\RouteCollector $r) {
-								$r->addGroup(
-									'/getItemByNotFeature',
-									function(FastRoute\RouteCollector $r) {
-										$r->get('/{parameters}', [[Controller::class, 'ItemsNotFeature']]);
-									}
-								);
+								// Feature $filter,
+								// string $notFeature,
+								// ?ItemIncomplete $location = null,
+								// int $limit = 100,
+								// ?\DateTime $creation = null,
+								// bool $deleted = false
+								$r->get('/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]', [[Controller::class, 'ItemsNotFeature']]);
 							}
 						);
 					}
@@ -727,6 +742,7 @@ class Controller extends AbstractController {
 					->withStatus(200);
 				break;
 			case FastRoute\Dispatcher::NOT_FOUND:
+				// TODO: why is this not working? There's no message...
 				$request = $request
 					->withAttribute('Status', JSend::FAIL)
 					->withAttribute('ErrorMessage', "API endpoint not found");
