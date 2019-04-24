@@ -81,7 +81,7 @@
 			enableNewItemButtons(clone);
 		}
 
-		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack.bind(null, null));
+		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack.bind(null, null, true));
 
 		for(let item of document.querySelectorAll('.item.editing')) {
 			let featuresElement = null;
@@ -1292,11 +1292,15 @@
 	 * Go back to view mode. Or go forward to view mode, depending on tne point of view.
 	 *
 	 * @param {string|null} code - Newly added item code, to redirect there from add item page
+	 * @param {boolean} confirm - Show the "leave/remain" message if there are unsaved changes
 	 */
-	function goBack(code = null) {
+	function goBack(code = null, confirm = false) {
 		let here = window.location.pathname;
 		let query = window.location.search;
 		let hash = window.location.hash;
+		if(!confirm) {
+			window.onbeforeunload = undefined;
+		}
 
 		let pieces = here.split('/');
 		let penultimate = pieces[pieces.length - 2];
@@ -1312,6 +1316,16 @@
 			}
 		}
 	}
+
+	window.onbeforeunload = function() {
+		if(document.querySelector('.value.changed, .new .value') !== null) {
+			// This message doesn't actually appear (in Firefox at least), but it's the thought that counts.
+			// The "leave/remain" popup still appears and works as expected.
+			return 'Wait! You have unsaved data!';
+		} else {
+			return undefined;
+		}
+	};
 
 	/**
 	 * Add divs that disappear randomly from contentEditable elements
