@@ -156,7 +156,7 @@ EOQ
 					throw new \RuntimeException('Data version larger than maximum');
 			}
 			$this->schemaVersion++;
-			echo 'Schema updated to version ' . $this->schemaVersion;
+			echo 'Schema updated to version ' . $this->schemaVersion . PHP_EOL;
 		}
 		$this->exec("UPDATE Configuration SET `Value` = \"$this->schemaVersion\" WHERE `Key` = \"SchemaVersion\"");
 	}
@@ -180,14 +180,17 @@ EOQ
 					// There's no trigger for this, but the Type change still goes through.
 					$this->exec("UPDATE `ItemFeature` SET `ValueDouble` = `ValueText`, `ValueText` = NULL WHERE `Feature` = 'power-idle-pfc'");
 					break;
+				case 3:
+					// This was a mistake...
+					break;
 				case 4:
 					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('internal-name', 'commercial', 0)");
 					break;
 				case 5:
-//					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('odd-form-factor', 'physical', 2)");
-//					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('odd-form-factor', '5.25'), ('odd-form-factor', 'laptop-odd-7mm'), ('odd-form-factor', 'laptop-odd-8.5mm'), ('odd-form-factor', 'laptop-odd-9.5mm'), ('odd-form-factor', 'laptop-odd-12.7mm')");
-//					$this->exec("UPDATE `ItemFeature` SET `Feature` = 'odd-form-factor' WHERE `Feature` = 'hdd-odd-form-factor' AND (`ValueEnum` = '5.25' OR `ValueEnum` LIKE 'laptop%')");
-//					$this->exec("DELETE FROM `FeatureEnum` WHERE `Feature` = 'hdd-odd-form-factor' AND (`ValueEnum` = '5.25' OR `ValueEnum` LIKE 'laptop%')");
+					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('odd-form-factor', 'physical', 2)");
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('odd-form-factor', '5.25'), ('odd-form-factor', 'laptop-odd-7mm'), ('odd-form-factor', 'laptop-odd-8.5mm'), ('odd-form-factor', 'laptop-odd-9.5mm'), ('odd-form-factor', 'laptop-odd-12.7mm')");
+					$this->exec("UPDATE `ItemFeature` SET `Feature` = 'odd-form-factor' WHERE `Feature` = 'hdd-odd-form-factor' AND (`ValueEnum` = '5.25' OR `ValueEnum` LIKE 'laptop%')");
+					$this->exec("DELETE FROM `FeatureEnum` WHERE `Feature` = 'hdd-odd-form-factor' AND (`ValueEnum` = '5.25' OR `ValueEnum` LIKE 'laptop%')");
 					// "If ON UPDATE CASCADE or ON UPDATE SET NULL recurses to update the same table it has previously updated during the cascade, it acts like RESTRICT"
 					// - https://dev.mysql.com/doc/refman/5.7/en/innodb-foreign-key-constraints.html
 					// And it's _obviously_ the same in MariaDB. There are 2 overlapping foreign key indexes: one for
@@ -213,7 +216,7 @@ EOQ
 					throw new \RuntimeException('Data version larger than maximum');
 			}
 			$this->dataVersion++;
-			echo 'Data updated to version ' . $this->dataVersion;
+			echo 'Data updated to version ' . $this->dataVersion . PHP_EOL;
 		}
 		$this->exec("UPDATE Configuration SET `Value` = '$this->dataVersion' WHERE `Key` = 'DataVersion'");
 	}
