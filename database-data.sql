@@ -356,3 +356,5 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('NET', 0),
 	('T', 0),
 	('', 0);
+
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 6);
