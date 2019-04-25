@@ -22,6 +22,7 @@ use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
+use WEEEOpen\Tarallo\Server\ValidationException;
 
 
 class Controller extends AbstractController {
@@ -36,12 +37,27 @@ class Controller extends AbstractController {
 
 		Validation::authorize($user, 3);
 
-		$id = Validation::validateOptionalString($parameters, 'id', null);
+		// So things aren't url-decoded automatically...
+		$id = urldecode(Validation::validateOptionalString($parameters, 'id', null));
 		$edit = Validation::validateOptionalString($parameters, 'edit', null);
 		$add = Validation::validateOptionalString($parameters, 'add', null);
 		$depth = Validation::validateOptionalInt($query, 'depth', 20);
 
-		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, $depth);
+		try {
+			$ii = new ItemIncomplete($id);
+		} catch(ValidationException $e) {
+			if($e->getCode() === 3) {
+				$response = $response
+					->withStatus(404);
+				$request = $request
+					->withAttribute('Template', 'genericError')
+					->withAttribute('TemplateParameters', ['reason' => "Code '$id' contains invalid characters"]);
+				return $next ? $next($request, $response) : $response;
+			}
+			throw $e;
+		}
+
+		$item = $db->itemDAO()->getItem($ii, null, $depth);
 		$renderParameters = ['item' => $item, 'deletedAt' => $item->getDeletedAt()];
 		// These should be mutually exclusive
 		if($edit !== null) {

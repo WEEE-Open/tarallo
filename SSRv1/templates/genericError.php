@@ -8,7 +8,7 @@ $this->layout('main', ['title' => $response->getStatusCode() . ' ' . $response->
 <section id="content">
 	<p class="httperror"><strong><?=$response->getStatusCode()?></strong> <?=$response->getReasonPhrase()?></p>
 	<?php if(isset($reason)): ?>
-		<p><?= $reason ?></p>
+		<p><?= $this->e($reason) ?></p>
 	<?php endif; ?>
 	<p></p>
 </section>
