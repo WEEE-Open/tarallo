@@ -156,6 +156,7 @@ EOQ
 					throw new \RuntimeException('Data version larger than maximum');
 			}
 			$this->schemaVersion++;
+			echo 'Schema updated to version ' . $this->schemaVersion;
 		}
 		$this->exec("UPDATE Configuration SET `Value` = \"$this->schemaVersion\" WHERE `Key` = \"SchemaVersion\"");
 	}
@@ -208,6 +209,7 @@ EOQ
 					throw new \RuntimeException('Data version larger than maximum');
 			}
 			$this->dataVersion++;
+			echo 'Data updated to version ' . $this->dataVersion;
 		}
 		$this->exec("UPDATE Configuration SET `Value` = '$this->dataVersion' WHERE `Key` = 'DataVersion'");
 	}
