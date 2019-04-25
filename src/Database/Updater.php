@@ -205,6 +205,10 @@ EOQ
 				case 6:
 					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('type', 'card-reader')");
 					break;
+				case 7:
+					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('working', 'to-be-tested')");
+					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('check', 'partial-inventory')");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

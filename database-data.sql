@@ -154,6 +154,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('working', 'no'), -- No --
 	('working', 'yes'), -- Yes --
 	('working', 'maybe'), -- Sometimes or unclear --
+	('working', 'to-be-tested'), -- Needs to be tested --
 	('isa', 'x86-32'), -- x86 32 bit --
 	('isa', 'x86-64'), -- x86 64 bit --
 	('isa', 'ia-64'), -- IA-64 --
@@ -287,6 +288,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('ram-form-factor', 'microdimm'), -- Micro DIMM --
 	('ram-form-factor', 'fbdimm'), -- FB-DIMM --
 	('check', 'missing-data'), -- Missing data --
+	('check', 'partial-inventory'), -- Partially inventoried --
 	('check', 'lost'), -- Lost --
 	('ram-ecc', 'no'), -- No --
 	('ram-ecc', 'yes'), -- Yes --
@@ -358,4 +360,4 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('T', 0),
 	('', 0);
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 7);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 8);

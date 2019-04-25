@@ -114,7 +114,7 @@ class FeaturePrinter {
 	];
 	const featuresEnum = [
 		'type' => ['location' => 'Location', 'case' => 'Case', 'motherboard' => 'Motherboard', 'cpu' => 'CPU', 'graphics-card' => 'Graphics card', 'ram' => 'RAM', 'hdd' => 'HDD', 'ssd' => 'SSD', 'odd' => 'ODD', 'psu' => 'PSU', 'audio-card' => 'Audio card', 'ethernet-card' => 'Ethernet card', 'monitor' => 'Monitor', 'mouse' => 'Mouse', 'keyboard' => 'Keyboard', 'network-switch' => 'Network switch', 'network-hub' => 'Network hub', 'modem-router' => 'Modem/router', 'fdd' => 'FDD', 'ports-bracket' => 'Bracket with ports', 'card-reader' => 'Card reader', 'other-card' => 'Other internal card', 'fan-controller' => 'Fan controller (rheobus)', 'modem-card' => 'Modem card', 'scsi-card' => 'SCSI card', 'wifi-card' => 'WiFi card', 'bluetooth-card' => 'Bluetooth card', 'external-psu' => 'External PSU', 'zip-drive' => 'ZIP drive', 'printer' => 'Printer', 'scanner' => 'Scanner', 'inventoried-object' => 'Other (with invetory sticker)', 'adapter' => 'Adapter', 'usbhub' => 'USB hub', 'tv-card' => 'TV tuner card'],
-		'working' => ['no' => 'No', 'yes' => 'Yes', 'maybe' => 'Sometimes or unclear'],
+		'working' => ['no' => 'No', 'yes' => 'Yes', 'maybe' => 'Sometimes or unclear', 'to-be-tested' => 'Needs to be tested'],
 		'isa' => ['x86-32' => 'x86 32 bit', 'x86-64' => 'x86 64 bit', 'ia-64' => 'IA-64', 'arm' => 'ARM'],
 		'color' => ['black' => 'Black', 'white' => 'White', 'green' => 'Green', 'yellow' => 'Yellow', 'red' => 'Red', 'blue' => 'Blue', 'grey' => 'Grey', 'darkgrey' => 'Dark grey', 'lightgrey' => 'Light grey', 'pink' => 'Pink', 'transparent' => 'Transparent', 'brown' => 'Brown', 'orange' => 'Orange', 'violet' => 'Violet', 'sip-brown' => 'SIP brown', 'lightblue' => 'Light blue', 'yellowed' => 'Yellowed', 'transparent-dark' => 'Transparent (dark)', 'golden' => 'Golden'],
 		'motherboard-form-factor' => ['atx' => 'ATX', 'miniatx' => 'Mini ATX (not standard)', 'microatx' => 'Micro ATX', 'miniitx' => 'Mini ITX', 'proprietary' => 'Proprietary (desktop)', 'btx' => 'BTX (slots ≤ 7)', 'microbtx' => 'Micro BTX (slots ≤ 4)', 'nanobtx' => 'Nano BTX (slots ≤ 2)', 'picobtx' => 'Pico BTX (slots ≤ 1)', 'wtx' => 'WTX', 'flexatx' => 'Flex ATX', 'proprietary-laptop' => 'Laptop', 'eatx' => 'Extended ATX'],
@@ -126,7 +126,7 @@ class FeaturePrinter {
 		'psu-connector-motherboard' => ['proprietary' => 'Proprietary', 'at' => 'AT', 'atx-20pin' => 'ATX 20 pin', 'atx-24pin' => 'ATX 24 pin', 'atx-24pin-mini' => 'Mini ATX 24 pin', 'atx-20pin-aux' => 'ATX 20 pin + AUX'],
 		'ram-type' => ['simm' => 'SIMM', 'edo' => 'EDO', 'sdr' => 'SDR', 'ddr' => 'DDR', 'ddr2' => 'DDR2', 'ddr3' => 'DDR3', 'ddr4' => 'DDR4'],
 		'ram-form-factor' => ['simm' => 'SIMM', 'dimm' => 'DIMM', 'sodimm' => 'SODIMM', 'minidimm' => 'Mini DIMM', 'microdimm' => 'Micro DIMM', 'fbdimm' => 'FB-DIMM'],
-		'check' => ['missing-data' => 'Missing data', 'lost' => 'Lost'],
+		'check' => ['missing-data' => 'Missing data', 'partial-inventory' => 'Partially inventoried', 'lost' => 'Lost'],
 		'ram-ecc' => ['no' => 'No', 'yes' => 'Yes'],
 		'data-erased' => ['yes' => 'Yes️'],
 		'surface-scan' => ['fail' => 'Failed', 'pass' => 'Passed'],
