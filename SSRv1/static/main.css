@@ -1,3 +1,7 @@
+* {
+	box-sizing: border-box;
+}
+
 html, body {
 	font-family: sans-serif;
 	margin: 0;
@@ -216,7 +220,7 @@ table {
 	width: 100%;
 }
 
-table > thead, .statswrapper table .total.last {
+table > thead, .tablewrapper table .total.last {
 	background: #333;
 	color: #eee;
 }
@@ -225,19 +229,19 @@ table td {
 	padding: 0.3em 0.5em;
 }
 
-.statswrapper table .total {
+.tablewrapper table .total {
 	background-color: #eee;
 }
 
-.statswrapper a {
+.tablewrapper a {
 	color: #333;
 }
 
-.statswrapper a:visited {
+.tablewrapper a:visited {
 	color: #000;
 }
 
-#content > *:not(.breadbox), .item {
+#content > :not(.breadbox), .item {
 	margin: .5em;
 }
 
@@ -445,25 +449,48 @@ label.searchby {
 	color: #eee;
 }
 
-.statswrapper {
+/* #content is needed, or else this is not specific enough to override a margin above */
+#content form.nice {
+	margin: auto;
+	display: block;
+	max-width: 60em;
+}
+
+form.nice > :not(.small) {
+	display: block;
+	width: 100%;
+	font-size: 1rem;
+}
+
+form.nice > .small {
+	display: block;
+	width: auto;
+	margin: 1em auto 0 auto;
+}
+
+form.nice textarea {
+	resize: vertical;
+}
+
+.tablewrapper {
 	width: auto;
 	margin-bottom: 2em;
 }
 
-.statswrapper p {
+.tablewrapper p {
 	margin: 0 0 1em 0;
 }
 
-.statswrapper table + p {
+.tablewrapper table + p {
 	margin-top: 1em;
 }
 
-.statswrapper div {
+.tablewrapper div {
 	line-height: 1.5em;
 }
 
-#searchcontrols .disabled {
-	display: none;
+.hidden {
+	display: none !important;
 }
 
 .pagination {
@@ -531,15 +558,15 @@ label.searchby {
 		align-items: stretch;
 	}
 
-	.statswrapper {
+	.tablewrapper {
 		width: 24em;
 	}
 
-	.statswrapper.large {
+	.tablewrapper.large {
 		width: 100%;
 	}
 
-	.statswrapper > table {
+	.tablewrapper > table {
 		width: 100%;
 	}
 }

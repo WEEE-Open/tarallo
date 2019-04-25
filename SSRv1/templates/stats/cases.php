@@ -15,7 +15,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 ?>
 <div class="statswrapperwrapper">
 <?php if(!empty($ready)): ?>
-	<div class="statswrapper large">
+	<div class="tablewrapper large">
 		<p>Ready computers:</p>
 		<div>
 			<?php foreach($ready as $item): ?>
@@ -25,7 +25,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 	</div>
 <?php endif ?>
 <?php if(!empty($leastRecent)): ?>
-	<div class="statswrapper">
+	<div class="tablewrapper">
 		<p>30 computers where no work has been done in a long time:</p>
 		<table>
 			<thead>
@@ -46,7 +46,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 	</div>
 <?php endif ?>
 <?php if(!empty($mostRecent)): ?>
-	<div class="statswrapper">
+	<div class="tablewrapper">
 		<p>30 computers where work has been done recently:</p>
 		<table>
 			<thead>
@@ -67,7 +67,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 	</div>
 <?php endif ?>
 <?php if(!empty($byOwner)): ?>
-	<div class="statswrapper">
+	<div class="tablewrapper">
 		<p>Computers by owner<?php if($startDate !== null):?> (acquired after <?=$startDate->format('Y-m-d')?>)<?php endif; ?>:</p>
 		<table>
 			<thead>
@@ -88,7 +88,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 	</div>
 <?php endif ?>
 <?php if(!empty($byMobo)): ?>
-	<div class="statswrapper">
+	<div class="tablewrapper">
 		<p>Cases by motherboard form factor<?php if($startDate !== null):?> (acquired after <?=$startDate->format('Y-m-d')?>)<?php endif; ?>:</p>
 		<table>
 			<thead>
@@ -109,7 +109,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 	</div>
 <?php endif ?>
 <?php if(!empty($byDate)): ?>
-	<div class="statswrapper">
+	<div class="tablewrapper">
 		<p>Owner by date:</p>
 		<table>
 			<thead>

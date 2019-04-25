@@ -22,23 +22,23 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 	</nav>
 	<!--<label><input type="checkbox" class="usecompactview" checked="checked">Usa ComputerView (se possibile)</label>-->
 	<div id="searchcontrols">
-		<div id="search-control-code" class="disabled">
+		<div id="search-control-code" class="hidden">
 			<label class="searchby" for="search-control-code-input">Code:</label>
 			<div class="filter"><input id="search-control-code-input">&nbsp;(Supports % and _)</div>
 		</div>
-		<div id="search-control-location" class="disabled">
+		<div id="search-control-location" class="hidden">
 			<label class="searchby" for="search-control-location-input">Location:</label>
 			<div class="filter"><input id="search-control-location-input"></div>
 		</div>
-		<div id="search-control-features" class="disabled">
+		<div id="search-control-features" class="hidden">
 			<label class="searchby">Features:</label>
 			<div class="filter"><div class="own features"><ul></ul></div><div class="selector"><label>Feature:<select class="allfeatures"></select></label><button>Add</button></div></div>
 		</div>
-		<div id="search-control-ancestor" class="disabled">
+		<div id="search-control-ancestor" class="hidden">
 			<label class="searchby">Ancestor:</label>
 			<div class="filter"><div class="own features"><ul></ul></div><div class="selector"><label>Feature:<select class="allfeatures"></select></label><button>Add</button></div></div>
 		</div>
-		<div id="search-control-sort" class="disabled">
+		<div id="search-control-sort" class="hidden">
 			<label class="searchby" for="search-control-sort-input">Order by:</label>
 			<div class="filter"><select id="search-control-sort-input" class="allfeatures">
 			</select><label><select id="search-control-sort-direction-input">
