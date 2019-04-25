@@ -774,13 +774,13 @@
 				features = ['brand', 'model', 'sn', 'family', 'ram-type', 'ram-form-factor', 'frequency-hertz', 'capacity-byte', 'ram-timings', 'ram-ecc', 'working', 'color', 'owner', 'notes'];
 				break;
 			case 'hdd':
-				features = ['brand', 'model', 'sn', 'wwn', 'family', 'capacity-decibyte', 'hdd-odd-form-factor', 'spin-rate-rpm', 'mini-ide-ports-n', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n', 'scsi-db68-ports-n', 'data-erased', 'surface-scan', 'smart-data',  'software', 'working', 'owner'];
+				features = ['brand', 'model', 'sn', 'wwn', 'family', 'capacity-decibyte', 'hdd-form-factor', 'spin-rate-rpm', 'mini-ide-ports-n', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n', 'scsi-db68-ports-n', 'data-erased', 'surface-scan', 'smart-data',  'software', 'working', 'owner'];
 				break;
 			case 'ssd':
-				features = ['brand', 'model', 'sn', 'family', 'capacity-byte', 'hdd-odd-form-factor', 'sata-ports-n', 'data-erased', 'surface-scan', 'smart-data',  'software', 'working', 'owner'];
+				features = ['brand', 'model', 'sn', 'family', 'capacity-byte', 'hdd-form-factor', 'sata-ports-n', 'data-erased', 'surface-scan', 'smart-data',  'software', 'working', 'owner'];
 				break;
 			case 'odd':
-				features = ['brand', 'model', 'family', 'sn', 'odd-type', 'ide-ports-n', 'jae-ports-n', 'sata-ports-n', 'hdd-odd-form-factor', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'family', 'sn', 'odd-type', 'ide-ports-n', 'jae-ports-n', 'sata-ports-n', 'odd-form-factor', 'color', 'working', 'owner'];
 				break;
 			case 'fdd':
 				features = ['brand', 'model', 'sn', 'color', 'working', 'owner'];
