@@ -789,63 +789,63 @@
 
 		switch(type) {
 			case 'case':
-				features = ['cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code', 'brand', 'model', 'sn', 'usb-ports-n', 'working', 'motherboard-form-factor', 'psu-form-factor', 'power-connector', 'psu-volt', 'psu-ampere', 'arrival-batch', 'owner', 'color', 'notes'];
+				features = ['cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code', 'brand', 'model', 'sn', 'usb-ports-n', 'motherboard-form-factor', 'psu-form-factor', 'power-connector', 'psu-volt', 'psu-ampere', 'arrival-batch', 'owner', 'color', 'notes'];
 				break;
 			case 'motherboard':
-				features = ['brand', 'model', 'sn', 'motherboard-form-factor', 'key-bios-setup', 'key-boot-menu', 'cpu-socket', 'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n', 'sata-ports-n', 'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n', 'usb-ports-n', 'firewire-ports-n', 'mini-firewire-ports-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'mac', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand', 'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'mini-jack-ports-n', 'psu-connector-cpu', 'psu-connector-motherboard', 'working', 'color', 'owner', 'notes'];
+				features = ['brand', 'model', 'sn', 'motherboard-form-factor', 'key-bios-setup', 'key-boot-menu', 'cpu-socket', 'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n', 'sata-ports-n', 'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n', 'usb-ports-n', 'firewire-ports-n', 'mini-firewire-ports-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'mac', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand', 'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'mini-jack-ports-n', 'psu-connector-cpu', 'psu-connector-motherboard', 'color', 'owner', 'notes'];
 				break;
 			case 'cpu':
-				features = ['brand', 'model', 'variant', 'core-n', 'isa', 'frequency-hertz', 'cpu-socket', 'integrated-graphics-brand', 'integrated-graphics-model', 'working', 'owner'];
+				features = ['brand', 'model', 'variant', 'core-n', 'isa', 'frequency-hertz', 'cpu-socket', 'integrated-graphics-brand', 'integrated-graphics-model', 'owner'];
 				break;
 			case 'ram':
-				features = ['brand', 'model', 'sn', 'family', 'ram-type', 'ram-form-factor', 'frequency-hertz', 'capacity-byte', 'ram-timings', 'ram-ecc', 'working', 'color', 'owner', 'notes'];
+				features = ['brand', 'model', 'sn', 'family', 'ram-type', 'ram-form-factor', 'frequency-hertz', 'capacity-byte', 'ram-timings', 'ram-ecc', 'color', 'owner', 'notes'];
 				break;
 			case 'hdd':
-				features = ['brand', 'model', 'sn', 'wwn', 'family', 'capacity-decibyte', 'hdd-form-factor', 'spin-rate-rpm', 'mini-ide-ports-n', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n', 'scsi-db68-ports-n', 'data-erased', 'surface-scan', 'smart-data',  'software', 'working', 'owner'];
+				features = ['brand', 'model', 'sn', 'wwn', 'family', 'capacity-decibyte', 'hdd-form-factor', 'spin-rate-rpm', 'mini-ide-ports-n', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n', 'scsi-db68-ports-n', 'data-erased', 'surface-scan', 'smart-data',  'software', 'owner'];
 				break;
 			case 'ssd':
-				features = ['brand', 'model', 'sn', 'family', 'capacity-byte', 'hdd-form-factor', 'sata-ports-n', 'data-erased', 'surface-scan', 'smart-data',  'software', 'working', 'owner'];
+				features = ['brand', 'model', 'sn', 'family', 'capacity-byte', 'hdd-form-factor', 'sata-ports-n', 'data-erased', 'surface-scan', 'smart-data',  'software', 'owner'];
 				break;
 			case 'odd':
-				features = ['brand', 'model', 'family', 'sn', 'odd-type', 'ide-ports-n', 'jae-ports-n', 'sata-ports-n', 'odd-form-factor', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'family', 'sn', 'odd-type', 'ide-ports-n', 'jae-ports-n', 'sata-ports-n', 'odd-form-factor', 'color', 'owner'];
 				break;
 			case 'fdd':
-				features = ['brand', 'model', 'sn', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'sn', 'color', 'owner'];
 				break;
 			case 'graphics-card':
-				features = ['brand', 'brand-manufacturer', 'model', 'capacity-byte', 'vga-ports-n', 'dvi-ports-n', 'dms-59-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'agp-sockets-n', 'pcie-sockets-n', 'pcie-power-pin-n', 'sn', 'color', 'working', 'owner'];
+				features = ['brand', 'brand-manufacturer', 'model', 'capacity-byte', 'vga-ports-n', 'dvi-ports-n', 'dms-59-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'agp-sockets-n', 'pcie-sockets-n', 'pcie-power-pin-n', 'sn', 'color', 'owner'];
 				break;
 			case 'psu':
-				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'power-rated-watt', 'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor', 'psu-rails-most-power', 'pcie-power-pin-n', 'sata-power-n', 'color', 'working', 'owner'];
+				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'power-rated-watt', 'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor', 'psu-rails-most-power', 'pcie-power-pin-n', 'sata-power-n', 'color', 'owner'];
 				break;
 			case 'external-psu':
-				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'psu-volt', 'psu-ampere', 'working', 'owner', 'notes'];
+				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'psu-volt', 'psu-ampere', 'owner', 'notes'];
 				break;
 			case 'ethernet-card':
-				features = ['brand', 'model', 'sn', 'pcie-sockets-n', 'pci-sockets-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n', 'mac', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'sn', 'pcie-sockets-n', 'pci-sockets-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n', 'mac', 'color', 'owner'];
 				break;
 			case 'audio-card':
 			case 'other-card':
 			case 'scsi-card':
 			case 'modem-card':
 			case 'tv-card':
-				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color', 'owner'];
 				break;
 			case 'bluetooth-card':
 			case 'wifi-card':
-				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n', 'mini-pci-sockets-n', 'mac', 'sn', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n', 'mini-pci-sockets-n', 'mac', 'sn', 'color', 'owner'];
 				break;
 			case 'network-switch':
 			case 'network-hub':
 			case 'modem-router':
-				features = ['brand', 'model', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n', 'power-connector', 'psu-volt', 'psu-ampere', 'color', 'working', 'owner', 'notes'];
+				features = ['brand', 'model', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n', 'power-connector', 'psu-volt', 'psu-ampere', 'color', 'owner', 'notes'];
 				break;
 			case 'keyboard':
 			case 'mouse':
-				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'ps2-ports-n', 'usb-ports-n', 'color', 'working', 'owner'];
+				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'ps2-ports-n', 'usb-ports-n', 'color', 'owner'];
 				break;
 			case 'monitor':
-				features = ['cib-qr', 'cib', 'cib-old', 'other-code', 'brand', 'model', 'sn', 'diagonal-inch', 'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n', 'usb-ports-n', 'power-connector', 'psu-volt', 'psu-ampere', 'color', 'working', 'owner', 'notes'];
+				features = ['cib-qr', 'cib', 'cib-old', 'other-code', 'brand', 'model', 'sn', 'diagonal-inch', 'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n', 'usb-ports-n', 'power-connector', 'psu-volt', 'psu-ampere', 'color', 'owner', 'notes'];
 				break;
 			case 'ports-bracket':
 				features = ['usb-ports-n', 'serial-ports-n', 'parallel-ports-n', 'firewire-ports-n', 'color', 'owner'];
@@ -854,7 +854,7 @@
 				features = ['notes'];
 				break;
 			default:
-				features = ['brand', 'model', 'working', 'owner', 'notes'];
+				features = ['brand', 'model', 'owner', 'notes'];
 				break;
 		}
 
