@@ -201,6 +201,9 @@ EOQ
 					$this->exec("UPDATE `ItemFeature` SET `Feature` = 'hdd-form-factor' WHERE `Feature` = 'hdd-odd-form-factor'");
 					$this->exec("SET FOREIGN_KEY_CHECKS = 1;");
 					break;
+				case 6:
+					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('type', 'card-reader')");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

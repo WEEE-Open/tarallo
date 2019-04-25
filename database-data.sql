@@ -136,6 +136,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('type', 'modem-router'), -- Modem/router --
 	('type', 'fdd'), -- FDD --
 	('type', 'ports-bracket'), -- Bracket with ports --
+	('type', 'card-reader'), -- Card reader --
 	('type', 'other-card'), -- Other internal card --
 	('type', 'fan-controller'), -- Fan controller (rheobus) --
 	('type', 'modem-card'), -- Modem card --
@@ -357,4 +358,4 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('T', 0),
 	('', 0);
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 6);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 7);
