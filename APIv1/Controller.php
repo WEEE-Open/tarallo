@@ -599,6 +599,24 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
+	public static function RecentAuditByType(Request $request, Response $response, ?callable $next = null): Response {
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$type = Validation::validateHasString($parameters, 'type');
+		$limit = Validation::validateOptionalInt($parameters, 'howMany', 100);
+
+		$array = $db->AuditDAO()->getRecentAuditByType($type, $limit);
+
+		$request = $request
+			->withAttribute('Status', JSend::SUCCESS)
+			->withAttribute('Data', $array);
+		$response = $response
+			->withStatus(200);
+		return $next ? $next($request, $response) : $response;
+	}
+
 	public static function getDispatcher(string $cachefile): FastRoute\Dispatcher {
 		return FastRoute\cachedDispatcher(
 			function(FastRoute\RouteCollector $r) {
@@ -707,6 +725,10 @@ class Controller extends AbstractController {
 								// ?\DateTime $creation = null,
 								// bool $deleted = false
 								$r->get('/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]', [[Controller::class, 'ItemsNotFeature']]);
+								$r->get(
+									'/getRecentAuditByType/{type}[/{howMany}]',
+									[[Controller::class, 'RecentAuditByType']]
+								);
 							}
 						);
 					}
