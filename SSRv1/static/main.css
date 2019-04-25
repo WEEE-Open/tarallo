@@ -137,9 +137,8 @@ nav#top nav.quick input {
 	margin-right: 0.5em;
 }
 
-.httperror strong {
-	font-weight: normal;
-	font-size: 30vw;
+.httperror .status {
+	font-size: 6vw;
 }
 
 .message {
