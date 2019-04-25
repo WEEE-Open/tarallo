@@ -188,4 +188,4 @@ CREATE TABLE `Configuration` (
 	DEFAULT CHARSET = utf8mb4
 	COLLATE = utf8mb4_unicode_ci;
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 4);
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 4);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 6);

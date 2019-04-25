@@ -152,6 +152,8 @@ EOQ
 						'ALTER TABLE `Audit` CHANGE `Time` `Time` timestamp(6) NOT NULL DEFAULT now(6) AFTER `Other`;'
 					);
 					break;
+				default:
+					throw new \RuntimeException('Data version larger than maximum');
 			}
 			$this->schemaVersion++;
 		}
@@ -180,6 +182,27 @@ EOQ
 				case 4:
 					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('internal-name', 'commercial', 0)");
 					break;
+				case 5:
+//					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('odd-form-factor', 'physical', 2)");
+//					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('odd-form-factor', '5.25'), ('odd-form-factor', 'laptop-odd-7mm'), ('odd-form-factor', 'laptop-odd-8.5mm'), ('odd-form-factor', 'laptop-odd-9.5mm'), ('odd-form-factor', 'laptop-odd-12.7mm')");
+//					$this->exec("UPDATE `ItemFeature` SET `Feature` = 'odd-form-factor' WHERE `Feature` = 'hdd-odd-form-factor' AND (`ValueEnum` = '5.25' OR `ValueEnum` LIKE 'laptop%')");
+//					$this->exec("DELETE FROM `FeatureEnum` WHERE `Feature` = 'hdd-odd-form-factor' AND (`ValueEnum` = '5.25' OR `ValueEnum` LIKE 'laptop%')");
+					// "If ON UPDATE CASCADE or ON UPDATE SET NULL recurses to update the same table it has previously updated during the cascade, it acts like RESTRICT"
+					// - https://dev.mysql.com/doc/refman/5.7/en/innodb-foreign-key-constraints.html
+					// And it's _obviously_ the same in MariaDB. There are 2 overlapping foreign key indexes: one for
+					// normal features, one for enums. They can't be done in any other way. Both are updated, this
+					// apparently counts as "recursively" so MariaDB throws a big fat error saying that it cannot
+					// CASCADE because there's a foreign key with ON UPDATE CASCADE preventing the cascade, because
+					// it decided that this is really a RESTRICT. Maybe it's to prevent infinite indirect loops, but
+					// other DBMS apparently do it without infinite loops...
+					$this->exec("SET FOREIGN_KEY_CHECKS = 0;");
+					$this->exec("UPDATE `Feature` SET `Feature` = 'hdd-form-factor' WHERE `Feature` = 'hdd-odd-form-factor'");
+					$this->exec("UPDATE `FeatureEnum` SET `Feature` = 'hdd-form-factor' WHERE `Feature` = 'hdd-odd-form-factor'");
+					$this->exec("UPDATE `ItemFeature` SET `Feature` = 'hdd-form-factor' WHERE `Feature` = 'hdd-odd-form-factor'");
+					$this->exec("SET FOREIGN_KEY_CHECKS = 1;");
+					break;
+				default:
+					throw new \RuntimeException('Data version larger than maximum');
 			}
 			$this->dataVersion++;
 		}
