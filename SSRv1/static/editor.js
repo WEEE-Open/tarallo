@@ -1,7 +1,7 @@
 (async function() {
 	"use strict";
 
-	window.newFeature = newFeature;
+	window.newFeature = createFeatureElement;
 	window.focusFeatureValueInput = focusFeatureValueInput;
 
 	// To generate unique IDs for features
@@ -624,15 +624,15 @@
 	/**
 	 * Handle clicking the "X" button
 	 *
-	 * @param {string} name - feature name
+	 * @param {HTMLElement} element - Element to be deleted
+	 * @param {string|null} name - feature name, used only if "set" is provided
 	 * @param {Set<string>|null} set - Deleted features, null if not tracking
-	 * @param {HTMLElement} row - Row to be deleted
 	 */
-	function deleteFeature(name, set, row) {
+	function deleteFeature(element, name = '', set = null) {
 		if(set !== null) {
 			set.add(name);
 		}
-		row.remove();
+		element.remove();
 	}
 
 	/**
@@ -642,7 +642,7 @@
 	 * @param ev Event
 	 */
 	function deleteFeatureClick(set, ev) {
-		deleteFeature(ev.target.dataset.name, set, ev.target.parentElement.parentElement);
+		deleteFeature(ev.target.parentElement.parentElement, ev.target.dataset.name, set);
 	}
 
 	/**
@@ -659,7 +659,7 @@
 			if(row.nextElementSibling && row.nextElementSibling.tagName === 'LI') {
 				row.nextElementSibling.querySelector('.value').focus();
 			}
-			deleteFeature(ev.target.dataset.internalName, set, row);
+			deleteFeature(row, ev.target.dataset.internalName, set);
 		}
 	}
 
@@ -672,7 +672,25 @@
 	 */
 	function addFeatureClick(select, featuresElement, deletedFeatures = null) {
 		let name = select.value;
-		addFeature(featuresElement, name, deletedFeatures);
+		addFeatureEditableDedupe(featuresElement, name, deletedFeatures);
+	}
+
+	/**
+	 * Find feature element for a feature, useful when checking for duplicates before insert
+	 *
+	 * @param {string} name - Feature name
+	 * @param {HTMLElement} featuresElement - Element that contains feature elements
+	 * @return {Element|null}
+	 */
+	function findFeatureElement(name, featuresElement) {
+		let pseudoId = 'feature-edit-' + name;
+
+		let elements = featuresElement.getElementsByClassName(pseudoId);
+		if (elements.length > 0) {
+			// There should be only one, hopefully
+			return elements[0];
+		}
+		return null;
 	}
 
 	/**
@@ -682,19 +700,14 @@
 	 * @param {string} name - Feature name
 	 * @param {Set<string>|null} deletedFeatures - Deleted features set, can be null if not tracked
 	 */
-	function addFeature(featuresElement, name, deletedFeatures = null) {
-		let pseudoId = 'feature-edit-' + name;
+	function addFeatureEditableDedupe(featuresElement, name, deletedFeatures = null) {
+		let theFeature = findFeatureElement(name, featuresElement);
 
-		let duplicates = featuresElement.getElementsByClassName(pseudoId);
-		if(duplicates.length > 0) {
-			// There should be only one, hopefully
-			focusFeatureValueInput(duplicates[0]);
-			return;
+		if(theFeature === null) {
+			theFeature = addFeatureEditable(name, featuresElement, deletedFeatures);
 		}
 
-		let newElement = addNewFeature(name, pseudoId, featuresElement, deletedFeatures);
-
-		focusFeatureValueInput(newElement);
+		focusFeatureValueInput(theFeature);
 	}
 
 	/**
@@ -724,12 +737,12 @@
 	 * This attaches event listeners that are suitable for edit mode but not for search, so beware.
 	 *
 	 * @param {string} name - Feature name
-	 * @param {string} pseudoId - Unique element identifier (already confirmed to be unique), used as class
 	 * @param {HTMLElement} featuresElement - The "own features" element
 	 * @param {Set<string>|null} deletedFeatures - Deleted features set, can be null if not tracked
 	 */
-	function addNewFeature(name, pseudoId, featuresElement, deletedFeatures = null) {
-		let newElement = newFeature(name, pseudoId, deletedFeatures);
+	function addFeatureEditable(name, featuresElement, deletedFeatures = null) {
+		let pseudoId = 'feature-edit-' + name;
+		let newElement = createFeatureElement(name, pseudoId, deletedFeatures);
 
 		// If it's a new item and we're adding a type, attach this listener...
 		if(name === 'type' && deletedFeatures === null) {
@@ -747,15 +760,29 @@
 	}
 
 	/**
+	 * Delete empty features from an editable item
+	 *
+	 * @param {HTMLElement} featuresElement - Where features are located
+	 * @param {string[]} except - These will be left even if empty
+	 */
+	function deleteEmptyFeatures(featuresElement, except = []) {
+		let all = featuresElement.querySelectorAll('li.feature-edit');
+		for(let el of all) {
+			let valueElement = el.querySelector('.value');
+			if(!except.includes(valueElement.dataset.internalName) && getValueFrom(valueElement) === '') {
+				deleteFeature(el);
+			}
+		}
+	}
+
+	/**
 	 * Add empty features according to object type, if nothing other than type has been added.
 	 *
 	 * @param {HTMLElement} featuresElement - The "own features" element
 	 * @param {HTMLSelectElement} featureElement - The feature element itself, to get type
 	 */
 	function setTypeClick(featuresElement, featureElement) {
-		if(featuresElement.getElementsByTagName('LI').length > 1) {
-			return;
-		}
+		deleteEmptyFeatures(featuresElement, ['type', 'working']);
 
 		let features;
 		let type = featureElement.getElementsByTagName('SELECT')[0].value;
@@ -832,7 +859,7 @@
 		}
 
 		for(let name of features) {
-			addNewFeature(name, 'feature-edit-' + name, featuresElement, null);
+			addFeatureEditableDedupe(featuresElement, name, null);
 		}
 	}
 
@@ -844,13 +871,14 @@
 	 * @param {Set<string>|null} deletedFeatures - Deleted features set. Null if not tracked (for new items)
 	 * @param {function|null} getComparison - Get the comparison dropdown (for searches)
 	 */
-	function newFeature(name, pseudoId, deletedFeatures, getComparison = null) {
+	function createFeatureElement(name, pseudoId, deletedFeatures, getComparison = null) {
 		// Needed for labels
 		let id = pseudoId + featureIdsCounter++;
 		let type = featureTypes.get(name);
 
 		let newElement = document.createElement("li");
 		newElement.classList.add(pseudoId);
+		newElement.classList.add("feature-edit");
 		let nameElement = document.createElement("div");
 		nameElement.classList.add("name");
 		newElement.appendChild(nameElement);
@@ -990,6 +1018,34 @@
 	}
 
 	/**
+	 * Get value from an editable feature element
+	 *
+	 * @param valueElement - Value element, e.g. featuresElement.querySelectorAll('.value')
+	 * @return {string} - Value. Empty string means default/no value
+	 */
+	function getValueFrom(valueElement) {
+		let value;
+		switch (valueElement.dataset.internalType) {
+			case 'e':
+				value = valueElement.value;
+				break;
+			case 'i':
+			case 'd':
+				value = valueElement.dataset.internalValue;
+				break;
+			case 's':
+			default:
+				let paragraphs = valueElement.getElementsByTagName('DIV');
+				let lines = [];
+				for (let paragraph of paragraphs) {
+					lines.push(paragraph.textContent);
+				}
+				value = lines.join('\n');
+		}
+		return value;
+	}
+
+	/**
 	 * Get changed or added features (changeset)
 	 *
 	 * @param {HTMLElement|Element} featuresElement
@@ -1003,24 +1059,7 @@
 
 		for(let element of changed) {
 			let feature = element.parentElement;
-			let value;
-			switch(element.dataset.internalType) {
-				case 'e':
-					value = element.value;
-					break;
-				case 'i':
-				case 'd':
-					value = element.dataset.internalValue;
-					break;
-				case 's':
-				default:
-					let paragraphs = element.getElementsByTagName('DIV');
-					let lines = [];
-					for(let paragraph of paragraphs) {
-						lines.push(paragraph.textContent);
-					}
-					value = lines.join('\n');
-			}
+			let value = getValueFrom(element);
 			if(value === "") {
 				throw new EmptyFeatureValueError(feature);
 			}
