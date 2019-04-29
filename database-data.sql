@@ -43,7 +43,8 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('ethernet-ports-100m-n', 'ports', 1), -- Ethernet (100M) --
 	('ethernet-ports-10base2-bnc-n', 'ports', 1), -- Ethernet (10BASE2 BNC) --
 	('ethernet-ports-10m-n', 'ports', 1), -- Ethernet (10M) --
-	('hdd-odd-form-factor', 'physical', 2), -- Form factor (HDD/ODD) --
+	('odd-form-factor', 'physical', 2), -- Form factor (ODD) --
+	('hdd-form-factor', 'physical', 2), -- Form factor (HDD) --
 	('ide-ports-n', 'ports', 1), -- IDE/ATA --
 	('odd-type', 'features', 2), -- ODD capabilities --
 	('pcie-power-pin-n', 'powerconnectors', 1), -- PCI Express power pins --
@@ -135,6 +136,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('type', 'modem-router'), -- Modem/router --
 	('type', 'fdd'), -- FDD --
 	('type', 'ports-bracket'), -- Bracket with ports --
+	('type', 'card-reader'), -- Card reader --
 	('type', 'other-card'), -- Other internal card --
 	('type', 'fan-controller'), -- Fan controller (rheobus) --
 	('type', 'modem-card'), -- Modem card --
@@ -152,6 +154,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('working', 'no'), -- No --
 	('working', 'yes'), -- Yes --
 	('working', 'maybe'), -- Sometimes or unclear --
+	('working', 'to-be-tested'), -- Needs to be tested --
 	('isa', 'x86-32'), -- x86 32 bit --
 	('isa', 'x86-64'), -- x86 64 bit --
 	('isa', 'ia-64'), -- IA-64 --
@@ -237,20 +240,20 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'lga1151'), -- LGA1151 (Socket H4) --
 	('cpu-socket', 'lga2066'), -- LGA2066 --
 	('cpu-socket', 'lga3647'), -- LGA3647 --
-	('hdd-odd-form-factor', '5.25'), -- 5.25 in. --
-	('hdd-odd-form-factor', '3.5'), -- 3.5 in. -- max height 26.10 mm, SFF-8301 also specifies 17.80 and 42.00. These are probably 1/3H, 1/4H and 1/2H, respectively. Fractions of full height, which is around 80 mm.
-	('hdd-odd-form-factor', '2.5-15mm'), -- 2.5 in. (15 mm uncommon) -- second number is the height in millimeters (these are specified as 15 but most common sizes, for both bays and drives, are 7 mm and 9.5 mm: the more you know...)
-	('hdd-odd-form-factor', '2.5-9.5mm'), -- 2.5 in. (9.5 mm) --
-	('hdd-odd-form-factor', '2.5-7mm'), -- 2.5 in. (7 mm) --
-	('hdd-odd-form-factor', '1.8-9.5mm'), -- 1.8 in. (9.5 mm) --
-	('hdd-odd-form-factor', '1.8-8mm'), -- 1.8 in. (8 mm) --
-	('hdd-odd-form-factor', '1.8-5mm'), -- 1.8 in. (5 mm) --
-	('hdd-odd-form-factor', 'm2'), -- M2 --
-	('hdd-odd-form-factor', 'm2.2'), -- M2.2 --
-	('hdd-odd-form-factor', 'laptop-odd-7mm'), -- SFF-8553 (7 mm) -- Physical dimensions specified in SFF-8553
-	('hdd-odd-form-factor', 'laptop-odd-8.5mm'), -- SFF-8553 (8.5 mm) -- Physical dimensions specified in SFF-8553
-	('hdd-odd-form-factor', 'laptop-odd-9.5mm'), -- SFF-8552 (9.5 mm standard cut corner) -- Physical dimensions specified in SFF-8552
-	('hdd-odd-form-factor', 'laptop-odd-12.7mm'), -- SFF-8552 (12.7 mm cut corner) -- Physical dimensions specified in SFF-8552 (or less formally: https://superuser.com/a/276241)
+	('odd-form-factor', '5.25'), -- 5.25 in. --
+	('odd-form-factor', 'laptop-odd-7mm'), -- SFF-8553 (7 mm) -- Physical dimensions specified in SFF-8553
+	('odd-form-factor', 'laptop-odd-8.5mm'), -- SFF-8553 (8.5 mm) -- Physical dimensions specified in SFF-8553
+	('odd-form-factor', 'laptop-odd-9.5mm'), -- SFF-8552 (9.5 mm standard cut corner) -- Physical dimensions specified in SFF-8552
+	('odd-form-factor', 'laptop-odd-12.7mm'), -- SFF-8552 (12.7 mm cut corner) -- Physical dimensions specified in SFF-8552 (or less formally: https://superuser.com/a/276241)
+	('hdd-form-factor', '3.5'), -- 3.5 in. -- max height 26.10 mm, SFF-8301 also specifies 17.80 and 42.00. These are probably 1/3H, 1/4H and 1/2H, respectively. Fractions of full height, which is around 80 mm.
+	('hdd-form-factor', '2.5-15mm'), -- 2.5 in. (15 mm uncommon) -- second number is the height in millimeters (these are specified as 15 but most common sizes, for both bays and drives, are 7 mm and 9.5 mm: the more you know...)
+	('hdd-form-factor', '2.5-9.5mm'), -- 2.5 in. (9.5 mm) --
+	('hdd-form-factor', '2.5-7mm'), -- 2.5 in. (7 mm) --
+	('hdd-form-factor', '1.8-9.5mm'), -- 1.8 in. (9.5 mm) --
+	('hdd-form-factor', '1.8-8mm'), -- 1.8 in. (8 mm) --
+	('hdd-form-factor', '1.8-5mm'), -- 1.8 in. (5 mm) --
+	('hdd-form-factor', 'm2'), -- M2 --
+	('hdd-form-factor', 'm2.2'), -- M2.2 --
 	('odd-type', 'cd-r'), -- CD-R --
 	('odd-type', 'cd-rw'), -- CD-RW --
 	('odd-type', 'dvd-r'), -- DVD-R --
@@ -285,6 +288,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('ram-form-factor', 'microdimm'), -- Micro DIMM --
 	('ram-form-factor', 'fbdimm'), -- FB-DIMM --
 	('check', 'missing-data'), -- Missing data --
+	('check', 'partial-inventory'), -- Partially inventoried --
 	('check', 'lost'), -- Lost --
 	('ram-ecc', 'no'), -- No --
 	('ram-ecc', 'yes'), -- Yes --
@@ -355,3 +359,5 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('NET', 0),
 	('T', 0),
 	('', 0);
+
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 8);

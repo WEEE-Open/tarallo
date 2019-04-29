@@ -1,9 +1,11 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 /** @var \WEEEOpen\Tarallo\Server\Item $copy */
+/** @var string[] $featuresEmpty */
 
 $recursion = $recursion ?? false; // Placed inside another item (new or existing)
 $innerrecursion = $innerrecursion ?? false; // Placed inside another NEW item
+$featuresEmpty = $featuresEmpty ?? [];
 
 if(!$innerrecursion && !$recursion) {
 	$this->layout('main', ['title' => 'New item', 'user' => $user, 'itembuttons' => true]);
@@ -12,11 +14,9 @@ if(!$innerrecursion && !$recursion) {
 if(isset($copy)) {
 	$features = $copy->getFeatures();
 	$subitems = $copy->getContents();
-	$featuresEmpty = [];
 } else {
 	$subitems = [];
 	$features = [];
-	$featuresEmpty = ['type'];
 }
 
 // to display new inner items, set their $recursion and $innerrecursion to true
