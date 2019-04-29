@@ -588,6 +588,8 @@ class Controller extends AbstractController {
 		//$deleted = isset($parameters['deleted']) ? $parameters['deleted'] : false;
 
 		$explosion = explode('=', $feature);
+		if(sizeof($explosion) !== 2)
+			throw new \LogicException("Format not valid in the feature parameter");
 		$array = $db->StatsDAO()->getItemByNotFeature(new Feature($explosion[0], $explosion[1]), $notFeature, new
 		ItemIncomplete($location), $limit, $creation === null ? null : new \DateTime($creation), $deleted);
 
