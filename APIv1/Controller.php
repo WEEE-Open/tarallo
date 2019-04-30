@@ -392,6 +392,31 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
+	public static function deleteItemParent(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+
+		Validation::authorize($user);
+
+		$id = Validation::validateHasString($parameters, 'id');
+
+		$responseCode = 204;
+		try {
+			$db->itemDAO()->deleteItem(new ItemIncomplete($id));
+		} catch(NotFoundException $ignored) {
+			$responseCode = 404;
+		} catch(ValidationException $e) {
+			throw new InvalidPayloadParameterException('*', $id, $e->getMessage());
+		}
+
+		$response = $response
+			->withStatus($responseCode);
+
+		return $next ? $next($request, $response) : $response;
+	}
+
 	public static function setItemFeatures(Request $request, Response $response, ?callable $next = null): Response {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
@@ -623,6 +648,7 @@ class Controller extends AbstractController {
 										// Useless
 										//$r->get('/parent',  [[Controller::class, 'getItemParent']]);
 										$r->put('/parent', [[Controller::class, 'setItemParent']]);
+										$r->delete('/parent', [[Controller::class, 'deleteItemParent']]);
 
 										//$r->get('/product', [[Controller::class, 'getItemProduct']]);
 										//$r->put('/product',  [[Controller::class, 'setItemProduct']]);
