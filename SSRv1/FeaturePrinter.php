@@ -35,6 +35,7 @@ class FeaturePrinter {
 		'cib' => 'CIB (red border)',
 		'cib-qr' => 'CIB (QR code)',
 		'core-n' => 'Cores',
+		'thread-n' => 'Threads',
 		'cpu-socket' => 'Socket (CPU)',
 		'dvi-ports-n' => 'DVI',
 		'ethernet-ports-1000m-n' => 'Ethernet (gigabit)',

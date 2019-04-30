@@ -795,7 +795,7 @@
 				features = ['brand', 'model', 'sn', 'motherboard-form-factor', 'key-bios-setup', 'key-boot-menu', 'cpu-socket', 'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n', 'sata-ports-n', 'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n', 'usb-ports-n', 'firewire-ports-n', 'mini-firewire-ports-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'mac', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand', 'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'mini-jack-ports-n', 'psu-connector-cpu', 'psu-connector-motherboard', 'color', 'owner', 'notes'];
 				break;
 			case 'cpu':
-				features = ['brand', 'model', 'variant', 'core-n', 'isa', 'frequency-hertz', 'cpu-socket', 'integrated-graphics-brand', 'integrated-graphics-model', 'owner'];
+				features = ['brand', 'model', 'variant', 'core-n', 'thread-n', 'isa', 'frequency-hertz', 'cpu-socket', 'integrated-graphics-brand', 'integrated-graphics-model', 'owner'];
 				break;
 			case 'ram':
 				features = ['brand', 'model', 'sn', 'family', 'ram-type', 'ram-form-factor', 'frequency-hertz', 'capacity-byte', 'ram-timings', 'ram-ecc', 'color', 'owner', 'notes'];

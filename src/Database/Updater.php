@@ -212,6 +212,9 @@ EOQ
 					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('working', 'to-be-tested')");
 					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('check', 'partial-inventory')");
 					break;
+				case 8:
+					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('thread-n', 'features', 1)");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

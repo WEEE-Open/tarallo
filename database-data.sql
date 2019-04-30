@@ -37,6 +37,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('cib', 'administrative', 0), -- CIB (red border) --
 	('cib-qr', 'administrative', 0), -- CIB (QR code) --
 	('core-n', 'features', 1), -- Cores --
+	('thread-n', 'features', 1), -- Threads --
 	('cpu-socket', 'sockets', 2), -- Socket (CPU) --
 	('dvi-ports-n', 'ports', 1), -- DVI --
 	('ethernet-ports-1000m-n', 'ports', 1), -- Ethernet (gigabit) --
@@ -360,4 +361,4 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('T', 0),
 	('', 0);
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 8);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 9);
