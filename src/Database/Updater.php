@@ -153,7 +153,7 @@ EOQ
 					);
 					break;
 				default:
-					throw new \RuntimeException('Data version larger than maximum');
+					throw new \RuntimeException('Schema version larger than maximum');
 			}
 			$this->schemaVersion++;
 			echo 'Schema updated to version ' . $this->schemaVersion . PHP_EOL;
