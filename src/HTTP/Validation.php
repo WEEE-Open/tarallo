@@ -64,7 +64,7 @@ class Validation {
 	 *
 	 * @throws InvalidPayloadParameterException if key is missing or not a string
 	 *
-	 * @return string
+	 * @return string the string
 	 */
 	public static function validateHasString($payload, $key) {
 		$value = self::validateHas($payload, $key);

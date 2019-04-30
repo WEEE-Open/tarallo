@@ -341,7 +341,7 @@ class Controller extends AbstractController {
 
 		Validation::authorize($user);
 
-		$id = Validation::validateOptionalString($parameters, 'id');
+		$id = Validation::validateHasString($parameters, 'id');
 
 		$responseCode = 204;
 		try {
