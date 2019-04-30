@@ -152,6 +152,77 @@ EOQ
 						'ALTER TABLE `Audit` CHANGE `Time` `Time` timestamp(6) NOT NULL DEFAULT now(6) AFTER `Other`;'
 					);
 					break;
+				case 4:
+					// "Can't update table 'Audit' in stored function/trigger because it is already used by statement
+					// which invoked this stored function/trigger" => Drop trigger and recreate it later
+					$this->exec('ALTER TABLE `Item` CHANGE `LostAt` `LostAt` timestamp(6) NULL');
+					$this->exec('ALTER TABLE `Item` CHANGE `DeletedAt` `DeletedAt` timestamp(6) NULL');
+					$this->exec("DROP TRIGGER IF EXISTS AuditLostItem");
+					$this->exec(<<<EOQ
+					UPDATE Item
+					SET LostAt = (
+						SELECT MAX(`Time`)
+						FROM Audit
+						WHERE Code = Item.Code
+					)
+					WHERE Code IN (
+						SELECT Code
+						FROM ItemFeature
+						WHERE Feature = 'check'
+						AND ValueEnum = 'lost'
+					)
+EOQ
+					);
+					// TODO: grouping happens before sorting, so it always select a "random" user instead of the one
+					// from the most recent row...
+					$this->exec(<<<EOQ
+					INSERT INTO Audit(Code, `Change`, Other, Time, User) 
+					SELECT Updated.`Code`, 'L', NULL, Updated.Ts, Updated.User FROM (
+						SELECT `Code`, TIMESTAMPADD(SECOND, 1, MAX(`Time`)) AS Ts, `User`
+						FROM Audit
+						WHERE Code IN (
+							SELECT Code
+							FROM ItemFeature
+							WHERE Feature = 'check'
+							AND ValueEnum = 'lost'
+						)
+					    GROUP BY Code
+					    ORDER BY `Time` DESC
+					) AS Updated
+EOQ
+					);
+					$this->exec(
+						<<<EOQ
+CREATE TRIGGER AuditLostItem
+  AFTER UPDATE
+  ON Item
+  FOR EACH ROW
+BEGIN
+  IF(NEW.LostAt IS NOT NULL AND (OLD.LostAt IS NULL OR OLD.LostAt <> NEW.LostAt)) THEN
+    INSERT INTO Audit(Code, `Change`, `User`)
+    VALUES(NEW.Code, 'L', @taralloAuditUsername);
+  END IF;
+END
+EOQ
+					);
+					$intermediate = $this->getPDO()->query("SELECT Code FROM Item WHERE Code = 'Lost'");
+					if($intermediate->rowCount() > 0) {
+						$intermediate->closeCursor();
+						$intermediate = $this->getPDO()->query("SELECT Descendant FROM Tree WHERE Ancestor = 'Lost' AND Depth = 1");
+						$intermediate->closeCursor();
+						$toMove = $intermediate->fetchColumn(0);
+						foreach($toMove as $item) {
+							// TODO: move
+							// TODO: manually create audit entries, again? INSERT ... FROM SELECT ... WHERE Time=DeletedAt - 1 second?
+							// TODO: delete "Lost" location
+						}
+						unset($toMove);
+						unset($item);
+					} else {
+						$intermediate->closeCursor();
+					}
+					unset($intermediate);
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}
