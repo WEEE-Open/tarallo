@@ -290,7 +290,6 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('ram-form-factor', 'fbdimm'), -- FB-DIMM --
 	('check', 'missing-data'), -- Missing data --
 	('check', 'partial-inventory'), -- Partially inventoried --
-	('check', 'lost'), -- Lost --
 	('ram-ecc', 'no'), -- No --
 	('ram-ecc', 'yes'), -- Yes --
 	('data-erased', 'yes'), -- Yes️ -- Just don't add the feature if it hasn't been erased...
@@ -361,4 +360,4 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('T', 0),
 	('', 0);
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 9);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 10);

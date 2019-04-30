@@ -92,7 +92,7 @@ class Feature {
 		'weight-gram' => self::INTEGER,
 		'spin-rate-rpm' => self::INTEGER,
 		'dms-59-ports-n' => self::INTEGER,
-		'check' => ['missing-data' => true, 'partial-inventory' => true, 'lost' => true],
+		'check' => ['missing-data' => true, 'partial-inventory' => true],
 		'ram-ecc' => ['no' => true, 'yes' => true],
 		'other-code' => self::STRING,
 		'hdmi-ports-n' => self::INTEGER,

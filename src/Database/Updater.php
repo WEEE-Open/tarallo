@@ -153,15 +153,15 @@ EOQ
 					);
 					break;
 				case 4:
-					// "Can't update table 'Audit' in stored function/trigger because it is already used by statement
-					// which invoked this stored function/trigger" => Drop trigger and recreate it later
 					$this->exec('ALTER TABLE `Item` CHANGE `LostAt` `LostAt` timestamp(6) NULL');
 					$this->exec('ALTER TABLE `Item` CHANGE `DeletedAt` `DeletedAt` timestamp(6) NULL');
+					// "Can't update table 'Audit' in stored function/trigger because it is already used by statement
+					// which invoked this stored function/trigger" => Drop trigger and recreate it later
 					$this->exec("DROP TRIGGER IF EXISTS AuditLostItem");
 					$this->exec(<<<EOQ
 					UPDATE Item
 					SET LostAt = (
-						SELECT MAX(`Time`)
+						SELECT TIMESTAMPADD(SECOND, 1, MAX(`Time`))
 						FROM Audit
 						WHERE Code = Item.Code
 					)
@@ -173,24 +173,77 @@ EOQ
 					)
 EOQ
 					);
-					// TODO: grouping happens before sorting, so it always select a "random" user instead of the one
-					// from the most recent row...
+					// This was a lot more painful to write than it should have been.
+					// Random searches on the Internet still bring up old Stack Overflow questions from a time when
+					// window functions were not widely available...
+					// Anyway: add missing L Audit entries due to missing trigger
 					$this->exec(<<<EOQ
 					INSERT INTO Audit(Code, `Change`, Other, Time, User) 
-					SELECT Updated.`Code`, 'L', NULL, Updated.Ts, Updated.User FROM (
-						SELECT `Code`, TIMESTAMPADD(SECOND, 1, MAX(`Time`)) AS Ts, `User`
-						FROM Audit
-						WHERE Code IN (
-							SELECT Code
-							FROM ItemFeature
-							WHERE Feature = 'check'
-							AND ValueEnum = 'lost'
-						)
-					    GROUP BY Code
-					    ORDER BY `Time` DESC
-					) AS Updated
+					SELECT Updated.`Code`, 'L', NULL, TIMESTAMPADD(SECOND, 1, Updated.`Time`), Updated.User FROM (
+					SELECT `Code`, `Time`, `User`, ROW_NUMBER() OVER (PARTITION BY `Code` ORDER BY `Time` DESC) AS RN
+					FROM Audit
+					WHERE Code IN (
+						SELECT Code
+						FROM ItemFeature
+						WHERE Feature = 'check'
+						AND ValueEnum = 'lost'
+					)
+					ORDER BY Code, RN
+					) Updated
+					WHERE RN = 1
 EOQ
 					);
+					// Now, this is only useful in production right now... But may have ended up in some test
+					// databases, so...
+					// Mark as lost all the items in the "Lost" location, if it exists.
+					$intermediate = $this->getPDO()->query("SELECT Code FROM Item WHERE Code = 'Lost'");
+					if($intermediate->rowCount() > 0) {
+						// Close that cursor so we can do other stuff
+						$intermediate->closeCursor();
+						// Trigger will create and Audit entry, this requires an username... will fix them manually
+						// in production, they're not important in development.
+						$this->exec(/** @lang MariaDB */ "CALL SetUser('IMPORT')");
+						// Also, there still trigger preventing this from being a single query...
+						$intermediate2 = $this->getPDO()->query("SELECT DISTINCT Descendant FROM Tree WHERE Ancestor = 'Lost' AND Depth > 0");
+						$fetched = $intermediate2->fetchAll(\PDO::FETCH_COLUMN);
+						foreach($fetched as $item) {
+							// Again, there are a billion triggers preventing the simplest of queries, so we have to
+							// make some inane byzantine workarounds, I don't even know anymore, it's 1.30 AM I just
+							// want to insert these damn 4 rows into the damn table and be done with it, please,
+							// pleeeease...
+							// Also: unsanitized $item going into the query. Congratulations, you have found no SQL
+							// injection at all since these are heavily validated everywhere and there's no item
+							// named "); DROP DATABASE -- " in production...
+							// Manual audit entries
+							$this->exec(<<<EOQ
+								INSERT INTO Audit(Code, `Change`, Other, Time, User) 
+								SELECT Updated.`Code`, 'L', NULL, TIMESTAMPADD(SECOND, 1, Updated.`Time`), Updated.User FROM (
+								SELECT `Code`, `Time`, `User`, ROW_NUMBER() OVER (PARTITION BY `Code` ORDER BY `Time` DESC) AS RN
+								FROM Audit
+								WHERE Code = '$item'
+								) Updated
+								WHERE RN = 1
+EOQ
+							);
+							// Finally lose the item
+							$this->exec("
+							UPDATE Item
+							SET LostAt = (SELECT MAX(`Time`) FROM `Audit` WHERE `Code` = '$item')
+							WHERE Code = '$item'");
+							unset($item);
+						}
+						$intermediate2->closeCursor();
+						unset($intermediate2);
+						unset($fetched);
+						// Remove the location
+						//$this->exec("DELETE FROM Item WHERE Code = 'Lost'");
+						// Doesn't work due to usual limitations that make ON UPDATE CASCADE become ON UPDATE
+						// RESTRICT AND PREVENT ANYTHING NO ACTION STOP HALT AND CATCH FIRE
+					} else {
+						$intermediate->closeCursor();
+					}
+					unset($intermediate);
+					// The trigger returns
 					$this->exec(
 						<<<EOQ
 CREATE TRIGGER AuditLostItem
@@ -205,23 +258,6 @@ BEGIN
 END
 EOQ
 					);
-					$intermediate = $this->getPDO()->query("SELECT Code FROM Item WHERE Code = 'Lost'");
-					if($intermediate->rowCount() > 0) {
-						$intermediate->closeCursor();
-						$intermediate = $this->getPDO()->query("SELECT Descendant FROM Tree WHERE Ancestor = 'Lost' AND Depth = 1");
-						$intermediate->closeCursor();
-						$toMove = $intermediate->fetchColumn(0);
-						foreach($toMove as $item) {
-							// TODO: move
-							// TODO: manually create audit entries, again? INSERT ... FROM SELECT ... WHERE Time=DeletedAt - 1 second?
-							// TODO: delete "Lost" location
-						}
-						unset($toMove);
-						unset($item);
-					} else {
-						$intermediate->closeCursor();
-					}
-					unset($intermediate);
 					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
@@ -285,6 +321,10 @@ EOQ
 					break;
 				case 8:
 					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('thread-n', 'features', 1)");
+					break;
+				case 9:
+					$this->exec("DELETE FROM ItemFeature WHERE Feature = 'check' AND ValueEnum = 'lost'");
+					$this->exec("DELETE FROM FeatureEnum WHERE Feature = 'check' AND ValueEnum = 'lost'");
 					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');

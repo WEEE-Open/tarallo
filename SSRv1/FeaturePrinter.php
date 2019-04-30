@@ -127,7 +127,7 @@ class FeaturePrinter {
 		'psu-connector-motherboard' => ['proprietary' => 'Proprietary', 'at' => 'AT', 'atx-20pin' => 'ATX 20 pin', 'atx-24pin' => 'ATX 24 pin', 'atx-24pin-mini' => 'Mini ATX 24 pin', 'atx-20pin-aux' => 'ATX 20 pin + AUX'],
 		'ram-type' => ['simm' => 'SIMM', 'edo' => 'EDO', 'sdr' => 'SDR', 'ddr' => 'DDR', 'ddr2' => 'DDR2', 'ddr3' => 'DDR3', 'ddr4' => 'DDR4'],
 		'ram-form-factor' => ['simm' => 'SIMM', 'dimm' => 'DIMM', 'sodimm' => 'SODIMM', 'minidimm' => 'Mini DIMM', 'microdimm' => 'Micro DIMM', 'fbdimm' => 'FB-DIMM'],
-		'check' => ['missing-data' => 'Missing data', 'partial-inventory' => 'Partially inventoried', 'lost' => 'Lost'],
+		'check' => ['missing-data' => 'Missing data', 'partial-inventory' => 'Partially inventoried'],
 		'ram-ecc' => ['no' => 'No', 'yes' => 'Yes'],
 		'data-erased' => ['yes' => 'Yes️'],
 		'surface-scan' => ['fail' => 'Failed', 'pass' => 'Passed'],
