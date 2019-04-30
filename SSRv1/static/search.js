@@ -151,6 +151,8 @@
 			method = 'PATCH';
 		}
 
+		let oldbeforeunload = window.onbeforeunload;
+		window.onbeforeunload = undefined;
 		searchButton.disabled = true;
 
 		try {
@@ -173,6 +175,7 @@
 			}
 		} finally {
 			searchButton.disabled = false;
+			window.onbeforeunload = oldbeforeunload;
 		}
 	}
 
