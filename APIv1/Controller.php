@@ -404,7 +404,7 @@ class Controller extends AbstractController {
 
 		$responseCode = 204;
 		try {
-			$db->itemDAO()->deleteItem(new ItemIncomplete($id));
+			$db->itemDAO()->loseItem(new ItemIncomplete($id));
 		} catch(NotFoundException $ignored) {
 			$responseCode = 404;
 		} catch(ValidationException $e) {

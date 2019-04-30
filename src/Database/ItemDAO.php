@@ -173,10 +173,17 @@ final class ItemDAO extends DAO {
 	 * Ensure that an Item exists in the Item table and lock its row
 	 *
 	 * @param ItemIncomplete $item
+	 * @param bool $allowDeleted True if a deleted item is acceptable as "existing", false if deleted items should be
+	 * ignored
 	 */
-	public function itemMustExist(ItemIncomplete $item) {
-		$statement = $this->getPDO()
-			->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod FOR UPDATE');
+	public function itemMustExist(ItemIncomplete $item, $allowDeleted = false) {
+		if($allowDeleted) {
+			$statement = $this->getPDO()
+				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod FOR UPDATE');
+		} else {
+			$statement = $this->getPDO()
+				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod and `DeletedAt` IS NULL FOR UPDATE');
+		}
 		try {
 			$statement->execute([$item->getCode()]);
 			if($statement->rowCount() === 0) {

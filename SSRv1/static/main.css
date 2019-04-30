@@ -166,6 +166,11 @@ nav#top nav.quick input {
 	background-color: #FEEFB3;
 }
 
+.serious.message {
+	color: #CC4100;
+	background-color: #FFCC89;
+}
+
 .error.message {
 	color: #D8000C;
 	background-color: #FFBABA;

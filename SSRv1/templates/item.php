@@ -4,6 +4,7 @@
 /** @var string|null $add */
 /** @var string|null $edit */
 /** @var \DateTime|null $deletedAt */
+/** @var \DateTime|null $lostAt */
 /** @var bool $recursion */
 $recursion = $recursion ?? false;
 $features = $item->getCombinedFeatures();
@@ -58,12 +59,15 @@ if(isset($edit)) {
 		<?php unset($noticeFeature); endif;
 		if($deletedAt !== null): ?>
 			<div class="error message">❌️️&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
+		<?php endif;
+		if($lostAt !== null): ?>
+            <div class="serious message">🏷️️️&nbsp;This item has been lost on <?= $lostAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 		<?php endif; ?>
 	</header>
 
 	<nav class="itembuttons" data-for-item="<?=$this->e($item->getCode())?>">
 		<?php if($editing && $target): ?>
-			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><?php if(!$containsMore): ?><button class="delete">❌&nbsp;Delete</button><?php endif ?>
+			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><?php if(!$containsMore): ?><button class="lost">🏷&nbsp;Lost</button><button class="delete">❌&nbsp;Delete</button><?php endif ?>
 		<?php elseif(!$adding && !$editing): ?>
 			<?php if($deletedAt === null): ?><button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button><button class="clone">🔲&nbsp;Copy</button><?php endif ?><button class="history">📖&nbsp;History</button>
 		<?php endif ?>

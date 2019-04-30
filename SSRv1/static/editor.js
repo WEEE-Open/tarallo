@@ -73,6 +73,11 @@
 				// noinspection JSUnresolvedFunction
 				deleteButton.addEventListener('click', deleteClick);
 			}
+			let lostButton = itemEditing.querySelector('.itembuttons .lost');
+			if(lostButton) {
+				// noinspection JSUnresolvedFunction
+				lostButton.addEventListener('click', lostClick);
+			}
 		}
 		// Page may contain some non-head new items open for editing.
 		// This happens mostly (possibly only) when cloning another item.
@@ -1218,6 +1223,29 @@
 			} finally {
 				toggleButtons(false);
 			}
+		}
+	}
+
+	async function lostClick(ev) {
+		let code = ev.target.parentElement.dataset.forItem;
+		toggleButtons(true);
+
+		let method, uri;
+		method = 'DELETE';
+		uri = `/v1/items/${encodeURIComponent(code)}/parent`;
+
+		let response = await fetch(uri, {
+			headers: {
+				'Accept': 'application/json'
+			},
+			method: method,
+			credentials: 'include'
+		});
+
+		try {
+			await jsendMe(response, goBack, displayError.bind(null));
+		} finally {
+			toggleButtons(false);
 		}
 	}
 

@@ -57,7 +57,7 @@ class Controller extends AbstractController {
 		}
 
 		$item = $db->itemDAO()->getItem($ii, null, $depth);
-		$renderParameters = ['item' => $item, 'deletedAt' => $item->getDeletedAt()];
+		$renderParameters = ['item' => $item, 'deletedAt' => $item->getDeletedAt(), 'lostAt' => $item->getLostAt()];
 		// These should be mutually exclusive
 		if($edit !== null) {
 			$renderParameters['add'] = null;
