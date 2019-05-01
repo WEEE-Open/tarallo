@@ -52,4 +52,4 @@ $this->layout('main', ['title' => 'Bulk operations', 'user' => $user]);
     <input id="bulk-move-location" type="text" name="where">
     <input type="submit" value="Move" class="small">
 </form>
-<script src="bulk.js"></script>
+<script src="/static/bulk.js"></script>

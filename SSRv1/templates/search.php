@@ -80,4 +80,4 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 <script>const activate = true;</script>
 <?php endif ?>
 <?php $this->insert('editor'); ?>
-<script src="/search.js"></script>
+<script src="/static/search.js"></script>

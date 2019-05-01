@@ -32,4 +32,4 @@
 	<?php $this->insert('featuresList'); ?>
 </template>
 <!--suppress JSUnusedLocalSymbols -->
-<script src="/editor.js"></script>
+<script src="/static/editor.js"></script>

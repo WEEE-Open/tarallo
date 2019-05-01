@@ -31,4 +31,4 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 	><span class="success message"><a href="#">Ok</a></span
 	><div class="warning message long">Fail</div>
 </nav>
-<script src="/menu.js"></script>
+<script src="/static/menu.js"></script>

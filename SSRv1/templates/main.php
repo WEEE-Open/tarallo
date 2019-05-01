@@ -14,8 +14,8 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<title><?=$this->e($title)?> - T.A.R.A.L.L.O.</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
-	<link rel="stylesheet" href="/main.css">
+    <link rel="shortcut icon" type="image/png" href="/static/favicon.png"/>
+	<link rel="stylesheet" href="/static/main.css">
 </head>
 <body>
 
@@ -37,7 +37,7 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 	</section>
 </div>
 <?php if($itembuttons): ?>
-	<script src="/itembuttons.js"></script>
+	<script src="/static/itembuttons.js"></script>
 <?php endif ?>
 </body>
 </html>
