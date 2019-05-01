@@ -241,7 +241,7 @@ class Controller extends AbstractController {
 								null,
 								500
 							),
-							'lost' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'lost'), null, 100),
+							'lost' => $db->statsDAO()->getLostItems([], 100),
 						]
 					);
 				break;
