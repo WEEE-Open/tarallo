@@ -14,6 +14,7 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<title><?=$this->e($title)?> - T.A.R.A.L.L.O.</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
 	<link rel="stylesheet" href="/main.css">
 </head>
 <body>
