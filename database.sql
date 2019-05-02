@@ -17,8 +17,8 @@ CREATE TABLE `Item` (
 	`Model` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 	`Variant` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
 	`Token` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
-	`DeletedAt` timestamp NULL DEFAULT NULL,
-	`LostAt` timestamp NULL DEFAULT NULL,
+	`DeletedAt` timestamp(6) NULL DEFAULT NULL,
+	`LostAt` timestamp(6) NULL DEFAULT NULL,
 	INDEX (`DeletedAt`),
 	INDEX (`LostAt`),
 	-- TODO: reenable later
@@ -188,4 +188,3 @@ CREATE TABLE `Configuration` (
 	DEFAULT CHARSET = utf8mb4
 	COLLATE = utf8mb4_unicode_ci;
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 4);
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 1);

@@ -341,7 +341,7 @@ class Controller extends AbstractController {
 
 		Validation::authorize($user);
 
-		$id = Validation::validateOptionalString($parameters, 'id');
+		$id = Validation::validateHasString($parameters, 'id');
 
 		$responseCode = 204;
 		try {
@@ -388,6 +388,31 @@ class Controller extends AbstractController {
 			// Moved or done nothing
 			$response = $response->withStatus(204);
 		}
+
+		return $next ? $next($request, $response) : $response;
+	}
+
+	public static function deleteItemParent(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+
+		Validation::authorize($user);
+
+		$id = Validation::validateHasString($parameters, 'id');
+
+		$responseCode = 204;
+		try {
+			$db->itemDAO()->loseItem(new ItemIncomplete($id));
+		} catch(NotFoundException $ignored) {
+			$responseCode = 404;
+		} catch(ValidationException $e) {
+			throw new InvalidPayloadParameterException('*', $id, $e->getMessage());
+		}
+
+		$response = $response
+			->withStatus($responseCode);
 
 		return $next ? $next($request, $response) : $response;
 	}
@@ -565,6 +590,40 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
+	public static function ItemsNotFeature(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+
+		Validation::authorize($user);
+
+//		Feature $filter,
+//		string $notFeature,
+//		?ItemIncomplete $location = null,
+//		int $limit = 100,
+//		?\DateTime $creation = null,
+//		bool $deleted = false
+		$feature = Validation::validateHasString($parameters, 'filter');
+		$notFeature = Validation::validateHasString($parameters, 'notFeature');
+		$location = Validation::validateOptionalString($parameters, 'location', null, null);
+		$limit = Validation::validateOptionalInt($parameters, 'limit', 100);
+		$creation = Validation::validateOptionalString($parameters, 'creation', null);
+		$deleted = boolval(Validation::validateOptionalString($parameters, 'creation', false));
+		//$deleted = isset($parameters['deleted']) ? $parameters['deleted'] : false;
+
+		$explosion = explode('=', $feature);
+		$array = $db->StatsDAO()->getItemByNotFeature(new Feature($explosion[0], $explosion[1]), $notFeature, new
+		ItemIncomplete($location), $limit, $creation === null ? null : new \DateTime($creation), $deleted);
+
+		$request = $request
+			->withAttribute('Status', JSend::SUCCESS)
+			->withAttribute('Data', $array);
+		$response = $response
+			->withStatus(200);
+		return $next ? $next($request, $response) : $response;
+	}
+
 	public static function getDispatcher(string $cachefile): FastRoute\Dispatcher {
 		return FastRoute\cachedDispatcher(
 			function(FastRoute\RouteCollector $r) {
@@ -589,6 +648,7 @@ class Controller extends AbstractController {
 										// Useless
 										//$r->get('/parent',  [[Controller::class, 'getItemParent']]);
 										$r->put('/parent', [[Controller::class, 'setItemParent']]);
+										$r->delete('/parent', [[Controller::class, 'deleteItemParent']]);
 
 										//$r->get('/product', [[Controller::class, 'getItemProduct']]);
 										//$r->put('/product',  [[Controller::class, 'setItemProduct']]);
@@ -663,6 +723,18 @@ class Controller extends AbstractController {
 						$r->delete('/session', [[Controller::class, 'sessionClose']]);
 						$r->head('/session', [[Controller::class, 'sessionRefresh']]);
 
+						$r->addGroup(
+							'/stats',
+							function(FastRoute\RouteCollector $r) {
+								// Feature $filter,
+								// string $notFeature,
+								// ?ItemIncomplete $location = null,
+								// int $limit = 100,
+								// ?\DateTime $creation = null,
+								// bool $deleted = false
+								$r->get('/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]', [[Controller::class, 'ItemsNotFeature']]);
+							}
+						);
 					}
 				);
 			},
@@ -696,6 +768,7 @@ class Controller extends AbstractController {
 					->withStatus(200);
 				break;
 			case FastRoute\Dispatcher::NOT_FOUND:
+				// TODO: why is this not working? There's no message...
 				$request = $request
 					->withAttribute('Status', JSend::FAIL)
 					->withAttribute('ErrorMessage', "API endpoint not found");

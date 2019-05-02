@@ -16,12 +16,12 @@ use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\Server\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
-use WEEEOpen\Tarallo\Server\HTTP\LanguageNegotiatior;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
+use WEEEOpen\Tarallo\Server\ValidationException;
 
 
 class Controller extends AbstractController {
@@ -36,13 +36,28 @@ class Controller extends AbstractController {
 
 		Validation::authorize($user, 3);
 
-		$id = Validation::validateOptionalString($parameters, 'id', null);
+		// So things aren't url-decoded automatically...
+		$id = urldecode(Validation::validateOptionalString($parameters, 'id', null));
 		$edit = Validation::validateOptionalString($parameters, 'edit', null);
 		$add = Validation::validateOptionalString($parameters, 'add', null);
 		$depth = Validation::validateOptionalInt($query, 'depth', 20);
 
-		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, $depth);
-		$renderParameters = ['item' => $item, 'deletedAt' => $item->getDeletedAt()];
+		try {
+			$ii = new ItemIncomplete($id);
+		} catch(ValidationException $e) {
+			if($e->getCode() === 3) {
+				$response = $response
+					->withStatus(404);
+				$request = $request
+					->withAttribute('Template', 'error')
+					->withAttribute('TemplateParameters', ['reason' => "Code '$id' contains invalid characters"]);
+				return $next ? $next($request, $response) : $response;
+			}
+			throw $e;
+		}
+
+		$item = $db->itemDAO()->getItem($ii, null, $depth);
+		$renderParameters = ['item' => $item, 'deletedAt' => $item->getDeletedAt(), 'lostAt' => $item->getLostAt()];
 		// These should be mutually exclusive
 		if($edit !== null) {
 			$renderParameters['add'] = null;
@@ -106,7 +121,7 @@ class Controller extends AbstractController {
 
 		$request = $request
 			->withAttribute('Template', 'newItem')
-			->withAttribute('TemplateParameters', ['add' => true, 'copy' => $from]);
+			->withAttribute('TemplateParameters', ['add' => true, 'copy' => $from, 'featuresEmpty' => ['type', 'working']]);
 
 		return $next ? $next($request, $response) : $response;
 	}
@@ -226,7 +241,7 @@ class Controller extends AbstractController {
 								null,
 								500
 							),
-							'lost' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'lost'), null, 100),
+							'lost' => $db->statsDAO()->getLostItems([], 100),
 						]
 					);
 				break;
@@ -499,7 +514,6 @@ class Controller extends AbstractController {
 	public static function getDispatcher(string $cachefile): FastRoute\Dispatcher {
 		return FastRoute\cachedDispatcher(
 			function(FastRoute\RouteCollector $r) {
-				// TODO: [new RateLimit(), [Controller::class, 'login']] or something like that
 				$r->addRoute(['GET', 'POST'], '/login', [[Controller::class, 'login']]);
 				$r->addRoute(['GET', 'POST'], '/options', [[Controller::class, 'options']]);
 				$r->get('/logout', [[Controller::class, 'logout']]);
@@ -537,7 +551,7 @@ class Controller extends AbstractController {
 	public static function handle(Request $request): Response {
 		$queue = [
 			new DatabaseConnection(),
-			new LanguageNegotiatior(),
+			//new LanguageNegotiatior(),
 			new TemplateEngine(),
 			[self::class, 'handleExceptions'],
 		];
@@ -559,18 +573,19 @@ class Controller extends AbstractController {
 				break;
 			case FastRoute\Dispatcher::NOT_FOUND:
 				$request = $request
-					->withAttribute('Template', 'notFound');
+					->withAttribute('Template', 'error')
+					->withAttribute('TemplateParameters', ['reason' => 'Invalid URL (no route in router)']);
 				$response = $response->withStatus(404);
 				break;
 			case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
 				$request = $request
-					->withAttribute('Template', 'genericError');
+					->withAttribute('Template', 'error');
 				$response = $response->withStatus(405)
 					->withHeader('Allow', implode(', ', $route[1]));
 				break;
 			default:
 				$request = $request
-					->withAttribute('Template', 'genericError')
+					->withAttribute('Template', 'error')
 					->withAttribute('TemplateParameters', ['reason' => 'SSR Error: unknown router result']);
 				$response = $response->withStatus(500);
 				break;
@@ -597,7 +612,6 @@ class Controller extends AbstractController {
 			/** @var Engine $engine */
 			$engine = $request->getAttribute('TemplateEngine');
 
-			// TODO: remove addData, read attrbitues in templates directly
 			$engine->addData(
 				[
 					'user' => $request->getAttribute('User'),
@@ -618,6 +632,14 @@ class Controller extends AbstractController {
 		}
 	}
 
+	/**
+	 * @param Request $request
+	 * @param Response $response
+	 * @param callable|null $next
+	 *
+	 * @return Response
+	 * @deprecated see https://github.com/WEEE-Open/tarallo/issues/50
+	 */
 	public static function handleExceptions(
 		Request $request,
 		Response $response,
@@ -628,31 +650,32 @@ class Controller extends AbstractController {
 				return $next($request, $response);
 			} catch(AuthenticationException $e) {
 				$request = $request
-					->withAttribute('Template', 'notAuthenticated')
-					->withAttribute('TemplateParameters', []);
+					->withAttribute('Template', 'error')
+					->withAttribute('TemplateParameters', ['reasonNoEscape' => '<a href="/login">Please authenticate</a>']);
 				$response = $response
 					->withStatus(401)
 					->withHeader('WWW-Authenticate', 'login');
 			} catch(AuthorizationException $e) {
 				$request = $request
-					->withAttribute('Template', 'genericError')
+					->withAttribute('Template', 'error')
 					->withAttribute('TemplateParameters', []);
 				$response = $response
 					->withStatus(403);
 			} catch(NotFoundException $e) {
 				$request = $request
-					->withAttribute('Template', 'notFound')
-					->withAttribute('TemplateParameters', []);
+					->withAttribute('Template', 'error')
+					->withAttribute('TemplateParameters', ['reason' => 'Whatever you\'re looking for, it doesn\'t exist.']);
 				$response = $response
 					->withStatus(404);
 			} catch(\Throwable $e) {
 				$request = $request
-					->withAttribute('Template', 'genericError')
+					->withAttribute('Template', 'error')
 					->withAttribute('TemplateParameters', ['reason' => $e->getMessage()]);
 				$response = $response
 					->withStatus(500);
 			}
 
+			// This thing. It's horrible. It shouldn't be here.
 			return self::renderResponse($request, $response);
 		} else {
 			return $response;

@@ -22,11 +22,14 @@
 <template id="feature-edit-template-generic-error">
 	<div class="error description">Error</div>
 </template>
+<template id="feature-edit-template-linked-error">
+    <div class="error description">Wrong value for a feature <a href="#first-error">here</a></div>
+</template>
 <template id="new-item-template">
-	<?php $this->insert('newItem', ['recursion' => true, 'innerrecursion' => true]) ?>
+	<?php $this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'featuresEmpty' => ['type', 'working']]) ?>
 </template>
 <template id="features-select-template">
 	<?php $this->insert('featuresList'); ?>
 </template>
 <!--suppress JSUnusedLocalSymbols -->
-<script src="/editor.js"></script>
+<script src="/static/editor.js"></script>

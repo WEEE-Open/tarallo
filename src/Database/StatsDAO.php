@@ -58,23 +58,43 @@ AND `Time` < FROM_UNIXTIME(:timestamp)
 	}
 
 	/**
-	 * Get an AND for a WHERE clause that ignores deleted items.
+	 * Get an AND for a WHERE clause that ignores deleted & lost items.
 	 *
-	 * @param string $alias Table alias, if you're doing "SELECT ItemFeatures AS alias", empty string if none
+	 * @param string $alias Table alias, if you're doing "SELECT ... FROM ItemFeatures AS alias", empty string if none
 	 *
 	 * @return string part of a query
 	 */
-	private static function filterDeleted(string $alias = '') {
+	private static function filterDeletedLost(string $alias = '') {
 		if($alias !== '') {
 			$alias .= '.';
 		}
 
-		return "AND $alias`Code` NOT IN (SELECT `Code` FROM `Item` WHERE DeletedAt IS NOT NULL)";
+		return "AND $alias`Code` NOT IN (SELECT `Code` FROM `Item` WHERE DeletedAt IS NOT NULL OR LostAt IS NOT NULL)";
+	}
+
+	/**
+	 * Get a filter for selecting items with a feature.
+	 * Bind paramenters to :ffname1 & :ffval1, :ffname2 & ffval2, etc...
+	 *
+	 * @param Feature[] $features
+	 *
+	 * @return string AND `Code` IN (...) AND `Code` IN (...) ...
+	 */
+	private static function filterFeatures(array $features): string {
+		$sqlFilter = '';
+		for($i = 0; $i < count($features); $i++) {
+			$sqlFilter .= "AND `Code` IN (
+			  SELECT `Code`
+			  FROM ItemFeature
+			  WHERE Feature = :ffname$i AND COALESCE(ValueEnum, `Value`, ValueText, ValueDouble) = :ffval$i
+			)";
+		}
+		return $sqlFilter;
 	}
 
 	/**
 	 * Get a list of all locations, ordered by number of items inside each one.
-	 * Ignores deleted items as they aren't placed anywhere.
+	 * Ignores deleted/lost items as they aren't placed anywhere.
 	 * No filtering by location because that doesn't make sense.
 	 *
 	 * @return array
@@ -114,7 +134,7 @@ EOQ
 	/**
 	 * Get most/least recently changed cases in a particular location, excluding in-use ones. This takes into account
 	 * all audit entries for all contained items.
-	 * Deleted items are ignored since they aren't in any location.
+	 * Deleted/lost items are ignored since they aren't in any location.
 	 *
 	 * Any attempt to make the function more generic failed miserably or was escessively complex, but consider
 	 * that this is a very specific kind of stat to begin with...
@@ -194,7 +214,7 @@ LIMIT :lim';
 	 * @param Feature|null $filter Feature that must match, useful to select items by type
 	 * @param ItemIncomplete $location Consider only this subtree
 	 * @param null|\DateTime $creation Creation date (starts from here)
-	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
+	 * @param bool $deleted Also count deleted/lost items, defaults to false (don't count them)
 	 * @param int $cutoff Report features only if count is greater than (or equal to) this number,
 	 * useful for text features with lots of possible values
 	 *
@@ -213,7 +233,7 @@ LIMIT :lim';
 		$array = [];
 
 		$locationFilter = self::filterLocation($location);
-		$deletedFilter = $deleted ? '' : self::filterDeleted();
+		$deletedFilter = $deleted ? '' : self::filterDeletedLost();
 		$createdFilter = self::filterCreated($creation);
 		if($filter === null) {
 			$featureFilter = '';
@@ -272,20 +292,20 @@ ORDER BY Quantity DESC, Val ASC";
 	 * @param int $limit Maximum number of results
 	 * @param null|ItemIncomplete $location
 	 * @param null|\DateTime $creation creation date (starts from here)
-	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
+	 * @param bool $deleted Also count deleted/lost items, defaults to false (don't count them)
 	 *
 	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
 	 */
 	public function getItemsByFeatures(
 		Feature $feature,
 		?ItemIncomplete $location = null,
-		?int $limit = null,
+		?int $limit = null, // TODO: $limit === null won't work (see getLostItem to do it correctly)
 		?\DateTime $creation = null,
 		bool $deleted = false
 	): array {
 		$pdo = $this->getPDO();
 		$locationFilter = self::filterLocation($location);
-		$deletedFilter = $deleted ? '' : self::filterDeleted();
+		$deletedFilter = $deleted ? '' : self::filterDeletedLost();
 		$createdFilter = self::filterCreated($creation);
 
 		/** @noinspection SqlResolve */
@@ -325,6 +345,55 @@ LIMIT :lim";
 	}
 
 	/**
+	 * Get items that are marked as lost
+	 *
+	 * @param Feature[] $features Only consider items with these features, empty array for no filters
+	 * @param int|null $limit Maximum number of results, null for no limit
+	 * @param bool $deleted Also return deleted items, defaults to false (don't return them)
+	 *
+	 * @return array
+	 */
+	public function getLostItems(array $features = [], ?int $limit = null, $deleted = false): array {
+		$pdo = $this->getPDO();
+		$deletedFilter = $deleted ? '' : 'AND DeletedAt IS NULL';
+
+		$featuresFilter = self::filterFeatures($features);
+
+		$limitFilter = $limit === null ? '' : 'LIMIT :lim';
+
+		/** @noinspection SqlResolve */
+		$query = "SELECT `Code`
+FROM Item
+WHERE LostAt IS NOT NULL
+$deletedFilter
+$featuresFilter
+$limitFilter";
+		$statement = $pdo->prepare($query);
+
+		for($i = 0; $i < count($features); $i++) {
+			$statement->bindValue(":ffname$i", $features[$i]->name, \PDO::PARAM_STR);
+			$statement->bindValue(":ffval$i", $features[$i]->value);
+		}
+		if($limit !== null) {
+			$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
+		}
+
+		$result = [];
+
+		try {
+			$success = $statement->execute();
+			assert($success, 'get items by features');
+			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+				$result[] = new ItemIncomplete($row['Code']);
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Get all items that don't have a feature at all.
 	 *
 	 * @param Feature $filter feature that should be there
@@ -333,7 +402,7 @@ LIMIT :lim";
 	 * @param null|ItemIncomplete $location
 	 * @param int $limit Maximum number of results
 	 * @param null|\DateTime $creation creation date (starts from here)
-	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
+	 * @param bool $deleted Also count deleted/lost items, defaults to false (don't count them)
 	 *
 	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
 	 */
@@ -347,7 +416,7 @@ LIMIT :lim";
 	): array {
 
 		$locationFilter = self::filterLocation($location);
-		$deletedFilter = $deleted ? '' : self::filterDeleted();
+		$deletedFilter = $deleted ? '' : self::filterDeletedLost();
 		$createdFilter = self::filterCreated($creation);
 
 		$query = "SELECT Code 
@@ -398,7 +467,7 @@ LIMIT :lim";
 	 * @param string[] $features which columns you want in the results table. Order is preserved.
 	 * @param null|ItemIncomplete $location Only consider items in this location
 	 * @param null|\DateTime $creation creation date (starts from here)
-	 * @param bool $deleted Also count deleted items, defaults to false (don't count them)
+	 * @param bool $deleted Also count deleted/lost items, defaults to false (don't count them)
 	 *
 	 * @return array[] Array of rows, as returned by the database: for N features there are N columns with feature values, the a count column at the end.
 	 */
@@ -439,7 +508,7 @@ LIMIT :lim";
 		$features = array_values($features);
 
 		$locationFilter = self::filterLocation($location, 'f0');
-		$deletedFilter = $deleted ? '' : self::filterDeleted('f0');
+		$deletedFilter = $deleted ? '' : self::filterDeletedLost('f0');
 		$createdFilter = self::filterCreated($creation, 'f0');
 
 		$select = 'SELECT ';

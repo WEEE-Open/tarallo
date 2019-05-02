@@ -1,9 +1,11 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 /** @var \WEEEOpen\Tarallo\Server\Item $copy */
+/** @var string[] $featuresEmpty */
 
 $recursion = $recursion ?? false; // Placed inside another item (new or existing)
 $innerrecursion = $innerrecursion ?? false; // Placed inside another NEW item
+$featuresEmpty = $featuresEmpty ?? [];
 
 if(!$innerrecursion && !$recursion) {
 	$this->layout('main', ['title' => 'New item', 'user' => $user, 'itembuttons' => true]);
@@ -14,7 +16,7 @@ if(isset($copy)) {
 	$subitems = $copy->getContents();
 } else {
 	$subitems = [];
-	$features = [new \WEEEOpen\Tarallo\Server\Feature('type', 'adapter')];
+	$features = [];
 }
 
 // to display new inner items, set their $recursion and $innerrecursion to true
@@ -35,12 +37,12 @@ if(isset($copy)) {
 
 
 	<?php if(!$innerrecursion && !$recursion): ?>
-		<div class="setlocation"><label>Location: <input id="newparent"></label></div>
+		<section class="setlocation"><label>Location: <input id="newparent"></label></section>
 	<?php endif ?>
 
 	<section class="own features editing">
 		<?php
-		$this->insert('featuresEdit', ['features' => $features]);
+		$this->insert('featuresEdit', ['features' => $features, 'featuresEmpty' => $featuresEmpty]);
 		?>
 	</section>
 
@@ -53,7 +55,7 @@ if(isset($copy)) {
 
 	<section class="subitems">
 		<?php
-			// Empty if not cloning
+			// Used when cloning, empty otherwise
 			foreach($subitems as $subitem) {
 				$this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'copy' => $subitem]);
 			}

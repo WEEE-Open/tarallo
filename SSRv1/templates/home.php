@@ -9,7 +9,7 @@ $this->layout('main', ['title' => 'Home', 'user' => $user]) ?>
 	<p>This is a temporary home page. Here are some stats.</p>
 	<div class="statswrapperwrapper">
 	<?php if(!empty($locations)): ?>
-		<div class="statswrapper">
+		<div class="tablewrapper">
 			<p>Available locations:</p>
 			<table>
 				<thead>
@@ -30,7 +30,7 @@ $this->layout('main', ['title' => 'Home', 'user' => $user]) ?>
 		</div>
 	<?php endif;
 	if(!empty($recentlyAdded)): ?>
-		<div class="statswrapper">
+		<div class="tablewrapper">
 			<p>Last <?= count($recentlyAdded) ?> items added:</p>
 			<table>
 				<thead>

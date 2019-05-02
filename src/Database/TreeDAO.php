@@ -49,9 +49,8 @@ final class TreeDAO extends DAO {
 		$moved = false;
 		// if $newParent === null will ever be supported, add a check here
 		// if(from nowhere to somewhere || from somewhere to somewhere else (including itself, which removes parent))
-		if(($oldParent === null && $newParent->compareCode(
-					$item
-				) !== 0) || ($oldParent !== null && $newParent->compareCode($oldParent) !== 0)) {
+		if(($oldParent === null && $newParent->compareCode($item) !== 0)
+			|| ($oldParent !== null && $newParent->compareCode($oldParent) !== 0)) {
 			try {
 				$db->treeDAO()->moveItem($item, $newParent);
 				$moved = true;
@@ -102,6 +101,8 @@ final class TreeDAO extends DAO {
 		if(!$this->database->itemDAO()->itemVisible($item)) {
 			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
 		}
+
+		$this->database->itemDAO()->unlose($item);
 
 		$this->splitSubtree($item);
 		if($newParent !== null) {

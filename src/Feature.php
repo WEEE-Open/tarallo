@@ -27,15 +27,17 @@ class Feature {
 	const features = [
 		'brand' => self::STRING,
 		'model' => self::STRING,
+		'internal-name' => self::STRING,
 		'family' => self::STRING,
 		'variant' => self::STRING,
 		'key-bios-setup' => self::STRING,
 		'key-boot-menu' => self::STRING,
 		'owner' => self::STRING,
 		'sn' => self::STRING,
+		'wwn' => self::STRING,
 		'mac' => self::STRING,
-		'type' => ['location' => true, 'case' => true, 'motherboard' => true, 'cpu' => true, 'graphics-card' => true, 'ram' => true, 'hdd' => true, 'ssd' => true, 'odd' => true, 'psu' => true, 'audio-card' => true, 'ethernet-card' => true, 'monitor' => true, 'mouse' => true, 'keyboard' => true, 'network-switch' => true, 'network-hub' => true, 'modem-router' => true, 'fdd' => true, 'ports-bracket' => true, 'other-card' => true, 'fan-controller' => true, 'modem-card' => true, 'scsi-card' => true, 'wifi-card' => true, 'bluetooth-card' => true, 'external-psu' => true, 'zip-drive' => true, 'printer' => true, 'scanner' => true, 'inventoried-object' => true, 'adapter' => true, 'usbhub' => true, 'tv-card' => true],
-		'working' => ['no' => true, 'yes' => true, 'maybe' => true],
+		'type' => ['location' => true, 'case' => true, 'motherboard' => true, 'cpu' => true, 'graphics-card' => true, 'ram' => true, 'hdd' => true, 'ssd' => true, 'odd' => true, 'psu' => true, 'audio-card' => true, 'ethernet-card' => true, 'monitor' => true, 'mouse' => true, 'keyboard' => true, 'network-switch' => true, 'network-hub' => true, 'modem-router' => true, 'fdd' => true, 'ports-bracket' => true, 'card-reader' => true, 'other-card' => true, 'fan-controller' => true, 'modem-card' => true, 'scsi-card' => true, 'wifi-card' => true, 'bluetooth-card' => true, 'external-psu' => true, 'zip-drive' => true, 'printer' => true, 'scanner' => true, 'inventoried-object' => true, 'adapter' => true, 'usbhub' => true, 'tv-card' => true],
+		'working' => ['no' => true, 'yes' => true, 'maybe' => true, 'to-be-tested' => true],
 		'capacity-byte' => self::INTEGER,
 		'frequency-hertz' => self::INTEGER,
 		'diameter-mm' => self::INTEGER,
@@ -48,14 +50,17 @@ class Feature {
 		'arrival-batch' => self::STRING,
 		'capacity-decibyte' => self::INTEGER,
 		'cib' => self::STRING,
+		'cib-qr' => self::STRING,
 		'core-n' => self::INTEGER,
+		'thread-n' => self::INTEGER,
 		'cpu-socket' => ['other-slot' => true, 'other-socket' => true, 'other-dip' => true, 'g1' => true, 'g2' => true, 'socket3' => true, 'socket7' => true, 'p' => true, 'am1' => true, 'am2' => true, 'am2plus' => true, 'am3' => true, 'am3plus' => true, 'am4' => true, 'fm1' => true, 'fm2' => true, 'fm2plus' => true, 'g34' => true, 'c32' => true, 'g3' => true, 'slot1' => true, 'super7' => true, 'socket370' => true, 'socket462a' => true, 'socket423' => true, 'socket478' => true, 'socket479a' => true, 'socket479c' => true, 'socket479m' => true, 'socket495' => true, 'socket603' => true, 'socket604' => true, 'socket615' => true, 'socket754' => true, 'socket940' => true, 'socket939' => true, 'lga775' => true, 'lga771' => true, 'lga1366' => true, 'lga1156' => true, 'lga1248' => true, 'lga1567' => true, 'lga1155' => true, 'lga2011' => true, 'lga1150' => true, 'lga1151' => true, 'lga2066' => true, 'lga3647' => true],
 		'dvi-ports-n' => self::INTEGER,
 		'ethernet-ports-1000m-n' => self::INTEGER,
 		'ethernet-ports-100m-n' => self::INTEGER,
 		'ethernet-ports-10base2-bnc-n' => self::INTEGER,
 		'ethernet-ports-10m-n' => self::INTEGER,
-		'hdd-odd-form-factor' => ['5.25' => true, '3.5' => true, '2.5-15mm' => true, '2.5-9.5mm' => true, '2.5-7mm' => true, '1.8-9.5mm' => true, '1.8-8mm' => true, '1.8-5mm' => true, 'm2' => true, 'm2.2' => true, 'laptop-odd-7mm' => true, 'laptop-odd-8.5mm' => true, 'laptop-odd-9.5mm' => true, 'laptop-odd-12.7mm' => true],
+		'odd-form-factor' => ['5.25' => true, 'laptop-odd-7mm' => true, 'laptop-odd-8.5mm' => true, 'laptop-odd-9.5mm' => true, 'laptop-odd-12.7mm' => true],
+		'hdd-form-factor' => ['3.5' => true, '2.5-15mm' => true, '2.5-9.5mm' => true, '2.5-7mm' => true, '1.8-9.5mm' => true, '1.8-8mm' => true, '1.8-5mm' => true, 'm2' => true, 'm2.2' => true],
 		'ide-ports-n' => self::INTEGER,
 		'odd-type' => ['cd-r' => true, 'cd-rw' => true, 'dvd-r' => true, 'dvd-rw' => true, 'bd-r' => true, 'bd-rw' => true],
 		'pcie-power-pin-n' => self::INTEGER,
@@ -69,6 +74,7 @@ class Feature {
 		'psu-connector-motherboard' => ['proprietary' => true, 'at' => true, 'atx-20pin' => true, 'atx-24pin' => true, 'atx-24pin-mini' => true, 'atx-20pin-aux' => true],
 		'psu-volt' => self::DOUBLE,
 		'ram-type' => ['simm' => true, 'edo' => true, 'sdr' => true, 'ddr' => true, 'ddr2' => true, 'ddr3' => true, 'ddr4' => true],
+		'ram-timings' => self::STRING,
 		'sata-ports-n' => self::INTEGER,
 		'software' => self::STRING,
 		'usb-ports-n' => self::INTEGER,
@@ -77,7 +83,7 @@ class Feature {
 		'vga-ports-n' => self::INTEGER,
 		'os-license-code' => self::STRING,
 		'os-license-version' => self::STRING,
-		'power-idle-pfc' => self::STRING,
+		'power-idle-pfc' => self::DOUBLE,
 		'firewire-ports-n' => self::INTEGER,
 		'mini-firewire-ports-n' => self::INTEGER,
 		'serial-ports-n' => self::INTEGER,
@@ -86,7 +92,7 @@ class Feature {
 		'weight-gram' => self::INTEGER,
 		'spin-rate-rpm' => self::INTEGER,
 		'dms-59-ports-n' => self::INTEGER,
-		'check' => ['missing-data' => true, 'lost' => true],
+		'check' => ['missing-data' => true, 'partial-inventory' => true],
 		'ram-ecc' => ['no' => true, 'yes' => true],
 		'other-code' => self::STRING,
 		'hdmi-ports-n' => self::INTEGER,
@@ -127,12 +133,14 @@ class Feature {
 	const groups = [
 		'brand' => self::GROUP_commercial,
 		'model' => self::GROUP_commercial,
+		'internal-name' => self::GROUP_commercial,
 		'family' => self::GROUP_commercial,
 		'variant' => self::GROUP_commercial,
 		'key-bios-setup' => self::GROUP_software,
 		'key-boot-menu' => self::GROUP_software,
 		'owner' => self::GROUP_administrative,
 		'sn' => self::GROUP_codes,
+		'wwn' => self::GROUP_codes,
 		'mac' => self::GROUP_codes,
 		'type' => self::GROUP_general,
 		'working' => self::GROUP_general,
@@ -148,14 +156,17 @@ class Feature {
 		'arrival-batch' => self::GROUP_administrative,
 		'capacity-decibyte' => self::GROUP_features,
 		'cib' => self::GROUP_administrative,
+		'cib-qr' => self::GROUP_administrative,
 		'core-n' => self::GROUP_features,
+		'thread-n' => self::GROUP_features,
 		'cpu-socket' => self::GROUP_sockets,
 		'dvi-ports-n' => self::GROUP_ports,
 		'ethernet-ports-1000m-n' => self::GROUP_ports,
 		'ethernet-ports-100m-n' => self::GROUP_ports,
 		'ethernet-ports-10base2-bnc-n' => self::GROUP_ports,
 		'ethernet-ports-10m-n' => self::GROUP_ports,
-		'hdd-odd-form-factor' => self::GROUP_physical,
+		'odd-form-factor' => self::GROUP_physical,
+		'hdd-form-factor' => self::GROUP_physical,
 		'ide-ports-n' => self::GROUP_ports,
 		'odd-type' => self::GROUP_features,
 		'pcie-power-pin-n' => self::GROUP_powerconnectors,
@@ -169,6 +180,7 @@ class Feature {
 		'psu-connector-motherboard' => self::GROUP_powerconnectors,
 		'psu-volt' => self::GROUP_power,
 		'ram-type' => self::GROUP_features,
+		'ram-timings' => self::GROUP_features,
 		'sata-ports-n' => self::GROUP_ports,
 		'software' => self::GROUP_software,
 		'usb-ports-n' => self::GROUP_ports,
@@ -447,12 +459,11 @@ class Feature {
 	/**
 	 * Get available options in an enum feature
 	 *
-	 * @param Feature $feature
+	 * @param string $name Feature name
 	 *
 	 * @return boolean[] map from feature value to true, because reasons.
 	 */
-	public static function getOptions(Feature $feature): array {
-		$name = $feature->name;
+	public static function getOptions(string $name): array {
 		if(self::getType($name) !== self::ENUM) {
 			throw new \InvalidArgumentException("Feature $name is not an enum");
 		}

@@ -10,7 +10,7 @@ date_default_timezone_set('Europe/Rome');
 
 <div class="statswrapperwrapper">
 <?php if(!empty($recentlyAdded)): ?>
-	<div class="statswrapper">
+	<div class="tablewrapper">
 		<p>Recently added items:</p>
 		<table>
 			<thead>
@@ -31,7 +31,7 @@ date_default_timezone_set('Europe/Rome');
 	</div>
 <?php endif ?>
 <?php if(!empty($recentlyModified)): ?>
-	<div class="statswrapper">
+	<div class="tablewrapper">
 		<p>Recently modified items:</p>
 		<table>
 			<thead>
@@ -52,7 +52,7 @@ date_default_timezone_set('Europe/Rome');
 	</div>
 <?php endif ?>
 <?php if(!empty($locations)): ?>
-	<div class="statswrapper">
+	<div class="tablewrapper">
 		<p>Items per location:</p>
 		<table>
 			<thead>

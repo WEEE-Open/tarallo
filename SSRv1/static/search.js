@@ -28,7 +28,7 @@
 
 		let id = ev.target.dataset.for;
 
-		document.getElementById(id).classList.toggle('disabled');
+		document.getElementById(id).classList.toggle('hidden');
 	}
 
 	function addFeatureClick(select, featuresElement, deletedFeatures = null) {
@@ -109,32 +109,32 @@
 
 		let query = {};
 
-		if(!document.getElementById('search-control-code').classList.contains('disabled')) {
+		if(!document.getElementById('search-control-code').classList.contains('hidden')) {
 			query.code = document.getElementById('search-control-code-input').value;
 			if(query.code === '') {
 				delete query.code;
 			}
 		}
 		// TODO: support multiple locations?
-		if(!document.getElementById('search-control-location').classList.contains('disabled')) {
+		if(!document.getElementById('search-control-location').classList.contains('hidden')) {
 			let location = document.getElementById('search-control-location-input').value;
 			if(location !== '') {
 				query.locations = [location];
 			}
 		}
-		if(!document.getElementById('search-control-features').classList.contains('disabled')) {
+		if(!document.getElementById('search-control-features').classList.contains('hidden')) {
 			query.features = getSelectedFeatures('search-control-features');
 			if(query.features.length <= 0) {
 				delete query.features;
 			}
 		}
-		if(!document.getElementById('search-control-ancestor').classList.contains('disabled')) {
+		if(!document.getElementById('search-control-ancestor').classList.contains('hidden')) {
 			query.ancestor = getSelectedFeatures('search-control-ancestor');
 			if(query.ancestor.length <= 0) {
 				delete query.ancestor;
 			}
 		}
-		if(!document.getElementById('search-control-sort').classList.contains('disabled')) {
+		if(!document.getElementById('search-control-sort').classList.contains('hidden')) {
 			let orderby = document.getElementById('search-control-sort-input').value;
 			let direction = document.getElementById('search-control-sort-direction-input').value;
 			query.sort = {};
@@ -151,6 +151,8 @@
 			method = 'PATCH';
 		}
 
+		let oldbeforeunload = window.onbeforeunload;
+		window.onbeforeunload = undefined;
 		searchButton.disabled = true;
 
 		try {
@@ -173,6 +175,7 @@
 			}
 		} finally {
 			searchButton.disabled = false;
+			window.onbeforeunload = oldbeforeunload;
 		}
 	}
 

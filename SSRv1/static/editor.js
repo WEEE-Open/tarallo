@@ -1,7 +1,7 @@
 (async function() {
 	"use strict";
 
-	window.newFeature = newFeature;
+	window.newFeature = createFeatureElement;
 	window.focusFeatureValueInput = focusFeatureValueInput;
 
 	// To generate unique IDs for features
@@ -13,6 +13,7 @@
 	let featureValuesTranslated = new Map();
 
 	let fadingErrors = new Map();
+	let linkedErrors = new Map();
 
 	for(let select of document.querySelectorAll('.allfeatures')) {
 		select.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
@@ -72,6 +73,11 @@
 				// noinspection JSUnresolvedFunction
 				deleteButton.addEventListener('click', deleteClick);
 			}
+			let lostButton = itemEditing.querySelector('.itembuttons .lost');
+			if(lostButton) {
+				// noinspection JSUnresolvedFunction
+				lostButton.addEventListener('click', lostClick);
+			}
 		}
 		// Page may contain some non-head new items open for editing.
 		// This happens mostly (possibly only) when cloning another item.
@@ -80,7 +86,7 @@
 			enableNewItemButtons(clone);
 		}
 
-		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack.bind(null, null));
+		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack.bind(null, null, true));
 
 		for(let item of document.querySelectorAll('.item.editing')) {
 			let featuresElement = null;
@@ -306,8 +312,9 @@
 	 *
 	 * @param {HTMLElement} feature the feature li element. Error message will be appended here.
 	 * @param {string|null} templateName Error identifier, used to get the correct template
+	 * @param {Element} root Root item in edit page, to show a linked error at the top, too
 	 */
-	function displayInlineError(feature, templateName = null) {
+	function displayInlineError(feature, templateName = null, root = null, ) {
 		let templateThingThatShouldExist;
 		if(templateName === null) {
 			templateThingThatShouldExist = document.getElementById('feature-edit-template-generic-error');
@@ -319,9 +326,17 @@
 			}
 		}
 		removeInlineErrors(feature);
-		let template = document.importNode(templateThingThatShouldExist.content, true);
+		let template = document.importNode(templateThingThatShouldExist.content, true).firstElementChild;
 		feature.appendChild(template);
 		feature.classList.add("haserror");
+
+		if(root !== null) {
+			let linkedError = document.importNode(document.getElementById('feature-edit-template-linked-error').content, true).firstElementChild;
+			root.querySelector('.itembuttons').insertAdjacentElement('afterend', linkedError);
+			linkedErrors.set(template, linkedError);
+			feature.id = 'first-error';
+		}
+
 		return true;
 	}
 
@@ -341,6 +356,11 @@
 		feature.classList.remove("fading");
 		for(let error of feature.querySelectorAll('.error.description')) {
 			feature.removeChild(error);
+			let linked = linkedErrors.get(error);
+			if(typeof linked !== "undefined") {
+				// It's 2019, this function finally exists.
+				linked.remove();
+			}
 		}
 	}
 
@@ -609,15 +629,15 @@
 	/**
 	 * Handle clicking the "X" button
 	 *
-	 * @param {string} name - feature name
+	 * @param {HTMLElement} element - Element to be deleted
+	 * @param {string|null} name - feature name, used only if "set" is provided
 	 * @param {Set<string>|null} set - Deleted features, null if not tracking
-	 * @param {HTMLElement} row - Row to be deleted
 	 */
-	function deleteFeature(name, set, row) {
+	function deleteFeature(element, name = '', set = null) {
 		if(set !== null) {
 			set.add(name);
 		}
-		row.remove();
+		element.remove();
 	}
 
 	/**
@@ -627,7 +647,7 @@
 	 * @param ev Event
 	 */
 	function deleteFeatureClick(set, ev) {
-		deleteFeature(ev.target.dataset.name, set, ev.target.parentElement.parentElement);
+		deleteFeature(ev.target.parentElement.parentElement, ev.target.dataset.name, set);
 	}
 
 	/**
@@ -644,7 +664,7 @@
 			if(row.nextElementSibling && row.nextElementSibling.tagName === 'LI') {
 				row.nextElementSibling.querySelector('.value').focus();
 			}
-			deleteFeature(ev.target.dataset.internalName, set, row);
+			deleteFeature(row, ev.target.dataset.internalName, set);
 		}
 	}
 
@@ -657,7 +677,25 @@
 	 */
 	function addFeatureClick(select, featuresElement, deletedFeatures = null) {
 		let name = select.value;
-		addFeature(featuresElement, name, deletedFeatures);
+		addFeatureEditableDedupe(featuresElement, name, deletedFeatures);
+	}
+
+	/**
+	 * Find feature element for a feature, useful when checking for duplicates before insert
+	 *
+	 * @param {string} name - Feature name
+	 * @param {HTMLElement} featuresElement - Element that contains feature elements
+	 * @return {Element|null}
+	 */
+	function findFeatureElement(name, featuresElement) {
+		let pseudoId = 'feature-edit-' + name;
+
+		let elements = featuresElement.getElementsByClassName(pseudoId);
+		if (elements.length > 0) {
+			// There should be only one, hopefully
+			return elements[0];
+		}
+		return null;
 	}
 
 	/**
@@ -667,19 +705,14 @@
 	 * @param {string} name - Feature name
 	 * @param {Set<string>|null} deletedFeatures - Deleted features set, can be null if not tracked
 	 */
-	function addFeature(featuresElement, name, deletedFeatures = null) {
-		let pseudoId = 'feature-edit-' + name;
+	function addFeatureEditableDedupe(featuresElement, name, deletedFeatures = null) {
+		let theFeature = findFeatureElement(name, featuresElement);
 
-		let duplicates = featuresElement.getElementsByClassName(pseudoId);
-		if(duplicates.length > 0) {
-			// There should be only one, hopefully
-			focusFeatureValueInput(duplicates[0]);
-			return;
+		if(theFeature === null) {
+			theFeature = addFeatureEditable(name, featuresElement, deletedFeatures);
 		}
 
-		let newElement = addNewFeature(name, pseudoId, featuresElement, deletedFeatures);
-
-		focusFeatureValueInput(newElement);
+		focusFeatureValueInput(theFeature);
 	}
 
 	/**
@@ -709,12 +742,12 @@
 	 * This attaches event listeners that are suitable for edit mode but not for search, so beware.
 	 *
 	 * @param {string} name - Feature name
-	 * @param {string} pseudoId - Unique element identifier (already confirmed to be unique), used as class
 	 * @param {HTMLElement} featuresElement - The "own features" element
 	 * @param {Set<string>|null} deletedFeatures - Deleted features set, can be null if not tracked
 	 */
-	function addNewFeature(name, pseudoId, featuresElement, deletedFeatures = null) {
-		let newElement = newFeature(name, pseudoId, deletedFeatures);
+	function addFeatureEditable(name, featuresElement, deletedFeatures = null) {
+		let pseudoId = 'feature-edit-' + name;
+		let newElement = createFeatureElement(name, pseudoId, deletedFeatures);
 
 		// If it's a new item and we're adding a type, attach this listener...
 		if(name === 'type' && deletedFeatures === null) {
@@ -732,75 +765,92 @@
 	}
 
 	/**
+	 * Delete empty features from an editable item
+	 *
+	 * @param {HTMLElement} featuresElement - Where features are located
+	 * @param {string[]} except - These will be left even if empty
+	 */
+	function deleteEmptyFeatures(featuresElement, except = []) {
+		let all = featuresElement.querySelectorAll('li.feature-edit');
+		for(let el of all) {
+			let valueElement = el.querySelector('.value');
+			if(!except.includes(valueElement.dataset.internalName) && getValueFrom(valueElement) === '') {
+				deleteFeature(el);
+			}
+		}
+	}
+
+	/**
 	 * Add empty features according to object type, if nothing other than type has been added.
 	 *
 	 * @param {HTMLElement} featuresElement - The "own features" element
 	 * @param {HTMLSelectElement} featureElement - The feature element itself, to get type
 	 */
 	function setTypeClick(featuresElement, featureElement) {
-		if(featuresElement.getElementsByTagName('LI').length > 1) {
-			return;
-		}
+		deleteEmptyFeatures(featuresElement, ['type', 'working']);
 
 		let features;
 		let type = featureElement.getElementsByTagName('SELECT')[0].value;
 
 		switch(type) {
 			case 'case':
-				features = ['cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code', 'brand', 'model', 'sn', 'usb-ports-n', 'working', 'motherboard-form-factor', 'psu-form-factor', 'power-connector', 'psu-volt', 'psu-ampere', 'arrival-batch', 'owner', 'color', 'software', 'notes'];
+				features = ['cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code', 'brand', 'model', 'sn', 'usb-ports-n', 'motherboard-form-factor', 'psu-form-factor', 'power-connector', 'psu-volt', 'psu-ampere', 'arrival-batch', 'owner', 'color', 'notes'];
 				break;
 			case 'motherboard':
-				features = ['brand', 'model', 'sn', 'motherboard-form-factor', 'key-bios-setup', 'key-boot-menu', 'cpu-socket', 'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n', 'sata-ports-n', 'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n', 'usb-ports-n', 'firewire-ports-n', 'mini-firewire-ports-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'mac', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand', 'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'mini-jack-ports-n', 'psu-connector-cpu', 'psu-connector-motherboard', 'working', 'color', 'owner', 'notes'];
+				features = ['brand', 'model', 'sn', 'motherboard-form-factor', 'key-bios-setup', 'key-boot-menu', 'cpu-socket', 'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n', 'sata-ports-n', 'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n', 'usb-ports-n', 'firewire-ports-n', 'mini-firewire-ports-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'mac', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand', 'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'mini-jack-ports-n', 'psu-connector-cpu', 'psu-connector-motherboard', 'color', 'owner', 'notes'];
 				break;
 			case 'cpu':
-				features = ['brand', 'model', 'variant', 'core-n', 'isa', 'frequency-hertz', 'cpu-socket', 'integrated-graphics-brand', 'integrated-graphics-model', 'working', 'owner'];
+				features = ['brand', 'model', 'variant', 'core-n', 'thread-n', 'isa', 'frequency-hertz', 'cpu-socket', 'integrated-graphics-brand', 'integrated-graphics-model', 'owner'];
 				break;
 			case 'ram':
-				features = ['brand', 'model', 'sn', 'family', 'ram-type', 'ram-form-factor', 'frequency-hertz', 'capacity-byte', 'ram-ecc', 'working', 'color', 'owner', 'notes'];
+				features = ['brand', 'model', 'sn', 'family', 'ram-type', 'ram-form-factor', 'frequency-hertz', 'capacity-byte', 'ram-timings', 'ram-ecc', 'color', 'owner', 'notes'];
 				break;
 			case 'hdd':
-				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'family', 'capacity-decibyte', 'hdd-odd-form-factor', 'spin-rate-rpm', 'mini-ide-ports-n', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n', 'scsi-db68-ports-n', 'data-erased', 'surface-scan', 'smart-data', 'working', 'owner'];
+				features = ['brand', 'model', 'sn', 'wwn', 'family', 'capacity-decibyte', 'hdd-form-factor', 'spin-rate-rpm', 'mini-ide-ports-n', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n', 'scsi-db68-ports-n', 'data-erased', 'surface-scan', 'smart-data',  'software', 'owner'];
+				break;
+			case 'ssd':
+				features = ['brand', 'model', 'sn', 'family', 'capacity-byte', 'hdd-form-factor', 'sata-ports-n', 'data-erased', 'surface-scan', 'smart-data',  'software', 'owner'];
 				break;
 			case 'odd':
-				features = ['brand', 'model', 'family', 'sn', 'odd-type', 'ide-ports-n', 'jae-ports-n', 'sata-ports-n', 'hdd-odd-form-factor', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'family', 'sn', 'odd-type', 'ide-ports-n', 'jae-ports-n', 'sata-ports-n', 'odd-form-factor', 'color', 'owner'];
 				break;
 			case 'fdd':
-				features = ['brand', 'model', 'sn', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'sn', 'color', 'owner'];
 				break;
 			case 'graphics-card':
-				features = ['brand', 'brand-manufacturer', 'model', 'capacity-byte', 'vga-ports-n', 'dvi-ports-n', 'dms-59-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'agp-sockets-n', 'pcie-sockets-n', 'pcie-power-pin-n', 'sn', 'color', 'working', 'owner'];
+				features = ['brand', 'brand-manufacturer', 'model', 'capacity-byte', 'vga-ports-n', 'dvi-ports-n', 'dms-59-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'agp-sockets-n', 'pcie-sockets-n', 'pcie-power-pin-n', 'sn', 'color', 'owner'];
 				break;
 			case 'psu':
-				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'power-rated-watt', 'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor', 'psu-rails-most-power', 'pcie-power-pin-n', 'sata-power-n', 'color', 'working', 'owner'];
+				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'power-rated-watt', 'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor', 'psu-rails-most-power', 'pcie-power-pin-n', 'sata-power-n', 'color', 'owner'];
 				break;
 			case 'external-psu':
-				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'psu-volt', 'psu-ampere', 'working', 'owner', 'notes'];
+				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'psu-volt', 'psu-ampere', 'owner', 'notes'];
 				break;
 			case 'ethernet-card':
-				features = ['brand', 'model', 'sn', 'pcie-sockets-n', 'pci-sockets-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n', 'mac', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'sn', 'pcie-sockets-n', 'pci-sockets-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n', 'mac', 'color', 'owner'];
 				break;
 			case 'audio-card':
 			case 'other-card':
 			case 'scsi-card':
 			case 'modem-card':
 			case 'tv-card':
-				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color', 'owner'];
 				break;
 			case 'bluetooth-card':
 			case 'wifi-card':
-				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n', 'mini-pci-sockets-n', 'mac', 'sn', 'color', 'working', 'owner'];
+				features = ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n', 'mini-pci-sockets-n', 'mac', 'sn', 'color', 'owner'];
 				break;
 			case 'network-switch':
 			case 'network-hub':
 			case 'modem-router':
-				features = ['brand', 'model', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n', 'power-connector', 'psu-volt', 'psu-ampere', 'color', 'working', 'owner', 'notes'];
+				features = ['brand', 'model', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n', 'power-connector', 'psu-volt', 'psu-ampere', 'color', 'owner', 'notes'];
 				break;
 			case 'keyboard':
 			case 'mouse':
-				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'ps2-ports-n', 'usb-ports-n', 'color', 'working', 'owner'];
+				features = ['brand', 'brand-manufacturer', 'model', 'sn', 'ps2-ports-n', 'usb-ports-n', 'color', 'owner'];
 				break;
 			case 'monitor':
-				features = ['cib', 'cib-old', 'other-code', 'brand', 'model', 'sn', 'diagonal-inch', 'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n', 'usb-ports-n', 'power-connector', 'psu-volt', 'psu-ampere', 'working', 'owner', 'notes'];
+				features = ['cib-qr', 'cib', 'cib-old', 'other-code', 'brand', 'model', 'sn', 'diagonal-inch', 'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n', 'usb-ports-n', 'power-connector', 'psu-volt', 'psu-ampere', 'color', 'owner', 'notes'];
 				break;
 			case 'ports-bracket':
 				features = ['usb-ports-n', 'serial-ports-n', 'parallel-ports-n', 'firewire-ports-n', 'color', 'owner'];
@@ -809,12 +859,12 @@
 				features = ['notes'];
 				break;
 			default:
-				features = ['brand', 'model', 'working', 'owner', 'notes'];
+				features = ['brand', 'model', 'owner', 'notes'];
 				break;
 		}
 
 		for(let name of features) {
-			addNewFeature(name, 'feature-edit-' + name, featuresElement, null);
+			addFeatureEditableDedupe(featuresElement, name, null);
 		}
 	}
 
@@ -826,13 +876,14 @@
 	 * @param {Set<string>|null} deletedFeatures - Deleted features set. Null if not tracked (for new items)
 	 * @param {function|null} getComparison - Get the comparison dropdown (for searches)
 	 */
-	function newFeature(name, pseudoId, deletedFeatures, getComparison = null) {
+	function createFeatureElement(name, pseudoId, deletedFeatures, getComparison = null) {
 		// Needed for labels
 		let id = pseudoId + featureIdsCounter++;
 		let type = featureTypes.get(name);
 
 		let newElement = document.createElement("li");
 		newElement.classList.add(pseudoId);
+		newElement.classList.add("feature-edit");
 		let nameElement = document.createElement("div");
 		nameElement.classList.add("name");
 		newElement.appendChild(nameElement);
@@ -972,6 +1023,34 @@
 	}
 
 	/**
+	 * Get value from an editable feature element
+	 *
+	 * @param valueElement - Value element, e.g. featuresElement.querySelectorAll('.value')
+	 * @return {string} - Value. Empty string means default/no value
+	 */
+	function getValueFrom(valueElement) {
+		let value;
+		switch (valueElement.dataset.internalType) {
+			case 'e':
+				value = valueElement.value;
+				break;
+			case 'i':
+			case 'd':
+				value = valueElement.dataset.internalValue;
+				break;
+			case 's':
+			default:
+				let paragraphs = valueElement.getElementsByTagName('DIV');
+				let lines = [];
+				for (let paragraph of paragraphs) {
+					lines.push(paragraph.textContent);
+				}
+				value = lines.join('\n');
+		}
+		return value;
+	}
+
+	/**
 	 * Get changed or added features (changeset)
 	 *
 	 * @param {HTMLElement|Element} featuresElement
@@ -985,24 +1064,7 @@
 
 		for(let element of changed) {
 			let feature = element.parentElement;
-			let value;
-			switch(element.dataset.internalType) {
-				case 'e':
-					value = element.value;
-					break;
-				case 'i':
-				case 'd':
-					value = element.dataset.internalValue;
-					break;
-				case 's':
-				default:
-					let paragraphs = element.getElementsByTagName('DIV');
-					let lines = [];
-					for(let paragraph of paragraphs) {
-						lines.push(paragraph.textContent);
-					}
-					value = lines.join('\n');
-			}
+			let value = getValueFrom(element);
 			if(value === "") {
 				throw new EmptyFeatureValueError(feature);
 			}
@@ -1076,7 +1138,7 @@
 			counter = getNewFeaturesRecursively(root, delta, contents);
 		} catch(e) {
 			if(e instanceof EmptyFeatureValueError) {
-				displayInlineError(e.feature, "empty-input");
+				displayInlineError(e.feature, "empty-input", root);
 				return;
 			} else {
 				throw e;
@@ -1164,18 +1226,42 @@
 		}
 	}
 
+	async function lostClick(ev) {
+		let code = ev.target.parentElement.dataset.forItem;
+		toggleButtons(true);
+
+		let method, uri;
+		method = 'DELETE';
+		uri = `/v1/items/${encodeURIComponent(code)}/parent`;
+
+		let response = await fetch(uri, {
+			headers: {
+				'Accept': 'application/json'
+			},
+			method: method,
+			credentials: 'include'
+		});
+
+		try {
+			await jsendMe(response, goBack, displayError.bind(null));
+		} finally {
+			toggleButtons(false);
+		}
+	}
+
 	/**
 	 * @return {Promise<void>} Nothing, really.
 	 */
 	async function saveModified(deletedFeatures) {
 		let counter;
+		let root = document.querySelector('.head.item.editing');
 		let delta = {};
 
 		try {
-			counter = getChangedFeatures(document.querySelector('.item.head.editing .features.own.editing'), delta);
+			counter = getChangedFeatures(root.querySelector('.features.own.editing'), delta);
 		} catch(e) {
 			if(e instanceof EmptyFeatureValueError) {
-				displayInlineError(e.feature, "empty-input");
+				displayInlineError(e.feature, "empty-input", root);
 				return;
 			} else {
 				throw e;
@@ -1273,11 +1359,15 @@
 	 * Go back to view mode. Or go forward to view mode, depending on tne point of view.
 	 *
 	 * @param {string|null} code - Newly added item code, to redirect there from add item page
+	 * @param {boolean} confirm - Show the "leave/remain" message if there are unsaved changes
 	 */
-	function goBack(code = null) {
+	function goBack(code = null, confirm = false) {
 		let here = window.location.pathname;
 		let query = window.location.search;
 		let hash = window.location.hash;
+		if(!confirm) {
+			window.onbeforeunload = undefined;
+		}
 
 		let pieces = here.split('/');
 		let penultimate = pieces[pieces.length - 2];
@@ -1293,6 +1383,16 @@
 			}
 		}
 	}
+
+	window.onbeforeunload = function() {
+		if(document.querySelector('.value.changed, .new .value') !== null) {
+			// This message doesn't actually appear (in Firefox at least), but it's the thought that counts.
+			// The "leave/remain" popup still appears and works as expected.
+			return 'Wait! You have unsaved data!';
+		} else {
+			return undefined;
+		}
+	};
 
 	/**
 	 * Add divs that disappear randomly from contentEditable elements

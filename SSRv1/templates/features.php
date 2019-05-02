@@ -1,6 +1,6 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\Feature[] $features */
-$groups = $this->getPrintableFeatures($features);
+$groups = $this->getGroupedFeatures($this->getUltraFeatures($features));
 
 if(count($features) > 0): ?>
 	<?php foreach($groups as $groupTitle => $group): ?>

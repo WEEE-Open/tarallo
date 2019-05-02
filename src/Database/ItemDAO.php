@@ -65,7 +65,7 @@ final class ItemDAO extends DAO {
 	 * @throws ValidationException if item contains other items (cannot be deleted)
 	 */
 	public function deleteItem(ItemIncomplete $item) {
-		if(!$this->itemVisible($item)) {
+		if(!$this->itemExists($item)) {
 			throw new NotFoundException();
 		}
 
@@ -85,10 +85,33 @@ final class ItemDAO extends DAO {
 	}
 
 	/**
+	 * Lose an item (mark as lost, detach from tree)
+	 *
+	 * @param ItemIncomplete $item
+	 */
+	public function loseItem(ItemIncomplete $item) {
+		$this->itemMustExist($item);
+		$statement = $this->getPDO()->prepare('UPDATE Item SET LostAt = NOW() WHERE `Code` = ?');
+
+		try {
+			$statement->execute([$item->getCode()]);
+		} catch(\PDOException $e) {
+			if($e->getCode() === '45000'
+				&& $statement->errorInfo()[2] === 'Cannot mark an item as lost while it contains other items') {
+				throw new ValidationException('Cannot mark an item as lost while it contains other items', 15, $e);
+			}
+			throw $e;
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
 	 * Yes, it's kinda like the true/false/FileNotFound thing.
 	 *
 	 * @param ItemIncomplete $item
 	 *
+	 * @deprecated This just doesn't cut it anymore with lost items
 	 * @return bool|null tri-state: true if marked as deleted, false if not marked but exists, null if doesn't exist
 	 */
 	private function itemIsDeleted(ItemIncomplete $item) {
@@ -115,6 +138,7 @@ final class ItemDAO extends DAO {
 	 * @param ItemIncomplete $item
 	 *
 	 * @return bool
+	 * @deprecated Use in tests only, replace with itemMustExist
 	 * @see itemVisible to see if item is visible or marked as deleted
 	 */
 	public function itemExists(ItemIncomplete $item): bool {
@@ -133,6 +157,7 @@ final class ItemDAO extends DAO {
 	 * @param ItemIncomplete $item
 	 *
 	 * @return bool
+	 * @deprecated Use in tests only, replace with itemMustExist
 	 * @see itemExists to check wether item exists at all or not
 	 */
 	public function itemVisible(ItemIncomplete $item): bool {
@@ -142,6 +167,31 @@ final class ItemDAO extends DAO {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Ensure that an Item exists in the Item table and lock its row
+	 *
+	 * @param ItemIncomplete $item
+	 * @param bool $allowDeleted True if a deleted item is acceptable as "existing", false if deleted items should be
+	 * ignored
+	 */
+	public function itemMustExist(ItemIncomplete $item, $allowDeleted = false) {
+		if($allowDeleted) {
+			$statement = $this->getPDO()
+				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod FOR UPDATE');
+		} else {
+			$statement = $this->getPDO()
+				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod and `DeletedAt` IS NULL FOR UPDATE');
+		}
+		try {
+			$statement->execute([$item->getCode()]);
+			if($statement->rowCount() === 0) {
+				throw new NotFoundException();
+			}
+		} finally {
+			$statement->closeCursor();
+		}
 	}
 
 	/**
@@ -180,6 +230,21 @@ final class ItemDAO extends DAO {
 			if($statement->rowCount() === 0) {
 				throw new NotFoundException();
 			}
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * Undo losing an item, when it's found again. It will turn into a root item, wether you want that or not: place it
+	 * somewhere right after that.
+	 *
+	 * @param ItemIncomplete $item
+	 */
+	public function unlose(ItemIncomplete $item) {
+		$statement = $this->getPDO()->prepare('UPDATE Item SET LostAt = NULL WHERE `Code` = ?');
+		try {
+			$statement->execute([$item->getCode()]);
 		} finally {
 			$statement->closeCursor();
 		}
@@ -331,10 +396,10 @@ EOQ
 			$result = $statement->fetch(\PDO::FETCH_ASSOC);
 			try {
 				if($result['DeletedAt'] !== null) {
-					$head->setDeletedAt(\DateTime::createFromFormat('U', $result['DeletedAt']));
+					$head->setDeletedAt(\DateTime::createFromFormat('U.u', $result['DeletedAt']));
 				}
 				if($result['LostAt'] !== null) {
-					$head->setLostAt(\DateTime::createFromFormat('U', $result['LostAt']));
+					$head->setLostAt(\DateTime::createFromFormat('U.u', $result['LostAt']));
 				}
 			} catch(\Exception $e) {
 				throw new \LogicException("Cannot create datetime", 0, $e);

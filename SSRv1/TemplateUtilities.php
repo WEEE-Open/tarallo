@@ -15,7 +15,8 @@ class TemplateUtilities implements ExtensionInterface {
 
 	public function register(Engine $engine) {
 		$engine->registerFunction('u', 'rawurlencode');
-		$engine->registerFunction('getPrintableFeatures', [$this, 'getPrintableFeatures']);
+		$engine->registerFunction('getUltraFeatures', [$this, 'getUltraFeatures']);
+		$engine->registerFunction('getGroupedFeatures', [$this, 'getGroupedFeatures']);
 		$engine->registerFunction('printFeature', [$this, 'printFeature']);
 		$engine->registerFunction('contentEditableWrap', [$this, 'contentEditableWrap']);
 		$engine->registerFunction('getOptions', [$this, 'getOptions']);
@@ -25,26 +26,43 @@ class TemplateUtilities implements ExtensionInterface {
 	/**
 	 * @param Feature[] $features
 	 *
-	 * @return string[][] Translated group name => [UltraFeature, UltraFeature, ...]
+	 * @return UltraFeature[]
 	 */
-	public function getPrintableFeatures(array $features) {
-		$groups = [];
-		$temp = [];
+	public function getUltraFeatures(array $features) {
+		$result = [];
 
 		foreach($features as $feature) {
 			/** @noinspection PhpUndefinedMethodInspection It's there. */
-			$ultra = new UltraFeature($feature, $this->template->data()['lang'] ?? 'en');
-			$temp[Feature::getGroup($feature->name)][] = $ultra;
+			$ultra = UltraFeature::fromFeature($feature, $this->template->data()['lang'] ?? 'en');
+			$result[] = $ultra;
 		}
-		unset($features);
+		return $result;
 
-		ksort($temp);
-		foreach($temp as $group => &$features) {
-			usort($features, [TemplateUtilities::class, 'featureNameSort']);
-			$groups[FeaturePrinter::printableGroup($group)] = $features;
+	}
+
+	/**
+	 * @param UltraFeature[] $ultraFeatures
+	 * @return UltraFeature[][] Translated group name => [UltraFeature, UltraFeature, ...]
+	 */
+	public function getGroupedFeatures(array $ultraFeatures) {
+		$groups = [];
+		$groupsPrintable = [];
+
+		foreach($ultraFeatures as $ultra) {
+			$groups[Feature::getGroup($ultra->feature->name)][] = $ultra;
 		}
 
-		return $groups;
+		// Group IDs are numbered, that's the order, so it has to be sorted HERE
+		// rather than later, when FeaturePrinter::printableGroup has translated
+		// IDs to human-readable names
+		ksort($groups);
+
+		foreach($groups as $groupId => &$ultraFeatures) {
+			usort($ultraFeatures, [TemplateUtilities::class, 'featureNameSort']);
+			$groupsPrintable[FeaturePrinter::printableGroup($groupId)] = $ultraFeatures;
+		}
+
+		return $groupsPrintable;
 	}
 
 	private static function featureNameSort(UltraFeature $a, UltraFeature $b) {
@@ -86,14 +104,14 @@ class TemplateUtilities implements ExtensionInterface {
 	/**
 	 * Get all options for an enum feature
 	 *
-	 * @param Feature $feature
+	 * @param string $name Feature name
 	 *
 	 * @return string[] Internal feature name => translated feature name
 	 */
-	public function getOptions(Feature $feature) {
-		$options = Feature::getOptions($feature);
+	public function getOptions(string $name) {
+		$options = Feature::getOptions($name);
 		foreach($options as $value => &$translated) {
-			$translated = FeaturePrinter::printableEnumValue($feature->name, $value);
+			$translated = FeaturePrinter::printableEnumValue($name, $value);
 		}
 		asort($options);
 		return $options;

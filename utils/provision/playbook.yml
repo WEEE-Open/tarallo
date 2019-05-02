@@ -22,8 +22,8 @@
       filename: "tarallo-server.conf"
       state: "present"
       extra_parameters: |
-        location ~ \.(css|js)$ {
-          root {{ document_root }}/server/SSRv1/static;
+        location /static/ {
+          root {{ document_root }}/server/SSRv1;
         }
 
         location / {

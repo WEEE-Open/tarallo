@@ -1,11 +1,18 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\Feature[] $features */
 /** @var \WEEEOpen\Tarallo\Server\Feature[] $featuresProduct */
+/** @var \WEEEOpen\Tarallo\Server\string[] $featuresEmpty */
 ?>
 
 <?php
-if(count($features) > 0):
-	$groups = $this->getPrintableFeatures($features);
+if(count($features) > 0 || count($featuresEmpty)):
+	$ultras = $this->getUltraFeatures($features);
+	if(isset($featuresEmpty) && count($featuresEmpty) > 0) {
+		foreach($featuresEmpty as $name) {
+			$ultras[] = \WEEEOpen\Tarallo\SSRv1\UltraFeature::fromEmpty($name);
+		}
+	}
+	$groups = $this->getGroupedFeatures($ultras);
 	// TODO: same for $featuresProduct.
 
 	foreach($groups as $groupTitle => $group): ?>
@@ -13,11 +20,12 @@ if(count($features) > 0):
 		<h3><?=$groupTitle?></h3>
 		<ul>
 			<?php foreach($group as $ultra): /** @var $ultra \WEEEOpen\Tarallo\SSRv1\UltraFeature */ ?>
-				<li class="feature-edit-<?= $ultra->feature->name ?>">
+				<li class="feature-edit-<?= $ultra->feature->name ?> feature-edit">
 					<div class="name"><label for="feature-edit-<?= $ultra->feature->name ?>"><?=$ultra->name?></label></div>
 					<?php switch($ultra->feature->type): case \WEEEOpen\Tarallo\Server\Feature::ENUM: ?>
 						<select class="value" autocomplete="off" data-internal-name="<?= $ultra->feature->name ?>" data-internal-type="e" data-initial-value="<?= $this->e($ultra->feature->value, 'asTextContent')?>" id="feature-edit-<?= $ultra->feature->name ?>">
-							<?php foreach($this->getOptions($ultra->feature) as $optionValue => $optionName): ?>
+							<?php if($ultra->feature->value == null): ?><option value="" disabled selected></option><?php endif; ?>
+							<?php foreach($this->getOptions($ultra->feature->name) as $optionValue => $optionName): ?>
 							<option value="<?= $optionValue ?>" <?= $optionValue === $ultra->feature->value ? 'selected' : '' ?>><?=$this->e($optionName)?></option>
 							<?php endforeach ?>
 						</select>

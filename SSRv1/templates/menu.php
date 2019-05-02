@@ -1,7 +1,7 @@
 <?php
-/** @var string $title */
-/** @var string $lang */
 /** @var \WEEEOpen\Tarallo\Server\User $user */
+/** @var string $moveDefaultFrom */
+$moveDefaultFrom = $moveDefaultFrom ?? null;
 ?>
 <nav>
 	<span class="message">Logged in as <?= $user->getUsername() ?></span><button id="logout">Logout</button>
@@ -23,11 +23,12 @@
 	><button>View item</button>
 </nav>
 <nav class="quick move">
-	<label>Move item:<input class="from" type="text"></label
-	><label>into:<input class="to" type="text"></label
-	><button>Move</button
+	<label>Move item:<input class="from" type="text"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>></label
+    ><button class="swap" title="Swap">⇄</button
+	><label> into:<input class="to" type="text"></label
+	><button class="do">Move</button
 	><span class="error message">Error</span
 	><span class="success message"><a href="#">Ok</a></span
 	><div class="warning message long">Fail</div>
 </nav>
-<script src="/menu.js"></script>
+<script src="/static/menu.js"></script>

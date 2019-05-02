@@ -37,7 +37,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 ?>
 <div class="statswrapperwrapper">
 	<?php if(!empty($byType) || !empty($byFormFactor)): ?>
-		<div class="statswrapper">
+		<div class="tablewrapper">
 			<?php if(!empty($byType)): ?>
 				<p>RAMs by type/standard:</p>
 				<table>
@@ -96,7 +96,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		</div>
 	<?php endif ?>
 	<?php if(!empty($byTypeFrequency)): ?>
-		<div class="statswrapper">
+		<div class="tablewrapper">
 			<p>RAMs by type and frequency</p>
 			<table>
 				<thead>
@@ -133,7 +133,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		</div>
 	<?php endif; ?>
 	<?php if(!empty($byTypeSize)): ?>
-		<div class="statswrapper">
+		<div class="tablewrapper">
 			<p>RAMs by type and size</p>
 			<table>
 				<thead>
@@ -170,7 +170,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		</div>
 	<?php endif ?>
 	<?php if(!empty($noWorking)): ?>
-		<div class="statswrapper large">
+		<div class="tablewrapper large">
 			<p>Untested RAMs (<?=count($noWorking)?>, max 200):</p>
 			<div>
 				<?php foreach($noWorking as $item): ?>
@@ -180,7 +180,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		</div>
 	<?php endif ?>
 	<?php if(!empty($noFrequency)): ?>
-		<div class="statswrapper large">
+		<div class="tablewrapper large">
 			<p>RAMs with unknown frequency (<?=count($noFrequency)?>, max 200):</p>
 			<div>
 				<?php foreach($noFrequency as $item): ?>
@@ -190,7 +190,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		</div>
 	<?php endif ?>
 	<?php if(!empty($noSize)): ?>
-		<div class="statswrapper large">
+		<div class="tablewrapper large">
 			<p>RAMs with unknown size (<?=count($noSize)?>, max 200):</p>
 			<div>
 				<?php foreach($noSize as $item): ?>

@@ -2,8 +2,10 @@
 /** @var string $title */
 /** @var string $lang */
 /** @var boolean $itembuttons */
+/** @var string $moveDefaultFrom */
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 $itembuttons = $itembuttons ?? false;
+$moveDefaultFrom = $moveDefaultFrom ?? null;
 ?>
 <!doctype html>
 <html lang="<?= /* $lang */ 'en-US' ?>">
@@ -12,7 +14,8 @@ $itembuttons = $itembuttons ?? false;
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<title><?=$this->e($title)?> - T.A.R.A.L.L.O.</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="/main.css">
+    <link rel="shortcut icon" type="image/png" href="/static/favicon.png"/>
+	<link rel="stylesheet" href="/static/main.css">
 </head>
 <body>
 
@@ -24,7 +27,7 @@ $itembuttons = $itembuttons ?? false;
 	<?php if(isset($user) || $this->section('aftermenu')): ?>
 	<nav id="top">
 		<?php if(isset($user)):
-			echo $this->fetch('menu');
+			echo $this->fetch('menu', ['moveDefaultFrom' => $moveDefaultFrom]);
 		endif ?>
 		<?= $this->section('aftermenu', '') ?>
 	</nav>
@@ -34,7 +37,7 @@ $itembuttons = $itembuttons ?? false;
 	</section>
 </div>
 <?php if($itembuttons): ?>
-	<script src="/itembuttons.js"></script>
+	<script src="/static/itembuttons.js"></script>
 <?php endif ?>
 </body>
 </html>

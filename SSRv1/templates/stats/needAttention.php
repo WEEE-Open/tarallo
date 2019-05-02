@@ -9,7 +9,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 
 <div class="statswrapperwrapper">
 <?php if(!empty($lost)): ?>
-	<div class="statswrapper large">
+	<div class="tablewrapper large">
 		<p>Most wanted, aka lost items (<?=count($lost)?>, max 100):</p>
 		<div>
 			<?php foreach($lost as $item): ?>
@@ -20,7 +20,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 <?php endif ?>
 
 <?php if(!empty($missingData)): ?>
-	<div class="statswrapper large">
+	<div class="tablewrapper large">
 		<p>Items with missing data (<?=count($missingData)?>, max 500):</p>
 		<div>
 			<?php foreach($missingData as $item): ?>
@@ -31,7 +31,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 <?php endif ?>
 
 <?php if(!empty($serials)): ?>
-	<div class="statswrapper">
+	<div class="tablewrapper">
 		<p>Duplicate serial numbers:</p>
 		<table>
 			<thead>

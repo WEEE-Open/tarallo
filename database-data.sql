@@ -12,12 +12,14 @@ TRUNCATE `Feature`;
 INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('brand', 'commercial', 0), -- Brand --
 	('model', 'commercial', 0), -- Model --
+	('internal-name', 'commercial', 0), -- Internal (code)name --
 	('family', 'commercial', 0), -- Model family --
 	('variant', 'commercial', 0), -- Variant --
 	('key-bios-setup', 'software', 0), -- Key to press for BIOS setup --
 	('key-boot-menu', 'software', 0), -- Key to press for boot menu --
 	('owner', 'administrative', 0), -- Owner --
 	('sn', 'codes', 0), -- Serial number (s/n) --
+	('wwn', 'codes', 0), -- WWN --
 	('mac', 'codes', 0), -- MAC address --
 	('type', 'general', 2), -- Type --
 	('working', 'general', 2), -- Working --
@@ -32,15 +34,18 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('agp-sockets-n', 'sockets', 1), -- AGP --
 	('arrival-batch', 'administrative', 0), -- Arrival batch --
 	('capacity-decibyte', 'features', 1), -- Capacity ("decimal" bytes) --
-	('cib', 'administrative', 0), -- CIB --
+	('cib', 'administrative', 0), -- CIB (red border) --
+	('cib-qr', 'administrative', 0), -- CIB (QR code) --
 	('core-n', 'features', 1), -- Cores --
+	('thread-n', 'features', 1), -- Threads --
 	('cpu-socket', 'sockets', 2), -- Socket (CPU) --
 	('dvi-ports-n', 'ports', 1), -- DVI --
 	('ethernet-ports-1000m-n', 'ports', 1), -- Ethernet (gigabit) --
 	('ethernet-ports-100m-n', 'ports', 1), -- Ethernet (100M) --
 	('ethernet-ports-10base2-bnc-n', 'ports', 1), -- Ethernet (10BASE2 BNC) --
 	('ethernet-ports-10m-n', 'ports', 1), -- Ethernet (10M) --
-	('hdd-odd-form-factor', 'physical', 2), -- Form factor (HDD/ODD) --
+	('odd-form-factor', 'physical', 2), -- Form factor (ODD) --
+	('hdd-form-factor', 'physical', 2), -- Form factor (HDD) --
 	('ide-ports-n', 'ports', 1), -- IDE/ATA --
 	('odd-type', 'features', 2), -- ODD capabilities --
 	('pcie-power-pin-n', 'powerconnectors', 1), -- PCI Express power pins --
@@ -54,6 +59,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('psu-connector-motherboard', 'powerconnectors', 2), -- Power connector (motherboard) -- use sata-ports-n and pcie-power-pin-n for that stuff
 	('psu-volt', 'power', 3), -- Power supply voltage --
 	('ram-type', 'features', 2), -- RAM type --
+	('ram-timings', 'features', 0), -- RAM timings -- https://en.wikipedia.org/wiki/Memory_timings
 	('sata-ports-n', 'ports', 1), -- SATA --
 	('software', 'software', 0), -- Software (installed) --
 	('usb-ports-n', 'ports', 1), -- USB --
@@ -62,7 +68,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('vga-ports-n', 'ports', 1), -- VGA --
 	('os-license-code', 'codes', 0), -- OS license code --
 	('os-license-version', 'codes', 0), -- OS license version --
-	('power-idle-pfc', 'power', 0), -- PFC (idle) --
+	('power-idle-pfc', 'power', 3), -- PFC (idle) --
 	('firewire-ports-n', 'ports', 1), -- Firewire --
 	('mini-firewire-ports-n', 'ports', 1), -- Mini Firewire --
 	('serial-ports-n', 'ports', 1), -- Serial (DE-9) -- Also known as RS-232 (which apparently is a standard that also works on DB-25 ports, so don't call them like that)
@@ -131,6 +137,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('type', 'modem-router'), -- Modem/router --
 	('type', 'fdd'), -- FDD --
 	('type', 'ports-bracket'), -- Bracket with ports --
+	('type', 'card-reader'), -- Card reader --
 	('type', 'other-card'), -- Other internal card --
 	('type', 'fan-controller'), -- Fan controller (rheobus) --
 	('type', 'modem-card'), -- Modem card --
@@ -148,6 +155,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('working', 'no'), -- No --
 	('working', 'yes'), -- Yes --
 	('working', 'maybe'), -- Sometimes or unclear --
+	('working', 'to-be-tested'), -- Needs to be tested --
 	('isa', 'x86-32'), -- x86 32 bit --
 	('isa', 'x86-64'), -- x86 64 bit --
 	('isa', 'ia-64'), -- IA-64 --
@@ -233,20 +241,20 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'lga1151'), -- LGA1151 (Socket H4) --
 	('cpu-socket', 'lga2066'), -- LGA2066 --
 	('cpu-socket', 'lga3647'), -- LGA3647 --
-	('hdd-odd-form-factor', '5.25'), -- 5.25 in. --
-	('hdd-odd-form-factor', '3.5'), -- 3.5 in. -- max height 26.10 mm, SFF-8301 also specifies 17.80 and 42.00. These are probably 1/3H, 1/4H and 1/2H, respectively. Fractions of full height, which is around 80 mm.
-	('hdd-odd-form-factor', '2.5-15mm'), -- 2.5 in. (15 mm uncommon) -- second number is the height in millimeters (these are specified as 15 but most common sizes, for both bays and drives, are 7 mm and 9.5 mm: the more you know...)
-	('hdd-odd-form-factor', '2.5-9.5mm'), -- 2.5 in. (9.5 mm) --
-	('hdd-odd-form-factor', '2.5-7mm'), -- 2.5 in. (7 mm) --
-	('hdd-odd-form-factor', '1.8-9.5mm'), -- 1.8 in. (9.5 mm) --
-	('hdd-odd-form-factor', '1.8-8mm'), -- 1.8 in. (8 mm) --
-	('hdd-odd-form-factor', '1.8-5mm'), -- 1.8 in. (5 mm) --
-	('hdd-odd-form-factor', 'm2'), -- M2 --
-	('hdd-odd-form-factor', 'm2.2'), -- M2.2 --
-	('hdd-odd-form-factor', 'laptop-odd-7mm'), -- SFF-8553 (7 mm) -- Physical dimensions specified in SFF-8553
-	('hdd-odd-form-factor', 'laptop-odd-8.5mm'), -- SFF-8553 (8.5 mm) -- Physical dimensions specified in SFF-8553
-	('hdd-odd-form-factor', 'laptop-odd-9.5mm'), -- SFF-8552 (9.5 mm standard cut corner) -- Physical dimensions specified in SFF-8552
-	('hdd-odd-form-factor', 'laptop-odd-12.7mm'), -- SFF-8552 (12.7 mm cut corner) -- Physical dimensions specified in SFF-8552 (or less formally: https://superuser.com/a/276241)
+	('odd-form-factor', '5.25'), -- 5.25 in. --
+	('odd-form-factor', 'laptop-odd-7mm'), -- SFF-8553 (7 mm) -- Physical dimensions specified in SFF-8553
+	('odd-form-factor', 'laptop-odd-8.5mm'), -- SFF-8553 (8.5 mm) -- Physical dimensions specified in SFF-8553
+	('odd-form-factor', 'laptop-odd-9.5mm'), -- SFF-8552 (9.5 mm standard cut corner) -- Physical dimensions specified in SFF-8552
+	('odd-form-factor', 'laptop-odd-12.7mm'), -- SFF-8552 (12.7 mm cut corner) -- Physical dimensions specified in SFF-8552 (or less formally: https://superuser.com/a/276241)
+	('hdd-form-factor', '3.5'), -- 3.5 in. -- max height 26.10 mm, SFF-8301 also specifies 17.80 and 42.00. These are probably 1/3H, 1/4H and 1/2H, respectively. Fractions of full height, which is around 80 mm.
+	('hdd-form-factor', '2.5-15mm'), -- 2.5 in. (15 mm uncommon) -- second number is the height in millimeters (these are specified as 15 but most common sizes, for both bays and drives, are 7 mm and 9.5 mm: the more you know...)
+	('hdd-form-factor', '2.5-9.5mm'), -- 2.5 in. (9.5 mm) --
+	('hdd-form-factor', '2.5-7mm'), -- 2.5 in. (7 mm) --
+	('hdd-form-factor', '1.8-9.5mm'), -- 1.8 in. (9.5 mm) --
+	('hdd-form-factor', '1.8-8mm'), -- 1.8 in. (8 mm) --
+	('hdd-form-factor', '1.8-5mm'), -- 1.8 in. (5 mm) --
+	('hdd-form-factor', 'm2'), -- M2 --
+	('hdd-form-factor', 'm2.2'), -- M2.2 --
 	('odd-type', 'cd-r'), -- CD-R --
 	('odd-type', 'cd-rw'), -- CD-RW --
 	('odd-type', 'dvd-r'), -- DVD-R --
@@ -281,7 +289,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('ram-form-factor', 'microdimm'), -- Micro DIMM --
 	('ram-form-factor', 'fbdimm'), -- FB-DIMM --
 	('check', 'missing-data'), -- Missing data --
-	('check', 'lost'), -- Lost --
+	('check', 'partial-inventory'), -- Partially inventoried --
 	('ram-ecc', 'no'), -- No --
 	('ram-ecc', 'yes'), -- Yes --
 	('data-erased', 'yes'), -- Yes️ -- Just don't add the feature if it hasn't been erased...
@@ -351,3 +359,5 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('NET', 0),
 	('T', 0),
 	('', 0);
+
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 10);
