@@ -590,7 +590,10 @@ class Controller extends AbstractController {
 		$explosion = explode('=', $feature);
 		if(sizeof($explosion) !== 2)
 			throw new \LogicException("Format not valid in the feature parameter");
-		$array = $db->StatsDAO()->getItemByNotFeature(new Feature($explosion[0], $explosion[1]), $notFeature, new
+		$array = $db->StatsDAO()->getItemByNotFeature(
+			new Feature($explosion[0], $explosion[1]),
+			$notFeature,
+			$location === null ? null : new
 		ItemIncomplete($location), $limit, $creation === null ? null : new \DateTime($creation), $deleted);
 
 		$request = $request
@@ -606,10 +609,54 @@ class Controller extends AbstractController {
 		$user = $request->getAttribute('User');
 		$parameters = $request->getAttribute('parameters', []);
 
+		Validation::authorize($user);
+
 		$type = Validation::validateHasString($parameters, 'type');
 		$limit = Validation::validateOptionalInt($parameters, 'howMany', 100);
 
 		$array = $db->AuditDAO()->getRecentAuditByType($type, $limit);
+
+		$request = $request
+			->withAttribute('Status', JSend::SUCCESS)
+			->withAttribute('Data', $array);
+		$response = $response
+			->withStatus(200);
+		return $next ? $next($request, $response) : $response;
+	}
+
+	public static function CountByFeature(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+
+		Validation::authorize($user);
+
+		$feature = Validation::validateHasString($parameters, 'feature');
+		$filter = Validation::validateOptionalString($parameters, 'filter');
+		$location = Validation::validateOptionalString($parameters, 'location', null, null);
+		$creation = Validation::validateOptionalString($parameters, 'creation');
+		$deleted = isset($parameters['deleted']) ? $parameters['deleted'] : false;
+		$cutoff = Validation::validateOptionalInt($parameters, 'cutoff', 1);
+
+		if(!empty($filter)) {
+			$explosion = explode('=', $filter);
+			if(sizeof($explosion) !== 2)
+				throw new \LogicException("Format not valid in the filter parameter");
+			$filter = new Feature($explosion[0], $explosion[1]);
+		}
+
+		$array = $db->statsDAO()->getCountByFeature(
+			$feature,
+			$filter,
+			$location === null ? null : new
+			ItemIncomplete(
+				$location
+			),
+			$creation === null ? null : new \DateTime($creation),
+			$deleted,
+			$cutoff
+		);
 
 		$request = $request
 			->withAttribute('Status', JSend::SUCCESS)
@@ -730,6 +777,10 @@ class Controller extends AbstractController {
 								$r->get(
 									'/getRecentAuditByType/{type}[/{howMany}]',
 									[[Controller::class, 'RecentAuditByType']]
+								);
+								$r->get(
+									'/getCountByFeature/{feature}[/{filter}[/{location}[/{creation[/{deleted[/{cutoff}]]]]]',
+									[[Controller::class, 'CountByFeature']]
 								);
 							}
 						);
