@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Summary;
+namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
 
 use WEEEOpen\Tarallo\Server\ItemFeatures;

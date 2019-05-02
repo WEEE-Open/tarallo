@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Summary;
+namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
 
 use WEEEOpen\Tarallo\Server\ItemFeatures;
@@ -8,6 +8,7 @@ use WEEEOpen\Tarallo\Server\ItemFeatures;
 class RamSummarizer implements Summarizer {
 
 	public static function summarize(ItemFeatures $item): string {
-		return 'Kingston KVR123456/1G 400 MHz 1 GiB';
+		// TODO: use FeaturePrinter::prettyPrint as much as possible
+		return 'RAM ...';
 	}
 }
