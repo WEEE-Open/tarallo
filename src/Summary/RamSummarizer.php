@@ -1,14 +1,13 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: lui
- * Date: 02/05/19
- * Time: 12.06
- */
 
 namespace WEEEOpen\Tarallo\Server\Summary;
 
 
-class RamSummarizer {
+use WEEEOpen\Tarallo\Server\ItemFeatures;
 
+class RamSummarizer implements Summarizer {
+
+	public static function summarize(ItemFeatures $item): string {
+		return 'Kingston KVR123456/1G 400 MHz 1 GiB';
+	}
 }
