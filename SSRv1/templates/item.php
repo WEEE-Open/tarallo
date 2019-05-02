@@ -6,7 +6,7 @@
 /** @var \DateTime|null $deletedAt */
 /** @var bool $recursion */
 $recursion = $recursion ?? false;
-$features = $item->getCombinedFeatures();
+$features = $item->getFeatures();
 $product = $item->getProduct();
 
 // Too much logic in a template, blah bla blah... this templates renders an Item in every respect,

@@ -127,29 +127,13 @@ class Item extends ItemFeatures implements \JsonSerializable {
 	 * Some features may override default features.
 	 *
 	 * @return Feature[]
+	 * @deprecated
 	 */
 	public function getCombinedFeatures() {
 		if($this->product === null) {
 			return $this->getFeatures();
 		} else {
 			return array_merge($this->product->getFeatures(), $this->getFeatures());
-		}
-	}
-
-	/**
-	 * Get a feature, or null if none.
-	 * Uses combined features (item and product).
-	 *
-	 * @param string $name Feature name
-	 *
-	 * @return Feature|null
-	 */
-	public function getFeature(string $name) {
-		$features = $this->getCombinedFeatures();
-		if(isset($features[$name])) {
-			return $features[$name];
-		} else {
-			return null;
 		}
 	}
 

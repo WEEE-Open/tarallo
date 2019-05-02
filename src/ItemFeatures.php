@@ -11,6 +11,23 @@ class ItemFeatures extends ItemIncomplete {
 	}
 
 	/**
+	 * Get a feature, or null if none.
+	 * Uses combined features (item and product).
+	 *
+	 * @param string $name Feature name
+	 *
+	 * @return Feature|null
+	 */
+	public function getFeature(string $name) {
+		$features = $this->getFeatures();
+		if(isset($features[$name])) {
+			return $features[$name];
+		} else {
+			return null;
+		}
+	}
+
+	/**
 	 * @param Feature $feature
 	 *
 	 * @return $this

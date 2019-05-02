@@ -15,7 +15,7 @@ class ItemPrefixer {
 	 * @throws \InvalidArgumentException if required features for type generation are not present
 	 */
 	public static function get(Item $item) {
-		$features = $item->getCombinedFeatures();
+		$features = $item->getFeatures();
 		if(!isset($features['type'])) {
 			throw new \InvalidArgumentException('Item has no type, cannot generate code');
 		}
