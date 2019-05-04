@@ -596,14 +596,8 @@ class Controller extends AbstractController {
 		$user = $request->getAttribute('User');
 		$parameters = $request->getAttribute('parameters', []);
 
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 
-//		Feature $filter,
-//		string $notFeature,
-//		?ItemIncomplete $location = null,
-//		int $limit = 100,
-//		?\DateTime $creation = null,
-//		bool $deleted = false
 		$feature = Validation::validateHasString($parameters, 'filter');
 		$notFeature = Validation::validateHasString($parameters, 'notFeature');
 		$location = Validation::validateOptionalString($parameters, 'location', null, null);
@@ -612,9 +606,11 @@ class Controller extends AbstractController {
 		$deleted = boolval(Validation::validateOptionalString($parameters, 'creation', false));
 		//$deleted = isset($parameters['deleted']) ? $parameters['deleted'] : false;
 
-		$explosion = explode('=', $feature);
-		if(sizeof($explosion) !== 2)
-			throw new \LogicException("Format not valid in the feature parameter");
+		try {
+			$explosion = Validation::explodeFeatureValuePair($feature);
+		} catch(\InvalidArgumentException $e) {
+			throw new InvalidPayloadParameterException('filter', $e->getMessage());
+		}
 		$array = $db->StatsDAO()->getItemByNotFeature(
 			new Feature($explosion[0], $explosion[1]),
 			$notFeature,
@@ -630,11 +626,12 @@ class Controller extends AbstractController {
 	}
 
 	public static function RecentAuditByType(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
 		$parameters = $request->getAttribute('parameters', []);
 
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 
 		$type = Validation::validateHasString($parameters, 'type');
 		$limit = Validation::validateOptionalInt($parameters, 'howMany', 100);
@@ -655,20 +652,22 @@ class Controller extends AbstractController {
 		$user = $request->getAttribute('User');
 		$parameters = $request->getAttribute('parameters', []);
 
-		Validation::authorize($user);
+		Validation::authorize($user, 3);
 
 		$feature = Validation::validateHasString($parameters, 'feature');
-		$filter = Validation::validateOptionalString($parameters, 'filter');
+		$filter = Validation::validateOptionalString($parameters, 'filter', null, null);
 		$location = Validation::validateOptionalString($parameters, 'location', null, null);
 		$creation = Validation::validateOptionalString($parameters, 'creation');
 		$deleted = isset($parameters['deleted']) ? $parameters['deleted'] : false;
 		$cutoff = Validation::validateOptionalInt($parameters, 'cutoff', 1);
 
-		if(!empty($filter)) {
-			$explosion = explode('=', $filter);
-			if(sizeof($explosion) !== 2)
-				throw new \LogicException("Format not valid in the filter parameter");
-			$filter = new Feature($explosion[0], $explosion[1]);
+		if($filter !== null) {
+			try {
+				$explosion = Validation::explodeFeatureValuePair($feature);
+				$filter = new Feature($explosion[0], $explosion[1]);
+			} catch(\InvalidArgumentException $e) {
+				throw new InvalidPayloadParameterException('filter', $e->getMessage());
+			}
 		}
 
 		$array = $db->statsDAO()->getCountByFeature(
@@ -793,13 +792,10 @@ class Controller extends AbstractController {
 						$r->addGroup(
 							'/stats',
 							function(FastRoute\RouteCollector $r) {
-								// Feature $filter,
-								// string $notFeature,
-								// ?ItemIncomplete $location = null,
-								// int $limit = 100,
-								// ?\DateTime $creation = null,
-								// bool $deleted = false
-								$r->get('/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]', [[Controller::class, 'ItemsNotFeature']]);
+								$r->get(
+									'/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]',
+									[[Controller::class, 'ItemsNotFeature']]
+								);
 								$r->get(
 									'/getRecentAuditByType/{type}[/{howMany}]',
 									[[Controller::class, 'RecentAuditByType']]

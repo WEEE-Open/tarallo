@@ -164,11 +164,10 @@ class Validation {
 	/**
 	 * Return a new ItemIncomplete or throw a NotFoundException if code is invalid
 	 *
-	 * @TODO: use this everywhere (even when the parameter item is invalid? That's not a 404...), or replace the thrown exception and remove upstream exception handlers from the pipeline.
-	 *
 	 * @param string $code
 	 *
 	 * @return ItemIncomplete
+	 * @deprecated handle all exceptions in controllers
 	 */
 	public static function newItemIncomplete(string $code) {
 		try {
@@ -179,5 +178,20 @@ class Validation {
 			}
 			throw $e;
 		}
+	}
+
+	/**
+	 * Split a feature=value pair, or throw an exception if invalid
+	 *
+	 * @param string $pair
+	 *
+	 * @return array ['feature', 'value']
+	 */
+	public static function explodeFeatureValuePair(string $pair) {
+		$explosion = explode('=', $pair);
+		if(sizeof($explosion) !== 2) {
+			throw new \InvalidArgumentException('Invalid format for feature and value: ' . $explosion);
+		}
+		return $explosion;
 	}
 }
