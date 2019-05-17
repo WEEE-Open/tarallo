@@ -305,6 +305,18 @@ class ItemValidatorTest extends TestCase {
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
+	public function testInvalidUSBLaptopFixupNoMobo() {
+		$pc = self::item('PC42', 'case');
+		$pc->addFeature(new Feature('motherboard-form-factor', 'proprietary-laptop'));
+		$pc->addFeature(new Feature('usb-ports-n', 4));
+		$hdd = self::item('S123', 'hdd');
+		$pc->addContent($hdd);
+
+		ItemValidator::fixupFeatures($pc);
+		$this->expectException(ValidationException::class);
+		ItemValidator::validateFeatures($pc);
+	}
+
 	public function testInvalidCaseInCase() {
 		$pc = self::item('PC42', 'case');
 		$pc2 = self::item('PC24', 'case');

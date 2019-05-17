@@ -19,12 +19,25 @@ class ItemValidator {
 		return $parent;
 	}
 
-	public static function fixupFeatures(Item $item) {
-		// This prevents any accidental modification to the parent, since that's
-		// an item already in the database and not modified in the last request.
-		// Editing an item shouldn't have side effects on other items around it,
-		// basically.
-		self::moveFeaturesAll($item /*, null*/);
+	/**
+	 * Execute the fixup procedure on an item.
+	 * Features will be changed inside this item and pushed down to sub-items if $subtree is true, which is the right
+	 * thing to do when adding new items. If $subtree is false, features won't be pushed around: this is useful when
+	 * editing features for a single item that may contain more items.
+	 * Features are never pushed up.
+	 *
+	 * This is needed to avoid modifications to items that weren't open in the editor. Otherwise it may confuse the
+	 * user, isn't visible to audit and seems a bad idea in general.
+	 *
+	 * @param Item $item The item
+	 * @param bool $subtree Push features down to sub-items or not
+	 */
+	public static function fixupFeatures(Item $item, bool $subtree = true) {
+		if($subtree) {
+			self::moveFeaturesAll($item);
+		}
+		// To change features in the same item, add this method:
+		// self::fixupFeaturesAll($item);
 	}
 
 	/**
@@ -90,27 +103,43 @@ class ItemValidator {
 		return $parent;
 	}
 
+	/**
+	 * Move all features that should be moved to the right item.
+	 * This method pushes features up or down, but only in the subtree.
+	 * Features will never leave or enter $item from/to its parent.
+	 *
+	 * @param Item $item
+	 */
 	private static function moveFeaturesAll(Item $item) {
+		self::moveFeaturesAllRecursively($item, false);
+	}
+
+	/**
+	 * Move all features that should be moved to the right item.
+	 *
+	 * @param Item $item
+	 * @param bool $pushup Also push features up (by 1 level at most), used during recursion
+	 */
+	private static function moveFeaturesAllRecursively(Item $item, bool $pushup) {
 		$type = self::getOrNull($item, 'type');
 
-		if($type !== null) {
-			if($type === 'case') {
-				$ff = self::getOrNull($item, 'motherboard-form-factor');
-				if($ff === 'proprietary-laptop') {
-					if(self::has($item, 'usb-ports-n')) {
-						$mobo = self::findMobo($item);
-						if(!self::has($mobo, 'usb-ports-n')) {
-							// TODO: this will end badly when products are implemented...
-							$mobo->addFeature($item->getFeature('usb-ports-n'));
-							$item->removeFeature('usb-ports-n');
-						}
+		// Move laptop usb ports from the case to the motherboard
+		if($type === 'case') {
+			$ff = self::getOrNull($item, 'motherboard-form-factor');
+			if($ff === 'proprietary-laptop') {
+				if(self::has($item, 'usb-ports-n')) {
+					$mobo = self::findMobo($item);
+					if($mobo !== null && !self::has($mobo, 'usb-ports-n')) {
+						// TODO: this will end badly when products are implemented...
+						$mobo->addFeature($item->getFeature('usb-ports-n'));
+						$item->removeFeature('usb-ports-n');
 					}
 				}
 			}
 		}
 
 		foreach($item->getContents() as $subitem) {
-			self::moveFeaturesAll($subitem);
+			self::moveFeaturesAllRecursively($subitem, true);
 		}
 	}
 
