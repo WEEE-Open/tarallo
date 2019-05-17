@@ -35,14 +35,6 @@ class UserTest extends TestCase {
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\User
 	 */
-	public function testNullUsername() {
-		$this->expectException(InvalidArgumentException::class);
-		new User(null, null, null, 2);
-	}
-
-	/**
-	 * @covers \WEEEOpen\Tarallo\Server\User
-	 */
 	public function testEmptyPasswordAndHash() {
 		$this->expectException(InvalidArgumentException::class);
 		new User('asd', '', '', 2);
