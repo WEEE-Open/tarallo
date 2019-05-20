@@ -167,6 +167,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('color', 'red'), -- Red --
 	('color', 'blue'), -- Blue --
 	('color', 'grey'), -- Grey --
+	('color', 'silver'), -- Silver --
 	('color', 'darkgrey'), -- Dark grey --
 	('color', 'lightgrey'), -- Light grey  --
 	('color', 'pink'), -- Pink --
@@ -360,4 +361,4 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('T', 0),
 	('', 0);
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 10);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 11);
