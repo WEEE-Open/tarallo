@@ -4,11 +4,16 @@ namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
 
 use WEEEOpen\Tarallo\Server\ItemFeatures;
+use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class RamSummarizer implements Summarizer {
 
 	public static function summarize(ItemFeatures $item): string {
 		// TODO: use FeaturePrinter::prettyPrint as much as possible
-		return 'RAM ...';
+		$prettySumm = '';
+		foreach($item->getFeatures() as $feature) {
+			$prettySumm = $prettySumm . FeaturePrinter::printableValue($feature);
+		}
+		return $prettySumm;
 	}
 }
