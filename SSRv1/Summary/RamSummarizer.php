@@ -10,10 +10,15 @@ class RamSummarizer implements Summarizer {
 
 	public static function summarize(ItemFeatures $item): string {
 		// TODO: use FeaturePrinter::prettyPrint as much as possible
-		$prettySumm = '';
-		foreach($item->getFeatures() as $feature) {
-			$prettySumm = $prettySumm . FeaturePrinter::printableValue($feature);
-		}
+		$prettySumm = FeaturePrinter::printableValue($item->getFeature('type'));
+		$prettySumm = $prettySumm . ' ' . FeaturePrinter::printableValue($item->getFeature('ram-type'));
+		$prettySumm = $prettySumm . ' ' . FeaturePrinter::printableValue($item->getFeature('ram-form-factor'));
+		$prettySumm = $prettySumm . ' ' . FeaturePrinter::printableValue($item->getFeature('capacity-byte'));
+		$prettySumm = $prettySumm . ' ' . FeaturePrinter::printableValue($item->getFeature('frequency-hertz'));
+		$prettySumm = $prettySumm . ',';
+		$prettySumm = $prettySumm . ' ' . FeaturePrinter::printableValue($item->getFeature('brand'));
+		$prettySumm = $prettySumm . ' ' . FeaturePrinter::printableValue($item->getFeature('model'));
+
 		return $prettySumm;
 	}
 }
