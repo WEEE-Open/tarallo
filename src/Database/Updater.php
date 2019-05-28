@@ -326,6 +326,9 @@ EOQ
 					$this->exec("DELETE FROM ItemFeature WHERE Feature = 'check' AND ValueEnum = 'lost'");
 					$this->exec("DELETE FROM FeatureEnum WHERE Feature = 'check' AND ValueEnum = 'lost'");
 					break;
+				case 10:
+					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('color', 'silver')");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

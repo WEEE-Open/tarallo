@@ -65,10 +65,7 @@ final class ItemDAO extends DAO {
 	 * @throws ValidationException if item contains other items (cannot be deleted)
 	 */
 	public function deleteItem(ItemIncomplete $item) {
-		if(!$this->itemExists($item)) {
-			throw new NotFoundException();
-		}
-
+		$this->itemMustExist($item);
 		$statement = $this->getPDO()->prepare('UPDATE Item SET DeletedAt = NOW() WHERE `Code` = ?');
 
 		try {
