@@ -13,9 +13,10 @@ class Summary {
 				return RamSummarizer::summarize($item);
 			case 'hdd':
 				//return HddSummarizer::summarize($item);
-				return 'foo';
+			case 'cpu':
+				//return CpuSummarizer::summarize($item);
 			default:
-				throw new \InvalidArgumentException("Cannot generate summary for items of type $type");
+				return null;
 		}
 	}
 }

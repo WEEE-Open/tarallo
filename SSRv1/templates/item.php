@@ -44,6 +44,9 @@ if(isset($edit)) {
 		$target = false;
 	}
 }
+
+$summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
+
 ?>
 
 <?php if(!$recursion): $this->insert('breadcrumbs', ['item' => $item]); endif; ?>
@@ -72,6 +75,11 @@ if(isset($edit)) {
 			<?php if($deletedAt === null): ?><button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button><button class="clone">🔲&nbsp;Copy</button><?php endif ?><button class="history">📖&nbsp;History</button>
 		<?php endif ?>
 	</nav>
+	<?php if($summary !== null && (!$editing || !$target)): ?>
+        <section class="summary <?=$working?>">
+            <span><?= $summary ?></span>
+        </section>
+    <?php endif; ?>
 
 	<?php if($editing && $target): ?>
 		<section class="own features editing">
