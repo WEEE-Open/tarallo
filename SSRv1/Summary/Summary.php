@@ -6,7 +6,7 @@ namespace WEEEOpen\Tarallo\SSRv1\Summary;
 use WEEEOpen\Tarallo\Server\ItemFeatures;
 
 class Summary {
-	public static function peel(ItemFeatures $item): string {
+	public static function peel(ItemFeatures $item): ?string {
 		$type = $item->getFeature('type');
 		switch($type) {
 			case 'ram':
