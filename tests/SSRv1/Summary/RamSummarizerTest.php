@@ -313,4 +313,22 @@ class RamSummarizerTest extends TestCase {
 
 		return $summary;
 	}
+
+	public function testRamSimm() {
+		$item = new Item('R123');
+		$item
+			->addFeature(new Feature('brand', 'PTC'))
+			->addFeature(new Feature('capacity-byte', 8388608))
+			->addFeature(new Feature('model', 'M1V-0 9638'))
+			->addFeature(new Feature('owner', 'DISAT'))
+			->addFeature(new Feature('ram-ecc', 'no'))
+			->addFeature(new Feature('ram-form-factor', 'simm'))
+			->addFeature(new Feature('ram-type', 'simm'))
+			->addFeature(new Feature('type', 'ram'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM SIMM 8 MiB, PTC M1V-0 9638', $summary);
+
+		return $summary;
+	}
 }

@@ -27,6 +27,11 @@ class RamSummarizer implements Summarizer {
 		$brand = $item->getFeature('brand');
 		$model = $item->getFeature('model');
 
+		if($type && $ff && $type->value === 'simm' && $ff->value === 'simm') {
+			// Avoid "RAM SIMM SIMM something, ...", one "SIMM" is enough
+			$ff = null;
+		}
+
 		$technical = FeaturePrinter::printableValue($item->getFeature('type'));
 		$technical .= $ecc ? " $ecc" : '';
 		$technical .= $type ? ' ' . FeaturePrinter::printableValue($type) : '';
