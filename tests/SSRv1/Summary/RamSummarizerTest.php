@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
+use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\SSRv1\Summary\RamSummarizer;
 
@@ -8,23 +9,307 @@ use WEEEOpen\Tarallo\SSRv1\Summary\RamSummarizer;
  * @covers \WEEEOpen\Tarallo\SSRv1\Summary\RamSummarizer
  */
 class RamSummarizerTest extends TestCase {
-	public function testValidUserNullPasswordAndHash() {
+	public function testRam() {
 		$item = new Item('R123');
-		$item->addFeature(new WEEEOpen\Tarallo\Server\Feature('brand', 'Kingston'))
-			->addFeature(new WEEEOpen\Tarallo\Server\Feature('capacity-byte', 2147483648))
-			->addFeature(new WEEEOpen\Tarallo\Server\Feature('color', 'green'))
-			->addFeature(new WEEEOpen\Tarallo\Server\Feature('frequency-hertz', 1066000000))
-			->addFeature(new WEEEOpen\Tarallo\Server\Feature('model', 'ACR256X64D3S13C9G'))
-			->addFeature(new WEEEOpen\Tarallo\Server\Feature('owner', 'Area IT'))
-			->addFeature(new WEEEOpen\Tarallo\Server\Feature('ram-ecc', 'no'))
-			->addFeature(new WEEEOpen\Tarallo\Server\Feature('ram-form-factor', 'sodimm'))
-			->addFeature(new WEEEOpen\Tarallo\Server\Feature('ram-type', 'ddr3'))
-			->addFeature(new WEEEOpen\Tarallo\Server\Feature('sn', 'E516B7B6'))
-			->addFeature(new WEEEOpen\Tarallo\Server\Feature('type', 'ram'))
-			->addFeature(new WEEEOpen\Tarallo\Server\Feature('working', 'yes'));
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('capacity-byte', 2147483648))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('frequency-hertz', 1066000000))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-ecc', 'no'))
+			->addFeature(new Feature('ram-form-factor', 'sodimm'))
+			->addFeature(new Feature('ram-type', 'ddr3'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
 
 		$summary = RamSummarizer::summarize($item);
 		$this->assertEquals('RAM DDR3 SODIMM 2 GiB 1.066 GHz, Kingston ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamNothing() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('type', 'ram'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM', $summary);
+
+		return $summary;
+	}
+
+	public function testRamMissingFreq() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('capacity-byte', 2147483648))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-ecc', 'no'))
+			->addFeature(new Feature('ram-form-factor', 'sodimm'))
+			->addFeature(new Feature('ram-type', 'ddr3'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM DDR3 SODIMM 2 GiB, Kingston ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamMissingSize() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('frequency-hertz', 1066000000))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-ecc', 'no'))
+			->addFeature(new Feature('ram-form-factor', 'sodimm'))
+			->addFeature(new Feature('ram-type', 'ddr3'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM DDR3 SODIMM 1.066 GHz, Kingston ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamMissingSizeAndFreq() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-ecc', 'no'))
+			->addFeature(new Feature('ram-form-factor', 'sodimm'))
+			->addFeature(new Feature('ram-type', 'ddr3'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM DDR3 SODIMM, Kingston ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamMissingType() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('capacity-byte', 2147483648))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('frequency-hertz', 1066000000))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-ecc', 'no'))
+			->addFeature(new Feature('ram-form-factor', 'sodimm'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM SODIMM 2 GiB 1.066 GHz, Kingston ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamMissingFormFactor() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('capacity-byte', 2147483648))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('frequency-hertz', 1066000000))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-ecc', 'no'))
+			->addFeature(new Feature('ram-type', 'ddr3'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM DDR3 2 GiB 1.066 GHz, Kingston ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamMissingLotsOfStuff() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('type', 'ram'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM, Kingston ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamMissingModel() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('capacity-byte', 2147483648))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('frequency-hertz', 1066000000))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-ecc', 'no'))
+			->addFeature(new Feature('ram-form-factor', 'sodimm'))
+			->addFeature(new Feature('ram-type', 'ddr3'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM DDR3 SODIMM 2 GiB 1.066 GHz, Kingston', $summary);
+
+		return $summary;
+	}
+
+	public function testRamMissingBrand() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('capacity-byte', 2147483648))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('frequency-hertz', 1066000000))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-ecc', 'no'))
+			->addFeature(new Feature('ram-form-factor', 'sodimm'))
+			->addFeature(new Feature('ram-type', 'ddr3'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM DDR3 SODIMM 2 GiB 1.066 GHz, Model: ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamMissingBrandAndModel() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('capacity-byte', 2147483648))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('frequency-hertz', 1066000000))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-ecc', 'no'))
+			->addFeature(new Feature('ram-form-factor', 'sodimm'))
+			->addFeature(new Feature('ram-type', 'ddr3'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM DDR3 SODIMM 2 GiB 1.066 GHz', $summary);
+
+		return $summary;
+	}
+
+	public function testRamEcc() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('capacity-byte', 2147483648))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('frequency-hertz', 1066000000))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-ecc', 'yes'))
+			->addFeature(new Feature('ram-form-factor', 'sodimm'))
+			->addFeature(new Feature('ram-type', 'ddr3'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM ECC DDR3 SODIMM 2 GiB 1.066 GHz, Kingston ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamNoEcc() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('capacity-byte', 2147483648))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('frequency-hertz', 1066000000))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-form-factor', 'sodimm'))
+			->addFeature(new Feature('ram-type', 'ddr3'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM (ECC?) DDR3 SODIMM 2 GiB 1.066 GHz, Kingston ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamEccMissingType() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('capacity-byte', 2147483648))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('frequency-hertz', 1066000000))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-ecc', 'yes'))
+			->addFeature(new Feature('ram-form-factor', 'sodimm'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM ECC SODIMM 2 GiB 1.066 GHz, Kingston ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamEccMissingStuff() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('capacity-byte', 2147483648))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('frequency-hertz', 1066000000))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('owner', 'Area IT'))
+			->addFeature(new Feature('ram-ecc', 'yes'))
+			->addFeature(new Feature('sn', 'E516B7B6'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM ECC 2 GiB 1.066 GHz, Kingston ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamEccMissingFirstPart() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('brand', 'Kingston'))
+			->addFeature(new Feature('model', 'ACR256X64D3S13C9G'))
+			->addFeature(new Feature('ram-ecc', 'yes'))
+			->addFeature(new Feature('type', 'ram'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM ECC, Kingston ACR256X64D3S13C9G', $summary);
+
+		return $summary;
+	}
+
+	public function testRamEccMissingEverything() {
+		$item = new Item('R123');
+		$item->addFeature(new Feature('ram-ecc', 'yes'))
+			->addFeature(new Feature('type', 'ram'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertEquals('RAM ECC', $summary);
 
 		return $summary;
 	}
