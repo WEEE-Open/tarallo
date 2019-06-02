@@ -5,11 +5,19 @@
 ?>
 
 <?php
-if(count($features) > 0 || count($featuresEmpty)):
+if(count($features) > 0 || count($featuresEmpty) > 0):
 	$ultras = $this->getUltraFeatures($features);
+	foreach($ultras as $ultra) {
+	    // Names of all the ultraFeatures to insert
+	    $ultraNames[$ultra->feature->name] = true;
+    }
 	if(isset($featuresEmpty) && count($featuresEmpty) > 0) {
 		foreach($featuresEmpty as $name) {
-			$ultras[] = \WEEEOpen\Tarallo\SSRv1\UltraFeature::fromEmpty($name);
+		    // Unless there's already an ultraFeature, add it
+            // (Needed when cloning items, they already have type and working status usually)
+		    if(!isset($ultraNames[$name])) {
+			    $ultras[] = \WEEEOpen\Tarallo\SSRv1\UltraFeature::fromEmpty($name);
+		    }
 		}
 	}
 	$groups = $this->getGroupedFeatures($ultras);

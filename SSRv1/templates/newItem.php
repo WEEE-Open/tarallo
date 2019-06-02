@@ -57,7 +57,7 @@ if(isset($copy)) {
 		<?php
 			// Used when cloning, empty otherwise
 			foreach($subitems as $subitem) {
-				$this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'copy' => $subitem]);
+				$this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'copy' => $subitem, 'featuresEmpty' => $featuresEmpty]);
 			}
 		?>
 	</section>
