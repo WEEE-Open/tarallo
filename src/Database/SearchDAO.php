@@ -310,12 +310,21 @@ EOQ;
 
 		self::unsort($searchId);
 
-		$miniquery = /** @lang MySQL */
-			"SELECT DISTINCT `Code` FROM ItemFeature WHERE `Code` IN (SELECT `Item` FROM SearchResult WHERE Search = ?) AND Feature = ? ORDER BY $column $ascdesc, CHAR_LENGTH(`Code`) DESC, `Code` DESC;";
+		$miniquery = /** @lang MySQL */ <<<EOQ
+SELECT DISTINCT `Item` AS `Code`
+FROM SearchResult
+LEFT JOIN (
+	SELECT `Code`, $column
+	FROM ItemFeature
+	WHERE Feature = ?
+) AS features ON `Item` = features.`Code`
+WHERE Search = ?
+ORDER BY ISNULL($column), $column $ascdesc, CHAR_LENGTH(`Code`) DESC, `Code` DESC;
+EOQ;
 
 		$sortedStatement = $this->getPDO()->prepare($miniquery);
 		try {
-			$result = $sortedStatement->execute([$searchId, $featureName]);
+			$result = $sortedStatement->execute([$featureName, $searchId]);
 			assert($result !== false, 'sorting results');
 
 			$sorted = $sortedStatement->fetchAll(\PDO::FETCH_ASSOC);
