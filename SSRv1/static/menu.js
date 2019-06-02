@@ -82,8 +82,9 @@
 	quickMove.querySelector('button.do').addEventListener('click', async () => {
 		let code = quickMoveCode.value;
 		let parent = quickMoveParent.value;
-		if(code !== "" && parent !== "") {
+		if(code !== '' && parent !== '') {
 			quickMoveCode.setCustomValidity('');
+			quickMoveParent.setCustomValidity('');
 			for(let message of quickMove.getElementsByClassName('message')) {
 				message.style.display = 'none';
 			}
@@ -94,7 +95,6 @@
 					'Content-Type': 'application/json'
 				},
 				method: 'PUT',
-				credentials: 'include',
 				body: JSON.stringify(parent)
 			});
 
@@ -106,22 +106,28 @@
 
 			let warning = quickMove.getElementsByClassName('warning')[0];
 			let error = quickMove.getElementsByClassName('error')[0];
-
-			if(response.status === 404) {
-				warning.style.display = '';
-				warning.textContent = `Item ${code} doesn't exist`;
-				quickMoveCode.setCustomValidity(`Item ${code} doesn't exist`);
-				return;
-			}
-
 			let jsend;
 
 			try {
 				jsend = await response.json();
 			} catch(e) {
-				error.style.display = '';
 				console.log(response);
+				error.style.display = '';
 				throw e;
+			}
+
+			if(response.status === 404) {
+				let errorText = `Item ${parent} doesn't exist`;
+				if(jsend.code === 1) {
+					errorText = `Item ${parent} doesn't exist`;
+					quickMoveParent.setCustomValidity(errorText);
+				} else {
+					errorText = `Item ${code} doesn't exist`;
+					quickMoveCode.setCustomValidity(errorText);
+				}
+				warning.style.display = '';
+				warning.textContent = errorText;
+				return false;
 			}
 
 			console.log(jsend);
@@ -133,11 +139,12 @@
 				} else {
 					warning.textContent = jsend.data.toString();
 				}
-				return;
+				return false;
 			}
 
 			quickMove.getElementsByClassName('error')[0].style.display = '';
 		}
+		return false;
 	});
 
 	quickView.addEventListener('keydown', function(e) {
