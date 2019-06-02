@@ -657,7 +657,7 @@
 	 * @param ev KeyboardEvent
 	 */
 	function deleteFeatureKey(set, ev) {
-		let pressed = (ev.ctrlKey && ev.key === 'Delete') || (ev.altKey && ev.key === 'x');
+		let pressed = (ev.ctrlKey && ev.key === 'Delete') || (ev.altKey && ev.ctrlKey && (ev.key === 'x' || ev.key === 'X'));
 		if(pressed) {
 			ev.preventDefault();
 			let row = ev.target.parentElement;

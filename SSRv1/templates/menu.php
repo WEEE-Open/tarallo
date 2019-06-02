@@ -24,7 +24,7 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 </nav>
 <nav class="quick move">
 	<label>Move item:<input class="from" type="text"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>></label
-    ><button class="swap" title="Swap">⇄</button
+    ><button class="swap" title="Swap" tabindex="-1">⇄</button
 	><label> into:<input class="to" type="text"></label
 	><button class="do">Move</button
 	><span class="error message">Error</span

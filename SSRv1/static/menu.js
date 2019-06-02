@@ -147,10 +147,15 @@
 		}
 	});
 
+	let quickMoveDo = quickMove.getElementsByClassName('do')[0];
+	let quickMoveSwap = quickMove.getElementsByClassName('swap')[0];
 	quickMove.addEventListener('keydown', function(e) {
 		if(e.key === "Enter") {
 			e.preventDefault();
-			quickMove.getElementsByTagName('BUTTON')[0].click();
+			quickMoveDo.click();
+		} else if(e.altKey && e.ctrlKey && (e.key === 's' || e.key === 'S')) {
+			e.preventDefault();
+			quickMoveSwap.click();
 		}
 	})
 
