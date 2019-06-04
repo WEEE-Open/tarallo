@@ -329,6 +329,10 @@ EOQ
 				case 10:
 					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('color', 'silver')");
 					break;
+				case 11:
+					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('todo', 'general', 2)");
+					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('todo', 'transplant'), ('todo', 'container'), ('todo', 'install-os'), ('todo', 'finish-os-install'), ('todo', 'replace-capacitors'), ('todo', 'add-components'), ('todo', 'salvage-components')");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

@@ -78,6 +78,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('spin-rate-rpm', 'features', 1), -- Rotation speed -- "spin rate" sounded cooler, but myabe I should change it...
 	('dms-59-ports-n', 'ports', 1), -- DMS-59 -- the weird DVI port which is actually 2 DVI ports in one
 	('check', 'general', 2), -- Needs to be checked --
+	('todo', 'general', 2), -- Next steps --
 	('ram-ecc', 'features', 2), -- ECC --
 	('other-code', 'codes', 0), -- Other code(s) --
 	('hdmi-ports-n', 'ports', 1), -- HDMI --
@@ -291,6 +292,13 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('ram-form-factor', 'fbdimm'), -- FB-DIMM --
 	('check', 'missing-data'), -- Missing data --
 	('check', 'partial-inventory'), -- Partially inventoried --
+	('todo', 'transplant'), -- Transplant into another case --
+	('todo', 'container'), -- Container for transplant --
+	('todo', 'install-os'), -- Install OS --
+	('todo', 'finish-os-install'), -- Finish OS installation --
+	('todo', 'replace-capacitors'), -- Replace blown capacitors --
+	('todo', 'add-components'), -- Add missing components --
+	('todo', 'salvage-components'), -- Salvage components --
 	('ram-ecc', 'no'), -- No --
 	('ram-ecc', 'yes'), -- Yes --
 	('data-erased', 'yes'), -- Yes️ -- Just don't add the feature if it hasn't been erased...
@@ -361,4 +369,4 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('T', 0),
 	('', 0);
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 11);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 12);
