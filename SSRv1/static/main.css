@@ -244,11 +244,11 @@ table td {
 	background-color: #eee;
 }
 
-.tablewrapper a {
+table a, .tablewrapper a {
 	color: #333;
 }
 
-.tablewrapper a:visited {
+table a:visited, .tablewrapper a:visited {
 	color: #000;
 }
 
