@@ -65,6 +65,9 @@ class Controller extends AbstractController {
 		} else if($add !== null) {
 			$renderParameters['add'] = $add;
 			$renderParameters['edit'] = null;
+		} else {
+			$renderParameters['add'] = null;
+			$renderParameters['edit'] = null;
 		}
 
 		$request = $request
