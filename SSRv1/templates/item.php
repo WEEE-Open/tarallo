@@ -54,16 +54,20 @@ $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
 		data-code="<?=$this->e($item->getCode())?>">
 	<header>
 		<h2 id="code-<?=$this->e($item->getCode())?>"><?=$this->e($item->getCode())?></h2>
-		<?php $noticeFeature = $item->getFeature('restrictions'); if($noticeFeature !== null): ?>
-			<div class="info message">ℹ️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature($noticeFeature, $lang ?? 'en'))->value; ?></div>
-		<?php unset($noticeFeature); endif;
-		$noticeFeature = $item->getFeature('check'); if($noticeFeature !== null): ?>
-			<div class="warning message">⚠️️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature($noticeFeature, $lang ?? 'en'))->value; ?></div>
-		<?php unset($noticeFeature); endif;
-		if($deletedAt !== null): ?>
+		<?php if($deletedAt === null): ?>
+            <?php if($item->getFeature('restrictions') !== null): ?>
+                <div class="info message">ℹ️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature($item->getFeature('restrictions'), $lang ?? 'en'))->value; ?></div>
+            <?php endif; ?>
+            <?php if($item->getFeature('check') !== null): ?>
+                <div class="warning message">⚠️️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature($item->getFeature('check'), $lang ?? 'en'))->value; ?></div>
+            <?php endif; ?>
+            <?php if($item->getFeature('todo') !== null): ?>
+                <div class="info message">➡️️️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature($item->getFeature('todo'), $lang ?? 'en'))->value; ?></div>
+            <?php endif; ?>
+		<?php else: ?>
 			<div class="error message">❌️️&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
-		<?php endif;
-		if($lostAt !== null): ?>
+		<?php endif; ?>
+		<?php if($lostAt !== null): ?>
             <div class="serious message">🏷️️️&nbsp;This item has been lost on <?= $lostAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 		<?php endif; ?>
 	</header>
