@@ -3,12 +3,12 @@
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
 /** @var string|null $add */
 /** @var string|null $edit */
-/** @var \DateTime|null $deletedAt */
-/** @var \DateTime|null $lostAt */
 /** @var bool $recursion */
 $recursion = $recursion ?? false;
 $features = $item->getFeatures();
 $product = $item->getProduct();
+$lostAt = $item->getLostAt();
+$deletedAt = $item->getDeletedAt();
 
 // Too much logic in a template, blah bla blah... this templates renders an Item in every respect,
 // what would I gain by moving this logic outside and passing $works as a parameter? More code, scattering
@@ -26,7 +26,7 @@ $adding = false;
 $editing = false;
 $target = false;
 
-$nextItemParameters = ['recursion' => true, 'deletedAt' => null];
+$nextItemParameters = ['recursion' => true];
 if(isset($edit)) {
 	$nextItemParameters['edit'] = $edit;
 	$editing = true;
