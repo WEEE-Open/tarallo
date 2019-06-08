@@ -14,7 +14,7 @@ class Summary {
 			case 'hdd':
 				//return HddSummarizer::summarize($item);
 			case 'cpu':
-				//return CpuSummarizer::summarize($item);
+				return CpuSummarizer::summarize($item);
 			default:
 				return null;
 		}
