@@ -230,11 +230,11 @@ class Item extends ItemFeatures implements \JsonSerializable {
 		$this->lostAt = $when;
 	}
 
-	public function getDeletedAt() {
+	public function getDeletedAt(): ?\DateTime {
 		return $this->deletedAt;
 	}
 
-	public function getLostAt() {
+	public function getLostAt(): ?\DateTime {
 		return $this->lostAt;
 	}
 }

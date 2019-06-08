@@ -1,18 +1,19 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 /** @var \WEEEOpen\Tarallo\Server\Item $item */
-/** @var bool $deleted */
 /** @var string[][] $history */
+/** @var bool $tooLong */
+$deletedAt = $item->getDeletedAt();
 $this->layout('main', ['title' => $item->getCode() . ' history', 'user' => $user, 'itembuttons' => true]);
 ?>
 
 <?php $this->insert('breadcrumbs', ['item' => $item]); ?>
-<article class="item root<?= $deleted ? ' deleted' : '' ?>"
+<article class="item root<?= $deletedAt === null ? '' : ' deleted' ?>"
 		data-code="<?=$this->e($item->getCode())?>">
 	<header>
 		<h2 id="code-<?=$this->e($item->getCode())?>"><?=$this->e($item->getCode())?></h2>
-		<?php if($deleted): ?>
-		<div class="error message">❌️️&nbsp;This item has been deleted</div>
+		<?php if($deletedAt !== null): ?>
+            <div class="error message">❌️️&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 		<?php endif; ?>
 	</header>
 
@@ -53,5 +54,9 @@ $this->layout('main', ['title' => $item->getCode() . ' history', 'user' => $user
 				</tbody>
 			</table>
 		<?php endif ?>
+        <?php if($tooLong): ?>
+            <p>History contains more than <?= count($history) ?> entries. Add the <code>?limit=</code> parameter to the
+                URL to see more.</p>
+        <?php endif ?>
 	</section>
 </article>

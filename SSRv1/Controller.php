@@ -87,22 +87,31 @@ class Controller extends AbstractController {
 		Validation::authorize($user, 3);
 
 		$id = Validation::validateOptionalString($parameters, 'id', null);
-		$count = Validation::validateOptionalInt($query, 'count', 20);
+		$limit = Validation::validateOptionalInt($query, 'limit', 20);
+		if($limit > 100) {
+			$limit = 100;
+		} else if($limit <= 0) {
+			$limit = 20;
+		}
+		$limit++;
 
 		// Full item needed to show breadcrumbs
-		$item = $db->itemDAO()->getItem(new ItemIncomplete($id), null, 0);
-		if(!$db->itemDAO()->itemExists($item)) {
-			throw new NotFoundException();
-		}
+		$item = new ItemIncomplete($id);
+		$item = $db->itemDAO()->getItem($item, null, 0);
 
-		// TODO: place a limit on $count
-		$history = $db->auditDAO()->getHistory($item, $count);
+		$history = $db->auditDAO()->getHistory($item, $limit);
+		if(count($history) === $limit) {
+			array_pop($history);
+			$tooLong = true;
+		} else {
+			$tooLong = false;
+		}
 
 		$request = $request
 			->withAttribute('Template', 'history')
 			->withAttribute(
 				'TemplateParameters',
-				['item' => $item, 'deleted' => !$db->itemDAO()->itemVisible($item), 'history' => $history]
+				['item' => $item, 'history' => $history, 'tooLong' => $tooLong]
 			);
 
 		return $next ? $next($request, $response) : $response;
