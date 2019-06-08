@@ -25,7 +25,12 @@ class CpuSummarizer implements Summarizer {
 		$coreStats = '';
 		$coreStats .= $numCores ? ' ' . $numCores . ' ' . FeaturePrinter::printableName('core-n') : '';
 		$coreStats .= $numThreads ? ' ' . $numThreads . ' ' . FeaturePrinter::printableName('thread-n') : '';
-		$coreStats .= $frequency ? ' ' . '@ ' . FeaturePrinter::printableValue($frequency) : '';
+		if($coreStats === '') {
+			$at = '';
+		} else {
+			$at = ' @';
+		}
+		$coreStats .= $frequency ? $at . ' ' . FeaturePrinter::printableValue($frequency) : '';
 
 		if(!$brand && $model) {
 			// To avoid possible confusion with serial numbers...
