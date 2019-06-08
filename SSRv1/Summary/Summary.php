@@ -12,7 +12,7 @@ class Summary {
 			case 'ram':
 				return RamSummarizer::summarize($item);
 			case 'hdd':
-				//return HddSummarizer::summarize($item);
+				return HddSummarizer::summarize($item);
 			case 'cpu':
 				return CpuSummarizer::summarize($item);
 			default:
