@@ -296,7 +296,7 @@ class CpuSummarizerTest extends TestCase {
 
 		$summary = CpuSummarizer::summarize($item);
 		$this->assertEquals(
-			'CPU (architecture?), 2 Cores 2 Threads @ 2.13 GHz, Intel Core 2 Duo E6400, Socket (CPU) LGA775',
+			'CPU (Architecture?), 2 Cores 2 Threads @ 2.13 GHz, Intel Core 2 Duo E6400, Socket (CPU) LGA775',
 			$summary
 		);
 

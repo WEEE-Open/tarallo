@@ -20,7 +20,11 @@ class CpuSummarizer implements Summarizer {
 		$socket = $item->getFeature('cpu-socket');
 
 		$architecture = FeaturePrinter::printableValue($type);
-		$architecture .= $isa ? ' ' . FeaturePrinter::printableValue($isa) : ' (architecture?)';
+		if($isa) {
+			$architecture .= ' ' . FeaturePrinter::printableValue($isa);
+		} else {
+			$architecture .= ' (' . FeaturePrinter::printableName('isa') . '?)';
+		}
 
 		$coreStats = '';
 		$coreStats .= $numCores ? ' ' . $numCores . ' ' . FeaturePrinter::printableName('core-n') : '';
@@ -43,8 +47,9 @@ class CpuSummarizer implements Summarizer {
 		if($socket) {
 			$socket = FeaturePrinter::printableValue($socket);
 			$socketOnly = explode(' ', $socket);
-		} else
+		} else {
 			$socket = '';
+		}
 
 		if(empty($coreStats) && empty($commercial) && empty($socket))
 			$pretty = FeaturePrinter::printableValue($type);
@@ -54,9 +59,11 @@ class CpuSummarizer implements Summarizer {
 				$pretty .= ",$coreStats";
 			if($commercial !== '')
 				$pretty .= ",$commercial";
-			$pretty .= !empty($socketOnly) ? ', ' . FeaturePrinter::printableName(
-					'cpu-socket'
-				) . ' ' . $socketOnly[0] : '';
+			if(empty($socketOnly)) {
+				$pretty .= '';
+			} else {
+				$pretty .= ', ' . FeaturePrinter::printableName('cpu-socket') . ' ' . $socketOnly[0];
+			}
 		}
 
 
