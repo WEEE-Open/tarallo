@@ -241,6 +241,18 @@ class Controller extends AbstractController {
 					);
 				break;
 
+			case 'todo':
+				$todos = [];
+				$possibileTodos = array_keys(Feature::features['todo']);
+				foreach($possibileTodos as $possibileTodo) {
+					$todos[$possibileTodo] = $db->statsDAO()->getItemsByFeatures(new Feature('todo', $possibileTodo), null, 100);
+				}
+
+				$request = $request
+					->withAttribute('Template', 'stats::todo')
+					->withAttribute('TemplateParameters', ['todos' => $todos]);
+				break;
+
 			case 'attention':
 				$request = $request
 					->withAttribute('Template', 'stats::needAttention')
