@@ -110,7 +110,7 @@ $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
 	<section class="subitems">
 		<?php
 		if($adding && $target) {
-			$this->insert('newItem', ['recursion' => true, 'innerrecursion' => false]);
+			$this->insert('newItem', ['recursion' => true, 'innerrecursion' => false, 'featuresEmpty' => ['type', 'working']]);
 		}
 
 		$subitems = $item->getContents();
@@ -120,7 +120,7 @@ $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
 		?>
 	</section>
 </article>
-<?php if(($editing || $adding) && $target): ?>
+<?php if($editing && $target): ?>
 	<script>const activate = true;</script>
 	<?php $this->insert('editor');
 endif;

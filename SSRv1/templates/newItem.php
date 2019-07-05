@@ -66,7 +66,7 @@ if(isset($copy)) {
 		<button class="addnew">🆕&nbsp;More</button>
 	</nav>
 </article>
-<?php if(!$recursion) {
+<?php if(!$innerrecursion) {
 	?><script>const activate = true;</script><?php
 	$this->insert('editor');
 } ?>
