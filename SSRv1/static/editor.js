@@ -132,7 +132,7 @@
 			type.getElementsByTagName('SELECT')[0].addEventListener('change', setTypeClick.bind(null, featuresElement, type))
 		}
 
-		let handler;
+		let handler, otherHandler;
 
 		// Enable the "X" button next to features
 		handler = deleteFeatureClick.bind(null, deletedFeatures);
@@ -140,10 +140,12 @@
 			deleteButton.addEventListener('click', handler);
 		}
 
-		// Enable key combinations for the "X" button
+		// Enable key combinations to delete features and format text
 		handler = deleteFeatureKey.bind(null, deletedFeatures);
+		otherHandler = textFormatKey;
 		for(let value of featuresElement.querySelectorAll('.value')) {
-			value.addEventListener('keydown', handler)
+			value.addEventListener('keydown', handler);
+			value.addEventListener('keydown', otherHandler);
 		}
 
 		// Event listeners for string and numeric features
@@ -669,6 +671,34 @@
 	}
 
 	/**
+	 * Handle key combinations for text formatting
+	 *
+	 * @param ev KeyboardEvent
+	 */
+	function textFormatKey(ev) {
+		if(ev.altKey && ev.ctrlKey && ev.target.dataset.internalType === "s") {
+			switch(ev.key) {
+				case 'U':
+				case 'u':
+					ev.target.childNodes[0].childNodes[0].textContent = ev.target.childNodes[0].childNodes[0].textContent.toLocaleUpperCase();
+					break;
+				case 'L':
+				case 'l':
+					ev.target.childNodes[0].childNodes[0].textContent = ev.target.childNodes[0].childNodes[0].textContent.toLocaleLowerCase();
+					break;
+				case 'y':
+				case 'Y':
+					// https://stackoverflow.com/a/22193094
+					ev.target.childNodes[0].childNodes[0].textContent = ev.target.childNodes[0].childNodes[0].textContent
+						.split(' ')
+						.map(a => a[0].toUpperCase() + a.substr(1).toLowerCase())
+						.join(' ');
+					break;
+			}
+		}
+	}
+
+	/**
 	 * Handle clicking the "add" button for new features
 	 *
 	 * @param {HTMLSelectElement} select - HTML "select" element
@@ -902,8 +932,8 @@
 				valueElement = document.createElement('select');
 				let defaultOption = document.createElement('option');
 				defaultOption.value = "";
-				defaultOption.disabled = "disabled";
-				defaultOption.selected = "selected";
+				defaultOption.disabled = true;
+				defaultOption.selected = true;
                 valueElement.appendChild(defaultOption);
                 valueElement.addEventListener("change", selectChanged);
 
@@ -967,6 +997,7 @@
 		deleteButton.tabIndex = -1;
 		deleteButton.addEventListener('click', deleteFeatureClick.bind(null, deletedFeatures));
 		valueElement.addEventListener('keydown', deleteFeatureKey.bind(null, deletedFeatures));
+		valueElement.addEventListener('keydown', textFormatKey);
 		controlsElement.appendChild(deleteButton);
 
 		return newElement;
