@@ -481,6 +481,20 @@ class Controller extends AbstractController {
 
 		Validation::authorize($user);
 
+		$response = $response
+			->withStatus(303)
+			->withoutHeader('Content-type')
+			->withHeader('Location', '/bulk/move');
+		return $next ? $next($request, $response) : $response;
+	}
+
+	public static function bulkMove(Request $request, Response $response, ?callable $next = null): Response {
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$body = $request->getParsedBody();
+
+		Validation::authorize($user);
+
 		if($body === null) {
 			// Opened page, didn't submit anything yet
 			$items = null;
@@ -516,10 +530,34 @@ class Controller extends AbstractController {
 			}
 		}
 		$request = $request
-			->withAttribute('Template', 'bulk')
+			->withAttribute('Template', 'bulk::move')
 			->withAttribute('TemplateParameters', ['error' => $error, 'moved' => $moved]);
 		$response = $response
 			->withStatus($code);
+		return $next ? $next($request, $response) : $response;
+	}
+
+
+	public static function bulkAdd(Request $request, Response $response, ?callable $next = null): Response {
+		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
+		$body = $request->getParsedBody();
+
+		Validation::authorize($user);
+
+		if($body === null) {
+			// Opened page, didn't submit anything yet
+			$request = $request
+				->withAttribute('Template', 'bulk::add');
+			$response = $response
+				->withStatus(200);
+		} else {
+			$items = (string) $body['items'];
+			$response = $response
+				->withStatus(303)
+				->withoutHeader('Content-type')
+				->withHeader('Location', '/bulk/add');
+		}
 		return $next ? $next($request, $response) : $response;
 	}
 
@@ -556,7 +594,9 @@ class Controller extends AbstractController {
 				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
 				$r->get('/search/{id:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
 				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
-				$r->addRoute(['GET', 'POST'], '/bulk', [[Controller::class, 'bulk']]);
+				$r->get('/bulk', [[Controller::class, 'bulk']]);
+				$r->addRoute(['GET', 'POST'], '/bulk/move', [[Controller::class, 'bulkMove']]);
+				$r->addRoute(['GET', 'POST'], '/bulk/add', [[Controller::class, 'bulkAdd']]);
 				$r->addGroup(
 					'/stats',
 					function(FastRoute\RouteCollector $r) {

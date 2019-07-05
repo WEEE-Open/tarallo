@@ -3,9 +3,10 @@
 /** @var string|null $result */
 /** @var string|null $error */
 /** @var array|null $moved */
-$this->layout('main', ['title' => 'Bulk operations', 'user' => $user]);
+$this->layout('main', ['title' => 'Bulk operations', 'user' => $user, 'currentPage' => 'bulk']);
+$this->insert('bulk::menu', ['currentPage' => 'move']);
 ?>
-<form action="\bulk" method="POST" enctype="multipart/form-data" class="nice" id="bulk-move">
+<form action="/bulk/move" method="POST" enctype="multipart/form-data" class="nice" id="bulk-move">
     <h2>Mass move</h2>
     <p>Format is "ITEM:LOCATION" or codes only (using the location below), one per line or separated by
         commas.<button id="bulk-move-button" data-alternate-text="Show text box" class="small">Upload a file</button></p>

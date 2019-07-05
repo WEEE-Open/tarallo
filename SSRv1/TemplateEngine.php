@@ -17,6 +17,7 @@ class TemplateEngine implements Middleware {
 		// Change this path if you move this file elsewhere!
 		$engine = new Engine(__DIR__ . DIRECTORY_SEPARATOR . 'templates');
 		$engine->addFolder('stats', $engine->getDirectory() . DIRECTORY_SEPARATOR . 'stats');
+		$engine->addFolder('bulk', $engine->getDirectory() . DIRECTORY_SEPARATOR . 'bulk');
 		$engine->addData(['lang' => $request->getAttribute('language')]);
 		//$engine->loadExtension(new URI($request->path));
 		$engine->loadExtension(new TemplateUtilities());
