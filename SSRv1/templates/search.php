@@ -61,6 +61,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 		<?php else:
 			$this->insert('pagination', ['page' => $page, 'pages' => $pages, 'searchId' => $searchId]);
 			foreach($results as $item) {
+				/* the editor is activated by item or newItem (called by item) */
 				$parameters = ['item' => $item, 'recursion' => false];
 				if(isset($add)) {
 					$parameters['add'] = $add;
@@ -75,9 +76,4 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 	?>
 
 </div>
-
-<?php if(isset($add) || isset($edit)): ?>
-<script>const activate = true;</script>
-<?php endif ?>
-<?php $this->insert('editor'); ?>
 <script src="/static/search.js"></script>

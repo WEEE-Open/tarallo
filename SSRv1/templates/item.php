@@ -120,7 +120,7 @@ $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
 		?>
 	</section>
 </article>
-<?php if($editing && $target): ?>
+<?php if($editing && $target): /* newItem activates the editor on its own */ ?>
 	<script>const activate = true;</script>
 	<?php $this->insert('editor');
 endif;

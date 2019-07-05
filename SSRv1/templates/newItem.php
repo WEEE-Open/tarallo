@@ -1,22 +1,17 @@
 <?php
-/** @var \WEEEOpen\Tarallo\Server\User $user */
-/** @var \WEEEOpen\Tarallo\Server\Item $copy */
+/** @var \WEEEOpen\Tarallo\Server\Item|null $copy */
+/** @var bool $recursion */
+/** @var bool $innerrrecursion */
+/** @var string[] $subitems */
 /** @var string[] $featuresEmpty */
 
-$recursion = $recursion ?? false; // Placed inside another item (new or existing)
-$innerrecursion = $innerrecursion ?? false; // Placed inside another NEW item
-$featuresEmpty = $featuresEmpty ?? [];
-
-if(!$innerrecursion && !$recursion) {
-	$this->layout('main', ['title' => 'New item', 'user' => $user, 'itembuttons' => true]);
-}
-
-if(isset($copy)) {
-	$features = $copy->getFeatures();
-	$subitems = $copy->getContents();
-} else {
+$copy = $copy ?? null;
+if($copy === null) {
 	$subitems = [];
 	$features = [];
+} else {
+	$subitems = $copy->getContents();
+	$features = $copy->getFeatures();
 }
 
 // to display new inner items, set their $recursion and $innerrecursion to true
@@ -34,7 +29,6 @@ if(isset($copy)) {
 	<nav class="itembuttons">
 		<?php if(!$innerrecursion): ?><button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><?php else: ?><button class="removenew">❌&nbsp;Delete</button><?php endif ?><button class="addnew">🆕&nbsp;More</button>
 	</nav>
-
 
 	<?php if(!$innerrecursion && !$recursion): ?>
 		<section class="setlocation"><label>Location: <input id="newparent"></label></section>
