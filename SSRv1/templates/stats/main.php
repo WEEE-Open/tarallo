@@ -3,7 +3,7 @@
 /** @var int[] $locations */
 /** @var int[] $recentlyAdded */
 /** @var int[] $recentlyModified */
-$this->layout('main', ['title' => 'Stats', 'user' => $user]);
+$this->layout('main', ['title' => 'Stats', 'user' => $user, 'currentPage' => 'stats']);
 $this->insert('stats::menu', ['currentPage' => '']);
 date_default_timezone_set('Europe/Rome');
 ?>

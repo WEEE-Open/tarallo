@@ -3,7 +3,7 @@
 /** @var int[] $serials */
 /** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $missingData */
 /** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $lost */
-$this->layout('main', ['title' => 'Stats: items that need attention', 'user' => $user]);
+$this->layout('main', ['title' => 'Stats: items that need attention', 'user' => $user, 'currentPage' => 'stats']);
 $this->insert('stats::menu', ['currentPage' => 'attention']);
 ?>
 

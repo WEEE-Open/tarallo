@@ -1,7 +1,7 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\User $user */
 /** @var string[][] $todos */
-$this->layout('main', ['title' => 'Stats: TODOs', 'user' => $user]);
+$this->layout('main', ['title' => 'Stats: TODOs', 'user' => $user, 'currentPage' => 'stats']);
 $this->insert('stats::menu', ['currentPage' => 'todo']);
 ?>
 <div class="statswrapperwrapper">

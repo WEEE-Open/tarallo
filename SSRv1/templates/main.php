@@ -4,6 +4,8 @@
 /** @var boolean $itembuttons */
 /** @var string $moveDefaultFrom */
 /** @var \WEEEOpen\Tarallo\Server\User $user */
+/** @var string $currentPage|null */
+$currentPage = $currentPage ?? null;
 $itembuttons = $itembuttons ?? false;
 $moveDefaultFrom = $moveDefaultFrom ?? null;
 ?>
@@ -27,7 +29,7 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 	<?php if(isset($user) || $this->section('aftermenu')): ?>
 	<nav id="top">
 		<?php if(isset($user)):
-			echo $this->fetch('menu', ['moveDefaultFrom' => $moveDefaultFrom]);
+			echo $this->fetch('menu', ['moveDefaultFrom' => $moveDefaultFrom, 'currentPage' => $currentPage]);
 		endif ?>
 		<?= $this->section('aftermenu', '') ?>
 	</nav>
