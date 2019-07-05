@@ -17,6 +17,7 @@ use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\Server\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
+use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
@@ -552,11 +553,21 @@ class Controller extends AbstractController {
 			$response = $response
 				->withStatus(200);
 		} else {
-			$items = (string) $body['items'];
-			$response = $response
-				->withStatus(303)
-				->withoutHeader('Content-type')
-				->withHeader('Location', '/bulk/add');
+			$add = json_decode((string) $body['add'], true);
+			if($add === null || json_last_error() !== JSON_ERROR_NONE) {
+				$request = $request
+					->withAttribute('Template', 'bulk::add')
+					->withAttribute('TemplateParameters', ['error' => json_last_error_msg()]);
+				$response = $response
+					->withStatus(400);
+			} else {
+				// TODO: do something like ItemBuilder
+				$request = $request
+					->withAttribute('Template', 'bulk::add')
+					->withAttribute('TemplateParameters', ['item' => new Item($add)]);
+				$response = $response
+					->withStatus(200);
+			}
 		}
 		return $next ? $next($request, $response) : $response;
 	}
