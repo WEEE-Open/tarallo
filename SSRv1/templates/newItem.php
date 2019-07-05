@@ -47,6 +47,10 @@ if($copy === null) {
 		<button>Add</button>
 	</section>
 
+    <nav class="itembuttons secondary">
+        <button class="addnew">🆕&nbsp;More</button>
+    </nav>
+
 	<section class="subitems">
 		<?php
 			// Used when cloning, empty otherwise
@@ -55,10 +59,6 @@ if($copy === null) {
 			}
 		?>
 	</section>
-
-	<nav class="itembuttons secondary">
-		<button class="addnew">🆕&nbsp;More</button>
-	</nav>
 </article>
 <?php if(!$innerrecursion) {
 	?><script>const activate = true;</script><?php
