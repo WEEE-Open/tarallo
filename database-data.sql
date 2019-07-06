@@ -61,8 +61,13 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('ram-type', 'features', 2), -- RAM type --
 	('ram-timings', 'features', 0), -- RAM timings -- https://en.wikipedia.org/wiki/Memory_timings
 	('sata-ports-n', 'ports', 1), -- SATA --
+	('esata-ports-n', 'ports', 1), -- sSATA --
+	('sas-sata-ports-n', 'ports', 1), -- SAS (SATA connector) --
+	('sas-sff-8087-ports-n', 'ports', 1), -- SAS (SFF-8087) --
+	('sas-sff-8088-ports-n', 'ports', 1), -- SAS (SFF-8088) --
 	('software', 'software', 0), -- Software (installed) --
 	('usb-ports-n', 'ports', 1), -- USB --
+	('usb-c-ports-n', 'ports', 1), -- USB-C --
 	('usb-header-n', 'ports', 1), -- USB (internal header) --
 	('internal-header-n', 'ports', 1), -- Internal header --
 	('vga-ports-n', 'ports', 1), -- VGA --
@@ -93,6 +98,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('ethernet-ports-10base5-aui-n', 'ports', 1), -- Ethernet (10BASE5 AUI) --
 	('midi-ports-n', 'ports', 1), -- MIDI --
 	('mini-jack-ports-n', 'ports', 1), -- Mini jack --
+	('thunderbolt-ports-n', 'ports', 1), -- Thunderbolt --
 	('rca-mono-ports-n', 'ports', 1), -- RCA Mono --
 	('tv-out-ports-n', 'ports', 1), -- TV-out --
 	('s-video-ports-n', 'ports', 1), -- S-Video --
@@ -110,6 +116,8 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('integrated-graphics-model', 'features', 0), -- Integrated graphics model --
 	('restrictions', 'general', 2), -- Restrictions --
 	('displayport-ports-n', 'ports', 1), -- DisplayPort --
+	('mini-displayport-ports-n', 'ports', 1), -- Mini DisplayPort --
+	('micro-hdmi-ports-n', 'ports', 1), -- Micro HDMI --
 	('pci-low-profile', 'features', 2), -- PCI low profile --
 	('psu-connector-cpu', 'powerconnectors', 2), -- Power connector (CPU) --
 	('sata-power-n', 'powerconnectors', 1), -- SATA power --
@@ -369,4 +377,4 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('T', 0),
 	('', 0);
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 12);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 13);
