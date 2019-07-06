@@ -129,7 +129,7 @@ class ItemValidatorTest extends TestCase {
 
 		$unchanged = ItemValidator::fixupLocation($pc, $lab);
 		$this->assertEquals($lab, $unchanged, 'Fixup shouldn\'t have changed parent');
-		$inmobo = $mobo->getContents();
+		$inmobo = $mobo->getContent();
 		$this->assertContains($cpu, $inmobo, 'CPU has been moved to motherboard');
 	}
 

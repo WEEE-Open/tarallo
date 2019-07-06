@@ -3,48 +3,38 @@
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemCode;
 
 class ItemTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testItemValidCodeString() {
 		$pc77 = new Item('PC77');
 		$this->assertEquals('PC77', (string) $pc77);
 		$this->assertEquals('PC77', $pc77->getCode());
 		$this->assertEmpty($pc77->getFeatures());
-		$this->assertEmpty($pc77->getContents());
+		$this->assertEmpty($pc77->getContent());
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @covers \WEEEOpen\Tarallo\Server\ItemIncomplete
-	 */
-	public function testItemInvalidDefaultEmptyString() {
-		/** @noinspection PhpUndefinedClassInspection */
-		$this->expectException(\TypeError::class);
-		new Item('HDD238947283', '');
-	}
-
-	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testItemValidAncestors() {
 		$hdd = new Item('HDD123');
 
-		$other1 = new ItemIncomplete('PC999');
-		$other2 = new ItemIncomplete('Tavolo');
-		$other3 = new ItemIncomplete('Chernobyl');
-		$other4 = new ItemIncomplete('Polito');
+		$other1 = new ItemCode('PC999');
+		$other2 = new ItemCode('Tavolo');
+		$other3 = new ItemCode('Chernobyl');
+		$other4 = new ItemCode('Polito');
 		$hdd->addAncestors([$other1, $other2, $other3, $other4]);
 
 		$path = $hdd->getPath();
 		$this->assertCount(4, $hdd->getPath());
-		$this->assertContainsOnly(ItemIncomplete::class, $path);
+		$this->assertContainsOnly(ItemCode::class, $path);
 
 		$parent = $path[0];
 
@@ -53,7 +43,7 @@ class ItemTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testItemNoAncestorGet() {
 		$hdd = new Item('HDD123');
@@ -62,26 +52,26 @@ class ItemTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testItemInvalidCodeInt() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidArgumentException::class);
 		new Item(42);
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testItemNullCode() {
 		$it = new Item(null);
-		$this->expectException(\LogicException::class);
+		$this->expectException(LogicException::class);
 		$it->getCode();
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testItemSetCode() {
 		$it = new Item(null);
@@ -91,16 +81,16 @@ class ItemTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testItemEmptyCode() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidArgumentException::class);
 		new Item('');
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testItemFeature() {
 		$item = new Item('TEST');
@@ -113,13 +103,13 @@ class ItemTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testItemDeleteFeature() {
 		$item = new Item('TEST');
 		$item->addFeature(new Feature('capacity-byte', 9001));
 		$item->addFeature(new Feature('color', 'yellow'));
-		$item->deleteFeature('color');
+		$item->removeFeatureByName('color');
 
 		$this->assertArrayNotHasKey('color', $item->getFeatures());
 		$this->assertArrayHasKey('capacity-byte', $item->getFeatures());
@@ -128,7 +118,7 @@ class ItemTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testItemToString() {
 		$item = new Item('TEST');
@@ -139,7 +129,7 @@ class ItemTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testItemMultipleFeatures() {
 		$item = new Item('TEST');
@@ -161,62 +151,62 @@ class ItemTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testInvalidFeatureNameArray() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidArgumentException::class);
 		/** @noinspection PhpParamsInspection */
 		(new Item('TEST'))->addFeature(new Feature(['brand'], 'value'));
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testInvalidFeatureNameInteger() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidArgumentException::class);
 		(new Item('TEST'))->addFeature(new Feature(42, 'value'));
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testInvalidFeatureValueNegative() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidArgumentException::class);
 		(new Item('TEST'))->addFeature(new Feature('capacity-byte', -50));
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testInvalidFeatureValueArray() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidArgumentException::class);
 		(new Item('TEST'))->addFeature(new Feature('capacity-byte', [400000]));
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testInvalidFeatureDuplicate() {
 		$item = (new Item('TEST'))->addFeature(new Feature('capacity-byte', 500));
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidArgumentException::class);
 		$item->addFeature(new Feature('capacity-byte', 123));
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testItemMultipleFeaturesArray() {
 		$item = new Item('TEST');
-		$item->addMultipleFeatures([
-			new Feature('capacity-byte', 9001),
-			new Feature('color', 'white'),
-			new Feature('brand', 'bar'),
-		])->addFeature(new Feature('model', 'T'));
+		$item
+			->addFeature(new Feature('capacity-byte', 9001))
+			->addFeature(new Feature('color', 'white'))
+			->addFeature(new Feature('brand', 'bar'))
+			->addFeature(new Feature('model', 'T'));
 
 		$this->assertArrayHasKey('capacity-byte', $item->getFeatures());
 		$this->assertEquals(9001, $item->getFeatures()['capacity-byte']->value);
@@ -233,37 +223,35 @@ class ItemTest extends TestCase {
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testValidAddChild() {
 		$item = new Item('TEST');
-		$child = (new Item('CHILD'))->addMultipleFeatures([
-			new Feature('capacity-byte', 9001),
-			new Feature('color', 'white'),
-			new Feature('brand', 'bar'),
-		]);
+		$child = (new Item('CHILD'))
+			->addFeature(new Feature('capacity-byte', 9001))
+			->addFeature(new Feature('color', 'white'))
+			->addFeature(new Feature('brand', 'bar'));
 
 		$item->addContent($child);
-		$this->assertContains($child, $item->getContents());
+		$this->assertContains($child, $item->getContent());
 	}
 
 	/**
 	 * @covers \WEEEOpen\Tarallo\Server\Item
-	 * @uses   \WEEEOpen\Tarallo\Server\ItemIncomplete
+	 * @uses   \WEEEOpen\Tarallo\Server\ItemCode
 	 */
 	public function testMultipleAddChild() {
 		$item = new Item('TEST');
-		$child = (new Item('CHILD'))->addMultipleFeatures([
-			new Feature('capacity-byte', 9001),
-			new Feature('color', 'white'),
-			new Feature('brand', 'bar'),
-		]);
-		$child2 = (new Item('bar'))->addMultipleFeatures([
-			new Feature('capacity-byte', 999), new Feature('color', 'grey'),
-		]);
+		$child = (new Item('CHILD'))
+			->addFeature(new Feature('capacity-byte', 9001))
+			->addFeature(new Feature('color', 'white'))
+			->addFeature(new Feature('brand', 'bar'));
+		$child2 = (new Item('bar'))
+			->addFeature(new Feature('capacity-byte', 999))
+			->addFeature(new Feature('color', 'grey'));
 
 		$item->addContent($child)->addContent($child2);
-		$this->assertContains($child, $item->getContents());
-		$this->assertContains($child2, $item->getContents());
+		$this->assertContains($child, $item->getContent());
+		$this->assertContains($child2, $item->getContent());
 	}
 }

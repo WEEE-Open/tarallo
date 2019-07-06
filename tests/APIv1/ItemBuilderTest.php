@@ -1,9 +1,9 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
-use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\APIv1\ItemBuilder;
+use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
+use WEEEOpen\Tarallo\Server\ItemCode;
 
 class ItemBuilderTest extends TestCase {
 
@@ -72,7 +72,7 @@ class ItemBuilderTest extends TestCase {
 	 */
 	public function testValidParent() {
 		ItemBuilder::ofArray(['parent' => 'ZonaBlu'], 'PC42', $parent);
-		$this->assertInstanceOf(ItemIncomplete::class, $parent);
+		$this->assertInstanceOf(ItemCode::class, $parent);
 		$this->assertEquals('ZonaBlu', $parent);
 	}
 }

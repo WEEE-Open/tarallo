@@ -5,7 +5,7 @@ namespace WEEEOpen\Tarallo\Server\Test\Database;
 use WEEEOpen\Tarallo\Server\Database\DuplicateItemCodeException;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemCode;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\ValidationException;
 
@@ -40,18 +40,18 @@ class ItemDAOTest extends DatabaseTest {
 		$case->addContent($discone2);
 		$db->itemDAO()->addItem($case);
 
-		$newCase = $db->itemDAO()->getItem(new ItemIncomplete('PC42'));
+		$newCase = $db->itemDAO()->getItem(new ItemCode('PC42'));
 		$this->assertInstanceOf(Item::class, $newCase);
 		/** @var Item $newCase */
-		$this->assertEquals(2, count($newCase->getContents()), 'Two child Item');
-		$this->assertContainsOnly(Item::class, $newCase->getContents(), null, 'Only Items are contained in an Item');
-		foreach($newCase->getContents() as $child) {
+		$this->assertEquals(2, count($newCase->getContent()), 'Two child Item');
+		$this->assertContainsOnly(Item::class, $newCase->getContent(), null, 'Only Items are contained in an Item');
+		foreach($newCase->getContent() as $child) {
 			/** @var Item $child */
 			$this->assertTrue($child->getCode() === 'SATAna1' || $child->getCode() === 'SATAna2',
 				'Sub-Item is one of the two expected items, ' . (string) $child);
 			// this works because the two items are identical except for the code...
 			$newFeatures = $child->getFeatures();
-			$oldFeatures = $case->getContents()[0]->getFeatures();
+			$oldFeatures = $case->getContent()[0]->getFeatures();
 			$this->assertEquals(count($oldFeatures), count($newFeatures), 'Feature count should be unchanged');
 			foreach($oldFeatures as $name => $feature) {
 				$value = $feature->value;
@@ -59,7 +59,7 @@ class ItemDAOTest extends DatabaseTest {
 				$this->assertEquals($value, $newFeatures[$name]->value,
 					"Sub-Item $child should have $name=$value as before");
 			}
-			$this->assertTrue(empty($child->getContents()), "No children of child Item $child should exist");
+			$this->assertTrue(empty($child->getContent()), "No children of child Item $child should exist");
 		}
 	}
 
@@ -72,7 +72,7 @@ class ItemDAOTest extends DatabaseTest {
 		$case = new Item('PC42');
 		$db->itemDAO()->addItem($case);
 
-		$deleteMe = new ItemIncomplete('PC42');
+		$deleteMe = new ItemCode('PC42');
 
 		$this->assertTrue($db->itemDAO()->itemExists($deleteMe), 'Item should exist before deletion');
 		$this->assertTrue($db->itemDAO()->itemVisible($deleteMe), 'Item shouldn be visible before deletion');
@@ -97,7 +97,7 @@ class ItemDAOTest extends DatabaseTest {
 		$case = new Item('PC42');
 		$db->itemDAO()->addItem($case);
 
-		$deleteMe = new ItemIncomplete('PC42');
+		$deleteMe = new ItemCode('PC42');
 		$db->itemDAO()->deleteItem($deleteMe);
 		$this->assertTrue($db->itemDAO()->itemExists($deleteMe), 'Item should still exist');
 		$this->assertFalse($db->itemDAO()->itemVisible($deleteMe), 'Item shouldn\'t be visible');
@@ -116,7 +116,7 @@ class ItemDAOTest extends DatabaseTest {
 		$case->addContent($mobo);
 		$db->itemDAO()->addItem($case);
 
-		$deleteMe = new ItemIncomplete('PC42');
+		$deleteMe = new ItemCode('PC42');
 
 		$this->expectException(ValidationException::class);
 		$db->itemDAO()->deleteItem($deleteMe);
@@ -133,7 +133,7 @@ class ItemDAOTest extends DatabaseTest {
 		$mobo->addFeature(new Feature('color', 'green'));
 		$db->itemDAO()->addItem($case);
 
-		$saveMe = new ItemIncomplete('MOBO42');
+		$saveMe = new ItemCode('MOBO42');
 		$db->itemDAO()->deleteItem($saveMe);
 
 		$db->itemDAO()->undelete($saveMe);
@@ -164,7 +164,7 @@ class ItemDAOTest extends DatabaseTest {
 		$case = new Item('PC42');
 		$db->itemDAO()->addItem($case);
 
-		$deleteMe = new ItemIncomplete('PC42');
+		$deleteMe = new ItemCode('PC42');
 		$this->expectException(NotFoundException::class);
 		$db->itemDAO()->undelete($deleteMe);
 	}
@@ -177,7 +177,7 @@ class ItemDAOTest extends DatabaseTest {
 		$case = new Item('PC42');
 		$db->itemDAO()->addItem($case);
 
-		$deleteMe = new ItemIncomplete('NOTEXISTING');
+		$deleteMe = new ItemCode('NOTEXISTING');
 		$this->expectException(NotFoundException::class);
 		$db->itemDAO()->undelete($deleteMe);
 	}
@@ -201,7 +201,7 @@ class ItemDAOTest extends DatabaseTest {
 	public function testNonExistingItem() {
 		$db = $this->getDb();
 
-		$notHere = new ItemIncomplete('PC9001');
+		$notHere = new ItemCode('PC9001');
 		$this->assertFalse($db->itemDAO()->itemExists($notHere), 'Item shouldn\'t exist');
 		$this->assertFalse($db->itemDAO()->itemVisible($notHere), 'Item shouldn\'t be recoverable');
 		$this->assertNull($db->itemDAO()->itemDeletedAt($notHere), 'Item shouldn\'t be marked as deleted');
@@ -256,10 +256,10 @@ class ItemDAOTest extends DatabaseTest {
 	public function testAddItemToken() {
 		$db = $this->getDb();
 		$case = (new Item('PC42'))->addFeature(new Feature('motherboard-form-factor', 'atx'));
-		$case->token = 'this-is-a-token';
+		$case->setToken('this-is-a-token');
 		$db->itemDAO()->addItem($case);
 
-		$newCase = $db->itemDAO()->getItem(new ItemIncomplete('PC42'));
+		$newCase = $db->itemDAO()->getItem(new ItemCode('PC42'));
 		$this->assertInstanceOf(Item::class, $newCase);
 	}
 
@@ -269,10 +269,10 @@ class ItemDAOTest extends DatabaseTest {
 	public function testGetItemToken() {
 		$db = $this->getDb();
 		$case = (new Item('PC42'))->addFeature(new Feature('motherboard-form-factor', 'atx'));
-		$case->token = 'this-is-a-token';
+		$case->setToken('this-is-a-token');
 		$db->itemDAO()->addItem($case);
 
-		$getMe = new ItemIncomplete('PC42');
+		$getMe = new ItemCode('PC42');
 		$newCase = $db->itemDAO()->getItem($getMe, 'this-is-a-token');
 		$this->assertInstanceOf(Item::class, $newCase);
 	}
@@ -283,10 +283,10 @@ class ItemDAOTest extends DatabaseTest {
 	public function testGetItemWrongToken() {
 		$db = $this->getDb();
 		$case = (new Item('PC42'))->addFeature(new Feature('motherboard-form-factor', 'atx'));
-		$case->token = 'this-is-a-token';
+		$case->setToken('this-is-a-token');
 		$db->itemDAO()->addItem($case);
 
-		$getMe = new ItemIncomplete('PC42');
+		$getMe = new ItemCode('PC42');
 		$this->expectException(NotFoundException::class);
 		$db->itemDAO()->getItem($getMe, 'WRONGWRONGWRONG');
 	}
@@ -320,7 +320,7 @@ class ItemDAOTest extends DatabaseTest {
 		$where->addContent($case);
 
 		$db->itemDAO()->addItem($where);
-		$getMe = new ItemIncomplete('PC42');
+		$getMe = new ItemCode('PC42');
 		$result = $db->itemDAO()->getItem($getMe);
 		json_encode($result);
 		$this->assertEquals(JSON_ERROR_NONE, json_last_error());

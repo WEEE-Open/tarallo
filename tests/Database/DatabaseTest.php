@@ -73,12 +73,12 @@ abstract class DatabaseTest extends TestCase {
 		if(!empty(array_diff_assoc($a->getFeatures(), $b->getFeatures()))) {
 			return false;
 		}
-		if(count($a->getContents()) !== count($b->getContents())) {
+		if(count($a->getContent()) !== count($b->getContent())) {
 			return false;
 		}
 		/** @var Item[] $bContent */
-		$bContent = $b->getContents();
-		foreach($a->getContents() as $item) {
+		$bContent = $b->getContent();
+		foreach($a->getContent() as $item) {
 			$code = $item->getCode();
 			foreach($bContent as $item2) {
 				if($code === $item2->getCode()) {

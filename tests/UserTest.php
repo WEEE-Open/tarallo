@@ -70,7 +70,7 @@ class UserTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Server\User
 	 */
 	public function testReadPasswordNotAvailable() {
-		$this->expectException(\LogicException::class);
+		$this->expectException(LogicException::class);
 		(new User('asd', null, '$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6', 2))->getPassword();
 	}
 
@@ -87,7 +87,7 @@ class UserTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Server\User
 	 */
 	public function testPasswordMismatch() {
-		$this->expectException(\InvalidArgumentException::class);
+		$this->expectException(InvalidArgumentException::class);
 		new User('asd123', 'wrong-password', '$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6', 2);
 	}
 

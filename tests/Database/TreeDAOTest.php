@@ -5,7 +5,7 @@ namespace WEEEOpen\Tarallo\Server\Test\Database;
 use WEEEOpen\Tarallo\Server\Database\TreeDAO;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemCode;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 
 class TreeDAOTest extends DatabaseTest {
@@ -24,22 +24,22 @@ class TreeDAOTest extends DatabaseTest {
 		$lab->addContent($case);
 		$db->itemDAO()->addItem($lab);
 
-		$lab = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));
+		$lab = $db->itemDAO()->getItem(new ItemCode('CHERNOBYL'));
 		$this->assertInstanceOf(Item::class, $lab);
 		/** @var Item $caseContent */
-		$case = $lab->getContents()[0];
+		$case = $lab->getContent()[0];
 		$this->assertEquals('PC42', $case->getCode(), 'PC42 is still there');
 		$this->assertTrue($this->itemCompare($lab, $lab), 'Lab should be unchanged');
 
 		$db->treeDAO()->removeFromTree($case);
 
-		$lab = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));
+		$lab = $db->itemDAO()->getItem(new ItemCode('CHERNOBYL'));
 		$this->assertInstanceOf(Item::class, $lab);
-		$this->assertEquals(0, count($lab->getContents()), 'Lab is empty');
+		$this->assertEquals(0, count($lab->getContent()), 'Lab is empty');
 
 		$ex = null;
 		try {
-			$db->itemDAO()->getItem(new ItemIncomplete('PC42'));
+			$db->itemDAO()->getItem(new ItemCode('PC42'));
 		} catch(\Throwable $e) {
 			$ex = $e;
 		}
@@ -47,7 +47,7 @@ class TreeDAOTest extends DatabaseTest {
 
 		$ex = null;
 		try {
-			$db->itemDAO()->getItem(new ItemIncomplete('HDD1'));
+			$db->itemDAO()->getItem(new ItemCode('HDD1'));
 		} catch(\Throwable $e) {
 			$ex = $e;
 		}
@@ -55,7 +55,7 @@ class TreeDAOTest extends DatabaseTest {
 
 		$ex = null;
 		try {
-			$db->itemDAO()->getItem(new ItemIncomplete('HDD2'));
+			$db->itemDAO()->getItem(new ItemCode('HDD2'));
 		} catch(\Throwable $e) {
 			$ex = $e;
 		}
@@ -139,7 +139,7 @@ class TreeDAOTest extends DatabaseTest {
 		$db = $this->getDb();
 		$db->itemDAO()->addItem($chernobyl);
 
-		$item = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));
+		$item = $db->itemDAO()->getItem(new ItemCode('CHERNOBYL'));
 		$this->assertInstanceOf(Item::class, $item);
 
 		// Hack of questionable quality to prevent:
@@ -151,13 +151,13 @@ class TreeDAOTest extends DatabaseTest {
 		// Move TI from TAVOLONE to ZonaBlu.
 		$db->treeDAO()->moveItem($ti, $zb);
 
-		$item = $db->itemDAO()->getItem(new ItemIncomplete('CHERNOBYL'));
+		$item = $db->itemDAO()->getItem(new ItemCode('CHERNOBYL'));
 		$this->assertInstanceOf(Item::class, $item);
 		/** @var Item $chernobylPost */
 		$chernobylPost = $item;
 		$zonaBluPost = null;
 		$tavolonePost = null;
-		$this->assertContainsOnly(Item::class, $itemz = $chernobylPost->getContents());
+		$this->assertContainsOnly(Item::class, $itemz = $chernobylPost->getContent());
 		/** @var Item[] $itemz */
 		foreach($itemz as $item) {
 			if($item->getCode() === 'ZonaBlu') {
@@ -172,12 +172,12 @@ class TreeDAOTest extends DatabaseTest {
 		/** @var Item $tavolonePost */
 		$tiShouldBeHere = null;
 		$tiShouldNotBeHere = null;
-		foreach($zonaBluPost->getContents() as $item) {
+		foreach($zonaBluPost->getContent() as $item) {
 			if($item->getCode() === 'PCTI') {
 				$tiShouldBeHere = $item;
 			}
 		}
-		foreach($tavolonePost->getContents() as $item) {
+		foreach($tavolonePost->getContent() as $item) {
 			if($item->getCode() === 'PCTI') {
 				$tiShouldNotBeHere = $item;
 			}
@@ -200,7 +200,7 @@ class TreeDAOTest extends DatabaseTest {
 
 		$this->expectException(NotFoundException::class);
 		$this->expectExceptionCode(TreeDAO::EXCEPTION_CODE_CHILD);
-		$db->treeDAO()->moveItem(new ItemIncomplete('SOMETHING'), new ItemIncomplete('TAVOLONE'));
+		$db->treeDAO()->moveItem(new ItemCode('SOMETHING'), new ItemCode('TAVOLONE'));
 	}
 
 	public function testTreeMoveToNonexistant() {
@@ -216,7 +216,7 @@ class TreeDAOTest extends DatabaseTest {
 
 		$this->expectException(NotFoundException::class);
 		$this->expectExceptionCode(TreeDAO::EXCEPTION_CODE_PARENT);
-		$db->treeDAO()->moveItem(new ItemIncomplete('TAVOLONE'), new ItemIncomplete('NOWHERE'));
+		$db->treeDAO()->moveItem(new ItemCode('TAVOLONE'), new ItemCode('NOWHERE'));
 	}
 
 	public function testRemoveFromTree() {
@@ -228,11 +228,11 @@ class TreeDAOTest extends DatabaseTest {
 		$db = $this->getDb();
 		$db->itemDAO()->addItem($tree);
 
-		$db->treeDAO()->removeFromTree(new ItemIncomplete('PC42'));
+		$db->treeDAO()->removeFromTree(new ItemCode('PC42'));
 
 		$ex = null;
 		try {
-			$db->itemDAO()->getItem(new ItemIncomplete('PC42'));
+			$db->itemDAO()->getItem(new ItemCode('PC42'));
 		} catch(NotFoundException $e) {
 			$ex = $e;
 		}
@@ -240,13 +240,13 @@ class TreeDAOTest extends DatabaseTest {
 
 		$ex = null;
 		try {
-			$db->itemDAO()->getItem(new ItemIncomplete('RAM9001'));
+			$db->itemDAO()->getItem(new ItemCode('RAM9001'));
 		} catch(NotFoundException $e) {
 			$ex = $e;
 		}
 		$this->assertInstanceOf(NotFoundException::class, $ex);
 
-		$bigtable = $db->itemDAO()->getItem(new ItemIncomplete('TAVOLONE'));
+		$bigtable = $db->itemDAO()->getItem(new ItemCode('TAVOLONE'));
 		$this->assertInstanceOf(Item::class, $bigtable);
 	}
 }
