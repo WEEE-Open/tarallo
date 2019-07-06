@@ -1,24 +1,29 @@
 (async function() {
 	"use strict";
 
+	// For search: these methods are called from there, even though the editor is not active
 	window.newFeature = createFeatureElement;
 	window.focusFeatureValueInput = focusFeatureValueInput;
 
 	// To generate unique IDs for features
 	let featureIdsCounter = 0;
 
+	// Beamed from the server to here in a giant JSON
 	let featureNames = new Map();
 	let featureTypes = new Map();
 	let featureValues = new Map();
 	let featureValuesTranslated = new Map();
 
+	// Set and unset as needed by the client
 	let fadingErrors = new Map();
 	let linkedErrors = new Map();
 
+	// Can't remember what this does
 	for(let select of document.querySelectorAll('.allfeatures')) {
 		select.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
 	}
 
+	// Get the giant JSON
 	let response = await fetch('/features.json', {
 		headers: {
 			'Accept': 'application/json'
@@ -28,12 +33,13 @@
 	});
 
 	if(response.ok) {
-		let everything = await response.json();
+		let payload = await response.json();
 
 		// Rebuild the Maps. These were previously precomputed.
-		for(let group of Object.keys(everything)) {
-			let features = everything[group];
-			for(let feature of features) {
+		let features = payload["features"];
+		for(let group of Object.keys(features)) { // Keys are group IDs
+			let featuresInGroup = features[group]; // Features from a group
+			for(let feature of featuresInGroup) { // For each feature, build Maps
 				featureTypes.set(feature.name, feature.type);
 				// noinspection JSUnresolvedVariable
 				featureNames.set(feature.name, feature.printableName);

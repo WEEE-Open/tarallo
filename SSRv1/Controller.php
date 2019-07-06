@@ -578,7 +578,7 @@ class Controller extends AbstractController {
 			->withHeader('Cache-Control', 'max-age=36000');
 		//->withHeader('Last-Modified', '...');
 
-		$response->getBody()->write(json_encode(FeaturePrinter::getAllFeatures()));
+		$response->getBody()->write(json_encode(['features' => FeaturePrinter::getAllFeatures()]));
 
 		return $next ? $next($request, $response) : $response;
 	}
