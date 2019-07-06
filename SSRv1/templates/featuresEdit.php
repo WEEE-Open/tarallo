@@ -1,5 +1,8 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\Feature[] $features */
+
+use WEEEOpen\Tarallo\Server\BaseFeature;
+
 /** @var \WEEEOpen\Tarallo\Server\Feature[] $featuresProduct */
 /** @var \WEEEOpen\Tarallo\Server\string[] $featuresEmpty */
 ?>
@@ -30,18 +33,18 @@ if(count($features) > 0 || count($featuresEmpty) > 0):
 			<?php foreach($group as $ultra): /** @var $ultra \WEEEOpen\Tarallo\SSRv1\UltraFeature */ ?>
 				<li class="feature-edit-<?= $ultra->feature->name ?> feature-edit">
 					<div class="name"><label for="feature-edit-<?= $ultra->feature->name ?>"><?=$ultra->name?></label></div>
-					<?php switch($ultra->feature->type): case \WEEEOpen\Tarallo\Server\Feature::ENUM: ?>
+					<?php switch($ultra->feature->type): case BaseFeature::ENUM: ?>
 						<select class="value" autocomplete="off" data-internal-name="<?= $ultra->feature->name ?>" data-internal-type="e" data-initial-value="<?= $this->e($ultra->feature->value, 'asTextContent')?>" id="feature-edit-<?= $ultra->feature->name ?>">
 							<?php if($ultra->feature->value == null): ?><option value="" disabled selected></option><?php endif; ?>
 							<?php foreach($this->getOptions($ultra->feature->name) as $optionValue => $optionName): ?>
 							<option value="<?= $optionValue ?>" <?= $optionValue === $ultra->feature->value ? 'selected' : '' ?>><?=$this->e($optionName)?></option>
 							<?php endforeach ?>
 						</select>
-					<?php break; default: case \WEEEOpen\Tarallo\Server\Feature::STRING: ?>
+					<?php break; default: case BaseFeature::STRING: ?>
 						<div class="value" data-internal-type="s" data-internal-name="<?= $ultra->feature->name ?>" data-initial-value="<?= $this->e($ultra->feature->value) ?>" id="feature-edit-<?= $ultra->feature->name ?>" contenteditable="true"><?=$this->contentEditableWrap($this->e($ultra->value))?></div>
-					<?php break; case \WEEEOpen\Tarallo\Server\Feature::INTEGER: ?>
+					<?php break; case BaseFeature::INTEGER: ?>
 						<div class="value" data-internal-type="i" data-internal-name="<?= $ultra->feature->name ?>" data-internal-value="<?= $ultra->feature->value ?>" data-previous-value="<?= $ultra->feature->value ?>" data-initial-value="<?= $ultra->feature->value ?>" id="feature-edit-<?= $ultra->feature->name ?>" contenteditable="true"><?=$this->contentEditableWrap($this->e($ultra->value))?></div>
-					<?php break; case \WEEEOpen\Tarallo\Server\Feature::DOUBLE: ?>
+					<?php break; case BaseFeature::DOUBLE: ?>
 						<div class="value" data-internal-type="d" data-internal-name="<?= $ultra->feature->name ?>" data-internal-value="<?= $ultra->feature->value ?>" data-previous-value="<?= $ultra->feature->value ?>" data-initial-value="<?= $ultra->feature->value ?>" id="feature-edit-<?= $ultra->feature->name ?>" contenteditable="true"><?=$this->contentEditableWrap($this->e($ultra->value))?></div>
 					<?php endswitch; ?>
 						<div class="controls"><button data-name="<?= $ultra->feature->name ?>" class="delete" tabindex="-1">❌</button></div>

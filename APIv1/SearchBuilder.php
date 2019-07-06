@@ -4,7 +4,7 @@ namespace WEEEOpen\Tarallo\APIv1;
 
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemCode;
 use WEEEOpen\Tarallo\Server\Search;
 use WEEEOpen\Tarallo\Server\SearchTriplet;
 
@@ -25,7 +25,7 @@ class SearchBuilder {
 			$locations = [];
 			try {
 				foreach($input['locations'] as $location) {
-					$locations[] = new ItemIncomplete($location);
+					$locations[] = new ItemCode($location);
 				}
 				unset($location);
 			} catch(\InvalidArgumentException $e) {

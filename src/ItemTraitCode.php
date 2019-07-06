@@ -15,15 +15,11 @@ trait ItemTraitCode {
 	 * @see ItemTraitOptionalCode if the code should be optional
 	 */
 	public function __construct($code) {
-		if($code === null) {
-			$this->code = null;
+		if(is_string($code) && trim($code) !== '') {
+			self::validateCode($code);
+			$this->code = $code;
 		} else {
-			if(is_string($code) && trim($code) !== '') {
-				self::validateCode($code);
-				$this->code = $code;
-			} else {
-				throw new \InvalidArgumentException('Item code must be a non-empty alphanumeric string or null');
-			}
+			throw new \InvalidArgumentException('Item code must be a non-empty alphanumeric string or null');
 		}
 	}
 

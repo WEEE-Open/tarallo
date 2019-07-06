@@ -10,7 +10,7 @@ if($copy === null) {
 	$subitems = [];
 	$features = [];
 } else {
-	$subitems = $copy->getContents();
+	$subitems = $copy->getContent();
 	$features = $copy->getFeatures();
 }
 

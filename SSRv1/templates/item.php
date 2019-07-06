@@ -6,7 +6,6 @@
 /** @var bool $recursion */
 $recursion = $recursion ?? false;
 $features = $item->getFeatures();
-$product = $item->getProduct();
 $lostAt = $item->getLostAt();
 $deletedAt = $item->getDeletedAt();
 
@@ -19,7 +18,7 @@ if(isset($features['working'])) {
 	$working = ' working ' . $this->e($features['working']->value);
 }
 
-$containsMore = count($item->getContents()) > 0;
+$containsMore = count($item->getContent()) > 0;
 
 // Until proven guilty, er, true
 $adding = false;
@@ -98,9 +97,9 @@ $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
 				</select></label><button>Add</button>
 		</section>
 
-		<section class="product features">
-			<?php $this->insert('features', ['features' => $product === null ? [] : $product->getFeatures()]) ?>
-		</section>
+		<!--<section class="product features">
+			$this->insert('features', ['features' => $product === null ? [] : $product->getFeatures()])
+		</section>-->
 	<?php else: ?>
 		<section class="features">
 			<?php $this->insert('features', ['features' => $features]) ?>
@@ -113,7 +112,7 @@ $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
 			$this->insert('newItem', ['recursion' => true, 'innerrecursion' => false, 'featuresEmpty' => ['type', 'working']]);
 		}
 
-		$subitems = $item->getContents();
+		$subitems = $item->getContent();
 		foreach($subitems as $subitem) {
 			$this->insert('item', array_merge($nextItemParameters, ['item' => $subitem]));
 		}

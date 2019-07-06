@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\SSRv1;
 
 
+use WEEEOpen\Tarallo\Server\BaseFeature;
 use WEEEOpen\Tarallo\Server\Feature;
 
 class UltraFeature {
@@ -29,7 +30,7 @@ class UltraFeature {
 		$that->feature = $feature;
 		$that->value = FeaturePrinter::printableValue($feature);
 		$that->name = FeaturePrinter::printableName($feature->name);
-		$that->group = FeaturePrinter::printableGroup(Feature::getGroup($feature->name));
+		$that->group = FeaturePrinter::printableGroup(BaseFeature::getGroup($feature->name));
 		return $that;
 	}
 
@@ -40,13 +41,14 @@ class UltraFeature {
 	public static function fromEmpty(string $name) {
 		$that = new UltraFeature();
 		// Mocking other classes...
+		// TODO: use FeatureBase, remove mocking mockery
 		$that->feature = new \stdClass();
 		$that->feature->name = $name;
 		$that->feature->value = '';
-		$that->feature->type = Feature::getType($name);
+		$that->feature->type = BaseFeature::getType($name);
 		$that->value = '';
 		$that->name = FeaturePrinter::printableName($name);
-		$that->group = FeaturePrinter::printableGroup(Feature::getGroup($name));
+		$that->group = FeaturePrinter::printableGroup(BaseFeature::getGroup($name));
 		return $that;
 	}
 }

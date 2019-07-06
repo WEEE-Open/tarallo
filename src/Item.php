@@ -28,6 +28,11 @@ class Item
 		return $this->token;
 	}
 
+	public function setToken($token) {
+		$this->token = $token;
+		return $this;
+	}
+
 	public function jsonSerialize() {
 		$array = [];
 		$array['code'] = $this->getCode();

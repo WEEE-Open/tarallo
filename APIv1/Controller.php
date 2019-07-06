@@ -12,6 +12,7 @@ use WEEEOpen\Tarallo\Server\Database\DatabaseException;
 use WEEEOpen\Tarallo\Server\Database\DuplicateItemCodeException;
 use WEEEOpen\Tarallo\Server\Database\ItemDAO;
 use WEEEOpen\Tarallo\Server\Database\TreeDAO;
+use WEEEOpen\Tarallo\Server\BaseFeature;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\AbstractController;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
@@ -20,10 +21,9 @@ use WEEEOpen\Tarallo\Server\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemFeatures;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
-use WEEEOpen\Tarallo\Server\ItemValidator;
+use WEEEOpen\Tarallo\Server\ItemCode;
 use WEEEOpen\Tarallo\Server\ItemNestingException;
+use WEEEOpen\Tarallo\Server\ItemValidator;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\ValidationException;
@@ -109,7 +109,7 @@ class Controller extends AbstractController {
 			throw new \LogicException('Not implemented');
 		} else {
 			try {
-				$item = new ItemIncomplete($id);
+				$item = new ItemCode($id);
 			} catch(ValidationException $e) {
 				if($e->getCode() === 3) {
 					throw new NotFoundException();
@@ -144,7 +144,7 @@ class Controller extends AbstractController {
 		Validation::authorize($user, 3);
 
 		try {
-			$item = new ItemIncomplete($id);
+			$item = new ItemCode($id);
 		} catch(ValidationException $e) {
 			throw new NotFoundException();
 		}
@@ -184,7 +184,7 @@ class Controller extends AbstractController {
 
 		$item = Validation::newItemIncomplete($id);
 		try {
-			$newParent = new ItemIncomplete($payload);
+			$newParent = new ItemCode($payload);
 		} catch(ValidationException $e) {
 			throw new InvalidPayloadParameterException('*', $payload, 'Location does not exist');
 		}
@@ -221,7 +221,7 @@ class Controller extends AbstractController {
 		}
 
 		try {
-			if(Feature::getType($id) !== Feature::STRING) {
+			if(BaseFeature::getType($id) !== BaseFeature::STRING) {
 				throw new InvalidPayloadParameterException('*', $id, "Only text features are supported, $id isn't");
 			}
 		} catch(\InvalidArgumentException $e) {
@@ -260,7 +260,7 @@ class Controller extends AbstractController {
 
 		// Validation and fixupLocation requires the full parent item, which may not exist.
 		// Since this part is optional, its existence will be checked again later
-		if($parent instanceof ItemIncomplete && ($fix || $validate)) {
+		if($parent instanceof ItemCode && ($fix || $validate)) {
 			try {
 				$parent = $db->itemDAO()->getItem($parent, null, 1);
 			} catch(NotFoundException $e) {
@@ -345,7 +345,7 @@ class Controller extends AbstractController {
 
 		$responseCode = 204;
 		try {
-			$db->itemDAO()->deleteItem(new ItemIncomplete($id));
+			$db->itemDAO()->deleteItem(new ItemCode($id));
 		} catch(NotFoundException $ignored) {
 			$responseCode = 404;
 		} catch(ValidationException $e) {
@@ -375,7 +375,7 @@ class Controller extends AbstractController {
 
 		$item = Validation::newItemIncomplete($id);
 		try {
-			$newParent = new ItemIncomplete($payload);
+			$newParent = new ItemCode($payload);
 		} catch(ValidationException $e) {
 			throw new InvalidPayloadParameterException('*', $payload, 'Location does not exist');
 		}
@@ -404,7 +404,7 @@ class Controller extends AbstractController {
 
 		$responseCode = 204;
 		try {
-			$db->itemDAO()->loseItem(new ItemIncomplete($id));
+			$db->itemDAO()->loseItem(new ItemCode($id));
 		} catch(NotFoundException $ignored) {
 			$responseCode = 404;
 		} catch(ValidationException $e) {
@@ -431,7 +431,7 @@ class Controller extends AbstractController {
 		$id = Validation::validateOptionalString($parameters, 'id');
 		$loopback = isset($query['loopback']);
 
-		$item = new ItemFeatures($id);
+		$item = new Item($id);
 		// PUT => delete every feature, replace with new ones
 		ItemBuilder::addFeatures($payload, $item);
 		$db->featureDAO()->deleteFeaturesAll($item);
@@ -464,7 +464,7 @@ class Controller extends AbstractController {
 		$id = Validation::validateOptionalString($parameters, 'id');
 		$loopback = isset($query['loopback']);
 
-		$item = new ItemFeatures($id);
+		$item = new Item($id);
 		// PATCH => specify features to update and to delete, other are left as they are
 		$delete = ItemBuilder::addFeaturesDelta($payload, $item);
 
@@ -567,7 +567,7 @@ class Controller extends AbstractController {
 		// TODO: rename to limit?
 		$length = Validation::validateOptionalInt($query, 'length', 20);
 
-		$item = new ItemIncomplete($id);
+		$item = new ItemCode($id);
 
 		if(!$db->itemDAO()->itemExists($item)) {
 			throw new NotFoundException();
@@ -615,7 +615,7 @@ class Controller extends AbstractController {
 			new Feature($explosion[0], $explosion[1]),
 			$notFeature,
 			$location === null ? null : new
-		ItemIncomplete($location), $limit, $creation === null ? null : new \DateTime($creation), $deleted);
+		ItemCode($location), $limit, $creation === null ? null : new \DateTime($creation), $deleted);
 
 		$request = $request
 			->withAttribute('Status', JSend::SUCCESS)
@@ -673,10 +673,7 @@ class Controller extends AbstractController {
 		$array = $db->statsDAO()->getCountByFeature(
 			$feature,
 			$filter,
-			$location === null ? null : new
-			ItemIncomplete(
-				$location
-			),
+			$location === null ? null : new ItemCode($location),
 			$creation === null ? null : new \DateTime($creation),
 			$deleted,
 			$cutoff

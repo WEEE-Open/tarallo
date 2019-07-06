@@ -5,8 +5,8 @@ namespace WEEEOpen\Tarallo\APIv1;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemFeatures;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemCode;
+use WEEEOpen\Tarallo\Server\ItemWithCodeAndFeatures;
 use WEEEOpen\Tarallo\Server\ValidationException;
 
 class ItemBuilder {
@@ -15,7 +15,7 @@ class ItemBuilder {
 	 *
 	 * @param array $input Decoded JSON from the client
 	 * @param string|null $code Code for new item, if explicitly set
-	 * @param ItemIncomplete|null $parent passed by reference, will contain the direct parent, if set.
+	 * @param ItemCode|null $parent passed by reference, will contain the direct parent, if set.
 	 *
 	 * @return Item
 	 */
@@ -24,7 +24,7 @@ class ItemBuilder {
 
 		if(isset($input['parent'])) {
 			try {
-				$parent = new ItemIncomplete($input['parent']);
+				$parent = new ItemCode($input['parent']);
 			} catch(ValidationException $e) {
 				if($e->getCode() === 3) {
 					throw new InvalidPayloadParameterException(
@@ -110,11 +110,11 @@ class ItemBuilder {
 	 * Process features to be added
 	 *
 	 * @param string[] $features The usual key-value pair for features
-	 * @param ItemFeatures $item Where to add those features
+	 * @param ItemWithCodeAndFeatures $item Where to add those features
 	 *
 	 * @see addFeaturesDelta
 	 */
-	public static function addFeatures(array $features, ItemFeatures $item) {
+	public static function addFeatures(array $features, ItemWithCodeAndFeatures $item) {
 		foreach($features as $name => $value) {
 			try {
 				$item->addFeature(Feature::ofString($name, $value));
@@ -131,13 +131,14 @@ class ItemBuilder {
 	 * Processes feature to be added AND removed
 	 *
 	 * @param string[] $features The usual key-value pair for features
-	 * @param ItemFeatures $item Where to add those features
+	 * @param ItemWithCodeAndFeatures $item Where to add those features
 	 *
 	 * @return string[] Features to be removed
 	 *
 	 * @see addFeatures
+	 * @TODO a specific class for ItemFeatures only? (aka: bring back ItemFeatures)
 	 */
-	public static function addFeaturesDelta(array $features, ItemFeatures $item) {
+	public static function addFeaturesDelta(array $features, ItemWithCodeAndFeatures $item) {
 		$delete = [];
 		$add = [];
 

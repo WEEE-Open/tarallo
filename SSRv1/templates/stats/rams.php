@@ -9,9 +9,9 @@
 /** @var int[] $byType */
 /** @var int[] $byFormFactor */
 /** @var int[] $bySize */
-/** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $noWorking */
-/** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $noFrequency */
-/** @var \WEEEOpen\Tarallo\Server\ItemIncomplete[] $noSize */
+/** @var \WEEEOpen\Tarallo\Server\ItemCode[] $noWorking */
+/** @var \WEEEOpen\Tarallo\Server\ItemCode[] $noFrequency */
+/** @var \WEEEOpen\Tarallo\Server\ItemCode[] $noSize */
 /** @var bool $allowDateSelection */
 $this->layout('main', ['title' => 'Stats: RAMs', 'user' => $user, 'currentPage' => 'stats']);
 $this->insert('stats::menu', ['currentPage' => 'rams']);

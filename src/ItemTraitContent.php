@@ -12,9 +12,9 @@ trait ItemTraitContent {
 	 *
 	 * @param ItemWithCode $item
 	 *
-	 * @return ItemTraitContent $this, aka the parent item to the one you just added
+	 * @return $this aka the parent item to the one you just added
 	 */
-	public function addContent(ItemWithCode $item): ItemTraitContent {
+	public function addContent(ItemWithCode $item) {
 		$this->contents[] = $item;
 		// This was cool, but caused problems during serialization. Serious problems.
 		// It made the serialization fail because of recursion.

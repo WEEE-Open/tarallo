@@ -3,12 +3,12 @@
 namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
 
-use WEEEOpen\Tarallo\Server\ItemFeatures;
+use WEEEOpen\Tarallo\Server\ItemWithCodeAndFeatures;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class RamSummarizer implements Summarizer {
 
-	public static function summarize(ItemFeatures $item): string {
+	public static function summarize(ItemWithCodeAndFeatures $item): string {
 		$ecc = $item->getFeature('ram-ecc');
 		if($ecc === null) {
 			$ecc = '(ECC?)';

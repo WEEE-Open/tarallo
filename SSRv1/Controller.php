@@ -10,6 +10,7 @@ use Relay\RelayBuilder;
 use Slim\Http\Body;
 use WEEEOpen\Tarallo\Server\Database\Database;
 use WEEEOpen\Tarallo\Server\Database\TreeDAO;
+use WEEEOpen\Tarallo\Server\BaseFeature;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\AbstractController;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
@@ -18,7 +19,7 @@ use WEEEOpen\Tarallo\Server\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemCode;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
@@ -44,7 +45,7 @@ class Controller extends AbstractController {
 		$depth = Validation::validateOptionalInt($query, 'depth', 20);
 
 		try {
-			$ii = new ItemIncomplete($id);
+			$ii = new ItemCode($id);
 		} catch(ValidationException $e) {
 			if($e->getCode() === 3) {
 				$response = $response
@@ -97,7 +98,7 @@ class Controller extends AbstractController {
 		$limit++;
 
 		// Full item needed to show breadcrumbs
-		$item = new ItemIncomplete($id);
+		$item = new ItemCode($id);
 		$item = $db->itemDAO()->getItem($item, null, 0);
 
 		$history = $db->auditDAO()->getHistory($item, $limit);
@@ -129,7 +130,7 @@ class Controller extends AbstractController {
 		if($from !== null) {
 			/** @var Database $db */
 			$db = $request->getAttribute('Database');
-			$from = $db->itemDAO()->getItem(new ItemIncomplete($from));
+			$from = $db->itemDAO()->getItem(new ItemCode($from));
 		}
 
 		$request = $request
@@ -244,7 +245,7 @@ class Controller extends AbstractController {
 
 			case 'todo':
 				$todos = [];
-				$possibileTodos = array_keys(Feature::features['todo']);
+				$possibileTodos = array_keys(BaseFeature::features['todo']);
 				foreach($possibileTodos as $possibileTodo) {
 					$todos[$possibileTodo] = $db->statsDAO()->getItemsByFeatures(new Feature('todo', $possibileTodo), null, 100);
 				}
@@ -275,7 +276,7 @@ class Controller extends AbstractController {
 				$locationDefault = 'LabFis4';
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
-				$location = $location === null ? null : new ItemIncomplete($location);
+				$location = $location === null ? null : new ItemCode($location);
 
 				$request = $request
 					->withAttribute('Template', 'stats::cases')
@@ -310,7 +311,7 @@ class Controller extends AbstractController {
 				$locationDefault = 'Rambox';
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
-				$location = $location === null ? null : new ItemIncomplete($location);
+				$location = $location === null ? null : new ItemCode($location);
 
 				$request = $request
 					->withAttribute('Template', 'stats::rams')
@@ -476,9 +477,7 @@ class Controller extends AbstractController {
 	}
 
 	public static function bulk(Request $request, Response $response, ?callable $next = null): Response {
-		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
-		$body = $request->getParsedBody();
 
 		Validation::authorize($user);
 
@@ -517,7 +516,7 @@ class Controller extends AbstractController {
 			// Null if there's no value or an empty string
 			$where = Validation::validateOptionalString($body, 'where', null, null);
 			if($where !== null) {
-				$where = new ItemIncomplete($where);
+				$where = new ItemCode($where);
 			}
 			try {
 				$moved = self::doBulkMove($items, $where, $db);
@@ -761,7 +760,7 @@ class Controller extends AbstractController {
 	 * Parse the file/input format for bulk move operations and do whatever's needed
 	 *
 	 * @param string $itemsList Items list, in string format
-	 * @param ItemIncomplete|null $defaultLocation Default location for items without a location in the list
+	 * @param ItemCode|null $defaultLocation Default location for items without a location in the list
 	 * @param Database $db Our dear database
 	 * @param bool $fix Perform fixup
 	 * @param bool $validate Perform validation
@@ -772,7 +771,7 @@ class Controller extends AbstractController {
 	 */
 	public static function doBulkMove(
 		string $itemsList,
-		?ItemIncomplete $defaultLocation,
+		?ItemCode $defaultLocation,
 		Database $db,
 		bool $fix = true,
 		bool $validate = true
@@ -792,15 +791,15 @@ class Controller extends AbstractController {
 			}
 			$lineExploded = explode(':', $line);
 			if(count($lineExploded) == 1) {
-				$item = new ItemIncomplete(trim($lineExploded[0]));
+				$item = new ItemCode(trim($lineExploded[0]));
 				if($defaultLocation === null) {
 					throw new \InvalidArgumentException("No location provided for $line and no default location", 1);
 				} else {
 					$location = $defaultLocation;
 				}
 			} else if(count($lineExploded) == 2) {
-				$item = new ItemIncomplete(trim($lineExploded[0]));
-				$location = new ItemIncomplete(trim($lineExploded[1]));
+				$item = new ItemCode(trim($lineExploded[0]));
+				$location = new ItemCode(trim($lineExploded[1]));
 			} else {
 				throw new \InvalidArgumentException("Invalid format for \"$line\", too many separators (:)", 2);
 			}

@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\SSRv1;
 
 
+use WEEEOpen\Tarallo\Server\BaseFeature;
 use WEEEOpen\Tarallo\Server\Feature;
 
 class FeaturePrinter {
@@ -152,18 +153,18 @@ class FeaturePrinter {
 	// END GENERATED CODE
 
 	const groupTranslations = [
-		Feature::GROUP_administrative => 'Administrative',
-		Feature::GROUP_commercial => 'Commercial',
-		Feature::GROUP_general => 'General',
-		Feature::GROUP_hddprocedures => 'HDD procedures',
-		Feature::GROUP_physical => 'Phyisical',
-		Feature::GROUP_features => 'Features',
-		Feature::GROUP_ports => 'Ports',
-		Feature::GROUP_sockets => 'Sockets',
-		Feature::GROUP_power => 'Power',
-		Feature::GROUP_powerconnectors => 'Power connectors',
-		Feature::GROUP_codes => 'Codes',
-		Feature::GROUP_software => 'Software',
+		BaseFeature::GROUP_administrative => 'Administrative',
+		BaseFeature::GROUP_commercial => 'Commercial',
+		BaseFeature::GROUP_general => 'General',
+		BaseFeature::GROUP_hddprocedures => 'HDD procedures',
+		BaseFeature::GROUP_physical => 'Phyisical',
+		BaseFeature::GROUP_features => 'Features',
+		BaseFeature::GROUP_ports => 'Ports',
+		BaseFeature::GROUP_sockets => 'Sockets',
+		BaseFeature::GROUP_power => 'Power',
+		BaseFeature::GROUP_powerconnectors => 'Power connectors',
+		BaseFeature::GROUP_codes => 'Codes',
+		BaseFeature::GROUP_software => 'Software',
 	];
 
 	/**
@@ -326,13 +327,13 @@ class FeaturePrinter {
 	 * @return string Value to be show to the user
 	 */
 	public static function printableValue(Feature $feature) {
-		if($feature->type === Feature::INTEGER || $feature->type === Feature::DOUBLE) {
+		if($feature->type === BaseFeature::INTEGER || $feature->type === BaseFeature::DOUBLE) {
 			try {
 				return FeaturePrinter::prettyPrint($feature);
 			} catch(\InvalidArgumentException $ignored) {
 
 			}
-		} else if($feature->type === Feature::ENUM) {
+		} else if($feature->type === BaseFeature::ENUM) {
 			return FeaturePrinter::printableEnumValue($feature->name, $feature->value);
 		}
 
@@ -391,26 +392,26 @@ class FeaturePrinter {
 	public static function getAllFeatures() {
 		$array = [];
 
-		foreach(Feature::features as $name => $stuff) {
-			$ntype = Feature::getType($name);
+		foreach(BaseFeature::features as $name => $stuff) {
+			$ntype = BaseFeature::getType($name);
 			switch($ntype) {
-				case Feature::ENUM:
+				case BaseFeature::ENUM:
 					$type = 'e';
 					$values = $stuff;
 					break;
-				case Feature::INTEGER:
+				case BaseFeature::INTEGER:
 					$type = 'i';
 					break;
-				case Feature::DOUBLE:
+				case BaseFeature::DOUBLE:
 					$type = 'd';
 					break;
-				case Feature::STRING:
+				case BaseFeature::STRING:
 				default:
 					$type = 's';
 					break;
 			}
 
-			$group = Feature::getGroup($name);
+			$group = BaseFeature::getGroup($name);
 			// 'group' => FeaturePrinter::printableGroup($group)
 			$line = ['name' => $name, 'type' => $type, 'printableName' => self::features[$name]];
 			if($type === 'e') {

@@ -197,7 +197,7 @@ final class ItemDAO extends DAO {
 	 * @param ItemWithCode $item
 	 *
 	 * @return null|string
-	 * @deprecated use getExtraData instead (which is private, so it's not a direct replacement and this stuff needs more thought: maybe move the LostAt and DeletedAt stuff to ItemIncomplete since they're optional and can exist for any item?)
+	 * @deprecated use getExtraData instead
 	 */
 	public function itemDeletedAt(ItemWithCode $item) {
 		$statement = $this->getPDO()->prepare('SELECT DeletedAt FROM Item WHERE `Code` = ?');

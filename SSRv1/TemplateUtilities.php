@@ -4,6 +4,7 @@ namespace WEEEOpen\Tarallo\SSRv1;
 
 use League\Plates\Engine;
 use League\Plates\Extension\ExtensionInterface;
+use WEEEOpen\Tarallo\Server\BaseFeature;
 use WEEEOpen\Tarallo\Server\Feature;
 
 class TemplateUtilities implements ExtensionInterface {
@@ -49,7 +50,7 @@ class TemplateUtilities implements ExtensionInterface {
 		$groupsPrintable = [];
 
 		foreach($ultraFeatures as $ultra) {
-			$groups[Feature::getGroup($ultra->feature->name)][] = $ultra;
+			$groups[BaseFeature::getGroup($ultra->feature->name)][] = $ultra;
 		}
 
 		// Group IDs are numbered, that's the order, so it has to be sorted HERE
@@ -109,7 +110,7 @@ class TemplateUtilities implements ExtensionInterface {
 	 * @return string[] Internal feature name => translated feature name
 	 */
 	public function getOptions(string $name) {
-		$options = Feature::getOptions($name);
+		$options = BaseFeature::getOptions($name);
 		foreach($options as $value => &$translated) {
 			$translated = FeaturePrinter::printableEnumValue($name, $value);
 		}
