@@ -17,7 +17,7 @@ class Search {
 	 * @param string|null $code Filter by code (% and _ are allowed, % is appended at the end anyway)
 	 * @param SearchTriplet[]|null $features Search by feature values in ancestor items
 	 * @param SearchTriplet[]|null $ancestors Search by ancestor features
-	 * @param ItemIncomplete[]|null $locations Only descendants of these items will be searched
+	 * @param ItemCode[]|null $locations Only descendants of these items will be searched
 	 * @param string[]|null $sorts Map (associative array) from feature name to order (+ or -)
 	 */
 	public function __construct(

@@ -4,9 +4,10 @@ namespace WEEEOpen\Tarallo\Server\Database;
 
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemCode;
 use WEEEOpen\Tarallo\Server\ItemNestingException;
 use WEEEOpen\Tarallo\Server\ItemValidator;
+use WEEEOpen\Tarallo\Server\ItemWithCode;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 
 final class TreeDAO extends DAO {
@@ -15,8 +16,8 @@ final class TreeDAO extends DAO {
 
 	public static function moveWithValidation(
 		Database $db,
-		ItemIncomplete $what,
-		ItemIncomplete $newParent,
+		ItemWithCode $what,
+		ItemWithCode $newParent,
 		bool $fix,
 		bool $validate
 	): bool {
@@ -68,10 +69,10 @@ final class TreeDAO extends DAO {
 	/**
 	 * Add a new Item to the tree. Don't call if it's already in the tree.
 	 *
-	 * @param ItemIncomplete $child new Item
-	 * @param ItemIncomplete|null $parent some existing Item as parent, NULL if it has no parent (root Item)
+	 * @param ItemWithCode $child new Item
+	 * @param ItemWithCode|null $parent some existing Item as parent, NULL if it has no parent (root Item)
 	 */
-	public function addToTree(ItemIncomplete $child, ItemIncomplete $parent = null) {
+	public function addToTree(ItemWithCode $child, ItemWithCode $parent = null) {
 		if($parent !== null && !$this->database->itemDAO()->itemVisible($parent)) {
 			throw new NotFoundException(self::EXCEPTION_CODE_PARENT);
 		}
@@ -89,11 +90,11 @@ final class TreeDAO extends DAO {
 	/**
 	 * Move an Item, and its descendants, somewhere else.
 	 *
-	 * @param ItemIncomplete $item Item to move
-	 * @param ItemIncomplete|null $newParent some existing Item as parent, NULL if parent should be removed (turn into
+	 * @param ItemWithCode $item Item to move
+	 * @param ItemWithCode|null $newParent some existing Item as parent, NULL if parent should be removed (turn into
 	 *     root Item)
 	 */
-	public function moveItem(ItemIncomplete $item, ItemIncomplete $newParent = null) {
+	public function moveItem(ItemWithCode $item, ItemWithCode $newParent = null) {
 		if(!$this->database->itemDAO()->itemVisible($newParent)) {
 			throw new NotFoundException(self::EXCEPTION_CODE_PARENT);
 		}
@@ -123,11 +124,11 @@ final class TreeDAO extends DAO {
 	/**
 	 * Get path to an item (item itself excluded).
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 *
-	 * @return ItemIncomplete[] 0 is direct parent, 1 is parent's parent, and so on
+	 * @return ItemWithCode[] 0 is direct parent, 1 is parent's parent, and so on
 	 */
-	private function getPathToArray(ItemIncomplete $item) {
+	private function getPathToArray(ItemWithCode $item) {
 		$statement = $this->getPDO()->prepare('SELECT Ancestor FROM Tree WHERE Descendant = ? ORDER BY Depth DESC');
 
 		try {
@@ -136,7 +137,7 @@ final class TreeDAO extends DAO {
 			$result = [];
 
 			while(($row = $statement->fetch(\PDO::FETCH_ASSOC)) !== false) {
-				$result[] = new ItemIncomplete($row['Ancestor']);
+				$result[] = new ItemCode($row['Ancestor']);
 			}
 
 			if(!empty($result)) {
@@ -152,7 +153,7 @@ final class TreeDAO extends DAO {
 		}
 	}
 
-	public function removeFromTree(ItemIncomplete $item) {
+	public function removeFromTree(ItemWithCode $item) {
 		if(!$this->database->itemDAO()->itemVisible($item)) {
 			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
 		}
@@ -186,9 +187,9 @@ final class TreeDAO extends DAO {
 	 * Items outside Tree are ignored by almost every query, so this is the most important step to bring an item into
 	 * existence.
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 */
-	private function addItemAsRoot(ItemIncomplete $item) {
+	private function addItemAsRoot(ItemWithCode $item) {
 		$pdo = $this->getPDO();
 		$statement = $pdo->prepare('INSERT INTO Tree (Ancestor, Descendant, Depth) VALUES (?, ?, 0)');
 		$id = $item->getCode();
@@ -199,12 +200,13 @@ final class TreeDAO extends DAO {
 	/**
 	 * addEdge, basically. It's better to use addToTree(), which in turn calls this function.
 	 *
-	 * @see addToTree
+	 * @param ItemWithCode $parent
+	 * @param ItemWithCode $child
 	 *
-	 * @param ItemIncomplete $parent
-	 * @param ItemIncomplete $child
+	 *@see addToTree
+	 *
 	 */
-	private function setParent(ItemIncomplete $parent, ItemIncomplete $child) {
+	private function setParent(ItemWithCode $parent, ItemWithCode $child) {
 		$parentID = $parent->getCode();
 		$childID = $child->getCode();
 
@@ -233,9 +235,9 @@ final class TreeDAO extends DAO {
 	/**
 	 * Turn an Item into a root, preserving its subtree
 	 *
-	 * @param ItemIncomplete $item the item
+	 * @param ItemWithCode $item the item
 	 */
-	private function splitSubtree(ItemIncomplete $item) {
+	private function splitSubtree(ItemWithCode $item) {
 		// straight from Bill Karwin's post (https://www.percona.com/blog/2011/02/14/moving-subtrees-in-closure-table/)
 		// other solutions exist, but they don't work in MySQL BECAUSE MYSQL, THAT'S WHY.
 		$statement = $this->getPDO()->prepare(

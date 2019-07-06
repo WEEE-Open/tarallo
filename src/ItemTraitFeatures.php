@@ -3,12 +3,8 @@
 namespace WEEEOpen\Tarallo\Server;
 
 
-class ItemFeatures extends ItemIncomplete {
+trait ItemTraitFeatures {
 	protected $features = [];
-
-	function __construct($code) {
-		parent::__construct($code);
-	}
 
 	/**
 	 * Get a feature, or null if none.
@@ -18,7 +14,7 @@ class ItemFeatures extends ItemIncomplete {
 	 *
 	 * @return Feature|null
 	 */
-	public function getFeature(string $name) {
+	public function getFeature(string $name): ?Feature {
 		$features = $this->getFeatures();
 		if(isset($features[$name])) {
 			return $features[$name];
@@ -32,7 +28,7 @@ class ItemFeatures extends ItemIncomplete {
 	 *
 	 * @return $this
 	 */
-	public function addFeature(Feature $feature) {
+	public function addFeature($feature) {
 		if(isset($this->features[$feature->name])) {
 			throw new \InvalidArgumentException('Feature ' . $feature->name . ' already added to ' . (string) $this);
 		}
@@ -45,31 +41,11 @@ class ItemFeatures extends ItemIncomplete {
 	 * Experimental method, may be removed, do not rely on it (yet)
 	 *
 	 * @param string $featureName
+	 *
+	 * @return $this
 	 */
-	public function removeFeature(string $featureName) {
+	public function removeFeatureByName(string $featureName) {
 		unset($this->features[$featureName]);
-	}
-
-	/**
-	 * @param string $name
-	 *
-	 * @return $this
-	 */
-	public function deleteFeature($name) {
-		unset($this->features[$name]);
-
-		return $this;
-	}
-
-	/**
-	 * @param array $features
-	 *
-	 * @return $this
-	 */
-	public function addMultipleFeatures(array $features) {
-		foreach($features as $feature) {
-			$this->addFeature($feature);
-		}
 
 		return $this;
 	}
@@ -77,7 +53,7 @@ class ItemFeatures extends ItemIncomplete {
 	/**
 	 * @return Feature[]
 	 */
-	public function getFeatures() {
+	public function getFeatures(): array {
 		return $this->features;
 	}
 }

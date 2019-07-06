@@ -2,21 +2,66 @@
 
 namespace WEEEOpen\Tarallo\Server\Database;
 
+use WEEEOpen\Tarallo\Server\BaseFeature;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemFeatures;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemWithCode;
+use WEEEOpen\Tarallo\Server\ItemWithCodeAndFeatures;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 
 
-final class FeatureDAO extends DAO {
+final class FeatureDAO extends DAO {/**
+ * Obtain \PDO::PARAM_... constant from feature name
+ *
+ * @param int $type Feature type
+ *
+ * @return int Column name (e.g. ValueText)
+ *@see getType
+ *
+ */public static function getPDOType(int $type): int {
+	switch($type) {
+		case BaseFeature::STRING:
+			return \PDO::PARAM_STR;
+		case BaseFeature::INTEGER:
+			return \PDO::PARAM_INT;
+		case BaseFeature::ENUM:
+			return \PDO::PARAM_STR;
+		case BaseFeature::DOUBLE:
+			return \PDO::PARAM_STR;
+		default:
+			throw new \LogicException('Unrecognized feature type in getPDOType');
+	}
+}
 
 	/**
-	 * Add features to ALL TEH ITEMS
+ * Obtain database column name (for the ItemFeature table)
+ *
+ * @param int $type Feature type
+ *
+ * @return string Column name (e.g. ValueText)
+ *@see getType
+ *
+ */public static function getColumn(int $type): string {
+	switch($type) {
+		case BaseFeature::STRING:
+			return 'ValueText';
+		case BaseFeature::INTEGER:
+			return 'Value';
+		case BaseFeature::ENUM:
+			return 'ValueEnum';
+		case BaseFeature::DOUBLE:
+			return 'ValueDouble';
+		default:
+			throw new \LogicException('Unrecognized feature type in getColumn');
+	}
+}
+
+	/**
+	 * Get features from ALL TEH ITEMS
 	 *
-	 * @param ItemFeatures[] $items
+	 * @param ItemWithCodeAndFeatures[] $items
 	 *
-	 * @return ItemFeatures[]|Item[] same array
+	 * @return ItemWithCodeAndFeatures[]|Item[] same array
 	 */
 	public function getFeaturesAll(array $items) {
 		foreach($items as $item) {
@@ -29,11 +74,11 @@ final class FeatureDAO extends DAO {
 	/**
 	 * Add features to an item
 	 *
-	 * @param ItemFeatures $item
+	 * @param ItemWithCodeAndFeatures $item
 	 *
-	 * @return ItemFeatures|Item same item
+	 * @return ItemWithCodeAndFeatures|Item same item
 	 */
-	public function getFeatures(ItemFeatures $item) {
+	public function getFeatures(ItemWithCodeAndFeatures $item) {
 		/*
 		 * This seemed a good query to fetch default and non-default features, when database structure was different:
 		 *
@@ -78,9 +123,9 @@ final class FeatureDAO extends DAO {
 	/**
 	 * Add a U audit entry for the specified item.
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 */
-	public function addAuditEntry(ItemIncomplete $item) {
+	public function addAuditEntry(ItemWithCode $item) {
 		$statement = $this->getPDO()
 			->prepare('INSERT INTO Audit (`Code`, `Change`, `User`) VALUES (?, \'U\', @taralloAuditUsername)');
 
@@ -102,12 +147,12 @@ final class FeatureDAO extends DAO {
 	/**
 	 * Set item features.
 	 *
-	 * @param ItemFeatures $item
+	 * @param ItemWithCodeAndFeatures $item
 	 *
 	 * @return bool True if anything actually changed (and an U audit entry was generated), false otherwise.
 	 * @TODO: it would be cool if changing a feature to the value it already has still didn't generate an entry...
 	 */
-	public function setFeatures(ItemFeatures $item): bool {
+	public function setFeatures(ItemWithCodeAndFeatures $item): bool {
 		$features = $item->getFeatures();
 
 		if(empty($features)) {
@@ -115,8 +160,8 @@ final class FeatureDAO extends DAO {
 		}
 
 		foreach($features as $feature) {
-			$column = Feature::getColumn($feature->type);
-			$type = Feature::getPDOType($feature->type);
+			$column = self::getColumn($feature->type);
+			$type = self::getPDOType($feature->type);
 			/** @noinspection SqlResolve */
 			$statement = $this->getPDO()
 				->prepare(
@@ -158,12 +203,12 @@ final class FeatureDAO extends DAO {
 	/**
 	 * Delete a single feature from an item. This generates no audit entries, BTW.
 	 *
-	 * @param ItemFeatures $item
+	 * @param ItemWithCodeAndFeatures $item
 	 * @param string[] $features
 	 *
 	 * @return bool True if anything was deleted
 	 */
-	public function deleteFeature(ItemFeatures $item, array $features) {
+	public function deleteFeature(ItemWithCodeAndFeatures $item, array $features) {
 		if(empty($features)) {
 			return false;
 		}
@@ -188,9 +233,9 @@ final class FeatureDAO extends DAO {
 	/**
 	 * Delete all features from an item
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 */
-	public function deleteFeaturesAll(ItemIncomplete $item) {
+	public function deleteFeaturesAll(ItemWithCode $item) {
 		$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ?');
 
 		try {

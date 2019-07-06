@@ -2,20 +2,22 @@
 
 namespace WEEEOpen\Tarallo\Server\Database;
 
+use WEEEOpen\Tarallo\Server\BaseFeature;
 use WEEEOpen\Tarallo\Server\Feature;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemCode;
+use WEEEOpen\Tarallo\Server\ItemWithCode;
 
 final class StatsDAO extends DAO {
 	/**
 	 * Get an AND for a WHERE clause that filters items by their location.
 	 * Bind :loc to the location.
 	 *
-	 * @param null|ItemIncomplete $location if null returns an empty string
+	 * @param null|ItemWithCode $location if null returns an empty string
 	 * @param string $alias Table alias, if you're doing "SELECT ItemFeatures AS alias", empty string if none
 	 *
 	 * @return string part of a query
 	 */
-	private static function filterLocation(?ItemIncomplete $location, string $alias = '') {
+	private static function filterLocation(?ItemWithCode $location, string $alias = '') {
 		if($location === null) {
 			return '';
 		}
@@ -138,16 +140,17 @@ EOQ
 	 *
 	 * Any attempt to make the function more generic failed miserably or was escessively complex, but consider
 	 * that this is a very specific kind of stat to begin with...
-	 * @todo parametrize the "in-use" exclusion, maybe? So the "most recently modified" makes more sense
-	 * @todo try to parametrize the "type=case" filter
 	 *
-	 * @param ItemIncomplete $location Where to look, null to search everywhere
+	 * @param ItemWithCode $location Where to look, null to search everywhere
 	 * @param bool $recent True for more recently modified items first, false for least recently modified
 	 * @param int $limit rows to return
 	 *
 	 * @return int[] code => timestamp
+	 *@todo parametrize the "in-use" exclusion, maybe? So the "most recently modified" makes more sense
+	 * @todo try to parametrize the "type=case" filter
+	 *
 	 */
-	public function getModifiedItems(?ItemIncomplete $location, bool $recent = true, int $limit = 100): array {
+	public function getModifiedItems(?ItemWithCode $location, bool $recent = true, int $limit = 100): array {
 		$array = [];
 
 		if($location !== null) {
@@ -212,7 +215,7 @@ LIMIT :lim';
 	 *
 	 * @param string $feature Feature name
 	 * @param Feature|null $filter Feature that must match, useful to select items by type
-	 * @param ItemIncomplete $location Consider only this subtree
+	 * @param ItemWithCode $location Consider only this subtree
 	 * @param null|\DateTime $creation Creation date (starts from here)
 	 * @param bool $deleted Also count deleted/lost items, defaults to false (don't count them)
 	 * @param int $cutoff Report features only if count is greater than (or equal to) this number,
@@ -223,12 +226,12 @@ LIMIT :lim';
 	public function getCountByFeature(
 		string $feature,
 		?Feature $filter,
-		?ItemIncomplete $location = null,
+		?ItemWithCode $location = null,
 		?\DateTime $creation = null,
 		bool $deleted = false,
 		int $cutoff = 1
 	) {
-		Feature::validateFeatureName($feature);
+		BaseFeature::validateFeatureName($feature);
 
 		$array = [];
 
@@ -290,15 +293,15 @@ ORDER BY Quantity DESC, Val ASC";
 	 *
 	 * @param Feature $feature Feature and value to search
 	 * @param int $limit Maximum number of results
-	 * @param null|ItemIncomplete $location
+	 * @param null|ItemWithCode $location
 	 * @param null|\DateTime $creation creation date (starts from here)
 	 * @param bool $deleted Also count deleted/lost items, defaults to false (don't count them)
 	 *
-	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
+	 * @return ItemWithCode[] Items that have that feature (or empty array if none)
 	 */
 	public function getItemsByFeatures(
 		Feature $feature,
-		?ItemIncomplete $location = null,
+		?ItemWithCode $location = null,
 		?int $limit = null, // TODO: $limit === null won't work (see getLostItem to do it correctly)
 		?\DateTime $creation = null,
 		bool $deleted = false
@@ -335,7 +338,7 @@ LIMIT :lim";
 			$success = $statement->execute();
 			assert($success, 'get items by features');
 			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-				$result[] = new ItemIncomplete($row['Code']);
+				$result[] = new ItemCode($row['Code']);
 			}
 		} finally {
 			$statement->closeCursor();
@@ -384,7 +387,7 @@ $limitFilter";
 			$success = $statement->execute();
 			assert($success, 'get items by features');
 			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-				$result[] = new ItemIncomplete($row['Code']);
+				$result[] = new ItemCode($row['Code']);
 			}
 		} finally {
 			$statement->closeCursor();
@@ -399,17 +402,17 @@ $limitFilter";
 	 * @param Feature $filter feature that should be there
 	 * (to at least set item type, you'll need it unless you want to receive the entire database, basically...)
 	 * @param string $notFeature Feature that should not be present at all
-	 * @param null|ItemIncomplete $location
+	 * @param null|ItemWithCode $location
 	 * @param int $limit Maximum number of results
 	 * @param null|\DateTime $creation creation date (starts from here)
 	 * @param bool $deleted Also count deleted/lost items, defaults to false (don't count them)
 	 *
-	 * @return ItemIncomplete[] Items that have that feature (or empty array if none)
+	 * @return ItemWithCode[] Items that have that feature (or empty array if none)
 	 */
 	public function getItemByNotFeature(
 		Feature $filter,
 		string $notFeature,
-		?ItemIncomplete $location = null,
+		?ItemWithCode $location = null,
 		int $limit = 100,
 		?\DateTime $creation = null,
 		bool $deleted = false
@@ -451,7 +454,7 @@ LIMIT :lim";
 			$success = $statement->execute();
 			assert($success, 'get items by NOT features');
 			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-				$result[] = new ItemIncomplete($row['Code']);
+				$result[] = new ItemCode($row['Code']);
 			}
 		} finally {
 			$statement->closeCursor();
@@ -465,7 +468,7 @@ LIMIT :lim";
 	 *
 	 * @param Feature $filter feature that should be there (use to select item type, possibly)
 	 * @param string[] $features which columns you want in the results table. Order is preserved.
-	 * @param null|ItemIncomplete $location Only consider items in this location
+	 * @param null|ItemWithCode $location Only consider items in this location
 	 * @param null|\DateTime $creation creation date (starts from here)
 	 * @param bool $deleted Also count deleted/lost items, defaults to false (don't count them)
 	 *
@@ -474,7 +477,7 @@ LIMIT :lim";
 	public function getRollupCountByFeature(
 		Feature $filter,
 		array $features,
-		?ItemIncomplete $location = null,
+		?ItemWithCode $location = null,
 		?\DateTime $creation = null,
 		bool $deleted = false
 	): array {
@@ -524,7 +527,7 @@ LIMIT :lim";
 
 		foreach($features as $i => $feature) {
 			// Can't do it with coalesce, numeric features end up in wrong order...
-			$column = Feature::getColumn(Feature::getType($feature));
+			$column = FeatureDAO::getColumn(BaseFeature::getType($feature));
 			$select .= "f$i.$column AS `$feature`, ";
 			if($i > 0) {
 				$from .= " JOIN ItemFeature AS f$i ON f0.Code=f$i.Code";
@@ -562,7 +565,9 @@ GROUP BY $group WITH ROLLUP";
 			// returns the correct type even with COALESCE
 			$cast = [];
 			foreach($features as $feature) {
-				if(Feature::getType($feature) === Feature::INTEGER || Feature::getType($feature) === Feature::DOUBLE) {
+				if(BaseFeature::getType($feature) === BaseFeature::INTEGER || BaseFeature::getType(
+						$feature
+					) === BaseFeature::DOUBLE) {
 					$cast[] = $feature;
 				}
 			}
@@ -570,9 +575,9 @@ GROUP BY $group WITH ROLLUP";
 				foreach($result as &$row) {
 					foreach($cast as $feature) {
 						if($row[$feature] !== null) {
-							if(Feature::getType($feature) === Feature::INTEGER) {
+							if(BaseFeature::getType($feature) === BaseFeature::INTEGER) {
 								$row[$feature] = (int) $row[$feature];
-							} else if(Feature::getType($feature) === Feature::DOUBLE) {
+							} else if(BaseFeature::getType($feature) === BaseFeature::DOUBLE) {
 								$row[$feature] = (double) $row[$feature];
 							}
 						}

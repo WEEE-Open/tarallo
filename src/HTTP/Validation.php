@@ -2,7 +2,7 @@
 
 namespace WEEEOpen\Tarallo\Server\HTTP;
 
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemCode;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\User;
 use WEEEOpen\Tarallo\Server\ValidationException;
@@ -166,12 +166,12 @@ class Validation {
 	 *
 	 * @param string $code
 	 *
-	 * @return ItemIncomplete
+	 * @return ItemCode
 	 * @deprecated handle all exceptions in controllers
 	 */
 	public static function newItemIncomplete(string $code) {
 		try {
-			return new ItemIncomplete($code);
+			return new ItemCode($code);
 		} catch(ValidationException $e) {
 			if($e->getCode() === 5) {
 				throw new NotFoundException();

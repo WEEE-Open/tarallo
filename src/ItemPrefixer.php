@@ -80,8 +80,8 @@ class ItemPrefixer {
 	}
 
 	private static function has(string $name, array $features): bool {
-		$type = Feature::getType($name);
-		if($type === Feature::INTEGER || $type === Feature::DOUBLE) {
+		$type = BaseFeature::getType($name);
+		if($type === BaseFeature::INTEGER || $type === BaseFeature::DOUBLE) {
 			return isset($features[$name]) && $features[$name]->value > 0;
 		} else {
 			return isset($features[$name]);

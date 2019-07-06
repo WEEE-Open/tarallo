@@ -8,7 +8,7 @@ namespace WEEEOpen\Tarallo\Server;
  * @package WEEEOpen\Tarallo
  */
 class Product implements \JsonSerializable {
-	use ItemFeatures;
+	use ItemTraitFeatures;
 	const DEFAULT_VARIANT = '0';
 	private $brand;
 	private $model;

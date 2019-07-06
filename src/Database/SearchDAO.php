@@ -2,9 +2,9 @@
 
 namespace WEEEOpen\Tarallo\Server\Database;
 
-use WEEEOpen\Tarallo\Server\Feature;
+use WEEEOpen\Tarallo\Server\BaseFeature;
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemCode;
 use WEEEOpen\Tarallo\Server\Search;
 use WEEEOpen\Tarallo\Server\SearchTriplet;
 use WEEEOpen\Tarallo\Server\User;
@@ -14,7 +14,7 @@ final class SearchDAO extends DAO {
 		$feature = $triplet->getAsFeature();
 		$operator = $triplet->getCompare();
 		switch($feature->type) {
-			case Feature::STRING:
+			case BaseFeature::STRING:
 				switch($operator) {
 					case '=':
 					case '<>':
@@ -25,9 +25,9 @@ final class SearchDAO extends DAO {
 						return "ValueText NOT LIKE :param$id";
 				}
 				break;
-			case Feature::INTEGER:
-			case Feature::DOUBLE:
-				$column = Feature::getColumn($feature->type);
+			case BaseFeature::INTEGER:
+			case BaseFeature::DOUBLE:
+				$column = FeatureDAO::getColumn($feature->type);
 				switch($operator) {
 					case '>':
 					case '<':
@@ -38,7 +38,7 @@ final class SearchDAO extends DAO {
 						return "$column $operator :param$id";
 				}
 				break;
-			case Feature::ENUM:
+			case BaseFeature::ENUM:
 				switch($operator) {
 					case '=':
 					case '<>':
@@ -227,7 +227,7 @@ EOQ;
 		$i = 0;
 		if($search->searchFeatures !== null) {
 			foreach($search->searchFeatures as $triplet) {
-				$pdoType = $triplet->getAsFeature()->value === Feature::INTEGER ? \PDO::PARAM_INT : \PDO::PARAM_STR;
+				$pdoType = $triplet->getAsFeature()->value === BaseFeature::INTEGER ? \PDO::PARAM_INT : \PDO::PARAM_STR;
 				$statement->bindValue(":fn$i", $triplet->getKey(), \PDO::PARAM_STR);
 				$statement->bindValue(":param$i", $triplet->getValue(), $pdoType);
 				$i++;
@@ -241,7 +241,7 @@ EOQ;
 		}
 		if($search->searchAncestors !== null) {
 			foreach($search->searchAncestors as $triplet) {
-				$pdoType = $triplet->getAsFeature()->value === Feature::INTEGER ? \PDO::PARAM_INT : \PDO::PARAM_STR;
+				$pdoType = $triplet->getAsFeature()->value === BaseFeature::INTEGER ? \PDO::PARAM_INT : \PDO::PARAM_STR;
 				$statement->bindValue(":fn$i", $triplet->getKey(), \PDO::PARAM_STR);
 				$statement->bindValue(":param$i", $triplet->getValue(), $pdoType);
 				$i++;
@@ -306,7 +306,7 @@ EOQ;
 		reset($search->sort);
 		$featureName = key($search->sort);
 		$ascdesc = $search->sort[$featureName] === '+' ? 'ASC' : 'DESC';
-		$column = Feature::getColumn(Feature::getType($featureName));
+		$column = FeatureDAO::getColumn(BaseFeature::getType($featureName));
 
 		self::unsort($searchId);
 
@@ -414,7 +414,7 @@ EOQ;
 			$statement->bindValue(':cnt', $perPage, \PDO::PARAM_INT);
 			$statement->execute();
 			foreach($statement as $result) {
-				$items[] = $itemDAO->getItem(new ItemIncomplete($result['Item']), null, $depth);
+				$items[] = $itemDAO->getItem(new ItemCode($result['Item']), null, $depth);
 			}
 		} finally {
 			$statement->closeCursor();

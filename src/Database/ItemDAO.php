@@ -3,8 +3,8 @@
 namespace WEEEOpen\Tarallo\Server\Database;
 
 use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
 use WEEEOpen\Tarallo\Server\ItemPrefixer;
+use WEEEOpen\Tarallo\Server\ItemWithCode;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\ValidationException;
 
@@ -15,11 +15,11 @@ final class ItemDAO extends DAO {
 	 * Insert a single item into the database
 	 *
 	 * @param Item $item the item to be inserted
-	 * @param ItemIncomplete $parent parent item
+	 * @param ItemWithCode $parent parent item
 	 *
 	 * @throws DuplicateItemCodeException If any item with same code already exists
 	 */
-	public function addItem(Item $item, ItemIncomplete $parent = null) {
+	public function addItem(Item $item, ItemWithCode $parent = null) {
 		if(!$item->hasCode()) {
 			try {
 				$prefix = ItemPrefixer::get($item);
@@ -34,7 +34,7 @@ final class ItemDAO extends DAO {
 
 		try {
 			$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
-			$statement->bindValue(':tok', $item->token, \PDO::PARAM_STR);
+			$statement->bindValue(':tok', $item->getToken(), \PDO::PARAM_STR);
 			$result = $statement->execute();
 			assert($result !== false, 'insert item');
 		} catch(\PDOException $e) {
@@ -50,7 +50,7 @@ final class ItemDAO extends DAO {
 		$this->database->featureDAO()->setFeatures($item);
 		$this->database->treeDAO()->addToTree($item, $parent);
 
-		$childItems = $item->getContents();
+		$childItems = $item->getContent();
 		foreach($childItems as $childItem) {
 			// yay recursion!
 			$this->addItem($childItem, $item);
@@ -60,11 +60,11 @@ final class ItemDAO extends DAO {
 	/**
 	 * Soft-delete an item (mark as deleted to make invisible, detach from tree)
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 *
 	 * @throws ValidationException if item contains other items (cannot be deleted)
 	 */
-	public function deleteItem(ItemIncomplete $item) {
+	public function deleteItem(ItemWithCode $item) {
 		$this->itemMustExist($item);
 		$statement = $this->getPDO()->prepare('UPDATE Item SET DeletedAt = NOW() WHERE `Code` = ?');
 
@@ -84,9 +84,9 @@ final class ItemDAO extends DAO {
 	/**
 	 * Lose an item (mark as lost, detach from tree)
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 */
-	public function loseItem(ItemIncomplete $item) {
+	public function loseItem(ItemWithCode $item) {
 		$this->itemMustExist($item);
 		$statement = $this->getPDO()->prepare('UPDATE Item SET LostAt = NOW() WHERE `Code` = ?');
 
@@ -106,12 +106,12 @@ final class ItemDAO extends DAO {
 	/**
 	 * Yes, it's kinda like the true/false/FileNotFound thing.
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 *
-	 * @deprecated This just doesn't cut it anymore with lost items
 	 * @return bool|null tri-state: true if marked as deleted, false if not marked but exists, null if doesn't exist
+	 *@deprecated This just doesn't cut it anymore with lost items
 	 */
-	private function itemIsDeleted(ItemIncomplete $item) {
+	private function itemIsDeleted(ItemWithCode $item) {
 		$statement = $this->getPDO()
 			->prepare('SELECT IF(DeletedAt IS NULL, FALSE, TRUE) FROM Item WHERE `Code` = :cod');
 		try {
@@ -132,13 +132,13 @@ final class ItemDAO extends DAO {
 	/**
 	 * True if item exists in any form (even if marked as deleted), false otherwise.
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 *
 	 * @return bool
 	 * @deprecated Use in tests only, replace with itemMustExist
 	 * @see itemVisible to see if item is visible or marked as deleted
 	 */
-	public function itemExists(ItemIncomplete $item): bool {
+	public function itemExists(ItemWithCode $item): bool {
 		$deleted = $this->itemIsDeleted($item);
 		if($deleted === null) {
 			return false;
@@ -151,13 +151,13 @@ final class ItemDAO extends DAO {
 	 * True if item is visibile (exists AND not marked as deleted), false otherwise (doesn't exist or is marked as
 	 * deleted)
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 *
 	 * @return bool
 	 * @deprecated Use in tests only, replace with itemMustExist
 	 * @see itemExists to check wether item exists at all or not
 	 */
-	public function itemVisible(ItemIncomplete $item): bool {
+	public function itemVisible(ItemWithCode $item): bool {
 		$deleted = $this->itemIsDeleted($item);
 		if($deleted === false) {
 			return true;
@@ -169,11 +169,11 @@ final class ItemDAO extends DAO {
 	/**
 	 * Ensure that an Item exists in the Item table and lock its row
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 * @param bool $allowDeleted True if a deleted item is acceptable as "existing", false if deleted items should be
 	 * ignored
 	 */
-	public function itemMustExist(ItemIncomplete $item, $allowDeleted = false) {
+	public function itemMustExist(ItemWithCode $item, $allowDeleted = false) {
 		if($allowDeleted) {
 			$statement = $this->getPDO()
 				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod FOR UPDATE');
@@ -194,12 +194,12 @@ final class ItemDAO extends DAO {
 	/**
 	 * Get deletion date for an item, null if not deleted or doesn't exist
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 *
 	 * @return null|string
 	 * @deprecated use getExtraData instead (which is private, so it's not a direct replacement and this stuff needs more thought: maybe move the LostAt and DeletedAt stuff to ItemIncomplete since they're optional and can exist for any item?)
 	 */
-	public function itemDeletedAt(ItemIncomplete $item) {
+	public function itemDeletedAt(ItemWithCode $item) {
 		$statement = $this->getPDO()->prepare('SELECT DeletedAt FROM Item WHERE `Code` = ?');
 		try {
 			$statement->execute([$item->getCode()]);
@@ -218,9 +218,9 @@ final class ItemDAO extends DAO {
 	 * Undo soft deletion of an item. It will turn into a root item, wether you want that or not: place it somewhere
 	 * right after that.
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 */
-	public function undelete(ItemIncomplete $item) {
+	public function undelete(ItemWithCode $item) {
 		$statement = $this->getPDO()->prepare('UPDATE Item SET DeletedAt = NULL WHERE `Code` = ?');
 		try {
 			$statement->execute([$item->getCode()]);
@@ -236,9 +236,9 @@ final class ItemDAO extends DAO {
 	 * Undo losing an item, when it's found again. It will turn into a root item, wether you want that or not: place it
 	 * somewhere right after that.
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 */
-	public function unlose(ItemIncomplete $item) {
+	public function unlose(ItemWithCode $item) {
 		$statement = $this->getPDO()->prepare('UPDATE Item SET LostAt = NULL WHERE `Code` = ?');
 		try {
 			$statement->execute([$item->getCode()]);
@@ -275,13 +275,13 @@ final class ItemDAO extends DAO {
 	/**
 	 * Get a single item (and its content)
 	 *
-	 * @param ItemIncomplete $itemToGet
+	 * @param ItemWithCode $itemToGet
 	 * @param string|null $token
 	 * @param int|null $depth max depth
 	 *
 	 * @return Item
 	 */
-	public function getItem(ItemIncomplete $itemToGet, $token = null, int $depth = null) {
+	public function getItem(ItemWithCode $itemToGet, $token = null, int $depth = null) {
 		if($token !== null && !$this->checkToken($itemToGet, $token)) {
 			throw new NotFoundException();
 		}
@@ -348,12 +348,12 @@ EOQ
 	/**
 	 * Check that item can be obtained with a token.
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 * @param string $token
 	 *
 	 * @return bool true if possible, false if wrong token or item doesn't exist
 	 */
-	private function checkToken(ItemIncomplete $item, string $token) {
+	private function checkToken(ItemWithCode $item, string $token) {
 		$tokenquery = $this->getPDO()->prepare(
 			<<<EOQ
 			SELECT IF(COUNT(*) > 0, TRUE, FALSE)

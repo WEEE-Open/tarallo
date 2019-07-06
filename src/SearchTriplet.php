@@ -57,7 +57,7 @@ class SearchTriplet {
 	}
 
 	private static function checkCanPartialMatch(Feature $feature) {
-		if($feature->type !== Feature::STRING) {
+		if($feature->type !== BaseFeature::STRING) {
 			throw new \InvalidArgumentException(
 				'Cannot partially match feature ' . $feature->name . ': not a text feature'
 			);
@@ -65,7 +65,7 @@ class SearchTriplet {
 	}
 
 	private static function checkWellOrdered(Feature $feature, $operator) {
-		if($feature->type !== Feature::INTEGER && $feature->type !== Feature::DOUBLE) {
+		if($feature->type !== BaseFeature::INTEGER && $feature->type !== BaseFeature::DOUBLE) {
 			throw new \InvalidArgumentException(
 				"Cannot apply operator '$operator' to " . $feature->name . ': cannot be ordered'
 			);

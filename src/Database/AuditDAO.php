@@ -3,7 +3,7 @@
 namespace WEEEOpen\Tarallo\Server\Database;
 
 
-use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemWithCode;
 
 class AuditDAO extends DAO {
 	/**
@@ -71,12 +71,12 @@ LIMIT ?'
 	/**
 	 * Get history entries for an item
 	 *
-	 * @param ItemIncomplete $item
+	 * @param ItemWithCode $item
 	 * @param int $howMany
 	 *
 	 * @return array
 	 */
-	public function getHistory(ItemIncomplete $item, int $howMany) {
+	public function getHistory(ItemWithCode $item, int $howMany) {
 		$statement = $this->getPDO()->prepare(
 			'SELECT `Change` as `change`, Other as other, UNIX_TIMESTAMP(`Time`) AS `time`, `User` as `user`
 FROM Audit

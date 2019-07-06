@@ -84,7 +84,7 @@ class ItemValidator {
 		}
 
 		$fixups = [];
-		foreach($item->getContents() as $subitem) {
+		foreach($item->getContent() as $subitem) {
 			$newParent = self::reparentAll($subitem, $item);
 			if($newParent !== $item) {
 				// Avoid changing arrays while foreachs are iterating over them
@@ -132,13 +132,13 @@ class ItemValidator {
 					if($mobo !== null && !self::has($mobo, 'usb-ports-n')) {
 						// TODO: this will end badly when products are implemented...
 						$mobo->addFeature($item->getFeature('usb-ports-n'));
-						$item->removeFeature('usb-ports-n');
+						$item->removeFeatureByName('usb-ports-n');
 					}
 				}
 			}
 		}
 
-		foreach($item->getContents() as $subitem) {
+		foreach($item->getContent() as $subitem) {
 			self::moveFeaturesAllRecursively($subitem, true);
 		}
 	}
@@ -201,7 +201,7 @@ class ItemValidator {
 			}
 		}
 
-		foreach($item->getContents() as $subitem) {
+		foreach($item->getContent() as $subitem) {
 			self::validateFeatures($subitem);
 		}
 	}
@@ -290,7 +290,7 @@ class ItemValidator {
 			}
 		}
 
-		foreach($item->getContents() as $subitem) {
+		foreach($item->getContent() as $subitem) {
 			self::checkNesting($subitem, $item);
 		}
 	}
@@ -360,7 +360,7 @@ class ItemValidator {
 	 * @return Item|null Motherboard, or null if not found
 	 */
 	private static function findMobo(Item $item) {
-		foreach($item->getContents() as $maybeMobo) {
+		foreach($item->getContent() as $maybeMobo) {
 			if(self::getOrNull($maybeMobo, 'type') === 'motherboard') {
 				return $maybeMobo;
 			}
