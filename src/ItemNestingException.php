@@ -13,7 +13,7 @@ class ItemNestingException extends \RuntimeException {
 	 * @param string $itemCode Item that can't be placed there
 	 * @param string $parentCode Parent item that can't accept it
 	 */
-	public function __construct(string $message = "", string $itemCode, string $parentCode) {
+	public function __construct(string $message, string $itemCode, string $parentCode) {
 		parent::__construct($message);
 		$this->itemCode = $itemCode;
 		$this->parentCode = $parentCode;
