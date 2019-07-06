@@ -156,7 +156,7 @@ $resultlocalized2 .= "\t];" . PHP_EOL . "\t// END GENERATED CODE";
 $resultlocalized = implode("\tconst featuresEnum = [\n", [$resultlocalized, $resultlocalized2]);
 unset($resultlocalized2);
 
-$php_filename = $basedir . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Feature.php';
+$php_filename = $basedir . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'BaseFeature.php';
 $php = file_get_contents($php_filename);
 
 $piecesphp = explode("\t// BEGIN GENERATED CODE" . PHP_EOL, $php, 2);
