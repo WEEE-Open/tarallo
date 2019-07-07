@@ -20,6 +20,7 @@ use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemCode;
+use WEEEOpen\Tarallo\Server\ItemValidator;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
 use WEEEOpen\Tarallo\Server\User;
@@ -578,7 +579,16 @@ class Controller extends AbstractController {
 			->withHeader('Cache-Control', 'max-age=36000');
 		//->withHeader('Last-Modified', '...');
 
-		$response->getBody()->write(json_encode(['features' => FeaturePrinter::getAllFeatures()]));
+		$defaults = [];
+		foreach(Feature::features['type'] as $type => $useless) {
+			$defaults[$type] = ItemValidator::getDefaultFeatures($type, $isDefault);
+		}
+		$defaults[null] = ItemValidator::getDefaultFeatures('', $isDefault);
+
+		$response->getBody()->write(json_encode([
+			'features' => FeaturePrinter::getAllFeatures(),
+			'defaults' => $defaults,
+		]));
 
 		return $next ? $next($request, $response) : $response;
 	}
