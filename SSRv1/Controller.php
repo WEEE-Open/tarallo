@@ -573,22 +573,38 @@ class Controller extends AbstractController {
 	}
 
 	public static function getFeaturesJson(Request $request, Response $response, ?callable $next = null): Response {
+		// They aren't changing >1 time per second, so this should be stable enough for the ETag header...
+		$lastmod1 = ItemValidator::defaultFeaturesLastModified();
+		$lastmod2 = BaseFeature::featuresLastModified();
+		$language = 'en';
+		$etag = "$lastmod1$lastmod2$language";
+
 		$response = $response
-			->withHeader('Content-Type', 'text/json')
-			->withHeader('Expires', gmdate('D, d M Y H:i:s', time() + 36000) . ' GMT')
-			->withHeader('Cache-Control', 'max-age=36000');
-		//->withHeader('Last-Modified', '...');
+			->withHeader('Etag', $etag)
+			->withHeader('Cache-Control', 'public, max-age=36000');
+
+		$cachedEtags = $request->getHeader('If-None-Match');
+		foreach($cachedEtags as $cachedEtag) {
+			if($cachedEtag === $etag) {
+				$response = $response
+					->withStatus(304);
+				return $next ? $next($request, $response) : $response;
+			}
+		}
 
 		$defaults = [];
 		foreach(Feature::features['type'] as $type => $useless) {
-			$defaults[$type] = ItemValidator::getDefaultFeatures($type, $isDefault);
+			$defaults[$type] = ItemValidator::getDefaultFeatures($type);
 		}
-		$defaults[null] = ItemValidator::getDefaultFeatures('', $isDefault);
+		//$defaults[null] = ItemValidator::getDefaultFeatures('');
 
 		$response->getBody()->write(json_encode([
 			'features' => FeaturePrinter::getAllFeatures(),
 			'defaults' => $defaults,
 		]));
+
+		$response = $response
+			->withHeader('Content-Type', 'text/json');
 
 		return $next ? $next($request, $response) : $response;
 	}

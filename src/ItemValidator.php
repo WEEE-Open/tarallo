@@ -479,7 +479,10 @@ class ItemValidator {
 				return ['notes'];
 			default:
 				return ['brand', 'model', 'owner', 'notes'];
-
 		}
+	}
+
+	public static function defaultFeaturesLastModified(): int {
+		return filemtime(__FILE__);
 	}
 }

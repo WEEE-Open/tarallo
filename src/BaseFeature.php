@@ -257,6 +257,10 @@ class BaseFeature {
 	];
 	// END GENERATED CODE
 
+	public static function featuresLastModified(): int {
+		return filemtime(__FILE__);
+	}
+
 	/**
 	 * Feature name
 	 *
