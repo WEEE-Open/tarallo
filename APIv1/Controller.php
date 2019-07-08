@@ -18,7 +18,10 @@ use WEEEOpen\Tarallo\Server\HTTP\AbstractController;
 use WEEEOpen\Tarallo\Server\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\Server\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\Server\HTTP\DatabaseConnection;
+use WEEEOpen\Tarallo\Server\HTTP\InvalidParameterException;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
+use WEEEOpen\Tarallo\Server\HTTP\InvalidRequestBodyException;
+use WEEEOpen\Tarallo\Server\HTTP\MissingMandatoryParameterException;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemCode;
@@ -177,7 +180,7 @@ class Controller extends AbstractController {
 		Validation::authorize($user);
 
 		// Could allow restoring items as roots by not calling self::moveWithValidation at all, BTW...
-		Validation::validateIsString($payload);
+		Validation::validateRequestBodyIsString($payload);
 		$id = Validation::validateHasString($parameters, 'id');
 		$fix = !isset($query['nofix']);
 		$validate = !isset($query['novalidate']);
@@ -368,7 +371,7 @@ class Controller extends AbstractController {
 
 		Validation::authorize($user);
 
-		Validation::validateIsString($payload);
+		Validation::validateRequestBodyIsString($payload);
 		$id = Validation::validateHasString($parameters, 'id');
 		$fix = !isset($query['nofix']);
 		$validate = !isset($query['novalidate']);
@@ -426,7 +429,7 @@ class Controller extends AbstractController {
 		$parameters = $request->getAttribute('parameters', []);
 
 		Validation::authorize($user);
-		Validation::validateArray($payload);
+		Validation::validateRequestBodyIsArray($payload);
 
 		$id = Validation::validateOptionalString($parameters, 'id');
 		$loopback = isset($query['loopback']);
@@ -459,7 +462,7 @@ class Controller extends AbstractController {
 		$parameters = $request->getAttribute('parameters', []);
 
 		Validation::authorize($user);
-		Validation::validateArray($payload);
+		Validation::validateRequestBodyIsArray($payload);
 
 		$id = Validation::validateOptionalString($parameters, 'id');
 		$loopback = isset($query['loopback']);
@@ -497,7 +500,7 @@ class Controller extends AbstractController {
 		$parameters = $request->getAttribute('parameters', []);
 
 		Validation::authorize($user, 3);
-		Validation::validateArray($payload);
+		Validation::validateRequestBodyIsArray($payload);
 
 		$id = Validation::validateOptionalString($parameters, 'id');
 
@@ -942,6 +945,14 @@ class Controller extends AbstractController {
 		}
 	}
 
+	/**
+	 * @param Request $request
+	 * @param Response $response
+	 * @param callable|null $next
+	 *
+	 * @return Response
+	 * @deprecated Remove it, see last point in https://github.com/WEEE-Open/tarallo/issues/50
+	 */
 	public static function handleExceptions(
 		Request $request,
 		Response $response,
@@ -970,6 +981,24 @@ class Controller extends AbstractController {
 				$request = $request
 					->withAttribute('Status', JSend::FAIL)
 					->withAttribute('Data', [$e->getParameter() => $e->getReason()]);
+				$response = $response
+					->withStatus(400);
+			} catch(InvalidParameterException $e) {
+				$request = $request
+					->withAttribute('Status', JSend::FAIL)
+					->withAttribute('Data', [$e->getParameter() => $e->getMessage()]);
+				$response = $response
+					->withStatus(400);
+			} catch(MissingMandatoryParameterException $e) {
+				$request = $request
+					->withAttribute('Status', JSend::FAIL)
+					->withAttribute('Data', [$e->getParameter() => $e->getMessage()]);
+				$response = $response
+					->withStatus(400);
+			} catch(InvalidRequestBodyException $e) {
+				$request = $request
+					->withAttribute('Status', JSend::FAIL)
+					->withAttribute('Data', ['*' => $e->getMessage()]);
 				$response = $response
 					->withStatus(400);
 			} catch(DatabaseException $e) {

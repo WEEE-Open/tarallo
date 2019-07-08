@@ -43,37 +43,36 @@ class Validation {
 	 * @param array $payload THE array
 	 * @param mixed $key Some key
 	 *
-	 * @throws InvalidPayloadParameterException if key is missing
-	 *
 	 * @return mixed Value for that key
 	 */
-	public static function validateHas(array $payload, $key) {
+	private static function validateHas(array $payload, $key) {
 		if(isset($payload[$key])) {
 			return $payload[$key];
 		} else {
-			throw new InvalidPayloadParameterException($key);
+			return null;
 		}
 	}
 
 	/**
-	 * Check that key exists and it's a string.
-	 * Or an int, which will be cast to a string because nobody cares.
+	 * Check that key exists and it's a non-empty string.
+	 * If it's not a string, it will be cast to a string: this is used for query parameters and FastRoute parameters,
+	 * mainly, which are always strings so that case shouldn't even happen.
 	 *
 	 * @param array $payload THE array
 	 * @param string $key Some key
 	 *
-	 * @throws InvalidPayloadParameterException if key is missing or not a string
-	 *
 	 * @return string the string
+	 * @throws MissingMandatoryParameterException
 	 */
-	public static function validateHasString($payload, $key) {
-		$value = self::validateHas($payload, $key);
+	public static function validateHasString(array $payload, string $key): string {
+		if(!isset($payload[$key])) {
+			throw new MissingMandatoryParameterException($key);
+		}
+		$value = $payload[$key];
 		if(is_string($value)) {
 			return $value;
-		} else if(is_int($value)) {
-			return (string) $value;
 		} else {
-			throw new InvalidPayloadParameterException($key, $value);
+			return (string) $value;
 		}
 	}
 
@@ -97,20 +96,18 @@ class Validation {
 		?string $default = null,
 		?string $emptyString = ''
 	) {
-		try {
-			$string = (string) self::validateHas($payload, $key);
-			if($string === '') {
-				return $emptyString;
-			} else {
-				return $string;
-			}
-		} catch(InvalidPayloadParameterException $e) {
+		if(!isset($payload[$key])) {
 			return $default;
 		}
+		$value = $payload[$key];
+		if($value === '') {
+			return $emptyString;
+		}
+		return $value;
 	}
 
 	/**
-	 * Return int value form a key if it exists (being casted if not a string),
+	 * Return int value form a key if it exists (being casted if not an int),
 	 * or supplied default value if it doesn't
 	 *
 	 * @param array $payload THE array
@@ -121,43 +118,45 @@ class Validation {
 	 * @return int|null Whatever the value is, or $default
 	 */
 	public static function validateOptionalInt(array $payload, string $key, ?int $default = null) {
-		try {
-			return (int) self::validateHas($payload, $key);
-		} catch(InvalidPayloadParameterException $e) {
+		if(isset($payload[$key])) {
+			return (int) $payload[$key];
+		} else {
 			return $default;
 		}
 	}
 
 	/**
-	 * Check that an array ($payload, basically) is
-	 * actually an array and contains something.
+	 * Check that the JSON request body contains something: that is, it is an array and is not empty
 	 *
-	 * @param mixed $array
+	 * @param mixed $possiblyArray
+	 *
+	 * @throws InvalidRequestBodyException
 	 */
-	public static function validateArray($array) {
-		if(!is_array($array)) {
-			throw new InvalidPayloadParameterException('*', null, 'Missing request body');
+	public static function validateRequestBodyIsArray($possiblyArray) {
+		if(!is_array($possiblyArray)) {
+			throw new InvalidRequestBodyException('Invalid request body, send some JSON instead');
 		}
-		if(empty($array)) {
-			throw new InvalidPayloadParameterException('*', null, 'Empty request body');
+		if(empty($possiblyArray)) {
+			throw new InvalidRequestBodyException('Empty request body, add something to that JSON array/object instead');
 		}
 	}
 
 	/**
-	 * Validate that the entire payload (or some other variable) IS a string
-	 * and it's not empty. Or is a number, which will be converted into a string.
+	 * Validate that the entire payload IS a string and it's not empty.
 	 *
 	 * @param $possiblyString
+	 *
+	 * @throws InvalidRequestBodyException
 	 */
-	public static function validateIsString($possiblyString) {
+	public static function validateRequestBodyIsString($possiblyString) {
 		if(is_int($possiblyString)) {
 			$possiblyString = (string) $possiblyString;
 		}
 		if(!is_string($possiblyString)) {
-			throw new InvalidPayloadParameterException('*', '', 'Request body should be a string');
+			throw new InvalidRequestBodyException('Invalid request body, send a string instead');
 		}
 		if(trim($possiblyString) === '') {
-			throw new InvalidPayloadParameterException('*', '', 'Empty string is not acceptable');
+			throw new InvalidRequestBodyException('Empty request body, send a string instead');
 		}
 	}
 
