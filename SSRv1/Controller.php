@@ -274,7 +274,7 @@ class Controller extends AbstractController {
 				break;
 
 			case 'cases':
-				$locationDefault = 'LabFis4';
+				$locationDefault = 'Chernobyl';
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
