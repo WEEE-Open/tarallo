@@ -30,14 +30,21 @@ class ItemValidator {
 	 * user, isn't visible to audit and seems a bad idea in general.
 	 *
 	 * @param Item $item The item
-	 * @param bool $subtree Push features down to sub-items or not
+	 * @param bool $pushdown Push features down to sub-items or not
+	 * @param bool $pushup Push features up to ancestor items or not
 	 */
-	public static function fixupFeatures(Item $item, bool $subtree = true) {
-		if($subtree) {
-			self::moveFeaturesAll($item);
+	public static function fixupFeatures(Item $item, bool $pushdown = true, bool $pushup = false) {
+		if($pushdown) {
+			$lowerLimit = null;
+		} else {
+			$lowerLimit = $item;
 		}
-		// To change features in the same item, add this method:
-		// self::fixupFeaturesAll($item);
+		if($pushup) {
+			$upperLimit = null;
+		} else {
+			$upperLimit = $item;
+		}
+		self::moveFeaturesAllRecursively($item, $lowerLimit, $upperLimit);
 	}
 
 	/**
@@ -105,41 +112,24 @@ class ItemValidator {
 
 	/**
 	 * Move all features that should be moved to the right item.
-	 * This method pushes features up or down, but only in the subtree.
-	 * Features will never leave or enter $item from/to its parent.
 	 *
-	 * @param Item $item
+	 * @param ItemWithFeatures $item
+	 * @param ItemWithFeatures|null $lowerLimit
+	 * @param ItemWithFeatures|null $upperLimit
 	 */
-	private static function moveFeaturesAll(Item $item) {
-		self::moveFeaturesAllRecursively($item, false);
-	}
-
-	/**
-	 * Move all features that should be moved to the right item.
-	 *
-	 * @param Item $item
-	 * @param bool $pushup Also push features up (by 1 level at most), used during recursion
-	 */
-	private static function moveFeaturesAllRecursively(Item $item, bool $pushup) {
-		$type = self::getOrNull($item, 'type');
-
-		// Move laptop usb ports from the case to the motherboard
-		if($type === 'case') {
-			$ff = self::getOrNull($item, 'motherboard-form-factor');
-			if($ff === 'proprietary-laptop') {
-				if(self::has($item, 'usb-ports-n')) {
-					$mobo = self::findMobo($item);
-					if($mobo !== null && !self::has($mobo, 'usb-ports-n')) {
-						// TODO: this will end badly when products are implemented...
-						$mobo->addFeature($item->getFeature('usb-ports-n'));
-						$item->removeFeatureByName('usb-ports-n');
-					}
-				}
-			}
+	private static function moveFeaturesAllRecursively(ItemWithFeatures $item, ?ItemWithFeatures $lowerLimit, ?ItemWithFeatures $upperLimit) {
+		// TODO: do something similar for item move?
+		if($lowerLimit !== $item) {
+			self::pushdownFeatures($item);
+		}
+		if($upperLimit !== $item) {
+			self::pushupFeatures($item);
 		}
 
-		foreach($item->getContent() as $subitem) {
-			self::moveFeaturesAllRecursively($subitem, true);
+		if($item instanceof ItemWithContent) {
+			foreach($item->getContent() as $subitem) {
+				self::moveFeaturesAllRecursively($subitem, $lowerLimit, $upperLimit);
+			}
 		}
 	}
 
@@ -226,14 +216,13 @@ class ItemValidator {
 	/**
 	 * Check that item nesting makes sense (e.g. no CPUs inside HDDs)
 	 *
-	 * @param Item $item Item to be checked
-	 * @param Item $parent Its parent
+	 * @param ItemWithFeatures $item Item to be checked
+	 * @param ItemWithFeatures|null $container Its container
 	 *
-	 * @throws ItemNestingException if items are invalidly nested
 	 */
-	private static function checkNesting(Item $item, ?Item $parent): void {
+	private static function checkNesting(ItemWithFeatures $item, ?ItemWithFeatures $container): void {
 		$type = self::getOrNull($item, 'type');
-		$parentType = self::getOrNull($parent, 'type');
+		$parentType = self::getOrNull($container, 'type');
 
 		if($type === null || $parentType == null) {
 			return;
@@ -242,50 +231,50 @@ class ItemValidator {
 		if($type === 'case' && $parentType !== 'location') {
 			throw new ItemNestingException(
 				'Cases should be inside a location',
-				$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : ''
+				$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
 			);
 		} else if($type === 'ram' || $type === 'cpu' || self::isExpansionCard($type)) {
 			if($parentType !== 'case' && $parentType !== 'location' && $parentType !== 'motherboard') {
 				throw new ItemNestingException(
 					'RAMs, CPUs and expansion cards cards should be inside a case, location or motherboard',
-					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : ''
+					$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
 				);
 			}
 		} else {
 			if($parentType !== 'case' && $parentType !== 'location') {
 				throw new ItemNestingException(
 					'Normal items can be placed only inside cases and locations',
-					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : ''
+					$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
 				);
 			}
 		}
 
 		if($type === 'cpu' && $parentType === 'motherboard') {
-			if(!self::compareFeature($item, $parent, 'cpu-socket')) {
+			if(!self::compareFeature($item, $container, 'cpu-socket')) {
 				$itemValue = $item->getFeature('cpu-socket');
-				$parentValue = $parent->getFeature('cpu-socket');
+				$parentValue = $container->getFeature('cpu-socket');
 				throw new ItemNestingException(
 					"Incompatible socket: CPU is $itemValue, motherboard is $parentValue",
-					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : ''
+					$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
 				);
 			}
 		}
 
 		if($type === 'ram' && $parentType === 'motherboard') {
-			if(!self::compareFeature($item, $parent, 'ram-form-factor')) {
+			if(!self::compareFeature($item, $container, 'ram-form-factor')) {
 				$itemValue = $item->getFeature('ram-form-factor');
-				$parentValue = $parent->getFeature('ram-form-factor');
+				$parentValue = $container->getFeature('ram-form-factor');
 				throw new ItemNestingException(
 					"Incompatible form factor: RAM is $itemValue, motherboard is $parentValue",
-					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : ''
+					$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
 				);
 			}
-			if(!self::compareFeature($item, $parent, 'ram-type')) {
+			if(!self::compareFeature($item, $container, 'ram-type')) {
 				$itemValue = $item->getFeature('ram-type');
-				$parentValue = $parent->getFeature('ram-type');
+				$parentValue = $container->getFeature('ram-type');
 				throw new ItemNestingException(
 					"Incompatible standard: RAM is $itemValue, motherboard is $parentValue",
-					$item->hasCode() ? $item->getCode() : '', $parent->hasCode() ? $parent->getCode() : ''
+					$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
 				);
 			}
 		}
@@ -319,15 +308,15 @@ class ItemValidator {
 	 * Check feature for "equality", or rather compatibility.
 	 * If one is null (doesn't exist), they're considered compatible (failsafe), even though they're different
 	 *
-	 * @param Item $item
-	 * @param Item $parent
+	 * @param ItemWithFeatures $item
+	 * @param ItemWithFeatures $container
 	 * @param string $feature
 	 *
 	 * @return bool If the feature is the same or one of them is null
 	 */
-	private static function compareFeature(Item $item, Item $parent, string $feature) {
+	private static function compareFeature(ItemWithFeatures $item, ItemWithFeatures $container, string $feature) {
 		$itemFeature = self::getOrNull($item, $feature);
-		$parentFeature = self::getOrNull($parent, $feature);
+		$parentFeature = self::getOrNull($container, $feature);
 
 		if($itemFeature !== null && $parentFeature !== null) {
 			return $itemFeature === $parentFeature;
@@ -336,13 +325,13 @@ class ItemValidator {
 		return true;
 	}
 
-	private static function has(Item $item, string $feature): bool {
+	private static function has(ItemWithFeatures $item, string $feature): bool {
 		// There's a similar method in ItemPrefixer that also checks that the value is not 0.
 		// This one is more strict.
 		return $item->getFeature($feature) !== null;
 	}
 
-	private static function getOrNull(Item $item, string $featureName) {
+	private static function getOrNull(ItemWithFeatures $item, string $featureName) {
 		$feature = $item->getFeature($featureName);
 		if($feature === null) {
 			return null;
@@ -355,11 +344,11 @@ class ItemValidator {
 	 * Find motherboard inside an item (possibly a case).
 	 * Search is only one level deep.
 	 *
-	 * @param Item $item
+	 * @param ItemWithFeatures $item
 	 *
 	 * @return Item|null Motherboard, or null if not found
 	 */
-	private static function findMobo(Item $item) {
+	private static function findMobo(ItemWithFeatures $item) {
 		foreach($item->getContent() as $maybeMobo) {
 			if(self::getOrNull($maybeMobo, 'type') === 'motherboard') {
 				return $maybeMobo;
@@ -484,5 +473,29 @@ class ItemValidator {
 
 	public static function defaultFeaturesLastModified(): int {
 		return filemtime(__FILE__);
+	}
+
+
+	private static function pushdownFeatures(ItemWithFeatures $item) {
+		$type = self::getOrNull($item, 'type');
+
+		// Move laptop usb ports from the case to the motherboard
+		if($type === 'case') {
+			$ff = self::getOrNull($item, 'motherboard-form-factor');
+			if($ff === 'proprietary-laptop') {
+				if(self::has($item, 'usb-ports-n')) {
+					$mobo = self::findMobo($item);
+					if($mobo !== null && !self::has($mobo, 'usb-ports-n')) {
+						// TODO: this will end badly when products are implemented...
+						$mobo->addFeature($item->getFeature('usb-ports-n'));
+						$item->removeFeatureByName('usb-ports-n');
+					}
+				}
+			}
+		}
+	}
+
+	private static function pushupFeatures(ItemWithFeatures $item) {
+
 	}
 }

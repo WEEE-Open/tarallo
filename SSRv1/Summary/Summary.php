@@ -3,10 +3,10 @@
 namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
 
-use WEEEOpen\Tarallo\Server\ItemWithCodeAndFeatures;
+use WEEEOpen\Tarallo\Server\ItemWithFeatures;
 
 class Summary {
-	public static function peel(ItemWithCodeAndFeatures $item): ?string {
+	public static function peel(ItemWithFeatures $item): ?string {
 		$type = $item->getFeature('type');
 		switch($type) {
 			case 'ram':

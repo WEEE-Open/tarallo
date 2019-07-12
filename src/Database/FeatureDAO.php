@@ -6,7 +6,7 @@ use WEEEOpen\Tarallo\Server\BaseFeature;
 use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemWithCode;
-use WEEEOpen\Tarallo\Server\ItemWithCodeAndFeatures;
+use WEEEOpen\Tarallo\Server\ItemWithFeatures;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 
 
@@ -59,9 +59,9 @@ final class FeatureDAO extends DAO {/**
 	/**
 	 * Get features from ALL TEH ITEMS
 	 *
-	 * @param ItemWithCodeAndFeatures[] $items
+	 * @param ItemWithFeatures[] $items
 	 *
-	 * @return ItemWithCodeAndFeatures[]|Item[] same array
+	 * @return ItemWithFeatures[]|Item[] same array
 	 */
 	public function getFeaturesAll(array $items) {
 		foreach($items as $item) {
@@ -74,11 +74,11 @@ final class FeatureDAO extends DAO {/**
 	/**
 	 * Add features to an item
 	 *
-	 * @param ItemWithCodeAndFeatures $item
+	 * @param ItemWithFeatures $item
 	 *
-	 * @return ItemWithCodeAndFeatures|Item same item
+	 * @return ItemWithFeatures|Item same item
 	 */
-	public function getFeatures(ItemWithCodeAndFeatures $item) {
+	public function getFeatures(ItemWithFeatures $item) {
 		/*
 		 * This seemed a good query to fetch default and non-default features, when database structure was different:
 		 *
@@ -147,12 +147,12 @@ final class FeatureDAO extends DAO {/**
 	/**
 	 * Set item features.
 	 *
-	 * @param ItemWithCodeAndFeatures $item
+	 * @param ItemWithFeatures $item
 	 *
 	 * @return bool True if anything actually changed (and an U audit entry was generated), false otherwise.
 	 * @TODO: it would be cool if changing a feature to the value it already has still didn't generate an entry...
 	 */
-	public function setFeatures(ItemWithCodeAndFeatures $item): bool {
+	public function setFeatures(ItemWithFeatures $item): bool {
 		$features = $item->getFeatures();
 
 		if(empty($features)) {
@@ -203,12 +203,12 @@ final class FeatureDAO extends DAO {/**
 	/**
 	 * Delete a single feature from an item. This generates no audit entries, BTW.
 	 *
-	 * @param ItemWithCodeAndFeatures $item
+	 * @param ItemWithFeatures $item
 	 * @param string[] $features
 	 *
 	 * @return bool True if anything was deleted
 	 */
-	public function deleteFeature(ItemWithCodeAndFeatures $item, array $features) {
+	public function deleteFeature(ItemWithFeatures $item, array $features) {
 		if(empty($features)) {
 			return false;
 		}

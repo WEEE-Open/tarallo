@@ -6,7 +6,7 @@ use WEEEOpen\Tarallo\Server\Feature;
 use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemCode;
-use WEEEOpen\Tarallo\Server\ItemWithCodeAndFeatures;
+use WEEEOpen\Tarallo\Server\ItemWithFeatures;
 use WEEEOpen\Tarallo\Server\ValidationException;
 
 class ItemBuilder {
@@ -110,11 +110,11 @@ class ItemBuilder {
 	 * Process features to be added
 	 *
 	 * @param string[] $features The usual key-value pair for features
-	 * @param ItemWithCodeAndFeatures $item Where to add those features
+	 * @param ItemWithFeatures $item Where to add those features
 	 *
 	 * @see addFeaturesDelta
 	 */
-	public static function addFeatures(array $features, ItemWithCodeAndFeatures $item) {
+	public static function addFeatures(array $features, ItemWithFeatures $item) {
 		foreach($features as $name => $value) {
 			try {
 				$item->addFeature(Feature::ofString($name, $value));
@@ -131,14 +131,14 @@ class ItemBuilder {
 	 * Processes feature to be added AND removed
 	 *
 	 * @param string[] $features The usual key-value pair for features
-	 * @param ItemWithCodeAndFeatures $item Where to add those features
+	 * @param ItemWithFeatures $item Where to add those features
 	 *
 	 * @return string[] Features to be removed
 	 *
 	 * @see addFeatures
 	 * @TODO a specific class for ItemFeatures only? (aka: bring back ItemFeatures)
 	 */
-	public static function addFeaturesDelta(array $features, ItemWithCodeAndFeatures $item) {
+	public static function addFeaturesDelta(array $features, ItemWithFeatures $item) {
 		$delete = [];
 		$add = [];
 

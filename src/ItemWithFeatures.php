@@ -3,14 +3,8 @@
 
 namespace WEEEOpen\Tarallo\Server;
 
-/**
- * TODO: merge this into ItemWithCodeAndFeatures? Nothing uses it alone...
- * Also: ItemIncomplete still implements ItemWithCode...
- *
- * @deprecated Use ItemWithCodeAndFeatures instead?
- * @package WEEEOpen\Tarallo\Server
- */
-interface ItemWithFeatures {
+
+interface ItemWithFeatures extends ItemWithCode {
 	public function getFeature(string $name);
 	public function removeFeatureByName(string $featureName);
 	public function addFeature($feature);

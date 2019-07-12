@@ -3,12 +3,12 @@
 namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
 
-use WEEEOpen\Tarallo\Server\ItemWithCodeAndFeatures;
+use WEEEOpen\Tarallo\Server\ItemWithFeatures;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class CpuSummarizer implements Summarizer {
 
-	public static function summarize(ItemWithCodeAndFeatures $item): string {
+	public static function summarize(ItemWithFeatures $item): string {
 
 		$type = $item->getFeature('type');
 		$isa = $item->getFeature('isa');

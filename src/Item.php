@@ -10,7 +10,7 @@ namespace WEEEOpen\Tarallo\Server;
 class Item
 	implements \JsonSerializable,
 	ItemWithCode,
-	ItemWithCodeAndFeatures,
+	ItemWithFeatures,
 	ItemWithContent,
 	ItemWithLocation {
 	use ItemTraitOptionalCode;

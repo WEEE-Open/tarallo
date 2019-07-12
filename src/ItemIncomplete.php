@@ -11,7 +11,7 @@ namespace WEEEOpen\Tarallo\Server;
 class ItemIncomplete
 	implements \JsonSerializable,
 	ItemWithCode,
-	ItemWithCodeAndFeatures,
+	ItemWithFeatures,
 	ItemWithContent,
 	ItemWithLocation {
 	use ItemTraitOptionalCode;

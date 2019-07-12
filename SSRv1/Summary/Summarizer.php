@@ -3,8 +3,8 @@
 namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
 
-use WEEEOpen\Tarallo\Server\ItemWithCodeAndFeatures;
+use WEEEOpen\Tarallo\Server\ItemWithFeatures;
 
 interface Summarizer {
-	public static function summarize(ItemWithCodeAndFeatures $item): string;
+	public static function summarize(ItemWithFeatures $item): string;
 }
