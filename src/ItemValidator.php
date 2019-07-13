@@ -6,14 +6,16 @@ namespace WEEEOpen\Tarallo\Server;
 class ItemValidator {
 	/**
 	 * Move item (or sub-items) to the correct place in their subtree, then in the items tree.
+	 * Items are only pushed toward leafs in their subtree and the container changed, they cannot be pushed towards
+	 * the root or the container.
 	 *
-	 * @param ItemWithFeatures $item The item os subtree being placed in a location
+	 * @param ItemWithFeatures $item The item or subtree being placed in a location
 	 * @param ItemWithFeatures|null $parent The location
 	 *
 	 * @return ItemWithFeatures|null Correct location (or the given one if unchanged, or null if null was given)
 	 */
 	public static function fixupLocation(ItemWithFeatures $item, ?ItemWithFeatures $parent): ?ItemWithFeatures {
-		$parent = self::reparentAll($item, $parent, $item);
+		$parent = self::reparentAll($item, $parent);
 
 		return $parent;
 	}
@@ -43,55 +45,54 @@ class ItemValidator {
 		} else {
 			$upperLimit = $item;
 		}
-		self::moveFeaturesAllRecursively($item, $lowerLimit, $upperLimit);
+		self::fixFeaturesRecursively($item, $lowerLimit, $upperLimit);
 	}
 
 	/**
-	 * Correctly move RAMs and CPUs from cases to motherboards, if case contains a motherboard.
+	 * Correctly move RAMs and CPUs from cases to motherboards, if case contains a motherboard, and the like.
 	 *
 	 * @param ItemWithFeatures $item The item being placed
-	 * @param ItemWithFeatures $parent Its location (case or anything else)
+	 * @param ItemWithFeatures $container Its location (case or anything else)
 	 *
 	 * @return ItemWithFeatures Correct parent (given one or a motherboard)
 	 */
-	private static function reparent(ItemWithFeatures $item, ItemWithFeatures $parent): ItemWithFeatures {
+	private static function reparent(ItemWithFeatures $item, ItemWithFeatures $container):
+	ItemWithFeatures {
 		$type = self::getOrNull($item, 'type');
-		$parentType = self::getOrNull($parent, 'type');
+		$parentType = self::getOrNull($container, 'type');
 
 		if($type === null || $parentType == null) {
-			return $parent;
+			return $container;
 		}
 
-		if($parentType === 'case') {
-			if($type === 'cpu' || $type === 'ram' || self::isExpansionCard($type)) {
-				$mobo = self::findMobo($parent, 'motherboard');
-				if($mobo !== null) {
-					return $mobo;
-				}
+		$shouldBeInMobo = self::shouldBeInMotherboard($type);
+		if($parentType === 'case' && $shouldBeInMobo) {
+			$mobo = self::findMobo($container, 'motherboard');
+			if($mobo !== null) {
+				return $mobo;
 			}
 		}
 
-		return $parent;
+		return $container;
 	}
 
 	/**
 	 * Reparent all items, recursively.
 	 *
 	 * @param ItemWithFeatures $item The root item being places
-	 * @param ItemWithFeatures|null $parent Its location (case or anything else)
-	 * @param ItemWithFeatures $top Root of the subtree, no items will be pushed outside this one
+	 * @param ItemWithFeatures|null $container Its location (case or anything else)
 	 *
 	 * @return ItemWithFeatures|null Correct parent for root item or null if was null
 	 * @see reparent
 	 */
-	private static function reparentAll(ItemWithFeatures $item, ?ItemWithFeatures $parent, ItemWithFeatures $top) {
-		if($parent !== null) {
-			$parent = self::reparent($item, $parent);
+	private static function reparentAll(ItemWithFeatures $item, ?ItemWithFeatures $container): ?ItemWithFeatures {
+		if($container !== null) {
+			$container = self::reparent($item, $container);
 		}
 
 		$fixups = [];
 		foreach($item->getContent() as $subitem) {
-			$newParent = self::reparentAll($subitem, $item, $top);
+			$newParent = self::reparentAll($subitem, $item);
 			if($newParent !== $item) {
 				// Avoid changing arrays while foreachs are iterating over them
 				$fixups[] = [$subitem, $item, $newParent];
@@ -106,7 +107,7 @@ class ItemValidator {
 			}
 		}
 
-		return $parent;
+		return $container;
 	}
 
 	/**
@@ -116,18 +117,20 @@ class ItemValidator {
 	 * @param ItemWithFeatures|null $lowerLimit
 	 * @param ItemWithFeatures|null $upperLimit
 	 */
-	private static function moveFeaturesAllRecursively(ItemWithFeatures $item, ?ItemWithFeatures $lowerLimit, ?ItemWithFeatures $upperLimit) {
-		// TODO: do something similar for item move?
+	private static function fixFeaturesRecursively(ItemWithFeatures $item, ?ItemWithFeatures $lowerLimit, ?ItemWithFeatures $upperLimit) {
 		if($lowerLimit !== $item) {
 			self::pushdownFeatures($item);
 		}
-		if($upperLimit !== $item) {
-			self::pushupFeatures($item);
-		}
+
+//		if($upperLimit !== $item) {
+//			self::pushupFeatures($item);
+//		}
 
 		foreach($item->getContent() as $subitem) {
-			self::moveFeaturesAllRecursively($subitem, $lowerLimit, $upperLimit);
+			self::fixFeaturesRecursively($subitem, $lowerLimit, $upperLimit);
 		}
+
+//		self::fixFeatures($item);
 	}
 
 	/**
@@ -230,7 +233,7 @@ class ItemValidator {
 				'Cases should be inside a location',
 				$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
 			);
-		} else if($type === 'ram' || $type === 'cpu' || self::isExpansionCard($type)) {
+		} else if(self::shouldBeInMotherboard($type)) {
 			if($parentType !== 'case' && $parentType !== 'location' && $parentType !== 'motherboard') {
 				throw new ItemNestingException(
 					'RAMs, CPUs and expansion cards cards should be inside a case, location or motherboard',
@@ -295,6 +298,10 @@ class ItemValidator {
 				'Set a location for this item or mark it as a location itself, this type cannot be a root item'
 			);
 		}
+	}
+
+	private static function shouldBeInMotherboard($type): bool {
+		return $type === 'cpu' || $type === 'ram' || self::isExpansionCard($type);
 	}
 
 	private static function isExpansionCard($type) {
@@ -493,7 +500,9 @@ class ItemValidator {
 		}
 	}
 
-	private static function pushupFeatures(ItemWithFeatures $item) {
-
-	}
+//	private static function pushupFeatures(ItemWithFeatures $item) {
+//	}
+//
+//	private static function fixFeatures(ItemWithFeatures $item) {
+//	}
 }
