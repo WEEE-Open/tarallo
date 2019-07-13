@@ -30,11 +30,11 @@ class ItemValidator {
 	 * This is needed to avoid modifications to items that weren't open in the editor. Otherwise it may confuse the
 	 * user, isn't visible to audit and seems a bad idea in general.
 	 *
-	 * @param Item $item The item
+	 * @param ItemWithFeatures $item The item
 	 * @param bool $pushdown Push features down to sub-items or not
 	 * @param bool $pushup Push features up to ancestor items or not
 	 */
-	public static function fixupFeatures(Item $item, bool $pushdown = true, bool $pushup = false) {
+	public static function fixupFeatures(ItemWithFeatures $item, bool $pushdown = true, bool $pushup = false) {
 		if($pushdown) {
 			$lowerLimit = null;
 		} else {
@@ -67,7 +67,7 @@ class ItemValidator {
 
 		$shouldBeInMobo = self::shouldBeInMotherboard($type);
 		if($parentType === 'case' && $shouldBeInMobo) {
-			$mobo = self::findMobo($container, 'motherboard');
+			$mobo = self::findByType($container->getContent(), 'motherboard');
 			if($mobo !== null) {
 				return $mobo;
 			}
@@ -131,6 +131,25 @@ class ItemValidator {
 		}
 
 //		self::fixFeatures($item);
+	}
+
+	/**
+	 * @param ItemWithFeatures[] $items
+	 *
+	 * @return ItemWithFeatures
+	 */
+	public static function treeify(array $items): ItemWithFeatures {
+		$case = self::findByType($items, 'case', true);
+		if($case === null) {
+			throw new ValidationException('Cannot find case in items');
+		}
+		foreach($items as $item) {
+			$case->addContent($item);
+		}
+
+		self::fixupLocation($case, null);
+		self::fixupFeatures($case, true, true);
+		return $case;
 	}
 
 	/**
@@ -199,13 +218,13 @@ class ItemValidator {
 	/**
 	 * Check that item nesting makes sense (e.g. no CPUs inside HDDs)
 	 *
-	 * @param Item $item Item to be checked
-	 * @param Item $parent Its parent, or none if a root item
+	 * @param ItemWithFeatures $item Item to be checked
+	 * @param ItemWithFeatures$parent Its parent, or none if a root item
 	 *
 	 * @throws ItemNestingException if items are invalidly nested
 	 * @throws ValidationException if item cannot be a root item and has a null parent
 	 */
-	public static function validateLocation(Item $item, ?Item $parent) {
+	public static function validateLocation(ItemWithFeatures $item, ?ItemWithFeatures $parent) {
 		if($parent === null) {
 			self::checkRoot($item);
 		} else {
@@ -287,11 +306,11 @@ class ItemValidator {
 	/**
 	 * Check that an item could be a root item (no parent)
 	 *
-	 * @param Item $item Item to be checked
+	 * @param ItemWithFeatures $item Item to be checked
 	 *
 	 * @throws ValidationException
 	 */
-	public static function checkRoot(Item $item) {
+	public static function checkRoot(ItemWithFeatures $item) {
 		$type = self::getOrNull($item, 'type');
 		if($type !== null && $type !== 'location') {
 			throw new ValidationException(
@@ -348,15 +367,19 @@ class ItemValidator {
 	 * Find item by type inside another one, e.g. motherboard inside a case.
 	 * Search is only one level deep.
 	 *
-	 * @param ItemWithFeatures $item
+	 * @param ItemWithFeatures[] $items
 	 * @param string $type
+	 * @param bool $remove Remove item from array
 	 *
 	 * @return Item|null Item, or null if not found
 	 */
-	private static function findMobo(ItemWithFeatures $item, string $type) {
-		foreach($item->getContent() as $maybeMobo) {
-			if(self::getOrNull($maybeMobo, 'type') === $type) {
-				return $maybeMobo;
+	private static function findByType(array &$items, string $type, bool $remove = false) {
+		foreach($items as $k => $maybe) {
+			if(self::getOrNull($maybe, 'type') === $type) {
+				if($remove) {
+					unset($items[$remove]);
+				}
+				return $maybe;
 			}
 		}
 		return null;
@@ -489,7 +512,7 @@ class ItemValidator {
 			$ff = self::getOrNull($item, 'motherboard-form-factor');
 			if($ff === 'proprietary-laptop') {
 				if(self::has($item, 'usb-ports-n')) {
-					$mobo = self::findMobo($item, 'motherboard');
+					$mobo = self::findByType($item->getContent(), 'motherboard');
 					if($mobo !== null && !self::has($mobo, 'usb-ports-n')) {
 						// TODO: this will end badly when products are implemented...
 						$mobo->addFeature($item->getFeature('usb-ports-n'));

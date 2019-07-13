@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\Server\Database;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemPrefixer;
 use WEEEOpen\Tarallo\Server\ItemWithCode;
+use WEEEOpen\Tarallo\Server\ItemWithFeatures;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\ValidationException;
 
@@ -14,12 +15,12 @@ final class ItemDAO extends DAO {
 	/**
 	 * Insert a single item into the database
 	 *
-	 * @param Item $item the item to be inserted
+	 * @param ItemWithFeatures $item the item to be inserted
 	 * @param ItemWithCode $parent parent item
 	 *
 	 * @throws DuplicateItemCodeException If any item with same code already exists
 	 */
-	public function addItem(Item $item, ItemWithCode $parent = null) {
+	public function addItem(ItemWithFeatures $item, ItemWithCode $parent = null) {
 		if(!$item->hasCode()) {
 			try {
 				$prefix = ItemPrefixer::get($item);

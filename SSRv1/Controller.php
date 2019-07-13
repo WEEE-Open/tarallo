@@ -20,6 +20,8 @@ use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Server\HTTP\Validation;
 use WEEEOpen\Tarallo\Server\Item;
 use WEEEOpen\Tarallo\Server\ItemCode;
+use WEEEOpen\Tarallo\Server\ItemIncomplete;
+use WEEEOpen\Tarallo\Server\ItemNestingException;
 use WEEEOpen\Tarallo\Server\ItemValidator;
 use WEEEOpen\Tarallo\Server\NotFoundException;
 use WEEEOpen\Tarallo\Server\Session;
@@ -540,9 +542,12 @@ class Controller extends AbstractController {
 
 
 	public static function bulkAdd(Request $request, Response $response, ?callable $next = null): Response {
+		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
 		$body = $request->getParsedBody();
+		$validate = true;
+		$location = new ItemCode('polito'); // TODO: remove hardcoding
 
 		Validation::authorize($user);
 
@@ -561,7 +566,32 @@ class Controller extends AbstractController {
 				$response = $response
 					->withStatus(400);
 			} else {
-				// TODO: do something like ItemBuilder
+				// TODO: move to an ItemBuilder class?
+				$items = [];
+				foreach($add as $stuff) {
+					$item = new ItemIncomplete(null);
+					foreach($stuff as $k => $v) {
+						$item->addFeature(new Feature($k, $v));
+					}
+					$items[] = $item;
+				}
+
+				$case = ItemValidator::treeify($items);
+
+				// Already done
+				//ItemValidator::fixupLocation($case, null);
+				//ItemValidator::fixupFeatures($case);
+
+				if($validate) {
+//					try {
+					// TODO: get location, do the thing
+						ItemValidator::validateLocation($case, $location);
+//					} catch(ItemNestingException $e) {
+//						throw new InvalidPayloadParameterException('*', $e->parentCode, $e->getMessage());
+//					}
+				}
+				$db->itemDAO()->addItem($case, $location);
+
 				$request = $request
 					->withAttribute('Template', 'bulk::add')
 					->withAttribute('TemplateParameters', ['item' => new Item($add)]);
