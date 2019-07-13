@@ -5,16 +5,15 @@ namespace WEEEOpen\Tarallo\Server;
 
 class ItemValidator {
 	/**
-	 * Move item (or sub-items) to the correct place, if possible. Move features around, if possible.
-	 * All fixes are applied to the entire item tree starting from $item, so limit the depth if it's a move operation...
+	 * Move item (or sub-items) to the correct place in their subtree, then in the items tree.
 	 *
-	 * @param Item $item The item being placed in a location
-	 * @param Item|null $parent The location
+	 * @param ItemWithFeatures $item The item os subtree being placed in a location
+	 * @param ItemWithFeatures|null $parent The location
 	 *
-	 * @return Item|null Correct parent (or the given one if unchanged, or null if null was given)
+	 * @return ItemWithFeatures|null Correct location (or the given one if unchanged, or null if null was given)
 	 */
-	public static function fixupLocation(Item $item, ?Item $parent): ?Item {
-		$parent = self::reparentAll($item, $parent);
+	public static function fixupLocation(ItemWithFeatures $item, ?ItemWithFeatures $parent): ?ItemWithFeatures {
+		$parent = self::reparentAll($item, $parent, $item);
 
 		return $parent;
 	}
@@ -50,12 +49,12 @@ class ItemValidator {
 	/**
 	 * Correctly move RAMs and CPUs from cases to motherboards, if case contains a motherboard.
 	 *
-	 * @param Item $item The item being placed
-	 * @param Item $parent Its location (case or anything else)
+	 * @param ItemWithFeatures $item The item being placed
+	 * @param ItemWithFeatures $parent Its location (case or anything else)
 	 *
-	 * @return Item Correct parent (given one or a motherboard)
+	 * @return ItemWithFeatures Correct parent (given one or a motherboard)
 	 */
-	private static function reparent(Item $item, Item $parent): Item {
+	private static function reparent(ItemWithFeatures $item, ItemWithFeatures $parent): ItemWithFeatures {
 		$type = self::getOrNull($item, 'type');
 		$parentType = self::getOrNull($parent, 'type');
 
@@ -65,7 +64,7 @@ class ItemValidator {
 
 		if($parentType === 'case') {
 			if($type === 'cpu' || $type === 'ram' || self::isExpansionCard($type)) {
-				$mobo = self::findMobo($parent);
+				$mobo = self::findMobo($parent, 'motherboard');
 				if($mobo !== null) {
 					return $mobo;
 				}
@@ -78,21 +77,21 @@ class ItemValidator {
 	/**
 	 * Reparent all items, recursively.
 	 *
+	 * @param ItemWithFeatures $item The root item being places
+	 * @param ItemWithFeatures|null $parent Its location (case or anything else)
+	 * @param ItemWithFeatures $top Root of the subtree, no items will be pushed outside this one
+	 *
+	 * @return ItemWithFeatures|null Correct parent for root item or null if was null
 	 * @see reparent
-	 *
-	 * @param Item $item The root item being places
-	 * @param Item|null $parent Its location (case or anything else)
-	 *
-	 * @return Item|null Correct parent for root item or null if was null
 	 */
-	private static function reparentAll(Item $item, ?Item $parent) {
+	private static function reparentAll(ItemWithFeatures $item, ?ItemWithFeatures $parent, ItemWithFeatures $top) {
 		if($parent !== null) {
 			$parent = self::reparent($item, $parent);
 		}
 
 		$fixups = [];
 		foreach($item->getContent() as $subitem) {
-			$newParent = self::reparentAll($subitem, $item);
+			$newParent = self::reparentAll($subitem, $item, $top);
 			if($newParent !== $item) {
 				// Avoid changing arrays while foreachs are iterating over them
 				$fixups[] = [$subitem, $item, $newParent];
@@ -126,10 +125,8 @@ class ItemValidator {
 			self::pushupFeatures($item);
 		}
 
-		if($item instanceof ItemWithContent) {
-			foreach($item->getContent() as $subitem) {
-				self::moveFeaturesAllRecursively($subitem, $lowerLimit, $upperLimit);
-			}
+		foreach($item->getContent() as $subitem) {
+			self::moveFeaturesAllRecursively($subitem, $lowerLimit, $upperLimit);
 		}
 	}
 
@@ -139,7 +136,7 @@ class ItemValidator {
 	 * @param Item $item Item to be checked
 	 *
 	 * @throws ValidationException if item contains invalid features
-	 * @TODO: make this thing work for PATCH requests... Or don't?
+	 * @TODO: make this thing work for PATCH requests...
 	 */
 	public static function validateFeatures(Item $item) {
 		$type = self::getOrNull($item, 'type');
@@ -341,16 +338,17 @@ class ItemValidator {
 	}
 
 	/**
-	 * Find motherboard inside an item (possibly a case).
+	 * Find item by type inside another one, e.g. motherboard inside a case.
 	 * Search is only one level deep.
 	 *
 	 * @param ItemWithFeatures $item
+	 * @param string $type
 	 *
-	 * @return Item|null Motherboard, or null if not found
+	 * @return Item|null Item, or null if not found
 	 */
-	private static function findMobo(ItemWithFeatures $item) {
+	private static function findMobo(ItemWithFeatures $item, string $type) {
 		foreach($item->getContent() as $maybeMobo) {
-			if(self::getOrNull($maybeMobo, 'type') === 'motherboard') {
+			if(self::getOrNull($maybeMobo, 'type') === $type) {
 				return $maybeMobo;
 			}
 		}
@@ -484,7 +482,7 @@ class ItemValidator {
 			$ff = self::getOrNull($item, 'motherboard-form-factor');
 			if($ff === 'proprietary-laptop') {
 				if(self::has($item, 'usb-ports-n')) {
-					$mobo = self::findMobo($item);
+					$mobo = self::findMobo($item, 'motherboard');
 					if($mobo !== null && !self::has($mobo, 'usb-ports-n')) {
 						// TODO: this will end badly when products are implemented...
 						$mobo->addFeature($item->getFeature('usb-ports-n'));

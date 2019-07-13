@@ -57,7 +57,7 @@ trait ItemTraitOptionalCode {
 	 *
 	 * @see setCode to set it
 	 */
-	public function hasCode() {
+	public function hasCode(): bool {
 		return $this->code !== null;
 	}
 }

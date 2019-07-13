@@ -38,6 +38,10 @@ trait ItemTraitCode {
 		return $this->code;
 	}
 
+	public function hasCode(): bool {
+		return true;
+	}
+
 	public function compareCode(ItemWithCode $other): int {
 		return strcasecmp($this->getCode(), $other->getCode());
 	}

@@ -9,4 +9,8 @@ interface ItemWithFeatures extends ItemWithCode {
 	public function removeFeatureByName(string $featureName);
 	public function addFeature($feature);
 	public function getFeatures(): array;
+
+	public function addContent(ItemWithCode $item);
+	public function removeContent(ItemWithCode $item);
+	public function getContent(): array;
 }
