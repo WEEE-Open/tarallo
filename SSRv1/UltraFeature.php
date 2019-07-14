@@ -21,16 +21,20 @@ class UltraFeature {
 	 *
 	 * Contains a Feature, its translated name,its pretty-printed value and its group.
 	 *
-	 * @param Feature $feature
+	 * @param Feature|BaseFeature $feature
 	 * @param string $language
 	 * @return UltraFeature
 	 */
-	public static function fromFeature(Feature $feature, string $language): UltraFeature {
+	public static function fromFeature(BaseFeature $feature, string $language): UltraFeature {
 		$that = new UltraFeature();
 		$that->feature = $feature;
-		$that->value = FeaturePrinter::printableValue($feature);
 		$that->name = FeaturePrinter::printableName($feature->name);
 		$that->group = FeaturePrinter::printableGroup(BaseFeature::getGroup($feature->name));
+		if($feature instanceof Feature) {
+			$that->value = FeaturePrinter::printableValue($feature);
+		} else {
+			$that->value = '';
+		}
 		return $that;
 	}
 
@@ -38,6 +42,13 @@ class UltraFeature {
 		return FeaturePrinter::printableValue($feature);
 	}
 
+	/**
+	 * @param string $name
+	 *
+	 * @return UltraFeature
+	 *
+	 * @deprecated
+	 */
 	public static function fromEmpty(string $name) {
 		$that = new UltraFeature();
 		// Mocking other classes...

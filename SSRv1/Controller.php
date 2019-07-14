@@ -543,8 +543,8 @@ class Controller extends AbstractController {
 
 
 	public static function bulkAdd(Request $request, Response $response, ?callable $next = null): Response {
-		/** @var Database $db */
-		$db = $request->getAttribute('Database');
+		///* @var Database $db */
+		//$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
 		$body = $request->getParsedBody();
 
@@ -575,6 +575,10 @@ class Controller extends AbstractController {
 					$items[] = $item;
 				}
 
+				foreach($items as $k => $item) {
+					$items[$k] = ItemValidator::fillWithDefaults($item);
+				}
+				unset($item);
 				$case = ItemValidator::treeify($items);
 				//$db->itemDAO()->addItem($case, $location);
 

@@ -120,12 +120,17 @@ class TemplateUtilities implements ExtensionInterface {
 
 	/**
 	 * Convert a string into the representation that textContent would give. That is, remove newlines.
+	 * Null is converted to an empty string.
 	 *
-	 * @param string $something
+	 * @param string|null $something
 	 *
 	 * @return string
 	 */
-	public function asTextContent(string $something): string {
-		return str_replace(["\r\n", "\r", "\n"], '', $something);
+	public function asTextContent(?string $something): string {
+		if($something === null) {
+			return '';
+		} else {
+			return str_replace(["\r\n", "\r", "\n"], '', $something);
+		}
 	}
 }

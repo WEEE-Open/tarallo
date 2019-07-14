@@ -523,6 +523,26 @@ class ItemValidator {
 		}
 	}
 
+	public static function fillWithDefaults(ItemIncomplete $item): ItemIncomplete {
+		$type = self::getOrNull($item, 'type');
+		if($type === null) {
+			return $item;
+		}
+		foreach(self::getDefaultFeatures($type) as $feature) {
+			$item->addFeature(new BaseFeature($feature));
+		}
+		return $item;
+	}
+
+	public static function fixupFromPeracotta(ItemIncomplete $item) {
+		// TODO: this. Remove laptop features unless computer is a laptop. Or send 'em from peracotta as null and
+		// accept that they may be null.
+
+		foreach($item->getContent() as $item) {
+			self::fixupFromPeracotta($item);
+		}
+	}
+
 //	private static function pushupFeatures(ItemWithFeatures $item) {
 //	}
 //

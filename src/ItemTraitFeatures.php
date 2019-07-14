@@ -12,9 +12,9 @@ trait ItemTraitFeatures {
 	 *
 	 * @param string $name Feature name
 	 *
-	 * @return Feature|null
+	 * @return Feature|BaseFeature|null
 	 */
-	public function getFeature(string $name): ?Feature {
+	public function getFeature(string $name) {
 		$features = $this->getFeatures();
 		if(isset($features[$name])) {
 			return $features[$name];
