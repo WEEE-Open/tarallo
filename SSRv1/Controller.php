@@ -546,8 +546,6 @@ class Controller extends AbstractController {
 		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
 		$body = $request->getParsedBody();
-		$validate = true;
-		$location = new ItemCode('polito'); // TODO: remove hardcoding
 
 		Validation::authorize($user);
 
@@ -577,24 +575,11 @@ class Controller extends AbstractController {
 				}
 
 				$case = ItemValidator::treeify($items);
-
-				// Already done
-				//ItemValidator::fixupLocation($case, null);
-				//ItemValidator::fixupFeatures($case);
-
-				if($validate) {
-//					try {
-					// TODO: get location, do the thing
-						ItemValidator::validateLocation($case, $location);
-//					} catch(ItemNestingException $e) {
-//						throw new InvalidPayloadParameterException('*', $e->parentCode, $e->getMessage());
-//					}
-				}
-				$db->itemDAO()->addItem($case, $location);
+				//$db->itemDAO()->addItem($case, $location);
 
 				$request = $request
 					->withAttribute('Template', 'bulk::add')
-					->withAttribute('TemplateParameters', ['item' => new Item($add)]);
+					->withAttribute('TemplateParameters', ['item' => $case]);
 				$response = $response
 					->withStatus(200);
 			}
