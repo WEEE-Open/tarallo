@@ -138,7 +138,8 @@ class Controller extends AbstractController {
 
 		$request = $request
 			->withAttribute('Template', 'newItemPage')
-			->withAttribute('TemplateParameters', ['add' => true, 'copy' => $from, 'featuresEmpty' => ['type', 'working']]);
+			->withAttribute('TemplateParameters', ['add' => true, 'base' => $from, 'featuresEmpty' => ['type',
+				'working']]);
 
 		return $next ? $next($request, $response) : $response;
 	}

@@ -1,17 +1,17 @@
 <?php
-/** @var \WEEEOpen\Tarallo\Server\Item|null $copy */
+/** @var \WEEEOpen\Tarallo\Server\Item|null $base */
 /** @var bool $recursion */
 /** @var bool $innerrrecursion */
 /** @var string[] $subitems */
 /** @var string[] $featuresEmpty */
 
-$copy = $copy ?? null;
-if($copy === null) {
+$base = $base ?? null;
+if($base === null) {
 	$subitems = [];
 	$features = [];
 } else {
-	$subitems = $copy->getContent();
-	$features = $copy->getFeatures();
+	$subitems = $base->getContent();
+	$features = $base->getFeatures();
 }
 
 // to display new inner items, set their $recursion and $innerrecursion to true
@@ -21,8 +21,8 @@ if($copy === null) {
 <article class="item new editing <?=$recursion ? '' : 'root'?> <?=$innerrecursion ? '' : 'head'?>">
 	<header>
 		<h2><label>Code: <input class="newcode" placeholder="Automatically generated"></label></h2>
-		<?php if(isset($copy)): ?>
-			<div class="info message">ℹ️&nbsp;This is a copy of <span class="code"><?= $copy->getCode() ?></span>, remember to change serial numbers, notes, working status, etc...</div>
+		<?php if(isset($base) && $base->hasCode()): ?>
+			<div class="info message">ℹ️&nbsp;This is a copy of <span class="code"><?= $base->getCode() ?></span>, remember to change serial numbers, notes, working status, etc...</div>
 		<?php unset($noticeFeature); endif; ?>
 	</header>
 
@@ -55,7 +55,7 @@ if($copy === null) {
 		<?php
 			// Used when cloning, empty otherwise
 			foreach($subitems as $subitem) {
-				$this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'copy' => $subitem, 'featuresEmpty' => $featuresEmpty]);
+				$this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'base' => $subitem, 'featuresEmpty' => $featuresEmpty]);
 			}
 		?>
 	</section>

@@ -17,7 +17,7 @@ $this->insert('bulk::menu', ['currentPage' => 'add']);
     <input type="submit" value="Add" class="small">
 </form>
 <?php else:
-    $this->insert('newItem', ['recursion' => true, 'add' => true, 'copy' => $item, 'featuresEmpty' => ['type', 'working']]);
+    $this->insert('newItem', ['recursion' => true, 'add' => true, 'base' => $item, 'featuresEmpty' => ['type', 'working']]);
 endif ?>
 <?php
 $mainParameters = ['title' => 'Bulk operations', 'user' => $user, 'currentPage' => 'bulk'];
