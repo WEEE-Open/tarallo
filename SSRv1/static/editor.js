@@ -75,6 +75,9 @@
 			for(let el of itemEditing.querySelectorAll('.itembuttons .addnew')) {
 				el.addEventListener('click', addNewClick);
 			}
+			for(let el of itemEditing.querySelectorAll('.itembuttons .removeemptyfeatures')) {
+				el.addEventListener('click', removeEmptyFeaturesClick);
+			}
 			// Root "new item" cannot be deleted, just cancel the entire operation
 			// itemEditing.querySelector('.itembuttons .removenew').addEventListener('click', removeNewClick);
 		} else {
@@ -959,6 +962,9 @@
 		for(let el of item.querySelectorAll('.addnew')) {
 			el.addEventListener('click', addNewClick);
 		}
+		for(let el of item.querySelectorAll('.removeemptyfeatures')) {
+			el.addEventListener('click', removeEmptyFeaturesClick);
+		}
 	}
 
 	/**
@@ -988,6 +994,31 @@
 	function addNewClick(ev) {
 		let item = newItem();
 		ev.target.parentElement.parentElement.querySelector('.subitems').appendChild(item);
+	}
+
+	/**
+	 * Handle clicking the "remove empty features" button inside new items
+	 *
+	 * @param ev Event
+	 */
+	function removeEmptyFeaturesClick(ev) {
+ 		let item = ev.target.parentElement.parentElement;
+ 		let featuresElement;
+ 		// Avoids accidental depth-first search into other items
+		for(let el of item.children) {
+			if(el.classList.contains('features')) {
+				featuresElement = el;
+				break;
+			}
+		}
+		let changed = featuresElement.querySelectorAll('.value');
+		for(let element of changed) {
+			let feature = element.parentElement;
+			let value = getValueFrom(element);
+			if(value === "") {
+				feature.querySelector('.delete').click();
+			}
+		}
 	}
 
 	/**

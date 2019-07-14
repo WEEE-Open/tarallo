@@ -17,7 +17,12 @@ $this->insert('bulk::menu', ['currentPage' => 'add']);
     <input type="submit" value="Add" class="small">
 </form>
 <?php else:
-    $this->insert('newItem', ['recursion' => true, 'add' => true, 'base' => $item, 'featuresEmpty' => ['type', 'working']]);
+    ?>
+    <div class="info message">
+        ℹ️&nbsp;This is data is often unreliable. Check that everything is right and add any missing item.
+    </div>
+    <?php
+    $this->insert('newItem', ['recursion' => false, 'add' => true, 'base' => $item, 'featuresEmpty' => ['type', 'working']]);
 endif ?>
 <?php
 $mainParameters = ['title' => 'Bulk operations', 'user' => $user, 'currentPage' => 'bulk'];

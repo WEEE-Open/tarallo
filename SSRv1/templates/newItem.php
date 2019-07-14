@@ -1,7 +1,7 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Server\Item|null $base */
 /** @var bool $recursion */
-/** @var bool $innerrrecursion */
+/** @var bool $innerrecursion */
 /** @var string[] $subitems */
 /** @var string[] $featuresEmpty */
 
@@ -48,6 +48,7 @@ if($base === null) {
 	</section>
 
     <nav class="itembuttons secondary">
+        <button class="removeemptyfeatures" title="Remove empty features">💥&nbsp;Clean</button>
         <button class="addnew">🆕&nbsp;More</button>
     </nav>
 
