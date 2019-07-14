@@ -48,7 +48,7 @@ if($base === null) {
 	</section>
 
     <nav class="itembuttons secondary">
-        <button class="removeemptyfeatures" title="Remove empty features">💥&nbsp;Clean</button>
+        <button class="removeemptyfeatures" title="Remove empty features">🧽&nbsp;Clean</button>
         <button class="addnew">🆕&nbsp;More</button>
     </nav>
 

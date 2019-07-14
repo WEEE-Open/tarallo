@@ -25,7 +25,7 @@ $this->insert('bulk::menu', ['currentPage' => 'add']);
     $this->insert('newItem', ['recursion' => false, 'add' => true, 'base' => $item, 'featuresEmpty' => ['type', 'working']]);
 endif ?>
 <?php
-$mainParameters = ['title' => 'Bulk operations', 'user' => $user, 'currentPage' => 'bulk'];
+$mainParameters = ['title' => 'Bulk add', 'user' => $user, 'currentPage' => 'bulk'];
 if($error != null) {
 	$mainParameters['itembuttons'] = true;
 }
