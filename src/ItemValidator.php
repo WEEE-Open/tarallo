@@ -377,7 +377,7 @@ class ItemValidator {
 		foreach($items as $k => $maybe) {
 			if(self::getOrNull($maybe, 'type') === $type) {
 				if($remove) {
-					unset($items[$remove]);
+					unset($items[$k]);
 				}
 				return $maybe;
 			}
