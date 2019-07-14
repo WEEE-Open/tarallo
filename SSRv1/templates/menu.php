@@ -11,19 +11,19 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 	<ul>
 		<li><a href="/">Home</a></li
 		><li><a href="/add">New</a></li
-		><li><a role="button" tabindex="0" class="quick" data-toggle="view">View</a></li
-		><li><a role="button" tabindex="0" class="quick" data-toggle="move">Move</a></li
+		><li><a role="button" tabindex="0" class="quick view" data-toggle="view">View</a></li
+		><li><a role="button" tabindex="0" class="quick move" data-toggle="move">Move</a></li
 		><li><a href="/search">Search</a></li
 		><li><a href="/stats" <?= $currentPage === 'stats' ? ' class="selected"' : '' ?>>Stats</a></li
 		><li><a href="/bulk" <?= $currentPage === 'bulk' ? ' class="selected"' : '' ?>>Bulk</a></li
 		><li><a href="/options">Options</a></li>
 	</ul>
 </nav>
-<nav class="quick view">
+<nav class="quick view bar">
 	<label>Code:<input type="text"></label
 	><button>View item</button>
 </nav>
-<nav class="quick move">
+<nav class="quick move bar">
 	<label>Move item:<input class="from" type="text"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>></label
     ><button class="swap" title="Swap" tabindex="-1">⇄</button
 	><label> into:<input class="to" type="text"></label

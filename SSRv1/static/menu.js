@@ -3,8 +3,8 @@
 
 	let nav = document.getElementById('main');
 	let top = document.getElementById('top');
-	let quickView = top.querySelector(".quick.view");
-	let quickMove = top.querySelector(".quick.move");
+	let quickView = top.querySelector(".quick.view.bar");
+	let quickMove = top.querySelector(".quick.move.bar");
 	let quickMoveCode = quickMove.querySelectorAll('input')[0];
 	let quickMoveParent = quickMove.querySelectorAll('input')[1];
 

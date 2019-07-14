@@ -75,7 +75,8 @@ $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
 		<?php if($editing && $target): ?>
 			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><?php if(!$containsMore): ?><button class="lost">🏷&nbsp;Lost</button><button class="delete">❌&nbsp;Delete</button><?php endif ?>
 		<?php elseif(!$adding && !$editing): ?>
-			<?php if($deletedAt === null): ?><button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button><button class="clone">🔲&nbsp;Copy</button><?php endif ?><button class="history">📖&nbsp;History</button>
+			<?php if($deletedAt === null): ?><button class="addinside">📄&nbsp;Add</button><button
+                    class="edit">🛠️&nbsp;Edit</button><button class="clone">🔲&nbsp;Copy</button><button class="move">📍&nbsp;Move</button><?php endif ?><button class="history">📖&nbsp;History</button>
 		<?php endif ?>
 	</nav>
 	<?php if($summary !== null && (!$editing || !$target)): ?>
