@@ -7,10 +7,13 @@ use WEEEOpen\Tarallo\Server\BaseFeature;
 use WEEEOpen\Tarallo\Server\Feature;
 
 class UltraFeature {
-	public $feature;
+	protected $feature;
 	public $name;
+	public $pname;
 	public $value;
+	public $pvalue;
 	public $group;
+	public $type;
 
 	private function __construct() {
 
@@ -19,7 +22,7 @@ class UltraFeature {
 	/**
 	 * UltraFeature 3000!
 	 *
-	 * Contains a Feature, its translated name,its pretty-printed value and its group.
+	 * Contains a Feature, its translated name, its pretty-printed value, its group, etc...
 	 *
 	 * @param Feature|BaseFeature $feature
 	 * @param string $language
@@ -28,38 +31,21 @@ class UltraFeature {
 	public static function fromFeature(BaseFeature $feature, string $language): UltraFeature {
 		$that = new UltraFeature();
 		$that->feature = $feature;
-		$that->name = FeaturePrinter::printableName($feature->name);
+		$that->type = $feature->type;
 		$that->group = FeaturePrinter::printableGroup(BaseFeature::getGroup($feature->name));
+		$that->name = $feature->name;
+		$that->pname = FeaturePrinter::printableName($feature->name);
 		if($feature instanceof Feature) {
-			$that->value = FeaturePrinter::printableValue($feature);
+			$that->value = $feature->value;
+			$that->pvalue = FeaturePrinter::printableValue($feature);
 		} else {
 			$that->value = '';
+			$that->pvalue = '';
 		}
 		return $that;
 	}
 
 	public static function printableValue(Feature $feature, string $language) {
 		return FeaturePrinter::printableValue($feature);
-	}
-
-	/**
-	 * @param string $name
-	 *
-	 * @return UltraFeature
-	 *
-	 * @deprecated
-	 */
-	public static function fromEmpty(string $name) {
-		$that = new UltraFeature();
-		// Mocking other classes...
-		// TODO: use FeatureBase, remove mocking mockery
-		$that->feature = new \stdClass();
-		$that->feature->name = $name;
-		$that->feature->value = '';
-		$that->feature->type = BaseFeature::getType($name);
-		$that->value = '';
-		$that->name = FeaturePrinter::printableName($name);
-		$that->group = FeaturePrinter::printableGroup(BaseFeature::getGroup($name));
-		return $that;
 	}
 }

@@ -49,8 +49,9 @@ class TemplateUtilities implements ExtensionInterface {
 		$groups = [];
 		$groupsPrintable = [];
 
+		// $group has the group ID as key, the human-radable name comes lates
 		foreach($ultraFeatures as $ultra) {
-			$groups[BaseFeature::getGroup($ultra->feature->name)][] = $ultra;
+			$groups[BaseFeature::getGroup($ultra->name)][] = $ultra;
 		}
 
 		// Group IDs are numbered, that's the order, so it has to be sorted HERE

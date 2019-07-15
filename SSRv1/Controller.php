@@ -130,7 +130,11 @@ class Controller extends AbstractController {
 
 		$from = Validation::validateOptionalString($query, 'copy', null);
 
-		if($from !== null) {
+		if($from === null) {
+			$from = new ItemIncomplete(null);
+			$from->addFeature(new BaseFeature('type'));
+			$from->addFeature(new BaseFeature('working'));
+		} else {
 			/** @var Database $db */
 			$db = $request->getAttribute('Database');
 			$from = $db->itemDAO()->getItem(new ItemCode($from));
@@ -138,8 +142,7 @@ class Controller extends AbstractController {
 
 		$request = $request
 			->withAttribute('Template', 'newItemPage')
-			->withAttribute('TemplateParameters', ['add' => true, 'base' => $from, 'featuresEmpty' => ['type',
-				'working']]);
+			->withAttribute('TemplateParameters', ['add' => true, 'base' => $from]);
 
 		return $next ? $next($request, $response) : $response;
 	}

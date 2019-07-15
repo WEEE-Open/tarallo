@@ -109,7 +109,10 @@ $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
 	<section class="subitems">
 		<?php
 		if($adding && $target) {
-			$this->insert('newItem', ['recursion' => true, 'innerrecursion' => false, 'featuresEmpty' => ['type', 'working']]);
+			$empty = new \WEEEOpen\Tarallo\Server\ItemIncomplete(null);
+			$empty->addFeature(new \WEEEOpen\Tarallo\Server\BaseFeature('type'));
+			$empty->addFeature(new \WEEEOpen\Tarallo\Server\BaseFeature('working'));
+			$this->insert('newItem', ['recursion' => true, 'innerrecursion' => false, 'base' => $empty]);
 		}
 
 		$subitems = $item->getContent();

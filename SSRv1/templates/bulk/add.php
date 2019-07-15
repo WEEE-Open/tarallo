@@ -22,7 +22,7 @@ $this->insert('bulk::menu', ['currentPage' => 'add']);
         ℹ️&nbsp;This is data is often unreliable. Check that everything is right and add any missing item.
     </div>
     <?php
-    $this->insert('newItem', ['recursion' => false, 'add' => true, 'base' => $item, 'featuresEmpty' => ['type', 'working']]);
+    $this->insert('newItem', ['recursion' => false, 'add' => true, 'base' => $item]);
 endif ?>
 <?php
 $mainParameters = ['title' => 'Bulk add', 'user' => $user, 'currentPage' => 'bulk'];

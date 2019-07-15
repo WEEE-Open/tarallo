@@ -1,11 +1,9 @@
 <?php
 
-use WEEEOpen\Tarallo\Server\BaseFeature;
-
 $features = \WEEEOpen\Tarallo\SSRv1\FeaturePrinter::features;
 $groups = [];
 foreach($features as $value => $name) {
-	$groups[BaseFeature::getGroup($value)][$value] = $name;
+	$groups[WEEEOpen\Tarallo\Server\BaseFeature::getGroup($value)][$value] = $name;
 }
 
 ksort($groups);

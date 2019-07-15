@@ -26,7 +26,12 @@
     <div class="error description">Wrong value for a feature <a href="#first-error">here</a></div>
 </template>
 <template id="new-item-template">
-	<?php $this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'featuresEmpty' => ['type', 'working']]) ?>
+	<?php
+    $empty = new \WEEEOpen\Tarallo\Server\ItemIncomplete(null);
+    $empty->addFeature(new \WEEEOpen\Tarallo\Server\BaseFeature('type'));
+    $empty->addFeature(new \WEEEOpen\Tarallo\Server\BaseFeature('working'));
+    $this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'base' => $empty])
+    ?>
 </template>
 <template id="features-select-template">
 	<?php $this->insert('featuresList'); ?>

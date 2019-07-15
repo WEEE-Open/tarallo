@@ -3,9 +3,9 @@
 /** @var bool $recursion */
 /** @var bool $innerrecursion */
 /** @var string[] $subitems */
-/** @var string[] $featuresEmpty */
 
 $base = $base ?? null;
+$innerrecursion = $innerrecursion ?? false;
 if($base === null) {
 	$subitems = [];
 	$features = [];
@@ -36,7 +36,7 @@ if($base === null) {
 
 	<section class="own features editing">
 		<?php
-		$this->insert('featuresEdit', ['features' => $features, 'featuresEmpty' => $featuresEmpty]);
+		$this->insert('featuresEdit', ['features' => $features]);
 		?>
 	</section>
 
@@ -56,7 +56,7 @@ if($base === null) {
 		<?php
 			// Used when cloning, empty otherwise
 			foreach($subitems as $subitem) {
-				$this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'base' => $subitem, 'featuresEmpty' => $featuresEmpty]);
+				$this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'base' => $subitem]);
 			}
 		?>
 	</section>

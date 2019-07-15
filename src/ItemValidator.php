@@ -67,7 +67,8 @@ class ItemValidator {
 
 		$shouldBeInMobo = self::shouldBeInMotherboard($type);
 		if($parentType === 'case' && $shouldBeInMobo) {
-			$mobo = self::findByType($container->getContent(), 'motherboard');
+			$content = $item->getContent();
+			$mobo = self::findByType($content, 'motherboard');
 			if($mobo !== null) {
 				return $mobo;
 			}
@@ -359,7 +360,11 @@ class ItemValidator {
 		if($feature === null) {
 			return null;
 		} else {
-			return $feature->value;
+			if($feature instanceof Feature) {
+				return $feature->value;
+			} else {
+				return null;
+			}
 		}
 	}
 
@@ -512,7 +517,8 @@ class ItemValidator {
 			$ff = self::getOrNull($item, 'motherboard-form-factor');
 			if($ff === 'proprietary-laptop') {
 				if(self::has($item, 'usb-ports-n')) {
-					$mobo = self::findByType($item->getContent(), 'motherboard');
+				    $content = $item->getContent();
+					$mobo = self::findByType($content, 'motherboard');
 					if($mobo !== null && !self::has($mobo, 'usb-ports-n')) {
 						// TODO: this will end badly when products are implemented...
 						$mobo->addFeature($item->getFeature('usb-ports-n'));
