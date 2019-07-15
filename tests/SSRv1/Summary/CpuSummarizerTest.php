@@ -328,4 +328,24 @@ class CpuSummarizerTest extends TestCase {
 
 		return $summary;
 	}
+
+	public function testCpuWeirdBehavior() {
+		$item = new Item('C140');
+		$item
+			->addFeature(new Feature('type', 'cpu'))
+			->addFeature(new Feature('brand', 'Intel'))
+			->addFeature(new Feature('cpu-socket', 'slot1'))
+			->addFeature(new Feature('frequency-hertz',700000000))
+			->addFeature(new Feature('isa', 'x86-32'))
+			->addFeature(new Feature('model', 'Pentium 3'))
+			->addFeature(new Feature('working', 'yes'))
+			->addFeature(new Feature('owner', 'l\'asd'));
+
+		// Incorrect output:
+		// "CPU x86 32 bit, 700 MHz, Intel Pentium 3, Socket Slot"
+		$summary = CpuSummarizer::summarize($item);
+		$this->assertEquals('CPU x86 32 bit, 700 MHz, Intel Pentium 3, Socket Slot 1', $summary);
+
+		return $summary;
+	}
 }

@@ -46,7 +46,7 @@ class CpuSummarizer implements Summarizer {
 
 		if($socket) {
 			$socket = FeaturePrinter::printableValue($socket);
-			$socketOnly = explode(' ', $socket);
+			$socketOnly = explode(' (', $socket);
 		} else {
 			$socket = '';
 		}
