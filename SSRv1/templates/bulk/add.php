@@ -26,8 +26,5 @@ $this->insert('bulk::menu', ['currentPage' => 'add']);
 endif ?>
 <?php
 $mainParameters = ['title' => 'Bulk add', 'user' => $user, 'currentPage' => 'bulk'];
-if($error != null) {
-	$mainParameters['itembuttons'] = true;
-}
 $this->layout('main', $mainParameters);
 ?>

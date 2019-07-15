@@ -583,7 +583,7 @@ class Controller extends AbstractController {
 				}
 				unset($item);
 				$case = ItemValidator::treeify($items);
-				//$db->itemDAO()->addItem($case, $location);
+				ItemValidator::fixupFromPeracotta($case);
 
 				$request = $request
 					->withAttribute('Template', 'bulk::add')

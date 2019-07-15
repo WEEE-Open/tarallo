@@ -56,8 +56,7 @@ class ItemValidator {
 	 *
 	 * @return ItemWithFeatures Correct parent (given one or a motherboard)
 	 */
-	private static function reparent(ItemWithFeatures $item, ItemWithFeatures $container):
-	ItemWithFeatures {
+	private static function reparent(ItemWithFeatures $item, ItemWithFeatures $container): ItemWithFeatures {
 		$type = self::getOrNull($item, 'type');
 		$parentType = self::getOrNull($container, 'type');
 
@@ -67,7 +66,7 @@ class ItemValidator {
 
 		$shouldBeInMobo = self::shouldBeInMotherboard($type);
 		if($parentType === 'case' && $shouldBeInMobo) {
-			$content = $item->getContent();
+			$content = $container->getContent();
 			$mobo = self::findByType($content, 'motherboard');
 			if($mobo !== null) {
 				return $mobo;
@@ -135,11 +134,11 @@ class ItemValidator {
 	}
 
 	/**
-	 * @param ItemWithFeatures[] $items
+	 * @param ItemWithFeatures[]|ItemIncomplete[] $items
 	 *
-	 * @return ItemWithFeatures
+	 * @return ItemWithFeatures|ItemIncomplete
 	 */
-	public static function treeify(array $items): ItemWithFeatures {
+	public static function treeify(array $items) {
 		$case = self::findByType($items, 'case', true);
 		if($case === null) {
 			throw new ValidationException('Cannot find case in items');
@@ -391,6 +390,25 @@ class ItemValidator {
 	}
 
 	/**
+	 * Find items by type inside another one, e.g. RAMs inside a motherboard.
+	 * Search is only one level deep.
+	 *
+	 * @param ItemWithFeatures[] $items
+	 * @param string $type
+	 *
+	 * @return Item[] Item, or empty array if not found
+	 */
+	private static function findAllByType(array &$items, string $type): array {
+		$found = [];
+		foreach($items as $maybe) {
+			if(self::getOrNull($maybe, 'type') === $type) {
+				$found[] = $maybe;
+			}
+		}
+		return $found;
+	}
+
+	/**
 	 * Get default feature names (i.e. most common ones) for an item type
 	 *
 	 * @param string $type Item type
@@ -529,6 +547,12 @@ class ItemValidator {
 		}
 	}
 
+//	private static function pushupFeatures(ItemWithFeatures $item) {
+//	}
+//
+//	private static function fixFeatures(ItemWithFeatures $item) {
+//	}
+
 	public static function fillWithDefaults(ItemIncomplete $item): ItemIncomplete {
 		$type = self::getOrNull($item, 'type');
 		if($type === null) {
@@ -541,17 +565,47 @@ class ItemValidator {
 	}
 
 	public static function fixupFromPeracotta(ItemIncomplete $item) {
-		// TODO: this. Remove laptop features unless computer is a laptop. Or send 'em from peracotta as null and
-		// accept that they may be null.
-
-		foreach($item->getContent() as $item) {
-			self::fixupFromPeracotta($item);
-		}
+		self::fixupFromPeracottaRecursive($item);
 	}
 
-//	private static function pushupFeatures(ItemWithFeatures $item) {
-//	}
+	private static function fixupFromPeracottaRecursive(ItemIncomplete $item) {
+		self::doFixupFromPeracotta($item);
+
+		foreach($item->getContent() as $subitem) {
+			self::fixupFromPeracottaRecursive($subitem);
+		}
+
+		self::doFixupFromPeracotta($item);
+	}
+
+	private static function doFixupFromPeracotta(ItemIncomplete $item) {
+		$type = self::getOrNull($item, 'type');
+
+		switch($type) {
+//			case 'motherboard':
+//				// TODO: do it on the client side?
+//				$ramType = self::getOrNull($item, 'ram-type');
+//				$ramSize = self::getOrNull($item, 'ram-form-factor');
+//				if($ramType === null || $ramSize === null) {
+//					$inside = $item->getContent();
+//					$rams = self::findAllByType($inside, 'ram');
+//					if(count($rams) > 0) {
 //
-//	private static function fixFeatures(ItemWithFeatures $item) {
-//	}
+//					}
+//				}
+//				break;
+			case 'case':
+				$ff = self::getOrNull($item, 'motherboard-form-factor');
+				if($ff === 'proprietary-laptop') {
+					$item->removeFeatureByName('psu-form-factor');
+				} else {
+					$item->removeFeatureByName('psu-volt');
+					$item->removeFeatureByName('psu-ampere');
+					$item->removeFeatureByName('power-connector');
+				}
+				break;
+		}
+		return $type;
+	}
+
 }
