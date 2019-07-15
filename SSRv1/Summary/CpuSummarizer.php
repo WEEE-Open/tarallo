@@ -62,7 +62,8 @@ class CpuSummarizer implements Summarizer {
 			if(empty($socketOnly)) {
 				$pretty .= '';
 			} else {
-				$pretty .= ', ' . FeaturePrinter::printableName('cpu-socket') . ' ' . $socketOnly[0];
+				$theWordSocketLiterally = str_replace(' (CPU)', '', FeaturePrinter::printableName('cpu-socket'));
+				$pretty .= ', ' . $theWordSocketLiterally . ' ' . $socketOnly[0];
 			}
 		}
 

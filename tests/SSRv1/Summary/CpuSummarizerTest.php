@@ -25,7 +25,7 @@ class CpuSummarizerTest extends TestCase {
 
 		$summary = CpuSummarizer::summarize($item);
 		$this->assertEquals(
-			'CPU x86 64 bit, 2 Cores 2 Threads @ 2.13 GHz, Intel Core 2 Duo E6400, Socket (CPU) LGA775',
+			'CPU x86 64 bit, 2 Cores 2 Threads @ 2.13 GHz, Intel Core 2 Duo E6400, Socket LGA775',
 			$summary
 		);
 
@@ -48,7 +48,7 @@ class CpuSummarizerTest extends TestCase {
 
 		$summary = CpuSummarizer::summarize($item);
 		$this->assertEquals(
-			'CPU x86 64 bit, 2 Cores 4 Threads @ 2.13 GHz, Intel Core 2 Duo E6400, Socket (CPU) LGA775',
+			'CPU x86 64 bit, 2 Cores 4 Threads @ 2.13 GHz, Intel Core 2 Duo E6400, Socket LGA775',
 			$summary
 		);
 
@@ -69,7 +69,7 @@ class CpuSummarizerTest extends TestCase {
 			->addFeature(new Feature('type', 'cpu'));
 
 		$summary = CpuSummarizer::summarize($item);
-		$this->assertEquals('CPU x86 64 bit, 2 Cores 2 Threads, Intel Core 2 Duo E6400, Socket (CPU) LGA775', $summary);
+		$this->assertEquals('CPU x86 64 bit, 2 Cores 2 Threads, Intel Core 2 Duo E6400, Socket LGA775', $summary);
 
 		return $summary;
 	}
@@ -89,7 +89,7 @@ class CpuSummarizerTest extends TestCase {
 
 		$summary = CpuSummarizer::summarize($item);
 		$this->assertEquals(
-			'CPU x86 64 bit, 2 Cores @ 2.13 GHz, Intel Core 2 Duo E6400, Socket (CPU) LGA775',
+			'CPU x86 64 bit, 2 Cores @ 2.13 GHz, Intel Core 2 Duo E6400, Socket LGA775',
 			$summary
 		);
 
@@ -111,7 +111,7 @@ class CpuSummarizerTest extends TestCase {
 
 		$summary = CpuSummarizer::summarize($item);
 		$this->assertEquals(
-			'CPU x86 64 bit, 2 Threads @ 2.13 GHz, Intel Core 2 Duo E6400, Socket (CPU) LGA775',
+			'CPU x86 64 bit, 2 Threads @ 2.13 GHz, Intel Core 2 Duo E6400, Socket LGA775',
 			$summary
 		);
 
@@ -131,7 +131,7 @@ class CpuSummarizerTest extends TestCase {
 			->addFeature(new Feature('type', 'cpu'));
 
 		$summary = CpuSummarizer::summarize($item);
-		$this->assertEquals('CPU x86 64 bit, 2.13 GHz, Intel Core 2 Duo E6400, Socket (CPU) LGA775', $summary);
+		$this->assertEquals('CPU x86 64 bit, 2.13 GHz, Intel Core 2 Duo E6400, Socket LGA775', $summary);
 
 		return $summary;
 	}
@@ -148,7 +148,7 @@ class CpuSummarizerTest extends TestCase {
 			->addFeature(new Feature('type', 'cpu'));
 
 		$summary = CpuSummarizer::summarize($item);
-		$this->assertEquals('CPU x86 64 bit, Intel Core 2 Duo E6400, Socket (CPU) LGA775', $summary);
+		$this->assertEquals('CPU x86 64 bit, Intel Core 2 Duo E6400, Socket LGA775', $summary);
 
 		return $summary;
 	}
@@ -167,7 +167,7 @@ class CpuSummarizerTest extends TestCase {
 			->addFeature(new Feature('type', 'cpu'));
 
 		$summary = CpuSummarizer::summarize($item);
-		$this->assertEquals('CPU x86 64 bit, 2 Cores 2 Threads @ 2.13 GHz, Intel, Socket (CPU) LGA775', $summary);
+		$this->assertEquals('CPU x86 64 bit, 2 Cores 2 Threads @ 2.13 GHz, Intel, Socket LGA775', $summary);
 
 		return $summary;
 	}
@@ -187,7 +187,7 @@ class CpuSummarizerTest extends TestCase {
 
 		$summary = CpuSummarizer::summarize($item);
 		$this->assertEquals(
-			'CPU x86 64 bit, 2 Cores 2 Threads @ 2.13 GHz, Core 2 Duo E6400, Socket (CPU) LGA775',
+			'CPU x86 64 bit, 2 Cores 2 Threads @ 2.13 GHz, Core 2 Duo E6400, Socket LGA775',
 			$summary
 		);
 
@@ -207,7 +207,7 @@ class CpuSummarizerTest extends TestCase {
 			->addFeature(new Feature('type', 'cpu'));
 
 		$summary = CpuSummarizer::summarize($item);
-		$this->assertEquals('CPU x86 64 bit, 2 Cores 2 Threads @ 2.13 GHz, Socket (CPU) LGA775', $summary);
+		$this->assertEquals('CPU x86 64 bit, 2 Cores 2 Threads @ 2.13 GHz, Socket LGA775', $summary);
 
 		return $summary;
 	}
@@ -260,7 +260,7 @@ class CpuSummarizerTest extends TestCase {
 			->addFeature(new Feature('type', 'cpu'));
 
 		$summary = CpuSummarizer::summarize($item);
-		$this->assertEquals('CPU x86 64 bit, Intel Core 2 Duo E6400, Socket (CPU) LGA775', $summary);
+		$this->assertEquals('CPU x86 64 bit, Intel Core 2 Duo E6400, Socket LGA775', $summary);
 
 		return $summary;
 	}
@@ -296,7 +296,7 @@ class CpuSummarizerTest extends TestCase {
 
 		$summary = CpuSummarizer::summarize($item);
 		$this->assertEquals(
-			'CPU (Architecture?), 2 Cores 2 Threads @ 2.13 GHz, Intel Core 2 Duo E6400, Socket (CPU) LGA775',
+			'CPU (Architecture?), 2 Cores 2 Threads @ 2.13 GHz, Intel Core 2 Duo E6400, Socket LGA775',
 			$summary
 		);
 
