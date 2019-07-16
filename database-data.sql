@@ -219,6 +219,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'fm1'), -- FM1 --
 	('cpu-socket', 'fm2'), -- FM2 --
 	('cpu-socket', 'fm2plus'), -- FM2+ --
+	('cpu-socket', 'f'), -- F (LGA1207) --
 	('cpu-socket', 'g34'), -- G34 --
 	('cpu-socket', 'c32'), -- C32 --
 	('cpu-socket', 'g3'), -- G3 (rPGA988A) --
@@ -351,6 +352,8 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('psu-connector-cpu', '6pin-hp-brown'), -- 6 pin (HP, 2 brown) -- 2 black, 2 yellow, 2 brown
 	('psu-connector-cpu', '6pin'), -- 6 pin (other) --
 	('psu-connector-cpu', '8pin'), -- 8 pin --
+	('psu-connector-cpu', '8pin4pin'), -- 8 pin + 4 pin --
+	('psu-connector-cpu', '8pin8pin'), -- 8 pin + 8 pin --
 	('psu-connector-cpu', 'proprietary'); -- Proprietary --
 
 TRUNCATE `Prefixes`;
@@ -377,4 +380,4 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('T', 0),
 	('', 0);
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 13);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 14);

@@ -336,6 +336,9 @@ EOQ
 				case 12:
 					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('sas-sata-ports-n', 'ports', 1),  ('sas-sff-8087-ports-n', 'ports', 1), ('sas-sff-8088-ports-n', 'ports', 1), ('usb-c-ports-n', 'ports', 1), ('mini-displayport-ports-n', 'ports', 1), ('micro-hdmi-ports-n', 'ports', 1), ('thunderbolt-ports-n', 'ports', 1), ('esata-ports-n', 'ports', 1)");
 					break;
+				case 13:
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('psu-connector-cpu', '8pin8pin'), ('psu-connector-cpu', '8pin4pin'), ('cpu-socket', 'f')");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}
