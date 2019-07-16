@@ -1190,6 +1190,9 @@
 			method = 'POST';
 			uri = '/v1/items';
 		}
+		let encoded = JSON.stringify(request);
+		console.log("Send to " + uri);
+		console.log(encoded);
 
 		response = await fetch(uri, {
 			headers: {
@@ -1198,7 +1201,7 @@
 			},
 			method: method,
 			credentials: 'include',
-			body: JSON.stringify(request)
+			body: encoded
 		});
 
 		try {
@@ -1288,15 +1291,20 @@
 		toggleButtons(true);
 		let code = document.querySelector('.item.head.editing').dataset.code;
 		let response;
+		let uri = '/v1/items/' + encodeURIComponent(code) + '/features';
+		let encoded = JSON.stringify(delta);
 
-		response = await fetch('/v1/items/' + encodeURIComponent(code) + '/features', {
+		console.log("Send to " + uri);
+		console.log(encoded);
+
+		response = await fetch(uri, {
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
 			},
 			method: 'PATCH',
 			credentials: 'include',
-			body: JSON.stringify(delta)
+			body: encoded
 		});
 
 		try {
