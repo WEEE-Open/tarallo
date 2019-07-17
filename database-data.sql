@@ -61,7 +61,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('ram-type', 'features', 2), -- RAM type --
 	('ram-timings', 'features', 0), -- RAM timings -- https://en.wikipedia.org/wiki/Memory_timings
 	('sata-ports-n', 'ports', 1), -- SATA --
-	('esata-ports-n', 'ports', 1), -- sSATA --
+	('esata-ports-n', 'ports', 1), -- eSATA --
 	('sas-sata-ports-n', 'ports', 1), -- SAS (SATA connector) --
 	('sas-sff-8087-ports-n', 'ports', 1), -- SAS (SFF-8087) --
 	('sas-sff-8088-ports-n', 'ports', 1), -- SAS (SFF-8088) --

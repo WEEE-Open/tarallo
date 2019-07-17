@@ -60,7 +60,7 @@ class FeaturePrinter {
 		'ram-type' => 'RAM type',
 		'ram-timings' => 'RAM timings',
 		'sata-ports-n' => 'SATA',
-		'esata-ports-n' => 'sSATA',
+		'esata-ports-n' => 'eSATA',
 		'sas-sata-ports-n' => 'SAS (SATA connector)',
 		'sas-sff-8087-ports-n' => 'SAS (SFF-8087)',
 		'sas-sff-8088-ports-n' => 'SAS (SFF-8088)',
