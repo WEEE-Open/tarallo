@@ -76,4 +76,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 	?>
 
 </div>
+<?php if(!isset($edit)):
+    $this->insert('editor');
+endif; ?>
 <script src="/static/search.js"></script>

@@ -19,7 +19,7 @@
 	let fadingErrors = new Map();
 	let linkedErrors = new Map();
 
-	// Can't remember what this does
+	// Fill the feature selection menus
 	for(let select of document.querySelectorAll('.allfeatures')) {
 		select.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
 	}
