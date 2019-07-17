@@ -117,7 +117,11 @@ class ItemValidator {
 	 * @param ItemWithFeatures|null $lowerLimit
 	 * @param ItemWithFeatures|null $upperLimit
 	 */
-	private static function fixFeaturesRecursively(ItemWithFeatures $item, ?ItemWithFeatures $lowerLimit, ?ItemWithFeatures $upperLimit) {
+	private static function fixFeaturesRecursively(
+		ItemWithFeatures $item,
+		?ItemWithFeatures $lowerLimit,
+		?ItemWithFeatures $upperLimit
+	) {
 		if($lowerLimit !== $item) {
 			self::pushdownFeatures($item);
 		}
@@ -219,7 +223,7 @@ class ItemValidator {
 	 * Check that item nesting makes sense (e.g. no CPUs inside HDDs)
 	 *
 	 * @param ItemWithFeatures $item Item to be checked
-	 * @param ItemWithFeatures$parent Its parent, or none if a root item
+	 * @param ItemWithFeatures $parent Its parent, or none if a root item
 	 *
 	 * @throws ItemNestingException if items are invalidly nested
 	 * @throws ValidationException if item cannot be a root item and has a null parent
@@ -420,67 +424,70 @@ class ItemValidator {
 			case 'case':
 				return [
 					'cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code', 'brand', 'model',
-					'sn', 'usb-ports-n', 'motherboard-form-factor', 'psu-form-factor', 'power-connector', 'psu-volt',
-					'psu-ampere', 'arrival-batch', 'owner', 'color', 'notes',
+					'working', 'sn', 'usb-ports-n', 'firewire-ports-n', 'mini-jack-ports-n', 'motherboard-form-factor',
+					'psu-form-factor', 'power-connector', 'psu-volt', 'psu-ampere', 'arrival-batch', 'owner',
+					'color', 'notes',
 				];
 			case 'motherboard':
 				return [
-					'brand', 'model', 'sn', 'motherboard-form-factor', 'key-bios-setup', 'key-boot-menu', 'cpu-socket',
-					'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n', 'sata-ports-n',
-					'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n', 'usb-ports-n',
-					'firewire-ports-n', 'mini-firewire-ports-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n',
-					'mac', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand', 'integrated-graphics-model',
-					'vga-ports-n', 'dvi-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'mini-jack-ports-n',
-					'psu-connector-cpu', 'psu-connector-motherboard', 'color', 'owner', 'notes',
+					'brand', 'model', 'working', 'sn', 'motherboard-form-factor', 'key-bios-setup', 'key-boot-menu',
+					'cpu-socket', 'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n',
+					'sata-ports-n', 'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n',
+					'usb-ports-n', 'firewire-ports-n', 'mini-firewire-ports-n', 'ethernet-ports-1000m-n',
+					'ethernet-ports-100m-n', 'mac', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand',
+					'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 's-video-ports-n',
+					's-video-7pin-ports-n', 'mini-jack-ports-n', 'psu-connector-cpu', 'psu-connector-motherboard',
+					'color', 'owner', 'notes',
 				];
 			case 'cpu':
 				return [
-					'brand', 'model', 'variant', 'core-n', 'thread-n', 'isa', 'frequency-hertz', 'cpu-socket',
+					'brand', 'model', 'working', 'variant', 'core-n', 'thread-n', 'isa', 'frequency-hertz',
+					'cpu-socket',
 					'integrated-graphics-brand', 'integrated-graphics-model', 'owner',
 				];
 			case 'ram':
 				return [
-					'brand', 'model', 'sn', 'family', 'ram-type', 'ram-form-factor', 'frequency-hertz', 'capacity-byte',
-					'ram-timings', 'ram-ecc', 'color', 'owner', 'notes',
+					'brand', 'model', 'working', 'sn', 'family', 'ram-type', 'ram-form-factor', 'frequency-hertz',
+					'capacity-byte', 'ram-timings', 'ram-ecc', 'color', 'owner', 'notes',
 				];
 			case 'hdd':
 				return [
-					'brand', 'model', 'sn', 'wwn', 'family', 'capacity-decibyte', 'hdd-form-factor', 'spin-rate-rpm',
-					'mini-ide-ports-n', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n', 'scsi-db68-ports-n',
-					'data-erased', 'surface-scan', 'smart-data', 'software', 'owner',
+					'brand', 'model', 'working', 'sn', 'wwn', 'family', 'capacity-decibyte', 'hdd-form-factor',
+					'spin-rate-rpm', 'mini-ide-ports-n', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n',
+					'scsi-db68-ports-n', 'data-erased', 'surface-scan', 'smart-data', 'software', 'owner',
 				];
 			case 'ssd':
 				return [
-					'brand', 'model', 'sn', 'family', 'capacity-byte', 'hdd-form-factor', 'sata-ports-n', 'data-erased',
-					'surface-scan', 'smart-data', 'software', 'owner',
+					'brand', 'model', 'working', 'sn', 'family', 'capacity-byte', 'hdd-form-factor', 'sata-ports-n',
+					'data-erased', 'surface-scan', 'smart-data', 'software', 'owner',
 				];
 			case 'odd':
 				return [
-					'brand', 'model', 'family', 'sn', 'odd-type', 'ide-ports-n', 'jae-ports-n', 'sata-ports-n',
-					'odd-form-factor', 'color', 'owner',
+					'brand', 'model', 'working', 'sn', 'odd-type', 'ide-ports-n', 'jae-ports-n',
+					'sata-ports-n', 'odd-form-factor', 'color', 'owner',
 				];
 			case 'fdd':
-				return ['brand', 'model', 'sn', 'color', 'owner'];
+				return ['brand', 'model', 'working', 'sn', 'color', 'owner'];
 			case 'graphics-card':
 				return [
-					'brand', 'brand-manufacturer', 'model', 'capacity-byte', 'vga-ports-n', 'dvi-ports-n',
+					'brand', 'brand-manufacturer', 'model', 'working', 'capacity-byte', 'vga-ports-n', 'dvi-ports-n',
 					'dms-59-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'agp-sockets-n', 'pcie-sockets-n',
 					'pcie-power-pin-n', 'sn', 'color', 'owner',
 				];
 			case 'psu':
 				return [
-					'brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'power-rated-watt',
-					'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor', 'psu-rails-most-power',
-					'pcie-power-pin-n', 'sata-power-n', 'color', 'owner',
+					'brand', 'brand-manufacturer', 'model', 'working', 'working', 'sn', 'power-connector',
+					'power-rated-watt', 'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor',
+					'psu-rails-most-power', 'pcie-power-pin-n', 'sata-power-n', 'color', 'owner',
 				];
 			case 'external-psu':
 				return [
-					'brand', 'brand-manufacturer', 'model', 'sn', 'power-connector', 'psu-volt', 'psu-ampere', 'owner',
-					'notes',
+					'brand', 'brand-manufacturer', 'model', 'working', 'sn', 'power-connector', 'psu-volt',
+					'psu-ampere', 'owner', 'notes',
 				];
 			case 'ethernet-card':
 				return [
-					'brand', 'model', 'sn', 'pcie-sockets-n', 'pci-sockets-n', 'ethernet-ports-1000m-n',
+					'brand', 'model', 'working', 'sn', 'pcie-sockets-n', 'pci-sockets-n', 'ethernet-ports-1000m-n',
 					'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n',
 					'ethernet-ports-10base5-aui-n', 'mac', 'color', 'owner',
 				];
@@ -489,32 +496,34 @@ class ItemValidator {
 			case 'scsi-card':
 			case 'modem-card':
 			case 'tv-card':
-				return ['brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color', 'owner'];
+				return ['brand', 'model', 'working', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color', 'owner'];
 			case 'bluetooth-card':
 			case 'wifi-card':
 				return [
-					'brand', 'model', 'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n', 'mini-pci-sockets-n',
-					'mac', 'sn', 'color', 'owner',
+					'brand', 'model', 'working', 'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n',
+					'mini-pci-sockets-n', 'mac', 'sn', 'color', 'owner',
 				];
 			case 'network-switch':
 			case 'network-hub':
 			case 'modem-router':
 				return [
-					'brand', 'model', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ethernet-ports-10m-n',
-					'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n', 'power-connector', 'psu-volt',
-					'psu-ampere', 'color', 'owner', 'notes',
+					'brand', 'model', 'working', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n',
+					'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n',
+					'power-connector', 'psu-volt', 'psu-ampere', 'color', 'owner', 'notes',
 				];
 			case 'keyboard':
 			case 'mouse':
-				return ['brand', 'brand-manufacturer', 'model', 'sn', 'ps2-ports-n', 'usb-ports-n', 'color', 'owner'];
+				return ['brand', 'brand-manufacturer', 'model', 'working', 'sn', 'ps2-ports-n', 'usb-ports-n', 'color',
+					'owner'];
 			case 'monitor':
 				return [
-					'cib-qr', 'cib', 'cib-old', 'other-code', 'brand', 'model', 'sn', 'diagonal-inch', 'vga-ports-n',
-					'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n', 'usb-ports-n', 'power-connector', 'psu-volt',
+					'cib-qr', 'cib', 'cib-old', 'other-code', 'brand', 'model', 'working', 'sn', 'diagonal-inch',
+					'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n', 'usb-ports-n', 'power-connector',
+					'psu-volt',
 					'psu-ampere', 'color', 'owner', 'notes',
 				];
 			case 'ports-bracket':
-				return ['usb-ports-n', 'serial-ports-n', 'parallel-ports-n', 'firewire-ports-n', 'color', 'owner'];
+				return ['usb-ports-n', 'serial-ports-n', 'game-ports-n', 'firewire-ports-n', 'color', 'owner'];
 			case 'location':
 				return ['notes'];
 			default:
@@ -535,7 +544,7 @@ class ItemValidator {
 			$ff = self::getOrNull($item, 'motherboard-form-factor');
 			if($ff === 'proprietary-laptop') {
 				if(self::has($item, 'usb-ports-n')) {
-				    $content = $item->getContent();
+					$content = $item->getContent();
 					$mobo = self::findByType($content, 'motherboard');
 					if($mobo !== null && !self::has($mobo, 'usb-ports-n')) {
 						// TODO: this will end badly when products are implemented...
