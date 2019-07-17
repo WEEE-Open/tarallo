@@ -5,8 +5,15 @@
 $this->layout('main', ['title' => 'Home', 'user' => $user]) ?>
 
 <article>
-	<h2>Hi</h2>
-	<p>This is a temporary home page. Here are some stats.</p>
+	<h2>Useful key combinations</h2>
+	<p>In editor mode, select a feature and...</p>
+    <ul>
+        <li>Ctrl + Alt + Z: delete feature</li>
+        <li>Ctrl + Alt + U: CONVERT TO UPPERCASE</li>
+        <li>Ctrl + Alt + L: convert to lowercase</li>
+        <li>Ctrl + Alt + Y: Convert To Title Case</li>
+    </ul>
+    <h2>Random stats</h2>
 	<div class="statswrapperwrapper">
 	<?php if(!empty($locations)): ?>
 		<div class="tablewrapper">
