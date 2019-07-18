@@ -339,6 +339,9 @@ EOQ
 				case 13:
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('psu-connector-cpu', '8pin8pin'), ('psu-connector-cpu', '8pin4pin'), ('cpu-socket', 'f')");
 					break;
+				case 14:
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('todo', 'replace-cmos-battery')");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

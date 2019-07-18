@@ -308,6 +308,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('todo', 'replace-capacitors'), -- Replace blown capacitors --
 	('todo', 'add-components'), -- Add missing components --
 	('todo', 'salvage-components'), -- Salvage components --
+	('todo', 'replace-cmos-battery'), -- Replace CMOS battery --
 	('ram-ecc', 'no'), -- No --
 	('ram-ecc', 'yes'), -- Yes --
 	('data-erased', 'yes'), -- Yes️ -- Just don't add the feature if it hasn't been erased...
@@ -380,4 +381,4 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('T', 0),
 	('', 0);
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 14);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 15);

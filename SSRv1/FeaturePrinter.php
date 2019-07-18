@@ -138,7 +138,7 @@ class FeaturePrinter {
 		'ram-type' => ['simm' => 'SIMM', 'edo' => 'EDO', 'sdr' => 'SDR', 'ddr' => 'DDR', 'ddr2' => 'DDR2', 'ddr3' => 'DDR3', 'ddr4' => 'DDR4'],
 		'ram-form-factor' => ['simm' => 'SIMM', 'dimm' => 'DIMM', 'sodimm' => 'SODIMM', 'minidimm' => 'Mini DIMM', 'microdimm' => 'Micro DIMM', 'fbdimm' => 'FB-DIMM'],
 		'check' => ['missing-data' => 'Missing data', 'partial-inventory' => 'Partially inventoried'],
-		'todo' => ['transplant' => 'Transplant into another case', 'container' => 'Container for transplant', 'install-os' => 'Install OS', 'finish-os-install' => 'Finish OS installation', 'replace-capacitors' => 'Replace blown capacitors', 'add-components' => 'Add missing components', 'salvage-components' => 'Salvage components'],
+		'todo' => ['transplant' => 'Transplant into another case', 'container' => 'Container for transplant', 'install-os' => 'Install OS', 'finish-os-install' => 'Finish OS installation', 'replace-capacitors' => 'Replace blown capacitors', 'add-components' => 'Add missing components', 'salvage-components' => 'Salvage components', 'replace-cmos-battery' => 'Replace CMOS battery'],
 		'ram-ecc' => ['no' => 'No', 'yes' => 'Yes'],
 		'data-erased' => ['yes' => 'Yes️'],
 		'surface-scan' => ['fail' => 'Failed', 'pass' => 'Passed'],
