@@ -16,7 +16,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 <div class="statswrapperwrapper">
 <?php if(!empty($ready)): ?>
 	<div class="tablewrapper large">
-		<p>Ready computers:</p>
+		<p>Ready computers (total <?= count($ready) ?>):</p>
 		<div>
 			<?php foreach($ready as $item): ?>
 				<a href="/item/<?=$item?>"><?=$item?></a>
