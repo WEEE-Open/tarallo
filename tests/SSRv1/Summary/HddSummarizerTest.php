@@ -14,7 +14,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -39,7 +39,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Western Digital'))
 			->addFeature(new Feature('family', 'Caviar'))
-			->addFeature(new Feature('capacity-byte', 40000000000))
+			->addFeature(new Feature('capacity-decibyte', 40000000000))
 			->addFeature(new Feature('spin-rate-rpm', 5400))
 			->addFeature(new Feature('model', 'WD40ASD'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -65,7 +65,7 @@ class HddSummarizerTest extends TestCase {
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -88,7 +88,7 @@ class HddSummarizerTest extends TestCase {
 	public function testHddNoCommercial() {
 		$item = new Item('H123');
 		$item
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('owner', 'Area IT'))
 			->addFeature(new Feature('sn', 'ABCD123123123'))
@@ -112,7 +112,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -134,7 +134,7 @@ class HddSummarizerTest extends TestCase {
 	public function testHddNoOsNoCommercial() {
 		$item = new Item('H123');
 		$item
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('owner', 'Area IT'))
 			->addFeature(new Feature('sn', 'ABCD123123123'))
@@ -157,7 +157,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -182,7 +182,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -207,7 +207,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -232,7 +232,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -257,7 +257,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -282,7 +282,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -308,7 +308,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -336,7 +336,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -363,7 +363,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -387,7 +387,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -411,7 +411,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -435,7 +435,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -459,7 +459,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -495,7 +495,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -521,7 +521,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -547,7 +547,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -573,7 +573,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -597,7 +597,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
 			->addFeature(new Feature('sn', 'ABCD123123123'))
@@ -621,7 +621,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -645,7 +645,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('spin-rate-rpm', 7200))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
@@ -669,7 +669,7 @@ class HddSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
 			->addFeature(new Feature('family', 'Barracuda'))
-			->addFeature(new Feature('capacity-byte', 80000000000))
+			->addFeature(new Feature('capacity-decibyte', 80000000000))
 			->addFeature(new Feature('model', 'STM123456XYZ'))
 			->addFeature(new Feature('owner', 'Area IT'))
 			->addFeature(new Feature('sn', 'ABCD123123123'))
