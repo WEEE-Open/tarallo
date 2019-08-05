@@ -57,8 +57,8 @@ class ItemValidator {
 	 * @return ItemWithFeatures Correct parent (given one or a motherboard)
 	 */
 	private static function reparent(ItemWithFeatures $item, ItemWithFeatures $container): ItemWithFeatures {
-		$type = self::getOrNull($item, 'type');
-		$parentType = self::getOrNull($container, 'type');
+		$type = $item->getFeature('type');
+		$parentType = $container->getFeature('type');
 
 		if($type === null || $parentType == null) {
 			return $container;
@@ -159,59 +159,21 @@ class ItemValidator {
 	/**
 	 * Check that item features make sense
 	 *
-	 * @param Item $item Item to be checked
+	 * @param ItemWithFeatures $item Item to be checked
 	 *
 	 * @throws ValidationException if item contains invalid features
 	 * @TODO: make this thing work for PATCH requests...
 	 */
-	public static function validateFeatures(Item $item) {
-		$type = self::getOrNull($item, 'type');
-		if($type !== null) {
-			if($type === 'case') {
-				$motherboardFF = self::getOrNull($item, 'motherboard-form-factor');
-				switch($motherboardFF) {
-					case 'proprietary-laptop':
-						// It's a laptop, reject features that make sense only in desktops.
-						if(self::has($item, 'usb-ports-n')) {
-							throw new ValidationException(
-								'A laptop does not have USB ports on the case, but on the motherboard only. Remove the "USB ports" feature from the case or change the motherboard form factor.'
-							);
-						}
-						if(self::has($item, 'psu-form-factor')) {
-							if($item->getFeature('psu-form-factor') !== 'proprietary') {
-								// Well, it may contain a power supply, if it's something really old... but it won't be standard anyway.
-								throw new ValidationException(
-									'A laptop does not have a standard internal PSU. Remove the "PSU form factor" feature from the case or change the motherboard form factor.'
-								);
-							}
-						}
-						break;
-					default:
-						// It's a desktop, reject features that make sense only in laptops
-						if(self::has($item, 'power-connector')) {
-							throw new ValidationException(
-								"A desktop computer case does not have any power connector. Remove that feature or change the motherboard form factor."
-							);
-						}
-						if(self::has($item, 'psu-volt')) {
-							throw new ValidationException(
-								'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply voltage" feature or change the motherboard form factor.'
-							);
-						}
-						if(self::has($item, 'psu-ampere')) {
-							throw new ValidationException(
-								'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply current" feature or change the motherboard form factor.'
-							);
-						}
-						break;
-					case null:
-					case 'proprietary':
-					case 'miniitx':
-						// Unknown form factor or one that can contain any feature, do nothing
-						// See also: https://github.com/WEEE-Open/tarallo/issues/63#issue-388831295
-						break;
-				}
-			}
+	public static function validateFeatures(ItemWithFeatures $item) {
+		$type = $item->getFeature('type');
+
+		switch($type) {
+			case 'case':
+				self::validateFeaturesCase($item);
+				break;
+			case 'monitor':
+				self::validateFeaturesMonitor($item);
+				break;
 		}
 
 		foreach($item->getContent() as $subitem) {
@@ -244,8 +206,8 @@ class ItemValidator {
 	 *
 	 */
 	private static function checkNesting(ItemWithFeatures $item, ?ItemWithFeatures $container): void {
-		$type = self::getOrNull($item, 'type');
-		$parentType = self::getOrNull($container, 'type');
+		$type = $item->getFeature('type');
+		$parentType = $container->getFeature('type');
 
 		if($type === null || $parentType == null) {
 			return;
@@ -315,7 +277,7 @@ class ItemValidator {
 	 * @throws ValidationException
 	 */
 	public static function checkRoot(ItemWithFeatures $item) {
-		$type = self::getOrNull($item, 'type');
+		$type = $item->getFeature('type');
 		if($type !== null && $type !== 'location') {
 			throw new ValidationException(
 				'Set a location for this item or mark it as a location itself, this type cannot be a root item'
@@ -342,33 +304,14 @@ class ItemValidator {
 	 * @return bool If the feature is the same or one of them is null
 	 */
 	private static function compareFeature(ItemWithFeatures $item, ItemWithFeatures $container, string $feature) {
-		$itemFeature = self::getOrNull($item, $feature);
-		$parentFeature = self::getOrNull($container, $feature);
+		$itemFeature = $item->getFeature($feature);
+		$parentFeature = $container->getFeature($feature);
 
 		if($itemFeature !== null && $parentFeature !== null) {
 			return $itemFeature === $parentFeature;
 		}
 
 		return true;
-	}
-
-	private static function has(ItemWithFeatures $item, string $feature): bool {
-		// There's a similar method in ItemPrefixer that also checks that the value is not 0.
-		// This one is more strict.
-		return $item->getFeature($feature) !== null;
-	}
-
-	private static function getOrNull(ItemWithFeatures $item, string $featureName) {
-		$feature = $item->getFeature($featureName);
-		if($feature === null) {
-			return null;
-		} else {
-			if($feature instanceof Feature) {
-				return $feature->value;
-			} else {
-				return null;
-			}
-		}
 	}
 
 	/**
@@ -383,7 +326,7 @@ class ItemValidator {
 	 */
 	private static function findByType(array &$items, string $type, bool $remove = false) {
 		foreach($items as $k => $maybe) {
-			if(self::getOrNull($maybe, 'type') === $type) {
+			if($maybe->getFeature('type') === $type) {
 				if($remove) {
 					unset($items[$k]);
 				}
@@ -405,7 +348,7 @@ class ItemValidator {
 	private static function findAllByType(array &$items, string $type): array {
 		$found = [];
 		foreach($items as $maybe) {
-			if(self::getOrNull($maybe, 'type') === $type) {
+			if($maybe->getFeature('type') === $type) {
 				$found[] = $maybe;
 			}
 		}
@@ -550,16 +493,16 @@ class ItemValidator {
 
 
 	private static function pushdownFeatures(ItemWithFeatures $item) {
-		$type = self::getOrNull($item, 'type');
+		$type = $item->getFeature('type');
 
 		// Move laptop usb ports from the case to the motherboard
 		if($type === 'case') {
-			$ff = self::getOrNull($item, 'motherboard-form-factor');
+			$ff = $item->getFeature('motherboard-form-factor');
 			if($ff === 'proprietary-laptop') {
-				if(self::has($item, 'usb-ports-n')) {
+				if($item->getFeature('usb-ports-n') !== null) {
 					$content = $item->getContent();
 					$mobo = self::findByType($content, 'motherboard');
-					if($mobo !== null && !self::has($mobo, 'usb-ports-n')) {
+					if($mobo !== null && !$mobo->getFeature('usb-ports-n') !== null) {
 						// TODO: this will end badly when products are implemented...
 						$mobo->addFeature($item->getFeature('usb-ports-n'));
 						$item->removeFeatureByName('usb-ports-n');
@@ -576,7 +519,7 @@ class ItemValidator {
 //	}
 
 	public static function fillWithDefaults(ItemIncomplete $item): ItemIncomplete {
-		$type = self::getOrNull($item, 'type');
+		$type = $item->getFeature('type');
 		if($type === null) {
 			return $item;
 		}
@@ -601,7 +544,7 @@ class ItemValidator {
 	}
 
 	private static function doFixupFromPeracotta(ItemIncomplete $item) {
-		$type = self::getOrNull($item, 'type');
+		$type = $item->getFeature('type');
 
 		switch($type) {
 //			case 'motherboard':
@@ -617,7 +560,7 @@ class ItemValidator {
 //				}
 //				break;
 			case 'case':
-				$ff = self::getOrNull($item, 'motherboard-form-factor');
+				$ff = $item->getFeature('motherboard-form-factor');
 				if($ff === 'proprietary-laptop') {
 					$item->removeFeatureByName('psu-form-factor');
 				} else {
@@ -630,4 +573,58 @@ class ItemValidator {
 		return $type;
 	}
 
+	private static function validateFeaturesCase(ItemWithFeatures $case) {
+		$motherboardFF = $case->getFeature('motherboard-form-factor');
+		switch($motherboardFF) {
+			case 'proprietary-laptop':
+				// It's a laptop, reject features that make sense only in desktops.
+				if($case->getFeature('usb-ports-n') !== null) {
+					throw new ValidationException(
+						'A laptop does not have USB ports on the case, but on the motherboard only. Remove the "USB ports" feature from the case or change the motherboard form factor.'
+					);
+				}
+				if($case->getFeature('psu-form-factor') !== null) {
+					if($case->getFeature('psu-form-factor') !== 'proprietary') {
+						// Well, it may contain a power supply, if it's something really old... but it won't be standard anyway.
+						throw new ValidationException(
+							'A laptop does not have a standard internal PSU. Remove the "PSU form factor" feature from the case or change the motherboard form factor.'
+						);
+					}
+				}
+				break;
+			default:
+				// It's a desktop, reject features that make sense only in laptops
+				if($case->getFeature('power-connector') !== null) {
+					throw new ValidationException(
+						"A desktop computer case does not have any power connector. Remove that feature or change the motherboard form factor."
+					);
+				}
+				if($case->getFeature('psu-volt') !== null) {
+					throw new ValidationException(
+						'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply voltage" feature or change the motherboard form factor.'
+					);
+				}
+				if($case->getFeature('psu-ampere') !== null) {
+					throw new ValidationException(
+						'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply current" feature or change the motherboard form factor.'
+					);
+				}
+				break;
+			case null:
+			case 'proprietary':
+			case 'miniitx':
+				// Unknown form factor or one that can contain any feature, do nothing
+				// See also: https://github.com/WEEE-Open/tarallo/issues/63#issue-388831295
+				break;
+		}
+	}
+
+	private static function validateFeaturesMonitor(ItemWithFeatures $monitor) {
+		$power = $monitor->getFeature('power-connector');
+		if($power === 'c13' || $power === 'c19') {
+			if($monitor->getFeature('psu-volt') !== null || $monitor->getFeature('psu-ampere') !== null) {
+				throw new ValidationException('A monitor with a 220 V power connector should not require specific voltages and currents. Remove "Power supply current" and "Power supply voltage" or select another power connector type.');
+			}
+		}
+	}
 }
