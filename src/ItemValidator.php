@@ -478,7 +478,7 @@ class ItemValidator {
 				return [
 					'brand', 'brand-manufacturer', 'model', 'working', 'working', 'sn', 'power-connector',
 					'power-rated-watt', 'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor',
-					'psu-rails-most-power', 'pcie-power-pin-n', 'sata-power-n', 'color', 'owner',
+					'psu-12v-rail-ampere', 'pcie-power-pin-n', 'sata-power-n', 'color', 'owner',
 				];
 			case 'external-psu':
 				return [
@@ -493,10 +493,14 @@ class ItemValidator {
 				];
 			case 'audio-card':
 			case 'other-card':
-			case 'scsi-card':
 			case 'modem-card':
 			case 'tv-card':
 				return ['brand', 'model', 'working', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color', 'owner'];
+			case 'storage-card':
+				return ['brand', 'model', 'working', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n',
+					'scsi-db68-ports-n', 'pcie-sockets-n', 'sas-sff-8087-ports-n', 'sas-sff-8088-ports-n',
+					'sas-sata-ports-n', 'pci-sockets-n', 'sn', 'color', 'owner'
+				];
 			case 'bluetooth-card':
 			case 'wifi-card':
 				return [
@@ -519,8 +523,7 @@ class ItemValidator {
 				return [
 					'cib-qr', 'cib', 'cib-old', 'other-code', 'brand', 'model', 'working', 'sn', 'diagonal-inch',
 					'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n', 'usb-ports-n', 'power-connector',
-					'psu-volt',
-					'psu-ampere', 'color', 'owner', 'notes',
+					'psu-volt', 'psu-ampere', 'color', 'owner', 'notes',
 				];
 			case 'ports-bracket':
 				return ['usb-ports-n', 'serial-ports-n', 'game-ports-n', 'firewire-ports-n', 'color', 'owner'];

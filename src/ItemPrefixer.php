@@ -58,7 +58,7 @@ class ItemPrefixer {
 				return 'FL';
 			case 'ports-bracket':
 			case 'other-card':
-			case 'scsi-card':
+			case 'storage-card':
 			case 'tv-card':
 				return 'SP';
 			case 'audio-card':

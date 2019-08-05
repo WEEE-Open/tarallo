@@ -111,6 +111,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('brand-manufacturer', 'commercial', 0), -- Brand (manufacturer) --
 	('psu-form-factor', 'physical', 2), -- Form factor (PSU) --
 	('psu-rails-most-power', 'power', 2), -- Rails with most power --
+	('psu-12v-rail-ampere', 'power', 3), -- Power on 12 V rail(s) --
 	('cib-old', 'administrative', 0), -- CIB (old) --
 	('integrated-graphics-brand', 'features', 0), -- Integrated graphics brand -- TODO: replace with brand & model, once namespaced features are implemented
 	('integrated-graphics-model', 'features', 0), -- Integrated graphics model --
@@ -150,7 +151,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('type', 'other-card'), -- Other internal card --
 	('type', 'fan-controller'), -- Fan controller (rheobus) --
 	('type', 'modem-card'), -- Modem card --
-	('type', 'scsi-card'), -- SCSI card --
+	('type', 'storage-card'), -- Storage card --
 	('type', 'wifi-card'), -- WiFi card --
 	('type', 'bluetooth-card'), -- Bluetooth card --
 	('type', 'external-psu'), -- External PSU --
@@ -309,6 +310,8 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('todo', 'add-components'), -- Add missing components --
 	('todo', 'salvage-components'), -- Salvage components --
 	('todo', 'replace-cmos-battery'), -- Replace CMOS battery --
+	('todo', 'finish-testing'), -- Finish testing components --
+	('todo', 'finish-inventory'), -- Finish inventory of components --
 	('ram-ecc', 'no'), -- No --
 	('ram-ecc', 'yes'), -- Yes --
 	('data-erased', 'yes'), -- Yes️ -- Just don't add the feature if it hasn't been erased...
@@ -381,4 +384,4 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('T', 0),
 	('', 0);
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 15);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 16);

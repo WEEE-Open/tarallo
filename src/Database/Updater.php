@@ -342,6 +342,14 @@ EOQ
 				case 14:
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('todo', 'replace-cmos-battery')");
 					break;
+				case 15:
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('todo', 'finish-testing'), ('todo', 'finish-inventory')");
+					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('psu-12v-rail-ampere', 'power', 3)");
+					$this->exec("SET FOREIGN_KEY_CHECKS = 0;"); // See case 5 for an explanation
+					$this->exec("UPDATE `FeatureEnum` SET `ValueEnum` = 'storage-card' WHERE `ValueEnum` = 'scsi-card' AND `Feature` = 'type'");
+					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = 'storage-card' WHERE `ValueEnum` = 'scsi-card' AND `Feature` = 'type'");
+					$this->exec("SET FOREIGN_KEY_CHECKS = 1;");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}
