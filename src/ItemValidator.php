@@ -492,8 +492,18 @@ class ItemValidator {
 					'ethernet-ports-10base5-aui-n', 'mac', 'color', 'owner',
 				];
 			case 'audio-card':
-			case 'other-card':
+				return [
+					'brand', 'model', 'working', 'mini-jack-ports-n', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color',
+					'owner'
+				];
+				break;
 			case 'modem-card':
+				return [
+					'brand', 'model', 'working', 'rj11-ports-n', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color',
+					'owner'
+				];
+				break;
+			case 'other-card':
 			case 'tv-card':
 				return ['brand', 'model', 'working', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color', 'owner'];
 			case 'storage-card':
