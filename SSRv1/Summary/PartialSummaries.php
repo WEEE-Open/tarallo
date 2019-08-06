@@ -41,21 +41,21 @@ class PartialSummaries {
 		return $concat;
 	}
 	
-	public static function summarizePorts(ItemWithFeatures $item, bool $compact = false) {
+	public static function summarizePorts(ItemWithFeatures $item, bool $compact = false, string $glue = ', ') {
 		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_ports);
 		$sequence = self::summarizeSequence($compact, $filtered);
 
 		return implode(', ', $sequence);
 	}
 
-	public static function summarizeSockets(ItemWithFeatures $item, bool $compact = false) {
+	public static function summarizeSockets(ItemWithFeatures $item, bool $compact = false, string $glue = ', ') {
 		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_sockets);
 		$sequence = self::summarizeSequence($compact, $filtered);
 
 		return implode(', ', $sequence);
 	}
 
-	public static function summarizePowerconnectors(ItemWithFeatures $item, bool $compact = false) {
+	public static function summarizePowerconnectors(ItemWithFeatures $item, bool $compact = false, string $glue = ', ') {
 		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_powerconnectors);
 		$sequence = self::summarizeSequence($compact, $filtered);
 
@@ -82,14 +82,16 @@ class PartialSummaries {
 	}
 
 	/**
-	 * @param bool $compact
-	 * @param $filtered
+	 * Summarize features in a sequence, useful for ports and the like
 	 *
-	 * @return array
+	 * @param bool $compact True to hide 1× when the value is 1 (there is 1 port of that type), false to always print 1×
+	 * @param array $features Features to print
+	 *
+	 * @return array Pretty printed features & values, implode them with a comma or a space or whatever
 	 */
-	private static function summarizeSequence(bool $compact, $filtered): array {
+	private static function summarizeSequence(bool $compact, array $features): array {
 		$sequence = [];
-		foreach($filtered as $feature) {
+		foreach($features as $feature) {
 			$value = FeaturePrinter::printableValue($feature);
 			$name = FeaturePrinter::printableName($feature->name);
 			if($compact && $value === '1') {

@@ -31,21 +31,20 @@ class Summary {
 				// return SomeSummarizer::summarize($item);
 			case 'psu':
 				return PsuSummarizer::summarize($item);
-			// case 'audio-card':
-			// case 'ethernet-card':
-			// case 'ports-bracket':
-			// case 'card-reader':
-			// case 'other-card':
-			// case 'fan-controller':
-			// case 'modem-card':
-			// case 'scsi-card':
-			// case 'wifi-card':
-			// case 'bluetooth-card':
-			// case 'adapter':
-			// case 'usbhub':
-			// case 'tv-card':
-				// Print type, brand, model and ports, these should all be very similar
-				// return SomeSummarizer::summarize($item);
+			case 'audio-card':
+			case 'ethernet-card':
+			case 'ports-bracket':
+			case 'card-reader':
+			case 'other-card':
+			case 'fan-controller':
+			case 'modem-card':
+			case 'scsi-card':
+			case 'wifi-card':
+			case 'bluetooth-card':
+			case 'adapter':
+			case 'usbhub':
+			case 'tv-card':
+				return SimplePortsSummarizer::summarize($item);
 
 			// case 'monitor':
 				// return SomeSummarizer::summarize($item);
