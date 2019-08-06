@@ -8,7 +8,6 @@ trait ItemTraitFeatures {
 
 	/**
 	 * Get a feature, or null if none.
-	 * Uses combined features (item and product).
 	 *
 	 * @param string $name Feature name
 	 *
@@ -20,6 +19,22 @@ trait ItemTraitFeatures {
 			return $features[$name];
 		} else {
 			return null;
+		}
+	}
+
+	/**
+	 * Get a feature value, or null if there is no feature (or has no value, if allowed).
+	 *
+	 * @param string $name Feature name
+	 *
+	 * @return string|int|double|null
+	 */
+	public function getFeatureValue(string $name) {
+		$feature = $this->getFeature($name);
+		if($feature === null) {
+			return null;
+		} else {
+			return $feature->value;
 		}
 	}
 
