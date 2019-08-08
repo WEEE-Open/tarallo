@@ -46,17 +46,13 @@ class Summary {
 			case 'tv-card':
 				return SimplePortsSummarizer::summarize($item);
 
+			case 'mouse':
+			case 'keyboard':
+			case 'network-switch':
+			case 'network-hub':
+			case 'modem-router':
+				return SimpleDeviceSummarizer::summarize($item);
 			// case 'monitor':
-				// return SomeSummarizer::summarize($item);
-
-			// case 'mouse':
-			// case 'keyboard':
-				// InputDeviceSummarizer can probably cover both
-				// return SomeSummarizer::summarize($item);
-
-			// case 'network-switch':
-			// case 'network-hub':
-			// case 'modem-router':
 				// return SomeSummarizer::summarize($item);
 
 			// case 'fdd':

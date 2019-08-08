@@ -92,7 +92,7 @@ class PartialSummaries {
 	private static function summarizeSequence(bool $compact, array $features): array {
 		$sequence = [];
 		foreach($features as $feature) {
-			$value = FeaturePrinter::printableValue($feature);
+			$value = (string) FeaturePrinter::printableValue($feature);
 			$name = FeaturePrinter::printableName($feature->name);
 			if($compact && $value === '1') {
 				$sequence["3$name"] = $name;
