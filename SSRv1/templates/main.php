@@ -18,12 +18,27 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 	<meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" type="image/png" href="/static/favicon.png"/>
 	<link rel="stylesheet" href="/static/main.css">
+	<?php if(defined('DEVELOPMENT_ENVIRONMENT') && DEVELOPMENT_ENVIRONMENT): ?>
+    <style>
+        a, a:visited, a:active, a:hover, a:visited:hover {
+            color: darkorange;
+        }
+
+        header#title, table > thead, .tablewrapper table .total.last, .item h2, #stats {
+            background-color: darkorange;
+        }
+    </style>
+    <?php endif; ?>
 </head>
 <body>
 
 <header id="title">
 	<h1>T.A.R.A.L.L.O.</h1>
+    <?php if(defined('DEVELOPMENT_ENVIRONMENT') && DEVELOPMENT_ENVIRONMENT): ?>
+    <p>Development version, this is running locally on your machine</p>
+    <?php else: ?>
 	<p>Trabiccolo Amministrazione Rottami e Assistenza, Legalmente-noto-come L'inventario Opportuno</p>
+    <?php endif ?>
 </header>
 <div id="view">
 	<?php if(isset($user) || $this->section('aftermenu')): ?>

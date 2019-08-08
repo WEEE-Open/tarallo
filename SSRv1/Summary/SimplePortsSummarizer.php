@@ -13,6 +13,7 @@ class SimplePortsSummarizer implements Summarizer {
 		$ports = PartialSummaries::summarizePorts($item, false, ' ');
 		$sockets = PartialSummaries::summarizeSockets($item, true, ' ');
 		$commercial = PartialSummaries::summarizeCommercial($item);
+		$color = $item->getFeature('color');
 
 		$pieces = [$type];
 		if($ports !== '') {
@@ -20,6 +21,9 @@ class SimplePortsSummarizer implements Summarizer {
 		}
 		if($sockets !== '') {
 			$pieces[] = $sockets;
+		}
+		if($color !== null) {
+			$pieces[] = FeaturePrinter::printableValue($color);
 		}
 		if($commercial !== '') {
 			$pieces[] = $commercial;
