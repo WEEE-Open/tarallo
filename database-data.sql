@@ -305,13 +305,17 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('todo', 'transplant'), -- Transplant into another case --
 	('todo', 'container'), -- Container for transplant --
 	('todo', 'install-os'), -- Install OS --
-	('todo', 'finish-os-install'), -- Finish OS installation --
+	('todo', 'finish-os-install'), -- Finish OS installation 🍑 --
 	('todo', 'replace-capacitors'), -- Replace blown capacitors --
-	('todo', 'add-components'), -- Add missing components --
-	('todo', 'salvage-components'), -- Salvage components --
+	('todo', 'replace-temp-parts'), -- Replace temporary parts --
+	('todo', 'remove-from-computer'), -- Remove from computer --
+	('todo', 'replace-broken-parts'), -- Replace parts marked as not working --
+	('todo', 'replace-elec-components'), -- Replace faulty electronic components --
+	('todo', 'add-parts'), -- Add missing parts --
+	('todo', 'salvage-parts'), -- Salvage parts (dismantle) --
 	('todo', 'replace-cmos-battery'), -- Replace CMOS battery --
-	('todo', 'finish-testing'), -- Finish testing components --
-	('todo', 'finish-inventory'), -- Finish inventory of components --
+	('todo', 'finish-testing'), -- Finish testing --
+	('todo', 'finish-inventory'), -- Finish inventory of parts --
 	('ram-ecc', 'no'), -- No --
 	('ram-ecc', 'yes'), -- Yes --
 	('data-erased', 'yes'), -- Yes️ -- Just don't add the feature if it hasn't been erased...
@@ -384,4 +388,4 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('T', 0),
 	('', 0);
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 16);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 17);

@@ -350,6 +350,15 @@ EOQ
 					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = 'storage-card' WHERE `ValueEnum` = 'scsi-card' AND `Feature` = 'type'");
 					$this->exec("SET FOREIGN_KEY_CHECKS = 1;");
 					break;
+				case 16:
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('todo', 'replace-temp-parts'), ('todo', 'remove-from-computer'), ('todo', 'replace-broken-parts'), ('todo', 'replace-elec-components')");
+					$this->exec("SET FOREIGN_KEY_CHECKS = 0;"); // See case 5 for an explanation
+					$this->exec("UPDATE `FeatureEnum` SET `ValueEnum` = 'add-parts' WHERE `ValueEnum` = 'add-components' AND `Feature` = 'todo'");
+					$this->exec("UPDATE `FeatureEnum` SET `ValueEnum` = 'salvage-parts' WHERE `ValueEnum` = 'salvage-components' AND `Feature` = 'todo'");
+					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = 'add-parts' WHERE `ValueEnum` = 'add-components' AND `Feature` = 'todo'");
+					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = 'salvage-parts' WHERE `ValueEnum` = 'salvage-components' AND `Feature` = 'todo'");
+					$this->exec("SET FOREIGN_KEY_CHECKS = 1;");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}
