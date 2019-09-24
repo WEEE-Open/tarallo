@@ -504,7 +504,7 @@ class ItemValidator {
 					$mobo = self::findByType($content, 'motherboard');
 					if($mobo !== null && !$mobo->getFeatureValue('usb-ports-n') !== null) {
 						// TODO: this will end badly when products are implemented...
-						$mobo->addFeature($item->getFeatureValue('usb-ports-n'));
+						$mobo->addFeature(new Feature('usb-ports-n', $item->getFeatureValue('usb-ports-n')));
 						$item->removeFeatureByName('usb-ports-n');
 					}
 				}
