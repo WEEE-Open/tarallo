@@ -24,8 +24,6 @@ class RamSummarizer implements Summarizer {
 		$ff = $item->getFeature('ram-form-factor');
 		$capacity = $item->getFeature('capacity-byte');
 		$freq = $item->getFeature('frequency-hertz');
-		$brand = $item->getFeature('brand');
-		$model = $item->getFeature('model');
 
 		if($type && $ff && $type->value === 'simm' && $ff->value === 'simm') {
 			// Avoid "RAM SIMM SIMM something, ...", one "SIMM" is enough
@@ -39,25 +37,18 @@ class RamSummarizer implements Summarizer {
 		$technical .= $capacity ? ' ' . FeaturePrinter::printableValue($capacity) : '';
 		$technical .= $freq ? ' ' . FeaturePrinter::printableValue($freq) : '';
 
-		if(!$brand && $model) {
-			// To avoid possible confusion with serial numbers...
-			$commercial = ' ' . FeaturePrinter::printableName('model') . ': ' . FeaturePrinter::printableValue($model);
-		} else {
-			$commercial = $brand ? ' ' . FeaturePrinter::printableValue($brand) : '';
-			$commercial .= $model ? ' ' . FeaturePrinter::printableValue($model) : '';
-		}
+		$commercial = PartialSummaries::summarizeCommercial($item);
 
 		if($technical === 'RAM (ECC?)') {
 			// Looks nicer
 			$technical = 'RAM';
 		}
 		if($technical !== '' && $commercial !== '') {
-			// $commercial already has a leading space
-			$pretty = "$technical,$commercial";
+			$pretty = "$technical, $commercial";
+		} else if($technical !== '') {
+			$pretty = $technical;
 		} else {
-			// One is an empty string, so it won't change the output.
-			// Actually, $commercial is the only one that can be empty...
-			$pretty = "$technical$commercial";
+			$pretty = $commercial;
 		}
 
 		return $pretty;

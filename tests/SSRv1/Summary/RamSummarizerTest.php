@@ -186,7 +186,7 @@ class RamSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = RamSummarizer::summarize($item);
-		$this->assertEquals('RAM DDR3 SODIMM 2 GiB 1.066 GHz, Model: ACR256X64D3S13C9G', $summary);
+		$this->assertEquals('RAM DDR3 SODIMM 2 GiB 1.066 GHz, ACR256X64D3S13C9G', $summary);
 
 		return $summary;
 	}

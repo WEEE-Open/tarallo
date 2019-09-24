@@ -36,17 +36,11 @@ class CpuSummarizer implements Summarizer {
 		}
 		$coreStats .= $frequency ? $at . ' ' . FeaturePrinter::printableValue($frequency) : '';
 
-		if(!$brand && $model) {
-			// To avoid possible confusion with serial numbers...
-			$commercial = ' ' . FeaturePrinter::printableValue($model);
-		} else {
-			$commercial = $brand ? ' ' . FeaturePrinter::printableValue($brand) : '';
-			$commercial .= $model ? ' ' . FeaturePrinter::printableValue($model) : '';
-		}
+		$commercial = PartialSummaries::summarizeCommercial($item);
 
 		if($socket) {
 			$socket = FeaturePrinter::printableValue($socket);
-			$socketOnly = explode(' (', $socket);
+			$socket = explode(' (', $socket)[0];
 		} else {
 			$socket = '';
 		}
@@ -55,15 +49,15 @@ class CpuSummarizer implements Summarizer {
 			$pretty = FeaturePrinter::printableValue($type);
 		else {
 			$pretty = $architecture;
-			if($coreStats !== '')
+			if($coreStats !== '') {
 				$pretty .= ",$coreStats";
-			if($commercial !== '')
-				$pretty .= ",$commercial";
-			if(empty($socketOnly)) {
-				$pretty .= '';
-			} else {
+			}
+			if($socket !== '') {
 				$theWordSocketLiterally = str_replace(' (CPU)', '', FeaturePrinter::printableName('cpu-socket'));
-				$pretty .= ', ' . $theWordSocketLiterally . ' ' . $socketOnly[0];
+				$pretty .= ', ' . $theWordSocketLiterally . ' ' . $socket;
+			}
+			if($commercial !== '') {
+				$pretty .= ", $commercial";
 			}
 		}
 
