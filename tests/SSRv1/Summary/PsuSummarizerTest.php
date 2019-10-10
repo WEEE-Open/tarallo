@@ -1,4 +1,4 @@
-<?php
+make <?php
 
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Server\Feature;
@@ -139,6 +139,7 @@ class PsuSummarizerTest extends TestCase {
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('brand', 'Corsair'))
+			->addFeature(new Feature('power-rated-watt', 500))
 			->addFeature(new Feature('model', 'CX500W'))
 			->addFeature(new Feature('color', 'black'))
 			->addFeature(new Feature('psu-form-factor', 'atx'))
@@ -261,7 +262,6 @@ class PsuSummarizerTest extends TestCase {
 		$item
 			->addFeature(new Feature('pcie-power-pin-n', 14))
 			->addFeature(new Feature('power-connector', 'c13'))
-			->addFeature(new Feature('power-rated-watt', 500))
 			->addFeature(new Feature('psu-connector-cpu', '8pin'))
 			->addFeature(new Feature('psu-connector-motherboard', 'atx-24pin'))
 			->addFeature(new Feature('sata-power-n', 4))
@@ -441,7 +441,7 @@ class PsuSummarizerTest extends TestCase {
 
 		$summary = PsuSummarizer::summarize($item);
 		$this->assertEquals(
-			'PSU Proprietary 100 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power), Green, (Delta Eletronics F00B4R) DPS-100DB A',
+			'PSU Proprietary 100 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power), Green, (Delta Eletronics) DPS-100DB A (F00B4R)',
 			$summary
 		);
 	}
