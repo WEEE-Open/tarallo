@@ -1,4 +1,4 @@
-make <?php
+<?php
 
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Server\Feature;
