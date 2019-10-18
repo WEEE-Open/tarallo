@@ -18,8 +18,8 @@ class Summary {
 				// return SomeSummarizer::summarize($item);
 			case 'cpu':
 				return CpuSummarizer::summarize($item);
-			//case 'graphics-card':
-				// return SomeSummarizer::summarize($item);
+			case 'graphics-card':
+				return GraphicCardSummarizer::summarize($item);
 			case 'ram':
 				return RamSummarizer::summarize($item);
 			case 'hdd':
