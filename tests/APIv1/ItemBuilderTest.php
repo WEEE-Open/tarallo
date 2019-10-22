@@ -2,8 +2,8 @@
 
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\APIv1\ItemBuilder;
-use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
-use WEEEOpen\Tarallo\Server\ItemCode;
+use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;
+use WEEEOpen\Tarallo\ItemCode;
 
 class ItemBuilderTest extends TestCase {
 
@@ -20,7 +20,7 @@ class ItemBuilderTest extends TestCase {
 	 */
 	public function testValidCode() {
 		$item = ItemBuilder::ofArray([], 'PC42', $discarded);
-		$this->assertInstanceOf(\WEEEOpen\Tarallo\Server\Item::class, $item);
+		$this->assertInstanceOf(\WEEEOpen\Tarallo\Item::class, $item);
 		$this->assertEquals('PC42', $item->getCode());
 	}
 
@@ -54,7 +54,7 @@ class ItemBuilderTest extends TestCase {
 	 */
 	public function testValidFeatures() {
 		$item = ItemBuilder::ofArray(['features' => ['motherboard-form-factor' => 'atx']], 'PC42', $discarded);
-		$this->assertInstanceOf(\WEEEOpen\Tarallo\Server\Item::class, $item);
+		$this->assertInstanceOf(\WEEEOpen\Tarallo\Item::class, $item);
 		$this->assertArrayHasKey('motherboard-form-factor', $item->getFeatures());
 		$this->assertEquals('atx', $item->getFeatures()['motherboard-form-factor']->value);
 	}

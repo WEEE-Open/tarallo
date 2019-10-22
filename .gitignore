@@ -4,6 +4,7 @@
 vendor/
 build/
 utils/provision/playbook.retry
+utils/provision/roles/
 utils/xdebug/*
 !utils/xdebug/
 !utils/xdebug/readme.txt
@@ -11,5 +12,5 @@ utils/xdebug/*
 *.generated.js*
 *.mo
 router.cache
-db.php
-db-production.php
+config/config.php
+config/config-production.php

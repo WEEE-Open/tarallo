@@ -1,12 +1,12 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Test\Database;
+namespace WEEEOpen\Tarallo\Test\Database;
 
 use PHPUnit\DbUnit\DataSet\YamlDataSet;
 use PHPUnit\DbUnit\TestCase;
 use PHPUnit\DbUnit\TestCaseTrait;
-use WEEEOpen\Tarallo\Server\Database\Database;
-use WEEEOpen\Tarallo\Server\Item;
+use WEEEOpen\Tarallo\Database\Database;
+use WEEEOpen\Tarallo\Item;
 
 abstract class DatabaseTest extends TestCase {
 	use TestCaseTrait;

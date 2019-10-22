@@ -1,13 +1,13 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Database;
+namespace WEEEOpen\Tarallo\Database;
 
-use WEEEOpen\Tarallo\Server\BaseFeature;
-use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemCode;
-use WEEEOpen\Tarallo\Server\Search;
-use WEEEOpen\Tarallo\Server\SearchTriplet;
-use WEEEOpen\Tarallo\Server\User;
+use WEEEOpen\Tarallo\BaseFeature;
+use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\ItemCode;
+use WEEEOpen\Tarallo\Search;
+use WEEEOpen\Tarallo\SearchTriplet;
+use WEEEOpen\Tarallo\User;
 
 final class SearchDAO extends DAO {
 	private static function getCompare(SearchTriplet $triplet, $id) {

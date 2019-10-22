@@ -1,11 +1,11 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Database;
+namespace WEEEOpen\Tarallo\Database;
 
-use WEEEOpen\Tarallo\Server\BaseFeature;
-use WEEEOpen\Tarallo\Server\Feature;
-use WEEEOpen\Tarallo\Server\ItemCode;
-use WEEEOpen\Tarallo\Server\ItemWithCode;
+use WEEEOpen\Tarallo\BaseFeature;
+use WEEEOpen\Tarallo\Feature;
+use WEEEOpen\Tarallo\ItemCode;
+use WEEEOpen\Tarallo\ItemWithCode;
 
 final class StatsDAO extends DAO {
 	/**

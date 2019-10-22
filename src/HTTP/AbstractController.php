@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\HTTP;
+namespace WEEEOpen\Tarallo\HTTP;
 
 use FastRoute\Dispatcher;
 use Psr\Http\Message\ResponseInterface as Response;

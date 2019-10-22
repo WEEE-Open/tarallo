@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\HTTP;
+namespace WEEEOpen\Tarallo\HTTP;
 
 class AuthorizationException extends \RuntimeException {
 	public function __construct() {

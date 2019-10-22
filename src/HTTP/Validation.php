@@ -1,11 +1,11 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\HTTP;
+namespace WEEEOpen\Tarallo\HTTP;
 
-use WEEEOpen\Tarallo\Server\ItemCode;
-use WEEEOpen\Tarallo\Server\NotFoundException;
-use WEEEOpen\Tarallo\Server\User;
-use WEEEOpen\Tarallo\Server\ValidationException;
+use WEEEOpen\Tarallo\ItemCode;
+use WEEEOpen\Tarallo\NotFoundException;
+use WEEEOpen\Tarallo\User;
+use WEEEOpen\Tarallo\ValidationException;
 
 class Validation {
 	/**

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace WEEEOpen\Tarallo\Server;
+namespace WEEEOpen\Tarallo;
 
 
 interface ItemWithFeatures extends ItemWithCode {

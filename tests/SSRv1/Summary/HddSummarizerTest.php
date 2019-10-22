@@ -1,8 +1,8 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use WEEEOpen\Tarallo\Server\Feature;
-use WEEEOpen\Tarallo\Server\Item;
+use WEEEOpen\Tarallo\Feature;
+use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\SSRv1\Summary\HddSummarizer;
 
 /**

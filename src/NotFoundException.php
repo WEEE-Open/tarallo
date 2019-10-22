@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server;
+namespace WEEEOpen\Tarallo;
 
 class NotFoundException extends \RuntimeException {
 	/**

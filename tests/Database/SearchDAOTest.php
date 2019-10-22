@@ -1,13 +1,13 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Test\Database;
+namespace WEEEOpen\Tarallo\Test\Database;
 
-use WEEEOpen\Tarallo\Server\Database\Database;
-use WEEEOpen\Tarallo\Server\Feature;
-use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\Search;
-use WEEEOpen\Tarallo\Server\SearchTriplet;
-use WEEEOpen\Tarallo\Server\User;
+use WEEEOpen\Tarallo\Database\Database;
+use WEEEOpen\Tarallo\Feature;
+use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\Search;
+use WEEEOpen\Tarallo\SearchTriplet;
+use WEEEOpen\Tarallo\User;
 
 class SearchDAOTest extends DatabaseTest {
 	private function getSample() {
@@ -56,7 +56,7 @@ class SearchDAOTest extends DatabaseTest {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
+	 * @covers \WEEEOpen\Tarallo\Database\SearchDAO
 	 */
 	public function testItemSearch() {
 		$db = $this->getDb();
@@ -73,7 +73,7 @@ class SearchDAOTest extends DatabaseTest {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
+	 * @covers \WEEEOpen\Tarallo\Database\SearchDAO
 	 */
 	public function testItemSearchByCode() {
 		$db = $this->getDb();
@@ -107,7 +107,7 @@ class SearchDAOTest extends DatabaseTest {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
+	 * @covers \WEEEOpen\Tarallo\Database\SearchDAO
 	 */
 	public function testItemSearchRefinementSorting() {
 		$db = $this->getDb();
@@ -134,7 +134,7 @@ class SearchDAOTest extends DatabaseTest {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
+	 * @covers \WEEEOpen\Tarallo\Database\SearchDAO
 	 */
 	public function testItemSearchSorting() {
 		$db = $this->getDb();
@@ -160,7 +160,7 @@ class SearchDAOTest extends DatabaseTest {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
+	 * @covers \WEEEOpen\Tarallo\Database\SearchDAO
 	 */
 	public function testGettingItemsCheckPath() {
 		$db = $this->getDb();
@@ -182,7 +182,7 @@ class SearchDAOTest extends DatabaseTest {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Item::jsonSerialize()
+	 * @covers \WEEEOpen\Tarallo\Item::jsonSerialize()
 	 */
 	public function testItemSearchSerialization() {
 		$db = $this->getDb();
@@ -266,7 +266,7 @@ class SearchDAOTest extends DatabaseTest {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\SearchDAO
+	 * @covers \WEEEOpen\Tarallo\Database\SearchDAO
 	 */
 	public function testItemSearchFiltering() {
 		$cpu['INTEL1'] = (new Item('INTEL1'))

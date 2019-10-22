@@ -1,9 +1,9 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Database;
+namespace WEEEOpen\Tarallo\Database;
 
 
-use WEEEOpen\Tarallo\Server\ItemWithCode;
+use WEEEOpen\Tarallo\ItemWithCode;
 
 class AuditDAO extends DAO {
 	/**

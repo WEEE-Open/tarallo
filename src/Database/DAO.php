@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Database;
+namespace WEEEOpen\Tarallo\Database;
 
 abstract class DAO {
 	protected $database;

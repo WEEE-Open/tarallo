@@ -1,13 +1,13 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Database;
+namespace WEEEOpen\Tarallo\Database;
 
-use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemPrefixer;
-use WEEEOpen\Tarallo\Server\ItemWithCode;
-use WEEEOpen\Tarallo\Server\ItemWithFeatures;
-use WEEEOpen\Tarallo\Server\NotFoundException;
-use WEEEOpen\Tarallo\Server\ValidationException;
+use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\ItemPrefixer;
+use WEEEOpen\Tarallo\ItemWithCode;
+use WEEEOpen\Tarallo\ItemWithFeatures;
+use WEEEOpen\Tarallo\NotFoundException;
+use WEEEOpen\Tarallo\ValidationException;
 
 final class ItemDAO extends DAO {
 	const EXCEPTION_CODE_GENERATE_ID = 3;

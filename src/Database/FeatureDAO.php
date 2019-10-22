@@ -1,13 +1,13 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Database;
+namespace WEEEOpen\Tarallo\Database;
 
-use WEEEOpen\Tarallo\Server\BaseFeature;
-use WEEEOpen\Tarallo\Server\Feature;
-use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemWithCode;
-use WEEEOpen\Tarallo\Server\ItemWithFeatures;
-use WEEEOpen\Tarallo\Server\NotFoundException;
+use WEEEOpen\Tarallo\BaseFeature;
+use WEEEOpen\Tarallo\Feature;
+use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\ItemWithCode;
+use WEEEOpen\Tarallo\ItemWithFeatures;
+use WEEEOpen\Tarallo\NotFoundException;
 
 
 final class FeatureDAO extends DAO {/**

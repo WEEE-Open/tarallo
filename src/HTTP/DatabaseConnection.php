@@ -1,12 +1,12 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\HTTP;
+namespace WEEEOpen\Tarallo\HTTP;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use WEEEOpen\Tarallo\Server\Database\Database;
-use WEEEOpen\Tarallo\Server\Database\DatabaseException;
-use WEEEOpen\Tarallo\Server\Session;
+use WEEEOpen\Tarallo\Database\Database;
+use WEEEOpen\Tarallo\Database\DatabaseException;
+use WEEEOpen\Tarallo\Session;
 
 class DatabaseConnection implements Middleware {
 //	public const en_US = 'en-US';
@@ -18,7 +18,7 @@ class DatabaseConnection implements Middleware {
 		?callable $next = null
 	): ResponseInterface {
 		try {
-			$db = new Database(DB_USERNAME, DB_PASSWORD, DB_DSN);
+			$db = new Database(TARALLO_DB_USER, TARALLO_DB_PASS, TARALLO_DB_DSN);
 		} catch(DatabaseException $e) {
 			throw new DatabaseException('Cannot connect to database');
 		}

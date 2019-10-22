@@ -1,11 +1,11 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use WEEEOpen\Tarallo\Server\Feature;
+use WEEEOpen\Tarallo\Feature;
 
 class FeatureTest extends TestCase {
 	/**
-	 * @covers WEEEOpen\Tarallo\Server\Feature
+	 * @covers WEEEOpen\Tarallo\Feature
 	 */
 	public function testNonexistantFeature() {
 		$this->expectException(InvalidArgumentException::class);
@@ -13,7 +13,7 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
-	 * @covers WEEEOpen\Tarallo\Server\Feature
+	 * @covers WEEEOpen\Tarallo\Feature
 	 */
 	public function testInvalidFeatureName() {
 		$this->expectException(InvalidArgumentException::class);
@@ -22,7 +22,7 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
-	 * @covers WEEEOpen\Tarallo\Server\Feature
+	 * @covers WEEEOpen\Tarallo\Feature
 	 */
 	public function testInvalidFeatureValueString() {
 		$this->expectException(InvalidArgumentException::class);
@@ -30,7 +30,7 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
-	 * @covers WEEEOpen\Tarallo\Server\Feature
+	 * @covers WEEEOpen\Tarallo\Feature
 	 */
 	public function testInvalidFeatureValueInteger() {
 		$this->expectException(InvalidArgumentException::class);
@@ -38,7 +38,7 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
-	 * @covers WEEEOpen\Tarallo\Server\Feature
+	 * @covers WEEEOpen\Tarallo\Feature
 	 */
 	public function testInvalidFeatureValueNegativeInteger() {
 		$this->expectException(InvalidArgumentException::class);
@@ -46,7 +46,7 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
-	 * @covers WEEEOpen\Tarallo\Server\Feature
+	 * @covers WEEEOpen\Tarallo\Feature
 	 */
 	public function testInvalidFeatureValueArray() {
 		$this->expectException(InvalidArgumentException::class);
@@ -54,7 +54,7 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
-	 * @covers WEEEOpen\Tarallo\Server\Feature
+	 * @covers WEEEOpen\Tarallo\Feature
 	 */
 	public function testInvalidFeatureValueEnum() {
 		$this->expectException(InvalidArgumentException::class);
@@ -62,7 +62,7 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
-	 * @covers WEEEOpen\Tarallo\Server\Feature
+	 * @covers WEEEOpen\Tarallo\Feature
 	 */
 	public function testValidFeatureValueEnum() {
 		$feature = new Feature('ram-form-factor', 'sodimm');
@@ -71,7 +71,7 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
-	 * @covers WEEEOpen\Tarallo\Server\Feature
+	 * @covers WEEEOpen\Tarallo\Feature
 	 */
 	public function testValidFeatureValueString() {
 		$feature = new Feature('frequency-hertz', 500);
@@ -80,7 +80,7 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
-	 * @covers WEEEOpen\Tarallo\Server\Feature
+	 * @covers WEEEOpen\Tarallo\Feature
 	 */
 	public function testValidFeatureValueInteger() {
 		$feature = new Feature('sn', 'F00B4R-1337-ASD');
@@ -89,7 +89,7 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
-	 * @covers WEEEOpen\Tarallo\Server\Feature
+	 * @covers WEEEOpen\Tarallo\Feature
 	 */
 	public function testInvalidFeatureOfString() {
 		$this->expectException(InvalidArgumentException::class);
@@ -97,7 +97,7 @@ class FeatureTest extends TestCase {
 	}
 
 	/**
-	 * @covers WEEEOpen\Tarallo\Server\Feature
+	 * @covers WEEEOpen\Tarallo\Feature
 	 */
 	public function testValidFeatureOfString() {
 		$feature = Feature::ofString('frequency-hertz', '9001');

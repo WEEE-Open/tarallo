@@ -1,8 +1,8 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server;
+namespace WEEEOpen\Tarallo;
 
-use WEEEOpen\Tarallo\Server\Database\Database;
+use WEEEOpen\Tarallo\Database\Database;
 
 class Session {
 	const COOKIE_NAME = 'tsession';

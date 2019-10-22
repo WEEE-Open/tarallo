@@ -1,12 +1,12 @@
 <?php
 
 
-namespace WEEEOpen\Tarallo\Server;
+namespace WEEEOpen\Tarallo;
 
 /**
  * Class ItemIncomplete
  *
- * @package WEEEOpen\Tarallo\Server
+ * @package WEEEOpen\Tarallo
  */
 class ItemIncomplete
 	implements \JsonSerializable,

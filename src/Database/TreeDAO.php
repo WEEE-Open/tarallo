@@ -1,14 +1,14 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Database;
+namespace WEEEOpen\Tarallo\Database;
 
-use WEEEOpen\Tarallo\Server\HTTP\InvalidPayloadParameterException;
-use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemCode;
-use WEEEOpen\Tarallo\Server\ItemNestingException;
-use WEEEOpen\Tarallo\Server\ItemValidator;
-use WEEEOpen\Tarallo\Server\ItemWithCode;
-use WEEEOpen\Tarallo\Server\NotFoundException;
+use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;
+use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\ItemCode;
+use WEEEOpen\Tarallo\ItemNestingException;
+use WEEEOpen\Tarallo\ItemValidator;
+use WEEEOpen\Tarallo\ItemWithCode;
+use WEEEOpen\Tarallo\NotFoundException;
 
 final class TreeDAO extends DAO {
 	const EXCEPTION_CODE_PARENT = 1;

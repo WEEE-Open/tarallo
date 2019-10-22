@@ -2,7 +2,8 @@ Vagrant.configure("2") do |config|
 
   ENV["LC_ALL"] = "en_US.UTF-8"
 
-  config.vm.box = "centos/7"
+  #config.vm.box = "centos/7"
+  config.vm.box = "geerlingguy/centos7"
   config.vm.hostname = "tarallo"
 
   config.vm.synced_folder ".", "/vagrant", disabled: true
@@ -49,11 +50,11 @@ Vagrant.configure("2") do |config|
     end
     config.vm.provision "db_update", type: "shell", run: "always" do |up|
         up.privileged = false
-        up.inline = "php /var/www/html/server/update.php"
+        up.inline = "php /var/www/html/server/bin/update.php"
     end
     config.vm.provision "test_db_update", type: "shell", run: "always" do |up|
         up.privileged = false
-        up.inline = "php /var/www/html/server/update.php test_db"
+        up.inline = "php /var/www/html/server/bin/update.php test_db"
     end
   end
 

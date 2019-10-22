@@ -1,11 +1,11 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use WEEEOpen\Tarallo\Server\User;
+use WEEEOpen\Tarallo\User;
 
 class UserTest extends TestCase {
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\User
 	 */
 	public function testValidUserNullPasswordAndHash() {
 		$user = new User('asd', null, null, 2);
@@ -16,7 +16,7 @@ class UserTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\User
 	 */
 	public function testReadHashNotAvailable() {
 		$user = new User('asd', null, null, 2);
@@ -25,7 +25,7 @@ class UserTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\User
 	 */
 	public function testEmptyUsername() {
 		$this->expectException(InvalidArgumentException::class);
@@ -33,7 +33,7 @@ class UserTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\User
 	 */
 	public function testEmptyPasswordAndHash() {
 		$this->expectException(InvalidArgumentException::class);
@@ -41,7 +41,7 @@ class UserTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\User
 	 */
 	public function testValidPasswordNoHash() {
 		$user = new User('asd', 'asd', null, 2);
@@ -50,7 +50,7 @@ class UserTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\User
 	 */
 	public function testEmptyHash() {
 		$this->expectException(InvalidArgumentException::class);
@@ -58,7 +58,7 @@ class UserTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\User
 	 */
 	public function testValidHashNoPassword() {
 		$this->assertEquals('asd',
@@ -67,7 +67,7 @@ class UserTest extends TestCase {
 
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\User
 	 */
 	public function testReadPasswordNotAvailable() {
 		$this->expectException(LogicException::class);
@@ -75,7 +75,7 @@ class UserTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\User
 	 */
 	public function testPasswordMatch() {
 		$user = new User('asd123', 'asd', '$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6', 2);
@@ -84,7 +84,7 @@ class UserTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\User
 	 */
 	public function testPasswordMismatch() {
 		$this->expectException(InvalidArgumentException::class);
@@ -92,7 +92,7 @@ class UserTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\User
+	 * @covers \WEEEOpen\Tarallo\User
 	 */
 	public function testPasswordHashCalculate() {
 		$user = new User('asd', 'asd', null, 2);

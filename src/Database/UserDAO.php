@@ -1,9 +1,9 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Database;
+namespace WEEEOpen\Tarallo\Database;
 
-use WEEEOpen\Tarallo\Server\NotFoundException;
-use WEEEOpen\Tarallo\Server\User;
+use WEEEOpen\Tarallo\NotFoundException;
+use WEEEOpen\Tarallo\User;
 
 final class UserDAO extends DAO {
 

@@ -1,11 +1,11 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use WEEEOpen\Tarallo\Server\ItemCode;
+use WEEEOpen\Tarallo\ItemCode;
 
 class ItemCodeTest extends TestCase {
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\ItemCode
+	 * @covers \WEEEOpen\Tarallo\ItemCode
 	 */
 	public function testItemValidCodeString() {
 		$pc77 = new ItemCode('PC77');
@@ -14,7 +14,7 @@ class ItemCodeTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\ItemCode
+	 * @covers \WEEEOpen\Tarallo\ItemCode
 	 */
 	public function testItemIntCode() {
 		$this->expectException(InvalidArgumentException::class);
@@ -22,7 +22,7 @@ class ItemCodeTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\ItemCode
+	 * @covers \WEEEOpen\Tarallo\ItemCode
 	 */
 	public function testItemNullCode() {
 		$this->expectException(InvalidArgumentException::class);
@@ -30,7 +30,7 @@ class ItemCodeTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\ItemCode
+	 * @covers \WEEEOpen\Tarallo\ItemCode
 	 */
 	public function testItemEmptyCode() {
 		$this->expectException(InvalidArgumentException::class);
@@ -38,7 +38,7 @@ class ItemCodeTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\ItemCode
+	 * @covers \WEEEOpen\Tarallo\ItemCode
 	 */
 	public function testItemArrayCode() {
 		$this->expectException(InvalidArgumentException::class);
@@ -47,7 +47,7 @@ class ItemCodeTest extends TestCase {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\ItemCode
+	 * @covers \WEEEOpen\Tarallo\ItemCode
 	 */
 	public function testJsonSerialize() {
 		$i = new ItemCode("TEST");

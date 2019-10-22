@@ -1,7 +1,7 @@
 <?php
 
 
-namespace WEEEOpen\Tarallo\Server\HTTP;
+namespace WEEEOpen\Tarallo\HTTP;
 
 use Throwable;
 

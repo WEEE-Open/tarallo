@@ -8,6 +8,7 @@
     database_username: tarallo
     database_password: thisisnottheproductionpassword
     document_root: /var/www/html
+    document_root_mounted: "{{ document_root }}/server"
 
     nginx_yum_repo_enabled: false
     nginx_remove_default_vhost: true
@@ -17,17 +18,19 @@
     - listen: "80 default_server"
       server_name: "_"
       index: "index.php"
-      root: "{{ document_root }}/server"
+      # root: "{{ document_root_mounted }}"
       template: "{{ nginx_vhost_template }}"
       filename: "tarallo-server.conf"
       state: "present"
       extra_parameters: |
         location /static/ {
-          root {{ document_root }}/server/SSRv1;
+          # static is in the request already
+          root {{ document_root_mounted }}/src/SSRv1;
         }
 
         location / {
           include fastcgi_params;
+          root {{ document_root_mounted }}/public;
           try_files $uri /index.php =404;
 
           fastcgi_param PATH_INFO $uri;
@@ -53,8 +56,8 @@
         }
 
   roles:
-    - { role: goozbach.EPEL }
-    - { role: geerlingguy.nginx }
+    - role: goozbach.EPEL
+    - role: geerlingguy.nginx
 
   handlers:
   - name: stop php-fpm
@@ -203,7 +206,7 @@
       command: install
       optimize_autoloader: no
       no_dev: no
-      working_dir: "{{ document_root }}/server"
+      working_dir: "{{ document_root_mounted }}"
 
   - name: Create Adminer directory
     file: path="{{ document_root }}/admin" state=directory mode=0775
@@ -253,7 +256,7 @@
       state: import
       login_user: root
       login_password: "{{ mariadb_root_password }}"
-      target: "{{ document_root }}/server/database.sql"
+      target: "{{ document_root_mounted }}/database.sql"
     with_items:
       - tarallo
       - tarallo_test
@@ -264,7 +267,7 @@
       state: import
       login_user: root
       login_password: "{{ mariadb_root_password }}"
-      target: "{{ document_root }}/server/database-data.sql"
+      target: "{{ document_root_mounted }}/database-data.sql"
     with_items:
       - tarallo
       - tarallo_test
@@ -275,7 +278,7 @@
       state: import
       login_user: root
       login_password: "{{ mariadb_root_password }}"
-      target: "{{ document_root }}/server/database-procedures.sql"
+      target: "{{ document_root_mounted }}/database-procedures.sql"
     with_items:
       - tarallo
       - tarallo_test
@@ -325,10 +328,10 @@
       name: mysqld
       state: restarted
 
-  - name: Enable tarallo to use database
+  - name: Create configuration file
     template:
-      src: db.php.j2
-      dest: "{{ document_root }}/server/db.php"
+      src: config.php.j2
+      dest: "{{ document_root_mounted }}/config/config.php"
       # This fails since it's a Virtualbox/SMB/whatever share and permissions and owners aren't supported, apparently
       # owner: vagrant
       # group: vagrant

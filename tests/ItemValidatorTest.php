@@ -1,14 +1,14 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use WEEEOpen\Tarallo\Server\Feature;
-use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemNestingException;
-use WEEEOpen\Tarallo\Server\ItemValidator;
-use WEEEOpen\Tarallo\Server\ValidationException;
+use WEEEOpen\Tarallo\Feature;
+use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\ItemNestingException;
+use WEEEOpen\Tarallo\ItemValidator;
+use WEEEOpen\Tarallo\ValidationException;
 
 /**
- * @covers \WEEEOpen\Tarallo\Server\ItemValidator
+ * @covers \WEEEOpen\Tarallo\ItemValidator
  */
 class ItemValidatorTest extends TestCase {
 	private static function item(string $code, string $type): Item {

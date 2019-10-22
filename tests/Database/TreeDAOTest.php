@@ -1,16 +1,16 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Server\Test\Database;
+namespace WEEEOpen\Tarallo\Test\Database;
 
-use WEEEOpen\Tarallo\Server\Database\TreeDAO;
-use WEEEOpen\Tarallo\Server\Feature;
-use WEEEOpen\Tarallo\Server\Item;
-use WEEEOpen\Tarallo\Server\ItemCode;
-use WEEEOpen\Tarallo\Server\NotFoundException;
+use WEEEOpen\Tarallo\Database\TreeDAO;
+use WEEEOpen\Tarallo\Feature;
+use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\ItemCode;
+use WEEEOpen\Tarallo\NotFoundException;
 
 class TreeDAOTest extends DatabaseTest {
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
+	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
 	 */
 	public function testSubtreeRemoval() {
 		$db = $this->getDb();
@@ -63,8 +63,8 @@ class TreeDAOTest extends DatabaseTest {
 	}
 
 	/**
-	 * @covers \WEEEOpen\Tarallo\Server\Database\ItemDAO
-	 * @covers \WEEEOpen\Tarallo\Server\Database\TreeDAO
+	 * @covers \WEEEOpen\Tarallo\Database\ItemDAO
+	 * @covers \WEEEOpen\Tarallo\Database\TreeDAO
 	 */
 	public function testTreeMove() {
 		// These items should be added in database.yml, but that just increases the amount of data to import for each test
