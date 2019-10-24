@@ -436,22 +436,6 @@ BEGIN
 END $$
 DELIMITER ;
 
--- Rename users in Audit table when renaming an account (to keep some kind of referential integrity)
-DROP TRIGGER IF EXISTS AuditUserRename;
-DELIMITER $$
-CREATE TRIGGER AuditUserRename
-	AFTER UPDATE
-	ON `User`
-	FOR EACH ROW
-	BEGIN
-		IF(NEW.Name <> OLD.Name) THEN
-			UPDATE Audit
-			SET `User` = NEW.Name
-			WHERE `User` = OLD.Name;
-		END IF;
-	END $$
-DELIMITER ;
-
 -- Features --------------------------------------------------------------------
 
 -- Painless conversion between integer and double features. Maybe.
@@ -475,10 +459,6 @@ CREATE TRIGGER ChangeFeatureType
 		END IF;
 	END $$
 DELIMITER ;
-
--- Users -----------------------------------------------------------------------
-
-
 
 -- SET GLOBAL -------------------------------------------------------------------
 

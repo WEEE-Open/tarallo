@@ -259,6 +259,21 @@ END
 EOQ
 					);
 					break;
+				case 5:
+					$this->exec('DROP TRIGGER AuditUserRename;');
+					$this->exec('CREATE TABLE Session
+(
+    Session VARCHAR(100) NOT NULL,
+    Data TEXT,
+    Redirect TEXT,
+    PRIMARY KEY (`Session`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;');
+					$this->exec('ALTER TABLE `Search` DROP FOREIGN KEY `Search_ibfk_1`');
+					$this->exec('DROP TABLE User;');
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}

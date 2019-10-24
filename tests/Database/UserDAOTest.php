@@ -67,10 +67,10 @@ class UserDAOTest extends DatabaseTest {
 	 */
 	public function testUserLoginLogout() {
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
-		$this->getDb()->userDAO()->setSessionFromUser('asd', 'session-started-in-test-12345678');
+		$this->getDb()->userDAO()->setUserForSession('asd', 'session-started-in-test-12345678');
 		$this->assertEquals('asd',
 			(string) $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
-		$this->getDb()->userDAO()->setSessionFromUser('asd', null);
+		$this->getDb()->userDAO()->setUserForSession('asd', null);
 		$this->assertEquals(null, $this->getDb()->userDAO()->getUserFromSession('session-started-in-test-12345678'));
 	}
 

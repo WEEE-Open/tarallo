@@ -8,183 +8,208 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 -- USE `tarallo`;
 
 SET NAMES utf8mb4
-COLLATE utf8mb4_unicode_ci;
+    COLLATE utf8mb4_unicode_ci;
 
-CREATE TABLE `Item` (
-	-- Max length would be approx. 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
-	`Code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-	`Brand` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-	`Model` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-	`Variant` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-	`Token` varchar(100) COLLATE utf8mb4_bin DEFAULT NULL,
-	`DeletedAt` timestamp(6) NULL DEFAULT NULL,
-	`LostAt` timestamp(6) NULL DEFAULT NULL,
-	INDEX (`DeletedAt`),
-	INDEX (`LostAt`),
-	-- TODO: reenable later
-	-- FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Products` (`Brand`, `Model`, `Variant`)
-	--	ON DELETE NO ACTION
-	--	ON UPDATE CASCADE,
-	PRIMARY KEY (`Code`)
+CREATE TABLE `Item`
+(
+    -- Max length would be approx. 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
+    `Code` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Brand` VARCHAR(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `Model` VARCHAR(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `Variant` VARCHAR(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `Token` VARCHAR(100) COLLATE utf8mb4_bin DEFAULT NULL,
+    `DeletedAt` TIMESTAMP(6) NULL DEFAULT NULL,
+    `LostAt` TIMESTAMP(6) NULL DEFAULT NULL,
+    INDEX (`DeletedAt`),
+    INDEX (`LostAt`),
+    -- TODO: reenable later
+    -- FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Products` (`Brand`, `Model`, `Variant`)
+    --	ON DELETE NO ACTION
+    --	ON UPDATE CASCADE,
+    PRIMARY KEY (`Code`)
 )
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `Feature` (
-	`Feature` varchar(40) COLLATE utf8mb4_bin NOT NULL,
-	`Group` varchar(100) COLLATE utf8mb4_bin NOT NULL,
-	`Type` int NOT NULL, -- 0 = text, 1 = number, 2 = "enum", 3 = double
-	PRIMARY KEY (`Feature`)
+CREATE TABLE `Feature`
+(
+    `Feature` VARCHAR(40) COLLATE utf8mb4_bin NOT NULL,
+    `Group` VARCHAR(100) COLLATE utf8mb4_bin NOT NULL,
+    `Type` INT NOT NULL, -- 0 = text, 1 = number, 2 = "enum", 3 = double
+    PRIMARY KEY (`Feature`)
 )
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
 
-CREATE TABLE `FeatureEnum` (
-	`Feature` varchar(40) COLLATE utf8mb4_bin NOT NULL,
-	`ValueEnum` varchar(40) COLLATE utf8mb4_bin NOT NULL,
-	PRIMARY KEY (`Feature`, `ValueEnum`),
-	CONSTRAINT FOREIGN KEY (`Feature`) REFERENCES `Feature` (`Feature`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE
+CREATE TABLE `FeatureEnum`
+(
+    `Feature` VARCHAR(40) COLLATE utf8mb4_bin NOT NULL,
+    `ValueEnum` VARCHAR(40) COLLATE utf8mb4_bin NOT NULL,
+    PRIMARY KEY (`Feature`, `ValueEnum`),
+    CONSTRAINT FOREIGN KEY (`Feature`) REFERENCES `Feature` (`Feature`)
+        ON DELETE NO ACTION
+        ON UPDATE CASCADE
 )
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
 
-CREATE TABLE `ItemFeature` (
-	`Code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-	`Feature` varchar(40) COLLATE utf8mb4_bin NOT NULL,
-	`Value` bigint UNSIGNED DEFAULT NULL,
-	`ValueEnum` varchar(40) COLLATE utf8mb4_bin DEFAULT NULL,
-	`ValueText` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-	`ValueDouble` double DEFAULT NULL,
-	PRIMARY KEY (`Code`, `Feature`),
-	-- INDEX `Feature` (`Feature`), -- FOREIGN KEY is already an INDEX
-	INDEX `Value` (`Value`),
-	INDEX `ValueDouble` (`ValueDouble`),
-	-- INDEX `Value2` (`ValueEnum`), -- FOREIGN KEY is already an INDEX
-	CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE,
-	CONSTRAINT FOREIGN KEY (`Feature`) REFERENCES `Feature` (`Feature`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE,
-	CONSTRAINT FOREIGN KEY (`Feature`, `ValueEnum`) REFERENCES `FeatureEnum` (`Feature`, `ValueEnum`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE,
-	CHECK ((`Value` IS NOT NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NULL)
-		OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NULL)
-		OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NOT NULL AND `ValueDouble` IS NULL)
-		OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NOT NULL))
+CREATE TABLE `ItemFeature`
+(
+    `Code` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Feature` VARCHAR(40) COLLATE utf8mb4_bin NOT NULL,
+    `Value` BIGINT UNSIGNED DEFAULT NULL,
+    `ValueEnum` VARCHAR(40) COLLATE utf8mb4_bin DEFAULT NULL,
+    `ValueText` TEXT COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `ValueDouble` DOUBLE DEFAULT NULL,
+    PRIMARY KEY (`Code`, `Feature`),
+    -- INDEX `Feature` (`Feature`), -- FOREIGN KEY is already an INDEX
+    INDEX `Value` (`Value`),
+    INDEX `ValueDouble` (`ValueDouble`),
+    -- INDEX `Value2` (`ValueEnum`), -- FOREIGN KEY is already an INDEX
+    CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`Feature`) REFERENCES `Feature` (`Feature`)
+        ON DELETE NO ACTION
+        ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`Feature`, `ValueEnum`) REFERENCES `FeatureEnum` (`Feature`, `ValueEnum`)
+        ON DELETE NO ACTION
+        ON UPDATE CASCADE,
+    CHECK ((`Value` IS NOT NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NULL)
+        OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NULL)
+        OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NOT NULL AND `ValueDouble` IS NULL)
+        OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NOT NULL))
 )
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE Audit (
-	`Code` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-	`Change` char(1) COLLATE utf8mb4_bin NOT NULL,
-	`Other` varchar(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-	`Time` timestamp(6) DEFAULT NOW(6) NOT NULL,
-	`User` varchar(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-	PRIMARY KEY (`Code`, `Time`, `Change`),
-	CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`)
-		ON DELETE CASCADE
-		ON UPDATE CASCADE,
-	INDEX (`Change`),
-	CONSTRAINT check_change
-		CHECK (
-			(`Change` IN ('M', 'R') AND `Other` IS NOT NULL) OR
-			(`Change` IN ('C', 'U', 'D', 'L') AND `Other` IS NULL)
-		)
+CREATE TABLE Audit
+(
+    `Code` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Change` CHAR(1) COLLATE utf8mb4_bin NOT NULL,
+    `Other` VARCHAR(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `Time` TIMESTAMP(6) DEFAULT NOW(6) NOT NULL,
+    `User` VARCHAR(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    PRIMARY KEY (`Code`, `Time`, `Change`),
+    CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    INDEX (`Change`),
+    CONSTRAINT check_change
+        CHECK (
+                (`Change` IN ('M', 'R') AND `Other` IS NOT NULL) OR
+                (`Change` IN ('C', 'U', 'D', 'L') AND `Other` IS NULL)
+            )
 )
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `Tree` (
-	`Ancestor` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-	`Descendant` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-	`Depth` int UNSIGNED NOT NULL,
-	PRIMARY KEY (`Ancestor`, `Descendant`),
-	-- PK is already an index on Ancestor
-	INDEX (`Descendant`),
-	INDEX (`Depth`),
-	CONSTRAINT FOREIGN KEY (`Ancestor`) REFERENCES `Item` (`Code`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE,
-	CONSTRAINT FOREIGN KEY (`Descendant`) REFERENCES `Item` (`Code`)
-		ON DELETE NO ACTION
-		ON UPDATE CASCADE
+CREATE TABLE `Tree`
+(
+    `Ancestor` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Descendant` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Depth` INT UNSIGNED NOT NULL,
+    PRIMARY KEY (`Ancestor`, `Descendant`),
+    -- PK is already an index on Ancestor
+    INDEX (`Descendant`),
+    INDEX (`Depth`),
+    CONSTRAINT FOREIGN KEY (`Ancestor`) REFERENCES `Item` (`Code`)
+        ON DELETE NO ACTION
+        ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`Descendant`) REFERENCES `Item` (`Code`)
+        ON DELETE NO ACTION
+        ON UPDATE CASCADE
 )
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `Prefixes` (
-	`Prefix` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
-	`Integer` bigint(20) UNSIGNED NOT NULL DEFAULT 0,
-	PRIMARY KEY (`Prefix`)
+CREATE TABLE `Prefixes`
+(
+    `Prefix` VARCHAR(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Integer` BIGINT(20) UNSIGNED NOT NULL DEFAULT 0,
+    PRIMARY KEY (`Prefix`)
 )
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `User` (
-	`Name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-	`Password` text COLLATE utf8mb4_unicode_ci NOT NULL,
-	`Session` char(32) COLLATE utf8mb4_bin,
-	`SessionExpiry` timestamp NOT NULL DEFAULT 0,
-	`Level` smallint DEFAULT 2,
-	`Enabled` boolean NOT NULL DEFAULT FALSE,
-	PRIMARY KEY (`Name`),
-	UNIQUE KEY (`Session`),
-	CHECK (Level >= 0 AND Level <= 3)
+CREATE TABLE `User`
+(
+    `Name` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Password` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Session` CHAR(32) COLLATE utf8mb4_bin,
+    `SessionExpiry` TIMESTAMP NOT NULL DEFAULT 0,
+    `Level` SMALLINT DEFAULT 2,
+    `Enabled` BOOLEAN NOT NULL DEFAULT FALSE,
+    PRIMARY KEY (`Name`),
+    UNIQUE KEY (`Session`),
+    CHECK (Level >= 0 AND Level <= 3)
 )
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `Search` (
-	`Code` bigint UNSIGNED AUTO_INCREMENT NOT NULL,
-	`Expires` timestamp NOT NULL DEFAULT 0,
-	`ResultsCount` bigint UNSIGNED NOT NULL DEFAULT 0,
-	`Owner` varchar(100) COLLATE utf8mb4_unicode_ci,
-	PRIMARY KEY (`Code`),
-	FOREIGN KEY (`Owner`) REFERENCES `User` (`Name`)
-		ON UPDATE CASCADE
-		ON DELETE SET NULL
+CREATE TABLE `Search`
+(
+    `Code` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `Expires` TIMESTAMP NOT NULL DEFAULT 0,
+    `ResultsCount` BIGINT UNSIGNED NOT NULL DEFAULT 0,
+    `Owner` VARCHAR(100) COLLATE utf8mb4_unicode_ci,
+    PRIMARY KEY (`Code`),
+    FOREIGN KEY (`Owner`) REFERENCES `User` (`Name`)
+        ON UPDATE CASCADE
+        ON DELETE SET NULL
 )
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `SearchResult` (
-	Search bigint UNSIGNED,
-	`Item` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-	`Order` bigint UNSIGNED,
-	PRIMARY KEY (Search, `Item`),
-	FOREIGN KEY (Search) REFERENCES `Search` (`Code`)
-		ON UPDATE CASCADE
-		ON DELETE CASCADE,
-	FOREIGN KEY (`Item`) REFERENCES `Item` (`Code`)
-		ON UPDATE CASCADE
-		ON DELETE CASCADE
+CREATE TABLE `SearchResult`
+(
+    Search BIGINT UNSIGNED,
+    `Item` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Order` BIGINT UNSIGNED,
+    PRIMARY KEY (Search, `Item`),
+    FOREIGN KEY (Search) REFERENCES `Search` (`Code`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (`Item`) REFERENCES `Item` (`Code`)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 )
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `Configuration` (
-  `Key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `Value` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-	PRIMARY KEY (`Key`)
+CREATE TABLE `Configuration`
+(
+    `Key` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Value` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    PRIMARY KEY (`Key`)
 )
-	ENGINE = InnoDB
-	DEFAULT CHARSET = utf8mb4
-	COLLATE = utf8mb4_unicode_ci;
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 4);
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE Session
+(
+    Session VARCHAR(100) NOT NULL,
+    Data TEXT DEFAULT NULL,
+    Redirect TEXT DEFAULT NULL,
+    PRIMARY KEY (`Session`)
+    -- CHECK ((Data IS NULL AND Redirect IS NOT NULL) OR (Data IS NOT NULL AND Redirect IS NULL))
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
+
+INSERT INTO `Configuration` (`Key`, `Value`)
+VALUES ('SchemaVersion', 5);

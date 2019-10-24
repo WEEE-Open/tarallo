@@ -4,126 +4,143 @@ namespace WEEEOpen\Tarallo\Database;
 
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\User;
+use WEEEOpen\Tarallo\UserSSO;
 
 final class UserDAO extends DAO {
-
-	public function getUserFromSession($session) {
-		$s = $this->getPDO()
-			->prepare(
-				'SELECT `Name`, `Password` AS `Hash`, `Level` FROM `User` WHERE `Session` = ? AND `SessionExpiry` > NOW() AND `Enabled` > 0'
-			);
-		$s->execute([$session]);
-		if($s->rowCount() > 1) {
-			$s->closeCursor();
-			throw new \LogicException('Duplicate session identifier in database');
-		} else if($s->rowCount() === 0) {
-			$s->closeCursor();
-
-			return null;
-		} else {
-			$user = $s->fetch(\PDO::FETCH_ASSOC);
-			$s->closeCursor();
-
-			return new User($user['Name'], null, $user['Hash'], $user['Level']);
-		}
-	}
-
 	/**
-	 * Set session id and expiration timestamp for a user
+	 * Get user data from a session, or null
 	 *
-	 * @param string $username
-	 * @param string|null $session
-	 */
-	public function setSessionFromUser($username, $session) {
-		try {
-			$s = $this->getPDO()
-				->prepare(
-					'UPDATE `User` SET `Session` = :s, SessionExpiry = TIMESTAMPADD(HOUR, 6, NOW()) WHERE `Name` = :n AND `Enabled` > 0'
-				);
-			$s->bindValue(':s', $session, $session === null ? \PDO::PARAM_NULL : \PDO::PARAM_STR);
-			$s->bindValue(':n', $username, \PDO::PARAM_STR);
-			$result = $s->execute();
-			assert($result !== false, 'set session from user');
-
-			$this->setAuditUsername($username);
-		} finally {
-			$s->closeCursor();
-		}
-	}
-
-	/**
-	 * Set new password for a user.
+	 * @param string $sessionId
 	 *
-	 * @param string $username
-	 * @param string $hash
+	 * @return UserSSO
 	 */
-	public function setPasswordFromUser(string $username, string $hash) {
+	public function getSession(string $sessionId): ?UserSSO {
 		try {
-			$s = $this->getPDO()->prepare('UPDATE `User` SET `Password` = :p WHERE `Name` = :n');
-			$s->bindValue(':p', $hash, \PDO::PARAM_STR);
-			$s->bindValue(':n', $username, \PDO::PARAM_STR);
-			$result = $s->execute();
-			assert($result !== false, 'update password hash');
-			if($s->rowCount() === 0) {
-				throw new NotFoundException(8);
+			$s = $this->getPDO()->prepare('SELECT `Data` FROM Session WHERE `Session` = ?');
+			$result = $s->execute([$sessionId]);
+			assert($result !== false, 'get session');
+			$rows = $s->rowCount();
+			if($rows === 0) {
+				return null;
 			}
+			return unserialize($s->fetch(\PDO::FETCH_NUM)[0]);
 		} finally {
 			$s->closeCursor();
 		}
 	}
 
-	/**
-	 * Create a user
-	 *
-	 * @param string $username
-	 * @param string $hash
-	 */
-	public function createUser(string $username, string $hash) {
+	public function getRedirect(string $sessionId): ?UserSSO {
 		try {
-			$s = $this->getPDO()->prepare('INSERT INTO `User`(`Name`, `Password`, `Enabled`) VALUES (:n, :p, 1)');
-			$s->bindValue(':n', $username, \PDO::PARAM_STR);
-			$s->bindValue(':p', $hash, \PDO::PARAM_STR);
+			$s = $this->getPDO()->prepare('SELECT `Redirect` FROM Session WHERE `Session` = ?');
+			$result = $s->execute([$sessionId]);
+			assert($result !== false, 'get session redirect');
+			$rows = $s->rowCount();
+			if($rows === 0) {
+				return null;
+			}
+			return $s->fetch(\PDO::FETCH_NUM)[0];
+		} finally {
+			$s->closeCursor();
+		}
+	}
+
+	public function deleteSession(string $sessionId) {
+		try {
+			$s = $this->getPDO()->prepare('DELETE FROM Session WHERE `Session` = ?');
+			$result = $s->execute([$sessionId]);
+			assert($result !== false, 'delete sessions');
+		} finally {
+			$s->closeCursor();
+		}
+	}
+
+
+	/**
+	 * Check if a session exists. If it does, lock the row for update so it won't disappear or change in the meantime.
+	 *
+	 * @param string $sessionID
+	 *
+	 * @return bool Does it exist or not?
+	 */
+	public function sessionExists(string $sessionID): bool {
+		try {
+			$s = $this->getPDO()->prepare('SELECT `Data`, `Redirect` FROM Session WHERE `Session` = :s FOR UPDATE');
+			$s->bindValue(':s', $sessionID, \PDO::PARAM_STR);
 			$result = $s->execute();
-			assert($result !== false, "create user");
+			assert($result !== false, 'session exists');
+			$rows = $s->rowCount();
+			return $rows > 0;
 		} finally {
 			$s->closeCursor();
 		}
 	}
 
 	/**
-	 * Log in a user, via username and password. Doesn't start any session!
+	 * Set or delete the redirect field for a session, create if it does not exist
 	 *
-	 * @param $username string username
-	 * @param $password string plaintext password
+	 * @param string $sessionID
+	 * @param string|null $redirect
 	 *
-	 * @return null|User User if found and password is valid, null otherwise
+	 * @throws DatabaseException if session does not exist
 	 */
-	public function getUserFromLogin($username, $password) {
-		$s = $this->getPDO()
-			->prepare('SELECT `Password` AS `Hash`, `Level` FROM `User` WHERE `Name` = ? AND `Enabled` > 0');
-		$s->execute([$username]);
-		if($s->rowCount() > 1) {
-			$s->closeCursor();
-			throw new \LogicException(
-				'Duplicate username in database (should never happen altough MySQL doesn\'t allow TEXT fields to be UNIQUE, since that would be too easy and suitable for the current millennium)'
-			);
-		} else if($s->rowCount() === 0) {
-			$s->closeCursor();
-
-			return null;
-		} else {
-			$user = $s->fetch(\PDO::FETCH_ASSOC);
-			$s->closeCursor();
-			try {
-				$this->setAuditUsername($username);
-				return new User($username, $password, $user['Hash'], $user['Level']);
-			} catch(\InvalidArgumentException $e) {
-				if($e->getCode() === 72) {
-					return null;
-				} else {
-					throw $e;
-				}
+	public function setRedirectForSession(string $sessionID, ?string $redirect = null) {
+		if(!$this->sessionExists($sessionID)) {
+			$this->createSession($sessionID);
+			if($redirect === null) {
+				// It's already null by default
+				return;
 			}
+		}
+
+		try{
+			$s = $this->getPDO()->prepare('UPDATE Session SET Redirect = :r WHERE `Session` = :s');
+			$s->bindValue(':s', $sessionID, \PDO::PARAM_STR);
+			$s->bindValue(':r', $redirect, $redirect === null ? \PDO::PARAM_BOOL : \PDO::PARAM_STR);
+			$result = $s->execute();
+			assert($result !== false, 'session exists');
+		} finally {
+			$s->closeCursor();
+		}
+	}
+
+	/**
+	 * Set or delete data for a session, if it exists
+	 *
+	 * @param string $sessionID
+	 * @param UserSSO $data
+	 */
+	public function setDataForSession(string $sessionID, ?UserSSO $data) {
+		if(!$this->sessionExists($sessionID)) {
+			$this->createSession($sessionID);
+			if($data === null) {
+				// It's already null by default
+				return;
+			}
+		}
+
+		try {
+			$s = $this->getPDO()->prepare('UPDATE Session SET Data = :d WHERE `Session` = :s');
+			$s->bindValue(':s', $sessionID, \PDO::PARAM_STR);
+			if($data === null) {
+				$s->bindValue(':d', null, \PDO::PARAM_NULL);
+			} else {
+				$s->bindValue(':d', serialize($data), \PDO::PARAM_STR);
+			}
+			$result = $s->execute();
+			assert($result !== false, 'session exists');
+		} finally {
+			$s->closeCursor();
+		}
+	}
+
+	private function createSession(string $sessionID) {
+		try {
+			$s = $this->getPDO()->prepare('INSERT INTO Session(Session, Data, Redirect) VALUES (:s, NULL, NULL)');
+			$s->bindValue(':s', $sessionID, \PDO::PARAM_STR);
+			$result = $s->execute();
+			assert($result !== false, 'create session');
+		} finally {
+			$s->closeCursor();
 		}
 	}
 

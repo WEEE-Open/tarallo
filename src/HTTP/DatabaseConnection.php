@@ -9,9 +9,6 @@ use WEEEOpen\Tarallo\Database\DatabaseException;
 use WEEEOpen\Tarallo\Session;
 
 class DatabaseConnection implements Middleware {
-//	public const en_US = 'en-US';
-//	public const it_IT = 'it-IT';
-
 	public function __invoke(
 		ServerRequestInterface $request,
 		ResponseInterface $response,
@@ -25,7 +22,8 @@ class DatabaseConnection implements Middleware {
 
 		try {
 			$db->beginTransaction();
-			$user = Session::restore($db);
+			// TODO: SSO or example thing, or basic auth for coso
+			// $user = Session::restore($db);
 			$db->commit();
 		} catch(\Exception $e) {
 			$db->rollback();
@@ -40,30 +38,4 @@ class DatabaseConnection implements Middleware {
 			return $response;
 		}
 	}
-
-//	/**
-//	 * Get best language among supported ones.
-//	 *
-//	 * @param string|null $languages Contents of the Accept-Language header
-//	 *
-//	 * @return string One of the class constants representing the chosen language
-//	 */
-//	private static function negotiateLanguage(string $languages = null): string {
-//		$supported = [self::en_US, self::it_IT];
-//
-//		if($languages === null || $languages === '') {
-//			return $supported[0];
-//		}
-//
-//		$negotiator = new LanguageNegotiator();
-//		$bestLanguage = $negotiator->getBest($languages, $supported);
-//
-//		if($bestLanguage === null) {
-//			return $supported[0];
-//		} else {
-//			/** @noinspection PhpUndefinedMethodInspection */
-//			return $bestLanguage->getType();
-//		}
-//	}
-
 }
