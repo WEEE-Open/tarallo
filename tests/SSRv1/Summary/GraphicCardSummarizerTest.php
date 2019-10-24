@@ -28,7 +28,7 @@ class GraphicCardSummarizerTest extends TestCase {
 
 		$summary = GraphicCardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, 2× DVI, 1× HDMI, 1× S-Video, Green, Nvidia GeForce4 MX 440',
+			'Graphics card PCI Express 128 MiB, 2× DVI 1× HDMI 1× S-Video, Green, Nvidia GeForce4 MX 440',
 			$summary
 		);
 	}
@@ -51,7 +51,7 @@ class GraphicCardSummarizerTest extends TestCase {
 
 		$summary = GraphicCardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, 2× DVI, 1× HDMI, 1× S-Video, Nvidia GeForce4 MX 440',
+			'Graphics card PCI Express 128 MiB, 2× DVI 1× HDMI 1× S-Video, Nvidia GeForce4 MX 440',
 			$summary
 		);
 	}
@@ -74,7 +74,7 @@ class GraphicCardSummarizerTest extends TestCase {
 
 		$summary = GraphicCardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, 2× DVI, 1× HDMI, 1× S-Video, Green, GeForce4 MX 440',
+			'Graphics card PCI Express 128 MiB, 2× DVI 1× HDMI 1× S-Video, Green, GeForce4 MX 440',
 			$summary
 		);
 	}
@@ -97,7 +97,7 @@ class GraphicCardSummarizerTest extends TestCase {
 
 		$summary = GraphicCardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, 2× DVI, 1× HDMI, 1× S-Video, Green, Nvidia',
+			'Graphics card PCI Express 128 MiB, 2× DVI 1× HDMI 1× S-Video, Green, Nvidia',
 			$summary
 		);
 	}
@@ -119,7 +119,7 @@ class GraphicCardSummarizerTest extends TestCase {
 
 		$summary = GraphicCardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, 2× DVI, 1× HDMI, 1× S-Video, Green',
+			'Graphics card PCI Express 128 MiB, 2× DVI 1× HDMI 1× S-Video, Green',
 			$summary
 		);
 	}
@@ -140,7 +140,7 @@ class GraphicCardSummarizerTest extends TestCase {
 
 		$summary = GraphicCardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, 2× DVI, 1× HDMI, 1× S-Video',
+			'Graphics card PCI Express 128 MiB, 2× DVI 1× HDMI 1× S-Video',
 			$summary
 		);
 	}
@@ -204,7 +204,7 @@ class GraphicCardSummarizerTest extends TestCase {
 
 		$summary = GraphicCardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Graphics card PCI Express, 2× DVI, 1× HDMI, 1× S-Video, Green, Nvidia GeForce4 MX 440',
+			'Graphics card PCI Express, 2× DVI 1× HDMI 1× S-Video, Green, Nvidia GeForce4 MX 440',
 			$summary
 		);
 	}
@@ -227,7 +227,7 @@ class GraphicCardSummarizerTest extends TestCase {
 
 		$summary = GraphicCardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Graphics card 128 MiB, 2× DVI, 1× HDMI, 1× S-Video, Green, Nvidia GeForce4 MX 440',
+			'Graphics card 128 MiB, 2× DVI 1× HDMI 1× S-Video, Green, Nvidia GeForce4 MX 440',
 			$summary
 		);
 	}
@@ -249,7 +249,7 @@ class GraphicCardSummarizerTest extends TestCase {
 
 		$summary = GraphicCardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Graphics card, 2× DVI, 1× HDMI, 1× S-Video, Green, Nvidia GeForce4 MX 440',
+			'Graphics card, 2× DVI 1× HDMI 1× S-Video, Green, Nvidia GeForce4 MX 440',
 			$summary
 		);
 	}
@@ -288,7 +288,7 @@ class GraphicCardSummarizerTest extends TestCase {
 
 		$summary = GraphicCardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Graphics card, 2× DVI, 1× HDMI, 1× S-Video, Green',
+			'Graphics card, 2× DVI 1× HDMI 1× S-Video, Green',
 			$summary
 		);
 	}
