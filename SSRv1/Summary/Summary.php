@@ -12,8 +12,8 @@ class Summary {
 			//case 'location':
 			// Not implemented
 
-			//case 'case':
-				// return SomeSummarizer::summarize($item);
+			case 'case':
+				 return CaseSummarizer::summarize($item);
 			//case 'motherboard':
 				// return SomeSummarizer::summarize($item);
 			case 'cpu':

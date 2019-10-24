@@ -6,27 +6,25 @@ namespace WEEEOpen\Tarallo\SSRv1\Summary;
 use WEEEOpen\Tarallo\Server\ItemWithFeatures;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
-class GraphicCardSummarizer implements Summarizer {
+class CaseSummarizer implements Summarizer {
 
 	public static function summarize(ItemWithFeatures $item): string {
 		$type = $item->getFeature('type');
-		$capacity = $item->getFeature('capacity-byte');
+		$form = $item->getFeature('motherboard-form-factor');
 		$color = $item->getFeature('color');
-
+		$brand = $item->getFeature('brand');
+		$model = $item->getFeature('model');
 
 		$type = FeaturePrinter::printableValue($type);
-		$socket = PartialSummaries::summarizeSockets($item, true);
-		$type .= $socket ? " $socket" : '';
-		$type .= $capacity ? ' ' . FeaturePrinter::printableValue($capacity) : '';
+		$type .= $form ? ' ' . FeaturePrinter::printableValue($form) : '';
 
-		$ports = PartialSummaries::summarizePorts($item);
-		//$ports = $ports ? ", $ports" : '';
+		$ports = PartialSummaries::summarizePorts($item, true);
+		$ports = $ports ? ", $ports" : '';
 
 		$color = $color ? ', ' . FeaturePrinter::printableValue($color) : '';
 
 		$commercial = PartialSummaries::summarizeCommercial($item);
 		$commercial = $commercial ? ", $commercial" : '';
-
 
 		$pretty = $type . $ports . $color . $commercial;
 
