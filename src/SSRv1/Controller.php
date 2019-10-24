@@ -14,6 +14,7 @@ use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\HTTP\AbstractController;
 use WEEEOpen\Tarallo\HTTP\AuthenticationException;
+use WEEEOpen\Tarallo\HTTP\AuthManager;
 use WEEEOpen\Tarallo\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;
@@ -24,8 +25,6 @@ use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\ItemNestingException;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
-use WEEEOpen\Tarallo\Session;
-use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\ValidationException;
 
 
@@ -676,6 +675,7 @@ class Controller extends AbstractController {
 			new DatabaseConnection(),
 			//new LanguageNegotiatior(),
 			new TemplateEngine(),
+			new AuthManager(),
 			[self::class, 'handleExceptions'],
 		];
 
