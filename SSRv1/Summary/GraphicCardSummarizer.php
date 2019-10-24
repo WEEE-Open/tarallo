@@ -20,7 +20,7 @@ class GraphicCardSummarizer implements Summarizer {
 		$type .= $capacity ? ' ' . FeaturePrinter::printableValue($capacity) : '';
 
 		$ports = PartialSummaries::summarizePorts($item);
-		//$ports = $ports ? ", $ports" : '';
+		$ports = $ports ? ", $ports" : '';
 
 		$color = $color ? ', ' . FeaturePrinter::printableValue($color) : '';
 
