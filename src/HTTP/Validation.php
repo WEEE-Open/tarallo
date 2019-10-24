@@ -5,18 +5,19 @@ namespace WEEEOpen\Tarallo\HTTP;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\User;
+use WEEEOpen\Tarallo\UserSSO;
 use WEEEOpen\Tarallo\ValidationException;
 
 class Validation {
 	/**
 	 * Check that an user is authorized (and authenticated too, or the entire thing won't make any sense)
 	 *
-	 * @param User|null $user Current, logged-in user. Or none if not authenticated.
+	 * @param UserSSO|null $user Current, logged-in user. Or none if not authenticated.
 	 * @param int $level Permission level required (default is "read/write")
 	 *
 	 * @see User::getLevel()
 	 */
-	public static function authorize(?User $user, $level = 2) {
+	public static function authorize(?UserSSO $user, $level = 2) {
 		self::authenticate($user);
 		if($user->getLevel() > $level) {
 			throw new AuthorizationException();
@@ -29,10 +30,10 @@ class Validation {
 	 *
 	 * @see Controller::authorize()
 	 *
-	 * @param User $user
+	 * @param UserSSO $user
 	 */
-	public static function authenticate(User $user = null) {
-		if(!($user instanceof User)) {
+	public static function authenticate(UserSSO $user = null) {
+		if(!($user instanceof UserSSO)) {
 			throw new AuthenticationException();
 		}
 	}

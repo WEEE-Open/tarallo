@@ -61,6 +61,8 @@ class AuthManager implements Middleware {
 		return $str;
 	}
 
+	// TODO: split this thing. One checks if user is logged in BEFORE routing and stuff, the other comes after and IF
+	// the controller says "oh this should have been authenticated" it performs a redirect and stuff
 	/**
 	 * @param ServerRequestInterface $request
 	 * @param ResponseInterface $response
@@ -77,7 +79,7 @@ class AuthManager implements Middleware {
 		$path = $request->getUri()->getPath();
 		if($path === '/auth') {
 			return $this->handleAuthResponse($request, $response, $next);
-		} elseif($path = '/logout') {
+		} elseif($path === '/logout') {
 			return $this->terminate($request, $response, $next);
 		} else {
 			return $this->authenticate($request, $response, $next);
@@ -103,7 +105,6 @@ class AuthManager implements Middleware {
 		ResponseInterface $response,
 		?callable $next = null
 	): ResponseInterface {
-
 		$cookie = $request->getCookieParams();
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
@@ -148,8 +149,17 @@ class AuthManager implements Middleware {
 
 			// Done, see you at /auth!
 			$oidc = self::oidc();
-			$oidc->setRedirectURL($request->getUri()->getHost() . '/auth');
-			$oidc->authenticate();
+			// TODO: port is missing
+			$gohere = 'http://' . $request->getUri()->getHost() . ':' . $request->getUri()->getPort() . '/auth';
+			if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
+				error_log('DEV: Bypassing authentication step 1');
+
+				http_response_code(303);
+				header("Location: $gohere");
+			} else {
+				$oidc->setRedirectURL($gohere);
+				$oidc->authenticate();
+			}
 			exit;
 		}
 
@@ -189,17 +199,30 @@ class AuthManager implements Middleware {
 				$request = $request->withAttribute('User', null);
 			} else {
 				// We have everything! Probably!
-				$oidc = self::oidc();
-				$oidc->authenticate();
+				if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
+					error_log('DEV: Bypassing authentication step 2');
 
-				$user = new UserSSO();
-				$user->uid = $oidc->getVerifiedClaims('preferred_username');
-				$user->cn = $oidc->getVerifiedClaims('name');
-				// $user->groups = $oidc->getVerifiedClaims('groups');
-				$user->idToken = $oidc->getIdToken();
-				$user->idTokenExpiry = $oidc->getVerifiedClaims('exp');
-				$user->refreshToken = $oidc->getRefreshToken();
-				$user->refreshTokenExpiry = time() + 3600; // TODO: this is apparently not stated in the token, use a constant
+					$user = new UserSSO();
+					$user->uid = 'dev.user';
+					$user->cn = 'Developement User';
+					$user->idToken = 'F00B4R';
+					$user->idTokenExpiry = time() + 60 * 60 * 24;
+					$user->refreshToken = 'N0REFRESH';
+					$user->refreshTokenExpiry = 0;
+				} else {
+					$oidc = self::oidc();
+					$oidc->authenticate();
+
+					$user = new UserSSO();
+					$user->uid = $oidc->getVerifiedClaims('preferred_username');
+					$user->cn = $oidc->getVerifiedClaims('name');
+					// $user->groups = $oidc->getVerifiedClaims('groups');
+					$user->idToken = $oidc->getIdToken();
+					$user->idTokenExpiry = $oidc->getVerifiedClaims('exp');
+					$user->refreshToken = $oidc->getRefreshToken();
+					$user->refreshTokenExpiry = time() + 3600; // TODO: this is apparently not stated in the token, use a constant
+				}
+
 
 				// Store it!
 				$db->userDAO()->setDataForSession($id, $user);
@@ -231,5 +254,11 @@ class AuthManager implements Middleware {
 		?callable $next = null
 	): ResponseInterface {
 		// TODO: perform SLO
+
+		if($next) {
+			return $next($request, $response);
+		} else {
+			return $response;
+		}
 	}
 }

@@ -19,10 +19,8 @@ use WEEEOpen\Tarallo\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\HTTP\Validation;
-use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemIncomplete;
-use WEEEOpen\Tarallo\ItemNestingException;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ValidationException;
@@ -147,43 +145,30 @@ class Controller extends AbstractController {
 	}
 
 	public static function login(Request $request, Response $response, ?callable $next = null): Response {
-		$db = $request->getAttribute('Database');
+		$user = $request->getAttribute('User');
 
-		if($request->getMethod() === 'POST') {
-			$body = $request->getParsedBody();
-			$username = Validation::validateHasString($body, 'username');
-			$password = Validation::validateHasString($body, 'password');
-			$user = $db->userDAO()->getUserFromLogin($username, $password);
-
-			if($user === null) {
-				$request = $request
-					->withAttribute('Template', 'login')
-					->withAttribute('TemplateParameters', ['failed' => true]);
-				$response = $response
-					->withStatus(400);
-			} else {
-				Session::start($user, $db);
-				$request = $request
-					->withAttribute('User', $user);
-				$response = $response
-					->withStatus(303)
-					->withoutHeader('Content-type')
-					->withHeader('Location', '/home');
-			}
-		} else {
+		if($user === null) {
 			$request = $request
-				->withAttribute('Template', 'login');
+				->withAttribute('Template', 'error')
+				->withAttribute('TemplateParameters', ['reason' => 'Login failed']);
+			$response = $response
+				->withStatus(400);
+		} else {
+			$response = $response
+				->withStatus(303)
+				->withoutHeader('Content-type')
+				->withHeader('Location', '/home');
 		}
 
 		return $next ? $next($request, $response) : $response;
 	}
 
 	public static function logout(Request $request, Response $response, ?callable $next = null): Response {
-		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
 
 		Validation::authenticate($user);
-		Session::close($user, $db);
+
+		// TODO: does it happen? Does AuthManager pick this up?
 
 		$request = $request
 			->withAttribute('Template', 'logout');
@@ -417,71 +402,6 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function options(Request $request, Response $response, ?callable $next = null): Response {
-		$db = $request->getAttribute('Database');
-		$user = $request->getAttribute('User');
-		$body = $request->getParsedBody();
-
-		Validation::authorize($user, 3);
-
-		if(empty($body)) {
-			$result = null;
-		} else {
-			$result = 'success';
-			$password = Validation::validateHasString($body, 'password');
-			$confirm = Validation::validateHasString($body, 'confirm');
-			$username = isset($body['username']) ? (string) trim($body['username']) : null;
-
-			$target = null;
-			if($username === null || $username === '') {
-				$target = $user;
-			} else {
-				Validation::authorize($user, 0);
-			}
-
-			try {
-				if($target === null) {
-					$target = new User($username, $password, null, 2);
-				}
-				$target->setPassword($password, $confirm);
-				$db->userDAO()->setPasswordFromUser($target->getUsername(), $target->getHash());
-			} catch(\InvalidArgumentException $e) {
-				switch($e->getCode()) {
-					case 5:
-						$result = 'empty';
-						break;
-					case 6:
-						$result = 'nomatch';
-						break;
-					case 7:
-						$result = 'short';
-						break;
-					default:
-						throw $e;
-				}
-			} catch(NotFoundException $e) {
-				if($e->getCode() === 8) {
-					$db->userDAO()->createUser($target->getUsername(), $target->getHash());
-					$result = 'successnew';
-				} else {
-					throw $e;
-				}
-			}
-		}
-
-		$request = $request
-			->withAttribute('Template', 'options')
-			->withAttribute('TemplateParameters', ['result' => $result]);
-
-		if($result === null || $result === 'success' || $result === 'successnew') {
-			$response = $response->withStatus(200);
-		} else {
-			$response = $response->withStatus(400);
-		}
-
-		return $next ? $next($request, $response) : $response;
-	}
-
 	public static function bulk(Request $request, Response $response, ?callable $next = null): Response {
 		$user = $request->getAttribute('User');
 
@@ -634,7 +554,7 @@ class Controller extends AbstractController {
 	public static function getDispatcher(string $cachefile): FastRoute\Dispatcher {
 		return FastRoute\cachedDispatcher(
 			function(FastRoute\RouteCollector $r) {
-				$r->addRoute(['GET', 'POST'], '/login', [[Controller::class, 'login']]);
+				$r->get('/auth', [[Controller::class, 'login']]);
 				$r->addRoute(['GET', 'POST'], '/options', [[Controller::class, 'options']]);
 				$r->get('/logout', [[Controller::class, 'logout']]);
 

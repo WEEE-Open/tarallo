@@ -6,7 +6,6 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Database\DatabaseException;
-use WEEEOpen\Tarallo\Session;
 
 class DatabaseConnection implements Middleware {
 	public function __invoke(
@@ -20,19 +19,8 @@ class DatabaseConnection implements Middleware {
 			throw new DatabaseException('Cannot connect to database');
 		}
 
-		try {
-			$db->beginTransaction();
-			// TODO: SSO or example thing, or basic auth for coso
-			// $user = Session::restore($db);
-			$db->commit();
-		} catch(\Exception $e) {
-			$db->rollback();
-			/** @noinspection PhpUnhandledExceptionInspection */
-			throw $e;
-		}
-
 		if($next) {
-			$request = $request->withAttribute('Database', $db)->withAttribute('User', $user);
+			$request = $request->withAttribute('Database', $db);
 			return $next($request, $response);
 		} else {
 			return $response;

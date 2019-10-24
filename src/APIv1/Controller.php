@@ -28,7 +28,6 @@ use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemNestingException;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
-use WEEEOpen\Tarallo\Session;
 use WEEEOpen\Tarallo\ValidationException;
 
 
@@ -43,53 +42,6 @@ class Controller extends AbstractController {
 		$request = $request
 			->withAttribute('Status', JSend::SUCCESS)
 			->withAttribute('Data', ['username' => $user->getUsername()]);
-
-		return $next ? $next($request, $response) : $response;
-	}
-
-	public static function sessionStart(Request $request, Response $response, ?callable $next = null): Response {
-		/** @var Database $db */
-		$db = $request->getAttribute('Database');
-		$payload = $request->getParsedBody();
-
-		$username = Validation::validateHasString($payload, 'username');
-		$password = Validation::validateHasString($payload, 'password');
-
-		$user = $db->userDAO()->getUserFromLogin($username, $password);
-		if($user === null) {
-			throw new AuthenticationException('Wrong username or password');
-		}
-		Session::start($user, $db);
-
-		$response = $response
-			->withStatus(204);
-
-		return $next ? $next($request, $response) : $response;
-	}
-
-	public static function sessionClose(Request $request, Response $response, ?callable $next = null): Response {
-		/** @var Database $db */
-		$db = $request->getAttribute('Database');
-		$user = $request->getAttribute('User');
-
-		// If we ever add another level for e.g. banned users, this at least allows them to log out
-		Validation::authenticate($user);
-		Session::close($user, $db);
-
-		$response = $response
-			->withStatus(204);
-
-		return $next ? $next($request, $response) : $response;
-	}
-
-	public static function sessionRefresh(Request $request, Response $response, ?callable $next = null): Response {
-		$user = $request->getAttribute('User');
-
-		// The refresh itself has already been done by Session::restore, sooooo...
-		Validation::authenticate($user);
-
-		$response = $response
-			->withStatus(204);
 
 		return $next ? $next($request, $response) : $response;
 	}
