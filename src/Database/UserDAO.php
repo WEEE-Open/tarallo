@@ -4,7 +4,7 @@ namespace WEEEOpen\Tarallo\Database;
 
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\User;
-use WEEEOpen\Tarallo\UserSSO;
+use WEEEOpen\Tarallo\SessionSSO;
 
 final class UserDAO extends DAO {
 	/**
@@ -12,9 +12,9 @@ final class UserDAO extends DAO {
 	 *
 	 * @param string $sessionId
 	 *
-	 * @return UserSSO
+	 * @return SessionSSO
 	 */
-	public function getSession(string $sessionId): ?UserSSO {
+	public function getSession(string $sessionId): ?SessionSSO {
 		try {
 			$s = $this->getPDO()->prepare('SELECT `Data` FROM Session WHERE `Session` = ?');
 			$result = $s->execute([$sessionId]);
@@ -29,7 +29,7 @@ final class UserDAO extends DAO {
 		}
 	}
 
-	public function getRedirect(string $sessionId): ?UserSSO {
+	public function getRedirect(string $sessionId): ?SessionSSO {
 		try {
 			$s = $this->getPDO()->prepare('SELECT `Redirect` FROM Session WHERE `Session` = ?');
 			$result = $s->execute([$sessionId]);
@@ -107,9 +107,9 @@ final class UserDAO extends DAO {
 	 * Set or delete data for a session, if it exists
 	 *
 	 * @param string $sessionID
-	 * @param UserSSO $data
+	 * @param SessionSSO $data
 	 */
-	public function setDataForSession(string $sessionID, ?UserSSO $data) {
+	public function setDataForSession(string $sessionID, ?SessionSSO $data) {
 		if(!$this->sessionExists($sessionID)) {
 			$this->createSession($sessionID);
 			if($data === null) {

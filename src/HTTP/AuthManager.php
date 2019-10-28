@@ -5,11 +5,14 @@ namespace WEEEOpen\Tarallo\HTTP;
 use Jumbojett\OpenIDConnectClient;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Server\MiddlewareInterface;
+use Psr\Http\Server\RequestHandlerInterface;
 use WEEEOpen\Tarallo\Database\Database;
+use WEEEOpen\Tarallo\SessionSSO;
 use WEEEOpen\Tarallo\User;
-use WEEEOpen\Tarallo\UserSSO;
+use Zend\Diactoros\Response\RedirectResponse;
 
-class AuthManager implements Middleware {
+class AuthManager implements MiddlewareInterface {
 	const COOKIE_NAME = 'tsessionsso';
 	const KEYSPACE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
 	const KEYSPACE_STRLEN = 64;
@@ -22,6 +25,12 @@ class AuthManager implements Middleware {
 	 */
 	protected static function setCookie(string $newContent, int $expire) {
 		setcookie(self::COOKIE_NAME, $newContent, $expire, '', '', !TARALLO_DEVELOPMENT_ENVIRONMENT, true);
+	}
+
+	private static function oidc() {
+		$oidc = new OpenIDConnectClient(TARALLO_OIDC_ISSUER, TARALLO_OIDC_CLIENT_KEY, TARALLO_OIDC_CLIENT_SECRET);
+		$oidc->addScope(['openid', 'profile']);
+		return $oidc;
 	}
 
 	/**
@@ -61,85 +70,61 @@ class AuthManager implements Middleware {
 		return $str;
 	}
 
-	// TODO: split this thing. One checks if user is logged in BEFORE routing and stuff, the other comes after and IF
-	// the controller says "oh this should have been authenticated" it performs a redirect and stuff
-	/**
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @param callable|null $next
-	 *
-	 * @return ResponseInterface
-	 * @throws \Jumbojett\OpenIDConnectClientException
-	 */
-	public function __invoke(
-		ServerRequestInterface $request,
-		ResponseInterface $response,
-		?callable $next = null
-	): ResponseInterface {
+	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$path = $request->getUri()->getPath();
 		if($path === '/auth') {
-			return $this->handleAuthResponse($request, $response, $next);
-		} elseif($path === '/logout') {
-			return $this->terminate($request, $response, $next);
-		} else {
-			return $this->authenticate($request, $response, $next);
+			return $this->handleAuthResponse($request, $handler);
+		} else if($path === '/logout') {
+			return $this->terminate($request, $handler);
 		}
-	}
 
-	private static function oidc() {
-		$oidc = new OpenIDConnectClient(TARALLO_OIDC_ISSUER, TARALLO_OIDC_CLIENT_KEY, TARALLO_OIDC_CLIENT_SECRET);
-		$oidc->addScope(['openid', 'profile']);
-		return $oidc;
-	}
-
-	/**
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @param callable|null $next
-	 *
-	 * @return ResponseInterface
-	 * @throws \Jumbojett\OpenIDConnectClientException
-	 */
-	private function authenticate(
-		ServerRequestInterface $request,
-		ResponseInterface $response,
-		?callable $next = null
-	): ResponseInterface {
 		$cookie = $request->getCookieParams();
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
 		if(isset($cookie[self::COOKIE_NAME])) {
 			$id = $cookie[self::COOKIE_NAME];
+			$session = $db->userDAO()->getSession($id);
 
-			$user = $db->userDAO()->getSession($id);
-			if($user === null) {
-				// No session here... We need to authenticate
-				$needToAuthenticate = true;
-			} elseif(time() < $user->idTokenExpiry) {
+			if($session === null) {
+				// Guest
+				$user = null;
+			} else if(time() < $session->idTokenExpiry) {
 				// We're good to go, the sessions is valid
-				$needToAuthenticate = false;
-				$request = $request->withAttribute('User', $user);
-			} elseif(time() < $user->refreshTokenExpiry) {
+				$user = User::fromSession($session);
+			} else if(time() < $session->refreshTokenExpiry) {
 				// Ok, ID Token expired, but Refresh Token is still valid
-				// TODO: perform refresh HERE
+				// TODO: perform refresh somewhere
 				// Until this is implemented, discard the refresh token and begin a new session
-				$needToAuthenticate = true;
+				self::setCookie($id, time() + 3600);
+				$db->beginTransaction();
+				$db->userDAO()->deleteSession($id);
+				$db->commit();
+				$session = null;
+				$user = null;
 			} else {
 				// Everything expired, delete the old session and begin a new one
-				$needToAuthenticate = true;
+				self::setCookie($id, time() + 3600); // enough time for a login
+				$db->beginTransaction();
 				$db->userDAO()->deleteSession($id);
-				$id = self::newUniqueIdentifier($db);
+				$db->commit();
+				$session = null;
+				$user = null;
 			}
 		} else {
-			// No cookie, cold start
-			$needToAuthenticate = true;
 			$id = self::newUniqueIdentifier($db);
+			$session = null;
+			$user = null;
 		}
 
-		if($needToAuthenticate) {
-			// Enough time for a login...
-			self::setCookie($id, time() + 3600);
+
+		try {
+			$response = $handler->handle($request->withAttribute('User', $user));
+		} catch(AuthenticationException $e) {
+			// We need to authenticate.
+			// TODO: support refresh
+
+			$db->beginTransaction();
 
 			// Delete previous data, ensure that session exists, lock the database row, all in one step
 			$db->userDAO()->setDataForSession($id, null);
@@ -147,9 +132,10 @@ class AuthManager implements Middleware {
 			// After login, go back there
 			$db->userDAO()->setRedirectForSession($id, $request->getUri());
 
+			$db->commit();
+
 			// Done, see you at /auth!
 			$oidc = self::oidc();
-			// TODO: port is missing
 			$gohere = 'http://' . $request->getUri()->getHost() . ':' . $request->getUri()->getPort() . '/auth';
 			if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
 				error_log('DEV: Bypassing authentication step 1');
@@ -162,26 +148,12 @@ class AuthManager implements Middleware {
 			}
 			exit;
 		}
-
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $response;
 	}
 
-	/**
-	 * @param ServerRequestInterface $request
-	 * @param ResponseInterface $response
-	 * @param callable|null $next
-	 *
-	 * @return ResponseInterface
-	 * @throws \Jumbojett\OpenIDConnectClientException
-	 */
 	private function handleAuthResponse(
 		ServerRequestInterface $request,
-		ResponseInterface $response,
-		?callable $next = null
+		RequestHandlerInterface $handler
 	): ResponseInterface {
 		// Coming back from a trip to the SSO...
 
@@ -202,63 +174,53 @@ class AuthManager implements Middleware {
 				if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
 					error_log('DEV: Bypassing authentication step 2');
 
-					$user = new UserSSO();
-					$user->uid = 'dev.user';
-					$user->cn = 'Developement User';
-					$user->idToken = 'F00B4R';
-					$user->idTokenExpiry = time() + 60 * 60 * 24;
-					$user->refreshToken = 'N0REFRESH';
-					$user->refreshTokenExpiry = 0;
+					$session = new SessionSSO();
+					$session->uid = 'dev.user';
+					$session->cn = 'Developement User';
+					$session->idToken = 'F00B4R';
+					$session->idTokenExpiry = time() + 60 * 60 * 24;
+					$session->refreshToken = 'N0REFRESH';
+					$session->refreshTokenExpiry = 0;
 				} else {
 					$oidc = self::oidc();
 					$oidc->authenticate();
 
-					$user = new UserSSO();
-					$user->uid = $oidc->getVerifiedClaims('preferred_username');
-					$user->cn = $oidc->getVerifiedClaims('name');
+					$session = new SessionSSO();
+					$session->uid = $oidc->getVerifiedClaims('preferred_username');
+					$session->cn = $oidc->getVerifiedClaims('name');
 					// $user->groups = $oidc->getVerifiedClaims('groups');
-					$user->idToken = $oidc->getIdToken();
-					$user->idTokenExpiry = $oidc->getVerifiedClaims('exp');
-					$user->refreshToken = $oidc->getRefreshToken();
-					$user->refreshTokenExpiry = time() + 3600; // TODO: this is apparently not stated in the token, use a constant
+					$session->idToken = $oidc->getIdToken();
+					$session->idTokenExpiry = $oidc->getVerifiedClaims('exp');
+					$session->refreshToken = $oidc->getRefreshToken();
+					// TODO: this is apparently not stated in the token, use a constant
+					$session->refreshTokenExpiry = time() + 3600;
 				}
 
-
 				// Store it!
-				$db->userDAO()->setDataForSession($id, $user);
-				$db->userDAO()->setRedirectForSession($user);
-				$request = $request->withAttribute('User', $user);
+				$db->beginTransaction();
+				$db->userDAO()->setDataForSession($id, $session);
+				$db->userDAO()->setRedirectForSession($session);
+				$db->commit();
+				//$request = $request->withAttribute('User', User::fromSession($session));
 
-				$response
-					->withStatus(303)
-					->withHeader('Location', $redirect); // It's already urlencoded
-
-				// TODO: stop here or handle somewhere?
-				return $response;
+				// Do not process further middleware, just redirect
+				return new RedirectResponse($redirect, 303);
 			}
 		} else {
 			// uh, cookie is missing... no user here
 			$request = $request->withAttribute('User', null);
 		}
 
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $handler->handle($request);
 	}
 
 	private function terminate(
 		ServerRequestInterface $request,
-		ResponseInterface $response,
-		?callable $next = null
+		RequestHandlerInterface $handler
 	): ResponseInterface {
 		// TODO: perform SLO
+		//return new RedirectResponse('/logout/result', 303);
 
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
+		return $handler->handle($request);
 	}
 }

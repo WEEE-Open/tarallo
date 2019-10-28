@@ -4,56 +4,9 @@ namespace WEEEOpen\Tarallo\HTTP;
 
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\NotFoundException;
-use WEEEOpen\Tarallo\User;
-use WEEEOpen\Tarallo\UserSSO;
 use WEEEOpen\Tarallo\ValidationException;
 
 class Validation {
-	/**
-	 * Check that an user is authorized (and authenticated too, or the entire thing won't make any sense)
-	 *
-	 * @param UserSSO|null $user Current, logged-in user. Or none if not authenticated.
-	 * @param int $level Permission level required (default is "read/write")
-	 *
-	 * @see User::getLevel()
-	 */
-	public static function authorize(?UserSSO $user, $level = 2) {
-		self::authenticate($user);
-		if($user->getLevel() > $level) {
-			throw new AuthorizationException();
-		}
-	}
-
-	/**
-	 * Check that user is a valid user.
-	 * You probably want authorize() instead, which also checks permission.
-	 *
-	 * @see Controller::authorize()
-	 *
-	 * @param UserSSO $user
-	 */
-	public static function authenticate(UserSSO $user = null) {
-		if(!($user instanceof UserSSO)) {
-			throw new AuthenticationException();
-		}
-	}
-
-	/**
-	 * Check that payload array has a key and it's not null
-	 *
-	 * @param array $payload THE array
-	 * @param mixed $key Some key
-	 *
-	 * @return mixed Value for that key
-	 */
-	private static function validateHas(array $payload, $key) {
-		if(isset($payload[$key])) {
-			return $payload[$key];
-		} else {
-			return null;
-		}
-	}
-
 	/**
 	 * Check that key exists and it's a non-empty string.
 	 * If it's not a string, it will be cast to a string: this is used for query parameters and FastRoute parameters,

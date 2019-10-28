@@ -4,7 +4,7 @@
 namespace WEEEOpen\Tarallo;
 
 
-class UserSSO {
+class SessionSSO {
 	public $uid;
 	public $cn;
 	//public $groups;
@@ -12,8 +12,4 @@ class UserSSO {
 	public $idTokenExpiry = 0;
 	public $refreshToken;
 	public $refreshTokenExpiry = 0;
-
-	public function getLevel() {
-		return 0;
-	}
 }

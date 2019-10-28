@@ -3,21 +3,21 @@
 namespace WEEEOpen\Tarallo\SSRv1;
 
 use FastRoute;
-use League\Plates\Engine;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface;
 use Relay\RelayBuilder;
-use Slim\Http\Body;
+use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Database\TreeDAO;
-use WEEEOpen\Tarallo\BaseFeature;
+use WEEEOpen\Tarallo\ExceptionHandler;
 use WEEEOpen\Tarallo\Feature;
-use WEEEOpen\Tarallo\HTTP\AbstractController;
 use WEEEOpen\Tarallo\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
-use WEEEOpen\Tarallo\HTTP\AuthorizationException;
+use WEEEOpen\Tarallo\HTTP\AuthValidator;
 use WEEEOpen\Tarallo\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;
+use WEEEOpen\Tarallo\HTTP\TransactionWrapper;
 use WEEEOpen\Tarallo\HTTP\Validation;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemIncomplete;
@@ -26,7 +26,7 @@ use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ValidationException;
 
 
-class Controller extends AbstractController {
+class Controller implements RequestHandlerInterface {
 	const cachefile = __DIR__ . '/router.cache';
 
 	public static function getItem(Request $request, Response $response, ?callable $next = null): Response {
@@ -238,7 +238,11 @@ class Controller extends AbstractController {
 				$todos = [];
 				$possibileTodos = array_keys(BaseFeature::features['todo']);
 				foreach($possibileTodos as $possibileTodo) {
-					$todos[$possibileTodo] = $db->statsDAO()->getItemsByFeatures(new Feature('todo', $possibileTodo), null, 100);
+					$todos[$possibileTodo] = $db->statsDAO()->getItemsByFeatures(
+						new Feature('todo', $possibileTodo),
+						null,
+						100
+					);
 				}
 
 				$request = $request
@@ -514,217 +518,6 @@ class Controller extends AbstractController {
 		return $next ? $next($request, $response) : $response;
 	}
 
-	public static function getFeaturesJson(Request $request, Response $response, ?callable $next = null): Response {
-		// They aren't changing >1 time per second, so this should be stable enough for the ETag header...
-		$lastmod1 = ItemValidator::defaultFeaturesLastModified();
-		$lastmod2 = BaseFeature::featuresLastModified();
-		$language = 'en';
-		$etag = "$lastmod1$lastmod2$language";
-
-		$response = $response
-			->withHeader('Etag', $etag)
-			->withHeader('Cache-Control', 'public, max-age=36000');
-
-		$cachedEtags = $request->getHeader('If-None-Match');
-		foreach($cachedEtags as $cachedEtag) {
-			if($cachedEtag === $etag) {
-				$response = $response
-					->withStatus(304);
-				return $next ? $next($request, $response) : $response;
-			}
-		}
-
-		$defaults = [];
-		foreach(Feature::features['type'] as $type => $useless) {
-			$defaults[$type] = ItemValidator::getDefaultFeatures($type);
-		}
-		//$defaults[null] = ItemValidator::getDefaultFeatures('');
-
-		$response->getBody()->write(json_encode([
-			'features' => FeaturePrinter::getAllFeatures(),
-			'defaults' => $defaults,
-		]));
-
-		$response = $response
-			->withHeader('Content-Type', 'text/json');
-
-		return $next ? $next($request, $response) : $response;
-	}
-
-	public static function getDispatcher(string $cachefile): FastRoute\Dispatcher {
-		return FastRoute\cachedDispatcher(
-			function(FastRoute\RouteCollector $r) {
-				$r->get('/auth', [[Controller::class, 'login']]);
-				$r->addRoute(['GET', 'POST'], '/options', [[Controller::class, 'options']]);
-				$r->get('/logout', [[Controller::class, 'logout']]);
-
-				$r->get('/', [[Controller::class, 'getHome']]);
-				$r->get('', [[Controller::class, 'getHome']]);
-				$r->get('/features.json', [[Controller::class, 'getFeaturesJson']]);
-				$r->get('/home', [[Controller::class, 'getHome']]);
-				$r->get('/item/{id}', [[Controller::class, 'getItem']]);
-				$r->get('/history/{id}', [[Controller::class, 'getHistory']]);
-				$r->get('/item/{id}/add/{add}', [[Controller::class, 'getItem']]);
-				$r->get('/item/{id}/edit/{edit}', [[Controller::class, 'getItem']]);
-				$r->get('/add', [[Controller::class, 'addItem']]);
-				$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [[Controller::class, 'search']]);
-				$r->get('/search/{id:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
-				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [[Controller::class, 'search']]);
-				$r->get('/search/{id:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
-				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [[Controller::class, 'search']]);
-				$r->get('/bulk', [[Controller::class, 'bulk']]);
-				$r->addRoute(['GET', 'POST'], '/bulk/move', [[Controller::class, 'bulkMove']]);
-				$r->addRoute(['GET', 'POST'], '/bulk/add', [[Controller::class, 'bulkAdd']]);
-				$r->addGroup(
-					'/stats',
-					function(FastRoute\RouteCollector $r) {
-						$r->get('', [[Controller::class, 'getStats']]);
-						$r->get('/{which}', [[Controller::class, 'getStats']]);
-					}
-				);
-			},
-			[
-				'cacheFile' => $cachefile,
-				'cacheDisabled' => !TARALLO_CACHE_ENABLED,
-			]
-		);
-	}
-
-	public static function handle(Request $request): Response {
-		$queue = [
-			new DatabaseConnection(),
-			//new LanguageNegotiatior(),
-			new TemplateEngine(),
-			new AuthManager(),
-			[self::class, 'handleExceptions'],
-		];
-
-		$response = new \Slim\Http\Response();
-		$response = $response
-			->withHeader('Content-Type', 'text/html')
-			->withBody(new Body(fopen('php://memory', 'r+')));
-
-		$route = self::route($request);
-
-		switch($route[0]) {
-			case FastRoute\Dispatcher::FOUND:
-				$queue = array_merge($queue, [[static::class, 'doTransaction']], $route[1]);
-				$request = $request
-					->withAttribute('parameters', $route[2]);
-				$response = $response
-					->withStatus(200);
-				break;
-			case FastRoute\Dispatcher::NOT_FOUND:
-				$request = $request
-					->withAttribute('Template', 'error')
-					->withAttribute('TemplateParameters', ['reason' => 'Invalid URL (no route in router)']);
-				$response = $response->withStatus(404);
-				break;
-			case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
-				$request = $request
-					->withAttribute('Template', 'error');
-				$response = $response->withStatus(405)
-					->withHeader('Allow', implode(', ', $route[1]));
-				break;
-			default:
-				$request = $request
-					->withAttribute('Template', 'error')
-					->withAttribute('TemplateParameters', ['reason' => 'SSR Error: unknown router result']);
-				$response = $response->withStatus(500);
-				break;
-		}
-
-		unset($route);
-
-		$queue = array_merge($queue, [[static::class, 'renderResponse']]);
-
-		$relayBuilder = new RelayBuilder();
-		$relay = $relayBuilder->newInstance($queue);
-
-		return $relay($request, $response);
-	}
-
-	public static function renderResponse(
-		Request $request,
-		Response $response,
-		?callable $next = null
-	): Response {
-		$template = $request->getAttribute('Template');
-
-		if($request->getMethod() !== 'HEAD' && $template !== null) {
-			/** @var Engine $engine */
-			$engine = $request->getAttribute('TemplateEngine');
-
-			$engine->addData(
-				[
-					'user' => $request->getAttribute('User'),
-					'self' => $request->getUri()->getPath(),
-					'request' => $request,
-					'response' => $response,
-				]
-			);
-
-			$response->getBody()->rewind();
-			$response->getBody()->write($engine->render($template, $request->getAttribute('TemplateParameters', [])));
-		}
-
-		if($next) {
-			return $next($request, $response);
-		} else {
-			return $response;
-		}
-	}
-
-	/**
-	 * @param Request $request
-	 * @param Response $response
-	 * @param callable|null $next
-	 *
-	 * @return Response
-	 * @deprecated see https://github.com/WEEE-Open/tarallo/issues/50
-	 */
-	public static function handleExceptions(
-		Request $request,
-		Response $response,
-		?callable $next = null
-	): Response {
-		if($next) {
-			try {
-				return $next($request, $response);
-			} catch(AuthenticationException $e) {
-				$request = $request
-					->withAttribute('Template', 'error')
-					->withAttribute('TemplateParameters', ['reasonNoEscape' => '<a href="/login">Please authenticate</a>']);
-				$response = $response
-					->withStatus(401)
-					->withHeader('WWW-Authenticate', 'login');
-			} catch(AuthorizationException $e) {
-				$request = $request
-					->withAttribute('Template', 'error')
-					->withAttribute('TemplateParameters', []);
-				$response = $response
-					->withStatus(403);
-			} catch(NotFoundException $e) {
-				$request = $request
-					->withAttribute('Template', 'error')
-					->withAttribute('TemplateParameters', ['reason' => 'Whatever you\'re looking for, it doesn\'t exist.']);
-				$response = $response
-					->withStatus(404);
-			} catch(\Throwable $e) {
-				$request = $request
-					->withAttribute('Template', 'error')
-					->withAttribute('TemplateParameters', ['reason' => $e->getMessage()]);
-				$response = $response
-					->withStatus(500);
-			}
-
-			// This thing. It's horrible. It shouldn't be here.
-			return self::renderResponse($request, $response);
-		} else {
-			return $response;
-		}
-	}
-
 	/**
 	 * Parse the file/input format for bulk move operations and do whatever's needed
 	 *
@@ -777,6 +570,149 @@ class Controller extends AbstractController {
 			$moved[$item->getCode()] = $location->getCode();
 		}
 		return $moved;
+	}
+
+	public static function getFeaturesJson(Request $request, Response $response, ?callable $next = null): Response {
+		// They aren't changing >1 time per second, so this should be stable enough for the ETag header...
+		$lastmod1 = ItemValidator::defaultFeaturesLastModified();
+		$lastmod2 = BaseFeature::featuresLastModified();
+		$language = 'en';
+		$etag = "$lastmod1$lastmod2$language";
+
+		$response = $response
+			->withHeader('Etag', $etag)
+			->withHeader('Cache-Control', 'public, max-age=36000');
+
+		$cachedEtags = $request->getHeader('If-None-Match');
+		foreach($cachedEtags as $cachedEtag) {
+			if($cachedEtag === $etag) {
+				$response = $response
+					->withStatus(304);
+				return $next ? $next($request, $response) : $response;
+			}
+		}
+
+		$defaults = [];
+		foreach(Feature::features['type'] as $type => $useless) {
+			$defaults[$type] = ItemValidator::getDefaultFeatures($type);
+		}
+		//$defaults[null] = ItemValidator::getDefaultFeatures('');
+
+		$response->getBody()->write(
+			json_encode(
+				[
+					'features' => FeaturePrinter::getAllFeatures(),
+					'defaults' => $defaults,
+				]
+			)
+		);
+
+		$response = $response
+			->withHeader('Content-Type', 'text/json');
+
+		return $next ? $next($request, $response) : $response;
+	}
+
+	public function handle(Request $request): Response {
+		$route = $this->route($request);
+
+		switch($route[0]) {
+			case FastRoute\Dispatcher::FOUND:
+
+				$level = $route[1][0];
+				$function = $route[1][1];
+				$request = $request->withAttribute('parameters', $route[2]);
+				break;
+			case FastRoute\Dispatcher::NOT_FOUND:
+				$level = null;
+				$function = null;
+				$request = $request
+					->withAttribute('Template', 'error')
+					->withAttribute('TemplateParameters', ['reason' => 'Invalid URL (no route in router)'])
+					->withAttribute('ResponseStatus', 404);
+				break;
+			case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
+				$level = null;
+				$function = null;
+				$request = $request
+					->withAttribute('Template', 'error')
+					->withAttribute('ReasponseHeaders', implode(', ', $route[1]))
+					->withAttribute('ResponseStatus', 405);
+				break;
+			default:
+				$level = null;
+				$function = null;
+				$request = $request
+					->withAttribute('Template', 'error')
+					->withAttribute('TemplateParameters', ['reason' => 'SSR Error: unknown router result'])
+					->withAttribute('ResponseStatus', 500);
+				break;
+		}
+		unset($route);
+
+		$queue = [
+			new ExceptionHandler(),
+			new DatabaseConnection(),
+			//LanguageNegotiatior::class,
+			new AuthManager(),
+			new TemplateEngine(),
+			new GracefulExceptionHandler(),
+		];
+		if($level !== null) {
+			$queue[] = new AuthValidator($level);
+		}
+		if($function !== null) {
+			$queue[] = new TransactionWrapper();
+			$queue[] = $function;
+		}
+		$queue[] = new TemplateRender();
+
+		$relayBuilder = new RelayBuilder();
+		$relay = $relayBuilder->newInstance($queue);
+
+		return $relay->handle($request);
+	}
+
+	private function route(Request $request): array {
+		$dispatcher = FastRoute\cachedDispatcher(
+			function(FastRoute\RouteCollector $r) {
+				$r->get('/auth', [null, 'login']);
+				$r->get('/logout', [null, 'logout']);
+
+				$r->get('/', [AuthValidator::AUTH_LEVEL_RO, 'getHome']);
+				$r->get('', [AuthValidator::AUTH_LEVEL_RO, 'getHome']);
+				$r->get('/features.json', [AuthValidator::AUTH_LEVEL_RO, 'getFeaturesJson']);
+				$r->get('/home', [AuthValidator::AUTH_LEVEL_RO, 'getHome']);
+				$r->get('/item/{id}', [AuthValidator::AUTH_LEVEL_RO, 'getItem']);
+				$r->get('/history/{id}', [AuthValidator::AUTH_LEVEL_RO, 'getHistory']);
+				$r->get('/item/{id}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'getItem']);
+				$r->get('/item/{id}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'getItem']);
+				$r->get('/add', [AuthValidator::AUTH_LEVEL_RO, 'addItem']);
+				$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [AuthValidator::AUTH_LEVEL_RO, 'search']);
+				$r->get('/search/{id:[0-9]+}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'search']);
+				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'search']);
+				$r->get('/search/{id:[0-9]+}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'search']);
+				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'search']);
+				$r->get('/bulk', [AuthValidator::AUTH_LEVEL_RO, 'bulk']);
+				$r->get('/bulk/move', [AuthValidator::AUTH_LEVEL_RO, 'bulkMove']);
+				$r->post('/bulk/move', [AuthValidator::AUTH_LEVEL_RW, 'bulkMove']);
+				$r->get('/bulk/add', [AuthValidator::AUTH_LEVEL_RO, 'bulkAdd']);
+				$r->post('/bulk/add', [AuthValidator::AUTH_LEVEL_RW, 'bulkAdd']);
+				$r->addGroup(
+					'/stats',
+					function(FastRoute\RouteCollector $r) {
+						$r->get('', [AuthValidator::AUTH_LEVEL_RO, 'getStats']);
+						$r->get('/{which}', [AuthValidator::AUTH_LEVEL_RO, 'getStats']);
+					}
+				);
+			},
+			[
+				'cacheFile' => self::cachefile,
+				'cacheDisabled' => !TARALLO_CACHE_ENABLED,
+			]
+		);
+
+		return $dispatcher->dispatch($request->getMethod(), $request->getUri());
 	}
 
 }
