@@ -14,8 +14,8 @@ class Summary {
 
 			case 'case':
 				 return CaseSummarizer::summarize($item);
-			//case 'motherboard':
-				// return SomeSummarizer::summarize($item);
+			case 'motherboard':
+				return MotherboardSummarizer::summarize($item);
 			case 'cpu':
 				return CpuSummarizer::summarize($item);
 			case 'graphics-card':
