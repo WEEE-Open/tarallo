@@ -10,7 +10,7 @@ $this->insert('bulk::menu', ['currentPage' => 'add']);
     <h2>Add a computer</h2>
     <p>Paste output from peracotta</p>
     <?php if($error !== null): ?>
-        <p class="error message"><?= $error ?></p>
+        <p class="error message"><?= $this->e($error) ?></p>
     <?php endif; ?>
     <label for="bulk-add-text">Things</label>
     <textarea id="bulk-add-text" name="add" rows="15"></textarea>

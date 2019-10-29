@@ -15,7 +15,7 @@ $this->insert('bulk::menu', ['currentPage' => 'move']);
 	    if($error === null) {
 		    ?><p class="success message">Move completed</p><?php
 	    } else {
-		    ?><p class="error message"><?= $error ?></p><?php
+		    ?><p class="error message"><?= $this->e($error) ?></p><?php
 	    }
     }
 
