@@ -12,8 +12,6 @@ class CaseSummarizer implements Summarizer {
 		$type = $item->getFeature('type');
 		$form = $item->getFeature('motherboard-form-factor');
 		$color = $item->getFeature('color');
-		$brand = $item->getFeature('brand');
-		$model = $item->getFeature('model');
 
 		$type = FeaturePrinter::printableValue($type);
 		$type .= $form ? ' ' . FeaturePrinter::printableValue($form) : '';
