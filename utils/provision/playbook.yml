@@ -195,6 +195,14 @@
     notify:
     - restart php-fpm
 
+  - name: Set max execution time
+    lineinfile:
+      dest: /etc/php.ini
+      regexp: '^max_execution_time\s*='
+      line: "max_execution_time = 0"
+    notify:
+      - restart php-fpm
+
   - name: Install Composer
     script: composer.sh
     args:
