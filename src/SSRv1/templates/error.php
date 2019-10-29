@@ -1,13 +1,15 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
+/** @var string $statusCode int */
 /** @var string $reason optional */
 /** @var string $reasonNoEscape optional and not escaped */
-$this->layout('main', ['title' => '$response->getStatusCode()' . ' ' . '$response->getReasonPhrase()']); ?>
+$reasonPhrase = $this->fetch('reasonPhrase', ['statusCode' => $statusCode]);
+$this->layout('main', ['title' => $statusCode . ' ' . $reasonPhrase]); ?>
 
 <section id="content">
 	<p class="httperror">
-        <strong class="status"><?='$response->getStatusCode()'?></strong><span class="status">
-            <?='$response->getReasonPhrase()'?></span>
+        <strong class="status"><?= $statusCode ?></strong><span class="status">
+            <?= $reasonPhrase ?></span>
     </p>
 	<?php if(isset($reason)): ?>
 		<p><?= $this->e($reason) ?></p>

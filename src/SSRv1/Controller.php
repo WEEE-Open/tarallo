@@ -3,8 +3,8 @@
 namespace WEEEOpen\Tarallo\SSRv1;
 
 use FastRoute;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Relay\RelayBuilder;
 use WEEEOpen\Tarallo\BaseFeature;
@@ -12,7 +12,6 @@ use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Database\TreeDAO;
 use WEEEOpen\Tarallo\ExceptionHandler;
 use WEEEOpen\Tarallo\Feature;
-use WEEEOpen\Tarallo\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
 use WEEEOpen\Tarallo\HTTP\AuthValidator;
 use WEEEOpen\Tarallo\HTTP\DatabaseConnection;
@@ -24,20 +23,21 @@ use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ValidationException;
+use Zend\Diactoros\Response\EmptyResponse;
+use Zend\Diactoros\Response\JsonResponse;
+use Zend\Diactoros\Response\RedirectResponse;
+use Zend\Diactoros\UploadedFile;
 
 
 class Controller implements RequestHandlerInterface {
 	const cachefile = __DIR__ . '/router.cache';
 
-	public static function getItem(Request $request, Response $response, ?callable $next = null): Response {
+	public static function getItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
-		$user = $request->getAttribute('User');
+
 		$parameters = $request->getAttribute('parameters', []);
-
-		Validation::authorize($user, 3);
-
 		// So things aren't url-decoded automatically...
 		$id = urldecode(Validation::validateOptionalString($parameters, 'id', null));
 		$edit = Validation::validateOptionalString($parameters, 'edit', null);
@@ -48,12 +48,11 @@ class Controller implements RequestHandlerInterface {
 			$ii = new ItemCode($id);
 		} catch(ValidationException $e) {
 			if($e->getCode() === 3) {
-				$response = $response
-					->withStatus(404);
 				$request = $request
 					->withAttribute('Template', 'error')
+					->withAttribute('ResponseCode', 404)
 					->withAttribute('TemplateParameters', ['reason' => "Code '$id' contains invalid characters"]);
-				return $next ? $next($request, $response) : $response;
+				return $handler->handle($request);
 			}
 			throw $e;
 		}
@@ -76,18 +75,14 @@ class Controller implements RequestHandlerInterface {
 			->withAttribute('Template', 'viewItem')
 			->withAttribute('TemplateParameters', $renderParameters);
 
-		return $next ? $next($request, $response) : $response;
+		return $handler->handle($request);
 	}
 
-	public static function getHistory(Request $request, Response $response, ?callable $next = null): Response {
+	public static function getHistory(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
-		$user = $request->getAttribute('User');
 		$parameters = $request->getAttribute('parameters', []);
-
-		Validation::authorize($user, 3);
-
 		$id = Validation::validateOptionalString($parameters, 'id', null);
 		$limit = Validation::validateOptionalInt($query, 'limit', 20);
 		if($limit > 100) {
@@ -116,15 +111,11 @@ class Controller implements RequestHandlerInterface {
 				['item' => $item, 'history' => $history, 'tooLong' => $tooLong]
 			);
 
-		return $next ? $next($request, $response) : $response;
+		return $handler->handle($request);
 	}
 
-	public static function addItem(Request $request, Response $response, ?callable $next = null): Response {
+	public static function addItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$query = $request->getQueryParams();
-		$user = $request->getAttribute('User');
-
-		Validation::authorize($user);
-
 		$from = Validation::validateOptionalString($query, 'copy', null);
 
 		if($from === null) {
@@ -141,55 +132,29 @@ class Controller implements RequestHandlerInterface {
 			->withAttribute('Template', 'newItemPage')
 			->withAttribute('TemplateParameters', ['add' => true, 'base' => $from]);
 
-		return $next ? $next($request, $response) : $response;
+		return $handler->handle($request);
 	}
 
-	public static function login(Request $request, Response $response, ?callable $next = null): Response {
-		$user = $request->getAttribute('User');
+	public static function authError(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		$request = $request
+			->withAttribute('Template', 'error')
+			->withAttribute('ResponseCode', 400)
+			->withAttribute('TemplateParameters', ['reason' => 'Login failed']);
 
-		if($user === null) {
-			$request = $request
-				->withAttribute('Template', 'error')
-				->withAttribute('TemplateParameters', ['reason' => 'Login failed']);
-			$response = $response
-				->withStatus(400);
-		} else {
-			$response = $response
-				->withStatus(303)
-				->withoutHeader('Content-type')
-				->withHeader('Location', '/home');
-		}
-
-		return $next ? $next($request, $response) : $response;
+		return $handler->handle($request);
 	}
 
-	public static function logout(Request $request, Response $response, ?callable $next = null): Response {
-		$user = $request->getAttribute('User');
-
-		Validation::authenticate($user);
-
+	public static function logout(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		// TODO: does it happen? Does AuthManager pick this up?
 
 		$request = $request
 			->withAttribute('Template', 'logout');
 
-		return $next ? $next($request, $response) : $response;
+		return $handler->handle($request);
 	}
 
-	public static function getHome(Request $request, Response $response, ?callable $next = null): Response {
+	public static function getHome(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$db = $request->getAttribute('Database');
-		$user = $request->getAttribute('User');
-
-		try {
-			Validation::authorize($user, 3);
-		} catch(AuthenticationException $e) {
-			$response = $response
-				->withStatus(303)
-				->withoutHeader('Content-type')
-				->withHeader('Location', '/login');
-
-			return $next ? $next($request, $response) : $response;
-		}
 
 		$request = $request
 			->withAttribute('Template', 'home')
@@ -201,18 +166,14 @@ class Controller implements RequestHandlerInterface {
 				]
 			);
 
-		return $next ? $next($request, $response) : $response;
+		return $handler->handle($request);
 	}
 
-	public static function getStats(Request $request, Response $response, ?callable $next = null): Response {
+	public static function getStats(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
-		$user = $request->getAttribute('User');
 		$query = $request->getQueryParams();
 		$parameters = $request->getAttribute('parameters', ['which' => null]);
-
-		Validation::authorize($user, 3);
-
 		// a nice default value: 'now - 1 year'
 		$startDateDefault = '2016-01-01';
 		$startDate = Validation::validateOptionalString($query, 'from', $startDateDefault, null);
@@ -360,17 +321,13 @@ class Controller implements RequestHandlerInterface {
 				throw new NotFoundException();
 		}
 
-		return $next ? $next($request, $response) : $response;
+		return $handler->handle($request);
 	}
 
-	public static function search(Request $request, Response $response, ?callable $next = null): Response {
+	public static function search(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$db = $request->getAttribute('Database');
-		$user = $request->getAttribute('User');
 		$parameters = $request->getAttribute('parameters', []);
 		$query = $request->getQueryParams();
-
-		Validation::authorize($user, 3);
-
 		$id = Validation::validateOptionalInt($parameters, 'id', null);
 		$page = Validation::validateOptionalInt($parameters, 'page', 1);
 		$edit = Validation::validateOptionalString($parameters, 'edit', null);
@@ -403,38 +360,39 @@ class Controller implements RequestHandlerInterface {
 			->withAttribute('Template', 'search')
 			->withAttribute('TemplateParameters', $templateParameters);
 
-		return $next ? $next($request, $response) : $response;
+		return $handler->handle($request);
 	}
 
-	public static function bulk(Request $request, Response $response, ?callable $next = null): Response {
-		$user = $request->getAttribute('User');
+	public static function bulk(/** @noinspection PhpUnusedParameterInspection */ ServerRequestInterface $request,
+		RequestHandlerInterface $handler): ResponseInterface {
+		$response = new RedirectResponse('/bulk/move', 303);
+		$response->withoutHeader('Content-type');
 
-		Validation::authorize($user);
-
-		$response = $response
-			->withStatus(303)
-			->withoutHeader('Content-type')
-			->withHeader('Location', '/bulk/move');
-		return $next ? $next($request, $response) : $response;
+		return $response;
 	}
 
-	public static function bulkMove(Request $request, Response $response, ?callable $next = null): Response {
+	public static function bulkMove(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$db = $request->getAttribute('Database');
-		$user = $request->getAttribute('User');
 		$body = $request->getParsedBody();
-
-		Validation::authorize($user);
 
 		if($body === null) {
 			// Opened page, didn't submit anything yet
 			$items = null;
 		} else {
-			if(empty($_FILES['Fitems']['tmp_name'])) {
+			/** @var UploadedFile[] $uploaded */
+			$uploaded = $request->getUploadedFiles();
+			if(count($uploaded) === 0 || !isset($uploaded['Fitems'])) {
 				$items = (string) $body['items'];
 			} else {
-				$items = file_get_contents($_FILES['Fitems']['tmp_name']);
-				if($items === false) {
-					throw new \LogicException('Cannot open temporary file');
+				if($uploaded['Fitems']->getError() !== UploadedFile::ERROR_MESSAGES['UPLOAD_ERR_OK']) {
+					$items = $uploaded['Fitems']->getStream()->getContents();
+					if($items === false) {
+						// TODO: throw some other exception
+						throw new \LogicException('Cannot open temporary file');
+					}
+				} else {
+					// TODO: throw some other exception
+					throw new \LogicException(UploadedFile::ERROR_MESSAGES[$uploaded['Fitems']->getError()]);
 				}
 			}
 		}
@@ -450,7 +408,7 @@ class Controller implements RequestHandlerInterface {
 			}
 			try {
 				$moved = self::doBulkMove($items, $where, $db);
-			} catch(\Exception $e) {
+			} catch(\Exception $e) { // TODO: catch specific exceptions (when an item is not found, it's too generic)
 				$error = $e->getMessage();
 				if($e instanceof \InvalidArgumentException || $e instanceof InvalidPayloadParameterException) {
 					$code = 400;
@@ -461,35 +419,29 @@ class Controller implements RequestHandlerInterface {
 		}
 		$request = $request
 			->withAttribute('Template', 'bulk::move')
+			->withAttribute('StatusCode', $code)
 			->withAttribute('TemplateParameters', ['error' => $error, 'moved' => $moved]);
-		$response = $response
-			->withStatus($code);
-		return $next ? $next($request, $response) : $response;
+
+		return $handler->handle($request);
 	}
 
 
-	public static function bulkAdd(Request $request, Response $response, ?callable $next = null): Response {
+	public static function bulkAdd(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		///* @var Database $db */
 		//$db = $request->getAttribute('Database');
-		$user = $request->getAttribute('User');
 		$body = $request->getParsedBody();
-
-		Validation::authorize($user);
 
 		if($body === null) {
 			// Opened page, didn't submit anything yet
 			$request = $request
 				->withAttribute('Template', 'bulk::add');
-			$response = $response
-				->withStatus(200);
 		} else {
 			$add = json_decode((string) $body['add'], true);
 			if($add === null || json_last_error() !== JSON_ERROR_NONE) {
 				$request = $request
 					->withAttribute('Template', 'bulk::add')
+					->withAttribute('StatusCode', 400)
 					->withAttribute('TemplateParameters', ['error' => json_last_error_msg()]);
-				$response = $response
-					->withStatus(400);
 			} else {
 				// TODO: move to an ItemBuilder class?
 				$items = [];
@@ -511,11 +463,10 @@ class Controller implements RequestHandlerInterface {
 				$request = $request
 					->withAttribute('Template', 'bulk::add')
 					->withAttribute('TemplateParameters', ['item' => $case]);
-				$response = $response
-					->withStatus(200);
 			}
 		}
-		return $next ? $next($request, $response) : $response;
+
+		return $handler->handle($request);
 	}
 
 	/**
@@ -572,23 +523,20 @@ class Controller implements RequestHandlerInterface {
 		return $moved;
 	}
 
-	public static function getFeaturesJson(Request $request, Response $response, ?callable $next = null): Response {
+	public static function getFeaturesJson(/** @noinspection PhpUnusedParameterInspection */
+	ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		// They aren't changing >1 time per second, so this should be stable enough for the ETag header...
 		$lastmod1 = ItemValidator::defaultFeaturesLastModified();
 		$lastmod2 = BaseFeature::featuresLastModified();
 		$language = 'en';
 		$etag = "$lastmod1$lastmod2$language";
 
-		$response = $response
-			->withHeader('Etag', $etag)
-			->withHeader('Cache-Control', 'public, max-age=36000');
+		$responseHeaders = ['Etag' => $etag, 'Cache-Control' => 'public, max-age=36000'];
 
 		$cachedEtags = $request->getHeader('If-None-Match');
 		foreach($cachedEtags as $cachedEtag) {
 			if($cachedEtag === $etag) {
-				$response = $response
-					->withStatus(304);
-				return $next ? $next($request, $response) : $response;
+				return new EmptyResponse(304, $responseHeaders);
 			}
 		}
 
@@ -596,24 +544,16 @@ class Controller implements RequestHandlerInterface {
 		foreach(Feature::features['type'] as $type => $useless) {
 			$defaults[$type] = ItemValidator::getDefaultFeatures($type);
 		}
-		//$defaults[null] = ItemValidator::getDefaultFeatures('');
 
-		$response->getBody()->write(
-			json_encode(
-				[
-					'features' => FeaturePrinter::getAllFeatures(),
-					'defaults' => $defaults,
-				]
-			)
-		);
+		$json = [
+			'features' => FeaturePrinter::getAllFeatures(),
+			'defaults' => $defaults,
+		];
 
-		$response = $response
-			->withHeader('Content-Type', 'text/json');
-
-		return $next ? $next($request, $response) : $response;
+		return new JsonResponse($json, 200, $responseHeaders);
 	}
 
-	public function handle(Request $request): Response {
+	public function handle(ServerRequestInterface $request): ResponseInterface {
 		$route = $this->route($request);
 
 		switch($route[0]) {
@@ -629,7 +569,7 @@ class Controller implements RequestHandlerInterface {
 				$request = $request
 					->withAttribute('Template', 'error')
 					->withAttribute('TemplateParameters', ['reason' => 'Invalid URL (no route in router)'])
-					->withAttribute('ResponseStatus', 404);
+					->withAttribute('ResponseCode', 404);
 				break;
 			case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
 				$level = null;
@@ -637,7 +577,7 @@ class Controller implements RequestHandlerInterface {
 				$request = $request
 					->withAttribute('Template', 'error')
 					->withAttribute('ReasponseHeaders', implode(', ', $route[1]))
-					->withAttribute('ResponseStatus', 405);
+					->withAttribute('ResponseCode', 405);
 				break;
 			default:
 				$level = null;
@@ -645,7 +585,7 @@ class Controller implements RequestHandlerInterface {
 				$request = $request
 					->withAttribute('Template', 'error')
 					->withAttribute('TemplateParameters', ['reason' => 'SSR Error: unknown router result'])
-					->withAttribute('ResponseStatus', 500);
+					->withAttribute('ResponseCode', 500);
 				break;
 		}
 		unset($route);
@@ -663,7 +603,7 @@ class Controller implements RequestHandlerInterface {
 		}
 		if($function !== null) {
 			$queue[] = new TransactionWrapper();
-			$queue[] = $function;
+			$queue[] = 'WEEEOpen\\Tarallo\\SSRv1\\' . $function;
 		}
 		$queue[] = new TemplateRender();
 
@@ -673,36 +613,36 @@ class Controller implements RequestHandlerInterface {
 		return $relay->handle($request);
 	}
 
-	private function route(Request $request): array {
+	private function route(ServerRequestInterface $request): array {
 		$dispatcher = FastRoute\cachedDispatcher(
 			function(FastRoute\RouteCollector $r) {
 				$r->get('/auth', [null, 'login']);
 				$r->get('/logout', [null, 'logout']);
 
-				$r->get('/', [AuthValidator::AUTH_LEVEL_RO, 'getHome']);
-				$r->get('', [AuthValidator::AUTH_LEVEL_RO, 'getHome']);
-				$r->get('/features.json', [AuthValidator::AUTH_LEVEL_RO, 'getFeaturesJson']);
-				$r->get('/home', [AuthValidator::AUTH_LEVEL_RO, 'getHome']);
-				$r->get('/item/{id}', [AuthValidator::AUTH_LEVEL_RO, 'getItem']);
-				$r->get('/history/{id}', [AuthValidator::AUTH_LEVEL_RO, 'getHistory']);
-				$r->get('/item/{id}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'getItem']);
-				$r->get('/item/{id}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'getItem']);
-				$r->get('/add', [AuthValidator::AUTH_LEVEL_RO, 'addItem']);
-				$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [AuthValidator::AUTH_LEVEL_RO, 'search']);
-				$r->get('/search/{id:[0-9]+}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'search']);
-				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'search']);
-				$r->get('/search/{id:[0-9]+}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'search']);
-				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'search']);
-				$r->get('/bulk', [AuthValidator::AUTH_LEVEL_RO, 'bulk']);
-				$r->get('/bulk/move', [AuthValidator::AUTH_LEVEL_RO, 'bulkMove']);
-				$r->post('/bulk/move', [AuthValidator::AUTH_LEVEL_RW, 'bulkMove']);
-				$r->get('/bulk/add', [AuthValidator::AUTH_LEVEL_RO, 'bulkAdd']);
-				$r->post('/bulk/add', [AuthValidator::AUTH_LEVEL_RW, 'bulkAdd']);
+				$r->get('/', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getHome']);
+				$r->get('', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getHome']);
+				$r->get('/home', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getHome']);
+				$r->get('/features.json', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getFeaturesJson']);
+				$r->get('/item/{id}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getItem']);
+				$r->get('/history/{id}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getHistory']);
+				$r->get('/item/{id}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getItem']);
+				$r->get('/item/{id}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getItem']);
+				$r->get('/add', [AuthValidator::AUTH_LEVEL_RO, 'Controller::addItem']);
+				$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
+				$r->get('/search/{id:[0-9]+}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
+				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
+				$r->get('/search/{id:[0-9]+}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
+				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
+				$r->get('/bulk', [AuthValidator::AUTH_LEVEL_RO, 'Controller::bulk']);
+				$r->get('/bulk/move', [AuthValidator::AUTH_LEVEL_RO, 'Controller::bulkMove']);
+				$r->post('/bulk/move', [AuthValidator::AUTH_LEVEL_RW, 'Controller::bulkMove']);
+				$r->get('/bulk/add', [AuthValidator::AUTH_LEVEL_RO, 'Controller::bulkAdd']);
+				$r->post('/bulk/add', [AuthValidator::AUTH_LEVEL_RW, 'Controller::bulkAdd']);
 				$r->addGroup(
 					'/stats',
 					function(FastRoute\RouteCollector $r) {
-						$r->get('', [AuthValidator::AUTH_LEVEL_RO, 'getStats']);
-						$r->get('/{which}', [AuthValidator::AUTH_LEVEL_RO, 'getStats']);
+						$r->get('', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getStats']);
+						$r->get('/{which}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getStats']);
 					}
 				);
 			},
@@ -712,7 +652,7 @@ class Controller implements RequestHandlerInterface {
 			]
 		);
 
-		return $dispatcher->dispatch($request->getMethod(), $request->getUri());
+		return $dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath());
 	}
 
 }

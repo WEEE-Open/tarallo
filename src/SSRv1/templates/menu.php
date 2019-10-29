@@ -5,7 +5,7 @@
 $moveDefaultFrom = $moveDefaultFrom ?? null;
 ?>
 <nav>
-	<span class="message">Logged in as <?= $user->getUsername() ?></span><button id="logout">Logout</button>
+	<span class="message">Logged in as <?= $user->cn ?> (<?= $user->uid ?>)</span><button id="logout">Logout</button>
 </nav>
 <nav id="main" class="menu">
 	<ul>

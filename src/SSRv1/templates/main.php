@@ -18,7 +18,7 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 	<meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" type="image/png" href="/static/favicon.png"/>
 	<link rel="stylesheet" href="/static/main.css">
-	<?php if(defined('DEVELOPMENT_ENVIRONMENT') && TARALLO_DEVELOPMENT_ENVIRONMENT): ?>
+	<?php if(defined('TARALLO_DEVELOPMENT_ENVIRONMENT') && TARALLO_DEVELOPMENT_ENVIRONMENT): ?>
     <style>
         a, a:visited, a:active, a:hover, a:visited:hover {
             color: darkorange;
@@ -34,7 +34,7 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 
 <header id="title">
 	<h1>T.A.R.A.L.L.O.</h1>
-    <?php if(defined('DEVELOPMENT_ENVIRONMENT') && TARALLO_DEVELOPMENT_ENVIRONMENT): ?>
+    <?php if(defined('TARALLO_DEVELOPMENT_ENVIRONMENT') && TARALLO_DEVELOPMENT_ENVIRONMENT): ?>
     <p>Development version, this is running locally on your machine</p>
     <?php else: ?>
 	<p>Trabiccolo Amministrazione Rottami e Assistenza, Legalmente-noto-come L'inventario Opportuno</p>

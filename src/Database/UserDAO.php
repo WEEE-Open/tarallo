@@ -2,8 +2,6 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
-use WEEEOpen\Tarallo\NotFoundException;
-use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\SessionSSO;
 
 final class UserDAO extends DAO {
@@ -23,13 +21,17 @@ final class UserDAO extends DAO {
 			if($rows === 0) {
 				return null;
 			}
-			return unserialize($s->fetch(\PDO::FETCH_NUM)[0]);
+			$data = $s->fetch(\PDO::FETCH_NUM)[0];
+			if($data === null) {
+				return null;
+			}
+			return unserialize($data);
 		} finally {
 			$s->closeCursor();
 		}
 	}
 
-	public function getRedirect(string $sessionId): ?SessionSSO {
+	public function getRedirect(string $sessionId): string {
 		try {
 			$s = $this->getPDO()->prepare('SELECT `Redirect` FROM Session WHERE `Session` = ?');
 			$result = $s->execute([$sessionId]);
@@ -38,7 +40,13 @@ final class UserDAO extends DAO {
 			if($rows === 0) {
 				return null;
 			}
-			return $s->fetch(\PDO::FETCH_NUM)[0];
+
+			$redirect = $s->fetch(\PDO::FETCH_NUM)[0];
+			if($redirect === null) {
+				return '/';
+			}
+			// PHPStorm thinks that an if-else here provides a path where nothing is returned... Yeah right...
+			return $redirect;
 		} finally {
 			$s->closeCursor();
 		}
@@ -92,7 +100,7 @@ final class UserDAO extends DAO {
 			}
 		}
 
-		try{
+		try {
 			$s = $this->getPDO()->prepare('UPDATE Session SET Redirect = :r WHERE `Session` = :s');
 			$s->bindValue(':s', $sessionID, \PDO::PARAM_STR);
 			$s->bindValue(':r', $redirect, $redirect === null ? \PDO::PARAM_BOOL : \PDO::PARAM_STR);

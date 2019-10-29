@@ -87,8 +87,11 @@ class AuthManager implements MiddlewareInterface {
 			$session = $db->userDAO()->getSession($id);
 
 			if($session === null) {
-				// Guest
-				$user = null;
+				// Failed login or very old expired session or some kind of attack, delete the cookie
+				self::setCookie($id, 1);
+				$db->beginTransaction();
+				$db->userDAO()->deleteSession($id);
+				$db->commit();
 			} else if(time() < $session->idTokenExpiry) {
 				// We're good to go, the sessions is valid
 				$user = User::fromSession($session);
@@ -96,23 +99,27 @@ class AuthManager implements MiddlewareInterface {
 				// Ok, ID Token expired, but Refresh Token is still valid
 				// TODO: perform refresh somewhere
 				// Until this is implemented, discard the refresh token and begin a new session
-				self::setCookie($id, time() + 3600);
+				self::setCookie($id, 1);
 				$db->beginTransaction();
 				$db->userDAO()->deleteSession($id);
 				$db->commit();
+
+				// Right now, we have nothing
 				$session = null;
 				$user = null;
 			} else {
 				// Everything expired, delete the old session and begin a new one
-				self::setCookie($id, time() + 3600); // enough time for a login
+				self::setCookie($id, 1);
 				$db->beginTransaction();
 				$db->userDAO()->deleteSession($id);
 				$db->commit();
+
+				// Right now, we have nothing
 				$session = null;
 				$user = null;
 			}
 		} else {
-			$id = self::newUniqueIdentifier($db);
+			// No cookie
 			$session = null;
 			$user = null;
 		}
@@ -124,25 +131,29 @@ class AuthManager implements MiddlewareInterface {
 			// We need to authenticate.
 			// TODO: support refresh
 
+			// Create new session
+			$id = self::newUniqueIdentifier($db);
+
 			$db->beginTransaction();
-
-			// Delete previous data, ensure that session exists, lock the database row, all in one step
+			// Delete previous data (if any), ensure that session exists, lock the database row (useless)
 			$db->userDAO()->setDataForSession($id, null);
-
 			// After login, go back there
 			$db->userDAO()->setRedirectForSession($id, $request->getUri());
-
 			$db->commit();
 
+			// Enough time to log in
+			self::setCookie($id, time() + 3600);
+
 			// Done, see you at /auth!
-			$oidc = self::oidc();
-			$gohere = 'http://' . $request->getUri()->getHost() . ':' . $request->getUri()->getPort() . '/auth';
 			if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
 				error_log('DEV: Bypassing authentication step 1');
 
 				http_response_code(303);
-				header("Location: $gohere");
+				header("Location: /auth");
 			} else {
+				$oidc = self::oidc();
+				$gohere = 'https://' . $request->getUri()->getHost() . '/auth';
+
 				$oidc->setRedirectURL($gohere);
 				$oidc->authenticate();
 			}
@@ -199,7 +210,7 @@ class AuthManager implements MiddlewareInterface {
 				// Store it!
 				$db->beginTransaction();
 				$db->userDAO()->setDataForSession($id, $session);
-				$db->userDAO()->setRedirectForSession($session);
+				$db->userDAO()->setRedirectForSession($id, $request->getUri());
 				$db->commit();
 				//$request = $request->withAttribute('User', User::fromSession($session));
 

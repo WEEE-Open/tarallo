@@ -11,16 +11,17 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Zend\Diactoros\Response\TextResponse;
 
 class ExceptionHandler implements MiddlewareInterface {
-
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		try {
 			return $handler->handle($request);
 		} catch(\Throwable $exception) {
 			if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
-				/** @noinspection PhpUnhandledExceptionInspection */
-				throw $exception;
+				return new TextResponse(
+					"⚠️ Error ⚠️\n\n" . get_class($exception) . ': ' . $exception->getMessage() . "\n\nStack trace:\n" .
+					$exception->getTraceAsString(), 500
+				);
 			} else {
-				return new TextResponse('Error: ' . get_class($exception), 500);
+				return new TextResponse("⚠️ Error ⚠️\n\n" . get_class($exception), 500);
 			}
 		}
 
