@@ -6,6 +6,7 @@ namespace WEEEOpen\Tarallo\HTTP;
 use Throwable;
 
 class InvalidParameterException extends \RuntimeException {
+	public $status = 400;
 	protected $parameter;
 
 	public function __construct(

@@ -3,7 +3,9 @@
 namespace WEEEOpen\Tarallo;
 
 use WEEEOpen\Tarallo\APIv1;
+use WEEEOpen\Tarallo\APIv2\ErrorResponse;
 use WEEEOpen\Tarallo\SSRv1;
+use Zend\Diactoros\Response\JsonResponse;
 use Zend\Diactoros\ServerRequestFactory;
 use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
 
@@ -16,9 +18,12 @@ require '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.
 require '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
 
 $request = ServerRequestFactory::fromGlobals();
+$area = substr($request->getUri()->getPath(), 0, 4);
 
-if(substr($request->getUri()->getPath(), 0, 4) === '/v1/') {
-	$response = APIv1\Controller::handle($request);
+if($area === '/v2/') {
+	$response = (new APIv2\Controller())->handle($request);
+} elseif($area === '/v1/') {
+	$response = new JsonResponse(ErrorResponse::fromMessage('The v1 API is gone. Use v2.'), 410);
 } else {
 	$response = (new SSRv1\Controller())->handle($request);
 }

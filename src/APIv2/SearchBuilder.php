@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\APIv1;
+namespace WEEEOpen\Tarallo\APIv2;
 
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;

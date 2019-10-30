@@ -587,23 +587,11 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/item/{id}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getItem']);
 				$r->get('/item/{id}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getItem']);
 				$r->get('/add', [AuthValidator::AUTH_LEVEL_RO, 'Controller::addItem']);
-				$r->get(
-					'/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']
-				);
+				$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
 				$r->get('/search/{id:[0-9]+}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
-				$r->get(
-					'/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [
-						AuthValidator::AUTH_LEVEL_RO,
-						'Controller::search',
-					]
-				);
+				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
 				$r->get('/search/{id:[0-9]+}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
-				$r->get(
-					'/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [
-						AuthValidator::AUTH_LEVEL_RO,
-						'Controller::search',
-					]
-				);
+				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
 				$r->get('/bulk', [AuthValidator::AUTH_LEVEL_RO, 'Controller::bulk']);
 				$r->get('/bulk/move', [AuthValidator::AUTH_LEVEL_RO, 'Controller::bulkMove']);
 				$r->post('/bulk/move', [AuthValidator::AUTH_LEVEL_RW, 'Controller::bulkMove']);

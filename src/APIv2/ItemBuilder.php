@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\APIv1;
+namespace WEEEOpen\Tarallo\APIv2;
 
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;
@@ -43,13 +43,13 @@ class ItemBuilder {
 	}
 
 	/**
-	 * @see ofArray
-	 *
 	 * @param array $input Decoded JSON from the client
 	 * @param string|null $code Code for new item, if explicitly set
 	 * @param boolean $inner Used for recursion
 	 *
 	 * @return Item
+	 * @see ofArray
+	 *
 	 */
 	private static function ofArrayInternal(array $input, $code, $inner = false) {
 		try {

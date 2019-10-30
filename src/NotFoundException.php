@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo;
 
 class NotFoundException extends \RuntimeException {
+	public $status = 404;
 	/**
 	 * NotFoundException constructor.
 	 *

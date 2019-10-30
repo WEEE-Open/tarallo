@@ -7,6 +7,7 @@ namespace WEEEOpen\Tarallo\HTTP;
  * @package WEEEOpen\Tarallo\HTTP
  */
 class InvalidPayloadParameterException extends \RuntimeException {
+	public $status = 400;
 	private $parameter;
 	private $reason;
 

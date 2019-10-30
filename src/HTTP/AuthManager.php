@@ -16,6 +16,14 @@ class AuthManager implements MiddlewareInterface {
 	const COOKIE_NAME = 'tsessionsso';
 	const KEYSPACE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
 	const KEYSPACE_STRLEN = 64;
+	private $browser = true;
+
+	/**
+	 * @param bool $browser The client is a browser that can be redirect to the SSO server
+	 */
+	public function __construct($browser = true) {
+		$this->browser = $browser;
+	}
 
 	/**
 	 * Set the cookie
@@ -91,6 +99,7 @@ class AuthManager implements MiddlewareInterface {
 
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$path = $request->getUri()->getPath();
+		// These paths are in the SSR thing, not
 		if($path === '/auth') {
 			return $this->handleAuthResponse($request, $handler);
 		} else if($path === '/logout') {
@@ -111,6 +120,9 @@ class AuthManager implements MiddlewareInterface {
 				$db->beginTransaction();
 				$db->userDAO()->deleteSession($id);
 				$db->commit();
+
+				$session = null;
+				$user = null;
 			} else if(time() < $session->idTokenExpiry || self::withinGrace($request, $session->idTokenExpiry)) {
 				// We're good to go, the sessions is valid (or within grace time)
 				$user = User::fromSession($session);
@@ -143,10 +155,13 @@ class AuthManager implements MiddlewareInterface {
 			$user = null;
 		}
 
-
 		try {
 			$response = $handler->handle($request->withAttribute('User', $user));
 		} catch(AuthenticationException $e) {
+			if(!$this->browser) {
+				throw $e;
+			}
+
 			// We need to authenticate.
 			// TODO: support refresh
 
