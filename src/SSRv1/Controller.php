@@ -10,7 +10,7 @@ use Relay\RelayBuilder;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Database\TreeDAO;
-use WEEEOpen\Tarallo\ExceptionHandler;
+use WEEEOpen\Tarallo\ErrorHandler;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
 use WEEEOpen\Tarallo\HTTP\AuthValidator;
@@ -32,10 +32,7 @@ use Zend\Diactoros\UploadedFile;
 class Controller implements RequestHandlerInterface {
 	const cachefile = __DIR__ . '/router.cache';
 
-	public static function getItem(
-		ServerRequestInterface $request,
-		RequestHandlerInterface $handler
-	): ResponseInterface {
+	public static function getItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -51,9 +48,7 @@ class Controller implements RequestHandlerInterface {
 			$ii = new ItemCode($id);
 		} catch(ValidationException $e) {
 			if($e->getCode() === 3) {
-				$request = $request->withAttribute('Template', 'error')
-					->withAttribute('ResponseCode', 404)
-					->withAttribute('TemplateParameters', ['reason' => "Code '$id' contains invalid characters"]);
+				$request = $request->withAttribute('Template', 'error')->withAttribute('ResponseCode', 404)->withAttribute('TemplateParameters', ['reason' => "Code '$id' contains invalid characters"]);
 				return $handler->handle($request);
 			}
 			throw $e;
@@ -65,26 +60,24 @@ class Controller implements RequestHandlerInterface {
 		if($edit !== null) {
 			$renderParameters['add'] = null;
 			$renderParameters['edit'] = $edit;
-		} else if($add !== null) {
-			$renderParameters['add'] = $add;
-			$renderParameters['edit'] = null;
 		} else {
-			$renderParameters['add'] = null;
-			$renderParameters['edit'] = null;
+			if($add !== null) {
+				$renderParameters['add'] = $add;
+				$renderParameters['edit'] = null;
+			} else {
+				$renderParameters['add'] = null;
+				$renderParameters['edit'] = null;
+			}
 		}
 
 		$request = $request->withAttribute('Template', 'viewItem')->withAttribute(
-				'TemplateParameters',
-				$renderParameters
-			);
+			'TemplateParameters', $renderParameters
+		);
 
 		return $handler->handle($request);
 	}
 
-	public static function getHistory(
-		ServerRequestInterface $request,
-		RequestHandlerInterface $handler
-	): ResponseInterface {
+	public static function getHistory(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -93,8 +86,10 @@ class Controller implements RequestHandlerInterface {
 		$limit = Validation::validateOptionalInt($query, 'limit', 20);
 		if($limit > 100) {
 			$limit = 100;
-		} else if($limit <= 0) {
-			$limit = 20;
+		} else {
+			if($limit <= 0) {
+				$limit = 20;
+			}
 		}
 		$limit++;
 
@@ -111,17 +106,13 @@ class Controller implements RequestHandlerInterface {
 		}
 
 		$request = $request->withAttribute('Template', 'history')->withAttribute(
-				'TemplateParameters',
-				['item' => $item, 'history' => $history, 'tooLong' => $tooLong]
-			);
+			'TemplateParameters', ['item' => $item, 'history' => $history, 'tooLong' => $tooLong]
+		);
 
 		return $handler->handle($request);
 	}
 
-	public static function addItem(
-		ServerRequestInterface $request,
-		RequestHandlerInterface $handler
-	): ResponseInterface {
+	public static function addItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$query = $request->getQueryParams();
 		$from = Validation::validateOptionalString($query, 'copy', null);
 
@@ -136,29 +127,21 @@ class Controller implements RequestHandlerInterface {
 		}
 
 		$request = $request->withAttribute('Template', 'newItemPage')->withAttribute(
-				'TemplateParameters',
-				['add' => true, 'base' => $from]
-			);
+			'TemplateParameters', ['add' => true, 'base' => $from]
+		);
 
 		return $handler->handle($request);
 	}
 
-	public static function authError(
-		ServerRequestInterface $request,
-		RequestHandlerInterface $handler
-	): ResponseInterface {
+	public static function authError(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$request = $request->withAttribute('Template', 'error')->withAttribute('ResponseCode', 400)->withAttribute(
-				'TemplateParameters',
-				['reason' => 'Login failed']
-			);
+			'TemplateParameters', ['reason' => 'Login failed']
+		);
 
 		return $handler->handle($request);
 	}
 
-	public static function logout(
-		ServerRequestInterface $request,
-		RequestHandlerInterface $handler
-	): ResponseInterface {
+	public static function logout(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		// TODO: does it happen? Does AuthManager pick this up?
 
 		$request = $request->withAttribute('Template', 'logout');
@@ -166,27 +149,20 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function getHome(
-		ServerRequestInterface $request,
-		RequestHandlerInterface $handler
-	): ResponseInterface {
+	public static function getHome(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$db = $request->getAttribute('Database');
 
 		$request = $request->withAttribute('Template', 'home')->withAttribute(
-				'TemplateParameters',
-				[
-					'locations' => $locations = $db->statsDAO()->getLocationsByItems(),
-					'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', max(20, count($locations))),
-				]
-			);
+			'TemplateParameters', [
+				'locations' => $locations = $db->statsDAO()->getLocationsByItems(),
+				'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', max(20, count($locations))),
+			]
+		);
 
 		return $handler->handle($request);
 	}
 
-	public static function getStats(
-		ServerRequestInterface $request,
-		RequestHandlerInterface $handler
-	): ResponseInterface {
+	public static function getStats(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -201,13 +177,12 @@ class Controller implements RequestHandlerInterface {
 		switch($parameters['which']) {
 			case '':
 				$request = $request->withAttribute('Template', 'stats::main')->withAttribute(
-						'TemplateParameters',
-						[
-							'locations' => $db->statsDAO()->getLocationsByItems(),
-							'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 40),
-							'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 40),
-						]
-					);
+					'TemplateParameters', [
+						'locations' => $db->statsDAO()->getLocationsByItems(),
+						'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 40),
+						'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 40),
+					]
+				);
 				break;
 
 			case 'todo':
@@ -215,30 +190,25 @@ class Controller implements RequestHandlerInterface {
 				$possibileTodos = array_keys(BaseFeature::features['todo']);
 				foreach($possibileTodos as $possibileTodo) {
 					$todos[$possibileTodo] = $db->statsDAO()->getItemsByFeatures(
-						new Feature('todo', $possibileTodo),
-						null,
-						100
+						new Feature('todo', $possibileTodo), null, 100
 					);
 				}
 
 				$request = $request->withAttribute('Template', 'stats::todo')->withAttribute(
-						'TemplateParameters',
-						['todos' => $todos]
-					);
+					'TemplateParameters', ['todos' => $todos]
+				);
 				break;
 
 			case 'attention':
 				$request = $request->withAttribute('Template', 'stats::needAttention')->withAttribute(
-						'TemplateParameters',
-						[
-							'serials' => $db->statsDAO()->getCountByFeature('sn', null, null, null, false, 2),
-							'missingData' => $db->statsDAO()->getItemsByFeatures(
-								new Feature('check', 'missing-data'),
-								null,
-								500
-							), 'lost' => $db->statsDAO()->getLostItems([], 100),
-						]
-					);
+					'TemplateParameters', [
+						'serials' => $db->statsDAO()->getCountByFeature('sn', null, null, null, false, 2),
+						'missingData' => $db->statsDAO()->getItemsByFeatures(
+							new Feature('check', 'missing-data'), null, 500
+						),
+						'lost' => $db->statsDAO()->getLostItems([], 100),
+					]
+				);
 				break;
 
 			case 'cases':
@@ -248,29 +218,24 @@ class Controller implements RequestHandlerInterface {
 				$location = $location === null ? null : new ItemCode($location);
 
 				$request = $request->withAttribute('Template', 'stats::cases')->withAttribute(
-						'TemplateParameters',
-						[
-							'location' => $location === null ? null : $location->getCode(),
-							'locationSet' => $locationSet, 'startDate' => $startDate, 'startDateSet' => $startDateSet,
-							'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
-							'mostRecent' => $db->statsDAO()->getModifiedItems($location, true, 30),
-							'byOwner' => $db->statsDAO()->getCountByFeature(
-									'owner',
-									new Feature('type', 'case'),
-									$location,
-									$startDate
-								), 'byMobo' => $db->statsDAO()->getCountByFeature(
-								'motherboard-form-factor',
-								new Feature('type', 'case'),
-								$location,
-								$startDate
-							), 'ready' => $db->statsDAO()->getItemsByFeatures(
-							new Feature('restrictions', 'ready'),
-							$location,
-							100
+					'TemplateParameters', [
+						'location' => $location === null ? null : $location->getCode(),
+						'locationSet' => $locationSet,
+						'startDate' => $startDate,
+						'startDateSet' => $startDateSet,
+						'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
+						'mostRecent' => $db->statsDAO()->getModifiedItems($location, true, 30),
+						'byOwner' => $db->statsDAO()->getCountByFeature(
+							'owner', new Feature('type', 'case'), $location, $startDate
 						),
-						]
-					);
+						'byMobo' => $db->statsDAO()->getCountByFeature(
+							'motherboard-form-factor', new Feature('type', 'case'), $location, $startDate
+						),
+						'ready' => $db->statsDAO()->getItemsByFeatures(
+							new Feature('restrictions', 'ready'), $location, 100
+						),
+					]
+				);
 				break;
 
 			case 'rams':
@@ -280,48 +245,37 @@ class Controller implements RequestHandlerInterface {
 				$location = $location === null ? null : new ItemCode($location);
 
 				$request = $request->withAttribute('Template', 'stats::rams')->withAttribute(
-						'TemplateParameters',
-						[
-							'location' => $location === null ? null : $location->getCode(),
-							'locationSet' => $locationSet, 'startDate' => $startDate, 'startDateSet' => $startDateSet,
-							'byType' => $db->statsDAO()->getCountByFeature(
-									'ram-type',
-									new Feature('type', 'ram'),
-									$location
-								), 'byFormFactor' => $db->statsDAO()->getCountByFeature(
-								'ram-form-factor',
-								new Feature('type', 'ram'),
-								$location
-							), 'bySize' => $db->statsDAO()->getCountByFeature(
-								'capacity-byte',
-								new Feature('type', 'ram'),
-								$location
-							), 'byTypeFrequency' => $db->statsDAO()->getRollupCountByFeature(
-							new Feature('type', 'ram'),
-							['ram-type', 'ram-form-factor', 'frequency-hertz'],
-							$location
-						), 'byTypeSize' => $db->statsDAO()->getRollupCountByFeature(
-							new Feature('type', 'ram'),
-							['ram-type', 'ram-form-factor', 'capacity-byte'],
-							$location
-						), 'noWorking' => $db->statsDAO()->getItemByNotFeature(
-							new Feature('type', 'ram'),
-							'working',
-							$location,
-							200
-						), 'noFrequency' => $db->statsDAO()->getItemByNotFeature(
-							new Feature('type', 'ram'),
-							'frequency-hertz',
-							$location,
-							200
-						), 'noSize' => $db->statsDAO()->getItemByNotFeature(
-							new Feature('type', 'ram'),
-							'capacity-byte',
-							$location,
-							200
+					'TemplateParameters', [
+						'location' => $location === null ? null : $location->getCode(),
+						'locationSet' => $locationSet,
+						'startDate' => $startDate,
+						'startDateSet' => $startDateSet,
+						'byType' => $db->statsDAO()->getCountByFeature(
+							'ram-type', new Feature('type', 'ram'), $location
 						),
-						]
-					);
+						'byFormFactor' => $db->statsDAO()->getCountByFeature(
+							'ram-form-factor', new Feature('type', 'ram'), $location
+						),
+						'bySize' => $db->statsDAO()->getCountByFeature(
+							'capacity-byte', new Feature('type', 'ram'), $location
+						),
+						'byTypeFrequency' => $db->statsDAO()->getRollupCountByFeature(
+							new Feature('type', 'ram'), ['ram-type', 'ram-form-factor', 'frequency-hertz'], $location
+						),
+						'byTypeSize' => $db->statsDAO()->getRollupCountByFeature(
+							new Feature('type', 'ram'), ['ram-type', 'ram-form-factor', 'capacity-byte'], $location
+						),
+						'noWorking' => $db->statsDAO()->getItemByNotFeature(
+							new Feature('type', 'ram'), 'working', $location, 200
+						),
+						'noFrequency' => $db->statsDAO()->getItemByNotFeature(
+							new Feature('type', 'ram'), 'frequency-hertz', $location, 200
+						),
+						'noSize' => $db->statsDAO()->getItemByNotFeature(
+							new Feature('type', 'ram'), 'capacity-byte', $location, 200
+						),
+					]
+				);
 				break;
 
 			default:
@@ -332,10 +286,7 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function search(
-		ServerRequestInterface $request,
-		RequestHandlerInterface $handler
-	): ResponseInterface {
+	public static function search(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
 		$query = $request->getQueryParams();
@@ -353,27 +304,31 @@ class Controller implements RequestHandlerInterface {
 			$total = $db->searchDAO()->getResultsCount($id);
 			$pages = (int) ceil($total / $perPage);
 			$templateParameters = [
-				'searchId' => $id, 'page' => $page, 'pages' => $pages, 'total' => $total, 'resultsPerPage' => $perPage,
+				'searchId' => $id,
+				'page' => $page,
+				'pages' => $pages,
+				'total' => $total,
+				'resultsPerPage' => $perPage,
 				'results' => $results,
 			];
 			if($add !== null) {
 				$templateParameters['add'] = $add;
-			} else if($edit !== null) {
-				$templateParameters['edit'] = $edit;
+			} else {
+				if($edit !== null) {
+					$templateParameters['edit'] = $edit;
+				}
 			}
 		}
 
 		$request = $request->withAttribute('Template', 'search')->withAttribute(
-				'TemplateParameters',
-				$templateParameters
-			);
+			'TemplateParameters', $templateParameters
+		);
 
 		return $handler->handle($request);
 	}
 
 	public static function bulk(
-		/** @noinspection PhpUnusedParameterInspection */ ServerRequestInterface $request,
-		RequestHandlerInterface $handler
+		/** @noinspection PhpUnusedParameterInspection */ ServerRequestInterface $request, RequestHandlerInterface $handler
 	): ResponseInterface {
 		$response = new RedirectResponse('/bulk/move', 303);
 		$response->withoutHeader('Content-type');
@@ -381,10 +336,7 @@ class Controller implements RequestHandlerInterface {
 		return $response;
 	}
 
-	public static function bulkMove(
-		ServerRequestInterface $request,
-		RequestHandlerInterface $handler
-	): ResponseInterface {
+	public static function bulkMove(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$db = $request->getAttribute('Database');
 		$body = $request->getParsedBody();
 
@@ -430,19 +382,16 @@ class Controller implements RequestHandlerInterface {
 				}
 			}
 		}
-		$request = $request->withAttribute('Template', 'bulk::move')->withAttribute('StatusCode', $code)->withAttribute(
-				'TemplateParameters',
-				['error' => $error, 'moved' => $moved]
-			);
+		$request = $request
+			->withAttribute('Template', 'bulk::move')
+			->withAttribute('StatusCode', $code)
+			->withAttribute('TemplateParameters', ['error' => $error, 'moved' => $moved]);
 
 		return $handler->handle($request);
 	}
 
 
-	public static function bulkAdd(
-		ServerRequestInterface $request,
-		RequestHandlerInterface $handler
-	): ResponseInterface {
+	public static function bulkAdd(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		///* @var Database $db */
 		//$db = $request->getAttribute('Database');
 		$body = $request->getParsedBody();
@@ -453,9 +402,7 @@ class Controller implements RequestHandlerInterface {
 		} else {
 			$add = json_decode((string) $body['add'], true);
 			if($add === null || json_last_error() !== JSON_ERROR_NONE) {
-				$request = $request->withAttribute('Template', 'bulk::add')
-					->withAttribute('StatusCode', 400)
-					->withAttribute('TemplateParameters', ['error' => json_last_error_msg()]);
+				$request = $request->withAttribute('Template', 'bulk::add')->withAttribute('StatusCode', 400)->withAttribute('TemplateParameters', ['error' => json_last_error_msg()]);
 			} else {
 				// TODO: move to an ItemBuilder class?
 				$items = [];
@@ -475,9 +422,8 @@ class Controller implements RequestHandlerInterface {
 				ItemValidator::fixupFromPeracotta($case);
 
 				$request = $request->withAttribute('Template', 'bulk::add')->withAttribute(
-						'TemplateParameters',
-						['item' => $case]
-					);
+					'TemplateParameters', ['item' => $case]
+				);
 			}
 		}
 
@@ -498,11 +444,7 @@ class Controller implements RequestHandlerInterface {
 	 * @throws \Exception whatever may surface from TreeDAO::moveWithValidation
 	 */
 	public static function doBulkMove(
-		string $itemsList,
-		?ItemCode $defaultLocation,
-		Database $db,
-		bool $fix = true,
-		bool $validate = true
+		string $itemsList, ?ItemCode $defaultLocation, Database $db, bool $fix = true, bool $validate = true
 	): array {
 		$moved = [];
 		if(strpos($itemsList, ',') === false) {
@@ -525,11 +467,13 @@ class Controller implements RequestHandlerInterface {
 				} else {
 					$location = $defaultLocation;
 				}
-			} else if(count($lineExploded) == 2) {
-				$item = new ItemCode(trim($lineExploded[0]));
-				$location = new ItemCode(trim($lineExploded[1]));
 			} else {
-				throw new \InvalidArgumentException("Invalid format for \"$line\", too many separators (:)", 2);
+				if(count($lineExploded) == 2) {
+					$item = new ItemCode(trim($lineExploded[0]));
+					$location = new ItemCode(trim($lineExploded[1]));
+				} else {
+					throw new \InvalidArgumentException("Invalid format for \"$line\", too many separators (:)", 2);
+				}
 			}
 			// This may throw and leave the function
 			TreeDAO::moveWithValidation($db, $item, $location, $fix, $validate);
@@ -539,8 +483,7 @@ class Controller implements RequestHandlerInterface {
 	}
 
 	public static function getFeaturesJson(
-		/** @noinspection PhpUnusedParameterInspection */ ServerRequestInterface $request,
-		RequestHandlerInterface $handler
+		/** @noinspection PhpUnusedParameterInspection */ ServerRequestInterface $request, RequestHandlerInterface $handler
 	): ResponseInterface {
 		// They aren't changing >1 time per second, so this should be stable enough for the ETag header...
 		$lastmod1 = ItemValidator::defaultFeaturesLastModified();
@@ -563,7 +506,8 @@ class Controller implements RequestHandlerInterface {
 		}
 
 		$json = [
-			'features' => FeaturePrinter::getAllFeatures(), 'defaults' => $defaults,
+			'features' => FeaturePrinter::getAllFeatures(),
+			'defaults' => $defaults,
 		];
 
 		return new JsonResponse($json, 200, $responseHeaders);
@@ -574,41 +518,45 @@ class Controller implements RequestHandlerInterface {
 
 		switch($route[0]) {
 			case FastRoute\Dispatcher::FOUND:
-
 				$level = $route[1][0];
 				$function = $route[1][1];
-				$request = $request->withAttribute('parameters', $route[2]);
+				$request = $request
+					->withAttribute('parameters', $route[2]);
 				break;
 			case FastRoute\Dispatcher::NOT_FOUND:
 				$level = null;
 				$function = null;
-				$request = $request->withAttribute('Template', 'error')->withAttribute(
-						'TemplateParameters',
-						['reason' => 'Invalid URL (no route in router)']
-					)->withAttribute('ResponseCode', 404);
+				$request = $request
+					->withAttribute('Template', 'error')
+					->withAttribute('TemplateParameters', ['reason' => 'Invalid URL (no route in router)'])
+					->withAttribute('ResponseCode', 404);
 				break;
 			case FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
 				$level = null;
 				$function = null;
-				$request = $request->withAttribute('Template', 'error')->withAttribute(
-						'ReasponseHeaders',
-						implode(', ', $route[1])
-					)->withAttribute('ResponseCode', 405);
+				$request = $request
+					->withAttribute('Template', 'error')
+					->withAttribute('ReasponseHeaders', ['Allow' => implode(', ', $route[1])])
+					->withAttribute('ResponseCode', 405);
 				break;
 			default:
 				$level = null;
 				$function = null;
-				$request = $request->withAttribute('Template', 'error')->withAttribute(
-						'TemplateParameters',
-						['reason' => 'SSR Error: unknown router result']
-					)->withAttribute('ResponseCode', 500);
+				$request = $request
+					->withAttribute('Template', 'error')
+					->withAttribute('TemplateParameters', ['reason' => 'SSR Error: unknown router result'])
+					->withAttribute('ResponseCode', 500);
 				break;
 		}
 		unset($route);
 
 		$queue = [
-			new ExceptionHandler(), new DatabaseConnection(), //LanguageNegotiatior::class,
-			new AuthManager(), new TemplateEngine(), new GracefulExceptionHandler(),
+			new ErrorHandler(),
+			new DatabaseConnection(),
+			//LanguageNegotiatior::class,
+			new AuthManager(),
+			new TemplateEngine(),
+			new GracefulExceptionHandler(),
 		];
 		if($level !== null) {
 			$queue[] = new AuthValidator($level);
@@ -640,18 +588,21 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/item/{id}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getItem']);
 				$r->get('/add', [AuthValidator::AUTH_LEVEL_RO, 'Controller::addItem']);
 				$r->get(
-					'/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]',
-					[AuthValidator::AUTH_LEVEL_RO, 'Controller::search']
+					'/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']
 				);
 				$r->get('/search/{id:[0-9]+}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
 				$r->get(
-					'/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}',
-					[AuthValidator::AUTH_LEVEL_RO, 'Controller::search']
+					'/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [
+						AuthValidator::AUTH_LEVEL_RO,
+						'Controller::search',
+					]
 				);
 				$r->get('/search/{id:[0-9]+}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
 				$r->get(
-					'/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}',
-					[AuthValidator::AUTH_LEVEL_RO, 'Controller::search']
+					'/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [
+						AuthValidator::AUTH_LEVEL_RO,
+						'Controller::search',
+					]
 				);
 				$r->get('/bulk', [AuthValidator::AUTH_LEVEL_RO, 'Controller::bulk']);
 				$r->get('/bulk/move', [AuthValidator::AUTH_LEVEL_RO, 'Controller::bulkMove']);
@@ -659,15 +610,14 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/bulk/add', [AuthValidator::AUTH_LEVEL_RO, 'Controller::bulkAdd']);
 				$r->post('/bulk/add', [AuthValidator::AUTH_LEVEL_RW, 'Controller::bulkAdd']);
 				$r->addGroup(
-					'/stats',
-					function(FastRoute\RouteCollector $r) {
-						$r->get('', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getStats']);
-						$r->get('/{which}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getStats']);
-					}
+					'/stats', function(FastRoute\RouteCollector $r) {
+					$r->get('', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getStats']);
+					$r->get('/{which}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getStats']);
+				}
 				);
-			},
-			[
-				'cacheFile' => self::cachefile, 'cacheDisabled' => !TARALLO_CACHE_ENABLED,
+			}, [
+				'cacheFile' => self::cachefile,
+				'cacheDisabled' => !TARALLO_CACHE_ENABLED,
 			]
 		);
 
