@@ -70,6 +70,25 @@ class AuthManager implements MiddlewareInterface {
 		return $str;
 	}
 
+	/**
+	 * Is the request within the grace time limits, if ID token has expired?
+	 *
+	 * @param ServerRequestInterface $request The request
+	 * @param int $expiry ID token expiry
+	 *
+	 * @return bool True if it should be graced, false if it shouldn't
+	 */
+	private static function withinGrace(ServerRequestInterface $request, int $expiry): bool {
+		if(time() + TARALLO_POST_GRACE_TIME < $expiry) {
+			return false;
+		}
+		$method = $request->getMethod();
+		if($method !== 'POST' && $method !== 'PUT' && $method !== 'PATCH') {
+			return false;
+		}
+		return true;
+	}
+
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$path = $request->getUri()->getPath();
 		if($path === '/auth') {
@@ -92,8 +111,8 @@ class AuthManager implements MiddlewareInterface {
 				$db->beginTransaction();
 				$db->userDAO()->deleteSession($id);
 				$db->commit();
-			} else if(time() < $session->idTokenExpiry) {
-				// We're good to go, the sessions is valid
+			} else if(time() < $session->idTokenExpiry || self::withinGrace($request, $session->idTokenExpiry)) {
+				// We're good to go, the sessions is valid (or within grace time)
 				$user = User::fromSession($session);
 			} else if(time() < $session->refreshTokenExpiry) {
 				// Ok, ID Token expired, but Refresh Token is still valid
@@ -142,7 +161,7 @@ class AuthManager implements MiddlewareInterface {
 			$db->commit();
 
 			// Enough time to log in
-			self::setCookie($id, time() + 3600);
+			self::setCookie($id, time() + 600);
 
 			// Done, see you at /auth!
 			if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
@@ -204,7 +223,10 @@ class AuthManager implements MiddlewareInterface {
 					$session->idTokenExpiry = $oidc->getVerifiedClaims('exp');
 					$session->refreshToken = $oidc->getRefreshToken();
 					// TODO: this is apparently not stated in the token, use a constant
-					$session->refreshTokenExpiry = time() + 3600;
+					$session->refreshTokenExpiry = time() + TARALLO_OIDC_REFRESH_TOKEN_EXPIRY;
+
+					// Update the cookie
+					self::setCookie($id, $session->idTokenExpiry);
 				}
 
 				// Store it!
