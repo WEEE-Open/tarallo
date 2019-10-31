@@ -65,5 +65,6 @@ class ErrorResponse implements \JsonSerializable {
 		if(isset($this->trace)) {
 			$result['trace'] = $this->trace;
 		}
+		return $result;
 	}
 }

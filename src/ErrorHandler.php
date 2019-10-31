@@ -17,7 +17,8 @@ class ErrorHandler implements MiddlewareInterface {
 		} catch(\Throwable $exception) {
 			if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
 				return new TextResponse(
-					"⚠️ Error ⚠️\n\n" . get_class($exception) . ': ' . $exception->getMessage() . "\n\nStack trace:\n" .
+					"⚠️ Error ⚠️\n\n" . get_class($exception) . ': ' . $exception->getMessage() . ' in ' .
+					$exception->getFile() . ' on line ' . $exception->getLine() . "\n\nStack trace:\n" .
 					$exception->getTraceAsString(), 500
 				);
 			} else {

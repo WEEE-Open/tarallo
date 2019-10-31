@@ -144,10 +144,10 @@
 		let uri, method;
 
 		if(id === null) {
-			uri = '/v1/search';
+			uri = '/v2/search';
 			method = 'POST';
 		} else {
-			uri = '/v1/search/' + id;
+			uri = '/v2/search/' + id;
 			method = 'PATCH';
 		}
 

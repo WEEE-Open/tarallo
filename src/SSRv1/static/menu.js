@@ -89,7 +89,7 @@
 				message.style.display = 'none';
 			}
 
-			let response = await fetch('/v1/items/' + encodeURIComponent(code) + '/parent', {
+			let response = await fetch('/v2/items/' + encodeURIComponent(code) + '/parent', {
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'

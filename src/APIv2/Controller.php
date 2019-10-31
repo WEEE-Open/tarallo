@@ -14,6 +14,7 @@ use WEEEOpen\Tarallo\Database\ItemDAO;
 use WEEEOpen\Tarallo\Database\TreeDAO;
 use WEEEOpen\Tarallo\ErrorHandler;
 use WEEEOpen\Tarallo\Feature;
+use WEEEOpen\Tarallo\HTTP\AuthManager;
 use WEEEOpen\Tarallo\HTTP\AuthValidator;
 use WEEEOpen\Tarallo\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;
@@ -161,7 +162,7 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
-		$payload = $request->getParsedBody();
+		$payload = $request->getAttribute('ParsedBody', []);
 		$parameters = $request->getAttribute('parameters', []);
 
 		$id = Validation::validateOptionalString($parameters, 'id');
@@ -229,11 +230,11 @@ class Controller implements RequestHandlerInterface {
 
 		if($loopback) {
 			$response = new JsonResponse($db->itemDAO()->getItem($item), 201);
-			$response = $response->withHeader('Location', '/v1/items/' . urlencode($item->getCode()));
+			$response = $response->withHeader('Location', '/v2/items/' . urlencode($item->getCode()));
 		} else {
 			// TODO: wrap into something
 			$response = new JsonResponse($item->getCode(), 201);
-			$response = $response->withHeader('Location', '/v1/items/' . urlencode($item->getCode()));
+			$response = $response->withHeader('Location', '/v2/items/' . urlencode($item->getCode()));
 		}
 		return $response;
 	}
@@ -261,7 +262,7 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
-		$payload = json_decode($request->getBody()->getContents(), true);
+		$payload = $request->getAttribute('ParsedBody', []);
 		$parameters = $request->getAttribute('parameters', []);
 
 		Validation::validateRequestBodyIsString($payload);
@@ -308,7 +309,7 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
-		$payload = $request->getParsedBody();
+		$payload = $request->getAttribute('ParsedBody', []);
 		$parameters = $request->getAttribute('parameters', []);
 
 		Validation::validateRequestBodyIsArray($payload);
@@ -334,7 +335,7 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
-		$payload = $request->getParsedBody();
+		$payload = $request->getAttribute('ParsedBody', []);
 		$parameters = $request->getAttribute('parameters', []);
 
 		Validation::validateRequestBodyIsArray($payload);
@@ -366,7 +367,7 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$user = $request->getAttribute('User');
-		$payload = $request->getParsedBody();
+		$payload = $request->getAttribute('ParsedBody', []);
 		$parameters = $request->getAttribute('parameters', []);
 
 		Validation::validateRequestBodyIsArray($payload);
@@ -542,9 +543,9 @@ class Controller implements RequestHandlerInterface {
 			new EnsureJson(),
 			new DatabaseConnection(),
 			new ExceptionHandler(),
-			new ExceptionHandler(),
 		];
 		if($level !== null) {
+			$queue[] = new AuthManager(false);
 			$queue[] = new AuthValidator($level);
 		}
 		if($function !== null) {

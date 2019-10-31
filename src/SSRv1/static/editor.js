@@ -1132,6 +1132,32 @@
 		return counter;
 	}
 
+	function getTimeoutController() {
+		let controller = new AbortController();
+		setTimeout(() => controller.abort(), 30000);
+		return controller;
+	}
+
+	class TimeoutError extends Error {
+		constructor() {
+			super();
+			//this.name = this.constructor.name;
+		}
+	}
+
+	async function fetchWithTimeout(uri, init) {
+		init.signal = getTimeoutController().signal;
+		try {
+			return response = await fetch(uri, init);
+		} catch(err) {
+			if (err.name === 'AbortError') {
+				throw new TimeoutError();
+			} else {
+				throw err;
+			}
+		}
+	}
+
 	/**
 	 * @return {Promise<void>} Nothing, really.
 	 */
@@ -1185,27 +1211,38 @@
 		let method, uri;
 		if(code) {
 			method = 'PUT';
-			uri = '/v1/items/' + encodeURIComponent(code);
+			uri = '/v2/items/' + encodeURIComponent(code);
 		} else {
 			method = 'POST';
-			uri = '/v1/items';
+			uri = '/v2/items';
 		}
 		let encoded = JSON.stringify(request);
 		console.log("Send to " + uri);
 		console.log(encoded);
 
-		response = await fetch(uri, {
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			method: method,
-			credentials: 'include',
-			body: encoded
-		});
-
 		try {
-			await jsendMe(response, goBack, displayError.bind(null));
+			response = await fetchWithTimeout(uri, {
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				method: method,
+				credentials: 'include',
+				body: encoded
+			});
+			let json = await response.json();
+			if(response.status === 200 || response.status === 201) {
+				goBack(json);
+			} else {
+				let message = json.message || "Unknown error, status: " + response.status;
+				displayError(message)
+			}
+		} catch(err) {
+			if(err instanceof TimeoutError) {
+				displayError('Request timed out');
+			} else {
+				throw err;
+			}
 		} finally {
 			toggleButtons(false);
 		}
@@ -1219,18 +1256,30 @@
 
 			let method, uri;
 			method = 'DELETE';
-			uri = '/v1/items/' + encodeURIComponent(code);
-
-			let response = await fetch(uri, {
-				headers: {
-					'Accept': 'application/json'
-				},
-				method: method,
-				credentials: 'include'
-			});
+			uri = '/v2/items/' + encodeURIComponent(code);
 
 			try {
-				await jsendMe(response, goBack, displayError.bind(null));
+				let response = await fetchWithTimeout(uri, {
+					headers: {
+						'Accept': 'application/json'
+					},
+					method: method,
+					credentials: 'include'
+				});
+
+				if(response.status === 204) {
+					goBack();
+				} else {
+					let json = await response.json();
+					let message = json.message || "Unknown error, status: " + response.status;
+					displayError(message)
+				}
+			} catch(err) {
+				if(err instanceof TimeoutError) {
+					displayError('Request timed out');
+				} else {
+					throw err;
+				}
 			} finally {
 				toggleButtons(false);
 			}
@@ -1243,18 +1292,30 @@
 
 		let method, uri;
 		method = 'DELETE';
-		uri = `/v1/items/${encodeURIComponent(code)}/parent`;
-
-		let response = await fetch(uri, {
-			headers: {
-				'Accept': 'application/json'
-			},
-			method: method,
-			credentials: 'include'
-		});
+		uri = `/v2/items/${encodeURIComponent(code)}/parent`;
 
 		try {
-			await jsendMe(response, goBack, displayError.bind(null));
+			let response = await fetchWithTimeout(uri, {
+				headers: {
+					'Accept': 'application/json'
+				},
+				method: method,
+				credentials: 'include'
+			});
+
+			if(response.status === 204) {
+				goBack();
+			} else {
+				let json = await response.json();
+				let message = json.message || "Unknown error, status: " + response.status;
+				displayError(message)
+			}
+		} catch(err) {
+			if(err instanceof TimeoutError) {
+				displayError('Request timed out');
+			} else {
+				throw err;
+			}
 		} finally {
 			toggleButtons(false);
 		}
@@ -1291,24 +1352,36 @@
 		toggleButtons(true);
 		let code = document.querySelector('.item.head.editing').dataset.code;
 		let response;
-		let uri = '/v1/items/' + encodeURIComponent(code) + '/features';
+		let uri = '/v2/items/' + encodeURIComponent(code) + '/features';
 		let encoded = JSON.stringify(delta);
 
 		console.log("Send to " + uri);
 		console.log(encoded);
 
-		response = await fetch(uri, {
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			method: 'PATCH',
-			credentials: 'include',
-			body: encoded
-		});
-
 		try {
-			await jsendMe(response, goBack, displayError.bind(null));
+			response = await fetchWithTimeout(uri, {
+				headers: {
+					'Accept': 'application/json',
+					'Content-Type': 'application/json'
+				},
+				method: 'PATCH',
+				credentials: 'include',
+				body: encoded
+			});
+
+			if(response.status === 204) {
+				goBack();
+			} else {
+				let json = await response.json();
+				let message = json.message || "Unknown error, status: " + response.status;
+				displayError(message)
+			}
+		} catch(err) {
+			if(err instanceof TimeoutError) {
+				displayError('Request timed out');
+			} else {
+				throw err;
+			}
 		} finally {
 			toggleButtons(false);
 		}
@@ -1322,52 +1395,6 @@
 	function toggleButtons(disabled) {
 		for(let button of document.querySelectorAll('.itembuttons button')) {
 			button.disabled = disabled;
-		}
-	}
-
-	async function jsendMe(response, onsuccess, onerror) {
-		// TODO: 204 shouldn't contain Content-Type, but does...
-		if(response.headers.get("content-type").indexOf("application/json") > -1) {
-			if(response.status === 204) {
-				onsuccess(null);
-				return;
-			}
-			try {
-				let jsend = await response.json();
-				if(response.ok && jsend.status === 'success') {
-					onsuccess(jsend.data);
-				} else {
-					if(jsend.status === 'fail') {
-						if(jsend.data) {
-							for(let field of Object.keys(jsend.data)) {
-								let message = jsend.data[field];
-								onerror(message);
-								let input = document.getElementById('feature-edit-' + field);
-								if(input !== null) {
-									input.classList.add('invalid');
-								}
-							}
-						} else {
-							// "fail" with no data
-							onerror(response.status.toString() + ': unspecified validation error');
-							console.error(jsend);
-						}
-					} else {
-						// JSend error, or not a JSend response
-						onerror(response.status.toString() + ': ' + jsend.message ? jsend.message : '');
-						console.error(jsend);
-					}
-				}
-			} catch(e) {
-				// invalid JSON
-				onerror(e.message);
-				console.error(response);
-			}
-		} else {
-			// not JSON
-			let text = await response.text();
-			onerror(response.status.toString() + ': ' + text);
-			console.error(response);
 		}
 	}
 
