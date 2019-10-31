@@ -23,12 +23,10 @@ class Summary {
 			case 'ram':
 				return RamSummarizer::summarize($item);
 			case 'hdd':
+			case 'ssd':
 				return HddSummarizer::summarize($item);
-			//case 'ssd':
-				// TODO: can we reuse HddSummarizer?
-				// return SomeSummarizer::summarize($item);
-			//case 'odd':
-				// return SomeSummarizer::summarize($item);
+			case 'odd':
+				return OddSummarizer::summarize($item);
 			case 'psu':
 				return PsuSummarizer::summarize($item);
 			case 'audio-card':
