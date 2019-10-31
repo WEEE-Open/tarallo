@@ -29,7 +29,7 @@ final class TreeDAO extends DAO {
 			try {
 				$newParent = $db->itemDAO()->getItem($newParent, null, 1);
 			} catch(NotFoundException $e) {
-				throw new NotFoundException(TreeDAO::EXCEPTION_CODE_PARENT, "Parent item doesn't exist");
+				throw new NotFoundException($newParent->getCode());
 			}
 		}
 		if($fix) {
@@ -52,16 +52,10 @@ final class TreeDAO extends DAO {
 		// if(from nowhere to somewhere || from somewhere to somewhere else (including itself, which removes parent))
 		if(($oldParent === null && $newParent->compareCode($item) !== 0)
 			|| ($oldParent !== null && $newParent->compareCode($oldParent) !== 0)) {
-			try {
-				$db->treeDAO()->moveItem($item, $newParent);
-				$moved = true;
-			} catch(NotFoundException $e) {
-				if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
-					throw new NotFoundException(TreeDAO::EXCEPTION_CODE_PARENT, "Parent item doesn't exist");
-				} else {
-					throw $e;
-				}
-			}
+
+			// Throws NotFoundException (when needed, obv)
+			$db->treeDAO()->moveItem($item, $newParent);
+			$moved = true;
 		}
 		return $oldParent === null && $moved ? true : false;
 	}
@@ -74,11 +68,11 @@ final class TreeDAO extends DAO {
 	 */
 	public function addToTree(ItemWithCode $child, ItemWithCode $parent = null) {
 		if($parent !== null && !$this->database->itemDAO()->itemVisible($parent)) {
-			throw new NotFoundException(self::EXCEPTION_CODE_PARENT);
+			throw new NotFoundException($parent->getCode());
 		}
 
 		if(!$this->database->itemDAO()->itemVisible($child)) {
-			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
+			throw new NotFoundException($child->getCode());
 		}
 
 		$this->addItemAsRoot($child);
@@ -96,11 +90,11 @@ final class TreeDAO extends DAO {
 	 */
 	public function moveItem(ItemWithCode $item, ItemWithCode $newParent = null) {
 		if(!$this->database->itemDAO()->itemVisible($newParent)) {
-			throw new NotFoundException(self::EXCEPTION_CODE_PARENT);
+			throw new NotFoundException($newParent->getCode());
 		}
 
 		if(!$this->database->itemDAO()->itemVisible($item)) {
-			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
+			throw new NotFoundException($item->getCode());
 		}
 
 		// If it is an ItemCode or something else that doesn't have the LostAt property fetched, unlose it
@@ -159,7 +153,7 @@ final class TreeDAO extends DAO {
 
 	public function removeFromTree(ItemWithCode $item) {
 		if(!$this->database->itemDAO()->itemVisible($item)) {
-			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
+			throw new NotFoundException($item->getCode());
 		}
 
 		/* This is readable but doesn't work in MySQL (TODO: implemented in MariaDB 10.3, replace query once it's out):
@@ -177,7 +171,6 @@ final class TreeDAO extends DAO {
         WHERE Tree.Descendant=Pointless.Descendant
         AND Pointless.Ancestor = ?;'
 		);
-
 
 		try {
 			$statement->execute([$item->getCode()]);

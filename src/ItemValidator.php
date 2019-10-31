@@ -145,7 +145,7 @@ class ItemValidator {
 	public static function treeify(array $items) {
 		$case = self::findByType($items, 'case', true);
 		if($case === null) {
-			throw new ValidationException('Cannot find case in items');
+			throw new ValidationException(null, 'Cannot find case in items');
 		}
 		foreach($items as $item) {
 			$case->addContent($item);
@@ -279,9 +279,7 @@ class ItemValidator {
 	public static function checkRoot(ItemWithFeatures $item) {
 		$type = $item->getFeatureValue('type');
 		if($type !== null && $type !== 'location') {
-			throw new ValidationException(
-				'Set a location for this item or mark it as a location itself, this type cannot be a root item'
-			);
+			throw new ValidationException($item->peekCode(), 'Set a location for this item or mark it as a location itself, this type cannot be a root item');
 		}
 	}
 
@@ -579,35 +577,25 @@ class ItemValidator {
 			case 'proprietary-laptop':
 				// It's a laptop, reject features that make sense only in desktops.
 				if($case->getFeatureValue('usb-ports-n') !== null) {
-					throw new ValidationException(
-						'A laptop does not have USB ports on the case, but on the motherboard only. Remove the "USB ports" feature from the case or change the motherboard form factor.'
-					);
+					throw new FeatureValidationException('usb-ports-n', null, $case->peekCode(), 'A laptop does not have USB ports on the case, but on the motherboard only. Remove the "USB ports" feature from the case or change the motherboard form factor.');
 				}
 				if($case->getFeatureValue('psu-form-factor') !== null) {
 					if($case->getFeatureValue('psu-form-factor') !== 'proprietary') {
 						// Well, it may contain a power supply, if it's something really old... but it won't be standard anyway.
-						throw new ValidationException(
-							'A laptop does not have a standard internal PSU. Remove the "PSU form factor" feature from the case or change the motherboard form factor.'
-						);
+						throw new FeatureValidationException('psu-form-factor', null, $case->peekCode(), 'A laptop does not have a standard internal PSU. Remove the "PSU form factor" feature from the case or change the motherboard form factor.');
 					}
 				}
 				break;
 			default:
 				// It's a desktop, reject features that make sense only in laptops
 				if($case->getFeatureValue('power-connector') !== null) {
-					throw new ValidationException(
-						"A desktop computer case does not have any power connector. Remove that feature or change the motherboard form factor."
-					);
+					throw new FeatureValidationException('power-connector', null, $case->peekCode(), 'A desktop computer case does not have any power connector. Remove that feature or change the motherboard form factor.');
 				}
 				if($case->getFeatureValue('psu-volt') !== null) {
-					throw new ValidationException(
-						'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply voltage" feature or change the motherboard form factor.'
-					);
+					throw new FeatureValidationException('psu-volt', null, $case->peekCode(), 'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply voltage" feature or change the motherboard form factor.');
 				}
 				if($case->getFeatureValue('psu-ampere') !== null) {
-					throw new ValidationException(
-						'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply current" feature or change the motherboard form factor.'
-					);
+					throw new FeatureValidationException('psu-ampere', null, $case->peekCode(), 'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply current" feature or change the motherboard form factor.');
 				}
 				break;
 			case null:
@@ -623,7 +611,7 @@ class ItemValidator {
 		$power = $monitor->getFeatureValue('power-connector');
 		if($power === 'c13' || $power === 'c19') {
 			if($monitor->getFeatureValue('psu-volt') !== null || $monitor->getFeatureValue('psu-ampere') !== null) {
-				throw new ValidationException('A monitor with a 220 V power connector should not require specific voltages and currents. Remove "Power supply current" and "Power supply voltage" or select another power connector type.');
+				throw new FeatureValidationException('psu-volt', null, $monitor->peekCode(), 'A monitor with a 220 V power connector should not require specific voltages and currents. Remove "Power supply current" and "Power supply voltage" or select another power connector type.');
 			}
 		}
 	}

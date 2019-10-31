@@ -30,12 +30,16 @@ trait ItemTraitCode {
 			$valid = preg_match('/^[a-zA-Z0-9]+$/', $code);
 		}
 		if(!$valid) {
-			throw new ValidationException("Code must be alphanumeric, '$code' isn't", 3);
+			throw new ValidationException($code, "Code must be alphanumeric, '$code' isn't");
 		}
 	}
 
 	public function getCode(): string {
 		return $this->code;
+	}
+
+	public function peekCode(): ?string {
+		return $this->getCode();
 	}
 
 	public function hasCode(): bool {

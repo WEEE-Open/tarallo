@@ -115,25 +115,6 @@ class Validation {
 	}
 
 	/**
-	 * Return a new ItemIncomplete or throw a NotFoundException if code is invalid
-	 *
-	 * @param string $code
-	 *
-	 * @return ItemCode
-	 * @deprecated handle all exceptions in controllers
-	 */
-	public static function newItemIncomplete(string $code) {
-		try {
-			return new ItemCode($code);
-		} catch(ValidationException $e) {
-			if($e->getCode() === 5) {
-				throw new NotFoundException();
-			}
-			throw $e;
-		}
-	}
-
-	/**
 	 * Split a feature=value pair, or throw an exception if invalid
 	 *
 	 * @param string $pair

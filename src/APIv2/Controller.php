@@ -53,12 +53,8 @@ class Controller implements RequestHandlerInterface {
 		} else {
 			try {
 				$item = new ItemCode($id);
-			} catch(ValidationException $e) {
-				if($e->getCode() === 3) {
-					throw new NotFoundException();
-				} else {
-					throw $e;
-				}
+			} catch(\InvalidArgumentException | ValidationException $e) {
+				throw new NotFoundException($id);
 			}
 
 			if(!$db->itemDAO()->itemVisible($item)) {
@@ -80,7 +76,7 @@ class Controller implements RequestHandlerInterface {
 		try {
 			$item = new ItemCode($id);
 		} catch(ValidationException $e) {
-			throw new NotFoundException();
+			throw new NotFoundException($id);
 		}
 
 		$deleted = $db->itemDAO()->itemDeletedAt($item);
@@ -107,10 +103,14 @@ class Controller implements RequestHandlerInterface {
 		$fix = !isset($query['nofix']);
 		$validate = !isset($query['novalidate']);
 
-		$item = Validation::newItemIncomplete($id);
+		try {
+			$item = new ItemCode($id);
+		} catch(\InvalidArgumentException | ValidationException $e) {
+			throw new NotFoundException($id);
+		}
 		try {
 			$newParent = new ItemCode($payload);
-		} catch(ValidationException $e) {
+		} catch(\InvalidArgumentException | ValidationException $e) {
 			throw new InvalidPayloadParameterException('*', $payload, 'Location does not exist');
 		}
 
@@ -248,11 +248,8 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$db->itemDAO()->deleteItem(new ItemCode($id));
-			// TODO: why this? Let the global error handler handle NotFoundException
-//		} catch(NotFoundException $ignored) {
-//			$responseCode = 404;
-		} catch(ValidationException $e) {
-			throw new InvalidPayloadParameterException('*', $id, $e->getMessage());
+		} catch(\InvalidArgumentException | ValidationException $e) {
+			throw new NotFoundException($id);
 		}
 
 		return new EmptyResponse(204);
@@ -270,11 +267,15 @@ class Controller implements RequestHandlerInterface {
 		$fix = !isset($query['nofix']);
 		$validate = !isset($query['novalidate']);
 
-		$item = Validation::newItemIncomplete($id);
+		try {
+			$item = new ItemCode($id);
+		} catch(\InvalidArgumentException | ValidationException $e) {
+			throw new NotFoundException($id);
+		}
 		try {
 			$newParent = new ItemCode($payload);
-		} catch(ValidationException $e) {
-			throw new InvalidPayloadParameterException('*', $payload, 'Location does not exist');
+		} catch(\InvalidArgumentException | ValidationException $e) {
+			throw new NotFoundException($payload);
 		}
 
 		$created = TreeDAO::moveWithValidation($db, $item, $newParent, $fix, $validate);
@@ -295,12 +296,11 @@ class Controller implements RequestHandlerInterface {
 		$id = Validation::validateHasString($parameters, 'id');
 
 		try {
-			$db->itemDAO()->loseItem(new ItemCode($id));
-//		} catch(NotFoundException $ignored) {
-//			$responseCode = 404;
-		} catch(ValidationException $e) {
-			throw new InvalidPayloadParameterException('*', $id, $e->getMessage());
+			$code = new ItemCode($id);
+		} catch(\InvalidArgumentException | ValidationException $e) {
+			throw new NotFoundException($id);
 		}
+		$db->itemDAO()->loseItem($code);
 
 		return new EmptyResponse(204);
 	}
@@ -425,7 +425,11 @@ class Controller implements RequestHandlerInterface {
 		// TODO: rename to limit?
 		$length = Validation::validateOptionalInt($query, 'length', 20);
 
-		$item = new ItemCode($id);
+		try {
+			$item = new ItemCode($id);
+		} catch(\InvalidArgumentException | ValidationException $e) {
+			throw new NotFoundException($id);
+		}
 
 		if(!$db->itemDAO()->itemExists($item)) {
 			throw new NotFoundException();
@@ -508,10 +512,16 @@ class Controller implements RequestHandlerInterface {
 			}
 		}
 
+		try {
+			$item = new ItemCode($location);
+		} catch(\InvalidArgumentException | ValidationException $e) {
+			throw new NotFoundException($location);
+		}
+
 		$data = $db->statsDAO()->getCountByFeature(
 			$feature,
 			$filter,
-			$location === null ? null : new ItemCode($location),
+			$location === null ? null : $item,
 			$creation === null ? null : new \DateTime($creation),
 			$deleted,
 			$cutoff

@@ -2,15 +2,18 @@
 
 namespace WEEEOpen\Tarallo;
 
+use Throwable;
+
 class NotFoundException extends \RuntimeException {
 	public $status = 404;
-	/**
-	 * NotFoundException constructor.
-	 *
-	 * @param int $code
-	 * @param null $message
-	 */
-	public function __construct($code = 0, $message = null) {
-		parent::__construct($message ?? 'Not found/no results', $code);
+	public $item = null;
+
+	public function __construct(?string $item = null, $message = null, $code = 0, Throwable $previous = null) {
+		if($item === null) {
+			parent::__construct($message ?? 'Not found/no results', $code, $previous);
+		} else {
+			parent::__construct($message ?? "Item $item does not exist", $code, $previous);
+			$this->item = $item;
+		}
 	}
 }
