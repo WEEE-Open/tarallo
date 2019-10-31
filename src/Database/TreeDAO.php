@@ -11,9 +11,6 @@ use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\NotFoundException;
 
 final class TreeDAO extends DAO {
-	const EXCEPTION_CODE_PARENT = 1;
-	const EXCEPTION_CODE_CHILD = 2;
-
 	public static function moveWithValidation(
 		Database $db,
 		ItemWithCode $what,
@@ -36,11 +33,7 @@ final class TreeDAO extends DAO {
 			$newParent = ItemValidator::fixupLocation($item, $newParent);
 		}
 		if($validate) {
-			try {
-				ItemValidator::validateLocation($item, $newParent);
-			} catch(ItemNestingException $e) {
-				throw new InvalidPayloadParameterException('*', $e->parentCode, $e->getMessage());
-			}
+			ItemValidator::validateLocation($item, $newParent);
 		}
 		if($newParent === null) {
 			throw new \LogicException(

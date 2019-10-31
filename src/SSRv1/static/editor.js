@@ -1446,9 +1446,7 @@
 	 * @param {HTMLElement} element
 	 */
 	function fixDiv(element) {
-		//console.log("Type type type!");
 		for(let node of element.childNodes) {
-			//console.log(node);
 			if(node.nodeType === 3) {
 				let div = document.createElement('div');
 				div.textContent = node.textContent;

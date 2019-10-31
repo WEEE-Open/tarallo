@@ -188,35 +188,14 @@ class Controller implements RequestHandlerInterface {
 		}
 
 		if($validate) {
-			try {
-				ItemValidator::validateLocation($item, $parent);
-			} catch(ItemNestingException $e) {
-				throw new InvalidPayloadParameterException('parent', $e->parentCode, $e->getMessage());
-			} catch(ValidationException $e) {
-				throw new InvalidPayloadParameterException('location', null, $e->getMessage());
-			}
-			try {
-				ItemValidator::validateFeatures($item);
-			} catch(ValidationException $e) {
-				// Yyyyep, JSEnd "fail"s are basically unusable in the real world.
-				// This stuff really needs to go.
-				throw new InvalidPayloadParameterException('*', '*', $e->getMessage());
-			}
+			ItemValidator::validateLocation($item, $parent);
+			ItemValidator::validateFeatures($item);
 		}
 
 		try {
 			$db->itemDAO()->addItem($item, $parent);
 		} catch(DuplicateItemCodeException $e) {
 			throw new InvalidPayloadParameterException('code', $e->duplicate, $e->getMessage());
-		} catch(NotFoundException $e) {
-			if($e->getCode() === TreeDAO::EXCEPTION_CODE_PARENT) {
-				throw new InvalidPayloadParameterException(
-					'parent', $parent->getCode(),
-					'Requested location doesn\'t exist'
-				);
-			} else {
-				throw $e;
-			}
 		} catch(\InvalidArgumentException $e) {
 			if($e->getCode() === ItemDAO::EXCEPTION_CODE_GENERATE_ID) {
 				throw new InvalidPayloadParameterException(

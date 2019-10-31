@@ -58,7 +58,7 @@ class ErrorResponse implements \JsonSerializable {
 		if(isset($this->message)) {
 			$result['message'] = $this->message;
 		}
-		if(isset($this->code)) {
+		if(isset($this->code) && $this->code !== 0) {
 			$result['code'] = $this->code;
 		}
 		if(isset($this->item)) {

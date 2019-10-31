@@ -75,7 +75,6 @@ button:disabled, button:disabled:hover, button:disabled:active, input[type="subm
 nav#top {
 	margin-bottom: 1.5em;
 	box-shadow: 0 0.3em 0.6em -0.3em rgba(0,0,0,0.29);
-	white-space: nowrap;
 }
 
 nav#top nav {

@@ -283,7 +283,7 @@ final class ItemDAO extends DAO {
 	 */
 	public function getItem(ItemWithCode $itemToGet, $token = null, int $depth = null) {
 		if($token !== null && !$this->checkToken($itemToGet, $token)) {
-			throw new NotFoundException();
+			throw new NotFoundException($itemToGet->peekCode());
 		}
 
 		if($depth === null) {

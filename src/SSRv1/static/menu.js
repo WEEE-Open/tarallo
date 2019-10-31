@@ -106,19 +106,22 @@
 
 			let warning = quickMove.getElementsByClassName('warning')[0];
 			let error = quickMove.getElementsByClassName('error')[0];
-			let jsend;
+
+			let json;
 
 			try {
-				jsend = await response.json();
+				json = await response.json();
 			} catch(e) {
 				console.log(response);
 				error.style.display = '';
 				throw e;
 			}
 
-			if(response.status === 404) {
-				let errorText = `Item ${parent} doesn't exist`;
-				if(jsend.code === 1) {
+			console.log(json);
+
+			let errorText;
+			if(response.status === 404 && 'item' in json) {
+				if(json.item === parent) {
 					errorText = `Item ${parent} doesn't exist`;
 					quickMoveParent.setCustomValidity(errorText);
 				} else {
@@ -127,22 +130,18 @@
 				}
 				warning.style.display = '';
 				warning.textContent = errorText;
-				return false;
-			}
-
-			console.log(jsend);
-
-			if(jsend.status === 'fail') {
-				warning.style.display = '';
-				if(typeof jsend.data['*'] === 'string') {
-					warning.textContent = jsend.data['*'];
+			} else if(response.status === 400 && json.exception === 'WEEEOpen\\Tarallo\\ItemNestingException' && 'item' in json && 'other_item' in json) {
+				if('message' in json) {
+					errorText = `Cannot place ${json.item} inside ${json.other_item}: ${json.message}`;
 				} else {
-					warning.textContent = jsend.data.toString();
+					errorText = `Cannot place ${json.item} inside ${json.other_item}`;
 				}
-				return false;
+				warning.style.display = '';
+				warning.textContent = errorText;
+			} else {
+				error.style.display = '';
 			}
-
-			quickMove.getElementsByClassName('error')[0].style.display = '';
+			return false;
 		}
 		return false;
 	});

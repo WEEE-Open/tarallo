@@ -214,23 +214,14 @@ class ItemValidator {
 		}
 
 		if($type === 'case' && $parentType !== 'location') {
-			throw new ItemNestingException(
-				'Cases should be inside a location',
-				$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
-			);
+			throw new ItemNestingException($item->peekCode(), $container->peekCode(), 'Cases should be inside a location');
 		} else if(self::shouldBeInMotherboard($type)) {
 			if($parentType !== 'case' && $parentType !== 'location' && $parentType !== 'motherboard') {
-				throw new ItemNestingException(
-					'RAMs, CPUs and expansion cards cards should be inside a case, location or motherboard',
-					$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
-				);
+				throw new ItemNestingException($item->peekCode(), $container->peekCode(), 'RAMs, CPUs and expansion cards cards should be inside a case, location or motherboard');
 			}
 		} else {
 			if($parentType !== 'case' && $parentType !== 'location') {
-				throw new ItemNestingException(
-					'Normal items can be placed only inside cases and locations',
-					$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
-				);
+				throw new ItemNestingException($item->peekCode(), $container->peekCode(), 'Normal items can be placed only inside cases and locations');
 			}
 		}
 
@@ -238,10 +229,7 @@ class ItemValidator {
 			if(!self::compareFeature($item, $container, 'cpu-socket')) {
 				$itemValue = $item->getFeatureValue('cpu-socket');
 				$parentValue = $container->getFeatureValue('cpu-socket');
-				throw new ItemNestingException(
-					"Incompatible socket: CPU is $itemValue, motherboard is $parentValue",
-					$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
-				);
+				throw new ItemNestingException($item->peekCode(), $container->peekCode(), "Incompatible socket: CPU is $itemValue, motherboard is $parentValue");
 			}
 		}
 
@@ -249,18 +237,12 @@ class ItemValidator {
 			if(!self::compareFeature($item, $container, 'ram-form-factor')) {
 				$itemValue = $item->getFeatureValue('ram-form-factor');
 				$parentValue = $container->getFeatureValue('ram-form-factor');
-				throw new ItemNestingException(
-					"Incompatible form factor: RAM is $itemValue, motherboard is $parentValue",
-					$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
-				);
+				throw new ItemNestingException($item->peekCode(), $container->peekCode(), "Incompatible form factor: RAM is $itemValue, motherboard is $parentValue");
 			}
 			if(!self::compareFeature($item, $container, 'ram-type')) {
 				$itemValue = $item->getFeatureValue('ram-type');
 				$parentValue = $container->getFeatureValue('ram-type');
-				throw new ItemNestingException(
-					"Incompatible standard: RAM is $itemValue, motherboard is $parentValue",
-					$item->hasCode() ? $item->getCode() : '', $container->hasCode() ? $container->getCode() : ''
-				);
+				throw new ItemNestingException($item->peekCode(), $container->peekCode(), "Incompatible standard: RAM is $itemValue, motherboard is $parentValue");
 			}
 		}
 
