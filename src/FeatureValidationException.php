@@ -13,7 +13,7 @@ class FeatureValidationException extends \RuntimeException {
 	public $feature = null;
 	public $featurePath = null;
 
-	public function __construct(?$feature = null, ?string $featurePath = null, ?string $item = null, $message = null, $code = 0, Throwable $previous = null) {
+	public function __construct($feature = null, ?string $featurePath = null, ?string $item = null, $message = null, $code = 0, Throwable $previous = null) {
 		$this->featurePath = $featurePath;
 		if($item === null && $feature === null) {
 			parent::__construct($message ?? 'Validation failed', $code, $previous);

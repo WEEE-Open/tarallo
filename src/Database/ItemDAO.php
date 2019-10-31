@@ -73,7 +73,7 @@ final class ItemDAO extends DAO {
 			$statement->execute([$item->getCode()]);
 		} catch(\PDOException $e) {
 			if($e->getCode() === '45000' && $statement->errorInfo()[2] === 'Cannot delete an item while contains other items') {
-				throw new ValidationException($item->getCode(), 'Cannot delete an item while contains other items', $e);
+				throw new ValidationException($item->getCode(), 'Cannot delete an item while contains other items', 0, $e);
 			}
 			throw $e;
 		} finally {

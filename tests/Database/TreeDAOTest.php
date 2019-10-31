@@ -198,9 +198,14 @@ class TreeDAOTest extends DatabaseTest {
 		$db = $this->getDb();
 		$db->itemDAO()->addItem($chernobyl);
 
-		$this->expectException(NotFoundException::class);
-		$this->expectExceptionCode(TreeDAO::EXCEPTION_CODE_CHILD);
-		$db->treeDAO()->moveItem(new ItemCode('SOMETHING'), new ItemCode('TAVOLONE'));
+		$e = null;
+		try {
+			$db->treeDAO()->moveItem(new ItemCode('SOMETHING'), new ItemCode('TAVOLONE'));
+		} catch(NotFoundException $e) {
+
+		}
+		$this->assertInstanceOf(NotFoundException::class, $e);
+		$this->assertEquals('SOMETHING', $e->item);
 	}
 
 	public function testTreeMoveToNonexistant() {
@@ -214,9 +219,14 @@ class TreeDAOTest extends DatabaseTest {
 		$db = $this->getDb();
 		$db->itemDAO()->addItem($chernobyl);
 
-		$this->expectException(NotFoundException::class);
-		$this->expectExceptionCode(TreeDAO::EXCEPTION_CODE_PARENT);
-		$db->treeDAO()->moveItem(new ItemCode('TAVOLONE'), new ItemCode('NOWHERE'));
+		$e = null;
+		try {
+			$db->treeDAO()->moveItem(new ItemCode('TAVOLONE'), new ItemCode('NOWHERE'));
+		} catch(NotFoundException $e) {
+
+		}
+		$this->assertInstanceOf(NotFoundException::class, $e);
+		$this->assertEquals('NOWHERE', $e->item);
 	}
 
 	public function testRemoveFromTree() {
