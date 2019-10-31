@@ -103,7 +103,11 @@ final class TreeDAO extends DAO {
 			throw new NotFoundException(self::EXCEPTION_CODE_CHILD);
 		}
 
-		$this->database->itemDAO()->unlose($item);
+		// If it is an ItemCode or something else that doesn't have the LostAt property fetched, unlose it
+		// If it's marked as lost and we know it, unlose it
+		if(!($item instanceof Item) || ($item instanceof Item && $item->getLostAt() !== null)) {
+			$this->database->itemDAO()->unlose($item);
+		}
 
 		$this->splitSubtree($item);
 		if($newParent !== null) {
