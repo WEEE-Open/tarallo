@@ -50,8 +50,8 @@ class Summary {
 			case 'network-hub':
 			case 'modem-router':
 				return SimpleDeviceSummarizer::summarize($item);
-			// case 'monitor':
-				// return SomeSummarizer::summarize($item);
+			 case 'monitor':
+				return MonitorSummarizer::summarize($item);
 
 			// case 'fdd':
 			// case 'zip-drive':
