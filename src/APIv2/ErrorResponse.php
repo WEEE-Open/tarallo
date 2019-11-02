@@ -11,7 +11,7 @@ class ErrorResponse implements \JsonSerializable {
 	public $item;
 	public $otherItem;
 	public $feature;
-	public $featurePath;
+	public $itemPath;
 	public $status = 500;
 	public $trace;
 
@@ -35,8 +35,8 @@ class ErrorResponse implements \JsonSerializable {
 		if(isset($e->feature)) {
 			$error->feature = $e->feature;
 		}
-		if(isset($e->featurePath)) {
-			$error->featurePath = $e->featurePath;
+		if(isset($e->itemPath)) {
+			$error->itemPath = $e->itemPath;
 		}
 		if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
 			$error->trace = $e->getTraceAsString();
@@ -70,8 +70,8 @@ class ErrorResponse implements \JsonSerializable {
 		if(isset($this->feature)) {
 			$result['feature'] = $this->feature;
 		}
-		if(isset($this->featurePath)) {
-			$result['feature_path'] = $this->featurePath;
+		if(isset($this->itemPath)) {
+			$result['item_path'] = $this->itemPath;
 		}
 //		if(isset($this->status)) {
 //			$result['status'] = $this->status;

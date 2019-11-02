@@ -73,7 +73,7 @@ final class ItemDAO extends DAO {
 			$statement->execute([$item->getCode()]);
 		} catch(\PDOException $e) {
 			if($e->getCode() === '45000' && $statement->errorInfo()[2] === 'Cannot delete an item while contains other items') {
-				throw new ValidationException($item->getCode(), 'Cannot delete an item while contains other items', 0, $e);
+				throw new ValidationException($item->getCode(), null, 'Cannot delete an item while contains other items', 0, $e);
 			}
 			throw $e;
 		} finally {
@@ -95,7 +95,7 @@ final class ItemDAO extends DAO {
 		} catch(\PDOException $e) {
 			if($e->getCode() === '45000'
 				&& $statement->errorInfo()[2] === 'Cannot mark an item as lost while it contains other items') {
-				throw new ValidationException($item->getCode(), 'Cannot mark an item as lost while it contains other items');
+				throw new ValidationException($item->getCode(), null, 'Cannot mark an item as lost while it contains other items');
 			}
 			throw $e;
 		} finally {

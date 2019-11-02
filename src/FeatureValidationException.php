@@ -8,13 +8,11 @@ use Throwable;
  * When items are invalid other than for their location.
  */
 class FeatureValidationException extends \RuntimeException {
+	use ExceptionWithItem, ExceptionWithPath, ExceptionWithFeature;
 	public $status = 400;
-	public $item = null;
-	public $feature = null;
-	public $featurePath = null;
 
-	public function __construct($feature = null, ?string $featurePath = null, ?string $item = null, $message = null, $code = 0, Throwable $previous = null) {
-		$this->featurePath = $featurePath;
+	public function __construct($feature = null, $value = null, ?string $itemPath = null, ?string $item = null, $message = null, $code = 0, Throwable $previous = null) {
+		$this->itemPath = $itemPath;
 		if($item === null && $feature === null) {
 			parent::__construct($message ?? 'Validation failed', $code, $previous);
 		} elseif($feature === null) {
@@ -28,5 +26,6 @@ class FeatureValidationException extends \RuntimeException {
 			$this->item = $item;
 			$this->feature = $feature;
 		}
+		$this->featureValue = $value;
 	}
 }

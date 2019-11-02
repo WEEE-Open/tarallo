@@ -3,7 +3,7 @@
 namespace WEEEOpen\Tarallo\APIv2;
 
 use WEEEOpen\Tarallo\Feature;
-use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;
+use WEEEOpen\Tarallo\FeatureValidationException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemWithFeatures;
@@ -19,21 +19,15 @@ class ItemBuilder {
 	 *
 	 * @return Item
 	 */
-	public static function ofArray(array $input, $code, &$parent) {
-		$item = self::ofArrayInternal($input, $code);
+	public static function ofArray(array $input, ?string $code, &$parent) {
+		$item = self::ofArrayInternal($input, $code, [0]);
 
 		if(isset($input['parent'])) {
 			try {
 				$parent = new ItemCode($input['parent']);
 			} catch(ValidationException $e) {
-				if($e->getCode() === 3) {
-					throw new InvalidPayloadParameterException(
-						'parent', $input['parent'],
-						'Parent: ' . $e->getMessage()
-					);
-				} else {
-					throw $e;
-				}
+				$e->setItemPath([]);
+				throw $e;
 			}
 		} else {
 			$parent = null;
@@ -44,62 +38,60 @@ class ItemBuilder {
 
 	/**
 	 * @param array $input Decoded JSON from the client
-	 * @param string|null $code Code for new item, if explicitly set
+	 * @param string|null $code Code for new item, if supplied outside of item
+	 * @param int[] $path
 	 * @param boolean $inner Used for recursion
 	 *
 	 * @return Item
 	 * @see ofArray
-	 *
 	 */
-	private static function ofArrayInternal(array $input, $code, $inner = false) {
+	private static function ofArrayInternal(array $input, ?string $code, array $path, $inner = false) {
 		try {
 			$item = new Item($code);
 		} catch(ValidationException $e) {
-			if($e->getCode() === 3) {
-				throw new InvalidPayloadParameterException('*', $code, $e->getMessage());
-			} else {
-				throw $e;
-			}
-		}
-
-		if($inner && isset($input['parent'])) {
-			throw new InvalidPayloadParameterException(
-				'parent', $input['parent'],
-				'Cannot set parent for internal items'
-			);
+			$e->setItemPath($path);
+			throw $e;
 		}
 
 		if(isset($input['code'])) {
 			if($inner) {
-				$item->setCode($input['code']);
+				try {
+					$item->setCode($input['code']);
+				} catch(ValidationException $e) {
+					$e->setItemPath($path);
+					throw $e;
+				}
+				$code = $item->getCode();
 			} else {
-				throw new InvalidPayloadParameterException(
-					'code', $input['code'],
-					'Cannot set code for head/root item this way, use the URI'
-				);
+				throw new ValidationException($code, $path, 'Cannot set code for head/root item this way, use the URI');
 			}
 		}
 
+		if($inner && isset($input['parent'])) {
+			throw new ValidationException($code, $path, 'Cannot set parent for internal items');
+		}
+
 		if(isset($input['features'])) {
+			if(!is_array($input['features'])) {
+				throw new ValidationException($code, $path, 'Features must be an array, ' . gettype($input['features']) . ' given');
+			}
 			try {
 				self::addFeatures($input['features'], $item);
-			} /** @noinspection PhpUndefinedClassInspection */ catch(\TypeError $e) {
-				throw new InvalidPayloadParameterException(
-					'features', '',
-					'Features must be an array, ' . gettype($input['features']) . ' given'
-				);
+			} catch(FeatureValidationException $e) {
+				$e->setItem($code);
+				$e->setItemPath($path);
+				throw $e;
 			}
 		}
 
 		if(isset($input['contents'])) {
-			if(!is_array($input['contents'])) {
-				throw new InvalidPayloadParameterException(
-					'contents', '',
-					'Contents must be an array, ' . gettype($input['contents']) . ' given'
-				);
+			if(!is_array($input['features'])) {
+				throw new ValidationException($code, $path, 'Contents must be an array, ' . gettype($input['features']) .	' given');
 			}
+			$id = 0;
 			foreach($input['contents'] as $other) {
-				$item->addContent(self::ofArrayInternal($other, null, true));
+				$item->addContent(self::ofArrayInternal($other, null, array_merge($path, [$id]), true));
+				$id++;
 			}
 		}
 
@@ -119,10 +111,7 @@ class ItemBuilder {
 			try {
 				$item->addFeature(Feature::ofString($name, $value));
 			} catch(\Throwable $e) {
-				throw new InvalidPayloadParameterException(
-					is_string($name) ? $name : '?', $value,
-					'Features: ' . $e->getMessage()
-				);
+				throw new FeatureValidationException($name, $value, null, null, $e->getMessage());
 			}
 		}
 	}
@@ -136,7 +125,6 @@ class ItemBuilder {
 	 * @return string[] Features to be removed
 	 *
 	 * @see addFeatures
-	 * @TODO a specific class for ItemFeatures only? (aka: bring back ItemFeatures)
 	 */
 	public static function addFeaturesDelta(array $features, ItemWithFeatures $item) {
 		$delete = [];

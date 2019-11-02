@@ -53,7 +53,7 @@ class Controller implements RequestHandlerInterface {
 		} else {
 			try {
 				$item = new ItemCode($id);
-			} catch(\InvalidArgumentException | ValidationException $e) {
+			} catch(ValidationException $e) {
 				throw new NotFoundException($id);
 			}
 
@@ -105,12 +105,12 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$item = new ItemCode($id);
-		} catch(\InvalidArgumentException | ValidationException $e) {
+		} catch(ValidationException $e) {
 			throw new NotFoundException($id);
 		}
 		try {
 			$newParent = new ItemCode($payload);
-		} catch(\InvalidArgumentException | ValidationException $e) {
+		} catch(ValidationException $e) {
 			throw new InvalidPayloadParameterException('*', $payload, 'Location does not exist');
 		}
 
@@ -227,7 +227,7 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$db->itemDAO()->deleteItem(new ItemCode($id));
-		} catch(\InvalidArgumentException | ValidationException $e) {
+		} catch(ValidationException $e) {
 			throw new NotFoundException($id);
 		}
 
@@ -248,12 +248,12 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$item = new ItemCode($id);
-		} catch(\InvalidArgumentException | ValidationException $e) {
+		} catch(ValidationException $e) {
 			throw new NotFoundException($id);
 		}
 		try {
 			$newParent = new ItemCode($payload);
-		} catch(\InvalidArgumentException | ValidationException $e) {
+		} catch(ValidationException $e) {
 			throw new NotFoundException($payload);
 		}
 
@@ -276,7 +276,7 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$code = new ItemCode($id);
-		} catch(\InvalidArgumentException | ValidationException $e) {
+		} catch(ValidationException $e) {
 			throw new NotFoundException($id);
 		}
 		$db->itemDAO()->loseItem($code);
@@ -406,7 +406,7 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$item = new ItemCode($id);
-		} catch(\InvalidArgumentException | ValidationException $e) {
+		} catch(ValidationException $e) {
 			throw new NotFoundException($id);
 		}
 
@@ -493,7 +493,7 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$item = new ItemCode($location);
-		} catch(\InvalidArgumentException | ValidationException $e) {
+		} catch(ValidationException $e) {
 			throw new NotFoundException($location);
 		}
 

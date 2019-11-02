@@ -19,7 +19,7 @@ trait ItemTraitCode {
 			self::validateCode($code);
 			$this->code = $code;
 		} else {
-			throw new \InvalidArgumentException('Item code must be a non-empty alphanumeric string or null');
+			throw new ValidationException((string) $code, null, 'Item code must be a non-empty alphanumeric string or null');
 		}
 	}
 
@@ -30,7 +30,7 @@ trait ItemTraitCode {
 			$valid = preg_match('/^[a-zA-Z0-9]+$/', $code);
 		}
 		if(!$valid) {
-			throw new ValidationException($code, "Code must be alphanumeric, '$code' isn't");
+			throw new ValidationException($code, null, "Code must be alphanumeric, '$code' isn't");
 		}
 	}
 
@@ -39,7 +39,7 @@ trait ItemTraitCode {
 	}
 
 	public function peekCode(): ?string {
-		return $this->getCode();
+		return $this->code;
 	}
 
 	public function hasCode(): bool {

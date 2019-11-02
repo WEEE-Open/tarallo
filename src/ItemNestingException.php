@@ -5,8 +5,8 @@ namespace WEEEOpen\Tarallo;
 use Throwable;
 
 class ItemNestingException extends \RuntimeException {
+	use ExceptionWithItem, ExceptionWithPath, ExceptionWithFeature;
 	public $status = 400;
-	public $item = null;
 	public $otherItem = null;
 
 	/**
@@ -14,12 +14,12 @@ class ItemNestingException extends \RuntimeException {
 	 *
 	 * @param string $item Item that can't be placed there
 	 * @param string $parent Parent item that can't accept it
+	 * @param array|null $path Item path, for GUIs
 	 * @param string $message Explanation of the impossible nesting
 	 * @param int $code
 	 * @param Throwable|null $previous
 	 */
-	public function __construct(?string $item = null, ?string $parent = null, $message = null, $code = 0, Throwable $previous = null) {
-		// TODO: add a feature (for item and parent) argument, when features collide and prevent nesting?
+	public function __construct(?string $item = null, ?string $parent = null, ?array $path = null, $message = null, $code = 0, Throwable $previous = null) {
 		if($item === null && $parent === null) {
 			parent::__construct($message ?? "Cannot place item there", $code, $previous);
 		} elseif($item === null) {
@@ -31,5 +31,6 @@ class ItemNestingException extends \RuntimeException {
 		}
 		$this->item = $item;
 		$this->otherItem = $parent;
+		$this->itemPath = $path;
 	}
 }
