@@ -3,11 +3,15 @@
 namespace WEEEOpen\Tarallo\Database;
 
 
-class DuplicateItemCodeException extends \Exception {
-	public $duplicate;
+use Throwable;
+use WEEEOpen\Tarallo\ExceptionWithItem;
 
-	public function __construct(string $item) {
-		parent::__construct('Duplicate code: ' . $item, 1062);
-		$this->duplicate = $item;
+class DuplicateItemCodeException extends \RuntimeException {
+	use ExceptionWithItem;
+	public $status = 400;
+
+	public function __construct(string $item, $message = null, $code = 0, Throwable $previous = null) {
+		parent::__construct($message ?? 'Duplicate code: ' . $item, $code, $previous);
+		$this->item = $item;
 	}
 }

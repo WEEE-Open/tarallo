@@ -23,8 +23,10 @@ use WEEEOpen\Tarallo\HTTP\Validation;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemNestingException;
+use WEEEOpen\Tarallo\ItemPrefixerException;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
+use WEEEOpen\Tarallo\SearchException;
 use WEEEOpen\Tarallo\ValidationException;
 use Zend\Diactoros\Response\EmptyResponse;
 use Zend\Diactoros\Response\JsonResponse;
@@ -178,7 +180,7 @@ class Controller implements RequestHandlerInterface {
 			try {
 				$parent = $db->itemDAO()->getItem($parent, null, 1);
 			} catch(NotFoundException $e) {
-				throw new InvalidPayloadParameterException('parent', $parent->getCode(), 'Location doesn\'t exist');
+				throw new NotFoundException($parent->getCode(), 'Location doesn\'t exist', 0, $e);
 			}
 		}
 
@@ -194,17 +196,9 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$db->itemDAO()->addItem($item, $parent);
-		} catch(DuplicateItemCodeException $e) {
-			throw new InvalidPayloadParameterException('code', $e->duplicate, $e->getMessage());
-		} catch(\InvalidArgumentException $e) {
-			if($e->getCode() === ItemDAO::EXCEPTION_CODE_GENERATE_ID) {
-				throw new InvalidPayloadParameterException(
-					'code', null,
-					'Cannot generate code for an item (missing "type"?)'
-				);
-			} else {
-				throw $e;
-			}
+		} catch(ItemPrefixerException $e) {
+			// TODO: $e->setItemPath();
+			throw $e;
 		}
 
 		if($loopback) {
@@ -485,9 +479,13 @@ class Controller implements RequestHandlerInterface {
 		if($filter !== null) {
 			try {
 				$explosion = Validation::explodeFeatureValuePair($feature);
+			} catch(\InvalidArgumentException $e) {
+				throw new SearchException(null, null, $e->getMessage(), 0, $e);
+			}
+			try {
 				$filter = new Feature($explosion[0], $explosion[1]);
 			} catch(\InvalidArgumentException $e) {
-				throw new InvalidPayloadParameterException('filter', $e->getMessage());
+				throw new SearchException($explosion[0], $explosion[1], $e->getMessage(), 0, $e);
 			}
 		}
 

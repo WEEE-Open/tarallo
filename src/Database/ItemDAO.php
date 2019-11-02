@@ -22,11 +22,7 @@ final class ItemDAO extends DAO {
 	 */
 	public function addItem(ItemWithFeatures $item, ItemWithCode $parent = null) {
 		if(!$item->hasCode()) {
-			try {
-				$prefix = ItemPrefixer::get($item);
-			} catch(\InvalidArgumentException $e) {
-				throw new \InvalidArgumentException($e->getMessage(), self::EXCEPTION_CODE_GENERATE_ID);
-			}
+			$prefix = ItemPrefixer::get($item);
 			$code = $this->getNewCode($prefix);
 			$item->setCode($code);
 		}

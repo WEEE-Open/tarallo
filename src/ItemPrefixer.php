@@ -9,15 +9,14 @@ class ItemPrefixer {
 	 * Long term project: move this data to the database or a configuration file,
 	 * to allow other people to use their own prefixes.
 	 *
-	 * @param Item $item
+	 * @param ItemWithFeatures $item
 	 *
 	 * @return string
-	 * @throws \InvalidArgumentException if required features for type generation are not present
 	 */
-	public static function get(Item $item) {
+	public static function get(ItemWithFeatures $item) {
 		$features = $item->getFeatures();
 		if(!isset($features['type'])) {
-			throw new \InvalidArgumentException('Item has no type, cannot generate code');
+			throw new ItemPrefixerException(null, 'Item has no type, cannot generate code');
 		}
 		switch($features['type']->value) {
 			case 'mouse':
@@ -41,7 +40,7 @@ class ItemPrefixer {
 				} else if(self::has('scsi-sca2-ports-n', $features) || self::has('scsi-db68-ports-n', $features)) {
 					return 'SC';
 				} else {
-					throw new \InvalidArgumentException('No or unknown hard drive connector, cannot generate a code');
+					throw new ItemPrefixerException(null, 'No or unknown hard drive connector, cannot generate a code');
 				}
 			case 'odd':
 				return 'ODD';
@@ -75,7 +74,7 @@ class ItemPrefixer {
 			case 'case':
 				return '';
 			default:
-				throw new \InvalidArgumentException('No prefix found for type ' . $features['type']);
+				throw new ItemPrefixerException(null, 'No prefix found for type ' . $features['type']);
 		}
 	}
 
