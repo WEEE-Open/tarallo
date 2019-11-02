@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Test\Database;
+namespace WEEEOpen\TaralloTest\Database;
 
 use WEEEOpen\Tarallo\Database\TreeDAO;
 use WEEEOpen\Tarallo\Feature;
@@ -205,7 +205,7 @@ class TreeDAOTest extends DatabaseTest {
 
 		}
 		$this->assertInstanceOf(NotFoundException::class, $e);
-		$this->assertEquals('SOMETHING', $e->item);
+		$this->assertEquals('SOMETHING', $e->getItem());
 	}
 
 	public function testTreeMoveToNonexistant() {
@@ -226,7 +226,7 @@ class TreeDAOTest extends DatabaseTest {
 
 		}
 		$this->assertInstanceOf(NotFoundException::class, $e);
-		$this->assertEquals('NOWHERE', $e->item);
+		$this->assertEquals('NOWHERE', $e->getItem());
 	}
 
 	public function testRemoveFromTree() {

@@ -30,6 +30,12 @@ class AuthValidator implements MiddlewareInterface {
 		$this->level = $level;
 	}
 
+	public static function ensureLevel(User $user, $requiredLevel) {
+		if($user->getLevel() > $requiredLevel) {
+			throw new AuthorizationException();
+		}
+	}
+
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var User $user */
 		$user = $request->getAttribute('User');
@@ -38,9 +44,7 @@ class AuthValidator implements MiddlewareInterface {
 			throw new AuthenticationException();
 		}
 
-		if($user->getLevel() > $this->level) {
-			throw new AuthorizationException();
-		}
+		self::ensureLevel($user, $this->level);
 
 		return $handler->handle($request);
 	}

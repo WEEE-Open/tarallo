@@ -17,7 +17,7 @@ class ItemCodeTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\ItemCode
 	 */
 	public function testItemIntCode() {
-		$this->expectException(InvalidArgumentException::class);
+		$this->expectException(\WEEEOpen\Tarallo\ValidationException::class);
 		new ItemCode(42);
 	}
 
@@ -25,7 +25,7 @@ class ItemCodeTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\ItemCode
 	 */
 	public function testItemNullCode() {
-		$this->expectException(InvalidArgumentException::class);
+		$this->expectException(\WEEEOpen\Tarallo\ValidationException::class);
 		new ItemCode(null);
 	}
 
@@ -33,7 +33,7 @@ class ItemCodeTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\ItemCode
 	 */
 	public function testItemEmptyCode() {
-		$this->expectException(InvalidArgumentException::class);
+		$this->expectException(\WEEEOpen\Tarallo\ValidationException::class);
 		new ItemCode('');
 	}
 
@@ -41,7 +41,7 @@ class ItemCodeTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\ItemCode
 	 */
 	public function testItemArrayCode() {
-		$this->expectException(InvalidArgumentException::class);
+		$this->expectException(\WEEEOpen\Tarallo\ValidationException::class);
 		/** @noinspection PhpParamsInspection it's part of the test */
 		new ItemCode(["cose" => "a caso"]);
 	}

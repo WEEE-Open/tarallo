@@ -157,7 +157,7 @@ final class UserDAO extends DAO {
 	 *
 	 * @param $username
 	 */
-	private function setAuditUsername($username) {
+	public function setAuditUsername($username) {
 		try {
 			$s = $this->getPDO()->prepare(
 			/** @lang MySQL */

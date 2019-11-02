@@ -101,7 +101,7 @@ final class SearchDAO extends DAO {
 	 */
 	private function newSearch(User $user) {
 		$s = $this->getPDO()->prepare('INSERT INTO Search(`Owner`) VALUES (?)');
-		$result = $s->execute([$user->getUsername()]);
+		$result = $s->execute([$user->uid]);
 		assert($result !== false, 'start search');
 		return (int) $this->getPDO()->lastInsertId();
 	}

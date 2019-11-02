@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Test\Database;
+namespace WEEEOpen\TaralloTest\Database;
 
 use WEEEOpen\Tarallo\Database\DuplicateItemCodeException;
 use WEEEOpen\Tarallo\Feature;

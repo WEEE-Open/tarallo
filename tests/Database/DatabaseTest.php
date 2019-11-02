@@ -1,6 +1,6 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Test\Database;
+namespace WEEEOpen\TaralloTest\Database;
 
 use PHPUnit\DbUnit\DataSet\YamlDataSet;
 use PHPUnit\DbUnit\TestCase;

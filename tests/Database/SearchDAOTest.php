@@ -1,14 +1,18 @@
 <?php
 
-namespace WEEEOpen\Tarallo\Test\Database;
+namespace WEEEOpen\TaralloTest\Database;
 
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\Search;
 use WEEEOpen\Tarallo\SearchTriplet;
+use WEEEOpen\Tarallo\SessionSSO;
 use WEEEOpen\Tarallo\User;
 
+/**
+ * @covers \WEEEOpen\Tarallo\Database\SearchDAO
+ */
 class SearchDAOTest extends DatabaseTest {
 	private function getSample() {
 		$pc['PC20'] = (new Item('PC20'))
@@ -46,6 +50,13 @@ class SearchDAOTest extends DatabaseTest {
 
 		return $pc;
 	}
+	
+	private function getUser() {
+		$session = new SessionSSO();
+		$session->cn = 'Asd Asd';
+		$session->uid = 'asd';
+		return User::fromSession($session);
+	}
 
 	private function loadSample(Database $db) {
 		$pc = $this->getSample();
@@ -54,15 +65,12 @@ class SearchDAOTest extends DatabaseTest {
 			$db->itemDAO()->addItem($i);
 		}
 	}
-
-	/**
-	 * @covers \WEEEOpen\Tarallo\Database\SearchDAO
-	 */
+	
 	public function testItemSearch() {
 		$db = $this->getDb();
 		$this->loadSample($db);
 
-		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('color', '=', 'white')]), new User('asd'));
+		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('color', '=', 'white')]), $this->getUser());
 		$this->assertTrue(is_int($id), 'Search ID should be an integer');
 		$items = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertContainsOnly(Item::class, $items);
@@ -71,15 +79,12 @@ class SearchDAOTest extends DatabaseTest {
 			'Only SCHIFOMACCHINA should be returned'); // excellent piece of hardware, by the way. 2 minutes from power on to POST OK.
 
 	}
-
-	/**
-	 * @covers \WEEEOpen\Tarallo\Database\SearchDAO
-	 */
+	
 	public function testItemSearchByCode() {
 		$db = $this->getDb();
 		$this->loadSample($db);
 
-		$id = $db->searchDAO()->search(new Search('PC%'), new User('asd'));
+		$id = $db->searchDAO()->search(new Search('PC%'), $this->getUser());
 		$this->assertTrue(is_int($id), 'Search ID should be an integer');
 
 		$items = $db->searchDAO()->getResults($id, 1, 100);
@@ -91,30 +96,27 @@ class SearchDAOTest extends DatabaseTest {
 		$db = $this->getDb();
 		$this->loadSample($db);
 
-		$id = $db->searchDAO()->search(new Search('PC%'), new User('asd'));
-		$idRefined = $db->searchDAO()->search(new Search('%0'), new User('asd'), $id);
+		$id = $db->searchDAO()->search(new Search('PC%'), $this->getUser());
+		$idRefined = $db->searchDAO()->search(new Search('%0'), $this->getUser(), $id);
 		$this->assertEquals($id, $idRefined, "Search id shouldn't change");
 
 		$items = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(2, count($items), 'There should be only 2 items');
 
-		$idRefined = $db->searchDAO()->search(new Search('notacode'), new User('asd'), $id);
+		$idRefined = $db->searchDAO()->search(new Search('notacode'), $this->getUser(), $id);
 		$this->assertEquals($id, $idRefined, "Search id shouldn't change, again");
 
 		$items = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertEquals(0, count($items), 'There should be no results now');
 	}
 
-	/**
-	 * @covers \WEEEOpen\Tarallo\Database\SearchDAO
-	 */
 	public function testItemSearchRefinementSorting() {
 		$db = $this->getDb();
 		$this->loadSample($db);
 
-		$id = $db->searchDAO()->search(new Search('PC%'), new User('asd'));
-		$idRefined = $db->searchDAO()->search(new Search(null, null, null, null, ['brand' => '-']), new User('asd'),
+		$id = $db->searchDAO()->search(new Search('PC%'), $this->getUser());
+		$idRefined = $db->searchDAO()->search(new Search(null, null, null, null, ['brand' => '-']), $this->getUser(),
 			$id);
 		$this->assertEquals($id, $idRefined, "Search id shouldn't change");
 
@@ -130,19 +132,16 @@ class SearchDAOTest extends DatabaseTest {
 	public function testSearchSortingOnly() {
 		$db = $this->getDb();
 		$this->expectException(\InvalidArgumentException::class);
-		$db->searchDAO()->search(new Search(null, null, null, null, ['brand' => '+']), new User('asd'));
+		$db->searchDAO()->search(new Search(null, null, null, null, ['brand' => '+']), $this->getUser());
 	}
 
-	/**
-	 * @covers \WEEEOpen\Tarallo\Database\SearchDAO
-	 */
 	public function testItemSearchSorting() {
 		$db = $this->getDb();
 		$this->loadSample($db);
 
 		$quest = new Search(null, [new SearchTriplet('type', '=', 'case')], null, null,
 			['motherboard-form-factor' => '-']);
-		$id = $db->searchDAO()->search($quest, new User('asd'));
+		$id = $db->searchDAO()->search($quest, $this->getUser());
 		$this->assertTrue(is_int($id), 'Search ID should be an integer');
 
 		$items = $db->searchDAO()->getResults($id, 1, 100);
@@ -159,9 +158,6 @@ class SearchDAOTest extends DatabaseTest {
 		}
 	}
 
-	/**
-	 * @covers \WEEEOpen\Tarallo\Database\SearchDAO
-	 */
 	public function testGettingItemsCheckPath() {
 		$db = $this->getDb();
 		$case = (new Item('PC42'))->addFeature(new Feature('brand', 'TI'));
@@ -172,7 +168,7 @@ class SearchDAOTest extends DatabaseTest {
 		$db->itemDAO()->addItem($case);
 
 		$id = $db->searchDAO()->search(new Search(null,
-			[new SearchTriplet('brand', '=', 'SATAn Storage Corporation Inc.')]), new User('asd'));
+			[new SearchTriplet('brand', '=', 'SATAn Storage Corporation Inc.')]), $this->getUser());
 		$items = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertEquals(2, count($items));
 		$this->assertInstanceOf(Item::class, $items[0]);
@@ -189,7 +185,7 @@ class SearchDAOTest extends DatabaseTest {
 		$this->loadSample($db);
 
 		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('type', '=', 'case')], null,
-			null, ['motherboard-form-factor' => '-']), new User('asd'));
+			null, ['motherboard-form-factor' => '-']), $this->getUser());
 		$items = $db->searchDAO()->getResults($id, 1, 100);
 		// this ugly code courtesy of var_export(json_decode(json_encode($items), true), true);
 		// Items are sorted by what the search says, then code ascending. Or they should, anyway.
@@ -265,9 +261,6 @@ class SearchDAOTest extends DatabaseTest {
 		$this->assertEquals($expected, $array, 'Selected items should encode to some meaningful JSON representation');
 	}
 
-	/**
-	 * @covers \WEEEOpen\Tarallo\Database\SearchDAO
-	 */
 	public function testItemSearchFiltering() {
 		$cpu['INTEL1'] = (new Item('INTEL1'))
 			->addFeature(new Feature('type', 'cpu'))
@@ -306,8 +299,8 @@ class SearchDAOTest extends DatabaseTest {
 			$db->itemDAO()->addItem($c);
 		}
 
-		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('type', '=', 'cpu')]), new User('asd'));
-		//$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('type', '=', 'cpu')], null, null, ['frequency-hertz', '+']), new User('asd'));
+		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('type', '=', 'cpu')]), $this->getUser());
+		//$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('type', '=', 'cpu')], null, null, ['frequency-hertz', '+']), $this->getUser());
 		$items = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertContainsOnly(Item::class, $items);
 		$this->assertEquals(6, count($items), 'There should be 6 items');
@@ -318,11 +311,11 @@ class SearchDAOTest extends DatabaseTest {
 			$this->assertEquals($cpu[$code], $items[$pos], 'Item ' . $code . ' should be unchanged)');
 		}
 
-		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('brand', '=', 'Intel')]), new User('asd'));
+		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('brand', '=', 'Intel')]), $this->getUser());
 		$items = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertEquals(0, count($items), 'No items returned without wildcard');
 
-		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('brand', '~', 'Intel%')]), new User('asd'));
+		$id = $db->searchDAO()->search(new Search(null, [new SearchTriplet('brand', '~', 'Intel%')]), $this->getUser());
 		$itemsLike = $db->searchDAO()->getResults($id, 1, 100);
 		$this->assertContainsOnly(Item::class, $itemsLike);
 		$this->assertEquals(4, count($itemsLike),

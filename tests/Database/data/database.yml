@@ -1,34 +1,5 @@
 Audit:
 
-User:
-  -
-    Name: asd
-    Password: "$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6"
-    Enabled: 1
-    SessionExpiry: "2010-01-01 10:20:30"
-    Level: 0
-  -
-    Name: not-enabled
-    Password: "$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6"
-    Enabled: 0
-    Session: this-really-is-a-session-1234567
-    SessionExpiry: "2038-01-03 00:00:00"
-    Level: 3
-  -
-    Name: asd-expired
-    Password: "$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6"
-    Enabled: 1
-    Session: this-really-is-a-session-7654321
-    SessionExpiry: "2010-01-01 10:20:30"
-    Level: 3
-  -
-    Name: asd-valid
-    Password: "$2y$10$wXP1ooxhHQ2X63Rgxi8GZeHkotzjwW2/M3HX/so1bwal4zDhsMyW6"
-    Enabled: 1
-    Session: this-really-is-a-valid-session-1
-    SessionExpiry: "2038-01-03 00:00:00"
-    Level: 3
-
 Item:
 
 ItemFeature:

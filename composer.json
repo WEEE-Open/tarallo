@@ -4,7 +4,8 @@
   "minimum-stability": "stable",
   "autoload": {
     "psr-4": {
-      "WEEEOpen\\Tarallo\\": "src/"
+      "WEEEOpen\\Tarallo\\": "src/",
+      "WEEEOpen\\TaralloTest": "tests/"
     }
   },
   "config": {

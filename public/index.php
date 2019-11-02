@@ -2,7 +2,6 @@
 
 namespace WEEEOpen\Tarallo;
 
-use WEEEOpen\Tarallo\APIv1;
 use WEEEOpen\Tarallo\APIv2\ErrorResponse;
 use WEEEOpen\Tarallo\SSRv1;
 use Zend\Diactoros\Response\JsonResponse;

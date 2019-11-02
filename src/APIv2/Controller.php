@@ -331,6 +331,7 @@ class Controller implements RequestHandlerInterface {
 	public static function doSearch(ServerRequestInterface $request): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
+		/** @var \WEEEOpen\Tarallo\User $user */
 		$user = $request->getAttribute('User');
 		$payload = $request->getAttribute('ParsedBody', []);
 		$parameters = $request->getAttribute('parameters', []);
@@ -342,8 +343,8 @@ class Controller implements RequestHandlerInterface {
 		if($id) {
 			// Refining a search: must be owner or admin
 			$username = $db->searchDAO()->getOwnerUsername($id);
-			if($username !== $user->getUsername()) {
-				Validation::authorize($user, 0);
+			if($username !== $user->uid) {
+				AuthValidator::ensureLevel($user, 0);
 			}
 		}
 

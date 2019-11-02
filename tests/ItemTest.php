@@ -55,7 +55,7 @@ class ItemTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\ItemCode
 	 */
 	public function testItemInvalidCodeInt() {
-		$this->expectException(InvalidArgumentException::class);
+		$this->expectException(\WEEEOpen\Tarallo\ValidationException::class);
 		new Item(42);
 	}
 
@@ -84,7 +84,7 @@ class ItemTest extends TestCase {
 	 * @uses   \WEEEOpen\Tarallo\ItemCode
 	 */
 	public function testItemEmptyCode() {
-		$this->expectException(InvalidArgumentException::class);
+		$this->expectException(\WEEEOpen\Tarallo\ValidationException::class);
 		new Item('');
 	}
 

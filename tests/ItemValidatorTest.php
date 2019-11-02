@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Feature;
+use WEEEOpen\Tarallo\FeatureValidationException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemNestingException;
 use WEEEOpen\Tarallo\ItemValidator;
@@ -180,8 +181,15 @@ class ItemValidatorTest extends TestCase {
 		$pc->addFeature(new Feature('motherboard-form-factor', 'atx'));
 		$pc->addFeature(new Feature('psu-volt', 19.0));
 
-		$this->expectException(ValidationException::class);
-		ItemValidator::validateFeatures($pc);
+		$this->expectException(FeatureValidationException::class);
+		try {
+			ItemValidator::validateFeatures($pc);
+		} catch(FeatureValidationException $e) {
+			$this->assertEquals('PC42', $e->getItem());
+			$this->assertEquals('psu-volt', $e->getFeature());
+			$this->assertEquals(19.0, $e->getFeatureValue());
+			throw $e;
+		}
 	}
 
 	public function testInvalidFeatureA() {
@@ -189,8 +197,15 @@ class ItemValidatorTest extends TestCase {
 		$pc->addFeature(new Feature('motherboard-form-factor', 'atx'));
 		$pc->addFeature(new Feature('psu-ampere', 4.20));
 
-		$this->expectException(ValidationException::class);
-		ItemValidator::validateFeatures($pc);
+		$this->expectException(FeatureValidationException::class);
+		try {
+			ItemValidator::validateFeatures($pc);
+		} catch(FeatureValidationException $e) {
+			$this->assertEquals('PC42', $e->getItem());
+			$this->assertEquals('psu-ampere', $e->getFeature());
+			$this->assertEquals(4.20, $e->getFeatureValue());
+			throw $e;
+		}
 	}
 
 	public function testInvalidFeatureConnector() {
@@ -198,8 +213,15 @@ class ItemValidatorTest extends TestCase {
 		$pc->addFeature(new Feature('motherboard-form-factor', 'atx'));
 		$pc->addFeature(new Feature('power-connector', 'c13'));
 
-		$this->expectException(ValidationException::class);
-		ItemValidator::validateFeatures($pc);
+		$this->expectException(FeatureValidationException::class);
+		try {
+			ItemValidator::validateFeatures($pc);
+		} catch(FeatureValidationException $e) {
+			$this->assertEquals('PC42', $e->getItem());
+			$this->assertEquals('power-connector', $e->getFeature());
+			$this->assertEquals('c13', $e->getFeatureValue());
+			throw $e;
+		}
 	}
 
 	public function testInvalidFeaturePsuFF() {
@@ -207,8 +229,15 @@ class ItemValidatorTest extends TestCase {
 		$pc->addFeature(new Feature('motherboard-form-factor', 'proprietary-laptop'));
 		$pc->addFeature(new Feature('psu-form-factor', 'atx'));
 
-		$this->expectException(ValidationException::class);
-		ItemValidator::validateFeatures($pc);
+		$this->expectException(FeatureValidationException::class);
+		try {
+			ItemValidator::validateFeatures($pc);
+		} catch(FeatureValidationException $e) {
+			$this->assertEquals('PC42', $e->getItem());
+			$this->assertEquals('psu-form-factor', $e->getFeature());
+			$this->assertEquals('atx', $e->getFeatureValue());
+			throw $e;
+		}
 	}
 
 	public function testValidFeatureConnector() {
@@ -289,8 +318,15 @@ class ItemValidatorTest extends TestCase {
 		$mobo = self::item('MOBO55', 'motherboard');
 		$pc->addContent($mobo);
 
-		$this->expectException(ValidationException::class);
-		ItemValidator::validateFeatures($pc);
+		$this->expectException(FeatureValidationException::class);
+		try {
+			ItemValidator::validateFeatures($pc);
+		} catch(FeatureValidationException $e) {
+			$this->assertEquals('PC42', $e->getItem());
+			$this->assertEquals('usb-ports-n', $e->getFeature());
+			$this->assertEquals(4, $e->getFeatureValue());
+			throw $e;
+		}
 	}
 
 	public function testInvalidUSBLaptopFixup() {
@@ -313,8 +349,16 @@ class ItemValidatorTest extends TestCase {
 		$pc->addContent($hdd);
 
 		ItemValidator::fixupFeatures($pc);
-		$this->expectException(ValidationException::class);
-		ItemValidator::validateFeatures($pc);
+
+		$this->expectException(FeatureValidationException::class);
+		try {
+			ItemValidator::validateFeatures($pc);
+		} catch(FeatureValidationException $e) {
+			$this->assertEquals('PC42', $e->getItem());
+			$this->assertEquals('usb-ports-n', $e->getFeature());
+			$this->assertEquals(4, $e->getFeatureValue());
+			throw $e;
+		}
 	}
 
 	public function testInvalidCaseInCase() {

@@ -19,7 +19,10 @@ trait ItemTraitCode {
 			self::validateCode($code);
 			$this->code = $code;
 		} else {
-			throw new ValidationException((string) $code, null, 'Item code must be a non-empty alphanumeric string or null');
+			if(!is_string($code)) {
+				$code = null;
+			}
+			throw new ValidationException($code, null, 'Item code must be a non-empty alphanumeric string or null');
 		}
 	}
 
