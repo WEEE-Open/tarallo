@@ -3,10 +3,12 @@
 namespace WEEEOpen\Tarallo\APIv2;
 
 use WEEEOpen\Tarallo\Feature;
-use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;
+use WEEEOpen\Tarallo\HTTP\InvalidParameterException;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\Search;
+use WEEEOpen\Tarallo\SearchException;
 use WEEEOpen\Tarallo\SearchTriplet;
+use WEEEOpen\Tarallo\ValidationException;
 
 class SearchBuilder {
 	/**
@@ -28,8 +30,8 @@ class SearchBuilder {
 					$locations[] = new ItemCode($location);
 				}
 				unset($location);
-			} catch(\InvalidArgumentException $e) {
-				throw new InvalidPayloadParameterException('locations', $location, $e->getMessage());
+			} catch(ValidationException $e) {
+				throw new InvalidParameterException('locations', $location, $e->getMessage(), 0, $e);
 			}
 		} else {
 			$locations = null;
@@ -39,7 +41,7 @@ class SearchBuilder {
 			try {
 				$features = self::getFeatures($input['features'], 'features');
 			} catch(\TypeError $e) {
-				throw new InvalidPayloadParameterException('features', $input['features'], $e->getMessage());
+				throw new InvalidParameterException('features', $input['features'], $e->getMessage(), 0, $e);
 			}
 		} else {
 			$features = null;
@@ -49,7 +51,7 @@ class SearchBuilder {
 			try {
 				$ancestor = self::getFeatures($input['ancestor'], 'ancestor');
 			} catch(\TypeError $e) {
-				throw new InvalidPayloadParameterException('ancestor', $input['ancestor'], $e->getMessage());
+				throw new InvalidParameterException('ancestor', $input['ancestor'], $e->getMessage(), 0, $e);
 			}
 		} else {
 			$ancestor = null;
@@ -57,7 +59,7 @@ class SearchBuilder {
 
 		if(isset($input['sort'])) {
 			if(!is_array($input['sort'])) {
-				throw new InvalidPayloadParameterException('sort', $input['sort'], '"sort" must be an array');
+				throw new InvalidParameterException('sort', $input['sort'], '"sort" must be an array');
 			}
 			$sort = $input['sort'];
 		} else {
@@ -72,16 +74,10 @@ class SearchBuilder {
 		$result = [];
 		foreach($stuff as $triplet) {
 			if(!is_array($triplet)) {
-				throw new InvalidPayloadParameterException(
-					$field, (string) $triplet,
-					"Elements of $field should be arrays, not " . gettype($triplet)
-				);
+				throw new SearchException(null, null, "Elements of $field should be arrays, not " . gettype($triplet));
 			}
 			if(count($triplet) != 3) {
-				throw new InvalidPayloadParameterException(
-					$field, count($triplet),
-					"Triplet should contain 3 elements, not " . count($triplet)
-				);
+				throw new SearchException(null, null, "Triplet should contain 3 elements, not " . count($triplet));
 			}
 
 			// Create a Feature to convert strings to int/double. Then discard it and recreate it in SearchTriplet.

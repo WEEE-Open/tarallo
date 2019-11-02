@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\HTTP;
 
 use Throwable;
 
+// TODO: refactor it
 class InvalidParameterException extends \RuntimeException {
 	public $status = 400;
 	protected $parameter;

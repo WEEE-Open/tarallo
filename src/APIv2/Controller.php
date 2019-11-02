@@ -9,23 +9,21 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Relay\RelayBuilder;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Database\Database;
-use WEEEOpen\Tarallo\Database\DuplicateItemCodeException;
-use WEEEOpen\Tarallo\Database\ItemDAO;
 use WEEEOpen\Tarallo\Database\TreeDAO;
 use WEEEOpen\Tarallo\ErrorHandler;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
 use WEEEOpen\Tarallo\HTTP\AuthValidator;
 use WEEEOpen\Tarallo\HTTP\DatabaseConnection;
-use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;
+use WEEEOpen\Tarallo\HTTP\InvalidParameterException;
 use WEEEOpen\Tarallo\HTTP\TransactionWrapper;
 use WEEEOpen\Tarallo\HTTP\Validation;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemCode;
-use WEEEOpen\Tarallo\ItemNestingException;
 use WEEEOpen\Tarallo\ItemPrefixerException;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
+use WEEEOpen\Tarallo\RangeException;
 use WEEEOpen\Tarallo\SearchException;
 use WEEEOpen\Tarallo\ValidationException;
 use Zend\Diactoros\Response\EmptyResponse;
@@ -113,7 +111,7 @@ class Controller implements RequestHandlerInterface {
 		try {
 			$newParent = new ItemCode($payload);
 		} catch(ValidationException $e) {
-			throw new InvalidPayloadParameterException('*', $payload, 'Location does not exist');
+			throw new NotFoundException($payload, 'Location doesn\'t exist', 0, $e);
 		}
 
 		$db->itemDAO()->undelete($item);
@@ -136,21 +134,15 @@ class Controller implements RequestHandlerInterface {
 		$value = (string) $parameters['value'];
 		$limit = Validation::validateOptionalInt($parameters, 'limit', 5);
 
-		// TODO: handle limits with a standardized method
-		if($limit > 10) {
-			throw new InvalidPayloadParameterException('limit', $limit, 'Maximum number of results is 10');
-		} else {
-			if($limit < 1) {
-				throw new InvalidPayloadParameterException('limit', $limit, 'Limit < 1 doesn\'t make sense');
-			}
-		}
+		self::range('limit', $limit, 1, 10);
 
 		try {
 			if(BaseFeature::getType($id) !== BaseFeature::STRING) {
-				throw new InvalidPayloadParameterException('*', $id, "Only text features are supported, $id isn't");
+				// TODO: throw notImplementedException or something
+				throw new InvalidParameterException('feature', $id, "Only text features are supported, $id isn't", 0, $e);
 			}
 		} catch(\InvalidArgumentException $e) {
-			throw new InvalidPayloadParameterException('*', $value, $e->getMessage());
+			throw new InvalidParameterException('feature', $id, $e->getMessage(), 0, $e);
 		}
 
 		$feature = new Feature($id, $value);
@@ -371,17 +363,8 @@ class Controller implements RequestHandlerInterface {
 		$page = Validation::validateOptionalInt($parameters, 'page', 1);
 		$limit = Validation::validateOptionalInt($query, 'limit', 20);
 
-		if($page < 1) {
-			throw new InvalidPayloadParameterException('page', $page, 'Pages start from 1');
-		}
-
-		if($limit < 1) {
-			throw new InvalidPayloadParameterException('limit', $limit, 'Length < 1 doesn\'t make sense');
-		} else {
-			if($limit > 50) {
-				throw new InvalidPayloadParameterException('limit', $limit, 'Maximum number of entries per page is 50');
-			}
-		}
+		self::range('page', $page, 1, null);
+		self::range('limit', $limit, 1, 50);
 
 		$data = $db->auditDAO()->getRecentAudit($limit, $page);
 
@@ -408,13 +391,7 @@ class Controller implements RequestHandlerInterface {
 			throw new NotFoundException();
 		}
 
-		if($length > 50) {
-			throw new InvalidPayloadParameterException('limit', $length, 'Maximum number of entries is 50');
-		} else {
-			if($length < 1) {
-				throw new InvalidPayloadParameterException('limit', $length, 'Length < 1 doesn\'t make sense');
-			}
-		}
+		self::range('limit', $length, 1, 50);
 
 		$data = $db->auditDAO()->getHistory($item, $length);
 
@@ -437,7 +414,7 @@ class Controller implements RequestHandlerInterface {
 		try {
 			$explosion = Validation::explodeFeatureValuePair($feature);
 		} catch(\InvalidArgumentException $e) {
-			throw new InvalidPayloadParameterException('filter', $e->getMessage());
+			throw new SearchException($e->getMessage());
 		}
 		$data = $db->StatsDAO()->getItemByNotFeature(
 			new Feature($explosion[0], $explosion[1]),
@@ -505,6 +482,15 @@ class Controller implements RequestHandlerInterface {
 		);
 
 		return new JsonResponse($data);
+	}
+
+	private static function range(string $parameter, $value, ?int $min, ?int $max) {
+		if($max !== null && $value > $max) {
+			throw new RangeException($parameter, $min, $max, "Maximum value is $max");
+		}
+		if($min !== null && $value < $min) {
+			throw new RangeException($parameter, $min, $max, "Minimum value is $min");
+		}
 	}
 
 	public function handle(ServerRequestInterface $request): ResponseInterface {

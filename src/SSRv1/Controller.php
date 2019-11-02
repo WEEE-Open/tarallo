@@ -15,7 +15,6 @@ use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
 use WEEEOpen\Tarallo\HTTP\AuthValidator;
 use WEEEOpen\Tarallo\HTTP\DatabaseConnection;
-use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\HTTP\TransactionWrapper;
 use WEEEOpen\Tarallo\HTTP\Validation;
 use WEEEOpen\Tarallo\ItemCode;
@@ -375,7 +374,7 @@ class Controller implements RequestHandlerInterface {
 				$moved = self::doBulkMove($items, $where, $db);
 			} catch(\Exception $e) { // TODO: catch specific exceptions (when an item is not found, it's too generic)
 				$error = $e->getMessage();
-				if($e instanceof \InvalidArgumentException || $e instanceof InvalidPayloadParameterException) {
+				if($e instanceof \InvalidArgumentException || $e instanceof ValidationException) {
 					$code = 400;
 				} else {
 					$code = 500;

@@ -2,10 +2,8 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
-use WEEEOpen\Tarallo\HTTP\InvalidPayloadParameterException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemCode;
-use WEEEOpen\Tarallo\ItemNestingException;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\NotFoundException;
