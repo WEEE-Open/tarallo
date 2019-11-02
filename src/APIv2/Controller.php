@@ -25,6 +25,7 @@ use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\RangeException;
 use WEEEOpen\Tarallo\SearchException;
+use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\ValidationException;
 use Zend\Diactoros\Response\EmptyResponse;
 use Zend\Diactoros\Response\JsonResponse;
@@ -344,7 +345,7 @@ class Controller implements RequestHandlerInterface {
 			// Refining a search: must be owner or admin
 			$username = $db->searchDAO()->getOwnerUsername($id);
 			if($username !== $user->uid) {
-				AuthValidator::ensureLevel($user, 0);
+				AuthValidator::ensureLevel($user, User::AUTH_LEVEL_ADMIN);
 			}
 		}
 
@@ -543,35 +544,36 @@ class Controller implements RequestHandlerInterface {
 						$r->addGroup(
 							'/items',
 							function(FastRoute\RouteCollector $r) {
-								$r->get('', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getItem']);
-								$r->post('', [AuthValidator::AUTH_LEVEL_RW, 'Controller::createItem']);
+								$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
+								$r->post('', [User::AUTH_LEVEL_RW, 'Controller::createItem']);
 
 								$r->addGroup(
 									'/{id}',
 									function(FastRoute\RouteCollector $r) {
-										$r->get('[/token/{token}]', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getItem']);
-										$r->get('/history', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getHistory']);
-										$r->put('', [AuthValidator::AUTH_LEVEL_RW, 'Controller::createItem']);
-										$r->delete('', [AuthValidator::AUTH_LEVEL_RW, 'Controller::removeItem']);
+										// TODO: make token access public
+										$r->get('[/token/{token}]', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
+										$r->get('/history', [User::AUTH_LEVEL_RO, 'Controller::getHistory']);
+										$r->put('', [User::AUTH_LEVEL_RW, 'Controller::createItem']);
+										$r->delete('', [User::AUTH_LEVEL_RW, 'Controller::removeItem']);
 
 										// Useless
-										//$r->get('/parent',  [AuthValidator::AUTH_LEVEL_RW, 'Controller::getItemParent']);
-										$r->put('/parent', [AuthValidator::AUTH_LEVEL_RW, 'Controller::setItemParent']);
-										$r->delete('/parent', [AuthValidator::AUTH_LEVEL_RW, 'Controller::deleteItemParent']);
+										//$r->get('/parent',  [User::AUTH_LEVEL_RW, 'Controller::getItemParent']);
+										$r->put('/parent', [User::AUTH_LEVEL_RW, 'Controller::setItemParent']);
+										$r->delete('/parent', [User::AUTH_LEVEL_RW, 'Controller::deleteItemParent']);
 
-										//$r->get('/product', [AuthValidator::AUTH_LEVEL_RW, 'Controller::getItemProduct']);
-										//$r->put('/product',  [AuthValidator::AUTH_LEVEL_RW, 'Controller::setItemProduct']);
-										//$r->delete('/product',  [AuthValidator::AUTH_LEVEL_RW, 'Controller::deleteItemProduct']);
+										//$r->get('/product', [User::AUTH_LEVEL_RW, 'Controller::getItemProduct']);
+										//$r->put('/product',  [User::AUTH_LEVEL_RW, 'Controller::setItemProduct']);
+										//$r->delete('/product',  [User::AUTH_LEVEL_RW, 'Controller::deleteItemProduct']);
 
 										// Also useless, just get the item
-										// $r->get('/features',  [AuthValidator::AUTH_LEVEL_RW, 'Controller::getItemFeatures']);
-										$r->put('/features', [AuthValidator::AUTH_LEVEL_RW, 'Controller::setItemFeatures']);
-										$r->patch('/features', [AuthValidator::AUTH_LEVEL_RW, 'Controller::updateItemFeatures']);
+										// $r->get('/features',  [User::AUTH_LEVEL_RW, 'Controller::getItemFeatures']);
+										$r->put('/features', [User::AUTH_LEVEL_RW, 'Controller::setItemFeatures']);
+										$r->patch('/features', [User::AUTH_LEVEL_RW, 'Controller::updateItemFeatures']);
 
 										// TODO: implement this one
-										//$r->get('/path',  [AuthValidator::AUTH_LEVEL_RW, 'Controller::getItemPath']);
+										//$r->get('/path',  [User::AUTH_LEVEL_RW, 'Controller::getItemPath']);
 
-										// $r->get('/contents',  [AuthValidator::AUTH_LEVEL_RW, 'Controller::getItemContents']);
+										// $r->get('/contents',  [User::AUTH_LEVEL_RW, 'Controller::getItemContents']);
 									}
 								);
 							}
@@ -580,48 +582,48 @@ class Controller implements RequestHandlerInterface {
 							function(FastRoute\RouteCollector $r) {
 								$r->addGroup('/{id}',
 									function(FastRoute\RouteCollector $r) {
-										$r->get('', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getDeletedItem']);
-										$r->put('/parent', [AuthValidator::AUTH_LEVEL_RW, 'Controller::restoreItemParent']);
-										// TODO: this $r->delete('', [AuthValidator::AUTH_LEVEL_RW, 'Controller::removeItemPermanently']);
+										$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getDeletedItem']);
+										$r->put('/parent', [User::AUTH_LEVEL_RW, 'Controller::restoreItemParent']);
+										// TODO: this $r->delete('', [User::AUTH_LEVEL_RW, 'Controller::removeItemPermanently']);
 									}
 								);
 							}
 						);
 
-						$r->post('/search', [AuthValidator::AUTH_LEVEL_RO, 'Controller::doSearch']);
-						$r->patch('/search/{id}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::doSearch']);
-						$r->get('/search/{id}[/page/{page}]', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getSearch']);
+						$r->post('/search', [User::AUTH_LEVEL_RO, 'Controller::doSearch']);
+						$r->patch('/search/{id}', [User::AUTH_LEVEL_RO, 'Controller::doSearch']);
+						$r->get('/search/{id}[/page/{page}]', [User::AUTH_LEVEL_RO, 'Controller::getSearch']);
 
-						$r->get('/features/{feature}/{value}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getByFeature']);
+						$r->get('/features/{feature}/{value}', [User::AUTH_LEVEL_RO, 'Controller::getByFeature']);
 
 						$r->addGroup('/products',
 							function(FastRoute\RouteCollector $r) {
-								$r->get('', [AuthValidator::AUTH_LEVEL_RW, 'Controller::getProduct']); // TODO: implement
-								$r->get('/{brand}[/{model}[/{variant}]]', [AuthValidator::AUTH_LEVEL_RW, 'Controller::getProduct']); // TODO: implement
+								$r->get('', [User::AUTH_LEVEL_RW, 'Controller::getProduct']); // TODO: implement
+								$r->get('/{brand}[/{model}[/{variant}]]', [User::AUTH_LEVEL_RW, 'Controller::getProduct']); // TODO: implement
 
-								$r->post('/{brand}/{model}', [AuthValidator::AUTH_LEVEL_RW, 'Controller::createProduct']); // TODO: implement
-								$r->put('/{brand}/{model}/{variant}', [AuthValidator::AUTH_LEVEL_RW, 'Controller::createProduct']); // TODO: implement
+								$r->post('/{brand}/{model}', [User::AUTH_LEVEL_RW, 'Controller::createProduct']); // TODO: implement
+								$r->put('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::createProduct']); // TODO: implement
 
 								$r->addGroup('/{brand}/{model}/{variant}',
 									function(FastRoute\RouteCollector $r) {
-										//$r->get('/features',  [AuthValidator::AUTH_LEVEL_RW, 'Controller::getProductFeatures']);
-										$r->post('/features', [AuthValidator::AUTH_LEVEL_RW, 'Controller::setProductFeatures']); // TODO: implement
-										$r->patch('/features', [AuthValidator::AUTH_LEVEL_RW, 'Controller::updateProductFeatures']); // TODO: implement
+										//$r->get('/features',  [User::AUTH_LEVEL_RW, 'Controller::getProductFeatures']);
+										$r->post('/features', [User::AUTH_LEVEL_RW, 'Controller::setProductFeatures']); // TODO: implement
+										$r->patch('/features', [User::AUTH_LEVEL_RW, 'Controller::updateProductFeatures']); // TODO: implement
 									}
 								);
 							}
 						);
 
-						$r->get('/logs[/page/{page}]', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getLogs']);
+						$r->get('/logs[/page/{page}]', [User::AUTH_LEVEL_RO, 'Controller::getLogs']);
 
-						$r->get('/session', [AuthValidator::AUTH_LEVEL_RW, 'Controller::sessionWhoami']);
+						$r->get('/session', [User::AUTH_LEVEL_RW, 'Controller::sessionWhoami']);
 
 						$r->addGroup(
 							'/stats',
 							function(FastRoute\RouteCollector $r) {
-								$r->get('/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]', [AuthValidator::AUTH_LEVEL_RO, 'Controller::ItemsNotFeature']);
-								$r->get('/getRecentAuditByType/{type}[/{howMany}]', [AuthValidator::AUTH_LEVEL_RO, 'Controller::RecentAuditByType']);
-								$r->get('/getCountByFeature/{feature}[/{filter}[/{location}[/{creation[/{deleted[/{cutoff}]]]]]', [AuthValidator::AUTH_LEVEL_RO, 'Controller::CountByFeature']);
+								$r->get('/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]', [User::AUTH_LEVEL_RO, 'Controller::ItemsNotFeature']);
+								$r->get('/getRecentAuditByType/{type}[/{howMany}]', [User::AUTH_LEVEL_RO, 'Controller::RecentAuditByType']);
+								$r->get('/getCountByFeature/{feature}[/{filter}[/{location}[/{creation[/{deleted[/{cutoff}]]]]]', [User::AUTH_LEVEL_RO, 'Controller::CountByFeature']);
 							}
 						);
 					}

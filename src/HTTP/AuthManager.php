@@ -233,7 +233,7 @@ class AuthManager implements MiddlewareInterface {
 					$session = new SessionSSO();
 					$session->uid = $oidc->getVerifiedClaims('preferred_username');
 					$session->cn = $oidc->getVerifiedClaims('name');
-					// $user->groups = $oidc->getVerifiedClaims('groups');
+					$session->groups = $oidc->getVerifiedClaims('groups');
 					$session->idToken = $oidc->getIdToken();
 					$session->idTokenExpiry = $oidc->getVerifiedClaims('exp');
 					$session->refreshToken = $oidc->getRefreshToken();

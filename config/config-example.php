@@ -9,4 +9,6 @@ define('TARALLO_OIDC_ISSUER', 'https://sso.example.com/auth/realms/master');
 define('TARALLO_OIDC_CLIENT_ID', 'tarallo');
 define('TARALLO_OIDC_CLIENT_KEY', 'tarallo');
 define('TARALLO_OIDC_CLIENT_SECRET', '');
-define('TARALLO_OIDC_REFRESH_TOKEN_EXPIRY', 3600);
+define('TARALLO_OIDC_REFRESH_TOKEN_EXPIRY', 60 * 60 * 24);
+define('TARALLO_OIDC_READ_ONLY_GROUPS', ['TaralloReadOnly']);
+define('TARALLO_OIDC_ADMIN_GROUPS', ['Admin']);

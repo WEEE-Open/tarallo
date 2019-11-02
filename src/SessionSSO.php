@@ -7,7 +7,7 @@ namespace WEEEOpen\Tarallo;
 class SessionSSO {
 	public $uid;
 	public $cn;
-	//public $groups;
+	public $groups;
 	public $idToken;
 	public $idTokenExpiry = 0;
 	public $refreshToken;

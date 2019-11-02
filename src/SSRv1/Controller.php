@@ -21,6 +21,7 @@ use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
+use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\ValidationException;
 use Zend\Diactoros\Response\EmptyResponse;
 use Zend\Diactoros\Response\JsonResponse;
@@ -577,28 +578,29 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/auth', [null, 'Controller::authError']);
 				$r->get('/logout', [null, 'Controller::logout']);
 
-				$r->get('/', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getHome']);
-				$r->get('', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getHome']);
-				$r->get('/features.json', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getFeaturesJson']);
-				$r->get('/item/{id}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getItem']);
-				$r->get('/history/{id}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getHistory']);
-				$r->get('/item/{id}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getItem']);
-				$r->get('/item/{id}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getItem']);
-				$r->get('/add', [AuthValidator::AUTH_LEVEL_RO, 'Controller::addItem']);
-				$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
-				$r->get('/search/{id:[0-9]+}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
-				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
-				$r->get('/search/{id:[0-9]+}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
-				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::search']);
-				$r->get('/bulk', [AuthValidator::AUTH_LEVEL_RO, 'Controller::bulk']);
-				$r->get('/bulk/move', [AuthValidator::AUTH_LEVEL_RO, 'Controller::bulkMove']);
-				$r->post('/bulk/move', [AuthValidator::AUTH_LEVEL_RW, 'Controller::bulkMove']);
-				$r->get('/bulk/add', [AuthValidator::AUTH_LEVEL_RO, 'Controller::bulkAdd']);
-				$r->post('/bulk/add', [AuthValidator::AUTH_LEVEL_RW, 'Controller::bulkAdd']);
+				$r->get('/', [User::AUTH_LEVEL_RO, 'Controller::getHome']);
+				$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getHome']);
+				$r->get('/features.json', [User::AUTH_LEVEL_RO, 'Controller::getFeaturesJson']);
+				$r->get('/item/{id}', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
+				// TODO: make token access public
+				$r->get('/history/{id}', [User::AUTH_LEVEL_RO, 'Controller::getHistory']);
+				$r->get('/item/{id}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
+				$r->get('/item/{id}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
+				$r->get('/add', [User::AUTH_LEVEL_RO, 'Controller::addItem']);
+				$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [User::AUTH_LEVEL_RO, 'Controller::search']);
+				$r->get('/search/{id:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search']);
+				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search']);
+				$r->get('/search/{id:[0-9]+}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::search']);
+				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::search']);
+				$r->get('/bulk', [User::AUTH_LEVEL_RO, 'Controller::bulk']);
+				$r->get('/bulk/move', [User::AUTH_LEVEL_RO, 'Controller::bulkMove']);
+				$r->post('/bulk/move', [User::AUTH_LEVEL_RW, 'Controller::bulkMove']);
+				$r->get('/bulk/add', [User::AUTH_LEVEL_RO, 'Controller::bulkAdd']);
+				$r->post('/bulk/add', [User::AUTH_LEVEL_RW, 'Controller::bulkAdd']);
 				$r->addGroup(
 					'/stats', function(FastRoute\RouteCollector $r) {
-					$r->get('', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getStats']);
-					$r->get('/{which}', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getStats']);
+					$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getStats']);
+					$r->get('/{which}', [User::AUTH_LEVEL_RO, 'Controller::getStats']);
 				}
 				);
 			}, [
