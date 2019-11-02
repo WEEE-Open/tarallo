@@ -180,10 +180,10 @@ class AuthManager implements MiddlewareInterface {
 
 			// Done, see you at /auth!
 			if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
-				error_log('DEV: Bypassing authentication step 1');
+				//error_log('DEV: Bypassing authentication step 1');
 
 				http_response_code(303);
-				header("Location: /auth");
+				header("Location: /auth?code=bogus_for_auth_bypass");
 			} else {
 				$oidc = self::oidc();
 				$gohere = 'https://' . $request->getUri()->getHost() . '/auth';
@@ -206,7 +206,7 @@ class AuthManager implements MiddlewareInterface {
 		$cookie = $request->getCookieParams();
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
-		if(isset($cookie[self::COOKIE_NAME])) {
+		if(isset($cookie[self::COOKIE_NAME]) && (isset($_REQUEST["code"]) || isset($_REQUEST["error"]))) {
 			$id = $cookie[self::COOKIE_NAME];
 			$redirect = $db->userDAO()->getRedirect($id);
 
@@ -217,7 +217,7 @@ class AuthManager implements MiddlewareInterface {
 			} else {
 				// We have everything! Probably!
 				if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
-					error_log('DEV: Bypassing authentication step 2');
+					//error_log('DEV: Bypassing authentication step 2');
 
 					$session = new SessionSSO();
 					$session->uid = 'dev.user';
@@ -266,9 +266,39 @@ class AuthManager implements MiddlewareInterface {
 		ServerRequestInterface $request,
 		RequestHandlerInterface $handler
 	): ResponseInterface {
-		// TODO: perform SLO
-		//return new RedirectResponse('/logout/result', 303);
+		$cookie = $request->getCookieParams();
 
-		return $handler->handle($request);
+		// Logout done. Really really done. Just render the logout page!
+		if(isset($request->getQueryParams()['done']) && !isset($cookie[self::COOKIE_NAME])) {
+			return $handler->handle($request);
+		}
+
+		// Or let's logout and redirect!
+		if(isset($cookie[self::COOKIE_NAME])) {
+			// Get session data
+			$id = $cookie[self::COOKIE_NAME];
+			/** @var Database $db */
+			$db = $request->getAttribute('Database');
+			$data = $db->userDAO()->getSession($id);
+
+			// Destroy the local session
+			$db->beginTransaction();
+			$db->userDAO()->deleteSession($id);
+			self::setCookie($id, 1);
+			$db->commit();
+
+			$token = $data->idToken;
+		} else {
+			$token = null;
+		}
+
+		if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
+			//error_log('DEV: Bypassing logout');
+			return new RedirectResponse($request->getUri()->withQuery('done=true'), 302);
+		} else {
+			$oidc = self::oidc();
+			$oidc->signOut($token, $request->getUri()->withQuery('done=true'));
+			exit;
+		}
 	}
 }

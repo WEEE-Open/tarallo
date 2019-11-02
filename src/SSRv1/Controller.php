@@ -133,16 +133,15 @@ class Controller implements RequestHandlerInterface {
 	}
 
 	public static function authError(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
-		$request = $request->withAttribute('Template', 'error')->withAttribute('ResponseCode', 400)->withAttribute(
-			'TemplateParameters', ['reason' => 'Login failed']
-		);
+		$request = $request
+			->withAttribute('Template', 'error')
+			->withAttribute('ResponseCode', 400)
+			->withAttribute('TemplateParameters', ['reason' => 'Login failed']);
 
 		return $handler->handle($request);
 	}
 
 	public static function logout(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
-		// TODO: does it happen? Does AuthManager pick this up?
-
 		$request = $request->withAttribute('Template', 'logout');
 
 		return $handler->handle($request);
@@ -575,7 +574,7 @@ class Controller implements RequestHandlerInterface {
 	private function route(ServerRequestInterface $request): array {
 		$dispatcher = FastRoute\cachedDispatcher(
 			function(FastRoute\RouteCollector $r) {
-				$r->get('/auth', [null, 'Controller::login']);
+				$r->get('/auth', [null, 'Controller::authError']);
 				$r->get('/logout', [null, 'Controller::logout']);
 
 				$r->get('/', [AuthValidator::AUTH_LEVEL_RO, 'Controller::getHome']);
