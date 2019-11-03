@@ -3,10 +3,12 @@
 namespace WEEEOpen\Tarallo\HTTP;
 
 use Jumbojett\OpenIDConnectClient;
+use Jumbojett\OpenIDConnectClientException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use ReflectionMethod;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\SessionSSO;
 use WEEEOpen\Tarallo\User;
@@ -128,16 +130,30 @@ class AuthManager implements MiddlewareInterface {
 				$user = User::fromSession($session);
 			} else if(time() < $session->refreshTokenExpiry) {
 				// Ok, ID Token expired, but Refresh Token is still valid
-				// TODO: perform refresh somewhere
-				// Until this is implemented, discard the refresh token and begin a new session
-				self::setCookie($id, 1);
-				$db->beginTransaction();
-				$db->userDAO()->deleteSession($id);
-				$db->commit();
 
-				// Right now, we have nothing
-				$session = null;
-				$user = null;
+				$refreshedSession = $this->performRefresh($session);
+
+				if($refreshedSession === null) {
+					// Refresh failed, discard all tokens and begin a new session
+					self::setCookie($id, 1);
+					$db->beginTransaction();
+					$db->userDAO()->deleteSession($id);
+					$db->commit();
+
+					// Everything is gone
+					$session = null;
+					$user = null;
+				} else {
+					// Done, refresh happened, we have an updated session
+					$db->beginTransaction();
+					$db->userDAO()->setDataForSession($id, $refreshedSession);
+					$db->commit();
+
+					// Here we go
+					$session = $refreshedSession;
+					$user = User::fromSession($refreshedSession);
+				}
+
 			} else {
 				// Everything expired, delete the old session and begin a new one
 				self::setCookie($id, 1);
@@ -163,7 +179,6 @@ class AuthManager implements MiddlewareInterface {
 			}
 
 			// We need to authenticate.
-			// TODO: support refresh
 
 			// Create new session
 			$id = self::newUniqueIdentifier($db);
@@ -223,8 +238,10 @@ class AuthManager implements MiddlewareInterface {
 					$session->uid = 'dev.user';
 					$session->cn = 'Developement User';
 					$session->idToken = 'F00B4R';
-					$session->idTokenExpiry = time() + 60 * 60 * 24;
+					$session->idTokenValidityTime = 60 * 60 * 24;
+					$session->idTokenExpiry = time() + $session->refreshTokenValidityTime;
 					$session->refreshToken = 'N0REFRESH';
+					$session->refreshTokenValidityTime = 0;
 					$session->refreshTokenExpiry = 0;
 				} else {
 					$oidc = self::oidc();
@@ -236,9 +253,10 @@ class AuthManager implements MiddlewareInterface {
 					$session->groups = $oidc->getVerifiedClaims('groups');
 					$session->idToken = $oidc->getIdToken();
 					$session->idTokenExpiry = $oidc->getVerifiedClaims('exp');
+					$session->idTokenValidityTime = $session->idTokenExpiry - time();
 					$session->refreshToken = $oidc->getRefreshToken();
-					// TODO: this is apparently not stated in the token, use a constant
 					$session->refreshTokenExpiry = time() + TARALLO_OIDC_REFRESH_TOKEN_EXPIRY;
+					$session->refreshTokenValidityTime = TARALLO_OIDC_REFRESH_TOKEN_EXPIRY;
 
 					// Update the cookie
 					self::setCookie($id, $session->idTokenExpiry);
@@ -300,5 +318,95 @@ class AuthManager implements MiddlewareInterface {
 			$oidc->signOut($token, $request->getUri()->withQuery('done=true'));
 			exit;
 		}
+	}
+
+	private function performRefresh(SessionSSO $previousSession): ?SessionSSO {
+		$oidc = self::oidc();
+		$json = $oidc->refreshToken($_SESSION['refresh_token']);
+
+		// The "correct way" is apparently to call the refresh token endpoint ad obtain a new refresh token + access
+		// token. Which is never converted to an ID token, see e.g. https://bitbucket.org/moodle/moodle/src/e04a73ccc06e18d8d3b3661f8f9bc16911747830/lib/classes/oauth2/api.php?at=master#api.php-473
+		// And to error out if the server replies with an error. How long will the refreshed session be valid? Who
+		// knows, the application choses, as long as the refresh token does not expire in the meantime (the refresh
+		// token has no expiration date anyway, but the server can decide to delete it and reject further requests
+		// made with that token).
+		//
+		// Some alternatives exist: https://stackoverflow.com/a/47363175
+		// But none of them is as seamless as obtaining a new ID token in the refresh process: no redirects, no user
+		// interaction, the new ID token has a defined expiration date chosen by the server...
+		// What can we do?
+		//
+		// Let's see if refresh happened, first of all...
+		if(isset($json->error)) {
+			error_log('Error while refreshing: ' . $json->error);
+			return null;
+		}
+		// Do we have a new ID token?
+		if(!isset($json->id_token)) {
+			error_log('SSO server did not provide an ID token after refresh');
+			return null;
+		}
+		// We also need an access token
+		if(!isset($json->access_token)) {
+			error_log('SSO server did not provide an access token after refresh');
+			return null;
+		}
+
+		try {
+			// Validate the ID token signature
+			$valid = $oidc->verifyJWTsignature($json->id_token);
+			if(!$valid) {
+				error_log('JWT signature validation failed (returned false)');
+				return null;
+			}
+		} catch(OpenIDConnectClientException $e) {
+			error_log('JWT signature validation failed: ' . $e->getMessage());
+			return null;
+		}
+
+		// Now decode the claims
+		// decodeJWT() does exactly this
+		$claims = json_decode(\Jumbojett\base64url_decode(explode(".", $json->id_token)[1]));
+
+		try {
+			// We need to validate the claims. Possibly. Not entirely sure if this part is required.
+			$method = new ReflectionMethod($oidc, 'sayHelloTo');
+			$method->setAccessible(true);
+			$valid = $method->invoke($oidc, 'verifyJWTclaims', $claims, $json->access_token);
+			if(!$valid) {
+				error_log('JWT claims validation failed (returned false)');
+				return null;
+			}
+		} catch(\ReflectionException $e) {
+			error_log('Reflection failed :(');
+			return null;
+		} /** @noinspection PhpRedundantCatchClauseInspection */ catch(OpenIDConnectClientException $e) {
+			error_log('JWT claims validation failed: ' . $e->getMessage());
+			return null;
+		}
+
+		$session = new SessionSSO();
+		$now = time();
+
+		// Done! We just need to fill the new session with the claims we just obtained from the ID token!
+		$session->uid = $claims['preferred_username'] ?? null;
+		$session->cn = $claims['name'] ?? null;
+		$session->groups = $claims['groups'] ?? [];
+		$session->idToken = $json->id_token;
+		// Guess an expiry time, if not available
+		$session->idTokenExpiry = $claims['exp'] ?? $now + $session->idTokenValidityTime;
+		$session->idTokenValidityTime = $session->idTokenExpiry - $now;
+		if($oidc->getRefreshToken() === null) {
+			// No new refresh token? We'll try the old one next time, the worst that could happen is that the server
+			// rejects it
+			$session->refreshToken = $previousSession->refreshToken;
+		} else {
+			// Do we have a new refresh token?
+			$session->refreshToken = $oidc->getRefreshToken();
+		}
+		// Assume these didn't change
+		$session->refreshTokenExpiry = $now + $previousSession->refreshTokenValidityTime;
+		$session->refreshTokenValidityTime = $previousSession->refreshTokenValidityTime;
+		return $session;
 	}
 }
