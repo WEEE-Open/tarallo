@@ -101,7 +101,7 @@ final class UserDAO extends DAO {
 		}
 
 		try {
-			$s = $this->getPDO()->prepare('UPDATE Session SET Redirect = :r WHERE `Session` = :s');
+			$s = $this->getPDO()->prepare('UPDATE Session SET Redirect = :r, LastAccess = CURRENT_TIMESTAMP() WHERE `Session` = :s');
 			$s->bindValue(':s', $sessionID, \PDO::PARAM_STR);
 			$s->bindValue(':r', $redirect, $redirect === null ? \PDO::PARAM_BOOL : \PDO::PARAM_STR);
 			$result = $s->execute();
@@ -127,7 +127,7 @@ final class UserDAO extends DAO {
 		}
 
 		try {
-			$s = $this->getPDO()->prepare('UPDATE Session SET Data = :d WHERE `Session` = :s');
+			$s = $this->getPDO()->prepare('UPDATE Session SET Data = :d, LastAccess = CURRENT_TIMESTAMP() WHERE `Session` = :s');
 			$s->bindValue(':s', $sessionID, \PDO::PARAM_STR);
 			if($data === null) {
 				$s->bindValue(':d', null, \PDO::PARAM_NULL);
@@ -169,5 +169,4 @@ final class UserDAO extends DAO {
 			$s->closeCursor();
 		}
 	}
-
 }

@@ -274,6 +274,19 @@ EOQ
 					$this->exec('ALTER TABLE `Search` DROP FOREIGN KEY `Search_ibfk_1`');
 					$this->exec('DROP TABLE User;');
 					break;
+				case 6:
+					$this->exec('ALTER TABLE Session ADD COLUMN `LastAccess` TIMESTAMP NOT NULL DEFAULT current_timestamp AFTER Redirect;');
+					$this->exec('CREATE TABLE `SessionTokens`
+(
+    `Token` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `User` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `LastAccess` TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    PRIMARY KEY (`Token`),
+    INDEX (`User`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;');
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}

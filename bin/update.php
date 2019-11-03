@@ -26,7 +26,7 @@ if(isset($argv[1]) && $argv[1] === 'test_db') {
 try {
 	$db = new Database(TARALLO_DB_USER, TARALLO_DB_PASS, TARALLO_DB_DSN);
 	$updater = $db->updater();
-	$updater->updateTo(5, 17);
+	$updater->updateTo(7, 17);
 } catch(\Exception $e) {
 	echo get_class($e);
 	echo PHP_EOL;
