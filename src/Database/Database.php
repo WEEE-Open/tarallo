@@ -6,7 +6,7 @@ class Database {
 	/** @var \PDO */
 	private $pdo = null;
 	private $auditDAO = null;
-	private $userDAO = null;
+	private $sessionDAO = null;
 	private $itemDAO = null;
 	private $searchDAO = null;
 	private $statsDAO = null;
@@ -60,12 +60,12 @@ class Database {
 		return $this->auditDAO;
 	}
 
-	public function userDAO() {
-		if($this->userDAO === null) {
-			$this->userDAO = new UserDAO($this, $this->callback);
+	public function sessionDAO() {
+		if($this->sessionDAO === null) {
+			$this->sessionDAO = new SessionDAO($this, $this->callback);
 		}
 
-		return $this->userDAO;
+		return $this->sessionDAO;
 	}
 
 	public function itemDAO() {

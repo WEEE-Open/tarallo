@@ -19,9 +19,7 @@ class ExceptionHandler implements MiddlewareInterface {
 			$error = ErrorResponse::fromException($e);
 			$status = $error->status;
 			if($status == 401) {
-				// TODO: this may pop up into the SSR
-				//return new JsonResponse($error, $status, ['WWW-Authenticate' => 'Basic realm="APIv2 with application key", charset="UTF-8"']);
-				return new JsonResponse($error, $status, ['WWW-Authenticate' => 'login']);
+				return new JsonResponse($error, $status, ['WWW-Authenticate' => 'Token']);
 			} else {
 				return new JsonResponse($error, $status);
 			}

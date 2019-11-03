@@ -20,7 +20,7 @@ class TransactionWrapper implements MiddlewareInterface {
 		$user = $request->getAttribute('User');
 		$db->beginTransaction();
 		if($user !== null) {
-			$db->userDAO()->setAuditUsername($user->uid);
+			$db->sessionDAO()->setAuditUsername($user->uid);
 		}
 
 		try {

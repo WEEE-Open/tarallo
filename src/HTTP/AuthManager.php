@@ -12,6 +12,7 @@ use ReflectionMethod;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\SessionSSO;
 use WEEEOpen\Tarallo\User;
+use WEEEOpen\Tarallo\UserSSO;
 use Zend\Diactoros\Response\RedirectResponse;
 
 class AuthManager implements MiddlewareInterface {
@@ -54,7 +55,7 @@ class AuthManager implements MiddlewareInterface {
 	private static function newUniqueIdentifier(Database $db) {
 		do {
 			$id = self::newIdentifier();
-		} while($db->userDAO()->sessionExists($id));
+		} while($db->sessionDAO()->sessionExists($id));
 
 		return $id;
 	}
@@ -100,11 +101,16 @@ class AuthManager implements MiddlewareInterface {
 	}
 
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		// User is already set (by another authentication handler), skip ahead
+		if($request->getAttribute('User', null) !== null) {
+			return $handler->handle($request);
+		}
+
 		$path = $request->getUri()->getPath();
-		// These paths are in the SSR thing, not
-		if($path === '/auth') {
+		// These paths are in the SSR thing
+		if($path === '/auth' && $this->browser) {
 			return $this->handleAuthResponse($request, $handler);
-		} else if($path === '/logout') {
+		} else if($path === '/logout' && $this->browser) {
 			return $this->terminate($request, $handler);
 		}
 
@@ -114,20 +120,20 @@ class AuthManager implements MiddlewareInterface {
 
 		if(isset($cookie[self::COOKIE_NAME])) {
 			$id = $cookie[self::COOKIE_NAME];
-			$session = $db->userDAO()->getSession($id);
+			$session = $db->sessionDAO()->getSession($id);
 
 			if($session === null) {
 				// Failed login or very old expired session or some kind of attack, delete the cookie
 				self::setCookie($id, 1);
 				$db->beginTransaction();
-				$db->userDAO()->deleteSession($id);
+				$db->sessionDAO()->deleteSession($id);
 				$db->commit();
 
 				$session = null;
 				$user = null;
 			} else if(time() < $session->idTokenExpiry || self::withinGrace($request, $session->idTokenExpiry)) {
 				// We're good to go, the sessions is valid (or within grace time)
-				$user = User::fromSession($session);
+				$user = UserSSO::fromSession($session);
 			} else if(time() < $session->refreshTokenExpiry) {
 				// Ok, ID Token expired, but Refresh Token is still valid
 
@@ -137,7 +143,7 @@ class AuthManager implements MiddlewareInterface {
 					// Refresh failed, discard all tokens and begin a new session
 					self::setCookie($id, 1);
 					$db->beginTransaction();
-					$db->userDAO()->deleteSession($id);
+					$db->sessionDAO()->deleteSession($id);
 					$db->commit();
 
 					// Everything is gone
@@ -146,19 +152,19 @@ class AuthManager implements MiddlewareInterface {
 				} else {
 					// Done, refresh happened, we have an updated session
 					$db->beginTransaction();
-					$db->userDAO()->setDataForSession($id, $refreshedSession);
+					$db->sessionDAO()->setDataForSession($id, $refreshedSession);
 					$db->commit();
 
 					// Here we go
 					$session = $refreshedSession;
-					$user = User::fromSession($refreshedSession);
+					$user = UserSSO::fromSession($refreshedSession);
 				}
 
 			} else {
 				// Everything expired, delete the old session and begin a new one
 				self::setCookie($id, 1);
 				$db->beginTransaction();
-				$db->userDAO()->deleteSession($id);
+				$db->sessionDAO()->deleteSession($id);
 				$db->commit();
 
 				// Right now, we have nothing
@@ -185,9 +191,9 @@ class AuthManager implements MiddlewareInterface {
 
 			$db->beginTransaction();
 			// Delete previous data (if any), ensure that session exists, lock the database row (useless)
-			$db->userDAO()->setDataForSession($id, null);
+			$db->sessionDAO()->setDataForSession($id, null);
 			// After login, go back there
-			$db->userDAO()->setRedirectForSession($id, $request->getUri());
+			$db->sessionDAO()->setRedirectForSession($id, $request->getUri());
 			$db->commit();
 
 			// Enough time to log in
@@ -223,7 +229,7 @@ class AuthManager implements MiddlewareInterface {
 		$db = $request->getAttribute('Database');
 		if(isset($cookie[self::COOKIE_NAME]) && (isset($_REQUEST["code"]) || isset($_REQUEST["error"]))) {
 			$id = $cookie[self::COOKIE_NAME];
-			$redirect = $db->userDAO()->getRedirect($id);
+			$redirect = $db->sessionDAO()->getRedirect($id);
 
 			if($redirect === null) {
 				// Nowhere to go, probably something is missing
@@ -239,6 +245,7 @@ class AuthManager implements MiddlewareInterface {
 					$session->idToken = 'F00B4R';
 					$session->idTokenValidityTime = 60 * 60 * 24;
 					$session->idTokenExpiry = time() + $session->idTokenValidityTime;
+					$session->groups = ['Admin', 'Example', 'Developers'];
 					$session->refreshToken = 'N0REFRESH';
 					$session->refreshTokenValidityTime = 0;
 					$session->refreshTokenExpiry = 0;
@@ -249,7 +256,7 @@ class AuthManager implements MiddlewareInterface {
 					$session = new SessionSSO();
 					$session->uid = $oidc->getVerifiedClaims('preferred_username');
 					$session->cn = $oidc->getVerifiedClaims('name');
-					$session->groups = $oidc->getVerifiedClaims('groups');
+					$session->groups = $oidc->getVerifiedClaims('groups') ?? [];
 					$session->idToken = $oidc->getIdToken();
 					$session->idTokenExpiry = $oidc->getVerifiedClaims('exp');
 					$session->idTokenValidityTime = $session->idTokenExpiry - time();
@@ -263,10 +270,10 @@ class AuthManager implements MiddlewareInterface {
 
 				// Store it!
 				$db->beginTransaction();
-				$db->userDAO()->setDataForSession($id, $session);
-				$db->userDAO()->setRedirectForSession($id, null);
+				$db->sessionDAO()->setDataForSession($id, $session);
+				$db->sessionDAO()->setRedirectForSession($id, null);
 				$db->commit();
-				//$request = $request->withAttribute('User', User::fromSession($session));
+				//$request = $request->withAttribute('User', UserSSO::fromSession($session));
 
 				// Do not process further middleware, just redirect
 				return new RedirectResponse($redirect, 303);
@@ -296,11 +303,11 @@ class AuthManager implements MiddlewareInterface {
 			$id = $cookie[self::COOKIE_NAME];
 			/** @var Database $db */
 			$db = $request->getAttribute('Database');
-			$data = $db->userDAO()->getSession($id);
+			$data = $db->sessionDAO()->getSession($id);
 
 			// Destroy the local session
 			$db->beginTransaction();
-			$db->userDAO()->deleteSession($id);
+			$db->sessionDAO()->deleteSession($id);
 			self::setCookie($id, 1);
 			$db->commit();
 

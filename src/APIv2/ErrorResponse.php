@@ -69,9 +69,10 @@ class ErrorResponse implements \JsonSerializable {
 		return $error;
 	}
 
-	public static function fromMessage(string $message) {
+	public static function fromMessage(string $message): ErrorResponse {
 		$error = new ErrorResponse();
 		$error->message = $message;
+		return $error;
 	}
 
 	public function jsonSerialize() {

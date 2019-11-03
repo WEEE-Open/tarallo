@@ -8,7 +8,7 @@ use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\Search;
 use WEEEOpen\Tarallo\SearchTriplet;
 use WEEEOpen\Tarallo\SessionSSO;
-use WEEEOpen\Tarallo\User;
+use WEEEOpen\Tarallo\UserSSO;
 
 /**
  * @covers \WEEEOpen\Tarallo\Database\SearchDAO
@@ -55,7 +55,7 @@ class SearchDAOTest extends DatabaseTest {
 		$session = new SessionSSO();
 		$session->cn = 'Asd Asd';
 		$session->uid = 'asd';
-		return User::fromSession($session);
+		return UserSSO::fromSession($session);
 	}
 
 	private function loadSample(Database $db) {

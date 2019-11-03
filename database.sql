@@ -211,13 +211,15 @@ CREATE TABLE Session
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `SessionTokens`
+CREATE TABLE `SessionToken`
 (
     `Token` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `User` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Data` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Owner` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
     `LastAccess` TIMESTAMP NOT NULL DEFAULT current_timestamp,
     PRIMARY KEY (`Token`),
-    INDEX (`User`)
+    INDEX (`Owner`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;

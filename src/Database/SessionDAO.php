@@ -2,9 +2,10 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
+use WEEEOpen\Tarallo\SessionLocal;
 use WEEEOpen\Tarallo\SessionSSO;
 
-final class UserDAO extends DAO {
+final class SessionDAO extends DAO {
 	/**
 	 * Get user data from a session, or null
 	 *
@@ -84,6 +85,71 @@ final class UserDAO extends DAO {
 	}
 
 	/**
+	 * Get a token if it exists, or null. If it does, lock the row for update so it won't disappear or change in the meantime.
+	 *
+	 * @param string $token
+	 * @param \DateTimeImmutable|null $lastAccess Token last access time
+	 *
+	 * @return SessionLocal Session for the token, or null if it doesn't exist
+	 */
+	public function getToken(string $token, &$lastAccess): ?SessionLocal {
+		try {
+			$s = $this->getPDO()->prepare('SELECT `Hash`, `Data`, `LastAccess` FROM SessionToken WHERE `Token` = :t FOR UPDATE');
+			list($token, $pass) = self::splitToken($token);
+			$s->bindValue(':t', $token, \PDO::PARAM_STR);
+			$result = $s->execute();
+			assert($result !== false, 'token exists');
+			$rows = $s->rowCount();
+			if($rows > 0) {
+				$row = $s->fetchAll(\PDO::FETCH_ASSOC)[0];
+				$lastAccess = $row['LastAccess'];
+				$hash = $row['Hash'];
+				if(!password_verify($pass, $hash)) {
+					return null;
+				}
+				try {
+					$lastAccess = new \DateTimeImmutable($lastAccess, new \DateTimeZone('Europe/Rome'));
+				} catch(\Exception $e) {
+					return null;
+				}
+				return unserialize($row['Data']);
+			} else {
+				return null;
+			}
+			/** @noinspection PhpUnreachableStatementInspection It's either this, or "missing return statement"... */
+			return null;
+		} finally {
+			$s->closeCursor();
+		}
+	}
+
+	public function getUserTokens(string $user): array {
+		try {
+			$s = $this->getPDO()->prepare('SELECT `Token`, `Data`, LastAccess FROM SessionToken WHERE `Owner` = :o');
+			$s->bindValue(':o', $user, \PDO::PARAM_STR);
+			$result = $s->execute();
+			assert($result !== false, 'get user tokens');
+			$tokens = [];
+			foreach($s as $row) {
+				try {
+					$dt = new \DateTimeImmutable($row['LastAccess'], new \DateTimeZone('Europe/Rome'));
+				} catch(\Exception $e) {
+					$dt = null;
+				}
+
+				$tokens[] = [
+					'Token' => $row['Token'],
+					'Session' => unserialize($row['Data']),
+					'LastAccess' => $dt,
+					];
+			}
+			return $tokens;
+		} finally {
+			$s->closeCursor();
+		}
+	}
+
+	/**
 	 * Set or delete the redirect field for a session, create if it does not exist
 	 *
 	 * @param string $sessionID
@@ -141,6 +207,42 @@ final class UserDAO extends DAO {
 		}
 	}
 
+	/**
+	 * Set data for a token, create it if it does not exist.
+	 *
+	 * @param string $token
+	 * @param SessionLocal $data
+	 */
+	public function setDataForToken(string $token, SessionLocal $data) {
+		try {
+			$s = $this->getPDO()->prepare('REPLACE INTO SessionToken(Token, Hash, Data, Owner, LastAccess) VALUES (:t, :h, :d, :o, CURRENT_TIMESTAMP)');
+			list($token, $pass) = self::splitToken($token);
+			$s->bindValue(':t', $token, \PDO::PARAM_STR);
+			$s->bindValue(':h', password_hash($pass, PASSWORD_DEFAULT), \PDO::PARAM_STR);
+			$s->bindValue(':d', serialize($data), \PDO::PARAM_STR);
+			$s->bindValue(':o', $data->owner, \PDO::PARAM_STR);
+			$result = $s->execute();
+			assert($result !== false, 'token upsert');
+		} finally {
+			$s->closeCursor();
+		}
+	}
+
+	/**
+	 * @param string $token
+	 */
+	public function bumpToken(string $token) {
+		try {
+			$s = $this->getPDO()->prepare('UPDATE SessionToken SET LastAccess = CURRENT_TIMESTAMP WHERE Token = :t');
+			$token = self::splitToken($token)[0];
+			$s->bindValue(':t', $token, \PDO::PARAM_STR);
+			$result = $s->execute();
+			assert($result !== false, 'token bump');
+		} finally {
+			$s->closeCursor();
+		}
+	}
+
 	private function createSession(string $sessionID) {
 		try {
 			$s = $this->getPDO()->prepare('INSERT INTO Session(Session, Data, Redirect) VALUES (:s, NULL, NULL)');
@@ -167,6 +269,15 @@ final class UserDAO extends DAO {
 			assert($result !== false, 'set audit username');
 		} finally {
 			$s->closeCursor();
+		}
+	}
+
+	private static function splitToken(string $token): array {
+		$pieces = explode(':', $token, 2);
+		if(count($pieces) == 2) {
+			return $pieces;
+		} else {
+			return [$token, ''];
 		}
 	}
 }

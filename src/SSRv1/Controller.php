@@ -21,7 +21,10 @@ use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
+use WEEEOpen\Tarallo\SessionLocal;
 use WEEEOpen\Tarallo\User;
+use WEEEOpen\Tarallo\UserLocal;
+use WEEEOpen\Tarallo\UserSSO;
 use WEEEOpen\Tarallo\ValidationException;
 use Zend\Diactoros\Response\EmptyResponse;
 use Zend\Diactoros\Response\JsonResponse;
@@ -30,7 +33,7 @@ use Zend\Diactoros\UploadedFile;
 
 
 class Controller implements RequestHandlerInterface {
-	const cachefile = __DIR__ . '/router.cache';
+	const cachefile = __DIR__ . '../../resources/cache/SSRv1.cache';
 
 	public static function getItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
@@ -145,6 +148,39 @@ class Controller implements RequestHandlerInterface {
 	public static function logout(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$request = $request->withAttribute('Template', 'logout');
 
+		return $handler->handle($request);
+	}
+
+	public static function options(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		$body = $request->getParsedBody();
+		/** @var UserSSO $user */
+		$user = $request->getAttribute('User');
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$error = null;
+		$token = null;
+		if($body !== null && count($body) > 0) {
+			try {
+				if(isset($body['description']) && isset($body['new'])) {
+					$data = new SessionLocal();
+					$data->level = $user->getLevel();
+					$data->description = $body['description'];
+					$data->owner = $user->uid;
+					$token = SessionLocal::generateToken();
+					$db->sessionDAO()->setDataForToken($token, $data);
+				}
+			} catch(\Exception $e) {
+				$error = $e->getMessage();
+			}
+		}
+
+		$request = $request->withAttribute('Template', 'options');
+		$request = $request->withAttribute('TemplateParameters', [
+			'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
+			'newToken' => $token,
+			'error' => $error
+		]);
 		return $handler->handle($request);
 	}
 
@@ -319,9 +355,9 @@ class Controller implements RequestHandlerInterface {
 			}
 		}
 
-		$request = $request->withAttribute('Template', 'search')->withAttribute(
-			'TemplateParameters', $templateParameters
-		);
+		$request = $request
+			->withAttribute('Template', 'search')
+			->withAttribute('TemplateParameters', $templateParameters);
 
 		return $handler->handle($request);
 	}
@@ -339,16 +375,16 @@ class Controller implements RequestHandlerInterface {
 		$db = $request->getAttribute('Database');
 		$body = $request->getParsedBody();
 
-		if($body === null) {
+		if($body === null || count($body) === 0) {
 			// Opened page, didn't submit anything yet
 			$items = null;
 		} else {
 			/** @var UploadedFile[] $uploaded */
 			$uploaded = $request->getUploadedFiles();
-			if(count($uploaded) === 0 || !isset($uploaded['Fitems'])) {
+			if(count($uploaded) === 0 || !isset($uploaded['Fitems']) || $uploaded['Fitems']->getError() === UPLOAD_ERR_NO_FILE) {
 				$items = (string) $body['items'];
 			} else {
-				if($uploaded['Fitems']->getError() !== UploadedFile::ERROR_MESSAGES['UPLOAD_ERR_OK']) {
+				if($uploaded['Fitems']->getError() !== UPLOAD_ERR_OK) {
 					$items = $uploaded['Fitems']->getStream()->getContents();
 					if($items === false) {
 						// TODO: throw some other exception
@@ -581,8 +617,8 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/', [User::AUTH_LEVEL_RO, 'Controller::getHome']);
 				$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getHome']);
 				$r->get('/features.json', [User::AUTH_LEVEL_RO, 'Controller::getFeaturesJson']);
-				$r->get('/item/{id}', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
 				// TODO: make token access public
+				$r->get('/item/{id}', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
 				$r->get('/history/{id}', [User::AUTH_LEVEL_RO, 'Controller::getHistory']);
 				$r->get('/item/{id}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
 				$r->get('/item/{id}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
@@ -592,6 +628,8 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search']);
 				$r->get('/search/{id:[0-9]+}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::search']);
 				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::search']);
+				$r->get('/options', [User::AUTH_LEVEL_RO, 'Controller::options']);
+				$r->post('/options', [User::AUTH_LEVEL_RO, 'Controller::options']);
 				$r->get('/bulk', [User::AUTH_LEVEL_RO, 'Controller::bulk']);
 				$r->get('/bulk/move', [User::AUTH_LEVEL_RO, 'Controller::bulkMove']);
 				$r->post('/bulk/move', [User::AUTH_LEVEL_RW, 'Controller::bulkMove']);

@@ -13,6 +13,7 @@ use WEEEOpen\Tarallo\Database\TreeDAO;
 use WEEEOpen\Tarallo\ErrorHandler;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
+use WEEEOpen\Tarallo\HTTP\AuthTokenManager;
 use WEEEOpen\Tarallo\HTTP\AuthValidator;
 use WEEEOpen\Tarallo\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\HTTP\InvalidParameterException;
@@ -32,7 +33,7 @@ use Zend\Diactoros\Response\JsonResponse;
 
 
 class Controller implements RequestHandlerInterface {
-	const cachefile = __DIR__ . '/router.cache';
+	const cachefile = __DIR__ . '../../resources/cache/APIv2.cache';
 
 	public static function sessionWhoami(ServerRequestInterface $request): ResponseInterface {
 		$user = $request->getAttribute('User');
@@ -518,9 +519,10 @@ class Controller implements RequestHandlerInterface {
 			new EnsureJson(),
 			new DatabaseConnection(),
 			new ExceptionHandler(),
+			new AuthTokenManager(),
+			new AuthManager(false),
 		];
 		if($level !== null) {
-			$queue[] = new AuthManager(false);
 			$queue[] = new AuthValidator($level);
 		}
 		if($function !== null) {
