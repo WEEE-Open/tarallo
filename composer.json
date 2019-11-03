@@ -5,7 +5,7 @@
   "autoload": {
     "psr-4": {
       "WEEEOpen\\Tarallo\\": "src/",
-      "WEEEOpen\\TaralloTest": "tests/"
+      "WEEEOpen\\TaralloTest\\": "tests/"
     }
   },
   "config": {

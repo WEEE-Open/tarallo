@@ -52,9 +52,12 @@ class SearchDAOTest extends DatabaseTest {
 	}
 	
 	private function getUser() {
+		require_once __DIR__ . '/../../config/config.php';
+
 		$session = new SessionSSO();
 		$session->cn = 'Asd Asd';
 		$session->uid = 'asd';
+		$session->groups = ['Admin', 'Test', 'Bogus'];
 		return UserSSO::fromSession($session);
 	}
 

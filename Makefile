@@ -1,7 +1,7 @@
 default: production
 
 .PHONY:
-production: clean cache copies compose build/db.php
+production: clean cache copies compose build/config/config.php
 
 .PHONY:
 vm:
@@ -48,6 +48,7 @@ dbupdate:
 
 build/config/config.php:
 ifneq ("$(wildcard config/config-production.php)","")
+	mkdir build/config
 	cp config/config-production.php build/config/config.php
 else
 	@echo "/!\\ No config/config-production.php found, add your own config.php in the build/config directory /!\\"

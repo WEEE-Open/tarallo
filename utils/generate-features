@@ -171,7 +171,7 @@ if(count($piecesphp2) < 2) {
 	exit(1);
 }
 
-$localized_filename = $basedir . DIRECTORY_SEPARATOR . 'SSRv1' . DIRECTORY_SEPARATOR . 'FeaturePrinter.php';
+$localized_filename = $basedir . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'SSRv1' . DIRECTORY_SEPARATOR . 'FeaturePrinter.php';
 $localized = file_get_contents($localized_filename);
 
 $pieceslocalized = explode("\t// BEGIN GENERATED CODE" . PHP_EOL, $localized, 2);

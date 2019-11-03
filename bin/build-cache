@@ -3,27 +3,20 @@
 
 namespace WEEEOpen\Tarallo;
 
-use WEEEOpen\Tarallo\SSRv1\Controller;
 use Zend\Diactoros\ServerRequestFactory;
 
 require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
-if($argc > 1) {
-	$prefix = rtrim($argv[1], '\/') . DIRECTORY_SEPARATOR;
-	foreach([$prefix, $prefix . 'SSRv1/', $prefix . 'APIv1/'] as $dir) {
-		if(!is_dir($dir)) {
-			echo "$dir is not a directory";
-			exit(1);
-		}
-	}
-} else {
-	$prefix = '';
+define('TARALLO_CACHE_ENABLED', true);
+//define('TARALLO_DEVELOPMENT_ENVIRONMENT', true);
+$dir = __DIR__ . '/../resources/cache/';
+if(!is_dir($dir)) {
+	mkdir($dir, 0755, true);
 }
 
-define('CACHE_ENABLED', true);
-mkdir('../resources/cache/', true);
-$handle = new \ReflectionMethod(SSRv1\Controller::class, 'handle');
+$handle = new \ReflectionMethod(SSRv1\Controller::class, 'route');
 $handle->setAccessible(true);
 $handle->invoke(new SSRv1\Controller(), ServerRequestFactory::fromGlobals([], [], [], [], []));
-
-APIv2\Controller::getDispatcher($prefix . 'APIv1/router.cache');
+$handle = new \ReflectionMethod(APIv2\Controller::class, 'route');
+$handle->setAccessible(true);
+$handle->invoke(new APIv2\Controller(), ServerRequestFactory::fromGlobals([], [], [], [], []));

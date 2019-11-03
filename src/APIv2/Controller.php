@@ -33,7 +33,7 @@ use Zend\Diactoros\Response\JsonResponse;
 
 
 class Controller implements RequestHandlerInterface {
-	const cachefile = __DIR__ . '../../resources/cache/APIv2.cache';
+	const cachefile = __DIR__ . '/../../resources/cache/APIv2.cache';
 
 	public static function sessionWhoami(ServerRequestInterface $request): ResponseInterface {
 		$user = $request->getAttribute('User');

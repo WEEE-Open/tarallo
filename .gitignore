@@ -8,8 +8,8 @@ utils/provision/roles/
 utils/xdebug/*
 !utils/xdebug/
 !utils/xdebug/readme.txt
+resources/cache
 *.log
-*.generated.js*
 *.mo
 router.cache
 config/config.php

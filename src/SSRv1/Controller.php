@@ -23,7 +23,6 @@ use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\SessionLocal;
 use WEEEOpen\Tarallo\User;
-use WEEEOpen\Tarallo\UserLocal;
 use WEEEOpen\Tarallo\UserSSO;
 use WEEEOpen\Tarallo\ValidationException;
 use Zend\Diactoros\Response\EmptyResponse;
@@ -33,7 +32,7 @@ use Zend\Diactoros\UploadedFile;
 
 
 class Controller implements RequestHandlerInterface {
-	const cachefile = __DIR__ . '../../resources/cache/SSRv1.cache';
+	const cachefile = __DIR__ . '/../../resources/cache/SSRv1.cache';
 
 	public static function getItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
