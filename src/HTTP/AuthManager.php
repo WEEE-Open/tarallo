@@ -225,7 +225,6 @@ class AuthManager implements MiddlewareInterface {
 			$id = $cookie[self::COOKIE_NAME];
 			$redirect = $db->userDAO()->getRedirect($id);
 
-			// TODO: also check the SSO query parameters
 			if($redirect === null) {
 				// Nowhere to go, probably something is missing
 				$request = $request->withAttribute('User', null);
@@ -239,7 +238,7 @@ class AuthManager implements MiddlewareInterface {
 					$session->cn = 'Developement User';
 					$session->idToken = 'F00B4R';
 					$session->idTokenValidityTime = 60 * 60 * 24;
-					$session->idTokenExpiry = time() + $session->refreshTokenValidityTime;
+					$session->idTokenExpiry = time() + $session->idTokenValidityTime;
 					$session->refreshToken = 'N0REFRESH';
 					$session->refreshTokenValidityTime = 0;
 					$session->refreshTokenExpiry = 0;
@@ -265,7 +264,7 @@ class AuthManager implements MiddlewareInterface {
 				// Store it!
 				$db->beginTransaction();
 				$db->userDAO()->setDataForSession($id, $session);
-				$db->userDAO()->setRedirectForSession($id, $request->getUri());
+				$db->userDAO()->setRedirectForSession($id, null);
 				$db->commit();
 				//$request = $request->withAttribute('User', User::fromSession($session));
 
