@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpComposerExtensionStubsInspection APCu is suggested, but that's not enough for PHPStorm */
 
 
 namespace WEEEOpen\Tarallo\HTTP;
@@ -12,12 +12,20 @@ use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\UserLocal;
 
 class AuthTokenManager implements MiddlewareInterface {
+	private $useApcu;
+
+	public function __construct() {
+		$this->useApcu = !TARALLO_DEVELOPMENT_ENVIRONMENT && extension_loaded('apcu') && boolval(ini_get('apc.enabled'));
+	}
+
+	private function useApcu(): bool {
+		return $this->useApcu;
+	}
+
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$user = null;
 		$auth = $request->getHeader('Authorization');
-		if(count($auth) <= 0) {
-			$user = null;
-		} else {
+		if(count($auth) > 0) {
 			if(count($auth) >= 2) {
 				throw new AuthorizationException('Too many Authorization header values, found ' . count($auth));
 			}
@@ -30,6 +38,16 @@ class AuthTokenManager implements MiddlewareInterface {
 			/** @var Database $db */
 			$db = $request->getAttribute('Database');
 
+			// Try to read from cache. Yes it stores the plaintext "password", but at least avoids the overhead of
+			// password_verify on each request, that's the point. Cache entries have a limited TTL anyway...
+			if($this->useApcu()) {
+				$user = apcu_fetch('token-' . $token, $cached);
+				if($cached) {
+					return $handler->handle($request->withAttribute('User', $user));
+				}
+			}
+
+			// Cache miss :(
 			$session = $db->sessionDAO()->getToken($token, $lastAccess);
 			if($session === null || $lastAccess === null) {
 				$user = null;
@@ -46,6 +64,17 @@ class AuthTokenManager implements MiddlewareInterface {
 				} catch(\Exception $e) {
 					$user = null;
 				}
+			}
+
+			if($this->useApcu()) {
+				if($user === null) {
+					// Don't fill the cache with useless entries, users should notice pretty soon if the entered and
+					// invalid token
+					$ttl = 60; // 1 minute
+				} else {
+					$ttl = 30 * 60; // 30 minutes
+				}
+				apcu_store('token-' . $token, $user, $ttl);
 			}
 		}
 		return $handler->handle($request->withAttribute('User', $user));
