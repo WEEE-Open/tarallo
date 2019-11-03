@@ -1,7 +1,7 @@
 default: production
 
 .PHONY:
-production: clean copies cache compose build/db.php
+production: clean cache copies compose build/db.php
 
 .PHONY:
 vm:
@@ -21,15 +21,14 @@ clean:
 
 .PHONY:
 copies:
-	cp "index.php" build/
-	cp "update.php" build/
-	cp composer.{json,lock} "build/"
+	cp -r "bin/" "build/"
+	cp -r "public/" "build/"
 	cp -r "src/" "build/"
-	cp -r "APIv1/" "build/"
-	cp -r "SSRv1/" "build/"
+	cp -r "resources/" "build/"
+	cp composer.{json,lock} "build/"
 
 # Could be useful, could be not.
-# chmod o-w build/SSRv1/router.cache
+# chmod o-w build/src/SSRv1/router.cache
 
 .PHONY:
 compose:
@@ -41,15 +40,15 @@ compose:
 cache:
 	test ! -f "build/SSRv1/router.cache" || rm build/SSRv1/router.cache
 	test ! -f "build/APIv1/router.cache" || rm build/APIv1/router.cache
-	php utils/build-cache build/
+	php bin/build-cache ../build/
 
 .PHONY:
 dbupdate:
 	vagrant provision --provision-with db_update,test_db_update
 
-build/db.php:
-ifneq ("$(wildcard db-production.php)","")
-	cp db-production.php build/db.php
+build/config/config.php:
+ifneq ("$(wildcard config/config-production.php)","")
+	cp config/config-production.php build/config/config.php
 else
-	@echo "/!\\ No db-production.php found, add your own db.php in the 'build' directory /!\\"
+	@echo "/!\\ No config/config-production.php found, add your own config.php in the build/config directory /!\\"
 endif

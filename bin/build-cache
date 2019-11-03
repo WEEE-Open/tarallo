@@ -3,6 +3,9 @@
 
 namespace WEEEOpen\Tarallo;
 
+use WEEEOpen\Tarallo\SSRv1\Controller;
+use Zend\Diactoros\ServerRequestFactory;
+
 require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 
 if($argc > 1) {
@@ -18,5 +21,9 @@ if($argc > 1) {
 }
 
 define('CACHE_ENABLED', true);
-SSRv1\Controller::getDispatcher($prefix . 'SSRv1/router.cache');
-APIv1\Controller::getDispatcher($prefix . 'APIv1/router.cache');
+mkdir('../resources/cache/', true);
+$handle = new \ReflectionMethod(SSRv1\Controller::class, 'handle');
+$handle->setAccessible(true);
+$handle->invoke(new SSRv1\Controller(), ServerRequestFactory::fromGlobals([], [], [], [], []));
+
+APIv2\Controller::getDispatcher($prefix . 'APIv1/router.cache');
