@@ -12,7 +12,7 @@ use WEEEOpen\Tarallo\Database\DatabaseException;
 class DatabaseConnection implements MiddlewareInterface {
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		try {
-			$db = new Database(TARALLO_DB_USER, TARALLO_DB_PASS, TARALLO_DB_DSN);
+			$db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);
 		} catch(DatabaseException $e) {
 			throw new DatabaseException('Cannot connect to database');
 		}
