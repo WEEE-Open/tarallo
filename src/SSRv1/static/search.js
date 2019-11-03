@@ -102,6 +102,9 @@
 	}
 
 	async function searchButtonClick(ev) {
+		let error = document.getElementById('error');
+		error.classList.add('hidden');
+
 		let id = null;
 		if(ev.target.dataset.searchId) {
 			id = ev.target.dataset.searchId;
@@ -167,10 +170,18 @@
 			});
 
 			let result = await response.json();
-			if(result.status === 'success') {
-				let id = result.data;
-				goTo(id);
+			if(response.ok) {
+				goTo(result);
+			} else if(response.status === 401) {
+				error.textContent = 'Session expired or logged out. Open another tab, log in and try again.';
+				error.classList.remove('hidden');
 			} else {
+				if('message' in result) {
+					error.textContent = result['message'];
+				} else {
+					error.textContent = 'Error';
+				}
+				error.classList.remove('hidden');
 				console.log(result);
 			}
 		} finally {

@@ -9,6 +9,9 @@
 $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => true]);
 ?>
 
+<p class="error message hidden" id="error"></p>
+
+<?php if(!$searchId || !empty($results)): ?>
 <nav id="searcharea">
 	<nav id="searchbuttons">
 		<p>Filter by
@@ -49,6 +52,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 	</div>
 	<button id="searchbutton" <?= $searchId === null ?: 'data-search-id="'.$searchId.'"' ?>><?=$searchId === null ? 'Search' : 'Refine'?></button>
 </nav>
+<?php endif ?>
 <?php if(!empty($results)): ?>
 <div id="stats"><?= $total ?> results, showing <?= $resultsPerPage ?> (page <?= $page ?> of <?= $pages ?>).</div>
 <?php endif ?>
@@ -58,6 +62,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 	if($searchId):
 		if(empty($results)): ?>
 			<p>Nothing found :(</p>
+            <p><!--suppress HtmlUnknownTarget --><a href="/search">New search</a></p>
 		<?php else:
 			$this->insert('pagination', ['page' => $page, 'pages' => $pages, 'searchId' => $searchId]);
 			foreach($results as $item) {

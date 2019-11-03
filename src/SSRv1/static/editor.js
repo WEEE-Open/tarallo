@@ -1233,6 +1233,8 @@
 			let json = await response.json();
 			if(response.status === 200 || response.status === 201) {
 				goBack(json);
+			} else if(response.status === 401) {
+				displayError('Session expired or logged out. Open another tab, log in and try again.');
 			} else {
 				let message = json.message || "Unknown error, status: " + response.status;
 				displayError(message)
@@ -1269,10 +1271,12 @@
 
 				if(response.status === 204) {
 					goBack();
+				} else if(response.status === 401) {
+					displayError('Session expired or logged out. Open another tab, log in and try again.');
 				} else {
 					let json = await response.json();
 					let message = json.message || "Unknown error, status: " + response.status;
-					displayError(message)
+					displayError(message);
 				}
 			} catch(err) {
 				if(err instanceof TimeoutError) {
@@ -1305,10 +1309,12 @@
 
 			if(response.status === 204) {
 				goBack();
+			} else if(response.status === 401) {
+				displayError('Session expired or logged out. Open another tab, log in and try again.');
 			} else {
 				let json = await response.json();
 				let message = json.message || "Unknown error, status: " + response.status;
-				displayError(message)
+				displayError(message);
 			}
 		} catch(err) {
 			if(err instanceof TimeoutError) {
@@ -1371,6 +1377,8 @@
 
 			if(response.status === 204) {
 				goBack();
+			} else if(response.status === 401) {
+				displayError('Session expired or logged out. Open another tab, log in and try again.');
 			} else {
 				let json = await response.json();
 				let message = json.message || "Unknown error, status: " + response.status;

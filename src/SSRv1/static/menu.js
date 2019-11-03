@@ -130,6 +130,8 @@
 				}
 				warning.style.display = '';
 				warning.textContent = errorText;
+			} else if(response.status === 401) {
+				warning.textContent = 'Session expired or logged out. Open another tab, log in and try again.';
 			} else if(response.status === 400 && json.exception === 'WEEEOpen\\Tarallo\\ItemNestingException' && 'item' in json && 'other_item' in json) {
 				if('message' in json) {
 					errorText = `Cannot place ${json.item} inside ${json.other_item}: ${json.message}`;
