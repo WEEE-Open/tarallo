@@ -17,12 +17,6 @@ class GracefulExceptionHandler implements MiddlewareInterface {
 
 		try {
 			return $handler->handle($request);
-//		} catch(AuthenticationException $e) {
-//			$request = $request
-//				->withAttribute('Template', 'error')
-//				->withAttribute('TemplateParameters', ['reasonNoEscape' => '<a href="/login">Please authenticate</a>'])
-//				->withAttribute('ResponseCode', 401)
-//				->withAttribute('ResponseHeaders', ['WWW-Authenticate' => 'login']);
 		} catch(AuthorizationException $e) {
 			$request = $request
 				->withAttribute('Template', 'error')
