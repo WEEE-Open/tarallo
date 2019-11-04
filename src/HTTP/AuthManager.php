@@ -321,7 +321,7 @@ class AuthManager implements MiddlewareInterface {
 			return new RedirectResponse($request->getUri()->withQuery('done=true'), 302);
 		} else {
 			$oidc = self::oidc();
-			$oidc->signOut($token, $request->getUri()->withQuery('done=true'));
+			$oidc->signOut($token, (string) $request->getUri()->withQuery('done=true'));
 			exit;
 		}
 	}

@@ -15,14 +15,16 @@ class ErrorHandler implements MiddlewareInterface {
 		try {
 			return $handler->handle($request);
 		} catch(\Throwable $exception) {
+			$short = "⚠️ Error ⚠️\n\n" . get_class($exception);
+			$full = $short . ': ' . $exception->getMessage() . ' in ' .
+				$exception->getFile() . ' on line ' . $exception->getLine() . "\n\nStack trace:\n" .
+				$exception->getTraceAsString();
+
 			if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
-				return new TextResponse(
-					"⚠️ Error ⚠️\n\n" . get_class($exception) . ': ' . $exception->getMessage() . ' in ' .
-					$exception->getFile() . ' on line ' . $exception->getLine() . "\n\nStack trace:\n" .
-					$exception->getTraceAsString(), 500
-				);
+				return new TextResponse($full, 500);
 			} else {
-				return new TextResponse("⚠️ Error ⚠️\n\n" . get_class($exception), 500);
+				error_log($full);
+				return new TextResponse($short, 500);
 			}
 		}
 

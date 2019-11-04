@@ -63,7 +63,11 @@ class ErrorResponse implements \JsonSerializable {
 			$error->rh = $e->getRh();
 		}
 		if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
-			$error->trace = $e->getTraceAsString();
+			$error->trace .= $e->getFile();
+			$error->trace .= ' on line ';
+			$error->trace .= $e->getLine();
+			$error->trace .= "\n";
+			$error->trace .= $e->getTraceAsString();
 		}
 
 		return $error;

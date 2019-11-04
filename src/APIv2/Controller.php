@@ -36,9 +36,10 @@ class Controller implements RequestHandlerInterface {
 	const cachefile = __DIR__ . '/../../resources/cache/APIv2.cache';
 
 	public static function sessionWhoami(ServerRequestInterface $request): ResponseInterface {
+		/** @var User $user */
 		$user = $request->getAttribute('User');
 
-		return new JsonResponse(['username' => $user->getUsername()]);
+		return new JsonResponse(['username' => $user->uid]);
 	}
 
 	public static function getItem(ServerRequestInterface $request): ResponseInterface {
@@ -141,7 +142,7 @@ class Controller implements RequestHandlerInterface {
 		try {
 			if(BaseFeature::getType($id) !== BaseFeature::STRING) {
 				// TODO: throw notImplementedException or something
-				throw new InvalidParameterException('feature', $id, "Only text features are supported, $id isn't", 0, $e);
+				throw new InvalidParameterException('feature', $id, "Only text features are supported, $id isn't");
 			}
 		} catch(\InvalidArgumentException $e) {
 			throw new InvalidParameterException('feature', $id, $e->getMessage(), 0, $e);
@@ -214,10 +215,12 @@ class Controller implements RequestHandlerInterface {
 		$id = Validation::validateHasString($parameters, 'id');
 
 		try {
-			$db->itemDAO()->deleteItem(new ItemCode($id));
+			$id = new ItemCode($id);
 		} catch(ValidationException $e) {
 			throw new NotFoundException($id);
 		}
+
+		$db->itemDAO()->deleteItem($id);
 
 		return new EmptyResponse(204);
 	}

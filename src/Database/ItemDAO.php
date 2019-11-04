@@ -310,7 +310,7 @@ EOQ
 
 			// First Item is the head Item
 			if(($row = $statement->fetch(\PDO::FETCH_ASSOC)) === false) {
-				throw new NotFoundException();
+				throw new NotFoundException($itemToGet->getCode());
 			} else {
 				// Now we have the real code, with correct case (database is case-insensitive)
 				$head = new Item($row['Code']);
