@@ -12,10 +12,10 @@ class Summary {
 			//case 'location':
 			// Not implemented
 
-			//case 'case':
-				// return SomeSummarizer::summarize($item);
-			//case 'motherboard':
-				// return SomeSummarizer::summarize($item);
+			case 'case':
+				 return CaseSummarizer::summarize($item);
+			case 'motherboard':
+				return MotherboardSummarizer::summarize($item);
 			case 'cpu':
 				return CpuSummarizer::summarize($item);
 			case 'graphics-card':
@@ -23,12 +23,10 @@ class Summary {
 			case 'ram':
 				return RamSummarizer::summarize($item);
 			case 'hdd':
+			case 'ssd':
 				return HddSummarizer::summarize($item);
-			//case 'ssd':
-				// TODO: can we reuse HddSummarizer?
-				// return SomeSummarizer::summarize($item);
-			//case 'odd':
-				// return SomeSummarizer::summarize($item);
+			case 'odd':
+				return OddSummarizer::summarize($item);
 			case 'psu':
 				return PsuSummarizer::summarize($item);
 			case 'audio-card':
@@ -52,8 +50,8 @@ class Summary {
 			case 'network-hub':
 			case 'modem-router':
 				return SimpleDeviceSummarizer::summarize($item);
-			// case 'monitor':
-				// return SomeSummarizer::summarize($item);
+			 case 'monitor':
+				return MonitorSummarizer::summarize($item);
 
 			// case 'fdd':
 			// case 'zip-drive':
@@ -69,7 +67,7 @@ class Summary {
 				// How do you even implement this?
 
 			default:
-				// TODO: return item type and that's it, when everything else is summarized
+				// TODO: return SimpleDeviceSummarizer::summarize($item); when everything else is summarized
 				return null;
 		}
 	}
