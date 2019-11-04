@@ -139,7 +139,8 @@ class Controller implements RequestHandlerInterface {
 		$request = $request
 			->withAttribute('Template', 'error')
 			->withAttribute('ResponseCode', 400)
-			->withAttribute('TemplateParameters', ['reason' => 'Login failed']);
+			->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Login failed, <a href="/">retry</a>']);
+		error_log('Login failed');
 
 		return $handler->handle($request);
 	}

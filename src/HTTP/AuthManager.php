@@ -228,13 +228,16 @@ class AuthManager implements MiddlewareInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		if(isset($cookie[self::COOKIE_NAME]) && (isset($_REQUEST["code"]) || isset($_REQUEST["error"]))) {
+			error_log('/auth: got cookie');
 			$id = $cookie[self::COOKIE_NAME];
 			$redirect = $db->sessionDAO()->getRedirect($id);
 
 			if($redirect === null) {
 				// Nowhere to go, probably something is missing
+				error_log('/auth: redirect is null');
 				$request = $request->withAttribute('User', null);
 			} else {
+				error_log('/auth: got redirect');
 				// We have everything! Probably!
 				if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
 					//error_log('DEV: Bypassing authentication step 2');
@@ -275,10 +278,13 @@ class AuthManager implements MiddlewareInterface {
 				$db->commit();
 				//$request = $request->withAttribute('User', UserSSO::fromSession($session));
 
+				error_log('/auth: data stored, redirecting');
+
 				// Do not process further middleware, just redirect
 				return new RedirectResponse($redirect, 303);
 			}
 		} else {
+			error_log('/auth: missing cookie or other: ' . implode(', ', array_keys($cookie)) . ' - ' . implode(', ', array_keys($_REQUEST)));
 			// uh, cookie is missing... no user here
 			$request = $request->withAttribute('User', null);
 		}
