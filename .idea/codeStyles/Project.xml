@@ -1,5 +1,124 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
+    <DB2CodeStyleSettings version="2">
+      <option name="KEYWORD_CASE" value="0" />
+      <option name="TYPE_CASE" value="0" />
+      <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
+      <option name="QUERY_EL_LINE" value="0" />
+      <option name="QUERY_EL_COMMA" value="2" />
+      <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
+      <option name="INSERT_CONTENT" value="0" />
+      <option name="SET_ALIGN_EQUAL_SIGN" value="false" />
+      <option name="SELECT_USE_AS_WORD" value="1" />
+      <option name="SELECT_ALIGN_AS" value="false" />
+      <option name="FROM_INDENT_JOIN" value="false" />
+      <option name="TABLE_TYPES_ALIGN" value="false" />
+      <option name="TABLE_DEFAULTS_ALIGN" value="false" />
+      <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
+      <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
+    </DB2CodeStyleSettings>
+    <DerbyCodeStyleSettings version="2">
+      <option name="KEYWORD_CASE" value="0" />
+      <option name="TYPE_CASE" value="0" />
+      <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
+      <option name="QUERY_EL_LINE" value="0" />
+      <option name="QUERY_EL_COMMA" value="2" />
+      <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
+      <option name="INSERT_CONTENT" value="0" />
+      <option name="SET_ALIGN_EQUAL_SIGN" value="false" />
+      <option name="SELECT_USE_AS_WORD" value="1" />
+      <option name="SELECT_ALIGN_AS" value="false" />
+      <option name="FROM_INDENT_JOIN" value="false" />
+      <option name="TABLE_TYPES_ALIGN" value="false" />
+      <option name="TABLE_DEFAULTS_ALIGN" value="false" />
+      <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
+      <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
+    </DerbyCodeStyleSettings>
+    <H2CodeStyleSettings version="2">
+      <option name="KEYWORD_CASE" value="0" />
+      <option name="TYPE_CASE" value="0" />
+      <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
+      <option name="QUERY_EL_LINE" value="0" />
+      <option name="QUERY_EL_COMMA" value="2" />
+      <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
+      <option name="INSERT_CONTENT" value="0" />
+      <option name="SET_ALIGN_EQUAL_SIGN" value="false" />
+      <option name="SELECT_USE_AS_WORD" value="1" />
+      <option name="SELECT_ALIGN_AS" value="false" />
+      <option name="FROM_INDENT_JOIN" value="false" />
+      <option name="TABLE_TYPES_ALIGN" value="false" />
+      <option name="TABLE_DEFAULTS_ALIGN" value="false" />
+      <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
+      <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
+    </H2CodeStyleSettings>
+    <HSQLCodeStyleSettings version="2">
+      <option name="KEYWORD_CASE" value="0" />
+      <option name="TYPE_CASE" value="0" />
+      <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
+      <option name="QUERY_EL_LINE" value="0" />
+      <option name="QUERY_EL_COMMA" value="2" />
+      <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
+      <option name="INSERT_CONTENT" value="0" />
+      <option name="SET_ALIGN_EQUAL_SIGN" value="false" />
+      <option name="SELECT_USE_AS_WORD" value="1" />
+      <option name="SELECT_ALIGN_AS" value="false" />
+      <option name="FROM_INDENT_JOIN" value="false" />
+      <option name="TABLE_TYPES_ALIGN" value="false" />
+      <option name="TABLE_DEFAULTS_ALIGN" value="false" />
+      <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
+      <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
+    </HSQLCodeStyleSettings>
+    <MSSQLCodeStyleSettings version="2">
+      <option name="KEYWORD_CASE" value="0" />
+      <option name="TYPE_CASE" value="0" />
+      <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
+      <option name="QUERY_EL_LINE" value="0" />
+      <option name="QUERY_EL_COMMA" value="2" />
+      <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
+      <option name="INSERT_CONTENT" value="0" />
+      <option name="SET_ALIGN_EQUAL_SIGN" value="false" />
+      <option name="SELECT_USE_AS_WORD" value="1" />
+      <option name="SELECT_ALIGN_AS" value="false" />
+      <option name="FROM_INDENT_JOIN" value="false" />
+      <option name="TABLE_TYPES_ALIGN" value="false" />
+      <option name="TABLE_DEFAULTS_ALIGN" value="false" />
+      <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
+      <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
+    </MSSQLCodeStyleSettings>
+    <MySQLCodeStyleSettings version="2">
+      <option name="KEYWORD_CASE" value="0" />
+      <option name="TYPE_CASE" value="0" />
+      <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
+      <option name="QUERY_EL_LINE" value="0" />
+      <option name="QUERY_EL_COMMA" value="2" />
+      <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
+      <option name="INSERT_CONTENT" value="0" />
+      <option name="SET_ALIGN_EQUAL_SIGN" value="false" />
+      <option name="SELECT_USE_AS_WORD" value="1" />
+      <option name="SELECT_ALIGN_AS" value="false" />
+      <option name="FROM_INDENT_JOIN" value="false" />
+      <option name="TABLE_TYPES_ALIGN" value="false" />
+      <option name="TABLE_DEFAULTS_ALIGN" value="false" />
+      <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
+      <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
+    </MySQLCodeStyleSettings>
+    <OracleCodeStyleSettings version="2">
+      <option name="KEYWORD_CASE" value="0" />
+      <option name="TYPE_CASE" value="0" />
+      <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
+      <option name="QUERY_EL_LINE" value="0" />
+      <option name="QUERY_EL_COMMA" value="2" />
+      <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
+      <option name="INSERT_CONTENT" value="0" />
+      <option name="SET_ALIGN_EQUAL_SIGN" value="false" />
+      <option name="SELECT_USE_AS_WORD" value="1" />
+      <option name="SELECT_ALIGN_AS" value="false" />
+      <option name="FROM_INDENT_JOIN" value="false" />
+      <option name="TABLE_TYPES_ALIGN" value="false" />
+      <option name="TABLE_DEFAULTS_ALIGN" value="false" />
+      <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
+      <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
+    </OracleCodeStyleSettings>
     <PHPCodeStyleSettings>
       <option name="COMMA_AFTER_LAST_ARRAY_ELEMENT" value="true" />
       <option name="PHPDOC_BLANK_LINES_AROUND_PARAMETERS" value="true" />
@@ -13,6 +132,40 @@
       <option name="FORCE_SHORT_DECLARATION_ARRAY_STYLE" value="true" />
       <option name="PLACE_PARENS_FOR_CONSTRUCTOR" value="1" />
     </PHPCodeStyleSettings>
+    <PostgresCodeStyleSettings version="2">
+      <option name="KEYWORD_CASE" value="0" />
+      <option name="TYPE_CASE" value="0" />
+      <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
+      <option name="QUERY_EL_LINE" value="0" />
+      <option name="QUERY_EL_COMMA" value="2" />
+      <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
+      <option name="INSERT_CONTENT" value="0" />
+      <option name="SET_ALIGN_EQUAL_SIGN" value="false" />
+      <option name="SELECT_USE_AS_WORD" value="1" />
+      <option name="SELECT_ALIGN_AS" value="false" />
+      <option name="FROM_INDENT_JOIN" value="false" />
+      <option name="TABLE_TYPES_ALIGN" value="false" />
+      <option name="TABLE_DEFAULTS_ALIGN" value="false" />
+      <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
+      <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
+    </PostgresCodeStyleSettings>
+    <SQLiteCodeStyleSettings version="2">
+      <option name="KEYWORD_CASE" value="0" />
+      <option name="TYPE_CASE" value="0" />
+      <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
+      <option name="QUERY_EL_LINE" value="0" />
+      <option name="QUERY_EL_COMMA" value="2" />
+      <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
+      <option name="INSERT_CONTENT" value="0" />
+      <option name="SET_ALIGN_EQUAL_SIGN" value="false" />
+      <option name="SELECT_USE_AS_WORD" value="1" />
+      <option name="SELECT_ALIGN_AS" value="false" />
+      <option name="FROM_INDENT_JOIN" value="false" />
+      <option name="TABLE_TYPES_ALIGN" value="false" />
+      <option name="TABLE_DEFAULTS_ALIGN" value="false" />
+      <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
+      <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
+    </SQLiteCodeStyleSettings>
     <SqlCodeStyleSettings version="2">
       <option name="KEYWORD_CASE" value="0" />
       <option name="TYPE_CASE" value="0" />
@@ -30,7 +183,25 @@
       <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
       <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
     </SqlCodeStyleSettings>
+    <SybaseCodeStyleSettings version="2">
+      <option name="KEYWORD_CASE" value="0" />
+      <option name="TYPE_CASE" value="0" />
+      <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
+      <option name="QUERY_EL_LINE" value="0" />
+      <option name="QUERY_EL_COMMA" value="2" />
+      <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
+      <option name="INSERT_CONTENT" value="0" />
+      <option name="SET_ALIGN_EQUAL_SIGN" value="false" />
+      <option name="SELECT_USE_AS_WORD" value="1" />
+      <option name="SELECT_ALIGN_AS" value="false" />
+      <option name="FROM_INDENT_JOIN" value="false" />
+      <option name="TABLE_TYPES_ALIGN" value="false" />
+      <option name="TABLE_DEFAULTS_ALIGN" value="false" />
+      <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
+      <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
+    </SybaseCodeStyleSettings>
     <codeStyleSettings language="PHP">
+      <option name="RIGHT_MARGIN" value="0" />
       <option name="KEEP_CONTROL_STATEMENT_IN_ONE_LINE" value="false" />
       <option name="CLASS_BRACE_STYLE" value="1" />
       <option name="METHOD_BRACE_STYLE" value="1" />
