@@ -48,14 +48,14 @@ Vagrant.configure("2") do |config|
 	  ansible.compatibility_mode = "2.0"
 	  ansible.playbook = "utils/provision/playbook.yml"
     end
-    config.vm.provision "db_update", type: "shell", run: "always" do |up|
-        up.privileged = false
-        up.inline = "php /var/www/html/server/bin/update.php"
-    end
-    config.vm.provision "test_db_update", type: "shell", run: "always" do |up|
-        up.privileged = false
-        up.inline = "php /var/www/html/server/bin/update.php test_db"
-    end
+  end
+  config.vm.provision "db_update", type: "shell", run: "always" do |up|
+    up.privileged = false
+    up.inline = "php /var/www/html/server/bin/update.php"
+  end
+  config.vm.provision "test_db_update", type: "shell", run: "always" do |up|
+    up.privileged = false
+    up.inline = "php /var/www/html/server/bin/update.php test_db"
   end
 
 end

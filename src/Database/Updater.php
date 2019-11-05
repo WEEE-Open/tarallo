@@ -275,7 +275,7 @@ EOQ
 					$this->exec('DROP TABLE User;');
 					break;
 				case 6:
-					$this->exec('ALTER TABLE Session ADD COLUMN `LastAccess` TIMESTAMP NOT NULL DEFAULT current_timestamp AFTER Redirect;');
+					$this->exec('ALTER TABLE `Session` ADD COLUMN `LastAccess` TIMESTAMP NOT NULL DEFAULT current_timestamp AFTER Redirect;');
 					$this->exec('CREATE TABLE `SessionToken`
 (
     `Token` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
