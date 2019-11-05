@@ -56,6 +56,6 @@ Vagrant.configure("2") do |config|
   config.vm.provision "test_db_update", type: "shell", run: "always" do |up|
     up.privileged = false
     up.inline = "php /var/www/html/server/bin/update.php test_db"
-  gend
+  end
 
 end
