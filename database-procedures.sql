@@ -460,6 +460,30 @@ CREATE TRIGGER ChangeFeatureType
 	END $$
 DELIMITER ;
 
--- SET GLOBAL -------------------------------------------------------------------
+-- Sessions --------------------------------------------------------------------
+
+DROP EVENT IF EXISTS `SessionsCleanup`;
+DELIMITER $$
+CREATE EVENT `SessionsCleanup`
+    ON SCHEDULE EVERY '6' HOUR
+    ON COMPLETION PRESERVE
+    ENABLE DO
+    DELETE
+    FROM `Session`
+    WHERE LastAccess < TIMESTAMPADD(DAY, -2, NOW()) $$
+DELIMITER ;
+
+DROP EVENT IF EXISTS `TokensCleanup`;
+DELIMITER $$
+CREATE EVENT `TokensCleanup`
+    ON SCHEDULE EVERY '1' DAY
+    ON COMPLETION PRESERVE
+    ENABLE DO
+    DELETE
+    FROM `SessionToken`
+    WHERE LastAccess < TIMESTAMPADD(MONTH, -6, NOW()) $$
+DELIMITER ;
+
+-- SET GLOBAL ------------------------------------------------------------------
 
 SET GLOBAL event_scheduler = ON;

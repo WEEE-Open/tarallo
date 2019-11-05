@@ -23,6 +23,8 @@ class Updater extends DAO {
 		}
 		$result = $this->getPDO()->query("SELECT `Value` FROM Configuration WHERE `Key` = 'DataVersion'");
 		$this->dataVersion = (int) $result->fetchColumn();
+
+		echo 'Start from schema version ' . $this->schemaVersion . ' and data version ' . $this->dataVersion . PHP_EOL;
 	}
 
 	public function updateTo(int $schema, int $data) {
@@ -288,6 +290,26 @@ EOQ
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;');
+					break;
+				case 7:
+					$this->exec('DROP EVENT IF EXISTS `SessionsCleanup`');
+					$this->exec('CREATE EVENT `SessionsCleanup`
+    ON SCHEDULE EVERY \'6\' HOUR
+    ON COMPLETION PRESERVE
+    ENABLE DO
+    DELETE
+    FROM `Session`
+    WHERE LastAccess < TIMESTAMPADD(DAY, -2, NOW());
+');
+$this->exec('DROP EVENT IF EXISTS `TokensCleanup`;');
+$this->exec('CREATE EVENT `TokensCleanup`
+    ON SCHEDULE EVERY \'1\' DAY
+    ON COMPLETION PRESERVE
+    ENABLE DO
+    DELETE
+    FROM `SessionToken`
+    WHERE LastAccess < TIMESTAMPADD(MONTH, -6, NOW());
+');
 					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');

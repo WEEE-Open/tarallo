@@ -207,4 +207,4 @@ CREATE TABLE `SessionToken`
   COLLATE = utf8mb4_unicode_ci;
 
 INSERT INTO `Configuration` (`Key`, `Value`)
-VALUES ('SchemaVersion', 7);
+VALUES ('SchemaVersion', 8);
