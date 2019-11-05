@@ -3,6 +3,7 @@
 /** @var \WEEEOpen\Tarallo\SessionLocal $tokens */
 /** @var string|null $newToken */
 /** @var string|null $error */
+/** @var array $sessionInfo */
 $this->layout('main', ['title' => 'Options', 'user' => $user]) ?>
 <?php if($error !== null): ?>
 <p class="error message"><?= $this->e($error) ?></p>
@@ -44,3 +45,5 @@ $this->layout('main', ['title' => 'Options', 'user' => $user]) ?>
     <label for="description"></label><input type="text" id="description" name="description">
     <button type="submit" name="new" value="true">Get token</button>
 </form>
+
+<p>Debug info: <?php foreach($sessionInfo as &$s): $s = $s - time(); endforeach; echo implode(', ', $sessionInfo) ?></p>
