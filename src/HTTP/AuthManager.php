@@ -10,6 +10,7 @@ use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use ReflectionMethod;
 use WEEEOpen\Tarallo\Database\Database;
+use WEEEOpen\Tarallo\OpenIDConnectRefreshClient;
 use WEEEOpen\Tarallo\SessionSSO;
 use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\UserSSO;
@@ -35,6 +36,7 @@ class AuthManager implements MiddlewareInterface {
 	 * @param $expire
 	 */
 	protected static function setCookie(string $newContent, int $expire) {
+		error_log("set cookie to expire in " . ($expire - time()));
 		setcookie(self::COOKIE_NAME, $newContent, $expire, '', '', !TARALLO_DEVELOPMENT_ENVIRONMENT, true);
 	}
 
@@ -186,7 +188,6 @@ class AuthManager implements MiddlewareInterface {
 			if(!$this->browser) {
 				throw $e;
 			}
-
 			// We need to authenticate.
 
 			// Create new session
@@ -199,8 +200,8 @@ class AuthManager implements MiddlewareInterface {
 			$db->sessionDAO()->setRedirectForSession($id, $request->getUri());
 			$db->commit();
 
-			// Enough time to log in
-			self::setCookie($id, time() + 600);
+			// Expire at the end of browser session, the SSO page may remain open for hours anyway
+			self::setCookie($id, 0);
 
 			// Done, see you at /auth!
 			if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
@@ -231,16 +232,13 @@ class AuthManager implements MiddlewareInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		if(isset($cookie[self::COOKIE_NAME]) && (isset($_REQUEST["code"]) || isset($_REQUEST["error"]))) {
-			error_log('/auth: got cookie');
 			$id = $cookie[self::COOKIE_NAME];
 			$redirect = $db->sessionDAO()->getRedirect($id);
 
 			if($redirect === null) {
 				// Nowhere to go, probably something is missing
-				error_log('/auth: redirect is null');
 				$request = $request->withAttribute('User', null);
 			} else {
-				error_log('/auth: got redirect');
 				// We have everything! Probably!
 				if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
 					//error_log('DEV: Bypassing authentication step 2');
@@ -287,13 +285,10 @@ class AuthManager implements MiddlewareInterface {
 				$db->commit();
 				//$request = $request->withAttribute('User', UserSSO::fromSession($session));
 
-				error_log('/auth: data stored, redirecting');
-
 				// Do not process further middleware, just redirect
 				return new RedirectResponse($redirect, 303);
 			}
 		} else {
-			error_log('/auth: missing cookie or other: ' . implode(', ', array_keys($cookie)) . ' - ' . implode(', ', array_keys($_REQUEST)));
 			// uh, cookie is missing... no user here
 			$request = $request->withAttribute('User', null);
 		}
@@ -342,7 +337,8 @@ class AuthManager implements MiddlewareInterface {
 	}
 
 	private function performRefresh(SessionSSO $previousSession): ?SessionSSO {
-		$oidc = self::oidc();
+		$oidc = new OpenIDConnectRefreshClient(TARALLO_OIDC_ISSUER, TARALLO_OIDC_CLIENT_KEY, TARALLO_OIDC_CLIENT_SECRET);
+		$oidc->addScope(['openid', 'profile']);
 		$json = $oidc->refreshToken($previousSession->refreshToken);
 
 		// The "correct way" is apparently to call the refresh token endpoint ad obtain a new refresh token + access
@@ -377,11 +373,9 @@ class AuthManager implements MiddlewareInterface {
 			// Validate the ID token signature
 			$valid = $oidc->verifyJWTsignature($json->id_token);
 			if(!$valid) {
-				error_log('JWT signature validation failed (returned false)');
 				return null;
 			}
 		} catch(OpenIDConnectClientException $e) {
-			error_log('JWT signature validation failed: ' . $e->getMessage());
 			return null;
 		}
 
@@ -390,16 +384,22 @@ class AuthManager implements MiddlewareInterface {
 		$claims = json_decode(\Jumbojett\base64url_decode(explode(".", $json->id_token)[1]));
 
 		try {
+			// There's a comparison in verifyJWTclaims for the nonce set by the OIDC client. Which does not set any nonce.
+			// This prevents replay attacks during redirects, but this a backend request, it's simply not possible to do
+			// such an attack without taking control of the SSO server domain and generating a valid TLS certificate,
+			// at which point the attacker has basically control of everything...
+			// So we set it to the received value and the check passes.
+			$oidc->setNonceForRefresh($claims->nonce);
+
 			// We need to validate the claims. Possibly. Not entirely sure if this part is required.
-			$method = new ReflectionMethod($oidc, 'sayHelloTo');
+			$method = new ReflectionMethod($oidc, 'verifyJWTclaims');
 			$method->setAccessible(true);
-			$valid = $method->invoke($oidc, 'verifyJWTclaims', $claims, $json->access_token);
+			$valid = $method->invoke($oidc, $claims, $json->access_token);
 			if(!$valid) {
-				error_log('JWT claims validation failed (returned false)');
+				error_log('verifyJWTclaims failed');
 				return null;
 			}
 		} catch(\ReflectionException $e) {
-			error_log('Reflection failed :(');
 			return null;
 		} /** @noinspection PhpRedundantCatchClauseInspection */ catch(OpenIDConnectClientException $e) {
 			error_log('JWT claims validation failed: ' . $e->getMessage());
@@ -408,6 +408,8 @@ class AuthManager implements MiddlewareInterface {
 
 		$session = new SessionSSO();
 		$now = time();
+
+		$claims = (array) $claims;
 
 		// Done! We just need to fill the new session with the claims we just obtained from the ID token!
 		$session->uid = $claims['preferred_username'] ?? null;
