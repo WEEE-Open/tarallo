@@ -178,6 +178,9 @@ class AuthManager implements MiddlewareInterface {
 		}
 
 		try {
+			if($session !== null) {
+				$request = $request->withAttribute('SessionInfo', [$session->idTokenExpiry, $session->refreshTokenExpiry]);
+			}
 			$response = $handler->handle($request->withAttribute('User', $user));
 		} catch(AuthenticationException $e) {
 			if(!$this->browser) {
@@ -263,13 +266,19 @@ class AuthManager implements MiddlewareInterface {
 					$session->idToken = $oidc->getIdToken();
 					$session->idTokenExpiry = $oidc->getVerifiedClaims('exp');
 					$session->idTokenValidityTime = $session->idTokenExpiry - time();
-					$session->refreshToken = $oidc->getRefreshToken();
-					$session->refreshTokenExpiry = time() + TARALLO_OIDC_REFRESH_TOKEN_EXPIRY;
-					$session->refreshTokenValidityTime = TARALLO_OIDC_REFRESH_TOKEN_EXPIRY;
-
-					// Update the cookie
-					self::setCookie($id, $session->idTokenExpiry);
+					if($oidc->getRefreshToken() === null) {
+						$session->refreshToken = null;
+						$session->refreshTokenExpiry = 0;
+						$session->refreshTokenValidityTime = 0;
+					} else {
+						$session->refreshToken = $oidc->getRefreshToken();
+						$session->refreshTokenExpiry = time() + TARALLO_OIDC_REFRESH_TOKEN_EXPIRY;
+						$session->refreshTokenValidityTime = TARALLO_OIDC_REFRESH_TOKEN_EXPIRY;
+					}
 				}
+
+				// Update the cookie
+				self::setCookie($id, max($session->idTokenExpiry, $session->refreshTokenExpiry));
 
 				// Store it!
 				$db->beginTransaction();
