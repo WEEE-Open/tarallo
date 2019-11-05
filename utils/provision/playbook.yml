@@ -292,13 +292,13 @@
       - tarallo
       - tarallo_test
 
-  - name: Import sample data
-    mysql_db:
-      name: tarallo
-      state: import
-      login_user: root
-      login_password: "{{ mariadb_root_password }}"
-      target: "/data/sample-data.sql"
+#  - name: Import sample data
+#    mysql_db:
+#      name: tarallo
+#      state: import
+#      login_user: root
+#      login_password: "{{ mariadb_root_password }}"
+#      target: "/data/sample-data.sql"
 
   - name: Enable remote connections to MariaDB
     template:
