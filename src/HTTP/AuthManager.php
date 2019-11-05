@@ -343,7 +343,7 @@ class AuthManager implements MiddlewareInterface {
 
 	private function performRefresh(SessionSSO $previousSession): ?SessionSSO {
 		$oidc = self::oidc();
-		$json = $oidc->refreshToken($_SESSION['refresh_token']);
+		$json = $oidc->refreshToken($previousSession->refreshToken);
 
 		// The "correct way" is apparently to call the refresh token endpoint ad obtain a new refresh token + access
 		// token. Which is never converted to an ID token, see e.g. https://bitbucket.org/moodle/moodle/src/e04a73ccc06e18d8d3b3661f8f9bc16911747830/lib/classes/oauth2/api.php?at=master#api.php-473
