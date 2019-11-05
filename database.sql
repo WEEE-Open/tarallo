@@ -141,32 +141,13 @@ CREATE TABLE `Prefixes`
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `User`
-(
-    `Name` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `Password` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
-    `Session` CHAR(32) COLLATE utf8mb4_bin,
-    `SessionExpiry` TIMESTAMP NOT NULL DEFAULT 0,
-    `Level` SMALLINT DEFAULT 2,
-    `Enabled` BOOLEAN NOT NULL DEFAULT FALSE,
-    PRIMARY KEY (`Name`),
-    UNIQUE KEY (`Session`),
-    CHECK (Level >= 0 AND Level <= 3)
-)
-    ENGINE = InnoDB
-    DEFAULT CHARSET = utf8mb4
-    COLLATE = utf8mb4_unicode_ci;
-
 CREATE TABLE `Search`
 (
     `Code` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
     `Expires` TIMESTAMP NOT NULL DEFAULT 0,
     `ResultsCount` BIGINT UNSIGNED NOT NULL DEFAULT 0,
     `Owner` VARCHAR(100) COLLATE utf8mb4_unicode_ci,
-    PRIMARY KEY (`Code`),
-    FOREIGN KEY (`Owner`) REFERENCES `User` (`Name`)
-        ON UPDATE CASCADE
-        ON DELETE SET NULL
+    PRIMARY KEY (`Code`)
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
@@ -204,6 +185,7 @@ CREATE TABLE Session
     Session VARCHAR(100) NOT NULL,
     Data TEXT DEFAULT NULL,
     Redirect TEXT DEFAULT NULL,
+    `LastAccess` TIMESTAMP NOT NULL DEFAULT current_timestamp,
     PRIMARY KEY (`Session`)
     -- CHECK ((Data IS NULL AND Redirect IS NOT NULL) OR (Data IS NOT NULL AND Redirect IS NULL))
 )
