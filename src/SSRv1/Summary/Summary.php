@@ -27,6 +27,7 @@ class Summary {
 				return HddSummarizer::summarize($item);
 			case 'odd':
 				return OddSummarizer::summarize($item);
+			case 'external-psu':
 			case 'psu':
 				return PsuSummarizer::summarize($item);
 			case 'audio-card':
@@ -43,32 +44,20 @@ class Summary {
 			case 'usbhub':
 			case 'tv-card':
 				return SimplePortsSummarizer::summarize($item);
-
+			case 'monitor':
+			 	return MonitorSummarizer::summarize($item);
+			case 'printer':
+			case 'scanner':
+			case 'inventoried-object':
+			case 'fdd':
+			case 'zip-drive':
 			case 'mouse':
 			case 'keyboard':
 			case 'network-switch':
 			case 'network-hub':
 			case 'modem-router':
-				return SimpleDeviceSummarizer::summarize($item);
-			 case 'monitor':
-				return MonitorSummarizer::summarize($item);
-
-			// case 'fdd':
-			// case 'zip-drive':
-				// return SomeSummarizer::summarize($item);
-			// case 'external-psu':
-				// return SomeSummarizer::summarize($item);
-
-			// case 'printer':
-			// case 'scanner':
-			// Don't even bother
-
-			// case 'inventoried-object':
-				// How do you even implement this?
-
 			default:
-				// TODO: return SimpleDeviceSummarizer::summarize($item); when everything else is summarized
-				return null;
+				return SimpleDeviceSummarizer::summarize($item);
 		}
 	}
 }
