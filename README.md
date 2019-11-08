@@ -34,6 +34,11 @@ password: root, server: localhost:3306)
 * Database accessible externally by root at `127.0.0.1:3307` (note the non-standard port), connect PHPStorm to it!
 * phpinfo at `127.0.0.1:8081/phpinfo.php`
 
+During `vagrant up` setup process, system will ask you for user and password. Use your system account credentials of your machine.
+
+**For Windows Users** - If you log in Windows with your Microsoft account, you have to insert your local user (_type `echo %username%` in your windows terminal_)  and your Microsoft account password.
+If you use a local user, just type your local credentials.
+
 Ports may be changed from 8080/8081 to anything else by Vagrant, so pay attention to its output, especially at the beginning.
 
 There are two databases: `tarallo`, which is the one used by the interface and the APIs, and `tarallo_test`, which is populated and used only when running PHPUnit tests.
