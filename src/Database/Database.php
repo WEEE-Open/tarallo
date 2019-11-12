@@ -12,6 +12,7 @@ class Database {
 	private $statsDAO = null;
 	private $featureDAO = null;
 	private $treeDAO = null;
+	private $productDAO = null;
 	private $username;
 	private $password;
 	private $dsn;
@@ -106,6 +107,14 @@ class Database {
 		}
 
 		return $this->treeDAO;
+	}
+
+	public function productDAO() {
+		if($this->productDAO === null) {
+			$this->productDAO = new ProductDAO($this, $this->callback);
+		}
+
+		return $this->productDAO();
 	}
 
 	public function updater() {
