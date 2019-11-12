@@ -40,4 +40,25 @@ class Product implements \JsonSerializable {
 			return $this->model . ' ' . $this->model . '(' . $this->variant . ')';
 		}
 	}
+
+	/**
+	 * @return string
+	 */
+	public function getBrand(): string {
+		return $this->brand;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getModel(): string {
+		return $this->model;
+	}
+
+	/**
+	 * @return string|null
+	 */
+	public function getVariant(): ?string {
+		return $this->variant;
+	}
 }
