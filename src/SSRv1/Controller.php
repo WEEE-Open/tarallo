@@ -173,8 +173,9 @@ class Controller implements RequestHandlerInterface {
 			try {
 				if(isset($body['delete']) && isset($body['token'])) {
 					$db->sessionDAO()->deleteToken($body['token']);
+					return new RedirectResponse('/options', 303);
 				}
-				if(isset($body['description']) && isset($body['new'])) {
+				elseif(isset($body['description']) && isset($body['new'])) {
 					$data = new SessionLocal();
 					$data->level = $user->getLevel();
 					$data->description = $body['description'];
@@ -642,154 +643,33 @@ class Controller implements RequestHandlerInterface {
 	private function route(ServerRequestInterface $request): array {
 		$dispatcher = FastRoute\cachedDispatcher(
 			function(FastRoute\RouteCollector $r) {
-				$r->get(
-					'/auth', [
-					null,
-					'Controller::authError',
-				]
-				);
-				$r->get(
-					'/logout', [
-					null,
-					'Controller::logout',
-				]
-				);
-
-				$r->get(
-					'/', [
-					User::AUTH_LEVEL_RO,
-					'Controller::getHome',
-				]
-				);
-				$r->get(
-					'', [
-					User::AUTH_LEVEL_RO,
-					'Controller::getHome',
-				]
-				);
-				$r->get(
-					'/features.json', [
-					User::AUTH_LEVEL_RO,
-					'Controller::getFeaturesJson',
-				]
-				);
+				$r->get('/auth', [null, 'Controller::authError',]);
+				$r->get('/logout', [null, 'Controller::logout',]);
+				$r->get('/', [User::AUTH_LEVEL_RO, 'Controller::getHome',]);
+				$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getHome',]);
+				$r->get('/features.json', [User::AUTH_LEVEL_RO, 'Controller::getFeaturesJson',]);
 				// TODO: make token access public
-				$r->get(
-					'/item/{id}', [
-					User::AUTH_LEVEL_RO,
-					'Controller::getItem',
-				]
-				);
-				$r->get(
-					'/history/{id}', [
-					User::AUTH_LEVEL_RO,
-					'Controller::getHistory',
-				]
-				);
-				$r->get(
-					'/item/{id}/add/{add}', [
-					User::AUTH_LEVEL_RO,
-					'Controller::getItem',
-				]
-				);
-				$r->get(
-					'/item/{id}/edit/{edit}', [
-					User::AUTH_LEVEL_RO,
-					'Controller::getItem',
-				]
-				);
-				$r->get(
-					'/add', [
-					User::AUTH_LEVEL_RO,
-					'Controller::addItem',
-				]
-				);
-				$r->get(
-					'/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [
-					User::AUTH_LEVEL_RO,
-					'Controller::search',
-				]
-				);
-				$r->get(
-					'/search/{id:[0-9]+}/add/{add}', [
-					User::AUTH_LEVEL_RO,
-					'Controller::search',
-				]
-				);
-				$r->get(
-					'/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [
-					User::AUTH_LEVEL_RO,
-					'Controller::search',
-				]
-				);
-				$r->get(
-					'/search/{id:[0-9]+}/edit/{edit}', [
-					User::AUTH_LEVEL_RO,
-					'Controller::search',
-				]
-				);
-				$r->get(
-					'/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [
-					User::AUTH_LEVEL_RO,
-					'Controller::search',
-				]
-				);
-				$r->get(
-					'/options', [
-					User::AUTH_LEVEL_RO,
-					'Controller::options',
-				]
-				);
-				$r->post(
-					'/options', [
-					User::AUTH_LEVEL_RO,
-					'Controller::options',
-				]
-				);
-				$r->get(
-					'/bulk', [
-					User::AUTH_LEVEL_RO,
-					'Controller::bulk',
-				]
-				);
-				$r->get(
-					'/bulk/move', [
-					User::AUTH_LEVEL_RO,
-					'Controller::bulkMove',
-				]
-				);
-				$r->post(
-					'/bulk/move', [
-					User::AUTH_LEVEL_RW,
-					'Controller::bulkMove',
-				]
-				);
-				$r->get(
-					'/bulk/add', [
-					User::AUTH_LEVEL_RO,
-					'Controller::bulkAdd',
-				]
-				);
-				$r->post(
-					'/bulk/add', [
-					User::AUTH_LEVEL_RW,
-					'Controller::bulkAdd',
-				]
-				);
+				$r->get('/item/{id}', [User::AUTH_LEVEL_RO, 'Controller::getItem',]);
+				$r->get('/history/{id}', [User::AUTH_LEVEL_RO, 'Controller::getHistory',]);
+				$r->get('/item/{id}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::getItem',]);
+				$r->get('/item/{id}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::getItem',]);
+				$r->get('/add', [User::AUTH_LEVEL_RO, 'Controller::addItem',]);
+				$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [User::AUTH_LEVEL_RO, 'Controller::search',]);
+				$r->get('/search/{id:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
+				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
+				$r->get('/search/{id:[0-9]+}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
+				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
+				$r->get('/options', [User::AUTH_LEVEL_RO, 'Controller::options',]);
+				$r->post('/options', [User::AUTH_LEVEL_RO, 'Controller::options',]);
+				$r->get('/bulk', [User::AUTH_LEVEL_RO, 'Controller::bulk',]);
+				$r->get('/bulk/move', [User::AUTH_LEVEL_RO, 'Controller::bulkMove',]);
+				$r->post('/bulk/move', [User::AUTH_LEVEL_RW, 'Controller::bulkMove',]);
+				$r->get('/bulk/add', [User::AUTH_LEVEL_RO, 'Controller::bulkAdd',]);
+				$r->post('/bulk/add', [User::AUTH_LEVEL_RW, 'Controller::bulkAdd',]);
 				$r->addGroup(
 					'/stats', function(FastRoute\RouteCollector $r) {
-					$r->get(
-						'', [
-						User::AUTH_LEVEL_RO,
-						'Controller::getStats',
-					]
-					);
-					$r->get(
-						'/{which}', [
-						User::AUTH_LEVEL_RO,
-						'Controller::getStats',
-					]
-					);
+					$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getStats',]);
+					$r->get('/{which}', [User::AUTH_LEVEL_RO, 'Controller::getStats',]);
 				}
 				);
 			}, [

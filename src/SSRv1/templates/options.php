@@ -4,22 +4,14 @@
 /** @var string|null $newToken */
 /** @var string|null $error */
 /** @var array $sessionInfo */
-$this->layout(
-	'main', [
-	'title' => 'Options',
-	'user' => $user,
-]
-) ?>
+$this->layout('main', ['title' => 'Options', 'user' => $user,])
+?>
+
 <?php if($error !== null): ?>
     <p class="error message"><?= $this->e($error) ?></p>
 <?php endif; ?>
 <?php if($newToken !== null): ?>
-    <p class="success message">
-        Here
-        is
-        your
-        new
-        token: <?= $this->e($newToken) ?></p>
+    <p class="success message">Here is your new token: <?= $this->e($newToken) ?></p>
 <?php endif; ?>
 
 <table class="xl">
@@ -39,8 +31,7 @@ $this->layout(
         </th>
         <!-- uid -->
         <th>
-            Last
-            access
+            Last access
         </th>
         <th>
             Actions
@@ -64,14 +55,8 @@ $this->layout(
         <td><?= $this->e($lastAccess->format('Y-m-d')) ?></td>
         <td>
             <form method="post">
-                <input type="hidden"
-                       name="token"
-                       value="<?= $this->e($token['Token']) ?>">
-                <button type="submit"
-                        name="delete"
-                        value="true">
-                    Delete
-                </button>
+                <input type="hidden" name="token" value="<?= $this->e($token['Token']) ?>">
+                <button type="submit" name="delete" value="true">Delete</button>
             </form>
         </td>
 		<?php endforeach; ?>
@@ -80,19 +65,8 @@ $this->layout(
 </table>
 
 <form method="post">
-    <label for="description"></label><input
-            type="text"
-            id="description"
-            name="description">
-    <button type="submit"
-            name="new"
-            value="true">
-        Get
-        token
-    </button>
+    <label for="description"></label><input type="text" id="description" name="description">
+    <button type="submit" name="new" value="true">Get token</button>
 </form>
 
-<p>
-    Debug
-    info: <?php foreach($sessionInfo as &$s): $s = $s - time(); endforeach;
-	echo implode(', ', $sessionInfo) ?></p>
+<p> Debug info: <?php foreach($sessionInfo as &$s): $s = $s - time(); endforeach; echo implode(', ', $sessionInfo) ?> </p>
