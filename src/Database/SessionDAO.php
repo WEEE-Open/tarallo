@@ -123,6 +123,17 @@ final class SessionDAO extends DAO {
 		}
 	}
 
+	public function deleteToken( string $token) {
+		try {
+			$s = $this->getPDO()->prepare('DELETE FROM SessionToken WHERE Token = :t');
+			$s->bindValue(':t', $token, \PDO::PARAM_STR);
+			$result = $s->execute();
+			assert($result !== false, 'invalid token');
+		} finally {
+			$s->closeCursor();
+		}
+	}
+
 	public function getUserTokens(string $user): array {
 		try {
 			$s = $this->getPDO()->prepare('SELECT `Token`, `Data`, LastAccess FROM SessionToken WHERE `Owner` = :o');
