@@ -43,4 +43,18 @@ final class ProductDAO extends DAO{
 
 		return $product;
 	}
+
+	//Is this useful?
+	public function deleteProduct(Product $product){
+		$statement = $this->getPDO()->prepare('DELETE FROM Product WHERE Brand = :prod AND Model = :mod AND Variant = :var ');
+		try{
+			$statement->bindValue(':prod', $product->getBrand(), \PDO::PARAM_STR);
+			$statement->bindValue(':mod', $product->getModel(), \PDO::PARAM_STR);
+			$statement->bindValue(':var', $product->getVariant(), \PDO::PARAM_STR);
+			$result =  $statement->execute();
+			assert($result !== true, 'Delete product');
+		} finally{
+			$statement->closeCursor();
+		}
+	}
 }
