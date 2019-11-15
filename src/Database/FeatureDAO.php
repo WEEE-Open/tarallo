@@ -8,6 +8,7 @@ use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\NotFoundException;
+use WEEEOpen\Tarallo\Product;
 
 
 final class FeatureDAO extends DAO {/**
@@ -120,6 +121,10 @@ final class FeatureDAO extends DAO {/**
 		return $item;
 	}
 
+	public function getProductFeatures(Product $product) {
+		// TODO
+	}
+
 	/**
 	 * Add a U audit entry for the specified item.
 	 *
@@ -159,45 +164,52 @@ final class FeatureDAO extends DAO {/**
 			return false;
 		}
 
-		foreach($features as $feature) {
-			$column = self::getColumn($feature->type);
-			$type = self::getPDOType($feature->type);
-			/** @noinspection SqlResolve */
-			$statement = $this->getPDO()
-				->prepare(
-					"INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2"
-				);
+		if($item instanceof Product) {
+			// TODO
+			return true;
+		} else {
+			foreach($features as $feature) {
+				$column = self::getColumn($feature->type);
+				$type = self::getPDOType($feature->type);
+				/** @noinspection SqlResolve */
+				$statement = $this->getPDO()
+					->prepare(
+						"INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2"
+					);
 
-			try {
-				$statement->bindValue(':feature', $feature->name, \PDO::PARAM_STR);
-				$statement->bindValue(':item', $item->getCode(), \PDO::PARAM_STR);
-				$statement->bindValue(':val', $feature->value, $type);
-				$statement->bindValue(':val2', $feature->value, $type);
-				$result = $statement->execute();
-				assert($result !== false, 'set feature');
-			} catch(\PDOException $e) {
-				// This error has ever been witnessed when master-master replication breaks, but apparently it's used
-				// to signify that there's no foreign key target thing for the primary key other thing.
-				// That is: inserting/updating a row for an item that doesn't exist.
-				if($e->getCode() === 'HY000'
-					&& $statement->errorInfo()[1] === 1032
-					&& $statement->errorInfo()[2] === 'Can\'t find record in \'ItemFeature\''
-				) {
-					throw new NotFoundException();
-				} else if($e->getCode() === '23000'
-					&& $statement->errorInfo()[0] === '23000'
-					&& $statement->errorInfo()[1] === 1452
-				) {
-					throw new NotFoundException();
+				try {
+					$statement->bindValue(':feature', $feature->name, \PDO::PARAM_STR);
+					$statement->bindValue(':item', $item->getCode(), \PDO::PARAM_STR);
+					$statement->bindValue(':val', $feature->value, $type);
+					$statement->bindValue(':val2', $feature->value, $type);
+					$result = $statement->execute();
+					assert($result !== false, 'set feature');
+				} catch(\PDOException $e) {
+					// This error has ever been witnessed when master-master replication breaks, but apparently it's used
+					// to signify that there's no foreign key target thing for the primary key other thing.
+					// That is: inserting/updating a row for an item that doesn't exist.
+					if($e->getCode() === 'HY000'
+						&& $statement->errorInfo()[1] === 1032
+						&& $statement->errorInfo()[2] === 'Can\'t find record in \'ItemFeature\''
+					) {
+						throw new NotFoundException();
+					} else {
+						if($e->getCode() === '23000'
+							&& $statement->errorInfo()[0] === '23000'
+							&& $statement->errorInfo()[1] === 1452
+						) {
+							throw new NotFoundException();
+						}
+					}
+					throw $e;
+				} finally {
+					$statement->closeCursor();
 				}
-				throw $e;
-			} finally {
-				$statement->closeCursor();
 			}
-		}
 
-		$this->addAuditEntry($item);
-		return true;
+			$this->addAuditEntry($item);
+			return true;
+		}
 	}
 
 	/**

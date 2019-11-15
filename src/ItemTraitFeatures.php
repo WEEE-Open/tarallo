@@ -69,6 +69,12 @@ trait ItemTraitFeatures {
 	 * @return Feature[]
 	 */
 	public function getFeatures(): array {
-		return $this->features;
+		if(isset($this->product)) {
+			$product = $this->product;
+			/** @var Product $product */
+			return array_merge($product->getFeatures(), $this->features);
+		} else {
+			return $this->features;
+		}
 	}
 }

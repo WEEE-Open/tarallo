@@ -16,6 +16,7 @@ class Item
 	use ItemTraitContent;
 	use ItemTraitLocation;
 	use ItemTraitFeatures;
+	use ItemTraitProduct;
 
 	protected $product = null;
 	protected $token = null;

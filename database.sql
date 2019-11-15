@@ -22,11 +22,19 @@ CREATE TABLE `Item`
     `LostAt` TIMESTAMP(6) NULL DEFAULT NULL,
     INDEX (`DeletedAt`),
     INDEX (`LostAt`),
-    -- TODO: reenable later
-    -- FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Products` (`Brand`, `Model`, `Variant`)
-    --	ON DELETE NO ACTION
-    --	ON UPDATE CASCADE,
     PRIMARY KEY (`Code`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `Product`
+(
+    -- Max length would be approx. 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
+    `Brand` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Model` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Variant` VARCHAR(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    PRIMARY KEY (`Brand`, `Model`, `Variant`)
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
@@ -72,6 +80,37 @@ CREATE TABLE `ItemFeature`
     INDEX `ValueDouble` (`ValueDouble`),
     -- INDEX `Value2` (`ValueEnum`), -- FOREIGN KEY is already an INDEX
     CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`Feature`) REFERENCES `Feature` (`Feature`)
+        ON DELETE NO ACTION
+        ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`Feature`, `ValueEnum`) REFERENCES `FeatureEnum` (`Feature`, `ValueEnum`)
+        ON DELETE NO ACTION
+        ON UPDATE CASCADE,
+    CHECK ((`Value` IS NOT NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NULL)
+        OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NULL)
+        OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NOT NULL AND `ValueDouble` IS NULL)
+        OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NOT NULL))
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `ProductFeature`
+(
+    `Brand` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Model` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Variant` VARCHAR(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `Feature` VARCHAR(40) COLLATE utf8mb4_bin NOT NULL,
+    `Value` BIGINT UNSIGNED DEFAULT NULL,
+    `ValueEnum` VARCHAR(40) COLLATE utf8mb4_bin DEFAULT NULL,
+    `ValueText` TEXT COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `ValueDouble` DOUBLE DEFAULT NULL,
+    PRIMARY KEY (`Brand`, `Model`, `Variant`, `Feature`),
+    INDEX `Value` (`Value`),
+    INDEX `ValueDouble` (`ValueDouble`),
+    CONSTRAINT FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Product` (`Brand`, `Model`, `Variant`)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     CONSTRAINT FOREIGN KEY (`Feature`) REFERENCES `Feature` (`Feature`)
@@ -207,4 +246,4 @@ CREATE TABLE `SessionToken`
   COLLATE = utf8mb4_unicode_ci;
 
 INSERT INTO `Configuration` (`Key`, `Value`)
-VALUES ('SchemaVersion', 8);
+VALUES ('SchemaVersion', 9);
