@@ -15,7 +15,7 @@ final class ProductDAO extends DAO{
 			$statement->bindValue(':mod', $product->getModel(), \PDO::PARAM_STR);
 			$statement->bindValue(':var', $product->getVariant(), \PDO::PARAM_STR);
 			$result = $statement->execute();
-			assert($result !== true, 'Add product');
+			//assert($result !== true, 'Add product');
 		} catch(\PDOException $e) {
 			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1062) {
 				throw new DuplicateItemCodeException((string) $product);
@@ -34,7 +34,7 @@ final class ProductDAO extends DAO{
 			$statement->bindValue(':mod', $model, \PDO::PARAM_STR);
 			$statement->bindValue(':var', $variant, \PDO::PARAM_STR);
 			$result =  $statement->execute();
-			assert($result !== true, 'Get product');
+			//assert($result !== true, 'Get product');
 			$row = $statement->fetch(\PDO::FETCH_ASSOC);
 			$product = new Product($row['Brand'], $row['Model'], $row['Variant']);
 		} finally{
