@@ -69,6 +69,27 @@ class Controller implements RequestHandlerInterface {
 		}
 	}
 
+	public static function getProduct(ServerRequestInterface $request): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$brand = Validation::validateOptionalString($parameters, 'brand');
+		$model = Validation::validateOptionalString($parameters, 'model');
+		$variant = Validation::validateOptionalString($parameters, 'variant');
+
+
+		try {
+			$product = new Product($brand, $model, $variant);
+		} catch(ValidationException $e) {
+			throw new NotFoundException();
+		}
+
+		$data = $db->productDAO()->getProduct($brand, $model, $variant);
+
+		return new JsonResponse($data);
+	}
+
 	public static function getDeletedItem(ServerRequestInterface $request): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
