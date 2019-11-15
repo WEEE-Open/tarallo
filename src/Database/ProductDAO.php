@@ -26,4 +26,21 @@ final class ProductDAO extends DAO{
 		}
 
 	}
+
+	public function getProduct(string $brand, string $model, string  $variant): Product{
+		$statement = $this->getPDO()->prepare('SELECT * FROM Product WHERE Brand = :prod AND Model = :mod AND Variant = :var');
+		try{
+			$statement->bindValue(':prod', $brand, \PDO::PARAM_STR);
+			$statement->bindValue(':mod', $model, \PDO::PARAM_STR);
+			$statement->bindValue(':var', $variant, \PDO::PARAM_STR);
+			$result =  $statement->execute();
+			assert($result !== true, 'Get product');
+			$row = $statement->fetch(\PDO::FETCH_ASSOC);
+			$product = new Product($row['Brand'], $row['Model'], $row['Variant']);
+		} finally{
+			$statement->closeCursor();
+		}
+
+		return $product;
+	}
 }
