@@ -357,6 +357,21 @@ CREATE TABLE `Product`
     COLLATE = utf8mb4_unicode_ci;
 					");
 					break;
+				case 9:
+					$this->exec("CREATE VIEW ProductItemFeature AS
+SELECT  I.CODE AS Code, PF.BRAND AS Brand, PF.MODEL AS Model, PF.VARIANT AS Variant,
+        PF.FEATURE AS Feature_Prod, PF.VALUE AS Value_Prod, PF.VALUEENUM AS Valueenum_Prod,
+        PF.VALUETEXT AS Valuetext_Prod, PF.VALUEDOUBLE AS Valuedouble_Prod,
+        I.VARIANT AS Variant_Item, I.TOKEN AS Token, I.DELETEDAT AS DeletedAt, I.LOSTAT AS LostAt,
+        IFT.FEATURE AS Feature_Item, IFT.VALUE AS Value_Item, IFT.VALUEENUM AS Valueenum_Item,
+        IFT.VALUETEXT AS Valuetext_Item, IFT.VALUEDOUBLE AS Valuedouble_Item
+FROM    ProductFeature PF, Item I, ItemFeature IFT
+WHERE   I.Code = IFT.Code AND
+        PF.Model = I.Model AND
+        PF.Brand = I.Brand AND
+        PF.Variant = I.Variant AND
+        IFT.Feature = PF.Feature");
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}

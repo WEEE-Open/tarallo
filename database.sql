@@ -245,8 +245,6 @@ CREATE TABLE `SessionToken`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
-INSERT INTO `Configuration` (`Key`, `Value`)
-VALUES ('SchemaVersion', 9);
 
 -- ProductFeature - ItemFeature View
 
@@ -262,5 +260,8 @@ WHERE   I.Code = IFT.Code AND
         PF.Model = I.Model AND
         PF.Brand = I.Brand AND
         PF.Variant = I.Variant AND
-        IFT.Feature = PF.Feature
-ORDER BY I.CODE ASC
+        IFT.Feature = PF.Feature;
+
+-- Append this insert statement at the end of file and update schemaversion value
+INSERT INTO `Configuration` (`Key`, `Value`)
+VALUES ('SchemaVersion', 10);
