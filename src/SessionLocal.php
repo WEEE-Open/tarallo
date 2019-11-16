@@ -14,8 +14,8 @@ class SessionLocal {
 	const lengthAfter = 32;
 	public static function generateToken(): string {
 		try {
-			$before = strtr(base64_encode(random_bytes(self::lengthBefore)), '+/', '-_');
-			$after = strtr(base64_encode(random_bytes(self::lengthAfter)), '+/', '-_');
+			$before = rtrim(strtr(base64_encode(random_bytes(self::lengthBefore)), '+/', '-_'), '=');
+			$after = rtrim(strtr(base64_encode(random_bytes(self::lengthAfter)), '+/', '-_'), '=');
 		} catch(\Exception $e) {
 			throw new EntropyException($e->getMessage(), 0, $e);
 		}
