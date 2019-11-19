@@ -13,7 +13,8 @@ final class ProductDAO extends DAO{
 		try {
 			$statement->bindValue(':prod', $product->getBrand(), \PDO::PARAM_STR);
 			$statement->bindValue(':mod', $product->getModel(), \PDO::PARAM_STR);
-			$statement->bindValue(':var', $product->getVariant(), \PDO::PARAM_STR);
+			$variant = $product->getVariant() ? $product->getVariant() : '';
+			$statement->bindValue(':var', $variant, \PDO::PARAM_STR);
 			$result = $statement->execute();
 			assert($result === true, 'Add product');
 		} catch(\PDOException $e) {
@@ -27,7 +28,7 @@ final class ProductDAO extends DAO{
 
 	}
 
-	public function getProduct(string $brand, string $model, string  $variant): Product{
+	public function getProduct(string $brand, string $model, ?string  $variant = ''): Product{
 		$statement = $this->getPDO()->prepare('SELECT * FROM Product WHERE Brand = :prod AND Model = :mod AND Variant = :var');
 		try{
 			$statement->bindValue(':prod', $brand, \PDO::PARAM_STR);
@@ -52,7 +53,7 @@ final class ProductDAO extends DAO{
 			$statement->bindValue(':mod', $product->getModel(), \PDO::PARAM_STR);
 			$statement->bindValue(':var', $product->getVariant(), \PDO::PARAM_STR);
 			$result =  $statement->execute();
-			assert($result !== true, 'Delete product');
+			assert($result === true, 'Delete product');
 		} finally{
 			$statement->closeCursor();
 		}
