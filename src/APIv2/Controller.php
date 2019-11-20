@@ -86,7 +86,20 @@ class Controller implements RequestHandlerInterface {
 			throw new NotFoundException();
 		}
 
-		$data = $db->productDAO()->getProduct($brand, $model, $variant);
+		$data = $db->productDAO()->getProduct($product);
+
+		return new JsonResponse($data);
+	}
+
+	public static function getProducts(ServerRequestInterface $request): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$brand = Validation::validateOptionalString($parameters, 'brand');
+		$model = Validation::validateOptionalString($parameters, 'model');
+
+		$data = $db->productDAO()->getProducts($brand, $model);
 
 		return new JsonResponse($data);
 	}
