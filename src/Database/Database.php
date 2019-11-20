@@ -114,7 +114,7 @@ class Database {
 			$this->productDAO = new ProductDAO($this, $this->callback);
 		}
 
-		return $this->productDAO();
+		return $this->productDAO;
 	}
 
 	public function updater() {
