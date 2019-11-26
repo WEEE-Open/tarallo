@@ -8,19 +8,8 @@ use WEEEOpen\Tarallo\Product;
 
 class ProductDAOTest extends DatabaseTest {
 
-	//This, I hope, is (very) temporary
-	private function createExampleProducts(){
-		$db = $this->getDb();
-
-		//$db->productDAO()->addProduct(new Product('Intel', 'K3k', 'dunno'));
-		$db->productDAO()->addProduct(new Product('Intel', 'Lm40'));
-		$db->productDAO()->addProduct(new Product('Samsong', 'JWOSQPA', 'black'));
-		$db->productDAO()->addProduct(new Product('Dell', '19942', 'HD'));
-
-	}
 
 	public function testProduct() {
-		$this->createExampleProducts();
 		$db = $this->getDb();
 
 		$product = new Product('Intel', 'K3k', 'dunno');
@@ -45,7 +34,6 @@ class ProductDAOTest extends DatabaseTest {
 	public function  testDeleteProduct(){
 		$db = $this->getDb();
 
-		$this->createExampleProducts();
 		$product = new Product('Samsong', 'JWOSQPA', 'black');
 		$db->productDAO()->deleteProduct($product);
 		$gettedProduct = $db->productDAO()->getProduct($product->getBrand(), $product->getModel(), $product->getVariant());
