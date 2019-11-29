@@ -37,7 +37,7 @@ final class ProductDAO extends DAO{
 	 * @return Product
 	 */
 
-	public function getProduct(Product $product): Product {
+	public function getProductComplete(Product $product): Product {
 		//TODO: To implement
 	}
 
