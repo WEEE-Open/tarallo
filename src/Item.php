@@ -18,10 +18,10 @@ class Item
 	use ItemTraitFeatures;
 	use ItemTraitProduct;
 
-	protected $product = null;
 	protected $token = null;
 	protected $deletedAt = null;
 	protected $lostAt = null;
+	protected $separate = false;
 
 
 	public function getToken(): ?string {
@@ -33,15 +33,28 @@ class Item
 		return $this;
 	}
 
+	public function setSeparate() {
+		$this->separate = true;
+		foreach($this->contents as $item) {
+			$item->setSeparate();
+		}
+	}
+
 	public function jsonSerialize() {
 		$array = [];
 		$array['code'] = $this->getCode();
-		if(!empty($this->features)) {
-			foreach($this->features as $feature) {
-				/** @var Feature $feature */
-				$name = $feature->name;
-				$value = $feature->value;
-				$array['features'][$name] = $value;
+		if($this->separate) {
+			// TODO: add item_features + product_features to $array
+		} else {
+			// TODO: add features (both product and item) to $array
+			// TODO: item overrides product if there is a conflict
+			if(!empty($this->features)) {
+				foreach($this->features as $feature) {
+					/** @var Feature $feature */
+					$name = $feature->name;
+					$value = $feature->value;
+					$array['features'][$name] = $value;
+				}
 			}
 		}
 		if(!empty($this->contents)) {
