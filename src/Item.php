@@ -44,10 +44,21 @@ class Item
 		$array = [];
 		$array['code'] = $this->getCode();
 		if($this->separate) {
-			// TODO: add item_features + product_features to $array
+			if(!empty($this->features)){
+				foreach($this->features as $itemFeature) {
+					$name = $itemFeature->name;
+					$value = $itemFeature->value;
+					$array['item_features'][$name] = $value;
+				}
+			}
+			if(!empty($this->product)){
+				foreach($this->product->getFeatures() as $productFeature) {
+					$name = $productFeature->name;
+					$value = $productFeature->value;
+					$array['product_features'][$name] = $value;
+				}
+			}
 		} else {
-			// TODO: add features (both product and item) to $array
-			// TODO: item overrides product if there is a conflict
 			if(!empty($this->features)) {
 				foreach($this->features as $feature) {
 					/** @var Feature $feature */
@@ -56,6 +67,15 @@ class Item
 					$array['features'][$name] = $value;
 				}
 			}
+			$productArray = [];
+			if(!empty($this->product)){
+				foreach($this->product->getFeatures() as $productFeature) {
+					$name = $productFeature->name;
+					$value = $productFeature->value;
+					$productArray['features'][$name] = $value;
+				}
+			}
+			$array = array_merge($productArray, $array);
 		}
 		if(!empty($this->contents)) {
 			$array['contents'] = $this->contents;
