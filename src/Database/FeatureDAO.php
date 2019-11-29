@@ -99,8 +99,8 @@ final class FeatureDAO extends DAO {/**
 
 		// TODO: default features
 		$statement = $this->getPDO()->prepare(
-			'SELECT Feature, COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`
-            FROM ItemFeature
+			'SELECT Feature_Item, COALESCE(`Value_Item`, ValueText_Item, ValueEnum_Item, ValueDouble_Item) AS `Value`
+            FROM ProductItemFeature
             WHERE `Code` = :cod;'
 		);
 

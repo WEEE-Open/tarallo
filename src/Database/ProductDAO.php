@@ -4,6 +4,8 @@
 namespace WEEEOpen\Tarallo\Database;
 
 
+use phpDocumentor\Reflection\Types\Array_;
+use phpDocumentor\Reflection\Types\String_;
 use WEEEOpen\Tarallo\Product;
 
 final class ProductDAO extends DAO{
@@ -25,7 +27,31 @@ final class ProductDAO extends DAO{
 		} finally {
 			$statement->closeCursor();
 		}
+	}
 
+	/**
+	 * It gets product in exact match, requires model, brand and variant
+	 *
+	 * @param Product $product
+	 *
+	 * @return Product
+	 */
+
+	public function getProduct(Product $product): Product {
+		//TODO: To implement
+	}
+
+	/**
+	 *  It returns an array of product through brand and model. So it will get all variants of that product.
+	 *
+	 * @param String $brand
+	 * @param String $model
+	 *
+	 * @return Array
+	 */
+
+	public function getProducts(String $brand, String $model): Array {
+		//TODO: To implement
 	}
 
 	public function getProduct(string $brand, string $model, ?string  $variant = ''): Product{

@@ -24,6 +24,7 @@ use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemPrefixerException;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
+use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\RangeException;
 use WEEEOpen\Tarallo\SearchException;
 use WEEEOpen\Tarallo\User;
@@ -67,6 +68,40 @@ class Controller implements RequestHandlerInterface {
 
 			return new JsonResponse($data);
 		}
+	}
+
+	public static function getProduct(ServerRequestInterface $request): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$brand = Validation::validateOptionalString($parameters, 'brand');
+		$model = Validation::validateOptionalString($parameters, 'model');
+		$variant = Validation::validateOptionalString($parameters, 'variant');
+
+
+		try {
+			$product = new Product($brand, $model, $variant);
+		} catch(ValidationException $e) {
+			throw new NotFoundException();
+		}
+
+		$data = $db->productDAO()->getProduct($product);
+
+		return new JsonResponse($data);
+	}
+
+	public static function getProducts(ServerRequestInterface $request): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$brand = Validation::validateOptionalString($parameters, 'brand');
+		$model = Validation::validateOptionalString($parameters, 'model');
+
+		$data = $db->productDAO()->getProducts($brand, $model);
+
+		return new JsonResponse($data);
 	}
 
 	public static function getDeletedItem(ServerRequestInterface $request): ResponseInterface {
@@ -603,8 +638,8 @@ class Controller implements RequestHandlerInterface {
 
 						$r->addGroup('/products',
 							function(FastRoute\RouteCollector $r) {
-								$r->get('', [User::AUTH_LEVEL_RW, 'Controller::getProduct']); // TODO: implement
-								$r->get('/{brand}[/{model}[/{variant}]]', [User::AUTH_LEVEL_RW, 'Controller::getProduct']); // TODO: implement
+								//$r->get('', [User::AUTH_LEVEL_RW, 'Controller::getProduct']); // TODO: implement
+								$r->get('/{brand}/{model}[/{variant}]', [User::AUTH_LEVEL_RW, 'Controller::getProduct']);
 
 								$r->post('/{brand}/{model}', [User::AUTH_LEVEL_RW, 'Controller::createProduct']); // TODO: implement
 								$r->put('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::createProduct']); // TODO: implement
