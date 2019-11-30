@@ -9,7 +9,6 @@ class SessionLocal {
 	public $level;
 	public $owner;
 
-	const keyspace = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	const lengthBefore = 16;
 	const lengthAfter = 32;
 	public static function generateToken(): string {
