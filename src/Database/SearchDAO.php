@@ -142,12 +142,9 @@ final class SearchDAO extends DAO {
 				$subqueries[] = /** @lang MySQL */
 					<<<EOQ
 				SELECT `Code`
-				FROM ItemFeature -- , ProductFeature
+				FROM ProductItemFeatureUnified
 				WHERE Feature = :fn$i
 				AND $compare
-				-- AND Item.Brand=ProductFeature.Brand
-				-- AND Item.Model=ProductFeature.Model
-				-- AND Item.Variant=ProductFeature.Variant
 EOQ;
 				$i++;
 			}
@@ -173,8 +170,8 @@ EOQ;
 				$subqueries[] = /** @lang MySQL */
 					<<<EOQ
 			SELECT `Descendant`
-			FROM ItemFeature, Tree
-			WHERE ItemFeature.Code=Tree.Ancestor
+			FROM ProductItemFeatureUnified, Tree
+			WHERE ProductItemFeatureUnified.Code=Tree.Ancestor
 			AND Feature = :fn$i
 			AND $compare
 EOQ;
@@ -315,7 +312,7 @@ SELECT DISTINCT `Item` AS `Code`
 FROM SearchResult
 LEFT JOIN (
 	SELECT `Code`, $column
-	FROM ItemFeature
+	FROM ProductItemFeatureUnified
 	WHERE Feature = ?
 ) AS features ON `Item` = features.`Code`
 WHERE Search = ?
