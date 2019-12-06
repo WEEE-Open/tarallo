@@ -288,6 +288,15 @@ FROM (
      ) unioned
 GROUP BY Code, Feature;
 
+CREATE VIEW ProductItemFeatureUnified AS
+SELECT Code,
+       Feature,
+    COALESCE(Value_Item, Value_Product) AS `Value`,
+    COALESCE(ValueText_Item, ValueText_Product) AS ValueText,
+    COALESCE(ValueEnum_Item, ValueEnum_Product) AS ValueEnum,
+    COALESCE(ValueDouble_Item, ValueDouble_Product) AS ValueDouble
+FROM ProductItemFeature;
+
 -- Append this insert statement at the end of file and update schemaversion value
 INSERT INTO `Configuration` (`Key`, `Value`)
-VALUES ('SchemaVersion', 10);
+VALUES ('SchemaVersion', 11);
