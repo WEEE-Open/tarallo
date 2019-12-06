@@ -10,5 +10,10 @@ trait ItemTraitProduct {
 
 	public function setProduct(?Product $product) {
 		$this->product = $product;
+		return $this;
+	}
+
+	public function getProduct(): ?Product {
+		return $this->product;
 	}
 }

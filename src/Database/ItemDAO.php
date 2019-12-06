@@ -335,6 +335,7 @@ EOQ
 			$statement->closeCursor();
 		}
 		$this->database->treeDAO()->getPathTo($head);
+		$this->database->productDAO()->getProductsAll($flat);
 		$this->database->featureDAO()->getFeaturesAll($flat);
 		$this->getExtraData($head);
 
@@ -379,7 +380,7 @@ EOQ
 		// TODO: race conditions with other queries?
 		$statement = $this->getPDO()
 			->prepare(
-				'SELECT UNIX_TIMESTAMP(DeletedAt) AS DeletedAt, UNIX_TIMESTAMP(LostAt) AS LostAt FROM ProductItemFeature WHERE `Code` = ?'
+				'SELECT UNIX_TIMESTAMP(DeletedAt) AS DeletedAt, UNIX_TIMESTAMP(LostAt) AS LostAt FROM Item WHERE `Code` = ?'
 			);
 		try {
 			$statement->execute([$head->getCode()]);
