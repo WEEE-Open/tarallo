@@ -109,7 +109,7 @@ final class ItemDAO extends DAO {
 	 */
 	private function itemIsDeleted(ItemWithCode $item) {
 		$statement = $this->getPDO()
-			->prepare('SELECT IF(DeletedAt IS NULL, FALSE, TRUE) FROM ProductItemFeature WHERE `Code` = :cod');
+			->prepare('SELECT IF(DeletedAt IS NULL, FALSE, TRUE) FROM Item WHERE `Code` = :cod');
 		try {
 			$statement->execute([$item->getCode()]);
 			if($statement->rowCount() === 0) {

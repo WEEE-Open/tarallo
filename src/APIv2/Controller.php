@@ -265,6 +265,7 @@ class Controller implements RequestHandlerInterface {
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
 		$payload = $request->getAttribute('ParsedBody', []);
+
 		$parameters = $request->getAttribute('parameters', []);
 
 		Validation::validateRequestBodyIsString($payload);

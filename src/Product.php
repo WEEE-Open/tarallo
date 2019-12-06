@@ -7,37 +7,23 @@ namespace WEEEOpen\Tarallo;
  *
  * @package WEEEOpen\Tarallo
  */
-class Product implements \JsonSerializable {
+class Product extends ProductCode implements \JsonSerializable {
 	use ItemTraitFeatures;
-	const DEFAULT_VARIANT = null;
-	private $brand;
-	private $model;
-	private $variant;
-
-	/**
-	 * Product constructor.
-	 *
-	 * @param string $brand
-	 * @param string $model
-	 * @param string $variant
-	 */
-	public function __construct(string $brand, string $model, ?string $variant = self::DEFAULT_VARIANT) {
-		$this->brand = $brand;
-		$this->model = $model;
-		$this->variant = $variant;
-	}
 
 	function jsonSerialize() {
 		$array = [];
+		$array['brand'] = $this->brand;
+		$array['model'] = $this->model;
+		$array['variant'] = $this->variant;
 		$array['features'] = $this->getFeatures();
 		return $array;
 	}
 
 	function __toString() {
 		if($this->variant === self::DEFAULT_VARIANT) {
-			return $this->model . ' ' . $this->model;
+			return $this->brand . ' ' . $this->model;
 		} else {
-			return $this->model . ' ' . $this->model . '(' . $this->variant . ')';
+			return $this->brand . ' ' . $this->model . '(' . $this->variant . ')';
 		}
 	}
 

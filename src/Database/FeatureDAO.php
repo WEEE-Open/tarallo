@@ -2,9 +2,12 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
+use PDOStatement;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\ItemCode;
+use WEEEOpen\Tarallo\ItemTraitFeatures;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\NotFoundException;
@@ -152,64 +155,27 @@ final class FeatureDAO extends DAO {/**
 	/**
 	 * Set item features.
 	 *
-	 * @param ItemWithFeatures $item
+	 * @param ItemTraitFeatures $item
 	 *
 	 * @return bool True if anything actually changed (and an U audit entry was generated), false otherwise.
 	 * @TODO: it would be cool if changing a feature to the value it already has still didn't generate an entry...
 	 */
-	public function setFeatures(ItemWithFeatures $item): bool {
+	public function setFeatures($item): bool {
 		$features = $item->getFeatures();
 
 		if(empty($features)) {
 			return false;
 		}
 
-		if($item instanceof Product) {
-			// TODO
-			return true;
-		} else {
-			foreach($features as $feature) {
-				$column = self::getColumn($feature->type);
-				$type = self::getPDOType($feature->type);
-				/** @noinspection SqlResolve */
-				$statement = $this->getPDO()
-					->prepare(
-						"INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2"
-					);
-
-				try {
-					$statement->bindValue(':feature', $feature->name, \PDO::PARAM_STR);
-					$statement->bindValue(':item', $item->getCode(), \PDO::PARAM_STR);
-					$statement->bindValue(':val', $feature->value, $type);
-					$statement->bindValue(':val2', $feature->value, $type);
-					$result = $statement->execute();
-					assert($result !== false, 'set feature');
-				} catch(\PDOException $e) {
-					// This error has ever been witnessed when master-master replication breaks, but apparently it's used
-					// to signify that there's no foreign key target thing for the primary key other thing.
-					// That is: inserting/updating a row for an item that doesn't exist.
-					if($e->getCode() === 'HY000'
-						&& $statement->errorInfo()[1] === 1032
-						&& $statement->errorInfo()[2] === 'Can\'t find record in \'ItemFeature\''
-					) {
-						throw new NotFoundException();
-					} else {
-						if($e->getCode() === '23000'
-							&& $statement->errorInfo()[0] === '23000'
-							&& $statement->errorInfo()[1] === 1452
-						) {
-							throw new NotFoundException();
-						}
-					}
-					throw $e;
-				} finally {
-					$statement->closeCursor();
-				}
-			}
-
-			$this->addAuditEntry($item);
-			return true;
+		foreach($features as $feature) {
+			$this->setFeature($item, $feature);
 		}
+
+		if($item instanceof ItemWithCode) {
+			$this->addAuditEntry($item);
+		}
+
+		return true;
 	}
 
 	/**
@@ -256,5 +222,75 @@ final class FeatureDAO extends DAO {/**
 		} finally {
 			$statement->closeCursor();
 		}
+	}
+
+	/**
+	 * Set value for a single feature and update audit table
+	 *
+	 * @param ItemWithFeatures|Product|ItemTraitFeatures $item
+	 * @param Feature $feature
+	 */
+	private function setFeature($item, Feature $feature): void {
+		$column = self::getColumn($feature->type);
+		$type = self::getPDOType($feature->type);
+
+		if($item instanceof Product) {
+			$statement = $this->setFeaturesQueryForProduct($item, $column);
+		} else {
+			$statement = $this->setFeaturesQueryForItem($item, $column);
+		}
+		$statement->bindValue(':feature', $feature->name, \PDO::PARAM_STR);
+		$statement->bindValue(':val', $feature->value, $type);
+		$statement->bindValue(':val2', $feature->value, $type);
+		try {
+			$result = $statement->execute();
+			assert($result !== false, 'set feature');
+		} catch(\PDOException $e) {
+			// This error has ever been witnessed when master-master replication breaks, but apparently it's used
+			// to signify that there's no foreign key target thing for the primary key other thing.
+			// That is: inserting/updating a row for an item that doesn't exist.
+			if($e->getCode() === 'HY000'
+				&& $statement->errorInfo()[1] === 1032
+				&& $statement->errorInfo()[2] === 'Can\'t find record in \'ItemFeature\''
+			) {
+				throw new NotFoundException();
+			} else {
+				if($e->getCode() === '23000'
+					&& $statement->errorInfo()[0] === '23000'
+					&& $statement->errorInfo()[1] === 1452
+				) {
+					throw new NotFoundException();
+				}
+			}
+			throw $e;
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * @param ItemWithFeatures $item
+	 * @param string $column
+	 *
+	 * @return bool|PDOStatement
+	 */
+	private function setFeaturesQueryForItem(ItemWithFeatures $item, string $column) {
+		$statement = $this->getPDO()->prepare("INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2");
+		$statement->bindValue(':item', $item->getCode(), \PDO::PARAM_STR);
+		return $statement;
+	}
+
+	/**
+	 * @param Product $product
+	 * @param string $column
+	 *
+	 * @return bool|PDOStatement
+	 */
+	private function setFeaturesQueryForProduct(Product $product, string $column) {
+		$statement = $this->getPDO()->prepare("INSERT INTO ProductFeature (Feature, Brand, Model, Variant, `$column`) VALUES (:feature, :b, :m, :v, :val) ON DUPLICATE KEY UPDATE `$column`=:val2");
+		$statement->bindValue(':b', $product->getBrand(), \PDO::PARAM_STR);
+		$statement->bindValue(':m', $product->getModel(), \PDO::PARAM_STR);
+		$statement->bindValue(':v', $product->getVariant(), \PDO::PARAM_STR);
+		return $statement;
 	}
 }

@@ -27,6 +27,8 @@ final class ProductDAO extends DAO{
 		} finally {
 			$statement->closeCursor();
 		}
+
+		$this->database->featureDAO()->setFeatures($product);
 	}
 
 	/**
@@ -36,8 +38,7 @@ final class ProductDAO extends DAO{
 	 *
 	 * @return Product
 	 */
-
-	public function getProductComplete(Product $product): Product {
+	public function getProductComplete(ProductCode $product): Product {
 		//TODO: To implement
 	}
 
@@ -47,14 +48,13 @@ final class ProductDAO extends DAO{
 	 * @param String $brand
 	 * @param String $model
 	 *
-	 * @return Array
+	 * @return Product[]
 	 */
-
-	public function getProducts(String $brand, String $model): Array {
+	public function getProducts(String $brand, String $model): array {
 		//TODO: To implement
 	}
 
-	public function getProduct(string $brand, string $model, ?string  $variant = ''): Product{
+	public function getProduct(string $brand, string $model, ?string  $variant = ''): Product {
 		$statement = $this->getPDO()->prepare('SELECT * FROM Product WHERE Brand = :prod AND Model = :mod AND Variant = :var');
 		try{
 			$statement->bindValue(':prod', $brand, \PDO::PARAM_STR);
@@ -71,8 +71,7 @@ final class ProductDAO extends DAO{
 		return $product;
 	}
 
-	//Is this useful?
-	public function deleteProduct(Product $product){
+	public function deleteProduct(Product $product) {
 		$statement = $this->getPDO()->prepare('DELETE FROM Product WHERE Brand = :prod AND Model = :mod AND Variant = :var ');
 		try{
 			$statement->bindValue(':prod', $product->getBrand(), \PDO::PARAM_STR);

@@ -51,7 +51,7 @@ class Item
 					$array['item_features'][$name] = $value;
 				}
 			}
-			if(!empty($this->product)){
+			if(!empty($this->product)) {
 				foreach($this->product->getFeatures() as $productFeature) {
 					$name = $productFeature->name;
 					$value = $productFeature->value;
