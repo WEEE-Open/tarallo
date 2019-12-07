@@ -11,6 +11,7 @@ class Item
 	implements \JsonSerializable,
 	ItemWithCode,
 	ItemWithFeatures,
+	ItemWithProduct,
 	ItemWithLocation {
 	use ItemTraitOptionalCode;
 	use ItemTraitContent;
