@@ -8,7 +8,7 @@ vm:
 	mkdir -p utils/provision/roles
 	ansible-galaxy install -p utils/provision/roles goozbach.EPEL
 	ansible-galaxy install -p utils/provision/roles geerlingguy.nginx
-	vagrant plugin install vagrant-vbguest
+	#vagrant plugin install vagrant-vbguest
 
 .PHONY:
 features:
