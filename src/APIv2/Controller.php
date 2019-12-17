@@ -47,6 +47,7 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
+		$query = $request->getQueryParams();
 
 		$id = Validation::validateOptionalString($parameters, 'id');
 		$token = Validation::validateOptionalString($parameters, 'token');
@@ -64,6 +65,9 @@ class Controller implements RequestHandlerInterface {
 			if(!$db->itemDAO()->itemVisible($item)) {
 				throw new NotFoundException();
 			}
+			if($query['separate'])
+				/** @var Item $item */
+				$item->setSeparate();
 			$data = $db->itemDAO()->getItem($item, $token, $depth);
 
 			return new JsonResponse($data);
