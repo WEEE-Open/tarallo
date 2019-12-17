@@ -170,12 +170,13 @@ final class ItemDAO extends DAO {
 	 * ignored
 	 */
 	public function itemMustExist(ItemWithCode $item, $allowDeleted = false) {
+		// Use Item instead of ProductItemFeatures because we need to check DeletedAt, and we will modify Item anyway
 		if($allowDeleted) {
 			$statement = $this->getPDO()
-				->prepare('SELECT `Code` FROM ProductItemFeature WHERE `Code` = :cod FOR UPDATE');
+				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod FOR UPDATE');
 		} else {
 			$statement = $this->getPDO()
-				->prepare('SELECT `Code` FROM ProductItemFeature WHERE `Code` = :cod and `DeletedAt` IS NULL FOR UPDATE');
+				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod and `DeletedAt` IS NULL FOR UPDATE');
 		}
 		try {
 			$statement->execute([$item->getCode()]);
@@ -335,6 +336,7 @@ EOQ
 			$statement->closeCursor();
 		}
 		$this->database->treeDAO()->getPathTo($head);
+		$this->database->productDAO()->getProductsAll($flat);
 		$this->database->featureDAO()->getFeaturesAll($flat);
 		$this->getExtraData($head);
 
@@ -353,7 +355,7 @@ EOQ
 		$tokenquery = $this->getPDO()->prepare(
 			<<<EOQ
 			SELECT IF(COUNT(*) > 0, TRUE, FALSE)
-			FROM ProductItemFeature
+			FROM Item
 			WHERE `Code` = ? AND Token = ?
 EOQ
 		);
@@ -379,7 +381,7 @@ EOQ
 		// TODO: race conditions with other queries?
 		$statement = $this->getPDO()
 			->prepare(
-				'SELECT UNIX_TIMESTAMP(DeletedAt) AS DeletedAt, UNIX_TIMESTAMP(LostAt) AS LostAt FROM ProductItemFeature WHERE `Code` = ?'
+				'SELECT UNIX_TIMESTAMP(DeletedAt) AS DeletedAt, UNIX_TIMESTAMP(LostAt) AS LostAt FROM Item WHERE `Code` = ?'
 			);
 		try {
 			$statement->execute([$head->getCode()]);

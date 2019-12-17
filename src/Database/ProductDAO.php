@@ -6,6 +6,8 @@ namespace WEEEOpen\Tarallo\Database;
 
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\String_;
+use WEEEOpen\Tarallo\ItemWithCode;
+use WEEEOpen\Tarallo\ItemWithProduct;
 use WEEEOpen\Tarallo\Product;
 
 final class ProductDAO extends DAO{
@@ -79,6 +81,45 @@ final class ProductDAO extends DAO{
 			$statement->bindValue(':var', $product->getVariant(), \PDO::PARAM_STR);
 			$result =  $statement->execute();
 			assert($result === true, 'Delete product');
+		} finally{
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * @param ItemWithProduct[] $items
+	 *
+	 * @return ItemWithProduct[]
+	 */
+	public function getProductsAll(array $items): array {
+		foreach($items as $item) {
+			$product = $this->getProductFromItem($item);
+			$item->setProduct($product);
+		}
+
+		return $items;
+	}
+
+	private function getProductFromItem(ItemWithCode $item): ?Product {
+		$statement = $this->getPDO()->prepare('SELECT Brand, Model, Variant FROM Item WHERE Code = :cod');
+		try {
+			$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
+			$result =  $statement->execute();
+			assert($result === true, 'get product from item');
+			if($statement->rowCount() === 0) {
+				return null;
+			}
+			if($statement->rowCount() > 1) {
+				throw new \LogicException("Item $item has multiple products");
+			}
+			$row = $statement->fetch(\PDO::FETCH_ASSOC);
+			if($row['Brand'] === null || $row['Model'] === null || $row['Variant'] === null) {
+				return null;
+			} else {
+				$product = new Product($row['Brand'], $row['Model'], $row['Variant']);
+				$this->database->featureDAO()->getProductFeatures($product);
+				return $product;
+			}
 		} finally{
 			$statement->closeCursor();
 		}
