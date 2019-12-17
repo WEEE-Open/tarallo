@@ -249,18 +249,44 @@ CREATE TABLE `SessionToken`
 -- ProductFeature - ItemFeature View
 
 CREATE VIEW ProductItemFeature AS
-SELECT  I.CODE AS Code, PF.BRAND AS Brand, PF.MODEL AS Model, PF.VARIANT AS Variant,
-        PF.FEATURE AS Feature_Prod, PF.VALUE AS Value_Prod, PF.VALUEENUM AS Valueenum_Prod,
-        PF.VALUETEXT AS Valuetext_Prod, PF.VALUEDOUBLE AS Valuedouble_Prod,
-        I.VARIANT AS Variant_Item, I.TOKEN AS Token, I.DELETEDAT AS DeletedAt, I.LOSTAT AS LostAt,
-        IFT.FEATURE AS Feature_Item, IFT.VALUE AS Value_Item, IFT.VALUEENUM AS Valueenum_Item,
-        IFT.VALUETEXT AS Valuetext_Item, IFT.VALUEDOUBLE AS Valuedouble_Item
-FROM    ProductFeature PF, Item I, ItemFeature IFT
-WHERE   I.Code = IFT.Code AND
-        PF.Model = I.Model AND
-        PF.Brand = I.Brand AND
-        PF.Variant = I.Variant AND
-        IFT.Feature = PF.Feature;
+SELECT unioned.Code,
+       unioned.Feature AS Feature,
+       MAX(Value_Item) AS Value_Item,
+       MAX(ValueEnum_Item) AS ValueEnum_Item,
+       MAX(ValueText_Item) AS ValueText_Item,
+       MAX(ValueDouble_Item) AS ValueDouble_Item,
+       MAX(Value_Product) AS Value_Product,
+       MAX(ValueEnum_Product) AS ValueEnum_Product,
+       MAX(ValueText_Product) AS ValueText_Product,
+       MAX(ValueDouble_Product) AS ValueDouble_Product
+FROM (
+         SELECT Item.Code,
+                ItemFeature.Feature AS Feature,
+                ItemFeature.Value AS Value_Item,
+                ItemFeature.ValueEnum AS ValueEnum_Item,
+                ItemFeature.ValueText AS ValueText_Item,
+                ItemFeature.ValueDouble AS ValueDouble_Item,
+                NULL AS Value_Product,
+                NULL AS ValueEnum_Product,
+                NULL AS ValueText_Product,
+                NULL AS ValueDouble_Product
+         FROM Item
+              NATURAL JOIN ItemFeature
+         UNION
+         SELECT Item.Code,
+                PF.Feature AS Feature,
+                NULL AS Value_Item,
+                NULL AS ValueEnum_Item,
+                NULL AS ValueText_Item,
+                NULL AS ValueDouble_Item,
+                PF.Value AS Value_Product,
+                PF.ValueEnum AS ValueEnum_Product,
+                PF.ValueText AS ValueText_Product,
+                PF.ValueDouble AS ValueDouble_Product
+         FROM Item
+              JOIN ProductFeature PF ON Item.Brand = PF.Brand AND Item.Model = PF.Model AND Item.Variant = PF.Variant
+     ) unioned
+GROUP BY Code, Feature;
 
 -- Append this insert statement at the end of file and update schemaversion value
 INSERT INTO `Configuration` (`Key`, `Value`)

@@ -39,9 +39,13 @@ $db->productDAO()->addProduct(new Product("Strange", "Thing", "Dismone"));
 $db->productDAO()->addProduct(new Product("Intel", "Asd"));
 $db->productDAO()->addProduct(new Product("Centryno", "kakka", "Grigio"));
 $db->productDAO()->addProduct(new Product("Kek", "Asd"));
-$db->productDAO()->addProduct((new Product("eMachines", "EZ1600", "boh"))
+$db->productDAO()->addProduct((new Product("eMac", "EZ1600", "boh"))
 	->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
 	->addFeature(new Feature('color', 'white'))
+	->addFeature(new Feature('type', 'case')));
+$db->productDAO()->addProduct((new Product("Dill", "DI-360", "SFF"))
+	->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
+	->addFeature(new Feature('color', 'grey'))
 	->addFeature(new Feature('type', 'case')));
 
 $polito = (new Item('Polito'))->addFeature(new Feature('type', 'location'));
@@ -53,16 +57,12 @@ $chernobyl->addContent($table);
 $pc20 = (new Item('PC20'))
 	->addFeature(new Feature('brand', 'Dill'))
 	->addFeature(new Feature('model', 'DI-360'))
-	->addFeature(new Feature('type', 'case'))
-	->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
-	->addFeature(new Feature('color', 'black'))
+	->addFeature(new Feature('variant', 'SFF'))
 	->addFeature(new Feature('working', 'yes'));
 $pc90 = (new Item('PC90'))
 	->addFeature(new Feature('brand', 'Dill'))
 	->addFeature(new Feature('model', 'DI-360'))
-	->addFeature(new Feature('type', 'case'))
-	->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
-	->addFeature(new Feature('color', 'grey'))
+	->addFeature(new Feature('variant', 'SFF'))
 	->addFeature(new Feature('working', 'yes'));
 $pc55 = (new Item('PC55'))
 	->addFeature(new Feature('brand', 'TI'))
@@ -72,8 +72,7 @@ $pc55 = (new Item('PC55'))
 $pc22 = (new Item('PC22'))
 	->addFeature(new Feature('brand', 'Dill'))
 	->addFeature(new Feature('model', 'DI-360'))
-	->addFeature(new Feature('type', 'case'))
-	->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
+	->addFeature(new Feature('variant', 'SFF'))
 	->addFeature(new Feature('color', 'black'))
 	->addFeature(new Feature('working', 'yes'));
 $SCHIFOMACCHINA = (new Item('SCHIFOMACCHINA'))
