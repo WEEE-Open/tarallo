@@ -4,11 +4,28 @@
   become: true
   become_user: root
   vars:
-    mariadb_root_password: root
     database_username: tarallo
     database_password: thisisnottheproductionpassword
     document_root: /var/www/html
     document_root_mounted: "{{ document_root }}/server"
+    mariadb_mirror: 'mariadb.mirror.nucleus.be/yum'
+    mariadb_bind_address: '0.0.0.0'
+    mariadb_root_password: root
+    mariadb_databases:
+      - name: tarallo
+      - name: tarallo_test
+    mariadb_users:
+      - name: "{{ database_username }}"
+        password: "{{ database_password }}"
+        priv: "`tarallo%`.*:ALL"
+        host: "%"
+    mariadb_custom_cnf:
+      server:
+        bind-address: 0.0.0.0
+      mysqld:
+        general-log:
+        general-log-file: queries.log
+        log-output: file
 
     nginx_yum_repo_enabled: false
     nginx_remove_default_vhost: true
@@ -57,6 +74,7 @@
         }
 
   roles:
+    - role: bertvv.mariadb
     - role: goozbach.EPEL
     - role: geerlingguy.nginx
 
@@ -109,28 +127,6 @@
 
   - name: Adds Python-MySQL to set MariaDB configuration
     yum: name=MySQL-python state=present
-
-  - name: Set MariaDB root password
-    mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user=root password="{{ mariadb_root_password }}" state=present check_implicit_admin=yes
-
-  - name: Remove useless MariaDB root login
-    mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user=root host="{{ ansible_fqdn }}" state=absent check_implicit_admin=yes
-
-  - name: Set MariaDB root password from localhost
-    mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user=root password="{{ mariadb_root_password }}" host="localhost" check_implicit_admin=yes
-
-  - name: Set MariaDB root password from ::1
-    mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user=root password="{{ mariadb_root_password }}" host="::1" check_implicit_admin=yes
-
-  - name: Set MariaDB root password from 127.0.0.1
-    mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user=root password="{{ mariadb_root_password }}" host="127.0.0.1" check_implicit_admin=yes
-
-  # Doens't work for unknown reasons on Ansible 2.5.x, works again on 2.7 but whatever
-  #- name: Deletes anonymous MariaDB user
-  #  mysql_user: login_user=root login_password="{{ mariadb_root_password }}" user="" host_all=yes state=absent
-
-  - name: Removes MariaDB test database
-    mysql_db: login_user=root login_password="{{ mariadb_root_password }}" db=test state=absent
 
   - name: Uninstall old PHP 7.0 (if updating VM)
     yum:
@@ -300,11 +296,6 @@
 #      login_password: "{{ mariadb_root_password }}"
 #      target: "/data/sample-data.sql"
 
-  - name: Enable remote connections to MariaDB
-    template:
-      src: enable-remote-connection.conf.j2
-      dest: /etc/my.cnf.d/enable-remote-connection.conf
-
   - name: Replace my.cnf since it's the only way to enable event scheduler
     template:
       src: my.cnf.j2
@@ -312,30 +303,6 @@
       owner: root
       group: root
       mode: 0644
-
-  - name: Enable remote MariaDB root login
-    mysql_user:
-      login_user: root
-      login_password: "{{ mariadb_root_password }}"
-      user: root
-      password: "{{ mariadb_root_password }}"
-      host: "%"
-      priv: "*.*:ALL,GRANT"
-
-  - name: Create MariaDB user
-    mysql_user:
-      login_user: root
-      login_password: "{{ mariadb_root_password }}"
-      user: "{{ database_username }}"
-      password: "{{ database_password }}"
-      host: "localhost"
-      priv: "tarallo.*:ALL"
-
-  # This is not really the best way, I guess
-  - name: Restart MariaDB
-    service:
-      name: mysqld
-      state: restarted
 
   - name: Create configuration file
     template:
