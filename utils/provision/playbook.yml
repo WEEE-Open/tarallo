@@ -92,15 +92,6 @@
   - name: Create a directory for no reason
     file: path=/home/vagrant/.phpstorm_helpers state=directory mode=0777
 
-  - name: Enable MariaDB repo
-    yum_repository:
-      name: mariadb
-      description: MariaDB
-      baseurl: http://yum.mariadb.org/10.2/centos7-amd64
-      gpgkey: https://yum.mariadb.org/RPM-GPG-KEY-MariaDB
-      gpgcheck: yes
-      enabled: yes
-
   # https://github.com/iuscommunity/automation-examples/blob/ansible/enable-ius.yml
   - set_fact:
       ius_distribution_abbrev: "{{ (ansible_distribution == 'CentOS') | ternary('centos', 'rhel') }}"
@@ -111,22 +102,6 @@
     yum:
       name: "https://{{ ius_distribution_abbrev }}{{ ansible_distribution_major_version }}.iuscommunity.org/ius-release.rpm"
       state: present
-
-  - name: Install MariaDB 10.2 packages
-    yum:
-      state: installed
-      name:
-        - MariaDB-server
-        - MariaDB-client
-
-  - name: Enable and start MariaDB
-    service:
-      name: mariadb
-      enabled: yes
-      state: started
-
-  - name: Adds Python-MySQL to set MariaDB configuration
-    yum: name=MySQL-python state=present
 
   - name: Uninstall old PHP 7.0 (if updating VM)
     yum:
@@ -164,7 +139,6 @@
       enabled: yes
       state: started
 
-    # Not really sure about unzip
   - name: Install PHP developement dependencies
     yum:
       state: installed
