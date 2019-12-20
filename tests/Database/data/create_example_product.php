@@ -47,12 +47,14 @@ $db->productDAO()->addProduct((new Product("Dill", "DI-360", "SFF"))
 	->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
 	->addFeature(new Feature('color', 'grey'))
 	->addFeature(new Feature('type', 'case')));
-foreach([512, 1024, 2048] as $size) {
+foreach([256, 512, 1024, 2048] as $size) {
 	$db->productDAO()->addProduct(
 		(new Product("Samsung", "S667ABC" . $size, "v1"))
 			->addFeature(new Feature('capacity-byte', $size * 1024 * 1024))
 			->addFeature(new Feature('frequency-hertz', 667 * 1000 * 1000))
 			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('ram-type', 'ddr2'))
+			->addFeature(new Feature('ram-form-factor', 'dimm'))
 			->addFeature(new Feature('type', 'ram'))
 	);
 }
@@ -92,9 +94,9 @@ $SCHIFOMACCHINA = (new Item('SCHIFOMACCHINA'))
 	->addFeature(new Feature('variant', 'boh'));
 
 // RAM(DOM) GENERATOR 2000
-$i = 123;
-foreach([1024, 2048, 1024, 1024, 512, 512, 512, 512, 1024] as $ramSize) {
-	$ram = (new Item('R' . $i++))
+for($i = 100; $i < 222; $i++) {
+	$ramSize = pow(2, rand(8, 11));
+	$ram = (new Item('R' . $i))
 		->addFeature(new Feature('brand', 'Samsung'))
 		->addFeature(new Feature('model', 'S667ABC' . $ramSize))
 		->addFeature(new Feature('variant', 'v1'))
@@ -108,6 +110,17 @@ $ram = (new Item('R69'))
 	->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
 	->addFeature(new Feature('type', 'ram'));
 $rambox->addContent($ram);
+
+foreach([777, 778, 779] as $item) {
+	$ram = (new Item('R' . $item))
+		->addFeature(new Feature('brand', 'Samsung'))
+		->addFeature(new Feature('model', 'S667ABC512'))
+		->addFeature(new Feature('variant', 'v1'))
+		->addFeature(new Feature('sn', 'ASD' . substr(strtoupper(md5('512')), 0, 5) . '123456'))
+		->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'));
+	$rambox->addContent($ram);
+}
+
 
 $table->addContent($SCHIFOMACCHINA);
 $chernobyl->addContent($pc20)->addContent($pc22)->addContent($pc55)->addContent($pc90);
