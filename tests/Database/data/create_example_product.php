@@ -47,12 +47,23 @@ $db->productDAO()->addProduct((new Product("Dill", "DI-360", "SFF"))
 	->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
 	->addFeature(new Feature('color', 'grey'))
 	->addFeature(new Feature('type', 'case')));
+foreach([512, 1024, 2048] as $size) {
+	$db->productDAO()->addProduct(
+		(new Product("Samsung", "S667ABC" . $size, "v1"))
+			->addFeature(new Feature('capacity-byte', $size * 1024 * 1024))
+			->addFeature(new Feature('frequency-hertz', 667 * 1000 * 1000))
+			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('type', 'ram'))
+	);
+}
 
 $polito = (new Item('Polito'))->addFeature(new Feature('type', 'location'));
 $chernobyl = (new Item('Chernobyl'))->addFeature(new Feature('type', 'location'))->addFeature(new Feature('color', 'grey'));
 $polito->addContent($chernobyl);
 $table = (new Item('Table'))->addFeature(new Feature('type', 'location'))->addFeature(new Feature('color', 'white'));
 $chernobyl->addContent($table);
+$rambox = (new Item('RamBox'))->addFeature(new Feature('type', 'location'))->addFeature(new Feature('color', 'red'));
+$table->addContent($rambox);
 
 $pc20 = (new Item('PC20'))
 	->addFeature(new Feature('brand', 'Dill'))
@@ -79,6 +90,25 @@ $SCHIFOMACCHINA = (new Item('SCHIFOMACCHINA'))
 	->addFeature(new Feature('brand', 'eMac'))
 	->addFeature(new Feature('model', 'EZ1600'))
 	->addFeature(new Feature('variant', 'boh'));
+
+// RAM(DOM) GENERATOR 2000
+$i = 123;
+foreach([1024, 2048, 1024, 1024, 512, 512, 512, 512, 1024] as $ramSize) {
+	$ram = (new Item('R' . $i++))
+		->addFeature(new Feature('brand', 'Samsung'))
+		->addFeature(new Feature('model', 'S667ABC' . $ramSize))
+		->addFeature(new Feature('variant', 'v1'))
+		->addFeature(new Feature('sn', 'ASD' . substr(strtoupper(md5($ramSize)), 0, 5) . rand(100000, 999999)))
+		->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'));
+	$rambox->addContent($ram);
+}
+$ram = (new Item('R69'))
+	->addFeature(new Feature('check', 'missing-data'))
+	->addFeature(new Feature('notes', 'RAM di esempio con dati mancati'))
+	->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
+	->addFeature(new Feature('type', 'ram'));
+$rambox->addContent($ram);
+
 $table->addContent($SCHIFOMACCHINA);
 $chernobyl->addContent($pc20)->addContent($pc22)->addContent($pc55)->addContent($pc90);
 
