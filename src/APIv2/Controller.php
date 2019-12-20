@@ -65,11 +65,9 @@ class Controller implements RequestHandlerInterface {
 			if(!$db->itemDAO()->itemVisible($item)) {
 				throw new NotFoundException();
 			}
-			if($query['separate'])
-				/** @var Item $item */
-				$item->setSeparate();
 			$data = $db->itemDAO()->getItem($item, $token, $depth);
-
+			if($query['separate'])
+				$data->setSeparate();
 			return new JsonResponse($data);
 		}
 	}
