@@ -16,8 +16,8 @@ class CaseSummarizer implements Summarizer {
 		$type = FeaturePrinter::printableValue($type);
 		$type .= $form ? ' ' . FeaturePrinter::printableValue($form) : '';
 
-		$ports = PartialSummaries::summarizePorts($item, true);
-		$ports = $ports ? ", $ports" : '';
+		$ports = PartialSummaries::summarizePorts($item, false);
+		$ports = $ports ? " ($ports)" : '';
 
 		$color = $color ? ', ' . FeaturePrinter::printableValue($color) : '';
 

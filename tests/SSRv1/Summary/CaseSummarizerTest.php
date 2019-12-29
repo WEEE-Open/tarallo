@@ -22,7 +22,28 @@ class CaseSummarizerTest extends TestCase {
 
 		$summary = CaseSummarizer::summarize($item);
 		$this->assertEquals(
-			'Case ATX, 4× USB, White, Asus Optiplex 755 SFF',
+			'Case ATX (4× USB), White, Asus Optiplex 755 SFF',
+			$summary
+		);
+
+		return $summary;
+	}
+
+	public function testCaseSinglePort() {
+		$item = new Item('420');
+		$item
+			->addFeature(new Feature('color', 'grey'))
+			->addFeature(new Feature('usb-ports-n', 4))
+			->addFeature(new Feature('firewire-ports-n', 1))
+			->addFeature(new Feature('type', 'case'))
+			->addFeature(new Feature('working', 'yes'))
+			->addFeature(new Feature('brand', 'HP'))
+			->addFeature(new Feature('model', 'AsdPC'))
+			->addFeature(new Feature('motherboard-form-factor', 'microatx'));
+
+		$summary = CaseSummarizer::summarize($item);
+		$this->assertEquals(
+			'Case Micro ATX (1× Firewire, 4× USB), Grey, HP AsdPC',
 			$summary
 		);
 
@@ -41,7 +62,7 @@ class CaseSummarizerTest extends TestCase {
 
 		$summary = CaseSummarizer::summarize($item);
 		$this->assertEquals(
-			'Case ATX, 4× USB, White, Asus',
+			'Case ATX (4× USB), White, Asus',
 			$summary
 		);
 
@@ -59,7 +80,7 @@ class CaseSummarizerTest extends TestCase {
 
 		$summary = CaseSummarizer::summarize($item);
 		$this->assertEquals(
-			'Case ATX, 4× USB, White',
+			'Case ATX (4× USB), White',
 			$summary
 		);
 
@@ -78,7 +99,7 @@ class CaseSummarizerTest extends TestCase {
 
 		$summary = CaseSummarizer::summarize($item);
 		$this->assertEquals(
-			'Case ATX, 4× USB, Asus Optiplex 755 SFF',
+			'Case ATX (4× USB), Asus Optiplex 755 SFF',
 			$summary
 		);
 
@@ -134,7 +155,7 @@ class CaseSummarizerTest extends TestCase {
 
 		$summary = CaseSummarizer::summarize($item);
 		$this->assertEquals(
-			'Case, 4× USB, White, Asus Optiplex 755 SFF',
+			'Case (4× USB), White, Asus Optiplex 755 SFF',
 			$summary
 		);
 
@@ -151,7 +172,7 @@ class CaseSummarizerTest extends TestCase {
 
 		$summary = CaseSummarizer::summarize($item);
 		$this->assertEquals(
-			'Case ATX, 4× USB',
+			'Case ATX (4× USB)',
 			$summary
 		);
 
