@@ -167,7 +167,7 @@
 		for(let div of featuresElement.querySelectorAll('[contenteditable]')) {
 			if(div.dataset.internalType === 's') {
 				div.addEventListener('paste', sanitizePaste);
-				div.addEventListener('input', textChanged);
+				div.addEventListener('input', textChangedEvent);
 			} else {
 				div.addEventListener('blur', numberChanged);
 			}
@@ -198,25 +198,37 @@
 	/**
 	 * Handle changing content of an editable text div
 	 *
-	 * @param ev Event
+	 * @see textChangedEvent
+	 * @param {HTMLElement} input The input field
 	 * @TODO: adding and removing newlines should count as "changed", but it's absurdly difficult to detect, apparently...
 	 */
-	function textChanged(ev) {
-		let feature = ev.target.parentElement;
-		fixDiv(ev.target);
+	function textChanged(input) {
+		let feature = input.parentElement;
+		fixDiv(input);
 		fadeOutInlineErrors(feature);
 		// Newly added element
-		if(!ev.target.dataset.initialValue) {
+		if (!input.dataset.initialValue) {
 			return;
 		}
 
-		if(ev.target.textContent.length === ev.target.dataset.initialValue.length) {
-			if(ev.target.textContent === ev.target.dataset.initialValue) {
-				ev.target.classList.remove('changed');
+		if (input.textContent.length === input.dataset.initialValue.length) {
+			if (input.textContent === input.dataset.initialValue) {
+				input.classList.remove('changed');
 				return;
 			}
 		}
-		ev.target.classList.add('changed');
+		input.classList.add('changed');
+	}
+
+	/**
+	 * Handle changing content of an editable text div
+	 *
+	 * @see textChanged
+	 * @param ev Event
+	 * @TODO: adding and removing newlines should count as "changed", but it's absurdly difficult to detect, apparently...
+	 */
+	function textChangedEvent(ev) {
+		textChanged(ev.target);
 	}
 
 	/**
@@ -696,10 +708,12 @@
 				case 'U':
 				case 'u':
 					ev.target.childNodes[0].childNodes[0].textContent = ev.target.childNodes[0].childNodes[0].textContent.toLocaleUpperCase();
+					textChanged(ev.target);
 					break;
 				case 'L':
 				case 'l':
 					ev.target.childNodes[0].childNodes[0].textContent = ev.target.childNodes[0].childNodes[0].textContent.toLocaleLowerCase();
+					textChanged(ev.target);
 					break;
 				case 'y':
 				case 'Y':
@@ -708,6 +722,7 @@
 						.split(' ')
 						.map(a => a[0].toUpperCase() + a.substr(1).toLowerCase())
 						.join(' ');
+					textChanged(ev.target);
 					break;
 			}
 		}
@@ -920,7 +935,7 @@
 				valueElement.dataset.previousValue = '';
 				valueElement.contentEditable = 'true';
 				valueElement.addEventListener('paste', sanitizePaste);
-				valueElement.addEventListener('input', textChanged);
+				valueElement.addEventListener('input', textChangedEvent);
 
 				div = document.createElement('div');
 				//div.textContent = '?'; // empty <div>s break everything // not anymore apparently? 2018-12-05
