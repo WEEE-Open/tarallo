@@ -87,7 +87,7 @@ $pc22 = (new Item('PC22'))
 	->addFeature(new Feature('brand', 'Dill'))
 	->addFeature(new Feature('model', 'DI-360'))
 	->addFeature(new Feature('variant', 'SFF'))
-	->addFeature(new Feature('color', 'black'))
+	->addFeature(new Feature('color', 'black')) // override
 	->addFeature(new Feature('working', 'yes'));
 $SCHIFOMACCHINA = (new Item('SCHIFOMACCHINA'))
 	->addFeature(new Feature('brand', 'eMac'))

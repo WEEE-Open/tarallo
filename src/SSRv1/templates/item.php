@@ -105,7 +105,7 @@ $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
 		</section>-->
 	<?php else: ?>
 		<section class="features">
-			<?php $this->insert('features', ['features' => $features]) ?>
+			<?php $this->insert('features', ['features' => $features, 'product' => $item->getProduct()->getFeatures()]) ?>
 		</section>
 	<?php endif ?>
 
