@@ -76,6 +76,7 @@ $pc90 = (new Item('PC90'))
 	->addFeature(new Feature('brand', 'Dill'))
 	->addFeature(new Feature('model', 'DI-360'))
 	->addFeature(new Feature('variant', 'SFF'))
+	->addFeature(new Feature('todo', 'install-os'))
 	->addFeature(new Feature('working', 'yes'));
 $pc55 = (new Item('PC55'))
 	->addFeature(new Feature('brand', 'TI'))
@@ -110,6 +111,13 @@ $ram = (new Item('R69'))
 	->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
 	->addFeature(new Feature('type', 'ram'));
 $rambox->addContent($ram);
+$ram666 = (new Item('R666'))
+	->addFeature(new Feature('brand', 'Samsung'))
+	->addFeature(new Feature('model', 'S667ABC1024'))
+	->addFeature(new Feature('notes', 'RAM di esempio persa'))
+	->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
+	->addFeature(new Feature('type', 'ram'));
+$rambox->addContent($ram666);
 
 foreach([777, 778, 779] as $item) {
 	$ram = (new Item('R' . $item))
@@ -126,3 +134,4 @@ $table->addContent($SCHIFOMACCHINA);
 $chernobyl->addContent($pc20)->addContent($pc22)->addContent($pc55)->addContent($pc90);
 
 $db->itemDAO()->addItem($polito);
+$db->itemDAO()->loseItem($ram666);
