@@ -40,7 +40,7 @@ class Controller implements RequestHandlerInterface {
 		/** @var User $user */
 		$user = $request->getAttribute('User');
 
-		return new JsonResponse(['username' => $user->uid]);
+		return new JsonResponse(['username' => $user->uid, 'cn' => $user->cn, 'level' => $user->getLevel()]);
 	}
 
 	public static function getItem(ServerRequestInterface $request): ResponseInterface {

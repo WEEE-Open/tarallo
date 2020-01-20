@@ -147,7 +147,6 @@ class Controller implements RequestHandlerInterface {
 			->withAttribute('Template', 'error')
 			->withAttribute('ResponseCode', 400)
 			->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Login failed, <a href="/">retry</a>']);
-		error_log('Login failed');
 
 		return $handler->handle($request);
 	}
@@ -217,7 +216,7 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
-		$parameters = $request->getAttribute('parameters', ['which' => null]);
+		$parameters = $request->getAttribute('parameters');
 		// a nice default value: 'now - 1 year'
 		$startDateDefault = '2016-01-01';
 		$startDate = Validation::validateOptionalString($query, 'from', $startDateDefault, null);
@@ -225,7 +224,8 @@ class Controller implements RequestHandlerInterface {
 		/** @noinspection PhpUnhandledExceptionInspection */
 		$startDate = new \DateTime($startDate, new \DateTimeZone('Europe/Rome'));
 
-		switch($parameters['which']) {
+		$which = $parameters['which'] ?? '';
+		switch($which) {
 			case '':
 				$request = $request->withAttribute('Template', 'stats::main')->withAttribute(
 					'TemplateParameters', [

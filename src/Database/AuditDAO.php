@@ -47,9 +47,10 @@ LIMIT :offs, :cnt'
 		$array = [];
 
 		$statement = $this->getPDO()->prepare(
-			'SELECT `Code`, UNIX_TIMESTAMP(`Time`) AS `Time`
+			'SELECT `Code`, MAX(UNIX_TIMESTAMP(`Time`)) AS `Time`
 FROM Audit
 WHERE `Change` = ?
+GROUP BY `Code`
 ORDER BY `Time` DESC, `Code` DESC
 LIMIT ?'
 		);

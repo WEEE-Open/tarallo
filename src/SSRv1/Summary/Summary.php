@@ -9,9 +9,9 @@ class Summary {
 	public static function peel(ItemWithFeatures $item): ?string {
 		$type = $item->getFeature('type');
 		switch($type) {
-			//case 'location':
-			// Not implemented
-
+			case null:
+				// Otherwise it breaks the summarizers
+				return 'Unknown item (set the type)';
 			case 'case':
 				 return CaseSummarizer::summarize($item);
 			case 'motherboard':
@@ -46,16 +46,17 @@ class Summary {
 				return SimplePortsSummarizer::summarize($item);
 			case 'monitor':
 			 	return MonitorSummarizer::summarize($item);
-			case 'printer':
-			case 'scanner':
-			case 'inventoried-object':
-			case 'fdd':
-			case 'zip-drive':
-			case 'mouse':
-			case 'keyboard':
-			case 'network-switch':
-			case 'network-hub':
-			case 'modem-router':
+			// These are default cases, we'd get here anyway
+//			case 'printer':
+//			case 'scanner':
+//			case 'inventoried-object':
+//			case 'fdd':
+//			case 'zip-drive':
+//			case 'mouse':
+//			case 'keyboard':
+//			case 'network-switch':
+//			case 'network-hub':
+//			case 'modem-router':
 			default:
 				return SimpleDeviceSummarizer::summarize($item);
 		}

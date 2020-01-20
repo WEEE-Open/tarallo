@@ -36,7 +36,6 @@ class AuthManager implements MiddlewareInterface {
 	 * @param $expire
 	 */
 	protected static function setCookie(string $newContent, int $expire) {
-		error_log("set cookie to expire in " . ($expire - time()));
 		setcookie(self::COOKIE_NAME, $newContent, $expire, '', '', !TARALLO_DEVELOPMENT_ENVIRONMENT, true);
 	}
 
