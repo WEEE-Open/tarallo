@@ -23,10 +23,21 @@ if(isset($argv[1]) && $argv[1] === 'test_db') {
 	require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
 }
 
+$database = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'database.sql');
+$databasedata = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'database-data.sql');
+
+preg_match("#\(.SchemaVersion., (\d+)\)#", $database, $matches);
+$schema = (int) $matches[1];
+
+preg_match("#\(.DataVersion., (\d+)\)#", $databasedata, $matches);
+$data = (int) $matches[1];
+
+print("Last versions found in sql files: schema $schema, data $data");
+
 try {
 	$db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);
 	$updater = $db->updater();
-	$updater->updateTo(8, 17);
+	$updater->updateTo($schema, $data);
 } catch(\Exception $e) {
 	echo get_class($e);
 	echo PHP_EOL;

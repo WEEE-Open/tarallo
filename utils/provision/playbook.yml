@@ -6,6 +6,7 @@
   vars:
     database_username: tarallo
     database_password: thisisnottheproductionpassword
+
     document_root: /var/www/html
     document_root_mounted: "{{ document_root }}/server"
     mariadb_mirror: 'mariadb.mirror.nucleus.be/yum'

@@ -11,16 +11,18 @@ class Item
 	implements \JsonSerializable,
 	ItemWithCode,
 	ItemWithFeatures,
+	ItemWithProduct,
 	ItemWithLocation {
 	use ItemTraitOptionalCode;
 	use ItemTraitContent;
 	use ItemTraitLocation;
 	use ItemTraitFeatures;
+	use ItemTraitProduct;
 
-	protected $product = null;
 	protected $token = null;
 	protected $deletedAt = null;
 	protected $lostAt = null;
+	protected $separate = false;
 
 
 	public function getToken(): ?string {
@@ -32,16 +34,49 @@ class Item
 		return $this;
 	}
 
+	public function setSeparate() {
+		$this->separate = true;
+		foreach($this->contents as $item) {
+			$item->setSeparate();
+		}
+	}
+
 	public function jsonSerialize() {
 		$array = [];
 		$array['code'] = $this->getCode();
-		if(!empty($this->features)) {
-			foreach($this->features as $feature) {
-				/** @var Feature $feature */
-				$name = $feature->name;
-				$value = $feature->value;
-				$array['features'][$name] = $value;
+		if($this->separate) {
+			if(!empty($this->features)){
+				foreach($this->features as $itemFeature) {
+					$name = $itemFeature->name;
+					$value = $itemFeature->value;
+					$array['item_features'][$name] = $value;
+				}
 			}
+			if(!empty($this->product)) {
+				foreach($this->product->getFeatures() as $productFeature) {
+					$name = $productFeature->name;
+					$value = $productFeature->value;
+					$array['product_features'][$name] = $value;
+				}
+			}
+		} else {
+			if(!empty($this->features)) {
+				foreach($this->features as $feature) {
+					/** @var Feature $feature */
+					$name = $feature->name;
+					$value = $feature->value;
+					$array['features'][$name] = $value;
+				}
+			}
+			$productArray = [];
+			if(!empty($this->product)){
+				foreach($this->product->getFeatures() as $productFeature) {
+					$name = $productFeature->name;
+					$value = $productFeature->value;
+					$productArray['features'][$name] = $value;
+				}
+			}
+			$array = array_merge($productArray, $array);
 		}
 		if(!empty($this->contents)) {
 			$array['contents'] = $this->contents;

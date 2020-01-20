@@ -87,7 +87,7 @@ AND `Time` < FROM_UNIXTIME(:timestamp)
 		for($i = 0; $i < count($features); $i++) {
 			$sqlFilter .= "AND `Code` IN (
 			  SELECT `Code`
-			  FROM ItemFeature
+			  FROM ProductItemFeatureUnified
 			  WHERE Feature = :ffname$i AND COALESCE(ValueEnum, `Value`, ValueText, ValueDouble) = :ffval$i
 			)";
 		}
@@ -108,10 +108,10 @@ AND `Time` < FROM_UNIXTIME(:timestamp)
 		/** @lang MySQL */
 			<<<'EOQ'
 SELECT `Code` AS Location, COUNT(*) - 1 AS Descendants
-FROM ItemFeature, Tree
-WHERE ItemFeature.Code = Tree.Ancestor
-AND ItemFeature.Feature = 'type'
-AND ItemFeature.ValueEnum = 'location'
+FROM ProductItemFeatureUnified, Tree
+WHERE ProductItemFeatureUnified.Code = Tree.Ancestor
+AND ProductItemFeatureUnified.Feature = 'type'
+AND ProductItemFeatureUnified.ValueEnum = 'location'
 AND `Code` NOT IN (SELECT `Code` FROM Item WHERE DeletedAt IS NOT NULL)
 GROUP BY Tree.Ancestor
 ORDER BY COUNT(*) DESC, Location ASC;
@@ -168,13 +168,13 @@ FROM Audit
 JOIN Tree ON Tree.Descendant=Audit.Code
 WHERE `Ancestor` IN (
 	SELECT `Code`
-	FROM ItemFeature
+	FROM ProductItemFeatureUnified
 	WHERE Feature = 'type' AND `ValueEnum` = 'case'
 )
 $locationPart
 AND `Ancestor` NOT IN (
 	SELECT `Code`
-	FROM ItemFeature
+	FROM ProductItemFeatureUnified
 	WHERE Feature = 'restrictions' AND `ValueEnum` = 'in-use'
 )
 GROUP BY `Ancestor`
@@ -243,13 +243,13 @@ LIMIT :lim';
 		} else {
 			$featureFilter = 'AND `Code` IN (
   SELECT `Code`
-  FROM ItemFeature
+  FROM ProductItemFeatureUnified
   WHERE Feature = :filtername AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = :filtervalue
 )';
 		}
 
 		$query = "SELECT COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) as Val, COUNT(*) AS Quantity
-FROM ItemFeature
+FROM ProductItemFeatureUnified
 WHERE Feature = :feat
 $featureFilter
 $locationFilter
@@ -313,7 +313,7 @@ ORDER BY Quantity DESC, Val ASC";
 
 		/** @noinspection SqlResolve */
 		$query = "SELECT `Code`
-FROM ItemFeature
+FROM ProductItemFeatureUnified
 WHERE Feature = :feat
 AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = :val
 $locationFilter
@@ -423,7 +423,7 @@ $limitFilter";
 		$createdFilter = self::filterCreated($creation);
 
 		$query = "SELECT Code 
-FROM ItemFeature 
+FROM ProductItemFeatureUnified 
 WHERE Feature = :type 
 AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = :val
 $locationFilter
@@ -431,7 +431,7 @@ $deletedFilter
 $createdFilter
 AND Code NOT IN ( 
 SELECT `Code` 
-FROM ItemFeature 
+FROM ProductItemFeatureUnified 
 WHERE Feature = :notF
 )
 LIMIT :lim";
@@ -481,28 +481,6 @@ LIMIT :lim";
 		?\DateTime $creation = null,
 		bool $deleted = false
 	): array {
-		/*
-		 * This was a nice and readable query that rolls up (with a series of join(t)s, manco a farlo apposta...) the
-		 * RAMs. To make it generic it became almost unreadable, but the final result should be somewhat like this...
-		 *
-		 * SELECT a.ValueEnum AS Type,
-		 * b.ValueEnum AS FormFactor,
-		 * c.Value AS Frequency,
-		 * COUNT(*) AS Quantity
-		 * FROM ItemFeature AS a
-		 * JOIN ItemFeature AS b ON a.Code=b.Code
-		 * JOIN ItemFeature AS c ON b.Code=c.Code
-		 * WHERE a.Feature = 'ram-type'
-		 *   AND b.feature = 'ram-form-factor'
-		 *   AND c.Feature = 'frequency-hertz'
-		 *   AND a.Code IN (
-		 *     SELECT Code
-		 *     FROM ItemFeature
-		 *     WHERE Feature = 'type'
-		 *     AND ValueEnum = 'ram'
-		 * )
-		 * GROUP BY Type, FormFactor, Frequency WITH ROLLUP;
-		 */
 		if(empty($features)) {
 			throw new \LogicException('Nothing roll up in');
 		}
@@ -515,10 +493,10 @@ LIMIT :lim";
 		$createdFilter = self::filterCreated($creation, 'f0');
 
 		$select = 'SELECT ';
-		$from = 'FROM ItemFeature AS f0 '; // $f0 is guaranteed to exist, since the array is not empty
+		$from = 'FROM ProductItemFeatureUnified AS f0 '; // $f0 is guaranteed to exist, since the array is not empty
 		$where = 'WHERE f0.`Code` IN (
   SELECT `Code`
-  FROM ItemFeature
+  FROM ProductItemFeatureUnified
   WHERE Feature = :nam AND COALESCE(ValueEnum, `Value`, ValueText, ValueDouble) = :val
 ) ';
 		// Will produce e.g. `ram-type` ASC,`ram-form-factor` ASC,`frequency-hertz` ASC
@@ -530,7 +508,7 @@ LIMIT :lim";
 			$column = FeatureDAO::getColumn(BaseFeature::getType($feature));
 			$select .= "f$i.$column AS `$feature`, ";
 			if($i > 0) {
-				$from .= " JOIN ItemFeature AS f$i ON f0.Code=f$i.Code";
+				$from .= " JOIN ProductItemFeatureUnified AS f$i ON f0.Code=f$i.Code";
 			}
 			$where .= " AND f$i.`Feature` = :fname$i";
 		}

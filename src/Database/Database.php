@@ -12,6 +12,7 @@ class Database {
 	private $statsDAO = null;
 	private $featureDAO = null;
 	private $treeDAO = null;
+	private $productDAO = null;
 	private $username;
 	private $password;
 	private $dsn;
@@ -52,7 +53,7 @@ class Database {
 		}
 	}
 
-	public function auditDAO() {
+	public function auditDAO(): AuditDAO {
 		if($this->auditDAO === null) {
 			$this->auditDAO = new AuditDAO($this, $this->callback);
 		}
@@ -60,7 +61,7 @@ class Database {
 		return $this->auditDAO;
 	}
 
-	public function sessionDAO() {
+	public function sessionDAO(): SessionDAO {
 		if($this->sessionDAO === null) {
 			$this->sessionDAO = new SessionDAO($this, $this->callback);
 		}
@@ -68,7 +69,7 @@ class Database {
 		return $this->sessionDAO;
 	}
 
-	public function itemDAO() {
+	public function itemDAO(): ItemDAO {
 		if($this->itemDAO === null) {
 			$this->itemDAO = new ItemDAO($this, $this->callback);
 		}
@@ -76,7 +77,7 @@ class Database {
 		return $this->itemDAO;
 	}
 
-	public function searchDAO() {
+	public function searchDAO(): SearchDAO {
 		if($this->searchDAO === null) {
 			$this->searchDAO = new SearchDAO($this, $this->callback);
 		}
@@ -84,7 +85,7 @@ class Database {
 		return $this->searchDAO;
 	}
 
-	public function statsDAO() {
+	public function statsDAO(): StatsDAO {
 		if($this->statsDAO === null) {
 			$this->statsDAO = new StatsDAO($this, $this->callback);
 		}
@@ -100,12 +101,20 @@ class Database {
 		return $this->featureDAO;
 	}
 
-	public function treeDAO() {
+	public function treeDAO(): TreeDAO {
 		if($this->treeDAO === null) {
 			$this->treeDAO = new TreeDAO($this, $this->callback);
 		}
 
 		return $this->treeDAO;
+	}
+
+	public function productDAO(): ProductDAO {
+		if($this->productDAO === null) {
+			$this->productDAO = new ProductDAO($this, $this->callback);
+		}
+
+		return $this->productDAO;
 	}
 
 	public function updater() {

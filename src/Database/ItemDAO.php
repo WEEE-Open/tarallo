@@ -170,6 +170,7 @@ final class ItemDAO extends DAO {
 	 * ignored
 	 */
 	public function itemMustExist(ItemWithCode $item, $allowDeleted = false) {
+		// Use Item instead of ProductItemFeatures because we need to check DeletedAt, and we will modify Item anyway
 		if($allowDeleted) {
 			$statement = $this->getPDO()
 				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod FOR UPDATE');
@@ -335,6 +336,7 @@ EOQ
 			$statement->closeCursor();
 		}
 		$this->database->treeDAO()->getPathTo($head);
+		$this->database->productDAO()->getProductsAll($flat);
 		$this->database->featureDAO()->getFeaturesAll($flat);
 		$this->getExtraData($head);
 

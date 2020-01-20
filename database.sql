@@ -22,11 +22,19 @@ CREATE TABLE `Item`
     `LostAt` TIMESTAMP(6) NULL DEFAULT NULL,
     INDEX (`DeletedAt`),
     INDEX (`LostAt`),
-    -- TODO: reenable later
-    -- FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Products` (`Brand`, `Model`, `Variant`)
-    --	ON DELETE NO ACTION
-    --	ON UPDATE CASCADE,
     PRIMARY KEY (`Code`)
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `Product`
+(
+    -- Max length would be approx. 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
+    `Brand` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Model` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Variant` VARCHAR(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    PRIMARY KEY (`Brand`, `Model`, `Variant`)
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
@@ -72,6 +80,37 @@ CREATE TABLE `ItemFeature`
     INDEX `ValueDouble` (`ValueDouble`),
     -- INDEX `Value2` (`ValueEnum`), -- FOREIGN KEY is already an INDEX
     CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`Feature`) REFERENCES `Feature` (`Feature`)
+        ON DELETE NO ACTION
+        ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`Feature`, `ValueEnum`) REFERENCES `FeatureEnum` (`Feature`, `ValueEnum`)
+        ON DELETE NO ACTION
+        ON UPDATE CASCADE,
+    CHECK ((`Value` IS NOT NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NULL)
+        OR (`Value` IS NULL AND `ValueText` IS NOT NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NULL)
+        OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NOT NULL AND `ValueDouble` IS NULL)
+        OR (`Value` IS NULL AND `ValueText` IS NULL AND `ValueEnum` IS NULL AND `ValueDouble` IS NOT NULL))
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `ProductFeature`
+(
+    `Brand` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Model` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Variant` VARCHAR(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `Feature` VARCHAR(40) COLLATE utf8mb4_bin NOT NULL,
+    `Value` BIGINT UNSIGNED DEFAULT NULL,
+    `ValueEnum` VARCHAR(40) COLLATE utf8mb4_bin DEFAULT NULL,
+    `ValueText` TEXT COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `ValueDouble` DOUBLE DEFAULT NULL,
+    PRIMARY KEY (`Brand`, `Model`, `Variant`, `Feature`),
+    INDEX `Value` (`Value`),
+    INDEX `ValueDouble` (`ValueDouble`),
+    CONSTRAINT FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Product` (`Brand`, `Model`, `Variant`)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     CONSTRAINT FOREIGN KEY (`Feature`) REFERENCES `Feature` (`Feature`)
@@ -206,5 +245,58 @@ CREATE TABLE `SessionToken`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
+
+-- ProductFeature - ItemFeature View
+
+CREATE VIEW ProductItemFeature AS
+SELECT unioned.Code,
+       unioned.Feature AS Feature,
+       MAX(Value_Item) AS Value_Item,
+       MAX(ValueEnum_Item) AS ValueEnum_Item,
+       MAX(ValueText_Item) AS ValueText_Item,
+       MAX(ValueDouble_Item) AS ValueDouble_Item,
+       MAX(Value_Product) AS Value_Product,
+       MAX(ValueEnum_Product) AS ValueEnum_Product,
+       MAX(ValueText_Product) AS ValueText_Product,
+       MAX(ValueDouble_Product) AS ValueDouble_Product
+FROM (
+         SELECT Item.Code,
+                ItemFeature.Feature AS Feature,
+                ItemFeature.Value AS Value_Item,
+                ItemFeature.ValueEnum AS ValueEnum_Item,
+                ItemFeature.ValueText AS ValueText_Item,
+                ItemFeature.ValueDouble AS ValueDouble_Item,
+                NULL AS Value_Product,
+                NULL AS ValueEnum_Product,
+                NULL AS ValueText_Product,
+                NULL AS ValueDouble_Product
+         FROM Item
+              NATURAL JOIN ItemFeature
+         UNION
+         SELECT Item.Code,
+                PF.Feature AS Feature,
+                NULL AS Value_Item,
+                NULL AS ValueEnum_Item,
+                NULL AS ValueText_Item,
+                NULL AS ValueDouble_Item,
+                PF.Value AS Value_Product,
+                PF.ValueEnum AS ValueEnum_Product,
+                PF.ValueText AS ValueText_Product,
+                PF.ValueDouble AS ValueDouble_Product
+         FROM Item
+              JOIN ProductFeature PF ON Item.Brand = PF.Brand AND Item.Model = PF.Model AND Item.Variant = PF.Variant
+     ) unioned
+GROUP BY Code, Feature;
+
+CREATE VIEW ProductItemFeatureUnified AS
+SELECT Code,
+       Feature,
+    COALESCE(Value_Item, Value_Product) AS `Value`,
+    COALESCE(ValueText_Item, ValueText_Product) AS ValueText,
+    COALESCE(ValueEnum_Item, ValueEnum_Product) AS ValueEnum,
+    COALESCE(ValueDouble_Item, ValueDouble_Product) AS ValueDouble
+FROM ProductItemFeature;
+
+-- Append this insert statement at the end of file and update schemaversion value
 INSERT INTO `Configuration` (`Key`, `Value`)
-VALUES ('SchemaVersion', 8);
+VALUES ('SchemaVersion', 11);

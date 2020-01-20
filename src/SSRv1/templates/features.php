@@ -1,5 +1,6 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Feature[] $features */
+/** @var \WEEEOpen\Tarallo\Feature[] $product */
 $groups = $this->getGroupedFeatures($this->getUltraFeatures($features));
 
 if(count($features) > 0): ?>
@@ -10,7 +11,11 @@ if(count($features) > 0): ?>
 			<?php foreach($group as $feature): /** @var $feature \WEEEOpen\Tarallo\SSRv1\UltraFeature */ ?>
 				<li>
 					<div class="name"><span><?=$feature->pname /* The span is a <label> in edit mode, we need an element here in view mode for css to work */?></span></div>
-					<div class="value"><?=$this->contentEditableWrap($this->e($feature->pvalue))?></div>
+                    <?php if(isset($product[$feature->name]) && $product[$feature->name]->value !== $feature->value): ?>
+					    <div class="value"><div><del><?=$this->e(\WEEEOpen\Tarallo\SSRv1\FeaturePrinter::printableValue($product[$feature->name]))?></del>&nbsp;<?=$this->e($feature->pvalue)?></div></div>
+                    <?php else: ?>
+                        <div class="value"><?=$this->contentEditableWrap($this->e($feature->pvalue))?></div>
+                    <?php endif ?>
 				</li>
 			<?php endforeach; ?>
 		</ul>
