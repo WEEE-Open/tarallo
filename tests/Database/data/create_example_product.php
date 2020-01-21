@@ -28,17 +28,27 @@ $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Sear
 $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Search; SET FOREIGN_KEY_CHECKS = 1;");
 
 $db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);
-$db->productDAO()->addProduct(new Product("Ciao", "ne"));
-$db->productDAO()->addProduct(new Product("Intel", "kakka"));
 $db->productDAO()->addProduct(new Product("Samsong", "KAI39"));
 $db->productDAO()->addProduct(new Product("Caste", "Payton", "Brutto"));
-$db->productDAO()->addProduct(new Product("Centryno", "kakka", "Orosa"));
-$db->productDAO()->addProduct(new Product("Intel", "630583"));
-$db->productDAO()->addProduct(new Product("Samsong", "kakka", "Robe"));
-$db->productDAO()->addProduct(new Product("Strange", "Thing", "Dismone"));
-$db->productDAO()->addProduct(new Product("Intel", "Asd"));
-$db->productDAO()->addProduct(new Product("Centryno", "kakka", "Grigio"));
-$db->productDAO()->addProduct(new Product("Kek", "Asd"));
+$db->productDAO()->addProduct((new Product("Intel", "Centryno", "SL666"))
+	->addFeature(new Feature('frequency-hertz', 1500000000))
+	->addFeature(new Feature('isa', 'x86-64'))
+	->addFeature(new Feature('cpu-socket', 'lga771'))
+	->addFeature(new Feature('owner', 'DISAT'))
+	->addFeature(new Feature('type', 'cpu')));
+$db->productDAO()->addProduct((new Product("Intel", "MB346789", "v2.0"))
+	->addFeature(new Feature('frequency-hertz', 1500000000))
+	->addFeature(new Feature('color', 'green'))
+	->addFeature(new Feature('cpu-socket', 'lga771'))
+	->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
+	->addFeature(new Feature('parallel-ports-n', 1))
+	->addFeature(new Feature('serial-ports-n', 1))
+	->addFeature(new Feature('ps2-ports-n', 3))
+	->addFeature(new Feature('usb-ports-n', 4))
+	->addFeature(new Feature('ram-form-factor', 'dimm'))
+	->addFeature(new Feature('ram-type', 'ddr2'))
+	->addFeature(new Feature('owner', 'DISAT'))
+	->addFeature(new Feature('type', 'motherboard')));
 $db->productDAO()->addProduct((new Product("eMac", "EZ1600", "boh"))
 	->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
 	->addFeature(new Feature('color', 'white'))
@@ -53,6 +63,7 @@ foreach([256, 512, 1024, 2048] as $size) {
 			->addFeature(new Feature('capacity-byte', $size * 1024 * 1024))
 			->addFeature(new Feature('frequency-hertz', 667 * 1000 * 1000))
 			->addFeature(new Feature('color', 'green'))
+			->addFeature(new Feature('ram-ecc', 'no'))
 			->addFeature(new Feature('ram-type', 'ddr2'))
 			->addFeature(new Feature('ram-form-factor', 'dimm'))
 			->addFeature(new Feature('type', 'ram'))
@@ -93,6 +104,25 @@ $SCHIFOMACCHINA = (new Item('SCHIFOMACCHINA'))
 	->addFeature(new Feature('brand', 'eMac'))
 	->addFeature(new Feature('model', 'EZ1600'))
 	->addFeature(new Feature('variant', 'boh'));
+$SCHIFOMACCHINA->addContent((new Item('B25'))
+	->addFeature(new Feature('brand', 'Intel'))
+	->addFeature(new Feature('model', 'MB346789'))
+	->addFeature(new Feature('variant', 'v2.0'))
+	->addFeature(new Feature('working', 'yes'))
+	->addContent((new Item('R20'))
+		->addFeature(new Feature('brand', 'Samsung'))
+		->addFeature(new Feature('model', 'S667ABC512'))
+		->addFeature(new Feature('variant', 'v1'))
+		->addFeature(new Feature('sn', 'ASD' . strtoupper(substr(crc32(512), 0, 5) . rand(100000, 999999) . dechex(rand(0,255)))))
+		->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
+	)
+	->addContent((new Item('R21'))
+		->addFeature(new Feature('brand', 'Samsung'))
+		->addFeature(new Feature('model', 'S667ABC512'))
+		->addFeature(new Feature('variant', 'v1'))
+		->addFeature(new Feature('sn', 'ASD' . strtoupper(substr(crc32(512), 0, 5) . rand(100000, 999999) . dechex(rand(0,255)))))
+		->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
+	));
 
 // RAM(DOM) GENERATOR 2000
 for($i = 100; $i < 222; $i++) {
@@ -101,7 +131,7 @@ for($i = 100; $i < 222; $i++) {
 		->addFeature(new Feature('brand', 'Samsung'))
 		->addFeature(new Feature('model', 'S667ABC' . $ramSize))
 		->addFeature(new Feature('variant', 'v1'))
-		->addFeature(new Feature('sn', 'ASD' . substr(strtoupper(md5($ramSize)), 0, 5) . rand(100000, 999999)))
+		->addFeature(new Feature('sn', 'ASD' . strtoupper(substr(crc32($ramSize), 0, 5) . rand(100000, 999999) . dechex(rand(0,255)))))
 		->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'));
 	$rambox->addContent($ram);
 }
