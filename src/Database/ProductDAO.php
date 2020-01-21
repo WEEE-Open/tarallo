@@ -8,7 +8,9 @@ use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\String_;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\ItemWithProduct;
+use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\Product;
+use WEEEOpen\Tarallo\ProductCode;
 
 final class ProductDAO extends DAO{
 	public function addProduct(Product $product) {
@@ -36,12 +38,30 @@ final class ProductDAO extends DAO{
 	/**
 	 * It gets product in exact match, requires model, brand and variant
 	 *
-	 * @param Product $product
+	 * @param ProductCode $product
 	 *
 	 * @return Product
 	 */
-	public function getProductComplete(ProductCode $product): Product {
-		//TODO: To implement
+	public function getProduct(ProductCode $product): Product {
+		$statement = $this->getPDO()->prepare('SELECT * FROM Product WHERE Brand = :prod AND Model = :model AND Variant = :variant');
+		try {
+			$statement->bindValue(':prod', $product->getBrand(), \PDO::PARAM_STR);
+			$statement->bindValue(':model', $product->getModel(), \PDO::PARAM_STR);
+			$statement->bindValue(':variant', $product->getVariant(), \PDO::PARAM_STR);
+			$result =  $statement->execute();
+			assert($result === true, 'get product');
+			if($statement->rowCount() === 0) {
+				throw new NotFoundException();
+			}
+			$row = $statement->fetch(\PDO::FETCH_ASSOC);
+			$product = new Product($row['Brand'], $row['Model'], $row['Variant']);
+			$this->database->featureDAO()->addFeaturesTo($product);
+		} finally{
+			$statement->closeCursor();
+		}
+
+		/** @noinspection PhpUndefinedVariableInspection It's defined, if an exception happens before it is defined we'll never get here */
+		return $product;
 	}
 
 	/**
@@ -56,24 +76,7 @@ final class ProductDAO extends DAO{
 		//TODO: To implement
 	}
 
-	public function getProduct(string $brand, string $model, ?string  $variant = ''): Product {
-		$statement = $this->getPDO()->prepare('SELECT * FROM Product WHERE Brand = :prod AND Model = :mod AND Variant = :var');
-		try{
-			$statement->bindValue(':prod', $brand, \PDO::PARAM_STR);
-			$statement->bindValue(':mod', $model, \PDO::PARAM_STR);
-			$statement->bindValue(':var', $variant, \PDO::PARAM_STR);
-			$result =  $statement->execute();
-			assert($result === true, 'Get product');
-			$row = $statement->fetch(\PDO::FETCH_ASSOC);
-			$product = new Product($row['Brand'], $row['Model'], $row['Variant']);
-		} finally{
-			$statement->closeCursor();
-		}
-
-		return $product;
-	}
-
-	public function deleteProduct(Product $product) {
+	public function deleteProduct(ProductCode $product) {
 		$statement = $this->getPDO()->prepare('DELETE FROM Product WHERE Brand = :prod AND Model = :mod AND Variant = :var ');
 		try{
 			$statement->bindValue(':prod', $product->getBrand(), \PDO::PARAM_STR);

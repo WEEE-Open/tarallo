@@ -7,29 +7,8 @@ namespace WEEEOpen\Tarallo;
  *
  * @package WEEEOpen\Tarallo
  */
-class Product extends ProductCode implements \JsonSerializable {
+class Product extends ProductCode implements \JsonSerializable, ItemWithFeatures {
 	use ItemTraitFeatures;
-
-	/**
-	 * @return string
-	 */
-	public function getBrand(): string {
-		return $this->brand;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getModel(): string {
-		return $this->model;
-	}
-
-	/**
-	 * @return string|null
-	 */
-	public function getVariant(): ?string {
-		return $this->variant;
-	}
 
 	function jsonSerialize() {
 		$array = [];

@@ -64,7 +64,7 @@ abstract class DatabaseTest extends TestCase {
 			return false;
 		}
 		// TODO: compare recursively
-		//if($a->getProduct() !== $b->getProduct()) {
+		//if($a->getProductFromStrings() !== $b->getProductFromStrings()) {
 		//	return false;
 		//}
 		if(count($a->getFeatures()) !== count($b->getFeatures())) {

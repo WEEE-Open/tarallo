@@ -12,6 +12,7 @@ class Item
 	ItemWithCode,
 	ItemWithFeatures,
 	ItemWithProduct,
+	ItemWithContent,
 	ItemWithLocation {
 	use ItemTraitOptionalCode;
 	use ItemTraitContent;

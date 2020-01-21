@@ -13,6 +13,7 @@ use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\ItemWithProduct;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\Product;
+use WEEEOpen\Tarallo\ProductCode;
 
 
 final class FeatureDAO extends DAO {/**
@@ -62,36 +63,49 @@ final class FeatureDAO extends DAO {/**
 }
 
 	/**
-	 * Get features from ALL TEH ITEMS
+	 * Get features from ALL TEH ITEMS/PRODUCTS
 	 *
 	 * @param ItemWithFeatures[] $items
 	 *
-	 * @return ItemWithFeatures[]|Item[] same array
+	 * @return ItemWithFeatures[]|Item[]|Product[] same array
 	 */
 	public function getFeaturesAll(array $items) {
 		foreach($items as $item) {
-			$this->getFeaturesItem($item);
+			$this->addFeaturesTo($item);
 		}
 
 		return $items;
 	}
 
 	/**
-	 * Add own features to an item
+	 * Add own features to an item/product
 	 *
 	 * @param ItemWithFeatures $item
 	 *
-	 * @return ItemWithFeatures|Item same item
+	 * @return ItemWithFeatures|Item|Product same item/product
 	 */
-	public function getFeaturesItem(ItemWithFeatures $item): ItemWithFeatures {
-		// No need to search in ProductItemFeature
-		$statement = $this->getPDO()->prepare(
-			'SELECT Feature, COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`
+	public function addFeaturesTo(ItemWithFeatures $item): ItemWithFeatures {
+		if($item instanceof ItemWithCode) {
+			// No need to search ProductItemFeature
+			$statement = $this->getPDO()->prepare(
+				'SELECT Feature, COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`
             FROM ItemFeature
             WHERE `Code` = :cod;'
-		);
+			);
 
-		$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
+			$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
+		} else {
+			/** @var ProductCode $item */
+			$statement = $this->getPDO()->prepare(
+				'SELECT Feature, COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`
+            FROM ProductFeature
+            WHERE Brand = :b AND Model = :m AND Variant = :v;'
+			);
+
+			$statement->bindValue(':b', $item->getBrand(), \PDO::PARAM_STR);
+			$statement->bindValue(':m', $item->getModel(), \PDO::PARAM_STR);
+			$statement->bindValue(':v', $item->getVariant(), \PDO::PARAM_STR);
+		}
 
 		try {
 			$statement->execute();

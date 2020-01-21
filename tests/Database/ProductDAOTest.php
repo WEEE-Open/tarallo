@@ -15,7 +15,7 @@ class ProductDAOTest extends DatabaseTest {
 		$product = new Product('Intel', 'K3k', 'dunno');
 
 		$db->productDAO()->addProduct($product);
-		$gettedProduct = $db->productDAO()->getProduct($product->getBrand(), $product->getModel(), $product->getVariant());
+		$gettedProduct = $db->productDAO()->getProduct($product);
 		$this->assertEquals($product, $gettedProduct);
 	}
 
@@ -25,7 +25,7 @@ class ProductDAOTest extends DatabaseTest {
 		$product = new Product('Intel', 'K3k');
 
 		$db->productDAO()->addProduct($product);
-		$gettedProduct = $db->productDAO()->getProduct($product->getBrand(), $product->getModel());
+		$gettedProduct = $db->productDAO()->getProduct($product);
 		$this->assertEquals($product, $gettedProduct);
 	}
 
@@ -35,8 +35,12 @@ class ProductDAOTest extends DatabaseTest {
 		$db = $this->getDb();
 
 		$product = new Product('Samsong', 'JWOSQPA', 'black');
+		$db->productDAO()->addProduct($product);
+		$gettedProduct = $db->productDAO()->getProduct($product);
+		$this->assertEquals($product, $gettedProduct);
+
 		$db->productDAO()->deleteProduct($product);
-		$gettedProduct = $db->productDAO()->getProduct($product->getBrand(), $product->getModel(), $product->getVariant());
+		$gettedProduct = $db->productDAO()->getProduct($product);
 		$this->assertEquals($product, $gettedProduct);
 	}
 }

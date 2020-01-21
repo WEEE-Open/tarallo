@@ -25,6 +25,7 @@ use WEEEOpen\Tarallo\ItemPrefixerException;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\Product;
+use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\RangeException;
 use WEEEOpen\Tarallo\SearchException;
 use WEEEOpen\Tarallo\User;
@@ -82,9 +83,8 @@ class Controller implements RequestHandlerInterface {
 		$model = Validation::validateOptionalString($parameters, 'model');
 		$variant = Validation::validateOptionalString($parameters, 'variant');
 
-
 		try {
-			$product = new Product($brand, $model, $variant);
+			$product = new ProductCode($brand, $model, $variant);
 		} catch(ValidationException $e) {
 			throw new NotFoundException();
 		}
@@ -642,19 +642,20 @@ class Controller implements RequestHandlerInterface {
 
 						$r->addGroup('/products',
 							function(FastRoute\RouteCollector $r) {
-								//$r->get('', [User::AUTH_LEVEL_RW, 'Controller::getProduct']); // TODO: implement
-								$r->get('/{brand}/{model}[/{variant}]', [User::AUTH_LEVEL_RW, 'Controller::getProduct']);
+								//$r->get('', [User::AUTH_LEVEL_RW, 'Controller::']); // TODO: implement
+								$r->get('/{brand}/{model}', [User::AUTH_LEVEL_RO, 'Controller::getProducts']);
+								$r->get('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct']);
 
-								$r->post('/{brand}/{model}', [User::AUTH_LEVEL_RW, 'Controller::createProduct']); // TODO: implement
-								$r->put('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::createProduct']); // TODO: implement
+								//$r->post('/{brand}/{model}', [User::AUTH_LEVEL_RW, 'Controller::']); // TODO: implement
+								//$r->put('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::createProduct']); // TODO: implement
 
-								$r->addGroup('/{brand}/{model}/{variant}',
-									function(FastRoute\RouteCollector $r) {
-										//$r->get('/features',  [User::AUTH_LEVEL_RW, 'Controller::getProductFeatures']);
-										$r->post('/features', [User::AUTH_LEVEL_RW, 'Controller::setProductFeatures']); // TODO: implement
-										$r->patch('/features', [User::AUTH_LEVEL_RW, 'Controller::updateProductFeatures']); // TODO: implement
-									}
-								);
+//								$r->addGroup('/{brand}/{model}/{variant}/features',
+//									function(FastRoute\RouteCollector $r) {
+//										//$r->get('',  [User::AUTH_LEVEL_RW, 'Controller::getProductFeatures']);
+//										$r->post('', [User::AUTH_LEVEL_RW, 'Controller::setProductFeatures']); // TODO: implement
+//										$r->patch('', [User::AUTH_LEVEL_RW, 'Controller::updateProductFeatures']); // TODO: implement
+//									}
+//								);
 							}
 						);
 
