@@ -36,7 +36,12 @@ class Product extends ProductCode implements \JsonSerializable {
 		$array['brand'] = $this->brand;
 		$array['model'] = $this->model;
 		$array['variant'] = $this->variant;
-		$array['features'] = $this->getFeatures();
+		$array['features'] = [];
+		if(!empty($this->features)){
+			foreach($this->features as $features) {
+				$array['features'][$features->name] = $features->value;
+			}
+		}
 		return $array;
 	}
 
