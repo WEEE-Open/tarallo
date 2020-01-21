@@ -11,7 +11,7 @@ $this->layout(
 	[
 		'title' => $title,
 		'user' => $user,
-		'itembuttons' => true
+		'itembuttons' => false, // TODO: set to true when enabling buttons?
 	]
 );
 ?>
@@ -25,7 +25,7 @@ $this->layout(
 		<?php if($editing): ?>
 			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><button class="delete">❌&nbsp;Delete</button>
 		<?php else: ?>
-			<button class="edit">🛠️&nbsp;Edit</button><button class="clone">🔲&nbsp;Copy</button><button class="history">📖&nbsp;History</button>
+			<button class="edit" disabled>🛠️&nbsp;Edit</button><button class="clone" disabled>🔲&nbsp;Copy</button><button class="history" disabled>📖&nbsp;History</button>
 		<?php endif ?>
 	</nav>
 

@@ -45,7 +45,10 @@ if(isset($edit)) {
 }
 
 $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
-
+$product = $item->getProduct();
+if($product !== null) {
+	$productName = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) . rtrim(' ' . $this->e($product->getVariantOrEmpty()));
+}
 ?>
 
 <?php if(!$recursion): $this->insert('breadcrumbs', ['item' => $item]); endif; ?>
@@ -81,9 +84,9 @@ $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
 			<?php if($deletedAt === null): ?><button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button><button class="clone">🔲&nbsp;Copy</button><button class="move">📍&nbsp;Move</button><?php endif ?><button class="history">📖&nbsp;History</button>
 		<?php endif ?>
 	</nav>
-	<?php if($summary !== null && (!$editing || !$target)): ?>
+	<?php if(!$editing || !$target): ?>
         <section class="summary <?=$working?>">
-            <span><?= $summary ?></span>
+			<span><?= $summary ?></span><?php if($product !== null): ?><span><a href="/product/<?=$this->e($product->getBrand())?>/<?=$this->e($product->getModel())?>/<?=$this->e($product->getVariant())?>">View <?= $this->e($productName) ?></a></span><?php endif ?>
         </section>
     <?php endif; ?>
 
