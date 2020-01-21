@@ -46,7 +46,6 @@ $db->productDAO()->addProduct((new Product("Intel", "Centryno", "SL88C"))
 	->addFeature(new Feature('cpu-socket', 'lga771'))
 	->addFeature(new Feature('type', 'cpu')));
 $db->productDAO()->addProduct((new Product("Intel", "MB346789", "v2.0"))
-	->addFeature(new Feature('frequency-hertz', 1500000000))
 	->addFeature(new Feature('color', 'green'))
 	->addFeature(new Feature('cpu-socket', 'lga771'))
 	->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
