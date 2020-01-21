@@ -38,9 +38,17 @@ class ProductCode {
 	}
 
 	/**
-	 * @return string|null
+	 * @return string
 	 */
-	public function getVariant(): ?string {
+	public function getVariant(): string {
 		return $this->variant;
+	}
+
+	public function getVariantOrEmpty(): string {
+		if($this->variant === self::DEFAULT_VARIANT) {
+			return '';
+		} else {
+			return $this->variant;
+		}
 	}
 }

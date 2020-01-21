@@ -21,6 +21,7 @@ use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
+use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\SessionLocal;
 use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\UserSSO;
@@ -75,6 +76,23 @@ class Controller implements RequestHandlerInterface {
 		$request = $request->withAttribute('Template', 'viewItem')->withAttribute(
 			'TemplateParameters', $renderParameters
 		);
+
+		return $handler->handle($request);
+	}
+
+	public static function getProduct(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+		$parameters = $request->getAttribute('parameters', []);
+
+		$brand = Validation::validateOptionalString($parameters, 'brand');
+		$model = Validation::validateOptionalString($parameters, 'model');
+		$variant = Validation::validateOptionalString($parameters, 'variant');
+
+		$product = $db->productDAO()->getProduct(new ProductCode($brand, $model, $variant));
+
+		$request = $request->withAttribute('Template', 'product')->withAttribute('TemplateParameters', ['product' => $product]);
 
 		return $handler->handle($request);
 	}
@@ -650,6 +668,9 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/features.json', [User::AUTH_LEVEL_RO, 'Controller::getFeaturesJson',]);
 				// TODO: make token access public
 				$r->get('/item/{id}', [User::AUTH_LEVEL_RO, 'Controller::getItem',]);
+				$r->get('/product/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct',]);
+//				$r->get('/product/add', [User::AUTH_LEVEL_RO, 'Controller::',]); // TODO: implement
+//				$r->get('/product/{brand}/{model}/{variant}/edit', [User::AUTH_LEVEL_RO, 'Controller::',]); // TODO: implement
 				$r->get('/history/{id}', [User::AUTH_LEVEL_RO, 'Controller::getHistory',]);
 				$r->get('/item/{id}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::getItem',]);
 				$r->get('/item/{id}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::getItem',]);
