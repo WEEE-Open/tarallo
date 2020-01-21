@@ -45,39 +45,35 @@ class Item
 	public function jsonSerialize() {
 		$array = [];
 		$array['code'] = $this->getCode();
+
+		$array['features'] = [];
+
 		if($this->separate) {
+			// Add item features
 			if(!empty($this->features)){
-				foreach($this->features as $itemFeature) {
-					$name = $itemFeature->name;
-					$value = $itemFeature->value;
-					$array['item_features'][$name] = $value;
+				foreach($this->features as $features) {
+					$array['features'][$features->name] = $features->value;
 				}
 			}
+
+			// Then add a product
 			if(!empty($this->product)) {
-				foreach($this->product->getFeatures() as $productFeature) {
-					$name = $productFeature->name;
-					$value = $productFeature->value;
-					$array['product_features'][$name] = $value;
-				}
+				$array['product'] = $this->product;
 			}
 		} else {
-			if(!empty($this->features)) {
-				foreach($this->features as $feature) {
-					/** @var Feature $feature */
-					$name = $feature->name;
-					$value = $feature->value;
-					$array['features'][$name] = $value;
+			// Add product features first
+			if(!empty($this->product)) {
+				foreach($this->product->getFeatures() as $features) {
+					$array['features'][$features->name] = $features->value;
 				}
 			}
-			$productArray = [];
-			if(!empty($this->product)){
-				foreach($this->product->getFeatures() as $productFeature) {
-					$name = $productFeature->name;
-					$value = $productFeature->value;
-					$productArray['features'][$name] = $value;
+
+			// Then item features, so they can override others
+			if(!empty($this->features)){
+				foreach($this->features as $features) {
+					$array['features'][$features->name] = $features->value;
 				}
 			}
-			$array = array_merge($productArray, $array);
 		}
 		if(!empty($this->contents)) {
 			$array['contents'] = $this->contents;

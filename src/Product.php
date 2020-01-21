@@ -10,23 +10,6 @@ namespace WEEEOpen\Tarallo;
 class Product extends ProductCode implements \JsonSerializable {
 	use ItemTraitFeatures;
 
-	function jsonSerialize() {
-		$array = [];
-		$array['brand'] = $this->brand;
-		$array['model'] = $this->model;
-		$array['variant'] = $this->variant;
-		$array['features'] = $this->getFeatures();
-		return $array;
-	}
-
-	function __toString() {
-		if($this->variant === self::DEFAULT_VARIANT) {
-			return $this->brand . ' ' . $this->model;
-		} else {
-			return $this->brand . ' ' . $this->model . '(' . $this->variant . ')';
-		}
-	}
-
 	/**
 	 * @return string
 	 */
@@ -46,5 +29,22 @@ class Product extends ProductCode implements \JsonSerializable {
 	 */
 	public function getVariant(): ?string {
 		return $this->variant;
+	}
+
+	function jsonSerialize() {
+		$array = [];
+		$array['brand'] = $this->brand;
+		$array['model'] = $this->model;
+		$array['variant'] = $this->variant;
+		$array['features'] = $this->getFeatures();
+		return $array;
+	}
+
+	function __toString() {
+		if($this->variant === self::DEFAULT_VARIANT) {
+			return $this->brand . ' ' . $this->model;
+		} else {
+			return $this->brand . ' ' . $this->model . '(' . $this->variant . ')';
+		}
 	}
 }
