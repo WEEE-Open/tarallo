@@ -93,7 +93,7 @@ class Item
 	}
 
 	public function __toString() {
-		$type = $this->getFeature('type');
+		$type = $this->getFeatureValue('type');
 		if($type === null) {
 			return $this->getCode();
 		} else {
