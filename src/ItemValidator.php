@@ -201,8 +201,8 @@ class ItemValidator {
 	/**
 	 * Check that item nesting makes sense (e.g. no CPUs inside HDDs)
 	 *
-	 * @param ItemWithFeatures $item Item to be checked
-	 * @param ItemWithFeatures|null $container Its container
+	 * @param ItemWithFeatures|ItemWithCode $item Item to be checked
+	 * @param ItemWithFeatures|ItemWithCode|null $container Its container
 	 *
 	 */
 	private static function checkNesting(ItemWithFeatures $item, ?ItemWithFeatures $container): void {

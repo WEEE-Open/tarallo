@@ -5,9 +5,8 @@ namespace WEEEOpen\Tarallo;
 use Throwable;
 
 class ItemNestingException extends \RuntimeException {
-	use ExceptionWithItem, ExceptionWithPath, ExceptionWithFeature;
+	use ExceptionWithItem, ExceptionWithOtherItem, ExceptionWithPath, ExceptionWithFeature;
 	public $status = 400;
-	public $otherItem = null;
 
 	/**
 	 * When items are placed in impossible places.
