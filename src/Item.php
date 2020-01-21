@@ -82,11 +82,11 @@ class Item
 		if(!empty($this->location)) {
 			$array['location'] = $this->getPath();
 		}
-		if($this->deletedAt !== null) {
-			$array['deleted_at'] = $this->deletedAt;
+		if($this->deletedAt instanceof \DateTime) {
+			$array['deleted_at'] = $this->deletedAt->format(DATE_ISO8601);
 		}
-		if($this->lostAt !== null) {
-			$array['lost_at'] = $this->deletedAt;
+		if($this->lostAt instanceof \DateTime) {
+			$array['lost_at'] = $this->lostAt->format(DATE_ISO8601);
 		}
 
 		return $array;
