@@ -336,8 +336,8 @@ EOQ
 			$statement->closeCursor();
 		}
 		$this->database->treeDAO()->getPathTo($head);
-		$this->database->productDAO()->getProductsAll($flat);
 		$this->database->featureDAO()->getFeaturesAll($flat);
+		$this->database->productDAO()->getProductsAll($flat);
 		$this->getExtraData($head);
 
 		return $head;
