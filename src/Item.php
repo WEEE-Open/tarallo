@@ -37,6 +37,7 @@ class Item
 	public function setSeparate() {
 		$this->separate = true;
 		foreach($this->contents as $item) {
+			/** @var Item $item */
 			$item->setSeparate();
 		}
 	}
