@@ -217,6 +217,11 @@ class Controller implements RequestHandlerInterface {
 			}
 		}
 
+		// We need product features for fixup and validation
+		if($fix || $validate) {
+			$db->productDAO()->getProductsAll($item->getFlatContent());
+		}
+
 		if($fix) {
 			$parent = ItemValidator::fixupLocation($item, $parent);
 			ItemValidator::fixupFeatures($item);

@@ -27,12 +27,20 @@ final class TreeDAO extends DAO {
 				throw new NotFoundException($newParent->getCode());
 			}
 		}
+
+		// We need product features for fixup and validation
+		if($fix || $validate) {
+			$db->productDAO()->getProductsAll($item->getFlatContent());
+		}
+
 		if($fix) {
 			$newParent = ItemValidator::fixupLocation($item, $newParent);
 		}
+
 		if($validate) {
 			ItemValidator::validateLocation($item, $newParent);
 		}
+		
 		if($newParent === null) {
 			throw new \LogicException(
 				'Moving to "null" is not implemented, move an item into itself to make it a root'

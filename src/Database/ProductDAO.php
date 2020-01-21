@@ -109,6 +109,8 @@ final class ProductDAO extends DAO{
 	}
 
 	/**
+	 * Adds product to every item in the array (or does nothing if there's no product)
+	 *
 	 * @param ItemWithProduct[]|ItemWithFeatures[] $items
 	 *
 	 * @return ItemWithProduct[]|ItemWithFeatures[]

@@ -47,4 +47,19 @@ trait ItemTraitContent {
 	public function getContent(): array {
 		return $this->contents;
 	}
+
+
+	/**
+	 * Get items located inside, at any depth, flattened to a single array
+	 *
+	 * @return Item[]
+	 */
+	public function getFlatContent(): array {
+		$result = $this->contents;
+		foreach($this->contents as $item) {
+			/** @var Item $item */
+			$result = array_merge($result, $item->getFlatContent());
+		}
+		return $result;
+	}
 }
