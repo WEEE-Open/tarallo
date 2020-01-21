@@ -91,9 +91,17 @@ if($product !== null) {
     <?php endif; ?>
 
 	<?php if($editing && $target): ?>
+		<?php if($item->getProduct() !== null): ?>
+			<section class="product features">
+				<?php
+				$this->insert('features', ['features' => $item->getProduct()->getFeatures()]);
+				?>
+			</section>
+		<?php endif ?>
+
 		<section class="own features editing">
 			<?php
-			$this->insert('featuresEdit', ['features' => $item->getFeatures()]);
+			$this->insert('featuresEdit', ['features' => $item->getOwnFeatures()]);
 			?>
 		</section>
 

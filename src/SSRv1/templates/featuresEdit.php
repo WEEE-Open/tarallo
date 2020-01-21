@@ -1,6 +1,5 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Feature[] $features */
-/** @var \WEEEOpen\Tarallo\Feature[] $featuresProduct */
 ?>
 
 <?php
@@ -11,7 +10,6 @@ if(count($features) > 0):
 	    $ultraNames[$ultra->name] = true;
     }
 	$groups = $this->getGroupedFeatures($ultras);
-	// TODO: same for $featuresProduct.
 
 	foreach($groups as $groupTitle => $group): ?>
 	<section>
