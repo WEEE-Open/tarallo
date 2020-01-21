@@ -42,7 +42,7 @@ class Controller implements RequestHandlerInterface {
 
 		$parameters = $request->getAttribute('parameters', []);
 		// So things aren't url-decoded automatically...
-		$id = urldecode(Validation::validateOptionalString($parameters, 'id', null));
+		$id = Validation::validateOptionalString($parameters, 'id', null);
 		$edit = Validation::validateOptionalString($parameters, 'edit', null);
 		$add = Validation::validateOptionalString($parameters, 'add', null);
 		$depth = Validation::validateOptionalInt($query, 'depth', 20);

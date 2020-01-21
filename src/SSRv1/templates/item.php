@@ -86,7 +86,7 @@ if($product !== null) {
 	</nav>
 	<?php if(!$editing || !$target): ?>
         <section class="summary <?=$working?>">
-			<span><?= $summary ?></span><?php if($product !== null): ?><span><a href="/product/<?=$this->e($product->getBrand())?>/<?=$this->e($product->getModel())?>/<?=$this->e($product->getVariant())?>">View <?= $this->e($productName) ?></a></span><?php endif ?>
+			<span><?= $summary ?></span><?php if($product !== null): ?><span><a href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>">View <?= $this->e($productName) ?></a></span><?php endif ?>
         </section>
     <?php endif; ?>
 

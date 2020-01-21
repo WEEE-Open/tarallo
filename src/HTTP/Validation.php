@@ -57,7 +57,7 @@ class Validation {
 		if($value === '') {
 			return $emptyString;
 		}
-		return $value;
+		return rawurldecode($value);
 	}
 
 	/**
