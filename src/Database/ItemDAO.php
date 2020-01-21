@@ -10,8 +10,6 @@ use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ValidationException;
 
 final class ItemDAO extends DAO {
-	const EXCEPTION_CODE_GENERATE_ID = 3;
-
 	/**
 	 * Insert a single item into the database
 	 *

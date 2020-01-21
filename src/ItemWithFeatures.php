@@ -10,4 +10,5 @@ interface ItemWithFeatures {
 	public function removeFeatureByName(string $featureName);
 	public function addFeature($feature);
 	public function getFeatures(): array;
+	public function getOwnFeatures(): array;
 }

@@ -43,13 +43,6 @@ class Item
 		}
 	}
 
-	/**
-	 * @return Feature[]
-	 */
-	public function getOwnFeatures(): array {
-		return $this->features;
-	}
-
 	public function jsonSerialize() {
 		$array = [];
 		$array['code'] = $this->getCode();

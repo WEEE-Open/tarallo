@@ -190,7 +190,8 @@ final class FeatureDAO extends DAO {/**
 	 * @TODO: it would be cool if changing a feature to the value it already has still didn't generate an entry...
 	 */
 	public function setFeatures($item): bool {
-		$features = $item->getFeatures();
+		// Own features, or else it duplicates product features
+		$features = $item->getOwnFeatures();
 
 		if(empty($features)) {
 			return false;

@@ -77,4 +77,12 @@ trait ItemTraitFeatures {
 			return $this->features;
 		}
 	}
+
+	/**
+	 * @return Feature[]
+	 */
+	public function getOwnFeatures(): array {
+		return $this->features;
+	}
+
 }
