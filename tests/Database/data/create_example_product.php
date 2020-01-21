@@ -7,6 +7,7 @@ use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\Product;
+use WEEEOpen\Tarallo\ProductCode;
 
 require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
@@ -30,6 +31,11 @@ $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Sear
 $db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);
 $db->productDAO()->addProduct(new Product("Samsong", "KAI39"));
 $db->productDAO()->addProduct(new Product("Caste", "Payton", "Brutto"));
+$db->productDAO()->addProduct((new Product("AMD", "Opteron 3300", "AM1234567"))
+	->addFeature(new Feature('frequency-hertz', 3000000000))
+	->addFeature(new Feature('isa', 'x86-64'))
+	->addFeature(new Feature('cpu-socket', 'am3'))
+	->addFeature(new Feature('type', 'cpu')));
 $db->productDAO()->addProduct((new Product("Intel", "Centryno", "SL666"))
 	->addFeature(new Feature('frequency-hertz', 1500000000))
 	->addFeature(new Feature('isa', 'x86-64'))
@@ -89,27 +95,32 @@ $pc20 = (new Item('PC20'))
 	->addFeature(new Feature('brand', 'Dill'))
 	->addFeature(new Feature('model', 'DI-360'))
 	->addFeature(new Feature('variant', 'SFF'))
+	->addFeature(new Feature('owner', 'DISAT'))
 	->addFeature(new Feature('working', 'yes'));
 $pc90 = (new Item('PC90'))
 	->addFeature(new Feature('brand', 'Dill'))
 	->addFeature(new Feature('model', 'DI-360'))
 	->addFeature(new Feature('variant', 'SFF'))
 	->addFeature(new Feature('todo', 'install-os'))
+	->addFeature(new Feature('owner', 'DISAT'))
 	->addFeature(new Feature('working', 'yes'));
 $pc55 = (new Item('PC55'))
 	->addFeature(new Feature('brand', 'TI'))
 	->addFeature(new Feature('model', 'GreyPC-\'98'))
 	->addFeature(new Feature('type', 'case'))
+	->addFeature(new Feature('owner', 'DISAT'))
 	->addFeature(new Feature('motherboard-form-factor', 'atx'));
 $pc22 = (new Item('PC22'))
 	->addFeature(new Feature('brand', 'Dill'))
 	->addFeature(new Feature('model', 'DI-360'))
 	->addFeature(new Feature('variant', 'SFF'))
 	->addFeature(new Feature('color', 'black')) // override
+	->addFeature(new Feature('owner', 'DISAT'))
 	->addFeature(new Feature('working', 'yes'));
 $SCHIFOMACCHINA = (new Item('SCHIFOMACCHINA'))
 	->addFeature(new Feature('brand', 'eMac'))
 	->addFeature(new Feature('model', 'EZ1600'))
+	->addFeature(new Feature('owner', 'Area IT'))
 	->addFeature(new Feature('variant', 'boh'));
 $SCHIFOMACCHINA->addContent((new Item('B25'))
 	->addFeature(new Feature('brand', 'Intel'))
@@ -144,6 +155,15 @@ for($i = 100; $i < 222; $i++) {
 		->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'));
 	$rambox->addContent($ram);
 }
+for($i = 222; $i < 230; $i++) {
+	$ramSize = pow(2, rand(8, 11));
+	$ram = (new Item('R' . $i))
+		->addFeature(new Feature('brand', 'Samsung'))
+		->addFeature(new Feature('model', 'S667ABC' . $ramSize))
+		->addFeature(new Feature('variant', 'v1'))
+		->addFeature(new Feature('sn', 'ASD' . strtoupper(substr(crc32($ramSize), 0, 5) . rand(100000, 999999) . dechex(rand(0,255)))));
+	$rambox->addContent($ram);
+}
 $ram = (new Item('R69'))
 	->addFeature(new Feature('check', 'missing-data'))
 	->addFeature(new Feature('notes', 'RAM di esempio con dati mancati'))
@@ -168,6 +188,12 @@ foreach([777, 778, 779] as $item) {
 	$rambox->addContent($ram);
 }
 
+$lonelyCpu = (new Item(null))
+	->addFeature(new Feature('brand', 'AMD'))
+	->addFeature(new Feature('model', 'Opteron 3300'))
+	->addFeature(new Feature('variant', 'AM1234567'))
+	->setProduct($db->productDAO()->getProduct(new ProductCode('AMD', 'Opteron 3300', 'AM1234567')));
+$table->addContent($lonelyCpu);
 
 $table->addContent($SCHIFOMACCHINA);
 $chernobyl->addContent($pc20)->addContent($pc22)->addContent($pc55)->addContent($pc90);
