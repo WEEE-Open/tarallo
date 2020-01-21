@@ -43,7 +43,7 @@ final class ProductDAO extends DAO{
 	 * @return Product
 	 */
 	public function getProduct(ProductCode $product): Product {
-		$statement = $this->getPDO()->prepare('SELECT * FROM Product WHERE Brand = :prod AND Model = :model AND Variant = :variant');
+		$statement = $this->getPDO()->prepare('SELECT Brand, Model, Variant FROM Product WHERE Brand = :prod AND Model = :model AND Variant = :variant');
 		try {
 			$statement->bindValue(':prod', $product->getBrand(), \PDO::PARAM_STR);
 			$statement->bindValue(':model', $product->getModel(), \PDO::PARAM_STR);
@@ -56,12 +56,11 @@ final class ProductDAO extends DAO{
 			$row = $statement->fetch(\PDO::FETCH_ASSOC);
 			$product = new Product($row['Brand'], $row['Model'], $row['Variant']);
 			$this->database->featureDAO()->addFeaturesTo($product);
+
+			return $product;
 		} finally{
 			$statement->closeCursor();
 		}
-
-		/** @noinspection PhpUndefinedVariableInspection It's defined, if an exception happens before it is defined we'll never get here */
-		return $product;
 	}
 
 	/**
@@ -70,10 +69,30 @@ final class ProductDAO extends DAO{
 	 * @param String $brand
 	 * @param String $model
 	 *
-	 * @return Product[]
+	 * @return Product[] or empty array if none
 	 */
 	public function getProducts(String $brand, String $model): array {
-		//TODO: To implement
+		$statement = $this->getPDO()->prepare('SELECT  Brand, Model, Variant FROM Product WHERE Brand = :prod AND Model = :model');
+		try {
+			$statement->bindValue(':prod', $brand, \PDO::PARAM_STR);
+			$statement->bindValue(':model', $model, \PDO::PARAM_STR);
+			$result = $statement->execute();
+			assert($result === true, 'get products');
+			if($statement->rowCount() === 0) {
+				return [];
+			}
+			$result = [];
+			// TODO: this can be optimized, a single query can get all the features (instead of N queries in addFeaturesTo)
+			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+				$product = new Product($row['Brand'], $row['Model'], $row['Variant']);
+				$this->database->featureDAO()->addFeaturesTo($product);
+				$result[] = $product;
+			}
+
+			return $result;
+		} finally{
+			$statement->closeCursor();
+		}
 	}
 
 	public function deleteProduct(ProductCode $product) {
