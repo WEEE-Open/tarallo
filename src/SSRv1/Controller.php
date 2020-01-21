@@ -460,7 +460,7 @@ class Controller implements RequestHandlerInterface {
 		//$db = $request->getAttribute('Database');
 		$body = $request->getParsedBody();
 
-		if($body === null) {
+		if($body === null || count($body) === 0) {
 			// Opened page, didn't submit anything yet
 			$request = $request->withAttribute('Template', 'bulk::add');
 		} else {
