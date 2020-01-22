@@ -4,6 +4,7 @@ namespace WEEEOpen\Tarallo\Database;
 
 
 use WEEEOpen\Tarallo\ItemWithCode;
+use WEEEOpen\Tarallo\ProductCode;
 
 class AuditDAO extends DAO {
 	/**
@@ -77,7 +78,7 @@ LIMIT ?'
 	 *
 	 * @return array
 	 */
-	public function getHistory(ItemWithCode $item, int $howMany) {
+	public function getItemHistory(ItemWithCode $item, int $howMany) {
 		$statement = $this->getPDO()->prepare(
 			'SELECT `Change` as `change`, Other as other, UNIX_TIMESTAMP(`Time`) AS `time`, `User` as `user`
 FROM Audit
@@ -87,10 +88,37 @@ LIMIT ?'
 		);
 
 		$result = $statement->execute([$item->getCode(), $howMany]);
-		assert($result !== false, 'get history');
+		assert($result !== false, 'get item history');
 
 		try {
 			// TODO: a class rather than returning giant associative arrays, maybe...
+			return $statement->fetchAll(\PDO::FETCH_ASSOC);
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * Get history entries for a product
+	 *
+	 * @param ProductCode $product
+	 * @param int $howMany
+	 *
+	 * @return array
+	 */
+	public function getProductHistory(ProductCode $product, int $howMany) {
+		$statement = $this->getPDO()->prepare(
+			'SELECT `Change` as `change`, UNIX_TIMESTAMP(`Time`) AS `time`, `User` as `user`
+FROM AuditProduct
+WHERE `Brand` = ? AND `Model` = ? AND `Variant` = ?
+ORDER BY `Time` DESC, `Change` DESC
+LIMIT ?'
+		);
+
+		$result = $statement->execute([$product->getBrand(), $product->getModel(), $product->getVariant(), $howMany]);
+		assert($result !== false, 'get product history');
+
+		try {
 			return $statement->fetchAll(\PDO::FETCH_ASSOC);
 		} finally {
 			$statement->closeCursor();

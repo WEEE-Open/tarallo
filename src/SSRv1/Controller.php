@@ -97,7 +97,7 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function getHistory(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function getItemHistory(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -117,7 +117,7 @@ class Controller implements RequestHandlerInterface {
 		$item = new ItemCode($id);
 		$item = $db->itemDAO()->getItem($item, null, 0);
 
-		$history = $db->auditDAO()->getHistory($item, $limit);
+		$history = $db->auditDAO()->getItemHistory($item, $limit);
 		if(count($history) === $limit) {
 			array_pop($history);
 			$tooLong = true;
@@ -128,6 +128,43 @@ class Controller implements RequestHandlerInterface {
 		$request = $request->withAttribute('Template', 'history')->withAttribute(
 			'TemplateParameters', [
 				'item' => $item,
+				'history' => $history,
+				'tooLong' => $tooLong,
+			]
+		);
+
+		return $handler->handle($request);
+	}
+
+	public static function getProductHistory(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+		$parameters = $request->getAttribute('parameters', []);
+
+		$brand = Validation::validateOptionalString($parameters, 'brand');
+		$model = Validation::validateOptionalString($parameters, 'model');
+		$variant = Validation::validateOptionalString($parameters, 'variant');
+		$limit = Validation::validateOptionalInt($query, 'limit', 20);
+		$limit = min($limit, 100);
+		if($limit <= 0) {
+			$limit = 20;
+		}
+		$limit++;
+
+		$product = new ProductCode($brand, $model, $variant);
+
+		$history = $db->auditDAO()->getProductHistory($product, $limit);
+		if(count($history) === $limit) {
+			array_pop($history);
+			$tooLong = true;
+		} else {
+			$tooLong = false;
+		}
+
+		$request = $request->withAttribute('Template', 'historyProduct')->withAttribute(
+			'TemplateParameters', [
+				'product' => $product,
 				'history' => $history,
 				'tooLong' => $tooLong,
 			]
@@ -671,7 +708,8 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/product/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct',]);
 //				$r->get('/product/add', [User::AUTH_LEVEL_RO, 'Controller::',]); // TODO: implement
 //				$r->get('/product/{brand}/{model}/{variant}/edit', [User::AUTH_LEVEL_RO, 'Controller::',]); // TODO: implement
-				$r->get('/history/{id}', [User::AUTH_LEVEL_RO, 'Controller::getHistory',]);
+				$r->get('/history/{id}', [User::AUTH_LEVEL_RO, 'Controller::getItemHistory',]);
+				$r->get('/history/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProductHistory',]);
 				$r->get('/item/{id}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::getItem',]);
 				$r->get('/item/{id}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::getItem',]);
 				$r->get('/add', [User::AUTH_LEVEL_RO, 'Controller::addItem',]);

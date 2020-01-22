@@ -443,7 +443,7 @@ class Controller implements RequestHandlerInterface {
 
 		self::range('limit', $length, 1, 50);
 
-		$data = $db->auditDAO()->getHistory($item, $length);
+		$data = $db->auditDAO()->getItemHistory($item, $length);
 
 		return new JsonResponse($data);
 	}
@@ -601,7 +601,7 @@ class Controller implements RequestHandlerInterface {
 									function(FastRoute\RouteCollector $r) {
 										// TODO: make token access public
 										$r->get('[/token/{token}]', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
-										$r->get('/history', [User::AUTH_LEVEL_RO, 'Controller::getHistory']);
+										$r->get('/history', [User::AUTH_LEVEL_RO, 'Controller::getItemHistory']);
 										$r->put('', [User::AUTH_LEVEL_RW, 'Controller::createItem']);
 										$r->delete('', [User::AUTH_LEVEL_RW, 'Controller::removeItem']);
 
