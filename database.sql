@@ -33,7 +33,7 @@ CREATE TABLE `Product`
     -- Max length would be approx. 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
     `Brand` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
     `Model` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `Variant` VARCHAR(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `Variant` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
     PRIMARY KEY (`Brand`, `Model`, `Variant`)
 )
     ENGINE = InnoDB
@@ -101,7 +101,7 @@ CREATE TABLE `ProductFeature`
 (
     `Brand` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
     `Model` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `Variant` VARCHAR(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `Variant` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
     `Feature` VARCHAR(40) COLLATE utf8mb4_bin NOT NULL,
     `Value` BIGINT UNSIGNED DEFAULT NULL,
     `ValueEnum` VARCHAR(40) COLLATE utf8mb4_bin DEFAULT NULL,
@@ -145,6 +145,26 @@ CREATE TABLE Audit
                 (`Change` IN ('M', 'R') AND `Other` IS NOT NULL) OR
                 (`Change` IN ('C', 'U', 'D', 'L') AND `Other` IS NULL)
             )
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE AuditProduct
+(
+    `Brand` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Model` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Variant` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Change` CHAR(1) COLLATE utf8mb4_bin NOT NULL,
+    `Time` TIMESTAMP(6) DEFAULT NOW(6) NOT NULL,
+    `User` VARCHAR(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    PRIMARY KEY (`Brand`, `Model`, `Variant`, `Time`, `Change`),
+    CONSTRAINT FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Product` (`Brand`, `Model`, `Variant`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    INDEX (`Change`),
+    CONSTRAINT check_change
+        CHECK (`Change` IN ('C', 'U', 'D'))
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
@@ -299,4 +319,4 @@ FROM ProductItemFeature;
 
 -- Append this insert statement at the end of file and update schemaversion value
 INSERT INTO `Configuration` (`Key`, `Value`)
-VALUES ('SchemaVersion', 11);
+VALUES ('SchemaVersion', 12);

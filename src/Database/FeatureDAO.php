@@ -170,6 +170,7 @@ final class FeatureDAO extends DAO {/**
 			$success = $statement->execute([$item->getCode()]);
 			assert($success, 'add audit table entry for features update of ' . $item->getCode());
 		} catch(\PDOException $e) {
+			// TODO: this branch is probably useless, deleteFeatures does not add entries on its own, get rid of it
 			// Foreign key constraint fails = item does not exist (deleteFeatures cannot check that it doesn't,
 			// but still tries to add an audit entry)
 			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1452) {
@@ -182,14 +183,31 @@ final class FeatureDAO extends DAO {/**
 	}
 
 	/**
+	 * Add a U audit entry for the specified product.
+	 *
+	 * @param ProductCode $product
+	 */
+	public function addAuditProductEntry(ProductCode $product) {
+		$statement = $this->getPDO()
+			->prepare('INSERT INTO AuditProduct (`Brand`, `Model`, `Variant`, `Change`, `User`) VALUES (?, ?, ?, \'U\', @taralloAuditUsername)');
+
+		try {
+			$success = $statement->execute([$product->getBrand(), $product->getModel(), $product->getVariant()]);
+			assert($success, 'add audit table entry for features update of ' . (string) $product);
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
 	 * Set item features.
 	 *
-	 * @param ItemTraitFeatures $item
+	 * @param ItemWithFeatures $item
 	 *
 	 * @return bool True if anything actually changed (and an U audit entry was generated), false otherwise.
 	 * @TODO: it would be cool if changing a feature to the value it already has still didn't generate an entry...
 	 */
-	public function setFeatures($item): bool {
+	public function setFeatures(ItemWithFeatures $item): bool {
 		// Own features, or else it duplicates product features
 		$features = $item->getOwnFeatures();
 
@@ -203,13 +221,15 @@ final class FeatureDAO extends DAO {/**
 
 		if($item instanceof ItemWithCode) {
 			$this->addAuditEntry($item);
+		} elseif($item instanceof ProductCode) {
+			$this->addAuditProductEntry($item);
 		}
 
 		return true;
 	}
 
 	/**
-	 * Delete a single feature from an item. This generates no audit entries, BTW.
+	 * Delete features from an item. This generates no audit entries, BTW.
 	 *
 	 * @param ItemWithFeatures $item
 	 * @param string[] $features

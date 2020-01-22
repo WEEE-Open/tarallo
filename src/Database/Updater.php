@@ -422,6 +422,37 @@ SELECT Code,
     COALESCE(ValueDouble_Item, ValueDouble_Product) AS ValueDouble
 FROM ProductItemFeature;");
 					break;
+				case 11:
+					$this->exec("alter table Product modify Variant varchar(100) not null;");
+					$this->exec("alter table ProductFeature modify Variant varchar(100) not null;");
+					$this->exec("CREATE TABLE AuditProduct
+(
+    `Brand` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Model` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Variant` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Change` CHAR(1) COLLATE utf8mb4_bin NOT NULL,
+    `Time` TIMESTAMP(6) DEFAULT NOW(6) NOT NULL,
+    `User` VARCHAR(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    PRIMARY KEY (`Brand`, `Model`, `Variant`, `Time`, `Change`),
+    CONSTRAINT FOREIGN KEY (`Brand`, `Model`, `Variant`) REFERENCES `Product` (`Brand`, `Model`, `Variant`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    INDEX (`Change`),
+    CONSTRAINT check_change
+        CHECK (`Change` IN ('C', 'U'))
+)
+    ENGINE = InnoDB
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;");
+					$this->exec("CREATE TRIGGER AuditCreateProduct
+    AFTER INSERT
+    ON Product
+    FOR EACH ROW
+BEGIN
+    INSERT INTO AuditProduct(Brand, Model, Variant, `Change`, `User`)
+    VALUES(NEW.Brand, NEW.Model, NEW.Variant, 'C', @taralloAuditUsername);
+END;");
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}

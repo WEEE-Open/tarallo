@@ -369,6 +369,19 @@ CREATE TRIGGER AuditCreateItem
 	END $$
 DELIMITER ;
 
+-- Same for products
+DROP TRIGGER IF EXISTS AuditCreateProduct;
+DELIMITER $$
+CREATE TRIGGER AuditCreateProduct
+    AFTER INSERT
+    ON Product
+    FOR EACH ROW
+BEGIN
+    INSERT INTO AuditProduct(Brand, Model, Variant, `Change`, `User`)
+    VALUES(NEW.Brand, NEW.Model, NEW.Variant, 'C', @taralloAuditUsername);
+END $$
+DELIMITER ;
+
 -- Add an 'M' entry to audit table
 DROP TRIGGER IF EXISTS AuditMoveItem;
 DELIMITER $$
