@@ -23,12 +23,14 @@ $pdo->exec(/** @lang MariaDB */ "TRUNCATE TABLE Tree;");
 $pdo->exec(/** @lang MariaDB */ "TRUNCATE TABLE ItemFeature;");
 $pdo->exec(/** @lang MariaDB */ "TRUNCATE TABLE ProductFeature;");
 $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Audit; SET FOREIGN_KEY_CHECKS = 1;");
+$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE AuditProduct; SET FOREIGN_KEY_CHECKS = 1;");
 $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Item; SET FOREIGN_KEY_CHECKS = 1;");
 $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Product; SET FOREIGN_KEY_CHECKS = 1;");
 $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE SearchResult; SET FOREIGN_KEY_CHECKS = 1;");
 $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Search; SET FOREIGN_KEY_CHECKS = 1;");
 
 $db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);
+$db->sessionDAO()->setAuditUsername('ExampleScript');
 $db->productDAO()->addProduct(new Product("Samsong", "KAI39"));
 $db->productDAO()->addProduct(new Product("Caste", "Payton", "Brutto"));
 $db->productDAO()->addProduct((new Product("AMD", "Opteron 3300", "AM1234567"))
