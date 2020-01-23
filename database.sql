@@ -22,6 +22,7 @@ CREATE TABLE `Item`
     `LostAt` TIMESTAMP(6) NULL DEFAULT NULL,
     INDEX (`DeletedAt`),
     INDEX (`LostAt`),
+    INDEX `Brand_Model_Variant` (`Brand`, `Model`, `Variant`),
     PRIMARY KEY (`Code`)
 )
     ENGINE = InnoDB
@@ -319,4 +320,4 @@ FROM ProductItemFeature;
 
 -- Append this insert statement at the end of file and update schemaversion value
 INSERT INTO `Configuration` (`Key`, `Value`)
-VALUES ('SchemaVersion', 12);
+VALUES ('SchemaVersion', 13);

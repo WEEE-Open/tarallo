@@ -453,6 +453,9 @@ BEGIN
     VALUES(NEW.Brand, NEW.Model, NEW.Variant, 'C', @taralloAuditUsername);
 END;");
 					break;
+				case 12:
+					$this->exec("ALTER TABLE `Item` ADD INDEX `Brand_Model_Variant` (`Brand`, `Model`, `Variant`);");
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}
