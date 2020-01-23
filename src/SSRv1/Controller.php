@@ -97,6 +97,17 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
+	public static function getAllProducts(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$products = $db->statsDAO()->getAllProducts();
+
+		$request = $request->withAttribute('Template', 'products')->withAttribute('TemplateParameters', ['products' => $products]);
+
+		return $handler->handle($request);
+	}
+
 	public static function getItemHistory(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
@@ -705,6 +716,7 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/features.json', [User::AUTH_LEVEL_RO, 'Controller::getFeaturesJson',]);
 				// TODO: make token access public
 				$r->get('/item/{id}', [User::AUTH_LEVEL_RO, 'Controller::getItem',]);
+				$r->get('/product', [User::AUTH_LEVEL_RO, 'Controller::getAllProducts',]);
 				$r->get('/product/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct',]);
 //				$r->get('/product/add', [User::AUTH_LEVEL_RO, 'Controller::',]); // TODO: implement
 //				$r->get('/product/{brand}/{model}/{variant}/edit', [User::AUTH_LEVEL_RO, 'Controller::',]); // TODO: implement

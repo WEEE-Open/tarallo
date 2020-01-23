@@ -6,6 +6,7 @@ use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemWithCode;
+use WEEEOpen\Tarallo\ProductCode;
 
 final class StatsDAO extends DAO {
 	/**
@@ -564,6 +565,33 @@ GROUP BY $group WITH ROLLUP";
 			}
 			return $result;
 		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * Get all products in the database and a count of how many items are there for each one
+	 */
+	public function getAllProducts(): array {
+		$statement = $this->getPDO()->prepare(<<<EOQ
+		SELECT Brand, Model, Variant, COUNT(*) AS Items
+		FROM Item
+		WHERE (Brand, Model, Variant) IN (SELECT Brand, Model, Variant FROM Product)
+		GROUP BY Brand, Model, Variant
+		ORDER BY Brand, Model, Variant, Items DESC
+EOQ
+		);
+		try {
+			$result = $statement->execute();
+			assert($result === true, 'get products and count');
+			$result = [];
+			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+				$product = new ProductCode($row['Brand'], $row['Model'], $row['Variant']);
+				$result[] = [$product, $row['Items']];
+			}
+
+			return $result;
+		} finally{
 			$statement->closeCursor();
 		}
 	}
