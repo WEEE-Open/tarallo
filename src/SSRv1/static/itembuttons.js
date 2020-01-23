@@ -7,6 +7,10 @@
 		}
 
 		let code = ev.target.parentElement.dataset.forItem;
+		let brand = ev.target.parentElement.dataset.forProductBrand;
+		let model = ev.target.parentElement.dataset.forProductModel;
+		let variant = ev.target.parentElement.dataset.forProductVariant;
+
 		let here = window.location.pathname;
 		let query = window.location.search;
 		let hash = '#code-' + code;
@@ -16,9 +20,17 @@
 		} else if(ev.target.classList.contains("addinside")) {
 			window.location.href = here + '/add/' + encodeURIComponent(code) + query + hash;
 		} else if(ev.target.classList.contains("history")) {
-			window.location.href = '/history/' + encodeURIComponent(code) + query + hash;
+			if(typeof code === "undefined") {
+				window.location.href = '/history/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant) + query;
+			} else {
+				window.location.href = '/history/' + encodeURIComponent(code) + query;
+			}
 		} else if(ev.target.classList.contains("view")) {
-			window.location.href = '/item/' + encodeURIComponent(code) + query + hash;
+			if(typeof code === "undefined") {
+				window.location.href = '/product/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant) + query;
+			} else {
+				window.location.href = '/item/' + encodeURIComponent(code) + query;
+			}
 		} else if(ev.target.classList.contains("move")) {
 			let top = document.getElementById('top');
 			let quickMoveButton = top.querySelector(".quick.move");
