@@ -21,10 +21,10 @@ $this->layout(
 	</tr>
 	</thead>
 	<tbody>
-	<?php foreach($products as $row): $product = $row[0]; $count = $row[1] ?>
+	<?php foreach($products as $row): /** @var \WEEEOpen\Tarallo\ProductCode $product */ $product = $row[0]; $count = $row[1] ?>
 		<tr>
 			<td><a href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>"><?= $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) . rtrim(' ' . $this->e($product->getVariantOrEmpty())) ?></a></td>
-			<td><?= $count ?></td>
+			<td><a href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>/items"><?= $count ?></a></td>
 		</tr>
 	<?php endforeach ?>
 	</tbody>

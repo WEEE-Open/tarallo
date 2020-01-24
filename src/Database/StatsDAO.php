@@ -595,4 +595,25 @@ EOQ
 			$statement->closeCursor();
 		}
 	}
+
+	public function getAllItemsOfProduct(ProductCode $product): array {
+		$statement = $this->getPDO()->prepare(<<<EOQ
+		SELECT Code
+		FROM Item
+		WHERE Brand = ? AND Model = ? AND Variant = ?
+EOQ
+		);
+		try {
+			$result = $statement->execute([$product->getBrand(), $product->getModel(), $product->getVariant()]);
+			assert($result === true, 'get items from products and count');
+			$result = [];
+			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+				$result[] = $this->database->itemDAO()->getItem(new ItemCode($row['Code']));
+			}
+
+			return $result;
+		} finally{
+			$statement->closeCursor();
+		}
+	}
 }
