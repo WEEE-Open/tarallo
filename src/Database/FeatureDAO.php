@@ -157,42 +157,25 @@ final class FeatureDAO extends DAO {
 	}
 
 	/**
-	 * Add a U audit entry for the specified item.
+	 * Add a U audit entry for the specified item/product.
 	 *
-	 * @param ItemWithCode $item
+	 * @param ItemWithCode|ProductCode $item Item or product
 	 */
-	public function addAuditEntry(ItemWithCode $item) {
-		$statement = $this->getPDO()
-			->prepare('INSERT INTO Audit (`Code`, `Change`, `User`) VALUES (?, \'U\', @taralloAuditUsername)');
-
-		try {
-			$success = $statement->execute([$item->getCode()]);
-			assert($success, 'add audit table entry for features update of ' . $item->getCode());
-		} catch(\PDOException $e) {
-			// TODO: this branch is probably useless, deleteFeatures does not add entries on its own, get rid of it
-			// Foreign key constraint fails = item does not exist (deleteFeatures cannot check that it doesn't,
-			// but still tries to add an audit entry)
-			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1452) {
-				throw new NotFoundException();
-			}
-			throw $e;
-		} finally {
-			$statement->closeCursor();
+	public function addAuditEntry($item) {
+		if($item instanceof ItemWithCode) {
+			$statement = $this->getPDO()->prepare('INSERT INTO Audit (`Code`, `Change`, `User`) VALUES (?, \'U\', @taralloAuditUsername)');
+			$statement->bindValue(1, $item->getCode());
+		} else {
+			/** @var ProductCode $item */
+			$statement = $this->getPDO()->prepare('INSERT INTO AuditProduct (`Brand`, `Model`, `Variant`, `Change`, `User`) VALUES (?, ?, ?, \'U\', @taralloAuditUsername)');
+			$statement->bindValue(1, $item->getBrand());
+			$statement->bindValue(2, $item->getModel());
+			$statement->bindValue(3, $item->getVariant());
 		}
-	}
-
-	/**
-	 * Add a U audit entry for the specified product.
-	 *
-	 * @param ProductCode $product
-	 */
-	public function addAuditProductEntry(ProductCode $product) {
-		$statement = $this->getPDO()
-			->prepare('INSERT INTO AuditProduct (`Brand`, `Model`, `Variant`, `Change`, `User`) VALUES (?, ?, ?, \'U\', @taralloAuditUsername)');
 
 		try {
-			$success = $statement->execute([$product->getBrand(), $product->getModel(), $product->getVariant()]);
-			assert($success, 'add audit table entry for features update of ' . (string) $product);
+			$success = $statement->execute();
+			assert($success, 'add audit table entry for features update');
 		} finally {
 			$statement->closeCursor();
 		}
@@ -218,11 +201,8 @@ final class FeatureDAO extends DAO {
 			$this->setFeature($item, $feature);
 		}
 
-		if($item instanceof ItemWithCode) {
-			$this->addAuditEntry($item);
-		} else if($item instanceof ProductCode) {
-			$this->addAuditProductEntry($item);
-		}
+		assert($item instanceof ItemWithCode);
+		$this->addAuditEntry($item);
 
 		return true;
 	}
@@ -235,11 +215,11 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @return bool True if anything was deleted
 	 */
-	public function deleteFeature(ItemWithFeatures $item, array $features) {
+	public function deleteFeatures(ItemWithFeatures $item, array $features) {
 		if(empty($features)) {
 			return false;
 		}
-		// This never fails, ever for items that don't exist
+		// This never fails, even for items that don't exist
 		$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ? AND `Feature`= ?');
 		try {
 			foreach($features as $feature) {
@@ -260,14 +240,27 @@ final class FeatureDAO extends DAO {
 	/**
 	 * Delete all features from an item
 	 *
-	 * @param ItemWithCode $item
+	 * @param ItemWithCode|ProductCode $item
+	 *
+	 * @return bool True if anything was deleted, false otherwise
 	 */
-	public function deleteFeaturesAll(ItemWithCode $item) {
-		$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ?');
+	public function deleteFeaturesAll($item): bool {
+		if($item instanceof ItemWithCode) {
+			$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ?');
+			$statement->bindValue(1, $item->getCode());
+		} else {
+			/** @var ProductCode $item */
+			$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ProductFeature WHERE `Brand` = ? AND `Model` = ? AND `Variant` = ?');
+			$statement->bindValue(1, $item->getBrand());
+			$statement->bindValue(2, $item->getModel());
+			$statement->bindValue(3, $item->getVariant());
+		}
 
 		try {
-			$result = $statement->execute([$item->getCode()]);
+			$result = $statement->execute();
 			assert($result !== false, 'delete all features');
+			$rows = $statement->rowCount();
+			return $rows !== 0;
 		} finally {
 			$statement->closeCursor();
 		}

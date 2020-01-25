@@ -345,7 +345,7 @@ class Controller implements RequestHandlerInterface {
 		return new EmptyResponse(204);
 	}
 
-	public static function setItemFeatures(ServerRequestInterface $request): ResponseInterface {
+	public static function setFeatures(ServerRequestInterface $request): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -354,24 +354,39 @@ class Controller implements RequestHandlerInterface {
 
 		Validation::validateRequestBodyIsArray($payload);
 
-		$id = Validation::validateOptionalString($parameters, 'id');
+		$id = Validation::validateOptionalString($parameters, 'id', null);
+		if($id === null) {
+			$brand = Validation::validateOptionalString($parameters, 'brand');
+			$model = Validation::validateOptionalString($parameters, 'model');
+			$variant = Validation::validateOptionalString($parameters, 'variant');
+			$thing = new Product($brand, $model, $variant);
+		} else {
+			$thing = new Item($id);
+		}
 		$loopback = isset($query['loopback']);
 
-		$item = new Item($id);
 		// PUT => delete every feature, replace with new ones
-		ItemBuilder::addFeatures($payload, $item);
-		$db->featureDAO()->deleteFeaturesAll($item);
-		$db->featureDAO()->setFeatures($item);
+		ItemBuilder::addFeatures($payload, $thing);
+		$deleted = $db->featureDAO()->deleteFeaturesAll($thing);
+		$added = $db->featureDAO()->setFeatures($thing);
 
-		// TODO: this should maybe return 201 sometimes
+		if($deleted && !$added) {
+			// Delete everything and replace with an empty array => we need to generate an audit entry
+			$db->featureDAO()->addAuditEntry($thing);
+		}
+
 		if($loopback) {
-			return new JsonResponse($db->itemDAO()->getItem($item));
+			if($id === null) {
+				return new JsonResponse($db->itemDAO()->getItem($thing));
+			} else {
+				return new JsonResponse($db->productDAO()->getProduct($thing));
+			}
 		} else {
 			return new EmptyResponse(204);
 		}
 	}
 
-	public static function updateItemFeatures(ServerRequestInterface $request): ResponseInterface {
+	public static function updateFeatures(ServerRequestInterface $request): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -380,24 +395,35 @@ class Controller implements RequestHandlerInterface {
 
 		Validation::validateRequestBodyIsArray($payload);
 
-		$id = Validation::validateOptionalString($parameters, 'id');
+		$id = Validation::validateOptionalString($parameters, 'id', null);
+		if($id === null) {
+			$brand = Validation::validateOptionalString($parameters, 'brand');
+			$model = Validation::validateOptionalString($parameters, 'model');
+			$variant = Validation::validateOptionalString($parameters, 'variant');
+			$thing = new Product($brand, $model, $variant);
+		} else {
+			$thing = new Item($id);
+		}
 		$loopback = isset($query['loopback']);
 
-		$item = new Item($id);
 		// PATCH => specify features to update and to delete, other are left as they are
-		$delete = ItemBuilder::addFeaturesDelta($payload, $item);
+		$delete = ItemBuilder::addFeaturesDelta($payload, $thing);
 
-		$deleted = $db->featureDAO()->deleteFeature($item, $delete);
-		$changed = $db->featureDAO()->setFeatures($item);
+		$deleted = $db->featureDAO()->deleteFeatures($thing, $delete);
+		$changed = $db->featureDAO()->setFeatures($thing);
 
-		// setFeatures generates an audit entry if anything changed, deleteFeature never does
+		// setFeatures generates an audit entry if anything changed, deleteFeatures never does
 		// so we may need to generate it manually
-		if(!$changed && $deleted) {
-			$db->featureDAO()->addAuditEntry($item);
+		if($deleted && !$changed) {
+			$db->featureDAO()->addAuditEntry($thing);
 		}
 
 		if($loopback) {
-			return new JsonResponse($db->itemDAO()->getItem($item));
+			if($id === null) {
+				return new JsonResponse($db->productDAO()->getProduct($thing));
+			} else {
+				return new JsonResponse($db->itemDAO()->getItem($thing));
+			}
 		} else {
 			return new EmptyResponse(204);
 		}
@@ -642,8 +668,8 @@ class Controller implements RequestHandlerInterface {
 
 										// Also useless, just get the item
 										// $r->get('/features',  [User::AUTH_LEVEL_RW, 'Controller::getItemFeatures']);
-										$r->put('/features', [User::AUTH_LEVEL_RW, 'Controller::setItemFeatures']);
-										$r->patch('/features', [User::AUTH_LEVEL_RW, 'Controller::updateItemFeatures']);
+										$r->put('/features', [User::AUTH_LEVEL_RW, 'Controller::setFeatures']);
+										$r->patch('/features', [User::AUTH_LEVEL_RW, 'Controller::updateFeatures']);
 
 										// TODO: implement this one
 										//$r->get('/path',  [User::AUTH_LEVEL_RW, 'Controller::getItemPath']);
@@ -681,8 +707,8 @@ class Controller implements RequestHandlerInterface {
 								$r->addGroup('/{brand}/{model}/{variant}/features',
 									function(FastRoute\RouteCollector $r) {
 										//$r->get('',  [User::AUTH_LEVEL_RW, 'Controller::getProductFeatures']);
-										$r->post('', [User::AUTH_LEVEL_RW, 'Controller::setProductFeatures']);
-										$r->patch('', [User::AUTH_LEVEL_RW, 'Controller::updateProductFeatures']);
+										$r->post('', [User::AUTH_LEVEL_RW, 'Controller::setFeatures']);
+										$r->patch('', [User::AUTH_LEVEL_RW, 'Controller::updateFeatures']);
 									}
 								);
 							}
