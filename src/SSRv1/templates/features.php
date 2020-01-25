@@ -1,6 +1,9 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Feature[] $features */
 /** @var \WEEEOpen\Tarallo\Feature[] $product */
+if(isset($features['variant']) && $features['variant']->value === \WEEEOpen\Tarallo\Product::DEFAULT_VARIANT) {
+	unset($features['variant']);
+}
 $groups = $this->getGroupedFeatures($this->getUltraFeatures($features));
 
 if(count($features) > 0): ?>
