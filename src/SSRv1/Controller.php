@@ -749,12 +749,12 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/product', [User::AUTH_LEVEL_RO, 'Controller::getAllProducts',]);
 				$r->get('/product/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct',]);
 				$r->get('/product/{brand}/{model}/{variant}/history', [User::AUTH_LEVEL_RO, 'Controller::getProductHistory',]);
+				$r->get('/product/{brand}/{model}/{variant}/edit', [User::AUTH_LEVEL_RO, 'Controller::editProduct',]);
 				$r->get('/product/{brand}/{model}/{variant}/items', [User::AUTH_LEVEL_RO, 'Controller::getProductItems',]);
 				$r->get('/product/{brand}/{model}/{variant}/items/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::getProductItems',]);
 				$r->get('/product/{brand}/{model}/{variant}/items/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::getProductItems',]);
-//				$r->get('/product/add', [User::AUTH_LEVEL_RO, 'Controller::',]); // TODO: implement
-//				$r->get('/product/{brand}/{model}/{variant}/edit', [User::AUTH_LEVEL_RO, 'Controller::',]); // TODO: implement
-				$r->get('/add', [User::AUTH_LEVEL_RO, 'Controller::addItem',]);
+				$r->get('/new/item', [User::AUTH_LEVEL_RO, 'Controller::addItem',]);
+				$r->get('/new/product', [User::AUTH_LEVEL_RO, 'Controller::addProduct',]);
 				$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [User::AUTH_LEVEL_RO, 'Controller::search',]);
 				$r->get('/search/{id:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
 				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search',]);

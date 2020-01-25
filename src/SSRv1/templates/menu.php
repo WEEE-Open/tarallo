@@ -10,7 +10,7 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 <nav id="main" class="menu">
 	<ul>
 		<li><a href="/">Home</a></li
-		><li><a href="/add">New</a></li
+		><li><a href="/new/item">New</a></li
 		><li><a role="button" tabindex="0" class="quick view" data-toggle="view">View</a></li
 		><li><a role="button" tabindex="0" class="quick move" data-toggle="move">Move</a></li
 		><li><a href="/search">Search</a></li

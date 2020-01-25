@@ -18,7 +18,7 @@
 		if(ev.target.classList.contains("edit")) {
 			window.location.href = here + '/edit/' + encodeURIComponent(code) + query + hash;
 		} else if(ev.target.classList.contains("addinside")) {
-			window.location.href = here + '/add/' + encodeURIComponent(code) + query + hash;
+			window.location.href = here + '/new/item/' + encodeURIComponent(code) + query + hash;
 		} else if(ev.target.classList.contains("history")) {
 			if(typeof code === "undefined") {
 				window.location.href = '/product/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant) + '/history' + query;
@@ -47,7 +47,7 @@
 			let to = quickMoveBar.querySelector('input.to');
 			to.focus();
 		} else if(ev.target.classList.contains("clone")) {
-			window.location.href = '/add?copy=' + encodeURIComponent(code) + query + hash;
+			window.location.href = '/new/item?copy=' + encodeURIComponent(code) + query + hash;
 		} else if(ev.target.classList.contains("items")) {
 			window.location.href = '/product/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant) + '/items' + query;
 		}
