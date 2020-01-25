@@ -201,7 +201,7 @@ final class FeatureDAO extends DAO {
 			$this->setFeature($item, $feature);
 		}
 
-		assert($item instanceof ItemWithCode);
+		assert($item instanceof ItemWithCode || $item instanceof ProductCode);
 		$this->addAuditEntry($item);
 
 		return true;

@@ -177,6 +177,7 @@ $rambox->addContent($ram);
 $ram666 = (new Item('R666'))
 	->addFeature(new Feature('brand', 'Samsung'))
 	->addFeature(new Feature('model', 'S667ABC1024'))
+	->addFeature(new Feature('variant', 'v1'))
 	->addFeature(new Feature('notes', 'RAM di esempio persa'))
 	->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
 	->addFeature(new Feature('type', 'ram'));
