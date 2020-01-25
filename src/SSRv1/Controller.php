@@ -22,6 +22,7 @@ use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ProductCode;
+use WEEEOpen\Tarallo\ProductIncomplete;
 use WEEEOpen\Tarallo\SessionLocal;
 use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\UserSSO;
@@ -217,8 +218,9 @@ class Controller implements RequestHandlerInterface {
 
 		if($from === null) {
 			$from = new ItemIncomplete(null);
-			$from->addFeature(new BaseFeature('type'));
-			$from->addFeature(new BaseFeature('working'));
+			$from->addFeature(new BaseFeature('brand'));
+			$from->addFeature(new BaseFeature('model'));
+			$from->addFeature(new BaseFeature('variant'));
 		} else {
 			/** @var Database $db */
 			$db = $request->getAttribute('Database');
@@ -226,6 +228,30 @@ class Controller implements RequestHandlerInterface {
 		}
 
 		$request = $request->withAttribute('Template', 'newItemPage')->withAttribute(
+			'TemplateParameters', [
+				'add' => true,
+				'base' => $from,
+			]
+		);
+
+		return $handler->handle($request);
+	}
+
+	public static function addProduct(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		$query = $request->getQueryParams();
+//		$from = Validation::validateOptionalString($query, 'copy', null);
+
+		// TODO: allow cloning
+//		if($from === null) {
+			$from = new ProductIncomplete();
+			$from->addFeature(new BaseFeature('type'));
+//		} else {
+//			/** @var Database $db */
+//			$db = $request->getAttribute('Database');
+//			$from = $db->productDAO()->getProduct(new ItemCode($from));
+//		}
+
+		$request = $request->withAttribute('Template', 'newProductPage')->withAttribute(
 			'TemplateParameters', [
 				'add' => true,
 				'base' => $from,

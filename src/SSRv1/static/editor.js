@@ -71,7 +71,11 @@
 		let deletedFeatures;
 		if(isNew) {
 			deletedFeatures = null;
-			itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveNew);
+			if(itemEditing.classList.contains('product')) {
+				itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveNewProduct);
+			} else {
+				itemEditing.querySelector('.itembuttons .save').addEventListener('click', saveNewItem);
+			}
 			for(let el of itemEditing.querySelectorAll('.itembuttons .addnew')) {
 				el.addEventListener('click', addNewClick);
 			}
@@ -1113,7 +1117,7 @@
 	 *
 	 * @param {HTMLElement|Element} root - Item, the one with the "item" class
 	 * @param {object} delta - Where to add the changeset
-	 * @param {object[]} contents - Where to place inner items
+	 * @param {object[]|null} contents - Where to place inner items, or null to ignore them
 	 *
 	 * @return {int} How many features have been changed or added
 	 */
@@ -1130,6 +1134,11 @@
 		}
 
 		counter = getChangedFeatures(features, delta);
+
+		// End here if we don't want subitems
+		if(contents === null) {
+			return counter;
+		}
 
 		for(let subitem of subitems.children) {
 			let inner = {};
@@ -1173,10 +1182,7 @@
 		}
 	}
 
-	/**
-	 * @return {Promise<void>} Nothing, really.
-	 */
-	async function saveNew() {
+	async function saveNewItem() {
 		let counter;
 		let root = document.querySelector('.head.item.editing');
 
@@ -1198,9 +1204,7 @@
 			return;
 		}
 
-		let request, response;
-
-		request = {};
+		let request = {};
 
 		let code = document.querySelector('.newcode').value;
 		let parentSelector = root.querySelector('.setlocation input');
@@ -1221,8 +1225,6 @@
 		request.features = delta;
 		request.contents = contents;
 
-		toggleButtons(true);
-
 		let method, uri;
 		if(code) {
 			method = 'PUT';
@@ -1231,12 +1233,57 @@
 			method = 'POST';
 			uri = '/v2/items';
 		}
+
+		await saveNew(request, uri, method);
+	}
+
+	async function saveNewProduct() {
+		let root = document.querySelector('.head.item.editing');
+
+		let counter;
+		let delta = {};
+
+		try {
+			counter = getNewFeaturesRecursively(root, delta, null);
+		} catch(e) {
+			if(e instanceof EmptyFeatureValueError) {
+				displayInlineError(e.feature, "empty-input", root);
+				return;
+			} else {
+				throw e;
+			}
+		}
+
+		if(counter <= 0) {
+			return;
+		}
+
+		let request;
+
+		request = {};
+
+		let brand = document.getElementById('new-product-brand').value;
+		let model = document.getElementById('new-product-model').value;
+		let variant = document.getElementById('new-product-variant').value;
+
+		request.features = delta;
+
+		let method = 'PUT';
+		let uri = '/v2/products/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant);
+
+		await saveNew(request, uri, method);
+	}
+
+	async function saveNew(request, uri, method) {
 		let encoded = JSON.stringify(request);
+
 		console.log("Send to " + uri);
 		console.log(encoded);
 
+		toggleButtons(true);
+
 		try {
-			response = await fetchWithTimeout(uri, {
+			let response = await fetchWithTimeout(uri, {
 				headers: {
 					'Accept': 'application/json',
 					'Content-Type': 'application/json'
@@ -1246,16 +1293,16 @@
 				body: encoded
 			});
 			let json = await response.json();
-			if(response.status === 200 || response.status === 201) {
+			if (response.status === 200 || response.status === 201) {
 				goBack(json);
-			} else if(response.status === 401) {
+			} else if (response.status === 401) {
 				displayError('Session expired or logged out. Open another tab, log in and try again.');
 			} else {
 				let message = json.message || "Unknown error, status: " + response.status;
 				displayError(message)
 			}
-		} catch(err) {
-			if(err instanceof TimeoutError) {
+		} catch (err) {
+			if (err instanceof TimeoutError) {
 				displayError('Request timed out');
 			} else {
 				throw err;
@@ -1424,10 +1471,10 @@
 	/**
 	 * Go back to view mode. Or go forward to view mode, depending on tne point of view.
 	 *
-	 * @param {string|null} code - Newly added item code, to redirect there from add item page
+	 * @param {string|null} json - JSON response with newly added item code, to redirect there from add item page
 	 * @param {boolean} confirm - Show the "leave/remain" message if there are unsaved changes
 	 */
-	function goBack(code = null, confirm = false) {
+	function goBack(json = null, confirm = false) {
 		let here = window.location.pathname;
 		let query = window.location.search;
 		let hash = window.location.hash;
@@ -1441,8 +1488,12 @@
 			pieces.splice(pieces.length - 2);
 			window.location.href = pieces.join('/') + query + hash;
 		} else {
-			if(code) {
-				window.location.href = '/item/' + encodeURIComponent(code);
+			if(json) {
+				if(typeof json['brand'] === 'undefined') {
+					window.location.href = '/item/' + encodeURIComponent(json);
+				} else {
+					window.location.href = '/product/' + encodeURIComponent(json['brand']) + '/' + encodeURIComponent(json['model']) + '/' + encodeURIComponent(json['variant']);
+				}
 			} else {
 				// This feels sooooo 2001
 				window.history.back();

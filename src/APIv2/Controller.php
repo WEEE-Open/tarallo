@@ -270,7 +270,7 @@ class Controller implements RequestHandlerInterface {
 			$response = new JsonResponse($db->productDAO()->getProduct($product), 201);
 			$response = $response->withHeader('Location', '/v2/products/' . rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
 		} else {
-			$response = new EmptyResponse(201);
+			$response = new JsonResponse(['brand' => $product->getBrand(), 'model' => $product->getModel(), 'variant' => $product->getVariant()], 201);
 			$response = $response->withHeader('Location', '/v2/products/' . rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
 		}
 		return $response;
