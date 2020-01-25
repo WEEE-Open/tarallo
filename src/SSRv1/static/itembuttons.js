@@ -21,9 +21,9 @@
 			window.location.href = here + '/add/' + encodeURIComponent(code) + query + hash;
 		} else if(ev.target.classList.contains("history")) {
 			if(typeof code === "undefined") {
-				window.location.href = '/history/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant) + query;
+				window.location.href = '/product/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant) + '/history' + query;
 			} else {
-				window.location.href = '/history/' + encodeURIComponent(code) + query;
+				window.location.href = '/item/' + encodeURIComponent(code) + '/history' + query;
 			}
 		} else if(ev.target.classList.contains("view")) {
 			if(typeof code === "undefined") {
