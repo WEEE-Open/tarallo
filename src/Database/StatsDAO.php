@@ -574,9 +574,9 @@ GROUP BY $group WITH ROLLUP";
 	 */
 	public function getAllProducts(): array {
 		$statement = $this->getPDO()->prepare(<<<EOQ
-		SELECT Brand, Model, Variant, COUNT(*) AS Items
+		SELECT Brand, Model, Variant, COUNT(Code) AS Items
 		FROM Item
-		WHERE (Brand, Model, Variant) IN (SELECT Brand, Model, Variant FROM Product)
+		NATURAL RIGHT JOIN Product
 		GROUP BY Brand, Model, Variant
 		ORDER BY Brand, Model, Variant, Items DESC
 EOQ
