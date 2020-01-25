@@ -25,7 +25,7 @@ final class ProductDAO extends DAO{
 			assert($result === true, 'Add product');
 		} catch(\PDOException $e) {
 			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1062) {
-				throw new DuplicateItemCodeException((string) $product);
+				throw new DuplicateItemCodeException((string) $product, 'Product already exists: ' . (string) $product);
 			}
 			throw $e;
 		} finally {

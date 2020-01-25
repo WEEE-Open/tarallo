@@ -48,6 +48,8 @@
 			to.focus();
 		} else if(ev.target.classList.contains("clone")) {
 			window.location.href = '/add?copy=' + encodeURIComponent(code) + query + hash;
+		} else if(ev.target.classList.contains("items")) {
+			window.location.href = '/product/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant) + '/items' + query;
 		}
 	}
 

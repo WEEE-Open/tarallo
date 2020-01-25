@@ -241,11 +241,37 @@ class Controller implements RequestHandlerInterface {
 
 		if($loopback) {
 			$response = new JsonResponse($db->itemDAO()->getItem($item), 201);
-			$response = $response->withHeader('Location', '/v2/items/' . urlencode($item->getCode()));
+			$response = $response->withHeader('Location', '/v2/items/' . rawurlencode($item->getCode()));
 		} else {
 			// TODO: wrap into something
 			$response = new JsonResponse($item->getCode(), 201);
-			$response = $response->withHeader('Location', '/v2/items/' . urlencode($item->getCode()));
+			$response = $response->withHeader('Location', '/v2/items/' . rawurlencode($item->getCode()));
+		}
+		return $response;
+	}
+
+	public static function createProduct(ServerRequestInterface $request): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+		$payload = $request->getAttribute('ParsedBody', []);
+		$parameters = $request->getAttribute('parameters', []);
+
+		$brand = Validation::validateOptionalString($parameters, 'brand');
+		$model = Validation::validateOptionalString($parameters, 'model');
+		$variant = Validation::validateOptionalString($parameters, 'variant');
+		$loopback = isset($query['loopback']);
+
+		$product = ProductBuilder::ofArray($payload, $brand, $model, $variant);
+
+		$db->productDAO()->addProduct($product);
+
+		if($loopback) {
+			$response = new JsonResponse($db->productDAO()->getProduct($product), 201);
+			$response = $response->withHeader('Location', '/v2/products/' . rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
+		} else {
+			$response = new EmptyResponse(201);
+			$response = $response->withHeader('Location', '/v2/products/' . rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
 		}
 		return $response;
 	}
@@ -650,17 +676,15 @@ class Controller implements RequestHandlerInterface {
 								//$r->get('', [User::AUTH_LEVEL_RW, 'Controller::']); // TODO: implement
 								$r->get('/{brand}/{model}', [User::AUTH_LEVEL_RO, 'Controller::getProducts']);
 								$r->get('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct']);
+								$r->put('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::createProduct']);
 
-								//$r->post('/{brand}/{model}', [User::AUTH_LEVEL_RW, 'Controller::']); // TODO: implement
-								//$r->put('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::createProduct']); // TODO: implement
-
-//								$r->addGroup('/{brand}/{model}/{variant}/features',
-//									function(FastRoute\RouteCollector $r) {
-//										//$r->get('',  [User::AUTH_LEVEL_RW, 'Controller::getProductFeatures']);
-//										$r->post('', [User::AUTH_LEVEL_RW, 'Controller::setProductFeatures']); // TODO: implement
-//										$r->patch('', [User::AUTH_LEVEL_RW, 'Controller::updateProductFeatures']); // TODO: implement
-//									}
-//								);
+								$r->addGroup('/{brand}/{model}/{variant}/features',
+									function(FastRoute\RouteCollector $r) {
+										//$r->get('',  [User::AUTH_LEVEL_RW, 'Controller::getProductFeatures']);
+										$r->post('', [User::AUTH_LEVEL_RW, 'Controller::setProductFeatures']);
+										$r->patch('', [User::AUTH_LEVEL_RW, 'Controller::updateProductFeatures']);
+									}
+								);
 							}
 						);
 
