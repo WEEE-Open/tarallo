@@ -28,7 +28,7 @@ class Product extends ProductCode implements \JsonSerializable, ItemWithFeatures
 		if($this->variant === self::DEFAULT_VARIANT) {
 			return $this->brand . ' ' . $this->model;
 		} else {
-			return $this->brand . ' ' . $this->model . '(' . $this->variant . ')';
+			return $this->brand . ' ' . $this->model . ' (' . $this->variant . ')';
 		}
 	}
 }
