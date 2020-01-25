@@ -9,9 +9,15 @@ $innerrecursion = $innerrecursion ?? false;
 if($base === null) {
 	$subitems = [];
 	$features = [];
+	$product = null;
 } else {
 	$subitems = $base->getContent();
-	$features = $base->getFeatures();
+	$features = $base->getOwnFeatures();
+	if($base instanceof \WEEEOpen\Tarallo\ItemWithProduct) {
+		$product = $base->getProduct();
+	} else {
+		$product = null;
+	}
 }
 
 // to display new inner items, set their $recursion and $innerrecursion to true
@@ -32,6 +38,14 @@ if($base === null) {
 
 	<?php if(!$innerrecursion && !$recursion): ?>
 		<section class="setlocation"><label>Location: <input id="newparent"></label></section>
+	<?php endif ?>
+
+	<?php if($product !== null): ?>
+		<section class="product features">
+			<?php
+			$this->insert('features', ['features' => $product->getFeatures()]);
+			?>
+		</section>
 	<?php endif ?>
 
 	<section class="own features editing">
