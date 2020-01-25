@@ -9,10 +9,8 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder ".", "/vagrant", disabled: true
 	
   if Vagrant::Util::Platform.windows? then
-    config.vm.synced_folder "./utils/data", "/data", type: "smb"
     config.vm.synced_folder ".", "/var/www/html/server", type: "smb"
   else
-    config.vm.synced_folder "./utils/data", "/data"
     config.vm.synced_folder ".", "/var/www/html/server"
   end
 
@@ -45,7 +43,7 @@ Vagrant.configure("2") do |config|
   else
     config.vm.provision "ansible" do |ansible|
 	  #ansible.verbose = "v"
-	  #ansible.compatibility_mode = "2.0"
+	  ansible.compatibility_mode = "2.0"
 	  ansible.playbook = "utils/provision/playbook.yml"
     end
   end
@@ -56,6 +54,10 @@ Vagrant.configure("2") do |config|
   config.vm.provision "test_db_update", type: "shell", run: "always" do |up|
     up.privileged = false
     up.inline = "php /var/www/html/server/bin/update.php test_db"
+  end
+  config.vm.provision "example_data", type: "shell" do |up|
+    up.privileged = false
+    up.inline = "php /var/www/html/server/bin/create_example_data.php"
   end
 
 end

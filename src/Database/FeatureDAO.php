@@ -6,61 +6,60 @@ use PDOStatement;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
-use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemTraitFeatures;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\ItemWithFeatures;
-use WEEEOpen\Tarallo\ItemWithProduct;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ProductCode;
 
 
-final class FeatureDAO extends DAO {/**
- * Obtain \PDO::PARAM_... constant from feature name
- *
- * @param int $type Feature type
- *
- * @return int Column name (e.g. ValueText)
- *@see getType
- *
- */public static function getPDOType(int $type): int {
-	switch($type) {
-		case BaseFeature::STRING:
-			return \PDO::PARAM_STR;
-		case BaseFeature::INTEGER:
-			return \PDO::PARAM_INT;
-		case BaseFeature::ENUM:
-			return \PDO::PARAM_STR;
-		case BaseFeature::DOUBLE:
-			return \PDO::PARAM_STR;
-		default:
-			throw new \LogicException('Unrecognized feature type in getPDOType');
+final class FeatureDAO extends DAO {
+	/**
+	 * Obtain \PDO::PARAM_... constant from feature name
+	 *
+	 * @param int $type Feature type
+	 *
+	 * @return int Column name (e.g. ValueText)
+	 * @see getType
+	 *
+	 */
+	public static function getPDOType(int $type): int {
+		switch($type) {
+			case BaseFeature::ENUM:
+			case BaseFeature::DOUBLE:
+			case BaseFeature::STRING:
+				return \PDO::PARAM_STR;
+			case BaseFeature::INTEGER:
+				return \PDO::PARAM_INT;
+			default:
+				throw new \LogicException('Unrecognized feature type in getPDOType');
+		}
 	}
-}
 
 	/**
- * Obtain database column name (for the ItemFeature table)
- *
- * @param int $type Feature type
- *
- * @return string Column name (e.g. ValueText)
- *@see getType
- *
- */public static function getColumn(int $type): string {
-	switch($type) {
-		case BaseFeature::STRING:
-			return 'ValueText';
-		case BaseFeature::INTEGER:
-			return 'Value';
-		case BaseFeature::ENUM:
-			return 'ValueEnum';
-		case BaseFeature::DOUBLE:
-			return 'ValueDouble';
-		default:
-			throw new \LogicException('Unrecognized feature type in getColumn');
+	 * Obtain database column name (for the ItemFeature table)
+	 *
+	 * @param int $type Feature type
+	 *
+	 * @return string Column name (e.g. ValueText)
+	 * @see getType
+	 *
+	 */
+	public static function getColumn(int $type): string {
+		switch($type) {
+			case BaseFeature::STRING:
+				return 'ValueText';
+			case BaseFeature::INTEGER:
+				return 'Value';
+			case BaseFeature::ENUM:
+				return 'ValueEnum';
+			case BaseFeature::DOUBLE:
+				return 'ValueDouble';
+			default:
+				throw new \LogicException('Unrecognized feature type in getColumn');
+		}
 	}
-}
 
 	/**
 	 * Get features from ALL TEH ITEMS/PRODUCTS
@@ -221,7 +220,7 @@ final class FeatureDAO extends DAO {/**
 
 		if($item instanceof ItemWithCode) {
 			$this->addAuditEntry($item);
-		} elseif($item instanceof ProductCode) {
+		} else if($item instanceof ProductCode) {
 			$this->addAuditProductEntry($item);
 		}
 
@@ -299,16 +298,10 @@ final class FeatureDAO extends DAO {/**
 			// This error has ever been witnessed when master-master replication breaks, but apparently it's used
 			// to signify that there's no foreign key target thing for the primary key other thing.
 			// That is: inserting/updating a row for an item that doesn't exist.
-			if($e->getCode() === 'HY000'
-				&& $statement->errorInfo()[1] === 1032
-				&& $statement->errorInfo()[2] === 'Can\'t find record in \'ItemFeature\''
-			) {
+			if($e->getCode() === 'HY000' && $statement->errorInfo()[1] === 1032 && $statement->errorInfo()[2] === 'Can\'t find record in \'ItemFeature\'') {
 				throw new NotFoundException();
 			} else {
-				if($e->getCode() === '23000'
-					&& $statement->errorInfo()[0] === '23000'
-					&& $statement->errorInfo()[1] === 1452
-				) {
+				if($e->getCode() === '23000' && $statement->errorInfo()[0] === '23000' && $statement->errorInfo()[1] === 1452) {
 					throw new NotFoundException();
 				}
 			}

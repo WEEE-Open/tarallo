@@ -263,14 +263,6 @@
       - tarallo
       - tarallo_test
 
-#  - name: Import sample data
-#    mysql_db:
-#      name: tarallo
-#      state: import
-#      login_user: root
-#      login_password: "{{ mariadb_root_password }}"
-#      target: "/data/sample-data.sql"
-
   - name: Replace my.cnf since it's the only way to enable event scheduler
     template:
       src: my.cnf.j2

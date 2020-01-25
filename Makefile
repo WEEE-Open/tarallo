@@ -47,6 +47,10 @@ cache:
 dbupdate:
 	vagrant provision --provision-with db_update,test_db_update
 
+.PHONY:
+examples:
+	vagrant provision --provision-with example_data
+
 build/config/config.php:
 ifneq ("$(wildcard config/config-production.php)","")
 	mkdir build/config
