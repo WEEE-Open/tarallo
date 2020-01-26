@@ -219,6 +219,8 @@ class ItemValidator {
 			if($parentType !== 'case' && $parentType !== 'location' && $parentType !== 'motherboard') {
 				throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'RAMs, CPUs and expansion cards cards should be inside a case, location or motherboard');
 			}
+		} else if($type === 'location' && $parentType !== 'location') {
+			throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Locations should be inside other locations or nothing');
 		} else {
 			if($parentType !== 'case' && $parentType !== 'location') {
 				throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Normal items can be placed only inside cases and locations');
