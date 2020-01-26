@@ -55,7 +55,7 @@ trait ItemTraitContent {
 	 * @return Item[]
 	 */
 	public function getFlatContent(): array {
-		$result = $this->contents;
+		$result = array_merge([$this], $this->contents);
 		foreach($this->contents as $item) {
 			/** @var Item $item */
 			$result = array_merge($result, $item->getFlatContent());
