@@ -207,27 +207,31 @@ class ItemValidator {
 	 */
 	private static function checkNesting(ItemWithFeatures $item, ?ItemWithFeatures $container): void {
 		$type = $item->getFeatureValue('type');
-		$parentType = $container->getFeatureValue('type');
+		$containerType = $container->getFeatureValue('type');
 
-		if($type === null || $parentType == null) {
+		if($type === null || $containerType == null) {
 			return;
 		}
 
-		if($type === 'case' && $parentType !== 'location') {
+		if($type === 'case' && $containerType !== 'location') {
 			throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Cases should be inside a location');
-		} else if(self::shouldBeInMotherboard($type)) {
-			if($parentType !== 'case' && $parentType !== 'location' && $parentType !== 'motherboard') {
-				throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'RAMs, CPUs and expansion cards cards should be inside a case, location or motherboard');
-			}
-		} else if($type === 'location' && $parentType !== 'location') {
-			throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Locations should be inside other locations or nothing');
 		} else {
-			if($parentType !== 'case' && $parentType !== 'location') {
-				throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Normal items can be placed only inside cases and locations');
+			if(self::shouldBeInMotherboard($type)) {
+				if($containerType !== 'case' && $containerType !== 'location' && $containerType !== 'motherboard') {
+					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'RAMs, CPUs and expansion cards cards should be inside a case, location or motherboard');
+				}
+			} else {
+				if($type === 'location' && $containerType !== 'location') {
+					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Locations should be inside other locations or nothing');
+				} else {
+					if($containerType !== 'case' && $containerType !== 'location') {
+						throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Normal items can be placed only inside cases and locations');
+					}
+				}
 			}
 		}
 
-		if($type === 'cpu' && $parentType === 'motherboard') {
+		if($type === 'cpu' && $containerType === 'motherboard') {
 			if(!self::compareFeature($item, $container, 'cpu-socket')) {
 				$itemValue = $item->getFeatureValue('cpu-socket');
 				$parentValue = $container->getFeatureValue('cpu-socket');
@@ -235,7 +239,7 @@ class ItemValidator {
 			}
 		}
 
-		if($type === 'ram' && $parentType === 'motherboard') {
+		if($type === 'ram' && $containerType === 'motherboard') {
 			if(!self::compareFeature($item, $container, 'ram-form-factor')) {
 				$itemValue = $item->getFeatureValue('ram-form-factor');
 				$parentValue = $container->getFeatureValue('ram-form-factor');
@@ -245,6 +249,27 @@ class ItemValidator {
 				$itemValue = $item->getFeatureValue('ram-type');
 				$parentValue = $container->getFeatureValue('ram-type');
 				throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, "Incompatible standard: RAM is $itemValue, motherboard is $parentValue");
+			}
+		}
+
+		if($containerType === 'case' && $container->getFeatureValue('motherboard-form-factor') === 'proprietary-laptop') {
+			if($type === 'psu') {
+				$ff = $item->getFeatureValue('psu-form-factor');
+				if($ff !== null && $ff !== 'proprietary') {
+					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, "Incompatible items: cannot place an internal PSU inside a laptop case");
+				}
+			} else if($type === 'hdd') {
+				if($item->getFeatureValue('hdd-form-factor') === '3.5') {
+					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'A 3.5" HDD is too large for a laptop');
+				}
+			} else if($type === 'odd') {
+				if($item->getFeatureValue('odd-form-factor') === '5.25') {
+					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'A 5.25" ODD is too large for a laptop');
+				}
+			} else if(self::isExpansionCard($type)) {
+				if($item->getFeatureValue('pcie-sockets-n') !== null || $item->getFeatureValue('pci-sockets-n') !== null || $item->getFeatureValue('isa-sockets-n') !== null) {
+					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'A full size PCI(e) card cannot fit into a laptop');
+				}
 			}
 		}
 
@@ -419,13 +444,13 @@ class ItemValidator {
 			case 'audio-card':
 				return [
 					'brand', 'model', 'working', 'mini-jack-ports-n', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color',
-					'owner'
+					'owner',
 				];
 				break;
 			case 'modem-card':
 				return [
 					'brand', 'model', 'working', 'rj11-ports-n', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color',
-					'owner'
+					'owner',
 				];
 				break;
 			case 'other-card':
@@ -434,7 +459,7 @@ class ItemValidator {
 			case 'storage-card':
 				return ['brand', 'model', 'working', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n',
 					'scsi-db68-ports-n', 'pcie-sockets-n', 'sas-sff-8087-ports-n', 'sas-sff-8088-ports-n',
-					'sas-sata-ports-n', 'pci-sockets-n', 'sn', 'color', 'owner'
+					'sas-sata-ports-n', 'pci-sockets-n', 'sn', 'color', 'owner',
 				];
 			case 'bluetooth-card':
 			case 'wifi-card':
@@ -596,7 +621,7 @@ class ItemValidator {
 		if($power === 'c13' || $power === 'c19') {
 			if($monitor->getFeatureValue('psu-volt') !== null) {
 				throw new FeatureValidationException('psu-volt', $monitor->getFeatureValue('psu-volt'), null, $monitor->peekCode(), 'A monitor with a 220 V power connector should not require specific voltages and currents. Remove "Power supply voltage" or select another power connector type.');
-			} elseif($monitor->getFeatureValue('psu-ampere') !== null) {
+			} else if($monitor->getFeatureValue('psu-ampere') !== null) {
 				throw new FeatureValidationException('psu-ampere', $monitor->getFeatureValue('psu-ampere'), null, $monitor->peekCode(), 'A monitor with a 220 V power connector should not require specific voltages and currents. Remove "Power supply current" or select another power connector type.');
 			}
 		}
