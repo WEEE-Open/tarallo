@@ -369,135 +369,178 @@ class ItemValidator {
 	 *
 	 * @return string[]
 	 */
-	public static function getDefaultFeatures(string $type): array {
+	public static function getProductDefaultFeatures(string $type): array {
 		switch($type) {
 			case 'case':
 				return [
-					'cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code', 'brand', 'model',
-					'working', 'sn', 'usb-ports-n', 'firewire-ports-n', 'mini-jack-ports-n', 'motherboard-form-factor',
-					'psu-form-factor', 'power-connector', 'psu-volt', 'psu-ampere', 'arrival-batch', 'owner',
-					'color', 'notes',
+					'usb-ports-n', 'firewire-ports-n', 'mini-jack-ports-n', 'motherboard-form-factor',
+					'psu-form-factor', 'power-connector', 'psu-volt', 'psu-ampere', 'color'
 				];
 			case 'motherboard':
 				return [
-					'brand', 'model', 'working', 'sn', 'motherboard-form-factor', 'key-bios-setup', 'key-boot-menu',
+					'motherboard-form-factor', 'color', 'key-bios-setup', 'key-boot-menu',
 					'cpu-socket', 'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n',
 					'sata-ports-n', 'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n',
 					'usb-ports-n', 'firewire-ports-n', 'mini-firewire-ports-n', 'ethernet-ports-1000m-n',
 					'ethernet-ports-100m-n', 'mac', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand',
 					'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 's-video-ports-n',
 					's-video-7pin-ports-n', 'mini-jack-ports-n', 'psu-connector-cpu', 'psu-connector-motherboard',
-					'color', 'owner', 'notes',
 				];
 			case 'cpu':
 				return [
-					'brand', 'model', 'working', 'variant', 'core-n', 'thread-n', 'isa', 'frequency-hertz',
-					'cpu-socket',
-					'integrated-graphics-brand', 'integrated-graphics-model', 'owner',
+					'core-n', 'thread-n', 'isa', 'frequency-hertz',	'cpu-socket',
+					'integrated-graphics-brand', 'integrated-graphics-model'
 				];
 			case 'ram':
 				return [
-					'brand', 'model', 'working', 'sn', 'family', 'ram-type', 'ram-form-factor', 'frequency-hertz',
-					'capacity-byte', 'ram-timings', 'ram-ecc', 'color', 'owner', 'notes',
+					'family', 'ram-type', 'ram-form-factor', 'frequency-hertz',
+					'capacity-byte', 'ram-timings', 'ram-ecc', 'color'
 				];
 			case 'hdd':
 				return [
-					'brand', 'model', 'working', 'sn', 'wwn', 'family', 'capacity-decibyte', 'hdd-form-factor',
-					'spin-rate-rpm', 'mini-ide-ports-n', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n',
-					'scsi-db68-ports-n', 'data-erased', 'surface-scan', 'smart-data', 'software', 'owner',
+					'family', 'capacity-decibyte', 'hdd-form-factor', 'spin-rate-rpm', 'mini-ide-ports-n',
+					'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n', 'scsi-db68-ports-n'
 				];
 			case 'ssd':
 				return [
-					'brand', 'model', 'working', 'sn', 'family', 'capacity-byte', 'hdd-form-factor', 'sata-ports-n',
-					'data-erased', 'surface-scan', 'smart-data', 'software', 'owner',
+					'capacity-byte', 'hdd-form-factor', 'sata-ports-n',
 				];
 			case 'odd':
 				return [
-					'brand', 'model', 'working', 'sn', 'odd-type', 'ide-ports-n', 'jae-ports-n',
-					'sata-ports-n', 'odd-form-factor', 'color', 'owner',
+					'odd-type', 'ide-ports-n', 'jae-ports-n', 'sata-ports-n', 'odd-form-factor', 'color'
 				];
 			case 'fdd':
-				return ['brand', 'model', 'working', 'sn', 'color', 'owner'];
+				return ['color'];
 			case 'graphics-card':
 				return [
-					'brand', 'brand-manufacturer', 'model', 'working', 'capacity-byte', 'vga-ports-n', 'dvi-ports-n',
+					'brand-manufacturer', 'capacity-byte', 'vga-ports-n', 'dvi-ports-n',
 					'dms-59-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'agp-sockets-n', 'pcie-sockets-n',
-					'pcie-power-pin-n', 'sn', 'color', 'owner',
+					'pcie-power-pin-n','color'
 				];
 			case 'psu':
 				return [
-					'brand', 'brand-manufacturer', 'model', 'working', 'working', 'sn', 'power-connector',
+					'brand-manufacturer', 'power-connector',
 					'power-rated-watt', 'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor',
-					'psu-12v-rail-ampere', 'pcie-power-pin-n', 'sata-power-n', 'color', 'owner',
+					'psu-12v-rail-ampere', 'pcie-power-pin-n', 'sata-power-n', 'color'
 				];
 			case 'external-psu':
 				return [
-					'brand', 'brand-manufacturer', 'model', 'working', 'sn', 'power-connector', 'psu-volt',
-					'psu-ampere', 'owner', 'notes',
+					'brand-manufacturer', 'power-connector', 'psu-volt', 'psu-ampere'
 				];
 			case 'ethernet-card':
 				return [
-					'brand', 'model', 'working', 'sn', 'pcie-sockets-n', 'pci-sockets-n', 'ethernet-ports-1000m-n',
+					'pcie-sockets-n', 'pci-sockets-n', 'ethernet-ports-1000m-n',
 					'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n',
-					'ethernet-ports-10base5-aui-n', 'mac', 'color', 'owner',
+					'ethernet-ports-10base5-aui-n'
 				];
 			case 'audio-card':
 				return [
-					'brand', 'model', 'working', 'mini-jack-ports-n', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color',
-					'owner',
+					'mini-jack-ports-n', 'pcie-sockets-n', 'pci-sockets-n', 'color',
 				];
 				break;
 			case 'modem-card':
 				return [
-					'brand', 'model', 'working', 'rj11-ports-n', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color',
-					'owner',
+					'rj11-ports-n', 'pcie-sockets-n', 'pci-sockets-n', 'color',
 				];
 				break;
 			case 'other-card':
 			case 'tv-card':
-				return ['brand', 'model', 'working', 'pcie-sockets-n', 'pci-sockets-n', 'sn', 'color', 'owner'];
+				return ['pcie-sockets-n', 'pci-sockets-n', 'color'];
 			case 'storage-card':
-				return ['brand', 'model', 'working', 'sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n',
+				return ['sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n',
 					'scsi-db68-ports-n', 'pcie-sockets-n', 'sas-sff-8087-ports-n', 'sas-sff-8088-ports-n',
-					'sas-sata-ports-n', 'pci-sockets-n', 'sn', 'color', 'owner',
+					'sas-sata-ports-n', 'pci-sockets-n', 'color'
 				];
 			case 'bluetooth-card':
 			case 'wifi-card':
 				return [
-					'brand', 'model', 'working', 'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n',
-					'mini-pci-sockets-n', 'mac', 'sn', 'color', 'owner',
+					'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n',
+					'mini-pci-sockets-n', 'color'
 				];
 			case 'network-switch':
 			case 'network-hub':
 			case 'modem-router':
 				return [
-					'brand', 'model', 'working', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n',
+					'ethernet-ports-1000m-n', 'ethernet-ports-100m-n',
 					'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n', 'ethernet-ports-10base5-aui-n',
-					'power-connector', 'psu-volt', 'psu-ampere', 'color', 'owner', 'notes',
+					'power-connector', 'psu-volt', 'psu-ampere',
 				];
 			case 'keyboard':
 			case 'mouse':
-				return ['brand', 'brand-manufacturer', 'model', 'working', 'sn', 'ps2-ports-n', 'usb-ports-n', 'color',
-					'owner'];
+				return ['brand-manufacturer', 'ps2-ports-n', 'usb-ports-n', 'color'];
 			case 'monitor':
 				return [
-					'cib-qr', 'cib', 'cib-old', 'other-code', 'brand', 'model', 'working', 'sn', 'diagonal-inch',
-					'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n', 'usb-ports-n', 'power-connector',
-					'psu-volt', 'psu-ampere', 'color', 'owner', 'notes',
+					'diagonal-inch', 'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n',
+					'usb-ports-n', 'power-connector', 'psu-volt', 'psu-ampere', 'color'
 				];
 			case 'ports-bracket':
+				return ['usb-ports-n', 'serial-ports-n', 'game-ports-n', 'firewire-ports-n', 'color'];
+			default:
+				return [];
+		}
+	}
+
+
+	/**
+	 * Get default feature names (i.e. most common ones) for an item type
+	 *
+	 * @param string $type Item type
+	 *
+	 * @return string[]
+	 */
+	public static function getItemDefaultFeatures(string $type): array {
+		switch($type) {
+			case 'case':
+			case 'monitor':
+				return [
+					'cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code',
+					'brand', 'model', 'variant', 'working', 'sn', 'arrival-batch', 'owner', 'notes',
+				];
+			default: // Includes all these cases
+//			case 'cpu':
+//			case 'ram':
+//			case 'motherboard':
+//			case 'odd':
+//			case 'fdd':
+//			case 'graphics-card':
+//			case 'psu':
+//			case 'external-psu':
+//			case 'audio-card':
+//			case 'modem-card':
+//			case 'other-card':
+//			case 'tv-card':
+//			case 'storage-card':
+//			case 'network-switch':
+//			case 'network-hub':
+//			case 'keyboard':
+//			case 'mouse':
+				return [
+					'brand', 'model', 'variant', 'working', 'sn', 'owner'
+				];
+			case 'ethernet-card':
+			case 'bluetooth-card':
+			case 'wifi-card':
+			case 'modem-router':
+				return [
+					'brand', 'model', 'variant', 'working', 'mac', 'sn', 'owner', 'notes'
+				];
+			case 'hdd':
+			case 'ssd':
+				return [
+					'brand', 'model', 'variant', 'working', 'sn', 'wwn',
+					'data-erased', 'surface-scan', 'smart-data', 'software', 'owner',
+				];
+			case 'ports-bracket':
+				// These rarely ever have a brand or a model or anything
 				return ['usb-ports-n', 'serial-ports-n', 'game-ports-n', 'firewire-ports-n', 'color', 'owner'];
 			case 'location':
 				return ['notes'];
-			default:
-				return ['brand', 'model', 'owner', 'notes'];
 		}
 	}
 
 	public static function defaultFeaturesLastModified(): int {
 		return filemtime(__FILE__);
 	}
-
 
 	private static function pushdownFeatures(ItemWithFeatures $item) {
 		$type = $item->getFeatureValue('type');
@@ -530,7 +573,7 @@ class ItemValidator {
 		if($type === null) {
 			return $item;
 		}
-		foreach(self::getDefaultFeatures($type) as $feature) {
+		foreach(self::getItemDefaultFeatures($type) as $feature) {
 			$item->addFeature(new BaseFeature($feature));
 		}
 		return $item;

@@ -13,7 +13,8 @@
 	let featureTypes = new Map();
 	let featureValues = new Map();
 	let featureValuesTranslated = new Map();
-	let featureDefaultsByType = new Map();
+	let featureDefaultsItems = new Map();
+	let featureDefaultsProducts = new Map();
 
 	// Set and unset as needed by the client
 	let fadingErrors = new Map();
@@ -53,7 +54,13 @@
 
 		let defaults = payload["defaults"];
 		for(let type of Object.keys(defaults)) { // Keys are types
-			featureDefaultsByType.set(type, defaults[type]) // Value is a list of feature names
+			featureDefaultsItems.set(type, defaults[type]) // Value is a list of feature names
+		}
+
+		// Same as above
+		defaults = payload["products"];
+		for(let type of Object.keys(defaults)) {
+			featureDefaultsProducts.set(type, defaults[type])
 		}
 	} else {
 		console.error(response);
@@ -851,12 +858,16 @@
 	 * @param {HTMLSelectElement} featureElement - The feature element itself, to get type
 	 */
 	function setTypeClick(featuresElement, featureElement) {
-		deleteEmptyFeatures(featuresElement, ['type', 'working']);
-
 		let features;
 		let type = featureElement.getElementsByTagName('SELECT')[0].value;
 
-		features = featureDefaultsByType.get(type);
+		if(featuresElement.parentElement.classList.contains('product')) {
+			deleteEmptyFeatures(featuresElement, ['type']);
+			features = featureDefaultsProducts.get(type);
+		} else {
+			deleteEmptyFeatures(featuresElement, ['type', 'brand', 'model', 'variant']);
+			features = featureDefaultsItems.get(type);
+		}
 		if(typeof features === 'undefined') {
 			features = [];
 		}

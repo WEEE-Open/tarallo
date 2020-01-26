@@ -221,6 +221,7 @@ class Controller implements RequestHandlerInterface {
 
 		if($from === null) {
 			$from = new ItemIncomplete(null);
+			$from->addFeature(new BaseFeature('type'));
 			$from->addFeature(new BaseFeature('brand'));
 			$from->addFeature(new BaseFeature('model'));
 			$from->addFeature(new BaseFeature('variant'));
@@ -691,12 +692,18 @@ class Controller implements RequestHandlerInterface {
 
 		$defaults = [];
 		foreach(Feature::features['type'] as $type => $useless) {
-			$defaults[$type] = ItemValidator::getDefaultFeatures($type);
+			$defaults[$type] = ItemValidator::getItemDefaultFeatures($type);
+		}
+
+		$defaults2 = [];
+		foreach(Feature::features['type'] as $type => $useless) {
+			$defaults2[$type] = ItemValidator::getProductDefaultFeatures($type);
 		}
 
 		$json = [
 			'features' => FeaturePrinter::getAllFeatures(),
 			'defaults' => $defaults,
+			'products' => $defaults2,
 		];
 
 		return new JsonResponse($json, 200, $responseHeaders);
