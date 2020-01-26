@@ -42,7 +42,7 @@ class Controller implements RequestHandlerInterface {
 		$query = $request->getQueryParams();
 
 		$parameters = $request->getAttribute('parameters', []);
-		// So things aren't url-decoded automatically...
+
 		$id = Validation::validateOptionalString($parameters, 'id', null);
 		$edit = Validation::validateOptionalString($parameters, 'edit', null);
 		$add = Validation::validateOptionalString($parameters, 'add', null);
@@ -84,7 +84,6 @@ class Controller implements RequestHandlerInterface {
 	public static function getProduct(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
-		$query = $request->getQueryParams();
 		$parameters = $request->getAttribute('parameters', []);
 
 		$brand = Validation::validateOptionalString($parameters, 'brand');
@@ -93,7 +92,11 @@ class Controller implements RequestHandlerInterface {
 
 		$product = $db->productDAO()->getProduct(new ProductCode($brand, $model, $variant));
 
-		$request = $request->withAttribute('Template', 'product')->withAttribute('TemplateParameters', ['product' => $product]);
+		$editing = end(explode('/', $request->getUri()->getPath())) === 'edit';
+
+		$request = $request
+			->withAttribute('Template', 'product')
+			->withAttribute('TemplateParameters', ['product' => $product, 'editing' => $editing]);
 
 		return $handler->handle($request);
 	}
@@ -774,8 +777,8 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/item/{id}/history', [User::AUTH_LEVEL_RO, 'Controller::getItemHistory',]);
 				$r->get('/product', [User::AUTH_LEVEL_RO, 'Controller::getAllProducts',]);
 				$r->get('/product/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct',]);
+				$r->get('/product/{brand}/{model}/{variant}/edit', [User::AUTH_LEVEL_RO, 'Controller::getProduct',]);
 				$r->get('/product/{brand}/{model}/{variant}/history', [User::AUTH_LEVEL_RO, 'Controller::getProductHistory',]);
-				$r->get('/product/{brand}/{model}/{variant}/edit', [User::AUTH_LEVEL_RO, 'Controller::editProduct',]);
 				$r->get('/product/{brand}/{model}/{variant}/items', [User::AUTH_LEVEL_RO, 'Controller::getProductItems',]);
 				$r->get('/product/{brand}/{model}/{variant}/items/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::getProductItems',]);
 				$r->get('/product/{brand}/{model}/{variant}/items/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::getProductItems',]);

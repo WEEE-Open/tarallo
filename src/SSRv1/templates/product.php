@@ -16,7 +16,7 @@ $this->layout(
 );
 ?>
 
-<article class="item root <?=$editing ? ' head editing' : ''?>">
+<article class="item root <?=$editing ? ' head editing' : ''?>" data-brand="<?=$this->e($product->getBrand())?>" data-model="<?=$this->e($product->getModel())?>" data-variant="<?=$this->e($product->getVariant())?>">
 	<header>
 		<h2 id="code-<?=$this->e($product->getBrand())?>-<?=$this->e($product->getModel())?>-<?=$this->e($product->getVariant())?>"><?= $title ?></h2>
 	</header>
@@ -25,7 +25,7 @@ $this->layout(
 		<?php if($editing): ?>
 			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><button class="delete">❌&nbsp;Delete</button>
 		<?php else: ?>
-			<button class="edit" disabled>🛠️&nbsp;Edit</button><button class="clone" disabled>🔲&nbsp;Copy</button><button class="items">🖥&nbsp;Items</button><button class="history">📖&nbsp;History</button>
+			<button class="edit">🛠️&nbsp;Edit</button><button class="clone" disabled>🔲&nbsp;Copy</button><button class="items">🖥&nbsp;Items</button><button class="history">📖&nbsp;History</button>
 		<?php endif ?>
 	</nav>
 

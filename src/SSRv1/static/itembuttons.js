@@ -16,7 +16,11 @@
 		let hash = '#code-' + code;
 
 		if(ev.target.classList.contains("edit")) {
-			window.location.href = here + '/edit/' + encodeURIComponent(code) + query + hash;
+			if(typeof code === "undefined") {
+				window.location.href = '/product/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant) + '/edit' + query;
+			} else {
+				window.location.href = here + '/edit/' + encodeURIComponent(code) + query + hash;
+			}
 		} else if(ev.target.classList.contains("addinside")) {
 			window.location.href = here + '/new/item/' + encodeURIComponent(code) + query + hash;
 		} else if(ev.target.classList.contains("history")) {

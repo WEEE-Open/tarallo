@@ -1418,9 +1418,20 @@
 		}
 
 		toggleButtons(true);
-		let code = document.querySelector('.item.head.editing').dataset.code;
-		let response;
-		let uri = '/v2/items/' + encodeURIComponent(code) + '/features';
+		let dataset = document.querySelector('.item.head.editing').dataset;
+		let code = dataset.code;
+		let brand = dataset.brand;
+		let model = dataset.model;
+		let variant = dataset.variant;
+
+		let uri, response;
+
+		if(typeof code === "undefined") {
+			uri = '/v2/products/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant) + '/features';
+		} else {
+			uri = '/v2/items/' + encodeURIComponent(code) + '/features';
+		}
+
 		let encoded = JSON.stringify(delta);
 
 		console.log("Send to " + uri);
