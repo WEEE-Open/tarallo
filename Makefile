@@ -27,9 +27,7 @@ copies:
 	cp -r "src/" "build/"
 	cp -r "resources/" "build/"
 	cp composer.{json,lock} "build/"
-
-# Could be useful, could be not.
-# chmod o-w build/src/SSRv1/router.cache
+	cp *.sql "build/"
 
 .PHONY:
 compose:
@@ -39,9 +37,9 @@ compose:
 
 .PHONY:
 cache:
-	test ! -f "build/SSRv1/router.cache" || rm build/SSRv1/router.cache
-	test ! -f "build/APIv1/router.cache" || rm build/APIv1/router.cache
-	php bin/build-cache ../build/
+	test ! -f "build/resources/cache/SSRv1.cache" || rm "build/resources/cache/SSRv1.cache"
+	test ! -f "build/resources/cache/APIv2.cache" || rm "build/resources/cache/APIv2.cache"
+	php bin/build-cache
 
 .PHONY:
 dbupdate:
