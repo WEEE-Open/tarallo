@@ -102,10 +102,7 @@ class HddSummarizer implements Summarizer {
 			$procedures .= '_';
 		}
 
-		// TODO: create a CommercialSummarizer for PartialSummaries that considers family (only for some items like HDD and RAM)
-		$commercial = $brand ? FeaturePrinter::printableValue($brand) : '';
-		$commercial .= $family ? ' ' . FeaturePrinter::printableValue($family) : '';
-		$commercial .= $model ? ' ' . FeaturePrinter::printableValue($model) : '';
+		$commercial = PartialSummaries::summarizeCommercial($item);
 
 		$pretty = $hardware . ', ' . $procedures;
 		$pretty .= $commercial ? ', ' . $commercial : '';

@@ -11,11 +11,12 @@ use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class PartialSummaries {
 	public static function summarizeCommercial(ItemWithFeatures $item) {
-		$brand = $item->getFeature('brand');
-		$manufacturer = $item->getFeature('brand-manufacturer');
-		$model = $item->getFeature('model');
-		$variant = $item->getFeature('variant');
-		$internal = $item->getFeature('internal-name');
+		$brand = $item->getFeatureValue('brand');
+		$manufacturer = $item->getFeatureValue('brand-manufacturer');
+		$family = $item->getFeatureValue('family');
+		$model = $item->getFeatureValue('model');
+		$variant = $item->getFeatureValue('variant');
+		$internal = $item->getFeatureValue('internal-name');
 
 		$parts = [];
 		if($brand !== null) {
@@ -23,6 +24,11 @@ class PartialSummaries {
 		}
 		if($manufacturer !== null) {
 			$parts[] = "($manufacturer)";
+		}
+		if($family !== null) {
+			if($model === null || strpos($model, $family) === false) {
+				$parts[] = $family;
+			}
 		}
 		if($model !== null) {
 			$parts[] = $model;

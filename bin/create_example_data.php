@@ -35,10 +35,11 @@ $db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);
 $db->sessionDAO()->setAuditUsername('ExampleScript');
 $db->productDAO()->addProduct(new Product("Samsong", "KAI39"));
 $db->productDAO()->addProduct(new Product("Caste", "Payton", "Brutto"));
-$db->productDAO()->addProduct((new Product("AMD", "Opteron 3300", "AM1234567"))
+$db->productDAO()->addProduct((new Product("AMD", "Opteron 3300", "AJEJE"))
 	->addFeature(new Feature('frequency-hertz', 3000000000))
 	->addFeature(new Feature('isa', 'x86-64'))
 	->addFeature(new Feature('cpu-socket', 'am3'))
+	->addFeature(new Feature('internal-name', 'AM1234567BR4Z0'))
 	->addFeature(new Feature('type', 'cpu')));
 $db->productDAO()->addProduct((new Product("Intel", "Centryno", "SL666"))
 	->addFeature(new Feature('frequency-hertz', 1500000000))
@@ -70,8 +71,9 @@ $db->productDAO()->addProduct((new Product("eMac", "EZ1600", "boh"))
 	->addFeature(new Feature('motherboard-form-factor', 'miniitx'))
 	->addFeature(new Feature('color', 'white'))
 	->addFeature(new Feature('type', 'case')));
-$db->productDAO()->addProduct((new Product("Dill", "DI-360", "SFF"))
+$db->productDAO()->addProduct((new Product("Dill", "PessimPlex DI-360", "SFF"))
 	->addFeature(new Feature('motherboard-form-factor', 'proprietary'))
+	->addFeature(new Feature('family', 'PessimPlex'))
 	->addFeature(new Feature('color', 'grey'))
 	->addFeature(new Feature('type', 'case')));
 foreach([256, 512, 1024, 2048] as $size) {
@@ -97,13 +99,13 @@ $table->addContent($rambox);
 
 $pc20 = (new Item('PC20'))
 	->addFeature(new Feature('brand', 'Dill'))
-	->addFeature(new Feature('model', 'DI-360'))
+	->addFeature(new Feature('model', 'PessimPlex DI-360'))
 	->addFeature(new Feature('variant', 'SFF'))
 	->addFeature(new Feature('owner', 'DISAT'))
 	->addFeature(new Feature('working', 'yes'));
 $pc90 = (new Item('PC90'))
 	->addFeature(new Feature('brand', 'Dill'))
-	->addFeature(new Feature('model', 'DI-360'))
+	->addFeature(new Feature('model', 'PessimPlex DI-360'))
 	->addFeature(new Feature('variant', 'SFF'))
 	->addFeature(new Feature('todo', 'install-os'))
 	->addFeature(new Feature('owner', 'DISAT'))
@@ -116,7 +118,7 @@ $pc55 = (new Item('PC55'))
 	->addFeature(new Feature('motherboard-form-factor', 'atx'));
 $pc22 = (new Item('PC22'))
 	->addFeature(new Feature('brand', 'Dill'))
-	->addFeature(new Feature('model', 'DI-360'))
+	->addFeature(new Feature('model', 'PessimPlex DI-360'))
 	->addFeature(new Feature('variant', 'SFF'))
 	->addFeature(new Feature('color', 'black')) // override
 	->addFeature(new Feature('owner', 'DISAT'))
@@ -193,11 +195,11 @@ foreach([777, 778, 779] as $item) {
 	$rambox->addContent($ram);
 }
 
-$lonelyCpu = (new Item(null))
+$lonelyCpu = (new Item('C1'))
 	->addFeature(new Feature('brand', 'AMD'))
 	->addFeature(new Feature('model', 'Opteron 3300'))
-	->addFeature(new Feature('variant', 'AM1234567'))
-	->setProduct($db->productDAO()->getProduct(new ProductCode('AMD', 'Opteron 3300', 'AM1234567')));
+	->addFeature(new Feature('variant', 'AJEJE'))
+	->setProduct($db->productDAO()->getProduct(new ProductCode('AMD', 'Opteron 3300', 'AJEJE')));
 $table->addContent($lonelyCpu);
 
 $table->addContent($SCHIFOMACCHINA);
