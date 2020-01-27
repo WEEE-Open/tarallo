@@ -348,4 +348,45 @@ class CpuSummarizerTest extends TestCase {
 
 		return $summary;
 	}
+
+	public function testCpuBrandAndFamilyOnly() {
+		$item = new Item('C123');
+		$item
+			->addFeature(new Feature('brand', 'Intel'))
+			->addFeature(new Feature('family', 'Core 2 Duo'))
+			->addFeature(new Feature('cpu-socket', 'lga775'))
+			->addFeature(new Feature('frequency-hertz',2400000000))
+			->addFeature(new Feature('isa', 'x86-64'))
+			->addFeature(new Feature('working', 'yes'))
+			->addFeature(new Feature('owner', 'DISAT'))
+			->addFeature(new Feature('type', 'cpu'));
+
+		$summary = CpuSummarizer::summarize($item);
+		$this->assertEquals(
+			'CPU x86 64 bit, 2.4 GHz, Socket LGA775, Intel Core 2 Duo',
+			$summary
+		);
+
+		return $summary;
+	}
+
+	public function testCpuFamilyOnly() {
+		$item = new Item('C123');
+		$item
+			->addFeature(new Feature('family', 'Core 2 Duo'))
+			->addFeature(new Feature('cpu-socket', 'lga775'))
+			->addFeature(new Feature('frequency-hertz',2400000000))
+			->addFeature(new Feature('isa', 'x86-64'))
+			->addFeature(new Feature('working', 'yes'))
+			->addFeature(new Feature('owner', 'DISAT'))
+			->addFeature(new Feature('type', 'cpu'));
+
+		$summary = CpuSummarizer::summarize($item);
+		$this->assertEquals(
+			'CPU x86 64 bit, 2.4 GHz, Socket LGA775, Core 2 Duo',
+			$summary
+		);
+
+		return $summary;
+	}
 }
