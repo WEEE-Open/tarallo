@@ -4,12 +4,13 @@
 /** @var bool $editing */
 $features = $product->getFeatures();
 $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($product);
-$title = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) . rtrim(' ' . $this->e($product->getVariantOrEmpty()));
+$brandModel = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel());
+$maybeVariant = rtrim(' ' . $this->e($product->getVariantOrEmpty()));
 
 $this->layout(
 	'main',
 	[
-		'title' => $title,
+		'title' => $brandModel . $maybeVariant,
 		'user' => $user,
 		'itembuttons' => true,
 	]
@@ -18,7 +19,7 @@ $this->layout(
 
 <article class="item root <?=$editing ? ' head editing' : ''?>" data-brand="<?=$this->e($product->getBrand())?>" data-model="<?=$this->e($product->getModel())?>" data-variant="<?=$this->e($product->getVariant())?>">
 	<header>
-		<h2 id="code-<?=$this->e($product->getBrand())?>-<?=$this->e($product->getModel())?>-<?=$this->e($product->getVariant())?>"><?= $title ?></h2>
+		<h2 id="code-<?=$this->e($product->getBrand())?>-<?=$this->e($product->getModel())?>-<?=$this->e($product->getVariant())?>"><?= $brandModel ?><small><?= $maybeVariant ?></small></h2>
 	</header>
 
 	<nav class="itembuttons" data-for-product-brand="<?=$this->e($product->getBrand())?>" data-for-product-model="<?=$this->e($product->getModel())?>"  data-for-product-variant="<?=$this->e($product->getVariant())?>">
