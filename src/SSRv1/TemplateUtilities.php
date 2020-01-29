@@ -49,7 +49,7 @@ class TemplateUtilities implements ExtensionInterface {
 		$groups = [];
 		$groupsPrintable = [];
 
-		// $group has the group ID as key, the human-radable name comes lates
+		// $group has the group ID as key, the human-radable name comes later
 		foreach($ultraFeatures as $ultra) {
 			$groups[BaseFeature::getGroup($ultra->name)][] = $ultra;
 		}
@@ -68,7 +68,7 @@ class TemplateUtilities implements ExtensionInterface {
 	}
 
 	private static function featureNameSort(UltraFeature $a, UltraFeature $b) {
-		return $a->name <=> $b->name;
+		return $a->pname <=> $b->pname;
 	}
 
 	/**
