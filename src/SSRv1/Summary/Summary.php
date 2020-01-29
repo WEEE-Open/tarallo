@@ -4,6 +4,8 @@ namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
 
 use WEEEOpen\Tarallo\ItemWithFeatures;
+use WEEEOpen\Tarallo\Product;
+use WEEEOpen\Tarallo\ProductCode;
 
 class Summary {
 	public static function peel(ItemWithFeatures $item): ?string {
@@ -60,5 +62,28 @@ class Summary {
 			default:
 				return SimpleDeviceSummarizer::summarize($item);
 		}
+	}
+
+	public static function peelForList(ProductCode $product, ?string $manufacturer, ?string $family, ?string $internal): array {
+		$brand = $product->getBrand();
+		$model = $product->getModel();
+		$variant = $product->getVariant();
+		//$manufacturer = $item->getFeatureValue('brand-manufacturer');
+		//$family = $item->getFeatureValue('family');
+		//$internal = $item->getFeatureValue('internal-name');
+
+		$family = $family === null ? '' : $family;
+		$variant = $product->getVariantOrEmpty();
+		if($manufacturer !== null && $internal === null) {
+			$aka = "$manufacturer $model";
+		} else if($manufacturer === null && $internal !== null) {
+			$aka = "$brand $internal";
+		} else if($manufacturer !== null && $internal !== null) {
+			$aka = "$manufacturer $internal";
+		} else {
+			$aka = '';
+		}
+
+		return [$brand, $family, $model, $variant, $aka];
 	}
 }

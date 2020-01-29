@@ -10,6 +10,35 @@ $this->layout(
 		'itembuttons' => false,
 	]
 );
+$small = function(string $part) {
+	if($part === '') {
+		return '';
+	} else {
+		return "<small>$part</small>";
+	}
+};
+
+foreach($products as &$row) {
+	$product = $row[0];
+	// TODO: provide these parts (this is nearly impossible with the current query)
+	$rawSummary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peelForList($product, null, null, null);
+	$summary = [];
+	$end = count($rawSummary) - 1;
+	$i = 0;
+	for($i = 0; $i < $end; $i++) {
+		$part = $rawSummary[$i];
+		if($i % 2 === 0) {
+			$summary[] = $this->e($part);
+		} else {
+			$summary[] = $small($this->e($part));
+		}
+	}
+	$summary = implode(' ', $summary);
+	$row[] = $summary;
+	// The for-loop stopped before this element
+	$row[] = $small($this->e($rawSummary[$i]));
+}
+unset($summary);
 ?>
 <h2>All products</h2>
 
@@ -18,13 +47,15 @@ $this->layout(
 		<thead>
 		<tr>
 			<td>Product</td>
+			<!--<td>Other names</td>-->
 			<td>Items</td>
 		</tr>
 		</thead>
 		<tbody>
-		<?php foreach($products as $row): /** @var \WEEEOpen\Tarallo\ProductCode $product */ $product = $row[0]; $count = $row[1] ?>
+		<?php foreach($products as $row): /** @var \WEEEOpen\Tarallo\ProductCode $product */ $product = $row[0]; $count = $row[1]; $summary = $row[2]; $aka = $row[3] ?>
 			<tr>
-				<td><a href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>"><?= $this->e($product->getBrand()) . ' ' . $this->e($product->getModel())?><small><?= rtrim(' ' . $this->e($product->getVariantOrEmpty())) ?></small></a></td>
+				<td><a href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>"><?= $summary ?></small></a></td>
+				<!--<td><= $row[3] ?></td>-->
 				<?php if($count === 0): ?>
 				<td>0</td>
 				<?php else: ?>
