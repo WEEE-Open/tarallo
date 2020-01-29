@@ -7,15 +7,16 @@ namespace WEEEOpen\Tarallo\SSRv1\Summary;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\ItemWithFeatures;
+use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class PartialSummaries {
 	public static function summarizeCommercial(ItemWithFeatures $item) {
-		$brand = $item->getFeatureValue('brand');
+		$brand = $item instanceof ProductCode ? $item->getBrand() : $item->getFeatureValue('brand');
 		$manufacturer = $item->getFeatureValue('brand-manufacturer');
 		$family = $item->getFeatureValue('family');
-		$model = $item->getFeatureValue('model');
-		$variant = $item->getFeatureValue('variant');
+		$model = $item instanceof ProductCode ? $item->getModel() : $item->getFeatureValue('model');
+		$variant = $item instanceof ProductCode ? $item->getVariant() : $item->getFeatureValue('variant');
 		$internal = $item->getFeatureValue('internal-name');
 
 		$parts = [];

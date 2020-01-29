@@ -184,6 +184,7 @@ class AuthManager implements MiddlewareInterface {
 			}
 			$response = $handler->handle($request->withAttribute('User', $user));
 		} catch(AuthenticationException $e) {
+			error_log('Caught AuthenticationException');
 			if(!$this->browser) {
 				throw $e;
 			}
@@ -196,6 +197,7 @@ class AuthManager implements MiddlewareInterface {
 			// Delete previous data (if any), ensure that session exists, lock the database row (useless)
 			$db->sessionDAO()->setDataForSession($id, null);
 			// After login, go back there
+			error_log('Set redirect to ' . $request->getUri());
 			$db->sessionDAO()->setRedirectForSession($id, $request->getUri());
 			$db->commit();
 
@@ -278,8 +280,10 @@ class AuthManager implements MiddlewareInterface {
 				self::setCookie($id, max($session->idTokenExpiry, $session->refreshTokenExpiry));
 
 				// Store it!
+				error_log('"Store it!"');
 				$db->beginTransaction();
 				$db->sessionDAO()->setDataForSession($id, $session);
+				error_log('Set redirect to ' . $request->getUri());
 				$db->sessionDAO()->setRedirectForSession($id, null);
 				$db->commit();
 				//$request = $request->withAttribute('User', UserSSO::fromSession($session));
