@@ -294,6 +294,26 @@ class Controller implements RequestHandlerInterface {
 		return new EmptyResponse(204);
 	}
 
+	public static function deleteProduct(ServerRequestInterface $request): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$brand = Validation::validateOptionalString($parameters, 'brand');
+		$model = Validation::validateOptionalString($parameters, 'model');
+		$variant = Validation::validateOptionalString($parameters, 'variant');
+
+		$product = new ProductCode($brand, $model, $variant);
+
+		$found = $db->productDAO()->deleteProduct($product);
+
+		if($found) {
+			return new EmptyResponse();
+		} else {
+			throw new NotFoundException();
+		}
+	}
+
 	public static function setItemParent(ServerRequestInterface $request): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
@@ -703,6 +723,7 @@ class Controller implements RequestHandlerInterface {
 								$r->get('/{brand}/{model}', [User::AUTH_LEVEL_RO, 'Controller::getProducts']);
 								$r->get('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct']);
 								$r->put('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::createProduct']);
+								$r->delete('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::deleteProduct']);
 
 								$r->addGroup('/{brand}/{model}/{variant}/features',
 									function(FastRoute\RouteCollector $r) {

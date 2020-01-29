@@ -95,7 +95,7 @@ final class ProductDAO extends DAO{
 		}
 	}
 
-	public function deleteProduct(ProductCode $product) {
+	public function deleteProduct(ProductCode $product): bool {
 		$statement = $this->getPDO()->prepare('DELETE FROM Product WHERE Brand = :prod AND Model = :mod AND Variant = :var ');
 		try{
 			$statement->bindValue(':prod', $product->getBrand(), \PDO::PARAM_STR);
@@ -103,6 +103,7 @@ final class ProductDAO extends DAO{
 			$statement->bindValue(':var', $product->getVariant(), \PDO::PARAM_STR);
 			$result =  $statement->execute();
 			assert($result === true, 'Delete product');
+			return $statement->rowCount() > 0;
 		} finally{
 			$statement->closeCursor();
 		}
