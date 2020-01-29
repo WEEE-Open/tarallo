@@ -372,7 +372,7 @@ class PsuSummarizerTest extends TestCase {
 
 		$summary = PsuSummarizer::summarize($item);
 		$this->assertEquals(
-			'PSU Proprietary 100 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power), Green, HP (Delta Eletronics) DPS-100DB A (F00B4R)',
+			'PSU Proprietary 100 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power), Green, HP DPS-100DB A (Delta Eletronics F00B4R)',
 			$summary
 		);
 	}
@@ -441,7 +441,7 @@ class PsuSummarizerTest extends TestCase {
 
 		$summary = PsuSummarizer::summarize($item);
 		$this->assertEquals(
-			'PSU Proprietary 100 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power), Green, (Delta Eletronics) DPS-100DB A (F00B4R)',
+			'PSU Proprietary 100 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power), Green, DPS-100DB A (Delta Eletronics F00B4R)',
 			$summary
 		);
 	}

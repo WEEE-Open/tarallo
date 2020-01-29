@@ -23,18 +23,25 @@ class PartialSummaries {
 		if($brand !== null) {
 			$parts[] = $brand;
 		}
-		if($manufacturer !== null) {
-			$parts[] = "($manufacturer)";
-		}
 		if($family !== null) {
 			if($model === null || strpos($model, $family) === false) {
 				$parts[] = $family;
 			}
 		}
-		if($model !== null) {
-			$parts[] = $model;
-		}
-		if($internal !== null) {
+		if($internal === null) {
+			if($manufacturer !== null) {
+				$parts[] = "($manufacturer)";
+			}
+			if($model !== null) {
+				$parts[] = $model;
+			}
+		} else {
+			if($model !== null) {
+				$parts[] = $model;
+			}
+			if($manufacturer !== null) {
+				$parts[] = "($manufacturer)";
+			}
 			$parts[] = "($internal)";
 		}
 		if($variant !== null) {
