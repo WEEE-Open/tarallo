@@ -382,7 +382,7 @@ class ItemValidator {
 					'cpu-socket', 'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n',
 					'sata-ports-n', 'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n',
 					'usb-ports-n', 'firewire-ports-n', 'mini-firewire-ports-n', 'ethernet-ports-1000m-n',
-					'ethernet-ports-100m-n', 'mac', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand',
+					'ethernet-ports-100m-n', 'rj11-ports-n', 'ps2-ports-n', 'integrated-graphics-brand',
 					'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 's-video-ports-n',
 					's-video-7pin-ports-n', 'mini-jack-ports-n', 'psu-connector-cpu', 'psu-connector-motherboard',
 				];
@@ -499,7 +499,6 @@ class ItemValidator {
 			default: // Includes all these cases
 //			case 'cpu':
 //			case 'ram':
-//			case 'motherboard':
 //			case 'odd':
 //			case 'fdd':
 //			case 'graphics-card':
@@ -517,6 +516,7 @@ class ItemValidator {
 				return [
 					'brand', 'model', 'variant', 'working', 'sn', 'owner'
 				];
+			case 'motherboard':
 			case 'ethernet-card':
 			case 'bluetooth-card':
 			case 'wifi-card':
