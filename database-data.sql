@@ -302,6 +302,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('ram-form-factor', 'fbdimm'), -- FB-DIMM --
 	('check', 'missing-data'), -- Missing data --
 	('check', 'partial-inventory'), -- Partially inventoried --
+	('check', 'wrong-data'), -- Wrong/conflicting data --
 	('todo', 'transplant'), -- Transplant into another case --
 	('todo', 'container'), -- Container for transplant --
 	('todo', 'install-os'), -- Install OS --
@@ -313,6 +314,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('todo', 'replace-elec-components'), -- Replace faulty electronic components --
 	('todo', 'add-parts'), -- Add missing parts --
 	('todo', 'salvage-parts'), -- Salvage parts (dismantle) --
+    ('todo', 'thermal-paste'), -- Replace thermal paste --
 	('todo', 'replace-cmos-battery'), -- Replace CMOS battery --
 	('todo', 'finish-testing'), -- Finish testing --
 	('todo', 'finish-inventory'), -- Finish inventory of parts --
@@ -388,4 +390,4 @@ INSERT INTO `Prefixes` (`Prefix`, `Integer`) VALUES
 	('T', 0),
 	('', 0);
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 17);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 18);

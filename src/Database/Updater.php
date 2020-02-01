@@ -556,6 +556,10 @@ END;");
 					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = 'salvage-parts' WHERE `ValueEnum` = 'salvage-components' AND `Feature` = 'todo'");
 					$this->exec("SET FOREIGN_KEY_CHECKS = 1;");
 					break;
+				case 17:
+					$this->exect("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('todo', 'thermal-paste'), ('check', 'wrong-data')");
+					$this->exect("");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}
