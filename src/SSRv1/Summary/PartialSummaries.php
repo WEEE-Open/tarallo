@@ -44,7 +44,7 @@ class PartialSummaries {
 			}
 			$parts[] = "($internal)";
 		}
-		if($variant !== null) {
+		if($variant !== null && $variant !== ProductCode::DEFAULT_VARIANT) {
 			$parts[] = "$variant";
 		}
 		if(count($parts) <= 0) {
