@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\Database;
 
 use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\ItemPrefixer;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\ItemWithFeatures;
@@ -19,6 +20,7 @@ final class ItemDAO extends DAO {
 	 * @throws DuplicateItemCodeException If any item with same code already exists
 	 */
 	public function addItem(ItemWithFeatures $item, ItemWithCode $parent = null) {
+		assert($item instanceof ItemIncomplete || $item instanceof Item);
 		if(!$item->hasCode()) {
 			$prefix = ItemPrefixer::get($item);
 			$code = $this->getNewCode($prefix);

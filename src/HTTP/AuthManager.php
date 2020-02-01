@@ -14,7 +14,7 @@ use WEEEOpen\Tarallo\OpenIDConnectRefreshClient;
 use WEEEOpen\Tarallo\SessionSSO;
 use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\UserSSO;
-use Zend\Diactoros\Response\RedirectResponse;
+use Laminas\Diactoros\Response\RedirectResponse;
 
 class AuthManager implements MiddlewareInterface {
 	const COOKIE_NAME = 'tsessionsso';

@@ -57,6 +57,7 @@ class ItemValidator {
 	 * @return ItemWithFeatures Correct parent (given one or a motherboard)
 	 */
 	private static function reparent(ItemWithFeatures $item, ItemWithFeatures $container): ItemWithFeatures {
+		assert($container instanceof ItemWithContent);
 		$type = $item->getFeatureValue('type');
 		$parentType = $container->getFeatureValue('type');
 
@@ -86,6 +87,7 @@ class ItemValidator {
 	 * @see reparent
 	 */
 	private static function reparentAll(ItemWithFeatures $item, ?ItemWithFeatures $container): ?ItemWithFeatures {
+		assert($item instanceof ItemWithContent);
 		if($container !== null) {
 			$container = self::reparent($item, $container);
 		}
@@ -122,6 +124,7 @@ class ItemValidator {
 		?ItemWithFeatures $lowerLimit,
 		?ItemWithFeatures $upperLimit
 	) {
+		assert($item instanceof ItemWithContent);
 		if($lowerLimit !== $item) {
 			self::pushdownFeatures($item);
 		}
@@ -165,6 +168,7 @@ class ItemValidator {
 	 * @TODO: make this thing work for PATCH requests...
 	 */
 	public static function validateFeatures(ItemWithFeatures $item) {
+		assert($item instanceof ItemWithContent);
 		$type = $item->getFeatureValue('type');
 
 		switch($type) {
@@ -273,6 +277,7 @@ class ItemValidator {
 			}
 		}
 
+		assert($item instanceof ItemWithContent);
 		foreach($item->getContent() as $subitem) {
 			self::checkNesting($subitem, $item);
 		}
@@ -543,6 +548,7 @@ class ItemValidator {
 	}
 
 	private static function pushdownFeatures(ItemWithFeatures $item) {
+		assert($item instanceof ItemWithContent);
 		$type = $item->getFeatureValue('type');
 
 		// Move laptop usb ports from the case to the motherboard

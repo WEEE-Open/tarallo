@@ -24,10 +24,10 @@
     "relay/relay": "~2.0",
     "psr/http-message": "^1.0",
     "psr/http-server-middleware": "^1.0",
-    "zendframework/zend-diactoros": "^2.1",
+    "laminas/laminas-diactoros": "^2.2",
+    "laminas/laminas-httphandlerrunner": "^1.1",
     "jumbojett/openid-connect-php": "^0.8.0",
-    "pds/skeleton": "^1.0.0",
-    "zendframework/zend-httphandlerrunner": "^1.1"
+    "pds/skeleton": "^1.0.0"
   },
   "suggest": {
     "ext-apcu": "*"

@@ -30,8 +30,8 @@ use WEEEOpen\Tarallo\RangeException;
 use WEEEOpen\Tarallo\SearchException;
 use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\ValidationException;
-use Zend\Diactoros\Response\EmptyResponse;
-use Zend\Diactoros\Response\JsonResponse;
+use Laminas\Diactoros\Response\EmptyResponse;
+use Laminas\Diactoros\Response\JsonResponse;
 
 
 class Controller implements RequestHandlerInterface {
@@ -452,7 +452,7 @@ class Controller implements RequestHandlerInterface {
 	public static function doSearch(ServerRequestInterface $request): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
-		/** @var \WEEEOpen\Tarallo\User $user */
+		/** @var User $user */
 		$user = $request->getAttribute('User');
 		$payload = $request->getAttribute('ParsedBody', []);
 		$parameters = $request->getAttribute('parameters', []);

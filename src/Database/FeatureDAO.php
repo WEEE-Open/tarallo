@@ -216,6 +216,7 @@ final class FeatureDAO extends DAO {
 	 * @return bool True if anything was deleted
 	 */
 	public function deleteFeatures(ItemWithFeatures $item, array $features) {
+		assert($item instanceof ItemWithCode);
 		if(empty($features)) {
 			return false;
 		}
@@ -311,6 +312,7 @@ final class FeatureDAO extends DAO {
 	 * @return bool|PDOStatement
 	 */
 	private function setFeaturesQueryForItem(ItemWithFeatures $item, string $column) {
+		assert($item instanceof ItemWithCode);
 		$statement = $this->getPDO()->prepare("INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2");
 		$statement->bindValue(':item', $item->getCode(), \PDO::PARAM_STR);
 		return $statement;

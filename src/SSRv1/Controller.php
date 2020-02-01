@@ -27,10 +27,10 @@ use WEEEOpen\Tarallo\SessionLocal;
 use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\UserSSO;
 use WEEEOpen\Tarallo\ValidationException;
-use Zend\Diactoros\Response\EmptyResponse;
-use Zend\Diactoros\Response\JsonResponse;
-use Zend\Diactoros\Response\RedirectResponse;
-use Zend\Diactoros\UploadedFile;
+use Laminas\Diactoros\Response\EmptyResponse;
+use Laminas\Diactoros\Response\JsonResponse;
+use Laminas\Diactoros\Response\RedirectResponse;
+use Laminas\Diactoros\UploadedFile;
 
 
 class Controller implements RequestHandlerInterface {
