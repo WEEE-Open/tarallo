@@ -1,33 +1,9 @@
-* {
-	box-sizing: border-box;
+.bg-dark {
+	background-color: #333 !important;
 }
 
-html, body {
-	font-family: sans-serif;
-	margin: 0;
-	padding: 0;
-}
-
-template {
-	display: none;
-}
-
-header#title {
-	margin: 0;
-	padding: 0.5em;
-	background-color: #333;
-	color: #eee;
-	border-bottom: 1px solid #ccc;
-}
-
-header#title h1 {
-	margin: 0 0.5rem 0 0;
-	font-size: x-large;
-	display: inline-block;
-}
-
-header#title p {
-	display: none;
+.navbar-dark .navbar-text {
+	color: #eeeeee;
 }
 
 input, button, select {
@@ -48,96 +24,25 @@ select {
 	padding-right: 0.15em;
 }
 
-button:hover, input[type="submit"]:hover {
-	/* TODO: optimize transition by using opacity of the ::after pseudo element instead of box-shadow */
-	border-color: #aaa;
-	box-shadow: 0 0 0.15rem rgba(0,0,0,0.29);
-	transition: box-shadow,border-color 0.1s ease-in;
-}
-
-button:active, input[type="submit"]:active, button:focus, select:focus {
-	outline: none;
-	background-color: #eee;
-}
-
-button::-moz-focus-inner, select::-moz-focus-inner {
-	border: 0;
-}
-
-button:disabled, button:disabled:hover, button:disabled:active, input[type="submit"]:disabled, input[type="submit"]:disabled:hover, input[type="submit"]:disabled:active {
-	color: #999;
-	border-color: #ccc;
-	background: white;
-	transition: none;
-	box-shadow: none;
-}
-
-nav#top {
-	margin-bottom: 1.5em;
+nav#main {
 	box-shadow: 0 0.3em 0.6em -0.3em rgba(0,0,0,0.29);
+	margin-bottom: 1.5em;
+	padding-top: 0;
+	padding-bottom: 0;
 }
 
-nav#top nav {
-	margin-top: .5em;
-}
+/*nav#main .nav-link {*/
+/*	padding-bottom: 1rem;*/
+/*}*/
 
-nav.menu {
-	margin-bottom: 0;
-	padding: 0;
-}
+/*nav#main .nav-link.active {*/
+/*	background: #333;*/
+/*	color: #eee;*/
+/*}*/
 
-nav#main > ul {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: flex-start;
-	align-items: stretch;
-	align-content: stretch;
-}
-
-nav.menu a {
-	color: inherit;
-	cursor: pointer;
-	padding: .5em;
-	display: block;
-	text-decoration: none;
-	vertical-align: middle;
-}
-
-nav.menu a:hover, nav.menu a.selected {
-	color: #eee;
-	background-color: #333;
-}
-
-nav.menu ul {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-nav.menu ul li {
-	padding: 0;
-	margin: 0;
-	height: 100%;
-	display: inline-block;
-	position: relative;
-}
-
-nav#top nav.quick {
-	display: none;
-}
-
-nav#top nav.quick.open {
-	display: block;
-	color: #eee;
-	background-color: #333;
-	margin-top: 0;
-	margin-bottom: 0;
-	padding: .5em;
-}
-
-nav#top nav.quick input {
-	margin-left: 0.5em;
-	margin-right: 0.5em;
+#quickmove {
+	box-shadow: 0 0.3em 0.6em -0.3em rgba(0,0,0,0.29);
+	margin-bottom: 1.5em;
 }
 
 .httperror .status {
@@ -552,14 +457,6 @@ form.nice textarea {
 
 	.itembuttons.secondary {
 		float: none;
-	}
-}
-
-@media only screen and (min-width: 500px) {
-	header#title p {
-		margin: 0.5rem 0 0 0;
-		font-size: small;
-		display: inline-block;
 	}
 }
 

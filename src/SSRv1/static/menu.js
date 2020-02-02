@@ -1,90 +1,65 @@
 (function() {
 	"use strict";
 
+	let quickMoveButton = document.getElementById('quickmovebutton');
+	let quickMove = document.getElementById('quickmove');
 	let nav = document.getElementById('main');
-	let top = document.getElementById('top');
-	let quickView = top.querySelector(".quick.view.bar");
-	let quickMove = top.querySelector(".quick.move.bar");
-	let quickMoveCode = quickMove.querySelectorAll('input')[0];
-	let quickMoveParent = quickMove.querySelectorAll('input')[1];
-
-	document.getElementById('logout').addEventListener('click', () => window.location.href = '/logout');
+	let quickMoveCode = document.getElementById('quickmovecode');
+	let quickMoveLocation = document.getElementById('quickmovelocation');
+	let quickMoveDo = quickMove.getElementsByClassName('do')[0];
+	let quickMoveSwap = quickMove.getElementsByClassName('swap')[0];
 
 	for(let message of quickMove.getElementsByClassName('message')) {
-		message.style.display = 'none';
+		message.classList.add('d-none');
 	}
 
-	nav.addEventListener('click', ev => {
-		// noinspection JSUnresolvedVariable
-		if(!ev.target.classList || !ev.target.classList.contains('quick')) {
-			return true;
-		}
-		toggleAdditionalControls(ev.target);
-	});
-
-	nav.addEventListener('keypress', ev => {
-		if (ev.key === " " || ev.key === "Enter") {
-			// noinspection JSUnresolvedVariable
-			if(!ev.target.classList || !ev.target.classList.contains('quick')) {
-				return true;
-			}
-			toggleAdditionalControls(ev.target);
-		}
-	});
-
-	/**
-	 * Show/hide additional menu controls
-	 *
-	 * @param {HTMLElement|EventTarget} target button
-	 * @return {boolean}
-	 */
-	function toggleAdditionalControls(target) {
-		let toggle = target.dataset.toggle;
-
-		// not in the "foo bar" sense
-		let bar;
-		if(toggle === 'move') {
-			bar = quickMove;
-		} else if(toggle === 'view') {
-			bar = quickView;
+	quickMoveButton.addEventListener('click', ev => {
+		if(quickMoveButton.classList.contains("active")) {
+			quickMoveButton.classList.remove("active");
+			quickMove.classList.add("d-none");
+			nav.classList.remove("mb-0");
 		} else {
-			return true;
-		}
+			quickMoveButton.classList.add("active");
+			quickMove.classList.remove("d-none");
+			nav.classList.add("mb-0");
 
-		if(bar.classList.contains("open")) {
-			target.classList.remove('selected');
-			bar.classList.remove("open");
-		} else {
-			target.classList.add('selected');
-			bar.classList.add("open");
-			let input = bar.querySelector('input');
-			input.focus();
-			let inputLen = input.value.length;
-			if(inputLen > 0) {
-				input.setSelectionRange(inputLen, inputLen);
+			let len = quickMoveCode.value.length;
+			if(len <= 0) {
+				quickMoveCode.focus();
+			} else {
+				quickMoveLocation.focus();
+				len = quickMoveLocation.value.length;
+				if(len > 0) {
+					quickMoveLocation.setSelectionRange(len, len);
+				}
 			}
 		}
-	}
-
-	quickView.querySelector('button').addEventListener('click', function() {
-		let code = quickView.querySelector('input').value;
-		if(code !== "") {
-			window.location.href = '/item/' + encodeURIComponent(code);
-		}
 	});
 
-	quickMove.querySelector('button.swap').addEventListener('click', function() {
+	// quickMove.addEventListener('keypress', ev => {
+	// 	if (ev.key === " " || ev.key === "Enter") {
+	// 		// noinspection JSUnresolvedVariable
+	// 		if(!ev.target.classList || !ev.target.classList.contains('quick')) {
+	// 			return true;
+	// 		}
+	// 		toggleAdditionalControls(ev.target);
+	// 	}
+	// });
+
+	quickMoveSwap.addEventListener('click', function(e) {
+		e.preventDefault();
 		let temp = quickMoveCode.value;
-		quickMoveCode.value = quickMoveParent.value;
-		quickMoveParent.value = temp;
+		quickMoveCode.value = quickMoveLocation.value;
+		quickMoveLocation.value = temp;
 	});
 
-	quickMove.querySelector('button.do').addEventListener('click', async () => {
+	quickMoveDo.addEventListener('click', async (e) => {
+		e.preventDefault();
 		let code = quickMoveCode.value;
-		let parent = quickMoveParent.value;
+		let parent = quickMoveLocation.value;
 		if(code !== '' && parent !== '') {
 			quickMoveCode.setCustomValidity('');
-			quickMoveParent.setCustomValidity('');
+			quickMoveLocation.setCustomValidity('');
 			for(let message of quickMove.getElementsByClassName('message')) {
 				message.style.display = 'none';
 			}
@@ -123,7 +98,7 @@
 			if(response.status === 404 && 'item' in json) {
 				if(json.item === parent) {
 					errorText = `Item ${parent} doesn't exist`;
-					quickMoveParent.setCustomValidity(errorText);
+					quickMoveLocation.setCustomValidity(errorText);
 				} else {
 					errorText = `Item ${code} doesn't exist`;
 					quickMoveCode.setCustomValidity(errorText);
@@ -148,15 +123,7 @@
 		return false;
 	});
 
-	quickView.addEventListener('keydown', function(e) {
-		if(e.key === "Enter") {
-			e.preventDefault();
-			quickView.getElementsByTagName('BUTTON')[0].click();
-		}
-	});
 
-	let quickMoveDo = quickMove.getElementsByClassName('do')[0];
-	let quickMoveSwap = quickMove.getElementsByClassName('swap')[0];
 	quickMove.addEventListener('keydown', function(e) {
 		if(e.key === "Enter") {
 			e.preventDefault();

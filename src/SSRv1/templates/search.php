@@ -23,7 +23,6 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => tr
 		</p>
 		<!--Use an URL parameter: <button>Depth</button>-->
 	</nav>
-	<!--<label><input type="checkbox" class="usecompactview" checked="checked">Usa ComputerView (se possibile)</label>-->
 	<div id="searchcontrols">
 		<div id="search-control-code" class="hidden">
 			<label class="searchby" for="search-control-code-input">Code:</label>

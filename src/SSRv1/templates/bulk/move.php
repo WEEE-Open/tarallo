@@ -3,7 +3,7 @@
 /** @var string|null $result */
 /** @var string|null $error */
 /** @var array|null $moved */
-$this->layout('main', ['title' => 'Bulk operations', 'user' => $user, 'currentPage' => 'bulk']);
+$this->layout('main', ['title' => 'Bulk operations', 'user' => $user, 'currentPage' => 'item bulk move']);
 $this->insert('bulk::menu', ['currentPage' => 'move']);
 ?>
 <form action="/bulk/move" method="POST" enctype="multipart/form-data" class="nice" id="bulk-move">

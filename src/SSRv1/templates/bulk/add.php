@@ -4,6 +4,7 @@
 /** @var string|null $error */
 $item = $item ?? null;
 $this->insert('bulk::menu', ['currentPage' => 'add']);
+$this->layout('main', ['title' => 'Bulk add', 'user' => $user, 'currentPage' => 'item bulk add']);
 ?>
 <?php if($item === null): ?>
 <form action="/bulk/add" method="POST" enctype="multipart/form-data" class="nice" id="bulk-add">
@@ -24,7 +25,3 @@ $this->insert('bulk::menu', ['currentPage' => 'add']);
     <?php
     $this->insert('newItem', ['recursion' => false, 'add' => true, 'base' => $item]);
 endif ?>
-<?php
-$mainParameters = ['title' => 'Bulk add', 'user' => $user, 'currentPage' => 'bulk'];
-$this->layout('main', $mainParameters);
-?>
