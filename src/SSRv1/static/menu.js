@@ -3,7 +3,7 @@
 
 	let quickMoveButton = document.getElementById('quickmovebutton');
 	let quickMove = document.getElementById('quickmove');
-	let nav = document.getElementById('main');
+	let nav = document.getElementById('menu');
 	let quickMoveCode = document.getElementById('quickmovecode');
 	let quickMoveLocation = document.getElementById('quickmovelocation');
 	let quickMoveDo = quickMove.getElementsByClassName('do')[0];
@@ -36,18 +36,9 @@
 		}
 	});
 
-	// quickMove.addEventListener('keypress', ev => {
-	// 	if (ev.key === " " || ev.key === "Enter") {
-	// 		// noinspection JSUnresolvedVariable
-	// 		if(!ev.target.classList || !ev.target.classList.contains('quick')) {
-	// 			return true;
-	// 		}
-	// 		toggleAdditionalControls(ev.target);
-	// 	}
-	// });
-
 	quickMoveSwap.addEventListener('click', function(e) {
 		e.preventDefault();
+		e.stopPropagation();
 		let temp = quickMoveCode.value;
 		quickMoveCode.value = quickMoveLocation.value;
 		quickMoveLocation.value = temp;
@@ -55,74 +46,83 @@
 
 	quickMoveDo.addEventListener('click', async (e) => {
 		e.preventDefault();
+		e.stopPropagation();
+
+		let form = quickMove.querySelector('form');
+		//form.classList.remove('was-validated');
+		quickMoveCode.setCustomValidity('');
+		quickMoveLocation.setCustomValidity('');
+
+		// Checks that inputs are not empty
+		if(!form.checkValidity()) {
+			//form.classList.add('was-validated');
+			return false;
+		}
+
 		let code = quickMoveCode.value;
 		let parent = quickMoveLocation.value;
-		if(code !== '' && parent !== '') {
-			quickMoveCode.setCustomValidity('');
-			quickMoveLocation.setCustomValidity('');
-			for(let message of quickMove.getElementsByClassName('message')) {
-				message.style.display = 'none';
-			}
+		for(let message of quickMove.getElementsByClassName('alert')) {
+			message.classList.add('d-none');
+		}
 
-			let response = await fetch('/v2/items/' + encodeURIComponent(code) + '/parent', {
-				headers: {
-					'Accept': 'application/json',
-					'Content-Type': 'application/json'
-				},
-				method: 'PUT',
-				body: JSON.stringify(parent)
-			});
+		let response = await fetch('/v2/items/' + encodeURIComponent(code) + '/parent', {
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			method: 'PUT',
+			body: JSON.stringify(parent)
+		});
 
-			if(response.ok) {
-				quickMove.getElementsByClassName('success')[0].style.display = '';
-				quickMove.querySelector('.success.message a').href = '/item/' + encodeURIComponent(code);
-				return;
-			}
+		if(response.ok) {
+			quickMove.querySelector('.alert.alert-success').classList.remove('d-none');
+			quickMove.querySelector('.alert.alert-success a').href = '/item/' + encodeURIComponent(code);
+			return;
+		}
 
-			let warning = quickMove.getElementsByClassName('warning')[0];
-			let error = quickMove.getElementsByClassName('error')[0];
+		let warning = quickMove.querySelector('.alert.alert-warning');
+		let error = quickMove.querySelector('.alert.alert-danger');
 
-			let json;
+		let json;
 
-			try {
-				json = await response.json();
-			} catch(e) {
-				console.log(response);
-				error.style.display = '';
-				throw e;
-			}
+		try {
+			json = await response.json();
+		} catch(e) {
+			console.log(response);
+			error.classList.remove('d-none');
+			throw e;
+		}
 
-			console.log(json);
+		console.log(json);
 
-			let errorText;
-			if(response.status === 404 && 'item' in json) {
-				if(json.item === parent) {
-					errorText = `Item ${parent} doesn't exist`;
-					quickMoveLocation.setCustomValidity(errorText);
-				} else {
-					errorText = `Item ${code} doesn't exist`;
-					quickMoveCode.setCustomValidity(errorText);
-				}
-				warning.style.display = '';
-				warning.textContent = errorText;
-			} else if(response.status === 401) {
-				warning.textContent = 'Session expired or logged out. Open another tab, log in and try again.';
-			} else if(response.status === 400 && json.exception === 'WEEEOpen\\Tarallo\\ItemNestingException' && 'item' in json && 'other_item' in json) {
-				if('message' in json) {
-					errorText = `Cannot place ${json.item} inside ${json.other_item}: ${json.message}`;
-				} else {
-					errorText = `Cannot place ${json.item} inside ${json.other_item}`;
-				}
-				warning.style.display = '';
-				warning.textContent = errorText;
+		let errorText;
+		//form.classList.add('was-validated');
+		if(response.status === 404 && 'item' in json) {
+			if(json.item === parent) {
+				errorText = `Item ${parent} doesn't exist`;
+				quickMoveLocation.setCustomValidity(errorText);
 			} else {
-				error.style.display = '';
+				errorText = `Item ${code} doesn't exist`;
+				quickMoveCode.setCustomValidity(errorText);
 			}
-			return false;
+			warning.classList.remove('d-none');
+			warning.textContent = errorText;
+		} else if(response.status === 401) {
+			warning.classList.remove('d-none');
+			warning.textContent = 'Session expired or logged out. Open another tab, log in and try again.';
+		} else if(response.status === 400 && json.exception === 'WEEEOpen\\Tarallo\\ItemNestingException' && 'item' in json && 'other_item' in json) {
+			if('message' in json) {
+				errorText = `Cannot place ${json.item} inside ${json.other_item}: ${json.message}`;
+			} else {
+				errorText = `Cannot place ${json.item} inside ${json.other_item}`;
+			}
+			warning.classList.remove('d-none');
+			warning.textContent = errorText;
+		} else {
+			error.classList.remove('d-none');
 		}
 		return false;
 	});
-
 
 	quickMove.addEventListener('keydown', function(e) {
 		if(e.key === "Enter") {

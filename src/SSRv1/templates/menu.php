@@ -12,11 +12,11 @@ $hereSr = function($page, $current) {
 };
 ?>
 <nav class="navbar navbar-expand-md navbar-light bg-secondary" id="main">
-	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#main" aria-controls="main" aria-expanded="false" aria-label="Toggle navigation">
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#menu" aria-controls="main" aria-expanded="false" aria-label="Toggle navigation">
 		<span class="navbar-toggler-icon"></span>
 	</button>
 
-	<div class="collapse navbar-collapse" id="main">
+	<div class="collapse navbar-collapse" id="menu">
 		<ul class="navbar-nav mr-auto">
 			<li class="nav-item dropdown">
 				<a class="nav-link dropdown-toggle <?= $hereClass('item', $currentPageShort) ?>" href="#" id="itemsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -46,19 +46,23 @@ $hereSr = function($page, $current) {
 		</ul>
 
 		<form class="form-inline my-2 my-lg-0" action="/search" method="post">
-			<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+			<input required class="form-control mr-sm-2" type="search" aria-label="Search" name="search">
 			<button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Search</button>
 		</form>
 	</div>
 </nav>
 
 <nav id="quickmove" class="navbar navbar-dark bg-dark d-none">
-	<form class="form-inline">
-		<label class="navbar-text">Move item:<input class="form-control" name="code" id="quickmovecode" type="text"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>></label><button class="btn btn-outline-secondary swap" title="Swap" tabindex="-1">⇄</button><label class="navbar-text"> into:<input class="form-control to" id="quickmovelocation" type="text"></label><button class="btn btn-outline-secondary do">Move</button>
+	<form class="nav-item form-inline">
+		<label for="quickmovecode" class="navbar-text col-form-label">Move item:</label>
+		<input required class="form-control" name="code" id="quickmovecode" type="text"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>>
+		<button class="btn btn-outline-secondary swap" title="Swap" tabindex="-1">⇄</button>
+		<label for="quickmovelocation" class="navbar-text col-form-label">into:</label>
+		<input required class="form-control to" id="quickmovelocation" type="text">
+		<button type="submit" class="btn btn-outline-secondary do">Move</button>
 	</form>
-	<div class="navbar-text">
-
-	</div>
-	<span class="error message">Error</span><span class="success message"><a href="#">Ok</a></span><div class="warning message long">Fail</div>
+	<div class="nav-item alert alert-success ml-0 mr-auto my-auto d-none" role="alert"><a href="#">Ok</a></div>
+	<div class="nav-item alert alert-danger col-12 my-2 d-none" role="alert">Error</div>
+	<div class="nav-item alert alert-warning col-12 my-2 d-none" role="alert">Fail</div>
 </nav>
 <script src="/static/menu.js"></script>

@@ -1,7 +1,3 @@
-.bg-dark {
-	background-color: #333 !important;
-}
-
 .navbar-dark .navbar-text {
 	color: #eeeeee;
 }
@@ -24,25 +20,28 @@ select {
 	padding-right: 0.15em;
 }
 
-nav#main {
+#main {
 	box-shadow: 0 0.3em 0.6em -0.3em rgba(0,0,0,0.29);
 	margin-bottom: 1.5em;
 	padding-top: 0;
 	padding-bottom: 0;
 }
 
-/*nav#main .nav-link {*/
+/*nav#menu .nav-link {*/
 /*	padding-bottom: 1rem;*/
 /*}*/
 
-/*nav#main .nav-link.active {*/
+/*nav#menu .nav-link.active {*/
 /*	background: #333;*/
 /*	color: #eee;*/
 /*}*/
 
 #quickmove {
 	box-shadow: 0 0.3em 0.6em -0.3em rgba(0,0,0,0.29);
+	padding-top: 0.25rem;
+	padding-bottom: 0.25rem;
 	margin-bottom: 1.5em;
+	margin-top: -1.5em;
 }
 
 .httperror .status {
