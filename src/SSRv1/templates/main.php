@@ -58,7 +58,10 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 <?php if($itembuttons): ?>
 	<script src="/static/itembuttons.js"></script>
 <?php endif ?>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap.native@2/dist/bootstrap-native-v4.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap.native@2/dist/bootstrap-native-v4.min.js"></script>-->
+<!--<script src="https://cdn.jsdelivr.net/combine/npm/jquery@3/dist/jquery.slim.min.js,npm/@popperjs/core@2/dist/umd/popper.min.js,npm/bootstrap@4/dist/js/bootstrap.min.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js"></script>
 </body>
 </html>
