@@ -468,6 +468,15 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
+	public static function quickSearch(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		$db = $request->getAttribute('Database');
+		$body = $request->getParsedBody();
+
+		$search = Validation::validateHasString($body, 'search');
+
+		return new RedirectResponse('/item/' . rawurlencode($search), 303);
+	}
+
 	public static function search(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -791,6 +800,7 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/product/{brand}/{model}/{variant}/items/edit/{edit}', [User::AUTH_LEVEL_RW, 'Controller::getProductItems',]);
 				$r->get('/new/item', [User::AUTH_LEVEL_RO, 'Controller::addItem',]);
 				$r->get('/new/product', [User::AUTH_LEVEL_RO, 'Controller::addProduct',]);
+				$r->post('/search', [User::AUTH_LEVEL_RO, 'Controller::quickSearch',]);
 				$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [User::AUTH_LEVEL_RO, 'Controller::search',]);
 				$r->get('/search/{id:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
 				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
