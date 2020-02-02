@@ -1,0 +1,22 @@
+/*! `Custom` Bootstrap 4 theme */
+@import url(https://use.fontawesome.com/releases/v5.0.10/css/all.css);
+
+$enable-grid-classes:true;
+$primary:#333333;
+$secondary:#eeeeee;
+$success:#28a745;
+$danger:#dc3545;
+$info:#17a2b8;
+$warning:#ffc107;
+$light:#EEEEEE;
+$dark:#333333;
+//$border-width:0;
+//$btn-border-radius:0;
+//$enable-rounded:true;
+//$transition-base:all .2s ease-in-out;
+@import "bootstrap";
+
+html {font-size: .8rem;}
+@include media-breakpoint-up(sm) {html {font-size: .9rem;}}
+@include media-breakpoint-up(md) {html {font-size: .9rem;}}
+@include media-breakpoint-up(lg) {html {font-size: 1rem;}}
