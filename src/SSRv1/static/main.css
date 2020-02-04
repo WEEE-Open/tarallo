@@ -14,27 +14,12 @@ input, button, select {
 	transition: box-shadow,border-color 0.3s ease-out;
 }
 
-select {
-	/* I have no idea why this is needed or where the extra padding comes from. There's probably a bug somewhere else in the css file. */
-	padding-left: 0.15em;
-	padding-right: 0.15em;
-}
-
 #main {
 	box-shadow: 0 0.3em 0.6em -0.3em rgba(0,0,0,0.29);
 	margin-bottom: 1.5em;
 	padding-top: 0;
 	padding-bottom: 0;
 }
-
-/*nav#menu .nav-link {*/
-/*	padding-bottom: 1rem;*/
-/*}*/
-
-/*nav#menu .nav-link.active {*/
-/*	background: #333;*/
-/*	color: #eee;*/
-/*}*/
 
 #quickmove {
 	box-shadow: 0 0.3em 0.6em -0.3em rgba(0,0,0,0.29);

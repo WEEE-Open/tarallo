@@ -45,8 +45,8 @@ $hereSr = function($page, $current) {
 			</li>
 		</ul>
 
-		<form class="form-inline my-2 my-lg-0" action="/search" method="post">
-			<input required class="form-control mr-sm-2" type="search" aria-label="Search" name="search">
+		<form class="form-inline my-2 my-md-0" action="/search" method="post">
+			<input required class="form-control mx-0 mr-sm-2" type="search" aria-label="Search" name="search">
 			<button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Search</button>
 		</form>
 	</div>
