@@ -456,6 +456,55 @@ END;");
 				case 12:
 					$this->exec("ALTER TABLE `Item` ADD INDEX `Brand_Model_Variant` (`Brand`, `Model`, `Variant`);");
 					break;
+				case 13:
+					$this->exec("DROP FUNCTION GenerateCode");
+					$this->exec("CREATE FUNCTION GenerateCode(currentPrefix varchar(20))
+RETURNS varchar(190)
+MODIFIES SQL DATA
+DETERMINISTIC
+SQL SECURITY INVOKER
+	BEGIN
+		DECLARE thePrefix varchar(20) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
+		DECLARE theInteger bigint UNSIGNED;
+		DECLARE duplicateExists boolean;
+		DECLARE newCode varchar(190) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
+
+		IF NOT EXISTS(SELECT '1' FROM Prefixes WHERE Prefix = currentPrefix)
+		THEN
+            INSERT INTO Prefixes(Prefix, `Integer`)
+		    VALUES (currentPrefix, 0);
+        END IF;
+
+		SELECT Prefix, `Integer`
+		INTO thePrefix, theInteger
+		FROM Prefixes
+		WHERE Prefix = currentPrefix
+		FOR UPDATE;
+
+		IF (thePrefix IS NOT NULL)
+		THEN
+			REPEAT
+				SET theInteger = theInteger + 1;
+				SET NewCode = CONCAT(thePrefix, CAST(theInteger AS char(20)));
+
+				SELECT IF(COUNT(*) > 0, TRUE, FALSE)
+				INTO duplicateExists
+				FROM Item
+				WHERE Code = NewCode;
+			UNTIL duplicateExists = FALSE
+			END REPEAT;
+
+			UPDATE Prefixes
+			SET `Integer` = theInteger
+			WHERE Prefix = thePrefix;
+
+			RETURN newCode;
+		ELSE
+			RETURN NULL;
+		END IF;
+
+	END");
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}

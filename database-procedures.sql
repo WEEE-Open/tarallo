@@ -1,8 +1,3 @@
--- Remove deleted triggers
-DROP TRIGGER IF EXISTS RemoveOldAuditEntries;
-DROP TRIGGER IF EXISTS ItemDeleteSearchIntegrity;
-DROP TRIGGER IF EXISTS ItemUpdateSearchIntegrity;
-
 -- Now we're getting real.
 DROP FUNCTION IF EXISTS GenerateCode;
 DELIMITER $$
@@ -16,12 +11,16 @@ MODIFIES SQL DATA
 DETERMINISTIC
 SQL SECURITY INVOKER
 	BEGIN
-		DECLARE thePrefix varchar(20) CHARACTER SET 'utf8mb4'
-		COLLATE 'utf8mb4_unicode_ci';
+		DECLARE thePrefix varchar(20) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
 		DECLARE theInteger bigint UNSIGNED;
 		DECLARE duplicateExists boolean;
-		DECLARE newCode varchar(190) CHARACTER SET 'utf8mb4'
-		COLLATE 'utf8mb4_unicode_ci';
+		DECLARE newCode varchar(190) CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_unicode_ci';
+
+		IF NOT EXISTS(SELECT '1' FROM Prefixes WHERE Prefix = currentPrefix)
+		THEN
+            INSERT INTO Prefixes(Prefix, `Integer`)
+		    VALUES (currentPrefix, 0);
+        END IF;
 
 		SELECT Prefix, `Integer`
 		INTO thePrefix, theInteger
