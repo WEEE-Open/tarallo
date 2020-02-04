@@ -1,3 +1,4 @@
+.ONESHELL:
 default: production
 
 .PHONY:
@@ -35,11 +36,14 @@ compose:
 	pushd build/ >/dev/null && composer install --no-dev -n --no-suggest --classmap-authoritative --optimize-autoloader && popd
 	rm -f "build/composer.json" "build/composer.lock"
 
-.PHONY:
-cache:
-	test ! -f "build/resources/cache/SSRv1.cache" || rm "build/resources/cache/SSRv1.cache"
-	test ! -f "build/resources/cache/APIv2.cache" || rm "build/resources/cache/APIv2.cache"
+resources/cache/SSRv1.cache: src/SSRv1/Controller.php
 	php bin/build-cache
+
+resources/cache/APIv2.cache: src/APIv2/Controller.php
+	php bin/build-cache
+
+.PHONY:
+cache: resources/cache/SSRv1.cache resources/cache/APIv2.cache
 
 .PHONY:
 dbupdate:

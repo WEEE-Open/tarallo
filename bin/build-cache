@@ -14,9 +14,12 @@ if(!is_dir($dir)) {
 	mkdir($dir, 0755, true);
 }
 
+unlink(SSRv1\Controller::cachefile);
 $handle = new \ReflectionMethod(SSRv1\Controller::class, 'route');
 $handle->setAccessible(true);
 $handle->invoke(new SSRv1\Controller(), ServerRequestFactory::fromGlobals([], [], [], [], []));
+
+unlink(APIv2\Controller::cachefile);
 $handle = new \ReflectionMethod(APIv2\Controller::class, 'route');
 $handle->setAccessible(true);
 $handle->invoke(new APIv2\Controller(), ServerRequestFactory::fromGlobals([], [], [], [], []));
