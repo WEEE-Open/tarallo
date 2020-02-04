@@ -28,7 +28,7 @@ class ItemPrefixer {
 			case 'cpu':
 				return 'C';
 			case 'graphics-card':
-				return 'SG';
+				return 'G';
 			case 'ram':
 				return 'R';
 			case 'hdd':
@@ -43,7 +43,7 @@ class ItemPrefixer {
 					throw new ItemPrefixerException(null, 'No or unknown hard drive connector, cannot generate a code');
 				}
 			case 'odd':
-				return 'ODD';
+				return 'D';
 			case 'psu':
 			case 'external-psu':
 				if(self::is('power-connector', 'da-2', $features)) {
@@ -55,11 +55,12 @@ class ItemPrefixer {
 			case 'fdd':
 			case 'zip-drive':
 				return 'FL';
+			case 'card-reader':
 			case 'ports-bracket':
 			case 'other-card':
 			case 'storage-card':
 			case 'tv-card':
-				return 'SP';
+				return 'Q';
 			case 'audio-card':
 				return 'SA';
 			case 'wifi-card':
