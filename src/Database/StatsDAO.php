@@ -11,14 +11,13 @@ use WEEEOpen\Tarallo\ProductCode;
 final class StatsDAO extends DAO {
 	/**
 	 * Get an AND for a WHERE clause that filters items by their location.
-	 * Bind :loc to the location.
 	 *
 	 * @param null|ItemWithCode $location if null returns an empty string
 	 * @param string $alias Table alias, if you're doing "SELECT ItemFeatures AS alias", empty string if none
 	 *
 	 * @return string part of a query
 	 */
-	private static function filterLocation(?ItemWithCode $location, string $alias = '') {
+	private function filterLocation(?ItemWithCode $location, string $alias = '') {
 		if($location === null) {
 			return '';
 		}
@@ -30,7 +29,7 @@ final class StatsDAO extends DAO {
 		return "AND $alias`Code` IN (
 SELECT Descendant
 FROM Tree
-WHERE Ancestor = :loc
+WHERE Ancestor = " . $this->getPDO()->quote($location->getCode()) . "
 )";
 	}
 
@@ -43,7 +42,7 @@ WHERE Ancestor = :loc
 	 *
 	 * @return string part of a query
 	 */
-	private static function filterCreated(?\DateTime $creation, string $alias = '') {
+	private function filterCreated(?\DateTime $creation, string $alias = '') {
 		if($creation === null) {
 			return '';
 		}
@@ -56,7 +55,7 @@ WHERE Ancestor = :loc
 SELECT `Code`
 FROM Audit
 WHERE `Change` = \"C\"
-AND `Time` < FROM_UNIXTIME(:timestamp)
+AND `Time` < FROM_UNIXTIME(" . $this->getPDO()->quote($creation->getTimestamp()) . ")
 )";
 	}
 
@@ -77,19 +76,18 @@ AND `Time` < FROM_UNIXTIME(:timestamp)
 
 	/**
 	 * Get a filter for selecting items with a feature.
-	 * Bind paramenters to :ffname1 & :ffval1, :ffname2 & ffval2, etc...
 	 *
 	 * @param Feature[] $features
 	 *
 	 * @return string AND `Code` IN (...) AND `Code` IN (...) ...
 	 */
-	private static function filterFeatures(array $features): string {
+	private function filterFeatures(array $features): string {
 		$sqlFilter = '';
-		for($i = 0; $i < count($features); $i++) {
+		foreach($features as $feature) {
 			$sqlFilter .= "AND `Code` IN (
 			  SELECT `Code`
 			  FROM ProductItemFeatureUnified
-			  WHERE Feature = :ffname$i AND COALESCE(ValueEnum, `Value`, ValueText, ValueDouble) = :ffval$i
+			  WHERE Feature = " . $this->getPDO()->quote($feature->name) . " AND COALESCE(ValueEnum, `Value`, ValueText, ValueDouble) = " . $this->getPDO()->quote($feature->value) . "
 			)";
 		}
 		return $sqlFilter;
@@ -158,7 +156,7 @@ EOQ
 			$locationPart = 'AND `Ancestor` IN (
 	SELECT Descendant
 	FROM Tree
-	WHERE Ancestor = :loc
+	WHERE Ancestor = ' . $this->getPDO()->quote($location->getCode()) . '
 )';
 		} else {
 			$locationPart = '';
@@ -180,13 +178,8 @@ AND `Ancestor` NOT IN (
 )
 GROUP BY `Ancestor`
 ORDER BY `Last` " . ($recent ? 'DESC' : 'ASC') . '
-LIMIT :lim';
-		$statement = $this->getPDO()->prepare($query);
-
-		if($location !== null) {
-			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
-		}
-		$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
+LIMIT ' . (int) $limit;
+		$statement = $this->getPDO()->query($query);
 
 		try {
 			$success = $statement->execute();
@@ -233,47 +226,35 @@ LIMIT :lim';
 		int $cutoff = 1
 	) {
 		BaseFeature::validateFeatureName($feature);
+		$pdo = $this->getPDO();
 
 		$array = [];
 
-		$locationFilter = self::filterLocation($location);
-		$deletedFilter = $deleted ? '' : self::filterDeletedLost();
-		$createdFilter = self::filterCreated($creation);
+		$locationFilter = $this->filterLocation($location);
+		$deletedFilter = $deleted ? '' : $this->filterDeletedLost();
+		$createdFilter = $this->filterCreated($creation);
 		if($filter === null) {
 			$featureFilter = '';
 		} else {
 			$featureFilter = 'AND `Code` IN (
   SELECT `Code`
   FROM ProductItemFeatureUnified
-  WHERE Feature = :filtername AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = :filtervalue
+  WHERE Feature = ' . $pdo->quote($filter->name) . ' AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = ' . $pdo->quote($filter->value) . '
 )';
 		}
 
 		$query = "SELECT COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) as Val, COUNT(*) AS Quantity
 FROM ProductItemFeatureUnified
-WHERE Feature = :feat
+WHERE Feature = " . $pdo->quote($feature) . "
 $featureFilter
 $locationFilter
 $deletedFilter
 $createdFilter
 GROUP BY Val
-HAVING Quantity >= :cutoff
+HAVING Quantity >= " . $pdo->quote($cutoff) . "
 ORDER BY Quantity DESC, Val ASC";
 
 		$statement = $this->getPDO()->prepare($query);
-
-		$statement->bindValue(':feat', $feature, \PDO::PARAM_STR);
-		$statement->bindValue(':cutoff', $cutoff, \PDO::PARAM_INT);
-		if($filter !== null) {
-			$statement->bindValue(':filtername', $filter->name, \PDO::PARAM_STR);
-			$statement->bindValue(':filtervalue', $filter->value);
-		}
-		if($location !== null) {
-			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
-		}
-		if($creation !== null) {
-			$statement->bindValue(':timestamp', $creation->getTimestamp(), \PDO::PARAM_INT);
-		}
 
 		try {
 			$success = $statement->execute();
@@ -315,23 +296,13 @@ ORDER BY Quantity DESC, Val ASC";
 		/** @noinspection SqlResolve */
 		$query = "SELECT `Code`
 FROM ProductItemFeatureUnified
-WHERE Feature = :feat
-AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = :val
+WHERE Feature = " . $pdo->quote($feature->name) . "
+AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = " . $pdo->quote($feature->value) . "
 $locationFilter
 $deletedFilter
 $createdFilter
-LIMIT :lim";
+LIMIT " . (int) $limit;
 		$statement = $pdo->prepare($query);
-
-		$statement->bindValue(':feat', $feature->name, \PDO::PARAM_STR);
-		$statement->bindValue(':val', $feature->value);
-		$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
-		if($location !== null) {
-			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
-		}
-		if($creation !== null) {
-			$statement->bindValue(':timestamp', $creation->getTimestamp(), \PDO::PARAM_INT);
-		}
 
 		$result = [];
 
@@ -363,7 +334,7 @@ LIMIT :lim";
 
 		$featuresFilter = self::filterFeatures($features);
 
-		$limitFilter = $limit === null ? '' : 'LIMIT :lim';
+		$limitFilter = $limit === null ? '' : 'LIMIT ' . (int) $limit;
 
 		/** @noinspection SqlResolve */
 		$query = "SELECT `Code`
@@ -373,14 +344,6 @@ $deletedFilter
 $featuresFilter
 $limitFilter";
 		$statement = $pdo->prepare($query);
-
-		for($i = 0; $i < count($features); $i++) {
-			$statement->bindValue(":ffname$i", $features[$i]->name, \PDO::PARAM_STR);
-			$statement->bindValue(":ffval$i", $features[$i]->value);
-		}
-		if($limit !== null) {
-			$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
-		}
 
 		$result = [];
 
@@ -418,36 +381,26 @@ $limitFilter";
 		?\DateTime $creation = null,
 		bool $deleted = false
 	): array {
+		$pdo = $this->getPDO();
 
-		$locationFilter = self::filterLocation($location);
-		$deletedFilter = $deleted ? '' : self::filterDeletedLost();
-		$createdFilter = self::filterCreated($creation);
+		$locationFilter = $this->filterLocation($location);
+		$deletedFilter = $deleted ? '' : $this->filterDeletedLost();
+		$createdFilter = $this->filterCreated($creation);
 
 		$query = "SELECT Code 
 FROM ProductItemFeatureUnified 
-WHERE Feature = :type 
-AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = :val
+WHERE Feature = " . $pdo->quote($filter->name) . "
+AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = " . $pdo->quote($filter->value) . "
 $locationFilter
 $deletedFilter
 $createdFilter
 AND Code NOT IN ( 
 SELECT `Code` 
 FROM ProductItemFeatureUnified 
-WHERE Feature = :notF
+WHERE Feature = " . $pdo->quote($notFeature) . "
 )
-LIMIT :lim";
+LIMIT " . (int) $limit;
 		$statement = $this->getPDO()->prepare($query);
-
-		$statement->bindValue(':type', $filter->name, \PDO::PARAM_STR);
-		$statement->bindValue(':val', $filter->value);
-		$statement->bindValue(':notF', $notFeature, \PDO::PARAM_STR);
-		$statement->bindValue(':lim', $limit, \PDO::PARAM_INT);
-		if($location !== null) {
-			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
-		}
-		if($creation !== null) {
-			$statement->bindValue(':timestamp', $creation->getTimestamp(), \PDO::PARAM_INT);
-		}
 
 		$result = [];
 
@@ -485,34 +438,40 @@ LIMIT :lim";
 		if(empty($features)) {
 			throw new \LogicException('Nothing roll up in');
 		}
+		$pdo = $this->getPDO();
 		// Remove any manually set array keys, since these will go into te query without any sanitizations.
 		// This guarantees there are only numbers.
 		$features = array_values($features);
 
-		$locationFilter = self::filterLocation($location, 'f0');
-		$deletedFilter = $deleted ? '' : self::filterDeletedLost('f0');
-		$createdFilter = self::filterCreated($creation, 'f0');
+		$locationFilter = $this->filterLocation($location, 'f0');
+		$deletedFilter = $deleted ? '' : $this->filterDeletedLost('f0');
+		$createdFilter = $this->filterCreated($creation, 'f0');
 
 		$select = 'SELECT ';
 		$from = 'FROM ProductItemFeatureUnified AS f0 '; // $f0 is guaranteed to exist, since the array is not empty
 		$where = 'WHERE f0.`Code` IN (
   SELECT `Code`
   FROM ProductItemFeatureUnified
-  WHERE Feature = :nam AND COALESCE(ValueEnum, `Value`, ValueText, ValueDouble) = :val
+  WHERE Feature = ' . $pdo->quote($filter->name) . ' AND COALESCE(ValueEnum, `Value`, ValueText, ValueDouble) = ' . $pdo->quote($filter->value) . '
 ) ';
-		// Will produce e.g. `ram-type` ASC,`ram-form-factor` ASC,`frequency-hertz` ASC
-		$group = implode("` ASC,`", $features);
-		$group = "`$group` ASC";
 
+		$group = '';
 		foreach($features as $i => $feature) {
 			// Can't do it with coalesce, numeric features end up in wrong order...
 			$column = FeatureDAO::getColumn(BaseFeature::getType($feature));
-			$select .= "f$i.$column AS `$feature`, ";
+
+			if(!isset(BaseFeature::features[$feature])) {
+				throw new \InvalidArgumentException("$feature is not a feature");
+			}
+			$fcolname = $feature;
+			$select .= "f$i.$column AS `$fcolname`, ";
 			if($i > 0) {
 				$from .= " JOIN ProductItemFeatureUnified AS f$i ON f0.Code=f$i.Code";
 			}
-			$where .= " AND f$i.`Feature` = :fname$i";
+			$where .= " AND f$i.`Feature` = " . $pdo->quote($feature);
+			$group .= "`$fcolname` ASC, ";
 		}
+		$group = rtrim($group, ', ');
 		$select .= 'COUNT(*) AS Quantity';
 
 		$query = "$select
@@ -522,19 +481,8 @@ $locationFilter
 $deletedFilter
 $createdFilter
 GROUP BY $group WITH ROLLUP";
+		//echo("<pre>$query</pre>");
 		$statement = $this->getPDO()->prepare($query);
-
-		foreach($features as $i => $feature) {
-			$statement->bindValue(":fname$i", $feature);
-		}
-		$statement->bindValue(':nam', $filter->name, \PDO::PARAM_STR);
-		$statement->bindValue(':val', $filter->value);
-		if($location !== null) {
-			$statement->bindValue(':loc', $location->getCode(), \PDO::PARAM_STR);
-		}
-		if($creation !== null) {
-			$statement->bindValue(':timestamp', $creation->getTimestamp(), \PDO::PARAM_INT);
-		}
 
 		try {
 			$success = $statement->execute();
