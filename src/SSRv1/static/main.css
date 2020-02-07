@@ -2,23 +2,11 @@
 	color: #eeeeee;
 }
 
-input, button, select {
-	color: black;
-	background: white;
-	border: 1px solid #ccc;
-	border-radius: 0.3em;
-	margin: 0.2em;
-	padding: 0.2em 0.4em;
-	font-size: 100%;
-	font-family: inherit; /* I have no idea why is this needed */
-	transition: box-shadow,border-color 0.3s ease-out;
-}
-
 #main {
 	box-shadow: 0 0.3em 0.6em -0.3em rgba(0,0,0,0.29);
 	margin-bottom: 1.5em;
-	padding-top: 0;
-	padding-bottom: 0;
+	padding-top: 0.25rem;
+	padding-bottom: 0.25rem;
 }
 
 #quickmove {
@@ -114,43 +102,43 @@ ul.breadcrumbs li:not(:first-child)::before {
 	color: #555;
 }
 
-table {
-	border-collapse: collapse;
-	width: 100%;
+.stats a {
+	text-decoration: underline;
 }
 
-table > thead, .tablewrapper table .total.last {
+
+.stats.table .total {
 	background: #333;
 	color: #eee;
 }
 
-table td {
-	padding: 0.3em 0.5em;
-}
-
-.tablewrapper table .total {
-	background-color: #eee;
-}
-
-table a, .tablewrapper a {
+.stats.table caption {
+	caption-side: top;
 	color: #333;
+	font-weight: bolder;
 }
 
-table a:visited, .tablewrapper a:visited {
-	color: #000;
+.stats.table th, .stats.table td {
+	padding: .5rem;
+	font-weight: normal;
+}
+
+.stats.list p {
+	margin-top: 1rem;
+	margin-bottom: 0.5rem;
+	font-weight: bold;
+}
+
+.stats.list {
+	margin-bottom: 1rem;
+}
+
+.stats.text {
+	margin-top: 1rem;
 }
 
 #content > :not(.breadbox), .item {
 	margin: .5em;
-}
-
-#content > table.xl {
-	margin: 0;
-}
-
-#content nav.menu.submenu {
-	margin: -1.5em 0 1.5em;
-	box-shadow: 0 0.3em 0.6em -0.3em rgba(0,0,0,0.29);
 }
 
 .item + .item {
@@ -345,13 +333,6 @@ label.searchby {
 	margin-bottom: 1em;
 }
 
-#stats {
-	margin: .5em;
-	padding: .5em;
-	background-color: #333;
-	color: #eee;
-}
-
 /* #content is needed, or else this is not specific enough to override a margin above */
 #content form.nice {
 	margin: auto;
@@ -373,23 +354,6 @@ form.nice > .small {
 
 form.nice textarea {
 	resize: vertical;
-}
-
-.tablewrapper {
-	width: auto;
-	margin-bottom: 2em;
-}
-
-.tablewrapper p {
-	margin: 0 0 1em 0;
-}
-
-.tablewrapper table + p {
-	margin-top: 1em;
-}
-
-.tablewrapper div {
-	line-height: 1.5em;
 }
 
 .hidden {
@@ -441,28 +405,6 @@ form.nice textarea {
 
 	.itembuttons.secondary {
 		float: none;
-	}
-}
-
-@media only screen and (min-width: 54em) {
-
-	.statswrapperwrapper {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
-		align-items: stretch;
-	}
-
-	.tablewrapper {
-		width: 24em;
-	}
-
-	.tablewrapper.large {
-		width: 100%;
-	}
-
-	.tablewrapper > table {
-		width: 100%;
 	}
 }
 

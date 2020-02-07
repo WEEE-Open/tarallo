@@ -8,16 +8,16 @@ $this->insert('stats::menu', ['currentPage' => '']);
 date_default_timezone_set('Europe/Rome');
 ?>
 
-<div class="statswrapperwrapper">
+<div class="row">
 <?php if(!empty($recentlyAdded)): ?>
-	<div class="tablewrapper">
-		<p>Recently added items:</p>
-		<table>
-			<thead>
-			<tr>
-				<td>Item</td>
-				<td>Added</td>
-			</tr>
+	<div class="col-md-6 col-lg-4">
+		<table class="table table-borderless stats">
+			<caption>Recently added items</caption>
+			<thead class="thead-dark">
+				<tr>
+					<th scope="col">Item</th>
+					<th scope="col">Added</th>
+				</tr>
 			</thead>
 			<tbody>
 			<?php foreach($recentlyAdded as $code => $time): ?>
@@ -31,14 +31,14 @@ date_default_timezone_set('Europe/Rome');
 	</div>
 <?php endif ?>
 <?php if(!empty($recentlyModified)): ?>
-	<div class="tablewrapper">
-		<p>Recently modified items:</p>
-		<table>
-			<thead>
-			<tr>
-				<td>Item</td>
-				<td>Modified</td>
-			</tr>
+	<div class="col-md-6 col-lg-4">
+		<table class="table table-borderless stats">
+			<caption>Recently modified items</caption>
+			<thead class="thead-dark">
+				<tr>
+					<th scope="col">Item</th>
+					<th scope="col">Modified</th>
+				</tr>
 			</thead>
 			<tbody>
 			<?php foreach($recentlyModified as $code => $time): ?>
@@ -52,13 +52,13 @@ date_default_timezone_set('Europe/Rome');
 	</div>
 <?php endif ?>
 <?php if(!empty($locations)): ?>
-	<div class="tablewrapper">
-		<p>Items per location:</p>
-		<table>
-			<thead>
+	<div class="col-md-6 col-lg-4">
+		<table class="table table-borderless stats">
+			<caption>Items per location</caption>
+			<thead class="thead-dark">
 			<tr>
-				<td>Location</td>
-				<td>Items</td>
+				<th scope="col">Location</th>
+				<th scope="col">Items</th>
 			</tr>
 			</thead>
 			<tbody>
