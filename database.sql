@@ -165,7 +165,7 @@ CREATE TABLE AuditProduct
         ON UPDATE CASCADE,
     INDEX (`Change`),
     CONSTRAINT check_change
-        CHECK (`Change` IN ('C', 'U', 'D'))
+        CHECK (`Change` IN ('C', 'R', 'U', 'D'))
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
@@ -320,4 +320,4 @@ FROM ProductItemFeature;
 
 -- Append this insert statement at the end of file and update schemaversion value
 INSERT INTO `Configuration` (`Key`, `Value`)
-VALUES ('SchemaVersion', 14);
+VALUES ('SchemaVersion', 15);

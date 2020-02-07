@@ -505,6 +505,28 @@ SQL SECURITY INVOKER
 
 	END");
 					break;
+				case 14:
+					try {
+						$this->exec("ALTER TABLE AuditProduct DROP CONSTRAINT check_change;");
+					} catch (\PDOException $ignored) {
+
+					}
+					try {
+						$this->exec("ALTER TABLE AuditProduct DROP CONSTRAINT check_change_2;");
+					} catch (\PDOException $ignored) {
+
+					}
+					$this->exec("ALTER TABLE AuditProduct ADD CONSTRAINT check_change CHECK (`Change` IN ('C', 'R', 'U', 'D'));");
+					$this->exec("DROP TRIGGER IF EXISTS AuditRenameProduct;");
+					$this->exec("CREATE TRIGGER AuditRenameProduct
+    AFTER UPDATE
+    ON Product
+    FOR EACH ROW
+BEGIN
+    INSERT INTO AuditProduct(Brand, Model, Variant, `Change`, `User`)
+    VALUES(NEW.Brand, NEW.Model, NEW.Variant, 'R', @taralloAuditUsername);
+END;");
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}

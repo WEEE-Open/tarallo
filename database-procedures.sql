@@ -408,14 +408,27 @@ CREATE TRIGGER AuditRenameItem
 	FOR EACH ROW
 	BEGIN
 		IF(NEW.Code <> OLD.Code) THEN
-      UPDATE Audit SET `Code` = NEW.Code
-      WHERE `Code` = OLD.Code;
-      UPDATE Audit SET `Other` = NEW.Code
-      WHERE `Other` = OLD.Code;
-      INSERT INTO Audit(Code, `Change`, Other, `User`)
-      VALUES(NEW.Code, 'R', OLD.Code, @taralloAuditUsername);
+            UPDATE Audit SET `Code` = NEW.Code
+            WHERE `Code` = OLD.Code;
+            UPDATE Audit SET `Other` = NEW.Code
+            WHERE `Other` = OLD.Code;
+            INSERT INTO Audit(Code, `Change`, Other, `User`)
+            VALUES(NEW.Code, 'R', OLD.Code, @taralloAuditUsername);
 		END IF;
 	END $$
+DELIMITER ;
+
+-- Same for products, but foreign keys are handled correctly
+DROP TRIGGER IF EXISTS AuditRenameProduct;
+DELIMITER $$
+CREATE TRIGGER AuditRenameProduct
+    AFTER UPDATE
+    ON Product
+    FOR EACH ROW
+BEGIN
+    INSERT INTO AuditProduct(Brand, Model, Variant, `Change`, `User`)
+    VALUES(NEW.Brand, NEW.Model, NEW.Variant, 'R', @taralloAuditUsername);
+END $$
 DELIMITER ;
 
 -- Add a 'D' entry to audit table
