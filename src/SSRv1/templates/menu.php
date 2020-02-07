@@ -24,6 +24,7 @@ $hereSr = function($page, $current) {
 				</a>
 				<div class="dropdown-menu" aria-labelledby="itemsDropdown">
 					<a class="dropdown-item <?= $hereClass('item new', $currentPage) ?>" href="/new/item">Create<?= $hereSr('item new', $currentPage) ?></a>
+					<a class="dropdown-item <?= $hereClass('item search', $currentPage) ?>" href="/search">Search<?= $hereSr('item search', $currentPage) ?></a>
 					<a class="dropdown-item <?= $hereClass('item bulk add', $currentPage) ?>" href="/bulk/add">Bulk add<?= $hereSr('item bulk add', $currentPage) ?></a>
 					<a class="dropdown-item <?= $hereClass('item bulk move', $currentPage) ?>" href="/bulk/move">Bulk move<?= $hereSr('item bulk move', $currentPage) ?></a>
 				</div>
