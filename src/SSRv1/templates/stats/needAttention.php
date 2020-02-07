@@ -10,7 +10,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 <div class="row">
 <?php if(!empty($lost)): ?>
 	<div class="stats list col-12">
-		<p>Most wanted, aka lost items (<?=count($lost)?>, max 100)</p>
+		<p>Most wanted, aka lost items (<?=count($lost)?> items, max 100 shown)</p>
 		<div>
 			<?php foreach($lost as $item): ?>
 				<a href="/item/<?=$item?>"><?=$item?></a>
@@ -21,7 +21,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 
 <?php if(!empty($missingData)): ?>
 	<div class="stats list col-12">
-		<p>Items with missing data (<?=count($missingData)?>, max 500)</p>
+		<p>Items with missing data (<?=count($missingData)?> items, max 500 shown)</p>
 		<div>
 			<?php foreach($missingData as $item): ?>
 				<a href="/item/<?=$item?>"><?=$item?></a>
