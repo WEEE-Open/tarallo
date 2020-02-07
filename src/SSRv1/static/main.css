@@ -21,33 +21,24 @@
 	font-size: 6vw;
 }
 
-.message {
-	padding: .5em;
-}
-
-.message.long {
-	margin-top: .5em;
-}
-
-.info.message {
+.alert.alert-info {
 	color: #00529B;
 	background-color: #BDE5F8;
 }
-.success.message {
+.alert.alert-success-old {
 	color: #4F8A10;
 	background-color: #DFF2BF;
 }
-.warning.message {
+.alert.alert-warning {
 	color: #9F6000;
 	background-color: #FEEFB3;
 }
-
-.serious.message {
+.alert.alert-serious {
 	color: #CC4100;
 	background-color: #FFCC89;
 }
 
-.error.message {
+.alert.alert-danger {
 	color: #D8000C;
 	background-color: #FFBABA;
 }
@@ -455,5 +446,29 @@ form.nice textarea {
 
 	#searchcontrols .features ul > li > .value {
 		grid-column: -3;
+	}
+}
+
+@media (min-width: 576px) {
+	.w-sm-100 {
+		width: 100%;
+	}
+}
+
+@media (min-width: 768px) {
+	.w-md-100 {
+		width: 100%;
+	}
+}
+
+@media (min-width: 992px) {
+	.w-lg-100 {
+		width: 100%;
+	}
+}
+
+@media (min-width: 1200px) {
+	.w-xl-100 {
+		width: 100%;
 	}
 }

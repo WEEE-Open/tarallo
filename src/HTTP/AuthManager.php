@@ -179,9 +179,6 @@ class AuthManager implements MiddlewareInterface {
 		}
 
 		try {
-			if($session !== null) {
-				$request = $request->withAttribute('SessionInfo', [$session->idTokenExpiry, $session->refreshTokenExpiry]);
-			}
 			$response = $handler->handle($request->withAttribute('User', $user));
 		} catch(AuthenticationException $e) {
 			error_log('Caught AuthenticationException');

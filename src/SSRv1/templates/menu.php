@@ -44,6 +44,9 @@ $hereSr = function($page, $current) {
 			<li class="nav-item">
 				<a class="nav-link <?= $hereClass('stats', $currentPage) ?>" href="/stats">Stats<?= $hereSr('stats', $currentPage) ?></a>
 			</li>
+			<li class="nav-item">
+				<a class="nav-link <?= $hereClass('options', $currentPage) ?>" href="/options">Options<?= $hereSr('options', $currentPage) ?></a>
+			</li>
 		</ul>
 
 		<form class="form-inline my-2 my-md-0" action="/search" method="post">

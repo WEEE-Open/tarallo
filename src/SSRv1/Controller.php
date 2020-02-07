@@ -287,8 +287,6 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
-		$sessionInfo = $request->getAttribute('SessionInfo', []);
-
 		$error = null;
 		$token = null;
 		if($body !== null && count($body) > 0) {
@@ -315,8 +313,7 @@ class Controller implements RequestHandlerInterface {
 			'TemplateParameters', [
 			'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
 			'newToken' => $token,
-			'error' => $error,
-			'sessionInfo' => $sessionInfo,
+			'error' => $error
 		]
 		);
 		return $handler->handle($request);
