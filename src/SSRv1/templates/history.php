@@ -21,7 +21,7 @@ $this->layout('main', ['title' => $item->getCode() . ' history', 'user' => $user
 		<button class="view">🔍&nbsp;View</button>
 	</nav>
 
-	<section class="history">
+	<section class="history row">
 		<?= $this->insert('historyEntries', ['history' => $history, 'tooLong' => $tooLong]) ?>
 	</section>
 </article>
