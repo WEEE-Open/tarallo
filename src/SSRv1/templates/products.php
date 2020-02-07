@@ -43,27 +43,29 @@ unset($summary);
 ?>
 <h2>All products</h2>
 
-<div class="tablewrapper">
-	<table>
-		<thead>
-		<tr>
-			<td>Product</td>
-			<!--<td>Other names</td>-->
-			<td>Items</td>
-		</tr>
-		</thead>
-		<tbody>
-		<?php foreach($products as $row): /** @var \WEEEOpen\Tarallo\ProductCode $product */ $product = $row[0]; $count = $row[1]; $summary = $row[2]; $aka = $row[3] ?>
+<div class="row">
+	<div class="col-12">
+		<table class="table table-borderless stats">
+			<thead class="thead-dark">
 			<tr>
-				<td><a href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>"><?= $summary ?></small></a></td>
-				<!--<td><= $row[3] ?></td>-->
-				<?php if($count === 0): ?>
-				<td>0</td>
-				<?php else: ?>
-				<td><a href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>/items"><?= $count ?></a></td>
-				<?php endif ?>
+				<th scope="col">Product</th>
+				<!--<td>Other names</td>-->
+				<th scope="col">Items</th>
 			</tr>
-		<?php endforeach ?>
-		</tbody>
-	</table>
+			</thead>
+			<tbody>
+			<?php foreach($products as $row): /** @var \WEEEOpen\Tarallo\ProductCode $product */ $product = $row[0]; $count = $row[1]; $summary = $row[2]; $aka = $row[3] ?>
+				<tr>
+					<td><a href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>"><?= $summary ?></small></a></td>
+					<!--<td><= $row[3] ?></td>-->
+					<?php if($count === 0): ?>
+					<td>0</td>
+					<?php else: ?>
+					<td><a href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>/items"><?= $count ?></a></td>
+					<?php endif ?>
+				</tr>
+			<?php endforeach ?>
+			</tbody>
+		</table>
+	</div>
 </div>
