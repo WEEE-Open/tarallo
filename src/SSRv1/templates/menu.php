@@ -54,12 +54,12 @@ $hereSr = function($page, $current) {
 
 <nav id="quickmove" class="navbar navbar-dark bg-dark d-none">
 	<form class="nav-item form-inline">
-		<label for="quickmovecode" class="navbar-text col-form-label">Move item:</label>
-		<input required class="form-control" name="code" id="quickmovecode" type="text"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>>
-		<button class="btn btn-outline-secondary swap" title="Swap" tabindex="-1">⇄</button>
-		<label for="quickmovelocation" class="navbar-text col-form-label">into:</label>
-		<input required class="form-control to" id="quickmovelocation" type="text">
-		<button type="submit" class="btn btn-outline-secondary do">Move</button>
+		<label for="quickmovecode" class="navbar-text mr-sm-1 col-form-label">Move item:</label>
+		<input required class="form-control mr-sm-1" name="code" id="quickmovecode" type="text"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>>
+		<button class="btn btn-outline-secondary mr-1 my-2 my-sm-0 swap" title="Swap" tabindex="-1">⇄</button>
+		<label for="quickmovelocation" class="navbar-text col-form-label mr-sm-1">into:</label>
+		<input required class="form-control mr-sm-1 to" id="quickmovelocation" type="text">
+		<button type="submit" class="btn btn-outline-secondary mt-2 mt-sm-0 do">Move</button>
 	</form>
 	<div class="nav-item alert alert-success ml-0 mr-auto my-auto d-none" role="alert"><a href="#">Ok</a></div>
 	<div class="nav-item alert alert-danger col-12 my-2 d-none" role="alert">Error</div>
