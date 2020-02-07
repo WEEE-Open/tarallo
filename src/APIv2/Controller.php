@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\APIv2;
 
 use FastRoute;
+use PHPUnit\Util\Json;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -272,6 +273,36 @@ class Controller implements RequestHandlerInterface {
 		} else {
 			$response = new JsonResponse(['brand' => $product->getBrand(), 'model' => $product->getModel(), 'variant' => $product->getVariant()], 201);
 			$response = $response->withHeader('Location', '/v2/products/' . rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
+		}
+		return $response;
+	}
+
+	public static function renameProduct(ServerRequestInterface $request): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+		$payload = $request->getAttribute('ParsedBody', []);
+		$parameters = $request->getAttribute('parameters', []);
+
+		$brand = Validation::validateOptionalString($parameters, 'brand');
+		$model = Validation::validateOptionalString($parameters, 'model');
+		$variant = Validation::validateOptionalString($parameters, 'variant');
+		$loopback = isset($query['loopback']);
+
+		$brandNew = Validation::validateOptionalString($payload, 'brand', null, null);
+		$modelNew = Validation::validateOptionalString($payload, 'model', null, null);
+		$variantNew = Validation::validateOptionalString($payload, 'variant', null, null);
+
+		$product = new ProductCode($brand, $model, $variant);
+		$product = $db->productDAO()->renameProduct($product, $brandNew, $modelNew, $variantNew);
+
+		// TODO: why do these headers break everything? Why do they break everything *ONLY* for this method?
+		if($loopback) {
+			$response = new JsonResponse($db->productDAO()->getProduct($product), 200);
+			//$response = $response->withHeader('Location', '/v2/products/' . rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
+		} else {
+			$response = new JsonResponse(['brand' => $product->getBrand(), 'model' => $product->getModel(), 'variant' => $product->getVariant()], 200);
+			//$response = $response->withHeader('Location', '/v2/products/' . rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
 		}
 		return $response;
 	}
@@ -719,10 +750,11 @@ class Controller implements RequestHandlerInterface {
 
 						$r->addGroup('/products',
 							function(FastRoute\RouteCollector $r) {
-								//$r->get('', [User::AUTH_LEVEL_RW, 'Controller::']); // TODO: implement
+								//$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getProducts']);
 								$r->get('/{brand}/{model}', [User::AUTH_LEVEL_RO, 'Controller::getProducts']);
 								$r->get('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct']);
 								$r->put('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::createProduct']);
+								$r->patch('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::renameProduct']);
 								$r->delete('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::deleteProduct']);
 
 								$r->addGroup('/{brand}/{model}/{variant}/features',
