@@ -22,13 +22,9 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 	<link rel="stylesheet" href="/static/main.css">
 	<?php if(defined('TARALLO_DEVELOPMENT_ENVIRONMENT') && TARALLO_DEVELOPMENT_ENVIRONMENT): ?>
 	<style>
-        /*a, a:visited, a:active, a:hover, a:visited:hover {*/
-        /*    color: darkorange;*/
-        /*}*/
-
-        /*header#title, table > thead, .tablewrapper table .total.last, .item h2, #stats {*/
-        /*    background-color: darkorange;*/
-        /*}*/
+		.thead-dark th, .navbar-dark {
+            background-color: darkorange !important;
+        }
     </style>
 	<?php endif; ?>
 	<title><?=$this->e($title)?> - T.A.R.A.L.L.O.</title>
@@ -39,7 +35,7 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 	<a href="/" class="navbar-brand" title="Trabiccolo Amministrazione Rottami e Assistenza, Legalmente-noto-come L'inventario Opportuno">T.A.R.A.L.L.O.</a>
 
 	<?php if(defined('TARALLO_DEVELOPMENT_ENVIRONMENT') && TARALLO_DEVELOPMENT_ENVIRONMENT): ?>
-		<small class="navbar-text text-muted">Development version, this is running locally on your machine</small>
+		<small class="navbar-text">Development version, this is running locally on your machine</small>
 	<?php endif ?>
 	<?php if($user !== null): ?>
 	<div class="ml-auto">
