@@ -5,9 +5,11 @@
 /** @var string $moveDefaultFrom */
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var string $currentPage|null */
+/** @var bool $tooltips */
 $currentPage = $currentPage ?? null;
 $itembuttons = $itembuttons ?? false;
 $moveDefaultFrom = $moveDefaultFrom ?? null;
+$tooltips = $tooltips ?? false;
 ?>
 <!doctype html>
 <html lang="<?= /* $lang */ 'en-US' ?>">
@@ -57,7 +59,9 @@ $moveDefaultFrom = $moveDefaultFrom ?? null;
 <!--<script src="https://cdn.jsdelivr.net/npm/bootstrap.native@2/dist/bootstrap-native-v4.min.js"></script>-->
 <!--<script src="https://cdn.jsdelivr.net/combine/npm/jquery@3/dist/jquery.slim.min.js,npm/@popperjs/core@2/dist/umd/popper.min.js,npm/bootstrap@4/dist/js/bootstrap.min.js"></script>-->
 <script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js"></script>
+<?php if($tooltips): ?><script>$(function () {$('[data-toggle="tooltip"]').tooltip()})</script><?php endif; ?>
 </body>
 </html>
