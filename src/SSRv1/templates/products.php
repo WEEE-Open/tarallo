@@ -11,35 +11,38 @@ $this->layout(
 		'itembuttons' => false,
 	]
 );
-$small = function(string $part) {
-	if($part === '') {
-		return '';
-	} else {
-		return "<small>$part</small>";
+
+$summarize = function() use (&$products) {
+	$small = function(string $part) {
+		if($part === '') {
+			return '';
+		} else {
+			return "<small>$part</small>";
+		}
+	};
+
+	foreach($products as &$row) {
+		$product = $row[0];
+		// TODO: provide these parts (this is nearly impossible with the current query)
+		$rawSummary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peelForList($product, null, null, null);
+		$summary = [];
+		$end = count($rawSummary) - 1;
+		$i = 0;
+		for($i = 0; $i < $end; $i++) {
+			$part = $rawSummary[$i];
+			if($i % 2 === 0) {
+				$summary[] = $this->e($part);
+			} else {
+				$summary[] = $small($this->e($part));
+			}
+		}
+		$summary = implode(' ', $summary);
+		$row[] = $summary;
+		// The for-loop stopped before this element
+		$row[] = $small($this->e($rawSummary[$i]));
 	}
 };
-
-foreach($products as &$row) {
-	$product = $row[0];
-	// TODO: provide these parts (this is nearly impossible with the current query)
-	$rawSummary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peelForList($product, null, null, null);
-	$summary = [];
-	$end = count($rawSummary) - 1;
-	$i = 0;
-	for($i = 0; $i < $end; $i++) {
-		$part = $rawSummary[$i];
-		if($i % 2 === 0) {
-			$summary[] = $this->e($part);
-		} else {
-			$summary[] = $small($this->e($part));
-		}
-	}
-	$summary = implode(' ', $summary);
-	$row[] = $summary;
-	// The for-loop stopped before this element
-	$row[] = $small($this->e($rawSummary[$i]));
-}
-unset($summary);
+$summarize();
 ?>
 <h2>All products</h2>
 
