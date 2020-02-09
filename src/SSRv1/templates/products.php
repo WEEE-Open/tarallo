@@ -1,6 +1,8 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var array $products */
+/** @var string|null $brand */
+/** @var string|null $model */
 
 $this->layout(
 	'main',
@@ -44,7 +46,13 @@ $summarize = function() use (&$products) {
 };
 $summarize();
 ?>
-<h2>All products</h2>
+<?php if($brand === null && $model === null): ?>
+	<h2>All products</h2>
+<?php elseif($brand !== null && $model === null): ?>
+	<h2>Products by <?= $this->e($brand) ?></h2>
+<?php else: ?>
+	<h2>Products of type <?= $this->e($brand ?? '') ?> <?= $this->e($model ?? '') ?></h2>
+<?php endif ?>
 
 <div class="row">
 	<div class="col-12">

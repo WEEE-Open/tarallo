@@ -519,17 +519,40 @@ GROUP BY $group WITH ROLLUP";
 
 	/**
 	 * Get all products in the database and a count of how many items are there for each one
+	 *
+	 * @param string|null $brand Get only products with this brand
+	 * @param string|null $model Get only products with this model (different variants)
+	 *
+	 * @return array Associative array with rows of [product, items count]
 	 */
-	public function getAllProducts(): array {
+	public function getAllProducts(?string $brand, ?string $model): array {
+		$where = [];
+		if($brand !== null) {
+			$where[] = 'Brand = :b';
+		}
+		if($model !== null) {
+			$where[] = 'Model = :m';
+		}
+		if(count($where) > 0) {
+			$where = 'WHERE ' . implode(' AND ', $where);
+		}
+
 		$statement = $this->getPDO()->prepare(<<<EOQ
 		SELECT Brand, Model, Variant, COUNT(Code) AS Items
 		FROM Item
 		NATURAL RIGHT JOIN Product
+		$where
 		GROUP BY Brand, Model, Variant
 		ORDER BY Brand, Model, Variant, Items DESC
 EOQ
 		);
 		try {
+			if($brand !== null) {
+				$statement->bindValue(':b', $brand, \PDO::PARAM_STR);
+			}
+			if($model !== null) {
+				$statement->bindValue(':m', $model, \PDO::PARAM_STR);
+			}
 			$result = $statement->execute();
 			assert($result === true, 'get products and count');
 			$result = [];

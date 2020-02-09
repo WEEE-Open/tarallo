@@ -104,7 +104,6 @@ class Controller implements RequestHandlerInterface {
 	public static function getProductItems(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
-		$query = $request->getQueryParams();
 		$parameters = $request->getAttribute('parameters', []);
 
 		$brand = Validation::validateOptionalString($parameters, 'brand');
@@ -131,10 +130,14 @@ class Controller implements RequestHandlerInterface {
 	public static function getAllProducts(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
 
-		$products = $db->statsDAO()->getAllProducts();
+		$brand = Validation::validateOptionalString($parameters, 'brand', null, null);
+		$model = Validation::validateOptionalString($parameters, 'model', null, null);
 
-		$request = $request->withAttribute('Template', 'products')->withAttribute('TemplateParameters', ['products' => $products]);
+		$products = $db->statsDAO()->getAllProducts($brand, $model);
+
+		$request = $request->withAttribute('Template', 'products')->withAttribute('TemplateParameters', ['products' => $products, 'brand' => $brand, 'model' => $model]);
 
 		return $handler->handle($request);
 	}
@@ -795,6 +798,8 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/item/{id}/edit/{edit}', [User::AUTH_LEVEL_RW, 'Controller::getItem',]);
 				$r->get('/item/{id}/history', [User::AUTH_LEVEL_RO, 'Controller::getItemHistory',]);
 				$r->get('/product', [User::AUTH_LEVEL_RO, 'Controller::getAllProducts',]);
+				$r->get('/product/{brand}', [User::AUTH_LEVEL_RO, 'Controller::getAllProducts',]);
+				$r->get('/product/{brand}/{model}', [User::AUTH_LEVEL_RO, 'Controller::getAllProducts',]);
 				$r->get('/product/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct',]);
 				$r->get('/product/{brand}/{model}/{variant}/edit', [User::AUTH_LEVEL_RW, 'Controller::getProduct',]);
 				$r->get('/product/{brand}/{model}/{variant}/history', [User::AUTH_LEVEL_RO, 'Controller::getProductHistory',]);
