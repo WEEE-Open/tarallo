@@ -619,7 +619,7 @@ EOQ
 				FROM Item
 				LEFT JOIN Product ON Item.Brand = Product.Brand AND Item.Model = Product.Model
 				LEFT JOIN Product AS ProductAgain ON Item.Brand = ProductAgain.Brand AND Item.Model = ProductAgain.Model AND Item.Variant = ProductAgain.Variant
-				WHERE Item.Brand IS NOT NULL AND Item.Model IS NOT NULL AND ProductAgain.Brand IS NULL
+				WHERE Item.Brand IS NOT NULL AND Item.Model IS NOT NULL AND ProductAgain.Brand IS NULL AND Item.DeletedAt IS NULL
 				GROUP BY Item.Code, Item.Brand, Item.Model, Item.Variant
 				ORDER BY Brand, Model, Variant, Code
 EOQ
@@ -641,7 +641,7 @@ EOQ
 				FROM ItemFeature
 				NATURAL JOIN Item
 				LEFT JOIN Product AS ProductAgain ON Item.Brand = ProductAgain.Brand AND Item.Model = ProductAgain.Model AND Item.Variant = ProductAgain.Variant
-				WHERE Item.Brand IS NOT NULL AND Item.Model IS NOT NULL AND ProductAgain.Brand IS NULL
+				WHERE Item.Brand IS NOT NULL AND Item.Model IS NOT NULL AND ProductAgain.Brand IS NULL AND Item.DeletedAt IS NULL
 				AND Feature NOT IN ('brand', 'model', 'variant', 'restrictions', 'working', 'cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code', 'mac', 'sn', 'wwn', 'arrival-batch', 'owner', 'data-erased', 'surface-scan', 'smart-data', 'software', 'notes', 'todo', 'check')
 				GROUP BY Item.Code, Item.Brand, Item.Model, Item.Variant
 				ORDER BY Brand, Model, Variant, Code
