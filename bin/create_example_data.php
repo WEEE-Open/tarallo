@@ -92,22 +92,37 @@ $db->productDAO()->addProduct((new Product("Dill", "PessimPlex DI-360", "SFF"))
 	->addFeature(new Feature('color', 'grey'))
 	->addFeature(new Feature('type', 'case')));
 foreach([256, 512, 1024, 2048] as $size) {
-	$db->productDAO()->addProduct(
-		(new Product("Samsung", "S667ABC" . $size, "v1"))
-			->addFeature(new Feature('capacity-byte', $size * 1024 * 1024))
-			->addFeature(new Feature('frequency-hertz', 667 * 1000 * 1000))
-			->addFeature(new Feature('color', 'green'))
-			->addFeature(new Feature('ram-ecc', 'no'))
-			->addFeature(new Feature('ram-type', 'ddr2'))
-			->addFeature(new Feature('ram-form-factor', 'dimm'))
-			->addFeature(new Feature('type', 'ram'))
-	);
+	foreach([667, 800] as $freq) {
+		$db->productDAO()->addProduct(
+			(new Product("Samsung", "S${freq}ABC" . $size, "v1"))
+				->addFeature(new Feature('capacity-byte', $size * 1024 * 1024))
+				->addFeature(new Feature('frequency-hertz', $freq * 1000 * 1000))
+				->addFeature(new Feature('color', 'green'))
+				->addFeature(new Feature('ram-ecc', 'no'))
+				->addFeature(new Feature('ram-type', 'ddr2'))
+				->addFeature(new Feature('ram-form-factor', 'dimm'))
+				->addFeature(new Feature('type', 'ram'))
+		);
+	}
+	foreach([667, 800] as $freq) {
+		$db->productDAO()->addProduct(
+			(new Product("Samsung", "S${freq}ABC" . $size, "v2"))
+				->addFeature(new Feature('capacity-byte', $size * 1024 * 1024))
+				->addFeature(new Feature('frequency-hertz', $freq * 1000 * 1000))
+				->addFeature(new Feature('color', 'blue'))
+				->addFeature(new Feature('ram-ecc', 'no'))
+				->addFeature(new Feature('ram-type', 'ddr2'))
+				->addFeature(new Feature('ram-form-factor', 'dimm'))
+				->addFeature(new Feature('type', 'ram'))
+		);
+	}
 }
 
 $polito = (new Item('Polito'))->addFeature(new Feature('type', 'location'));
 $chernobyl = (new Item('Chernobyl'))->addFeature(new Feature('type', 'location'))->addFeature(new Feature('color', 'grey'));
 $polito->addContent($chernobyl);
 $table = (new Item('Table'))->addFeature(new Feature('type', 'location'))->addFeature(new Feature('color', 'white'));
+$bluezone = (new Item('BlueZone'))->addFeature(new Feature('type', 'location'))->addFeature(new Feature('color', 'blue'));
 $chernobyl->addContent($table);
 $rambox = (new Item('RamBox'))->addFeature(new Feature('type', 'location'))->addFeature(new Feature('color', 'red'));
 $table->addContent($rambox);
@@ -165,18 +180,50 @@ $SCHIFOMACCHINA->addContent((new Item('B25'))
 		->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
 	));
 
+$testpcs = [];
+// No variant but a product exists
+$testpcs[] = (new Item('PC100'))
+	->addFeature(new Feature('type', 'case'))
+	->addFeature(new Feature('brand', 'Samsong'))
+	->addFeature(new Feature('model', 'KAI39'))
+	->addFeature(new Feature('usb-ports-n', 4))
+	->addFeature(new Feature('firewire-ports-n', 1))
+	->addFeature(new Feature('color', 'yellowed'))
+	->addFeature(new Feature('working', 'yes'))
+	->addFeature(new Feature('owner', 'DISAT'));
+// No variant, no product
+$testpcs[] = (new Item('PC101'))
+	->addFeature(new Feature('type', 'case'))
+	->addFeature(new Feature('brand', 'Oildata'))
+	->addFeature(new Feature('model', 'OL4278A'))
+	->addFeature(new Feature('usb-ports-n', 2))
+	->addFeature(new Feature('color', 'red'))
+	->addFeature(new Feature('working', 'no'))
+	->addFeature(new Feature('owner', 'DAUIN'));
+// Variant but no product
+$testpcs[] = (new Item('PC102'))
+	->addFeature(new Feature('type', 'case'))
+	->addFeature(new Feature('brand', 'Oildata'))
+	->addFeature(new Feature('model', 'OL4278A'))
+	->addFeature(new Feature('variant', 'rev 2.5'))
+	->addFeature(new Feature('usb-ports-n', 2))
+	->addFeature(new Feature('color', 'red'))
+	->addFeature(new Feature('working', 'no'))
+	->addFeature(new Feature('owner', 'DAUIN'));
+
 // RAM(DOM) GENERATOR 2000
-for($i = 100; $i < 222; $i++) {
+for($i = 100; $i < 250; $i++) {
 	$ramSize = pow(2, rand(8, 11));
+	$freq = ['667', '800'][rand(0, 1)];
 	$ram = (new Item('R' . $i))
 		->addFeature(new Feature('brand', 'Samsung'))
-		->addFeature(new Feature('model', 'S667ABC' . $ramSize))
-		->addFeature(new Feature('variant', 'v1'))
+		->addFeature(new Feature('model', 'S' . $freq . 'ABC' . $ramSize))
+		->addFeature(new Feature('variant', 'v' . rand(1,2)))
 		->addFeature(new Feature('sn', 'ASD' . strtoupper(substr(crc32($ramSize), 0, 5) . rand(100000, 999999) . dechex(rand(0,255)))))
 		->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'));
 	$rambox->addContent($ram);
 }
-for($i = 222; $i < 230; $i++) {
+for($i = 250; $i < 230; $i++) {
 	$ramSize = pow(2, rand(8, 11));
 	$ram = (new Item('R' . $i))
 		->addFeature(new Feature('brand', 'Samsung'))
@@ -210,6 +257,15 @@ foreach([777, 778, 779] as $item) {
 	$rambox->addContent($ram);
 }
 
+$ram = (new Item('R6969'))
+	->addFeature(new Feature('brand', 'Samsung'))
+	->addFeature(new Feature('model', 'S667ABC512'))
+	->addFeature(new Feature('variant', 'v3'))
+	->addFeature(new Feature('color', 'red'))
+	->addFeature(new Feature('sn', 'ASD' . substr(strtoupper(md5('512')), 0, 5) . '123456'))
+	->addFeature(new Feature('working', 'no'));
+$rambox->addContent($ram);
+
 $lonelyCpu = (new Item('C1'))
 	->addFeature(new Feature('brand', 'AMD'))
 	->addFeature(new Feature('model', 'Opteron 3300'))
@@ -217,8 +273,11 @@ $lonelyCpu = (new Item('C1'))
 	->setProduct($db->productDAO()->getProduct(new ProductCode('AMD', 'Opteron 3300', 'AJEJE')));
 $table->addContent($lonelyCpu);
 
+foreach($testpcs as $testpc) {
+	$bluezone->addContent($testpc);
+}
 $table->addContent($SCHIFOMACCHINA);
-$chernobyl->addContent($pc20)->addContent($pc22)->addContent($pc55)->addContent($pc90);
+$chernobyl->addContent($pc20)->addContent($pc22)->addContent($pc55)->addContent($pc90)->addContent($bluezone);
 
 $db->itemDAO()->addItem($polito);
 $db->itemDAO()->loseItem($ram666);
