@@ -261,7 +261,7 @@ $ram = (new Item('R6969'))
 	->addFeature(new Feature('brand', 'Samsung'))
 	->addFeature(new Feature('model', 'S667ABC512'))
 	->addFeature(new Feature('variant', 'v3'))
-	->addFeature(new Feature('color', 'red'))
+//	->addFeature(new Feature('color', 'red'))
 	->addFeature(new Feature('sn', 'ASD' . substr(strtoupper(md5('512')), 0, 5) . '123456'))
 	->addFeature(new Feature('working', 'no'));
 $rambox->addContent($ram);

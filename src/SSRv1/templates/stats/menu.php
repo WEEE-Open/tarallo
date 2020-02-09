@@ -10,4 +10,5 @@
 	<a class="nav-link disabled" href="/stats/cpus" tabindex="-1" aria-disabled="true">CPUs</a>
 	<a class="nav-link disabled" href="/stats/hdds" tabindex="-1" aria-disabled="true">HDDs</a>
 	<a class="nav-link disabled" href="/stats/users" tabindex="-1" aria-disabled="true">Users</a>
+	<a class="nav-link <?= $currentPage === 'products' ? 'active' : '' ?>" href="/stats/products">Products</a>
 </nav>

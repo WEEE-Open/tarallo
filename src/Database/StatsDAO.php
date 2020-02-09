@@ -564,4 +564,68 @@ EOQ
 			$statement->closeCursor();
 		}
 	}
+
+	public function getProductsCountByBrand() {
+		$statement = $this->getPDO()->prepare(
+			<<<EOQ
+				SELECT Brand, COUNT(DISTINCT Model) AS Models, COUNT(*) AS Variants, COUNT(*)/COUNT(DISTINCT Model) AS VPP
+				FROM Product
+				GROUP BY Brand
+				ORDER BY Brand
+EOQ
+		);
+		try {
+			$result = $statement->execute();
+			assert($result === true, 'get products count by brand');
+
+			return $statement->fetchAll(\PDO::FETCH_ASSOC);
+		} finally{
+			$statement->closeCursor();
+		}
+	}
+
+	public function getItemsWithIncompleteProducts() {
+		$statement = $this->getPDO()->prepare(
+			<<<EOQ
+				SELECT Item.Code, Item.Brand, Item.Model, Item.Variant, COUNT(DISTINCT Product.Variant) AS NumVariants
+				FROM Item
+				LEFT JOIN Product ON Item.Brand = Product.Brand AND Item.Model = Product.Model
+				LEFT JOIN Product AS ProductAgain ON Item.Brand = ProductAgain.Brand AND Item.Model = ProductAgain.Model AND Item.Variant = ProductAgain.Variant
+				WHERE Item.Brand IS NOT NULL AND Item.Model IS NOT NULL AND ProductAgain.Brand IS NULL
+				GROUP BY Item.Code, Item.Brand, Item.Model, Item.Variant
+				ORDER BY Brand, Model, Variant, Code
+EOQ
+		);
+		try {
+			$result = $statement->execute();
+			assert($result === true, 'get incomplete products');
+
+			return $statement->fetchAll(\PDO::FETCH_ASSOC);
+		} finally{
+			$statement->closeCursor();
+		}
+	}
+
+	public function getSplittableItems() {
+		$statement = $this->getPDO()->prepare(
+			<<<EOQ
+				SELECT DISTINCT Item.Code, Item.Brand, Item.Model, Item.Variant, COUNT(Feature) AS Features
+				FROM ItemFeature
+				NATURAL JOIN Item
+				LEFT JOIN Product AS ProductAgain ON Item.Brand = ProductAgain.Brand AND Item.Model = ProductAgain.Model AND Item.Variant = ProductAgain.Variant
+				WHERE Item.Brand IS NOT NULL AND Item.Model IS NOT NULL AND ProductAgain.Brand IS NULL
+				AND Feature NOT IN ('brand', 'model', 'variant', 'restrictions', 'working', 'cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code', 'mac', 'sn', 'wwn', 'arrival-batch', 'owner', 'data-erased', 'surface-scan', 'smart-data', 'software', 'notes', 'todo', 'check')
+				GROUP BY Item.Code, Item.Brand, Item.Model, Item.Variant
+				ORDER BY Brand, Model, Variant, Code
+EOQ
+		);
+		try {
+			$result = $statement->execute();
+			assert($result === true, 'get splittable items');
+
+			return $statement->fetchAll(\PDO::FETCH_ASSOC);
+		} finally{
+			$statement->closeCursor();
+		}
+	}
 }

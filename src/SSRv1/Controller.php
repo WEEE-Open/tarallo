@@ -456,9 +456,15 @@ class Controller implements RequestHandlerInterface {
 					]
 				);
 				break;
-
+			case 'products':
+				$request = $request->withAttribute('Template', 'stats::products')->withAttribute('TemplateParameters', [
+						'brandsProducts' => $db->statsDAO()->getProductsCountByBrand(),
+						'incomplete' => $db->statsDAO()->getItemsWithIncompleteProducts(),
+						'splittable' => $db->statsDAO()->getSplittableItems(),
+					]
+				);
+				break;
 			default:
-				// TODO: if this gets used only for items (and the page suggesting items), change to something else
 				throw new NotFoundException();
 		}
 
