@@ -117,8 +117,8 @@ ul.breadcrumbs li:not(:first-child)::before {
 }
 
 .stats.table .total {
-	background: #333;
-	color: #eee;
+	background: #eee;
+	color: #333;
 }
 
 .stats.table caption {
