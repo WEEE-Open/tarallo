@@ -523,27 +523,32 @@ GROUP BY $group WITH ROLLUP";
 	 * @param string|null $brand Get only products with this brand
 	 * @param string|null $model Get only products with this model (different variants)
 	 *
-	 * @return array Associative array with rows of [product, items count]
+	 * @return array Associative array with rows of [product, manufacturer|null, family|null, internal|null, items count]
 	 */
 	public function getAllProducts(?string $brand, ?string $model): array {
 		$where = [];
 		if($brand !== null) {
-			$where[] = 'Brand = :b';
+			$where[] = 'Product.Brand = :b';
 		}
 		if($model !== null) {
-			$where[] = 'Model = :m';
+			$where[] = 'Product.Model = :m';
 		}
 		if(count($where) > 0) {
 			$where = 'WHERE ' . implode(' AND ', $where);
+		} else {
+			$where = '';
 		}
 
 		$statement = $this->getPDO()->prepare(<<<EOQ
-		SELECT Brand, Model, Variant, COUNT(Code) AS Items
-		FROM Item
-		NATURAL RIGHT JOIN Product
-		$where
-		GROUP BY Brand, Model, Variant
-		ORDER BY Brand, Model, Variant, Items DESC
+			SELECT Product.Brand, Product.Model, Product.Variant, pfManufacturer.ValueText AS Manufacturer, pfFamily.ValueText AS Family, pfInternal.ValueText AS Internal, COUNT(Code) AS Items
+			FROM Item
+			NATURAL RIGHT JOIN Product
+			LEFT OUTER JOIN ProductFeature AS pfManufacturer ON Product.Brand=pfManufacturer.Brand AND Product.Model=pfManufacturer.Model AND Product.Variant=pfManufacturer.Variant AND pfManufacturer.Feature = 'brand-manufacturer'
+			LEFT OUTER JOIN ProductFeature AS pfFamily ON Product.Brand=pfFamily.Brand AND Product.Model=pfFamily.Model AND Product.Variant=pfFamily.Variant AND pfFamily.Feature = 'family'
+			LEFT OUTER JOIN ProductFeature AS pfInternal ON Product.Brand=pfInternal.Brand AND Product.Model=pfInternal.Model AND Product.Variant=pfInternal.Variant AND pfInternal.Feature = 'internal-name'
+			$where
+			GROUP BY Product.Brand, Product.Model, Product.Variant
+			ORDER BY Product.Brand, Product.Model, Product.Variant, Items DESC
 EOQ
 		);
 		try {
@@ -558,7 +563,7 @@ EOQ
 			$result = [];
 			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 				$product = new ProductCode($row['Brand'], $row['Model'], $row['Variant']);
-				$result[] = [$product, $row['Items']];
+				$result[] = [$product, $row['Manufacturer'], $row['Family'], $row['Internal'], $row['Items']];
 			}
 
 			return $result;

@@ -67,13 +67,13 @@ class Summary {
 	public static function peelForList(ProductCode $product, ?string $manufacturer, ?string $family, ?string $internal): array {
 		$brand = $product->getBrand();
 		$model = $product->getModel();
-		$variant = $product->getVariant();
-		//$manufacturer = $item->getFeatureValue('brand-manufacturer');
-		//$family = $item->getFeatureValue('family');
-		//$internal = $item->getFeatureValue('internal-name');
+		$variant = $product->getVariantOrEmpty();
 
 		$family = $family === null ? '' : $family;
-		$variant = $product->getVariantOrEmpty();
+		if(strpos($model, $family) !== false) {
+			$family = '';
+		}
+
 		if($manufacturer !== null && $internal === null) {
 			$aka = "$manufacturer $model";
 		} else if($manufacturer === null && $internal !== null) {

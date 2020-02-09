@@ -14,7 +14,7 @@ $this->layout(
 	]
 );
 
-$summarize = function() use (&$products) {
+$summarize = function() use ($products) {
 	$small = function(string $part) {
 		if($part === '') {
 			return '';
@@ -23,13 +23,13 @@ $summarize = function() use (&$products) {
 		}
 	};
 
-	foreach($products as &$row) {
+	$updated = [];
+	foreach($products as $row) {
 		$product = $row[0];
-		// TODO: provide these parts (this is nearly impossible with the current query)
-		$rawSummary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peelForList($product, null, null, null);
+		$rawSummary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peelForList($product, $row[1], $row[2], $row[3]);
 		$summary = [];
+
 		$end = count($rawSummary) - 1;
-		$i = 0;
 		for($i = 0; $i < $end; $i++) {
 			$part = $rawSummary[$i];
 			if($i % 2 === 0) {
@@ -39,12 +39,14 @@ $summarize = function() use (&$products) {
 			}
 		}
 		$summary = implode(' ', $summary);
-		$row[] = $summary;
 		// The for-loop stopped before this element
-		$row[] = $small($this->e($rawSummary[$i]));
+		$aka = $small($this->e($rawSummary[$i]));
+		$new = [$product, $row[4], $summary, $aka];
+		$updated[] = $new;
 	}
+	return $updated;
 };
-$summarize();
+$products = $summarize();
 ?>
 <?php if($brand === null && $model === null): ?>
 	<h2>All products</h2>
@@ -56,11 +58,11 @@ $summarize();
 
 <div class="row">
 	<div class="col-12">
-		<table class="table table-borderless stats">
+		<table class="table table-borderless stats table-hover">
 			<thead class="thead-dark">
 			<tr>
 				<th scope="col">Product</th>
-				<!--<td>Other names</td>-->
+				<th scope="col">Other names</th>
 				<th scope="col">Items</th>
 			</tr>
 			</thead>
@@ -68,7 +70,7 @@ $summarize();
 			<?php foreach($products as $row): /** @var \WEEEOpen\Tarallo\ProductCode $product */ $product = $row[0]; $count = $row[1]; $summary = $row[2]; $aka = $row[3] ?>
 				<tr>
 					<td><a href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>"><?= $summary ?></small></a></td>
-					<!--<td><= $row[3] ?></td>-->
+					<td><?= $row[3] ?></td>
 					<?php if($count === 0): ?>
 					<td>0</td>
 					<?php else: ?>
