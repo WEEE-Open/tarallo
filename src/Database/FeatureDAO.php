@@ -216,25 +216,38 @@ final class FeatureDAO extends DAO {
 	 * @return bool True if anything was deleted
 	 */
 	public function deleteFeatures(ItemWithFeatures $item, array $features) {
-		assert($item instanceof ItemWithCode);
 		if(empty($features)) {
 			return false;
 		}
-		// This never fails, even for items that don't exist
-		$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ? AND `Feature`= ?');
+		if($item instanceof ItemWithCode) {
+			// This never fails, even for items that don't exist
+			$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = :cod AND `Feature`= :f');
+			$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
+		} else {
+			/** @var ProductCode $item */
+			$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ProductFeature WHERE Brand = :brand AND Model = :model AND Variant = :variant AND `Feature`= :f');
+			$statement->bindValue(':brand', $item->getBrand(), \PDO::PARAM_STR);
+			$statement->bindValue(':model', $item->getModel(), \PDO::PARAM_STR);
+			$statement->bindValue(':variant', $item->getVariant(), \PDO::PARAM_STR);
+		}
+
 		try {
+			$rows = 0;
 			foreach($features as $feature) {
 				if(!is_string($feature)) {
 					throw new \InvalidArgumentException('Name of feature to be deleted should be a string');
 				}
 
-				$result = $statement->execute([$item->getCode(), $feature]);
+				$statement->bindValue(':f', $feature, \PDO::PARAM_STR);
+
+				$result = $statement->execute();
 				assert($result !== false, 'delete feature');
+				$rows += $statement->rowCount();
 			}
 		} finally {
 			$statement->closeCursor();
 		}
-		return true;
+		return $rows !== 0;
 	}
 
 
