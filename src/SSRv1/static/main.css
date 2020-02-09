@@ -93,6 +93,14 @@ ul.breadcrumbs li:not(:first-child)::before {
 	color: #555;
 }
 
+.features del {
+	text-decoration-line: line-through;
+	text-decoration-style: wavy;
+	text-decoration-color: #D8000C;
+	/*text-decoration-color: #000000;*/
+	color: #aaaaaa;
+}
+
 .stats a {
 	text-decoration: underline;
 }
