@@ -13,7 +13,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 		<p>Most wanted, aka lost items (<?=count($lost)?> items, max 100 shown)</p>
 		<div>
 			<?php foreach($lost as $item): ?>
-				<a href="/item/<?=$item?>"><?=$item?></a>
+				<a href="/item/<?=$this->e($item)?>"><?=$this->e($item)?></a>
 			<?php endforeach ?>
 		</div>
 	</div>
@@ -24,7 +24,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 		<p>Items with missing data (<?=count($missingData)?> items, max 500 shown)</p>
 		<div>
 			<?php foreach($missingData as $item): ?>
-				<a href="/item/<?=$item?>"><?=$item?></a>
+				<a href="/item/<?=$this->e($item)?>"><?=$this->e($item)?></a>
 			<?php endforeach ?>
 		</div>
 	</div>
@@ -32,7 +32,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 
 <?php if(!empty($serials)): ?>
 	<div class="col-12 col-md-8 col-lg-6">
-	<table class="table table-borderless stats">
+		<table class="table table-borderless stats">
 		<caption>Duplicate serial numbers</caption>
 		<thead class="thead-dark">
 		<tr>
@@ -43,8 +43,8 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 		<tbody>
 		<?php foreach($serials as $serial => $count): ?>
 			<tr>
-				<td><?=$serial?></td>
-				<td><?=$count?></td>
+				<td><?=$this->e($serial)?></td>
+				<td><?=$this->e($count)?></td>
 			</tr>
 		<?php endforeach ?>
 		</tbody>
