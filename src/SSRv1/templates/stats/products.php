@@ -70,7 +70,7 @@ $this->insert('stats::menu', ['currentPage' => 'products']);
 <?php if(!empty($brandsProducts)): ?>
 	<div class="col-12 col-xl-6">
 		<table class="table table-borderless stats">
-			<caption>Items without a product, that could however have one</caption>
+			<caption>Products count per brand</caption>
 			<thead class="thead-dark">
 			<tr>
 				<th scope="col">Brand</th>
@@ -85,7 +85,7 @@ $this->insert('stats::menu', ['currentPage' => 'products']);
 					<td><a href="/product/<?= $this->e($row['Brand']) ?>"><?=$this->e($row['Brand'])?></a></td>
 					<td><?=$this->e($row['Models'])?></td>
 					<td><?=$this->e($row['Variants'] ?? '')?></td>
-					<td><?=sprintf("%.1f", (double) $this->e($row['VPP']))?></td>
+					<td><?=sprintf("%.2f", (double) $this->e($row['VPP']))?></td>
 				</tr>
 			<?php endforeach ?>
 			</tbody>
