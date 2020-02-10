@@ -4,6 +4,7 @@
 /** @var string|null $add */
 /** @var string|null $edit */
 /** @var bool $recursion */
+/** @var string $self */
 $recursion = $recursion ?? false;
 $features = $item->getFeatures();
 $lostAt = $item->getLostAt();
@@ -45,17 +46,23 @@ if(isset($edit)) {
 }
 
 $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
+$summary = explode(', ', $summary);
+
 $product = $item->getProduct();
 if($product !== null) {
 	$productName = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) . rtrim(' ' . $this->e($product->getVariantOrEmpty()));
 }
+
+$code_rawurlencoded = rawurlencode($item->getCode());
+$code_escaped = $this->e($item->getCode());
+$here = rtrim($self, '/') . '/';
 ?>
 
 <?php if(!$recursion): $this->insert('breadcrumbs', ['item' => $item]); endif; ?>
-<article class="item<?=$recursion ? '' : ' root'?><?=$working?><?=$editing && $target ? ' head editing' : ''?><?= $deletedAt === null ? '' : ' deleted' ?>"
-		data-code="<?=$this->e($item->getCode())?>">
-	<header>
-		<h2 id="code-<?=$this->e($item->getCode())?>"><?=$this->e($item->getCode())?></h2>
+<article class="container item<?=$recursion ? '' : ' root'?><?=$working?><?=$editing && $target ? ' head editing' : ''?><?= $deletedAt === null ? '' : ' deleted' ?>"
+		data-code="<?=$code_escaped?>">
+	<header class="row">
+		<h2 class="col-12" id="code-<?=$code_escaped?>"><?=$code_escaped?></h2>
 		<?php if($deletedAt === null): ?>
             <?php if($item->getFeature('restrictions') !== null): ?>
                 <div class="inline-alert alert-info" role="alert">ℹ️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
@@ -77,20 +84,15 @@ if($product !== null) {
 		<?php endif; ?>
 	</header>
 
-	<nav class="itembuttons" data-for-item="<?=$this->e($item->getCode())?>">
-		<?php if($editing && $target): ?>
-			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><?php if(!$containsMore): ?><button class="lost">🏷&nbsp;Lost</button><button class="delete">❌&nbsp;Delete</button><?php endif ?>
-		<?php elseif(!$adding && !$editing): ?>
-			<?php if($deletedAt === null): ?><button class="addinside">📄&nbsp;Add</button><button class="edit">🛠️&nbsp;Edit</button><button class="clone">🔲&nbsp;Copy</button><button class="move">📍&nbsp;Move</button><?php endif ?><button class="history">📖&nbsp;History</button>
-		<?php endif ?>
-	</nav>
 	<?php if(!$editing || !$target): ?>
-        <section class="summary <?=$working?>">
-			<span><?= $summary ?></span><?php if($product !== null): ?><span><a href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>">View <?= $this->e($productName) ?></a></span><?php endif ?>
+        <section class="summary <?=$working?> open">
+			<?php foreach($summary as $line): ?><span><?= $this->e($line) ?><span class="sep">, </span></span><?php endforeach ?>
         </section>
-    <?php endif; ?>
 
-	<?php if($editing && $target): ?>
+		<section class="features collapse" id="collapsible-features-<?=$this->e($item->getCode())?>">
+			<?php $this->insert('features', ['features' => $features, 'product' => $item->getProduct() === null ? [] : $item->getProduct()->getFeatures()]) ?>
+		</section>
+	<?php else: ?>
 		<?php if($item->getProduct() !== null): ?>
 			<section class="product features">
 				<?php
@@ -110,22 +112,48 @@ if($product !== null) {
 				<select class="allfeatures">
 				</select></label><button>Add</button>
 		</section>
-
-		<!--<section class="product features">
-			$this->insert('features', ['features' => $product === null ? [] : $product->getFeatures()])
-		</section>-->
-	<?php else: ?>
-		<section class="features">
-			<?php $this->insert('features', ['features' => $features, 'product' => $item->getProduct() === null ? [] : $item->getProduct()->getFeatures()]) ?>
-		</section>
 	<?php endif ?>
+
+	<nav class="itembuttons row" data-for-item="<?=$this->e($item->getCode())?>">
+		<?php if($editing && $target): ?>
+			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><?php if(!$containsMore): ?><button class="lost">🏷&nbsp;Lost</button><button class="delete">❌&nbsp;Delete</button><?php endif ?>
+		<?php elseif(!$adding && !$editing): ?>
+			<?php if($deletedAt === null): ?>
+				<a class="btn btn-outline-primary btn-sm col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>add/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
+					<i class="fa fa-plus-circle"></i>&nbsp;Add
+				</a>
+				<a class="btn btn-outline-primary btn-sm col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>edit/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
+					<i class="fa fa-cogs"></i>&nbsp;Edit
+				</a>
+				<a class="btn btn-outline-primary btn-sm col-6 col-sm-4 col-md-auto" role="button" href="/new/item?copy=<?= $code_rawurlencoded ?>">
+					<i class="fa fa-object-group"></i>&nbsp;Copy
+				</a>
+				<a class="btn btn-outline-primary btn-sm col-6 col-sm-4 col-md-auto" role="button" href="#">
+					<i class="fa fa-map-pin"></i>&nbsp;Move
+				</a>
+			<?php endif ?>
+			<a class="btn btn-outline-primary btn-sm col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-<?=$this->e($item->getCode())?>" role="button" aria-expanded="false" aria-controls="#collapsible-features-<?=$this->e($item->getCode())?>">
+				<i class="fa fa-globe"></i>&nbsp;Details
+			</a>
+			<a class="btn btn-outline-primary btn-sm col-6 col-sm-4 col-md-auto" role="button" href="/item/<?= $code_rawurlencoded ?>/history">
+				<i class="fa fa-search"></i>&nbsp;History
+			</a>
+			<?php if($product !== null): ?>
+				<a class="btn btn-outline-primary btn-sm col-12 col-md-auto" role="button" href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>">
+					<i class="fa fa-briefcase"></i>&nbsp;View <?= $this->e($productName) ?>
+				</a>
+			<?php endif ?>
+		<?php endif ?>
+	</nav>
 
 	<section class="subitems">
 		<?php
 		if($adding && $target) {
 			$empty = new \WEEEOpen\Tarallo\ItemIncomplete(null);
+			$empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('brand'));
+			$empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('model'));
+			$empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('variant'));
 			$empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('type'));
-			//$empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('working'));
 			$this->insert('newItem', ['recursion' => true, 'innerrecursion' => false, 'base' => $empty]);
 		}
 

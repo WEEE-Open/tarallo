@@ -102,10 +102,12 @@ ul.breadcrumbs li:not(:first-child)::before {
 	margin-right: 0.4em;
 }
 
-.summary span {
-	margin: 0 0.5rem;
-	font-size: smaller;
-	color: #555;
+.summary.open > span {
+	display: block;
+}
+
+.summary.open .sep {
+	display: none;
 }
 
 .features del {
@@ -336,12 +338,6 @@ label.searchby {
 	margin-left: .2em;
 }
 
-.itembuttons {
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-end;
-}
-
 .inside > div > .item {
 	margin-bottom: 1em;
 }
@@ -397,32 +393,7 @@ form.nice textarea {
 	display: block;
 }
 
-@media only screen and (min-width: 400px) {
-	.itembuttons {
-		flex-direction: row;
-		justify-content: space-around;
-		flex-wrap: wrap;
-	}
-
-	.itembuttons.secondary {
-		justify-content: flex-end;
-	}
-}
-
-@media only screen and (min-width: 30em) {
-	.itembuttons {
-		flex-direction: row;
-		flex-wrap: nowrap;
-		float: right;
-	}
-
-	.itembuttons.secondary {
-		float: none;
-	}
-}
-
 @media only screen and (min-width: 34rem) {
-
 	.features ul > li {
 		grid-template-rows: auto auto auto;
 		grid-template-columns: 10rem auto 2rem;
