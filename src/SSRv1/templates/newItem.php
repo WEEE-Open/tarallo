@@ -28,7 +28,7 @@ if($base === null) {
 	<header>
 		<h2><label>Code: <input class="newcode" placeholder="Automatically generated"></label></h2>
 		<?php if(isset($base) && $base->hasCode()): ?>
-			<div class="info message">ℹ️&nbsp;This is a copy of <span class="code"><?= $base->getCode() ?></span>, remember to change serial numbers, notes, working status, etc...</div>
+			<div class="inline-alert alert-info" role="alert">ℹ️&nbsp;This is a copy of <span class="code"><?= $base->getCode() ?></span>, remember to change serial numbers, notes, working status, etc...</div>
 		<?php unset($noticeFeature); endif; ?>
 	</header>
 

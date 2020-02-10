@@ -58,22 +58,22 @@ if($product !== null) {
 		<h2 id="code-<?=$this->e($item->getCode())?>"><?=$this->e($item->getCode())?></h2>
 		<?php if($deletedAt === null): ?>
             <?php if($item->getFeature('restrictions') !== null): ?>
-                <div class="info message">ℹ️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
+                <div class="inline-alert alert-info" role="alert">ℹ️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
                     ($item->getFeature('restrictions'), $lang ?? 'en'))->pvalue; ?></div>
             <?php endif; ?>
             <?php if($item->getFeature('check') !== null): ?>
-                <div class="warning message">⚠️️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
+                <div class="inline-alert alert-warning" role="alert">⚠️️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
                     ($item->getFeature('check'), $lang ?? 'en'))->pvalue; ?></div>
             <?php endif; ?>
             <?php if($item->getFeature('todo') !== null): ?>
-                <div class="info message">➡️️️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
+                <div class="inline-alert alert-info" role="alert">➡️️️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
                     ($item->getFeature('todo'), $lang ?? 'en'))->pvalue; ?></div>
             <?php endif; ?>
 		<?php else: ?>
-			<div class="error message">❌️️&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
+			<div class="inline-alert alert-danger" role="alert">❌️️&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 		<?php endif; ?>
 		<?php if($lostAt !== null): ?>
-            <div class="serious message">🏷️️️&nbsp;This item has been lost on <?= $lostAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
+            <div class="inline-alert alert-serious" role="alert">🏷️️️&nbsp;This item has been lost on <?= $lostAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 		<?php endif; ?>
 	</header>
 

@@ -11,7 +11,7 @@ $this->layout('main', ['title' => 'Bulk add', 'user' => $user, 'currentPage' => 
     <h2>Add a computer</h2>
     <p>Paste output from peracotta</p>
     <?php if($error !== null): ?>
-        <p class="error message"><?= $this->e($error) ?></p>
+        <p class="alert alert-danger" role="alert"><?= $this->e($error) ?></p>
     <?php endif; ?>
     <label for="bulk-add-text">Things</label>
     <textarea id="bulk-add-text" name="add" rows="15"></textarea>
@@ -19,7 +19,7 @@ $this->layout('main', ['title' => 'Bulk add', 'user' => $user, 'currentPage' => 
 </form>
 <?php else:
     ?>
-    <div class="info message">
+    <div class="inline-alert alert-info" role="alert">
         ℹ️&nbsp;This is data is often unreliable. Check that everything is right and add any missing item.
     </div>
     <?php

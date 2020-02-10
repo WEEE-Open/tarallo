@@ -21,24 +21,28 @@
 	font-size: 6vw;
 }
 
-.alert.alert-info {
+.inline-alert {
+	padding: 0.5rem;
+}
+
+.alert-info {
 	color: #00529B;
 	background-color: #BDE5F8;
 }
-.alert.alert-success-old {
+.alert-success-old {
 	color: #4F8A10;
 	background-color: #DFF2BF;
 }
-.alert.alert-warning {
+.alert-warning {
 	color: #9F6000;
 	background-color: #FEEFB3;
 }
-.alert.alert-serious {
+.alert-serious {
 	color: #CC4100;
 	background-color: #FFCC89;
 }
 
-.alert.alert-danger {
+.alert-danger {
 	color: #D8000C;
 	background-color: #FFBABA;
 }

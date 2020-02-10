@@ -9,7 +9,7 @@
 $this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => true, 'currentPage' => 'item search']);
 ?>
 
-<p class="error message hidden" id="error"></p>
+<p class="alert alert-danger" id="error" role="alert"></p>
 
 <?php if(!$searchId || !empty($results)): ?>
 <nav id="searcharea">

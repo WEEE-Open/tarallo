@@ -8,12 +8,12 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 
 <?php if($error !== null): ?>
 <div class="col-12">
-	<p class="alert alert-danger"><?= $this->e($error) ?></p>
+	<p class="alert alert-danger" role="alert"><?= $this->e($error) ?></p>
 </div>
 <?php endif; ?>
 <?php if($newToken !== null): ?>
 <div class="col-12">
-	<p class="alert alert-success">Here is your new token: <?= $this->e($newToken) ?></p>
+	<p class="alert alert-success" role="alert">Here is your new token: <?= $this->e($newToken) ?></p>
 </div>
 <?php endif; ?>
 
