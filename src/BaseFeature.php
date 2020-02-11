@@ -259,6 +259,32 @@ class BaseFeature {
 	];
 	// END GENERATED CODE
 
+	const itemOnlyFeatures = [
+		'brand' => true,
+		'model' => true,
+		'variant' => true,
+		'restrictions' => true,
+		'working' => true,
+		'cib-qr' => true,
+		'cib' => true,
+		'cib-old' => true,
+		'other-code' => true,
+		'os-license-version' => true,
+		'os-license-code' => true,
+		'mac' => true,
+		'sn' => true,
+		'wwn' => true,
+		'arrival-batch' => true,
+		'owner' => true,
+		'data-erased' => true,
+		'surface-scan' => true,
+		'smart-data' => true,
+		'software' => true,
+		'notes' => true,
+		'todo' => true,
+		'check' => true,
+	];
+
 	public static function featuresLastModified(): int {
 		return filemtime(__FILE__);
 	}

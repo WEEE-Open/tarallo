@@ -246,17 +246,34 @@ class Controller implements RequestHandlerInterface {
 
 	public static function addProduct(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$query = $request->getQueryParams();
-//		$from = Validation::validateOptionalString($query, 'copy', null);
 
-		// TODO: allow cloning
-//		if($from === null) {
+		$split = Validation::validateOptionalString($query, 'split', null, null);
+		$copyBrand = Validation::validateOptionalString($query, 'copy-brand', null, null);
+		$copyModel = Validation::validateOptionalString($query, 'copy-model', null, null);
+		$copyVariant = Validation::validateOptionalString($query, 'copy-variant', null, null);
+
+		if($split === null) {
+			if($copyBrand === null || $copyModel === null || $copyVariant === null) {
+				$from = null;
+			} else {
+				$from = new ProductCode($copyBrand, $copyModel, $copyVariant);
+			}
+		} else {
+			$from = new ItemCode($split);
+		}
+
+		if($from === null) {
 			$from = new ProductIncomplete();
 			$from->addFeature(new BaseFeature('type'));
-//		} else {
-//			/** @var Database $db */
-//			$db = $request->getAttribute('Database');
-//			$from = $db->productDAO()->getProduct(new ItemCode($from));
-//		}
+		} else {
+			/** @var Database $db */
+			$db = $request->getAttribute('Database');
+			if($from instanceof ProductCode) {
+				$from = $db->productDAO()->getProduct($from);
+			} else {
+				$from = $db->itemDAO()->getItem($from);
+			}
+		}
 
 		$request = $request->withAttribute('Template', 'newProductPage')->withAttribute(
 			'TemplateParameters', [
