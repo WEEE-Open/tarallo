@@ -5,7 +5,7 @@
 
 $title = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) . rtrim(' ' . $this->e($product->getVariantOrEmpty()));
 
-$this->layout('main', ['title' => "All $title", 'user' => $user, 'itembuttons' => true]);
+$this->layout('main', ['title' => "All $title", 'user' => $user]);
 ?>
 
 <h2><?= $title ?> (<?= count($items) ?> items)</h2>

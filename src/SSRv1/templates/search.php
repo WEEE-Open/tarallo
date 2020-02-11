@@ -6,7 +6,7 @@
 /** @var int|null $total Total number of results (only if searchId is not null) */
 /** @var int|null $resultsPerPage Pretty self-explanatory (only if searchId is not null) */
 /** @var \WEEEOpen\Tarallo\Item[]|null $results Items (only if searchId is not null) */
-$this->layout('main', ['title' => 'Search', 'user' => $user, 'itembuttons' => true, 'currentPage' => 'item search']);
+$this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'item search']);
 ?>
 
 <p class="alert alert-danger" id="error" role="alert"></p>

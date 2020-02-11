@@ -8,7 +8,7 @@ $base = $base ?? null;
 $recursion = $recursion ?? false; // Placed inside another item (new or existing)
 $innerrecursion = $innerrecursion ?? false; // Placed inside another NEW item
 
-$this->layout('main', ['title' => 'New item', 'itembuttons' => true, 'currentPage' => 'item new']);
+$this->layout('main', ['title' => 'New item', 'currentPage' => 'item new']);
 $this->insert('newItem', [
     'recursion' => $recursion,
     'innerrecursion' => $innerrecursion,

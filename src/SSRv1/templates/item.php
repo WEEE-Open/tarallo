@@ -84,6 +84,51 @@ $here = rtrim($self, '/') . '/';
 		<?php endif; ?>
 	</header>
 
+	<nav class="itembuttons row mx-md-2 mt-md-2" data-for-item="<?=$this->e($item->getCode())?>">
+		<?php if($editing && $target): ?>
+			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
+				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
+			</button>
+			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button">
+				💾&nbsp;Save
+			</button>
+			<?php if(!$containsMore): ?>
+				<button class="btn btn-outline-primary btn-item col-4 col-sm-auto lost" role="button">
+					🏷&nbsp;Lost
+				</button>
+				<button class="btn btn-outline-danger btn-item col-4 col-sm-auto delete" role="button">
+					❌&nbsp;Delete
+				</button>
+			<?php endif ?>
+		<?php elseif(!$adding && !$editing): ?>
+			<?php if($deletedAt === null): ?>
+				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>add/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
+					<i class="fa fa-plus-circle"></i>&nbsp;Add
+				</a>
+				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>edit/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
+					<i class="fa fa-cogs"></i>&nbsp;Edit
+				</a>
+				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/item?copy=<?= $code_rawurlencoded ?>">
+					<i class="fa fa-object-group"></i>&nbsp;Copy
+				</a>
+				<button class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto move" data-code="<?= $code_escaped ?>" role="button">
+					<i class="fa fa-map-pin"></i>&nbsp;Move
+				</button>
+			<?php endif ?>
+			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-<?=$this->e($item->getCode())?>" role="button" aria-expanded="false" aria-controls="#collapsible-features-<?=$this->e($item->getCode())?>">
+				<i class="fa fa-globe"></i>&nbsp;Details
+			</a>
+			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/item/<?= $code_rawurlencoded ?>/history">
+				<i class="fa fa-users"></i>&nbsp;History
+			</a>
+			<?php if($product !== null): ?>
+				<a class="btn btn-outline-primary btn-item col-12 col-md-auto" role="button" href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>">
+					<i class="fa fa-briefcase"></i>&nbsp;View <?= $this->e($productName) ?>
+				</a>
+			<?php endif ?>
+		<?php endif ?>
+	</nav>
+
 	<?php if(!$editing || !$target): ?>
         <section class="summary <?=$working?> open">
 			<?php foreach($summary as $line): ?><span><?= $this->e($line) ?><span class="sep">, </span></span><?php endforeach ?>
@@ -113,38 +158,6 @@ $here = rtrim($self, '/') . '/';
 				</select></label><button>Add</button>
 		</section>
 	<?php endif ?>
-
-	<nav class="itembuttons row mx-md-2" data-for-item="<?=$this->e($item->getCode())?>">
-		<?php if($editing && $target): ?>
-			<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><?php if(!$containsMore): ?><button class="lost">🏷&nbsp;Lost</button><button class="delete">❌&nbsp;Delete</button><?php endif ?>
-		<?php elseif(!$adding && !$editing): ?>
-			<?php if($deletedAt === null): ?>
-				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>add/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
-					<i class="fa fa-plus-circle"></i>&nbsp;Add
-				</a>
-				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>edit/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
-					<i class="fa fa-cogs"></i>&nbsp;Edit
-				</a>
-				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/item?copy=<?= $code_rawurlencoded ?>">
-					<i class="fa fa-object-group"></i>&nbsp;Copy
-				</a>
-				<button class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto move" role="button">
-					<i class="fa fa-map-pin"></i>&nbsp;Move
-				</button>
-			<?php endif ?>
-			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-<?=$this->e($item->getCode())?>" role="button" aria-expanded="false" aria-controls="#collapsible-features-<?=$this->e($item->getCode())?>">
-				<i class="fa fa-globe"></i>&nbsp;Details
-			</a>
-			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/item/<?= $code_rawurlencoded ?>/history">
-				<i class="fa fa-users"></i>&nbsp;History
-			</a>
-			<?php if($product !== null): ?>
-				<a class="btn btn-outline-primary btn-item col-12 col-md-auto" role="button" href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>">
-					<i class="fa fa-briefcase"></i>&nbsp;View <?= $this->e($productName) ?>
-				</a>
-			<?php endif ?>
-		<?php endif ?>
-	</nav>
 
 	<section class="subitems">
 		<?php

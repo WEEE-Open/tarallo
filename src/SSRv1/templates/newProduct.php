@@ -16,8 +16,13 @@ $base = $base ?? null;
 		<?php unset($noticeFeature); endif; ?>
 	</header>
 
-	<nav class="itembuttons">
-		<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button>
+	<nav class="itembuttons row mx-2 mt-2 justify-content-end">
+		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
+			<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
+		</button>
+		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button">
+			💾&nbsp;Save
+		</button>
 	</nav>
 
 	<section class="own features editing">
@@ -33,9 +38,11 @@ $base = $base ?? null;
 		<button>Add</button>
 	</section>
 
-    <nav class="itembuttons secondary">
-        <button class="removeemptyfeatures" title="Remove empty features">🧽&nbsp;Clean</button>
-    </nav>
+	<nav class="itembuttons secondary row mx-2 mt-2 justify-content-end">
+		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto removeemptyfeatures" title="Remove empty features" role="button">
+			🧽&nbsp;Clean
+		</button>
+	</nav>
 </article>
 <script>const activate = true;</script>
 <?php $this->insert('editor'); ?>

@@ -10,7 +10,6 @@ $this->layout(
 		'title' => 'All products',
 		'user' => $user,
 		'currentPage' => 'product list',
-		'itembuttons' => false,
 	]
 );
 

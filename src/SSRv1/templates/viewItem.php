@@ -9,7 +9,6 @@ $this->layout(
 		'title' => $item->getCode(),
 		'user' => $user,
 		'moveDefaultFrom' => $item->getCode(),
-		'itembuttons' => true
 	]
 );
 $this->insert(
