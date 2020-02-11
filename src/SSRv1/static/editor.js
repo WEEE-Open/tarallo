@@ -1022,6 +1022,7 @@
 	 * @param ev Event
 	 */
 	function addNewClick(ev) {
+		ev.preventDefault();
 		let item = newItem();
 		ev.target.parentElement.parentElement.querySelector('.subitems').appendChild(item);
 	}
@@ -1057,6 +1058,7 @@
 	 * @param ev Event
 	 */
 	function removeNewClick(ev) {
+		ev.preventDefault();
 		ev.target.parentElement.parentElement.remove();
 	}
 
@@ -1324,6 +1326,7 @@
 	}
 
 	async function deleteClick(ev) {
+		ev.preventDefault();
 		let code = ev.target.parentElement.dataset.forItem;
 		let go = confirm(`Delete item ${code}: are you sure? Really? REALLY?`);
 		if(go) {

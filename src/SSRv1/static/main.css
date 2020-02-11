@@ -63,6 +63,14 @@
 	font-weight: bold;
 }
 
+.item h2 label {
+	margin-bottom: 0;
+}
+
+.setlocation {
+
+}
+
 .breadbox {
 	margin: .5em .5em 0 .5em;
 }

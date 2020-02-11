@@ -128,9 +128,9 @@ $here = rtrim($self, '/') . '/';
 				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/item?copy=<?= $code_rawurlencoded ?>">
 					<i class="fa fa-object-group"></i>&nbsp;Copy
 				</a>
-				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="#">
+				<button class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto move" role="button">
 					<i class="fa fa-map-pin"></i>&nbsp;Move
-				</a>
+				</button>
 			<?php endif ?>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-<?=$this->e($item->getCode())?>" role="button" aria-expanded="false" aria-controls="#collapsible-features-<?=$this->e($item->getCode())?>">
 				<i class="fa fa-globe"></i>&nbsp;Details
