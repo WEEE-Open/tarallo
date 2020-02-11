@@ -36,19 +36,19 @@
 				window.location.href = '/item/' + encodeURIComponent(code) + query;
 			}
 		} else if(ev.target.classList.contains("move")) {
-			let top = document.getElementById('top');
-			let quickMoveButton = top.querySelector(".quick.move");
-			let quickMoveBar = top.querySelector(".quick.move.bar");
-			if(!quickMoveButton.classList.contains("selected")) {
-				quickMoveButton.classList.add("selected");
-				quickMoveBar.classList.add("open");
-			}
-			let from = quickMoveBar.querySelector('input.from');
+			let button = document.getElementById('quickmovebutton');
+			let bar = document.getElementById('quickmove');
+
+			$(bar).collapse('show');
+			button.classList.add('active');
+			button.setAttribute('aria-expanded', 'true');
+
+			let from = bar.querySelector('input.from');
 			from.value = code;
 			let inputLen = from.value.length;
 			from.setSelectionRange(inputLen, inputLen);
 
-			let to = quickMoveBar.querySelector('input.to');
+			let to = bar.querySelector('input.to');
 			to.focus();
 		} else if(ev.target.classList.contains("clone")) {
 			window.location.href = '/new/item?copy=' + encodeURIComponent(code) + query + hash;

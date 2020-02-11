@@ -39,7 +39,7 @@ $hereSr = function($page, $current) {
 				</div>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link" href="#" data-toggle="move" id="quickmovebutton">Move<span class="d-none"> (open)</span></a>
+				<a class="nav-link" data-toggle="collapse" href="#quickmove" role="button" aria-expanded="false" aria-controls="quickmove" id="quickmovebutton">Move</a>
 			</li>
 			<li class="nav-item">
 				<a class="nav-link <?= $hereClass('stats', $currentPage) ?>" href="/stats">Stats<?= $hereSr('stats', $currentPage) ?></a>
@@ -56,7 +56,7 @@ $hereSr = function($page, $current) {
 	</div>
 </nav>
 
-<nav id="quickmove" class="navbar navbar-dark bg-dark d-none">
+<nav id="quickmove" class="navbar navbar-dark bg-dark collapse">
 	<form class="nav-item form-inline">
 		<label for="quickmovecode" class="navbar-text mr-sm-1 col-form-label">Move item:</label>
 		<input required class="form-control mr-sm-1" name="code" id="quickmovecode" type="text"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>>
