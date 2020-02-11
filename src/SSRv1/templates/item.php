@@ -54,7 +54,7 @@ if($product !== null) {
 	$productName = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) . rtrim(' ' . $this->e($product->getVariantOrEmpty()));
 }
 
-$code_rawurlencoded = rawurlencode($item->getCode());
+$code_rawurlencoded = $this->e(rawurlencode($item->getCode()));
 $code_escaped = $this->e($item->getCode());
 $here = rtrim($self, '/') . '/';
 ?>
@@ -103,27 +103,30 @@ $here = rtrim($self, '/') . '/';
 			<?php endif ?>
 		<?php elseif(!$adding && !$editing): ?>
 			<?php if($deletedAt === null): ?>
-				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>add/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
+				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="<?= $here ?>add/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
 					<i class="fa fa-plus-circle"></i>&nbsp;Add
 				</a>
-				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>edit/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
+				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="<?= $here ?>edit/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
 					<i class="fa fa-cogs"></i>&nbsp;Edit
 				</a>
-				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/item?copy=<?= $code_rawurlencoded ?>">
+				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="/new/item?copy=<?= $code_rawurlencoded ?>">
 					<i class="fa fa-object-group"></i>&nbsp;Copy
 				</a>
-				<button class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto move" data-code="<?= $code_escaped ?>" role="button">
+				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="/new/product?split=<?= $code_rawurlencoded ?>">
+					<i class="fa fa-adjust"></i>&nbsp;Split
+				</a>
+				<button class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto move" data-code="<?= $code_escaped ?>" role="button">
 					<i class="fa fa-map-pin"></i>&nbsp;Move
 				</button>
 			<?php endif ?>
-			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-<?=$code_escaped?>" role="button" aria-expanded="false" aria-controls="#collapsible-features-<?=$code_escaped?>">
+			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" data-toggle="collapse" href="#collapsible-features-<?=$code_escaped?>" role="button" aria-expanded="false" aria-controls="#collapsible-features-<?=$code_escaped?>">
 				<i class="fa fa-globe"></i>&nbsp;Details
 			</a>
-			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/item/<?= $code_rawurlencoded ?>/history">
+			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="/item/<?= $code_rawurlencoded ?>/history">
 				<i class="fa fa-users"></i>&nbsp;History
 			</a>
 			<?php if($product !== null): ?>
-				<a class="btn btn-outline-primary btn-item col-12 col-md-auto" role="button" href="/product/<?=rawurlencode($product->getBrand())?>/<?=rawurlencode($product->getModel())?>/<?=rawurlencode($product->getVariant())?>">
+				<a class="btn btn-outline-primary btn-item col-12 col-sm-8 col-md-10 col-lg-auto" role="button" href="/product/<?=$this->e(rawurlencode($product->getBrand()))?>/<?=$this->e(rawurlencode($product->getModel()))?>/<?=$this->e(rawurlencode($product->getVariant()))?>">
 					<i class="fa fa-briefcase"></i>&nbsp;View <?= $this->e($productName) ?>
 				</a>
 			<?php endif ?>

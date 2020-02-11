@@ -6,6 +6,7 @@
 $title = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) . rtrim(' ' . $this->e($product->getVariantOrEmpty()));
 
 $this->layout('main', ['title' => $title . ' history', 'user' => $user]);
+$bmv_rawurlencoded = $this->e(rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
 ?>
 
 <article class="item root">
@@ -15,7 +16,7 @@ $this->layout('main', ['title' => $title . ' history', 'user' => $user]);
 
 
 	<nav class="itembuttons row mx-2 mt-2 justify-content-end">
-		<a class="btn btn-outline-primary btn-item col-sm-auto" role="button" href="/product/<?= rawurlencode($product->getBrand()) ?>/<?= rawurlencode($product->getModel()) ?>/<?= rawurlencode($product->getVariant()) ?>">
+		<a class="btn btn-outline-primary btn-item col-sm-auto" role="button" href="/product/<?= $bmv_rawurlencoded ?>">
 			<i class="fa fa-search"></i>&nbsp;View
 		</a>
 	</nav>

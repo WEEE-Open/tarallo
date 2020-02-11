@@ -12,7 +12,7 @@ $base = $base ?? null;
 		<label for="new-product-variant">Variant:</label><input class="newcode" maxlength="100" id="new-product-variant">
 		</h2 class="col-12">
 		<?php if(isset($base) && $base instanceof \WEEEOpen\Tarallo\Product): ?>
-			<div class="inline-alert alert-info" role="alert">ℹ️&nbsp;This is a copy of <span class="text-monospace">...</span></div>
+			<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>&nbsp;This is a copy of <span class="text-monospace">...</span></div>
 		<?php unset($noticeFeature); endif; ?>
 	</header>
 

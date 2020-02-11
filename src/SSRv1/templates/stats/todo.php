@@ -12,7 +12,7 @@ $this->insert('stats::menu', ['currentPage' => 'todo']);
                 $feature)) ?> (<?= count($items) ?> items, max 100 shown)</p>
         <div>
             <?php foreach($items as $item): ?>
-                <a href="/item/<?= rawurlencode($item) ?>"><?= $this->e($item) ?></a>
+                <a href="/item/<?= $this->e(rawurlencode($item)) ?>"><?= $this->e($item) ?></a>
             <?php endforeach ?>
         </div>
     </div>

@@ -6,7 +6,7 @@
 $deletedAt = $item->getDeletedAt();
 $this->layout('main', ['title' => $item->getCode() . ' history', 'user' => $user]);
 
-$code_rawurlencoded = rawurlencode($item->getCode());
+$code_rawurlencoded = $this->e(rawurlencode($item->getCode()));
 $code_escaped = $this->e($item->getCode());
 ?>
 

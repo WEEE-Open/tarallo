@@ -19,8 +19,13 @@ $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($product);
 $summary_escaped = array_map([$this, 'e'], explode(', ', $summary));
 unset($summary);
 
-$bmv_rawurlencoded = rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant());
+$bmv_rawurlencoded = $this->e(rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
 $here = rtrim($self, '/') . '/';
+$copyQuery = http_build_query([
+	'copy-brand' => $product->getBrand(),
+	'copy-model' => $product->getModel(),
+	'copy-variant' => $product->getVariant(),
+]);
 ?>
 
 <article class="container item root <?=$editing ? ' head editing' : ''?>" data-brand="<?=$this->e($product->getBrand())?>" data-model="<?=$this->e($product->getModel())?>" data-variant="<?=$this->e($product->getVariant())?>">
@@ -40,10 +45,10 @@ $here = rtrim($self, '/') . '/';
 				❌&nbsp;Delete
 			</button>
 		<?php else: ?>
-			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>edit?from=<?= rawurlencode($here) ?>">
+			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>edit?from=<?= $this->e(rawurlencode($here)) ?>">
 				<i class="fa fa-cogs"></i>&nbsp;Edit
 			</a>
-			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/product?copy=<?= $code_rawurlencoded ?>">
+			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/product?<?= $this->e($copyQuery) ?>">
 				<i class="fa fa-object-group"></i>&nbsp;Copy
 			</a>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-product" role="button" aria-expanded="false" aria-controls="#collapsible-features-product">
