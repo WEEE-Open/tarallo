@@ -5,7 +5,7 @@
 /** @var bool $tooLong */
 $title = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) . rtrim(' ' . $this->e($product->getVariantOrEmpty()));
 
-$this->layout('main', ['title' => $title . ' history', 'user' => $user, 'itembuttons' => true]);
+$this->layout('main', ['title' => $title . ' history', 'user' => $user]);
 ?>
 
 <article class="item root">
@@ -13,11 +13,16 @@ $this->layout('main', ['title' => $title . ' history', 'user' => $user, 'itembut
 		<h2 id="code-<?=$this->e($product->getBrand())?>-<?=$this->e($product->getModel())?>-<?=$this->e($product->getVariant())?>"><?= $title ?></h2>
 	</header>
 
-	<nav class="itembuttons" data-for-product-brand="<?=$this->e($product->getBrand())?>" data-for-product-model="<?=$this->e($product->getModel())?>"  data-for-product-variant="<?=$this->e($product->getVariant())?>">
-		<button class="view">🔍&nbsp;View</button>
+
+	<nav class="itembuttons row mx-2 mt-2 justify-content-end">
+		<a class="btn btn-outline-primary btn-item col-sm-auto" role="button" href="/product/<?= rawurlencode($product->getBrand()) ?>/<?= rawurlencode($product->getModel()) ?>/<?= rawurlencode($product->getVariant()) ?>">
+			<i class="fa fa-search"></i>&nbsp;View
+		</a>
 	</nav>
 
 	<section class="history row">
-		<?= $this->insert('historyEntries', ['history' => $history, 'tooLong' => $tooLong]) ?>
+		<div class="col-12">
+			<?= $this->insert('historyEntries', ['history' => $history, 'tooLong' => $tooLong]) ?>
+		</div>
 	</section>
 </article>

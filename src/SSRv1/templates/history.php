@@ -20,7 +20,7 @@ $code_escaped = $this->e($item->getCode());
 		<?php endif; ?>
 	</header>
 
-	<nav class="itembuttons row mx-2 mt-2 justify-content-end" data-for-item="<?=$this->e($item->getCode())?>">
+	<nav class="itembuttons row mx-2 mt-2 justify-content-end">
 		<a class="btn btn-outline-primary btn-item col-sm-auto" role="button" href="/item/<?= $code_rawurlencoded ?>">
 			<i class="fa fa-search"></i>&nbsp;View
 		</a>
@@ -28,7 +28,7 @@ $code_escaped = $this->e($item->getCode());
 
 	<section class="history row">
 		<div class="col-12">
-		<?= $this->insert('historyEntries', ['history' => $history, 'tooLong' => $tooLong]) ?>
+			<?= $this->insert('historyEntries', ['history' => $history, 'tooLong' => $tooLong]) ?>
 		</div>
 	</section>
 </article>
