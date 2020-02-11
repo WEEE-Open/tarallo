@@ -46,7 +46,8 @@ if(isset($edit)) {
 }
 
 $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
-$summary = explode(', ', $summary);
+$summary_escaped = array_map([$this, 'e'], explode(', ', $summary));
+unset($summary);
 
 $product = $item->getProduct();
 if($product !== null) {
@@ -115,7 +116,7 @@ $here = rtrim($self, '/') . '/';
 					<i class="fa fa-map-pin"></i>&nbsp;Move
 				</button>
 			<?php endif ?>
-			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-<?=$this->e($item->getCode())?>" role="button" aria-expanded="false" aria-controls="#collapsible-features-<?=$this->e($item->getCode())?>">
+			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-<?=$code_escaped?>" role="button" aria-expanded="false" aria-controls="#collapsible-features-<?=$code_escaped?>">
 				<i class="fa fa-globe"></i>&nbsp;Details
 			</a>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/item/<?= $code_rawurlencoded ?>/history">
@@ -131,7 +132,7 @@ $here = rtrim($self, '/') . '/';
 
 	<?php if(!$editing || !$target): ?>
         <section class="summary <?=$working?> open">
-			<?php foreach($summary as $line): ?><span><?= $this->e($line) ?><span class="sep">, </span></span><?php endforeach ?>
+			<span><?= implode('<span class="sep">, </span></span><span>', $summary_escaped) ?></span>
         </section>
 
 		<section class="features collapse" id="collapsible-features-<?=$this->e($item->getCode())?>">

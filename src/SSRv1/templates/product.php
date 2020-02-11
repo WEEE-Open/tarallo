@@ -4,8 +4,6 @@
 /** @var bool $editing */
 /** @var string $self */
 $features = $product->getFeatures();
-$summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($product);
-$summary = explode(', ', $summary);
 $brandModel = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel());
 $maybeVariant = rtrim(' ' . $this->e($product->getVariantOrEmpty()));
 
@@ -16,6 +14,10 @@ $this->layout(
 		'user' => $user,
 	]
 );
+
+$summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($product);
+$summary_escaped = array_map([$this, 'e'], explode(', ', $summary));
+unset($summary);
 
 $bmv_rawurlencoded = rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant());
 $here = rtrim($self, '/') . '/';
@@ -56,9 +58,9 @@ $here = rtrim($self, '/') . '/';
 		<?php endif ?>
 	</nav>
 
-	<?php if($summary !== null && !$editing): ?>
+	<?php if(count($summary_escaped) > 0 && !$editing): ?>
 		<section class="summary open">
-			<?php foreach($summary as $line): ?><span><?= $this->e($line) ?><span class="sep">, </span></span><?php endforeach ?>
+			<span><?= implode('<span class="sep">, </span></span><span>', $summary_escaped) ?></span>
 		</section>
 	<?php endif; ?>
 

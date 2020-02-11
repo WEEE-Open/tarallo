@@ -13,9 +13,13 @@
 		message.classList.add('d-none');
 	}
 
-	let itembuttonMoves = document.querySelectorAll('.itembuttons .move');
-	for(let el of itembuttonMoves) {
+	for(let el of document.querySelectorAll('.itembuttons .move')) {
 		el.addEventListener('click', moveButtonInItemListener);
+	}
+
+	for(let el of document.querySelectorAll('.features.collapse')) {
+		$(el).on('show.bs.collapse', toggleSummary);
+		$(el).on('hidden.bs.collapse', toggleSummary);
 	}
 
 	function focusQuickMove() {
@@ -159,5 +163,10 @@
 		quickMoveCode.value = e.target.dataset.code;
 
 		focusQuickMove();
+	}
+
+	function toggleSummary(e) {
+		let summary = e.target.parentElement.querySelector('.summary');
+		summary.classList.toggle('open');
 	}
 }());
