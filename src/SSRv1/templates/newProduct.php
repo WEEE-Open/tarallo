@@ -4,15 +4,15 @@
 $base = $base ?? null;
 ?>
 
-<article class="product item new editing root head">
-	<header>
+<article class="container product item new editing root head">
+	<header class="col-12">
 		<h2>
 		<label for="new-product-brand">Brand:</label><input class="newcode" maxlength="100" id="new-product-brand">
 		<label for="new-product-model">Model:</label><input class="newcode" maxlength="100" id="new-product-model">
 		<label for="new-product-variant">Variant:</label><input class="newcode" maxlength="100" id="new-product-variant">
-		</h2>
+		</h2 class="col-12">
 		<?php if(isset($base) && $base instanceof \WEEEOpen\Tarallo\Product): ?>
-			<div class="inline-alert alert-info" role="alert">ℹ️&nbsp;This is a copy of <span class="code">...</span></div>
+			<div class="inline-alert alert-info" role="alert">ℹ️&nbsp;This is a copy of <span class="text-monospace">...</span></div>
 		<?php unset($noticeFeature); endif; ?>
 	</header>
 

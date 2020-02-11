@@ -23,6 +23,7 @@
 
 .inline-alert {
 	padding: 0.5rem;
+	width: 100%;
 }
 
 .alert-info {
@@ -110,7 +111,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 	margin-right: 0.4em;
 }
 
-.summary.open > span {
+.summary > span {
 	display: block;
 }
 

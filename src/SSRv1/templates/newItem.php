@@ -24,11 +24,11 @@ if($base === null) {
 // .head is the beginning of the edit/new subtree, .root is the root of the entire tree
 ?>
 
-<article class="item new editing <?=$recursion ? '' : 'root'?> <?=$innerrecursion ? '' : 'head'?>">
-	<header>
-		<h2><label>Code: <input class="newcode" placeholder="Automatically generated"></label></h2>
+<article class="container item new editing <?=$recursion ? '' : 'root'?> <?=$innerrecursion ? '' : 'head'?>">
+	<header class="row">
+		<h2 class="col-12"><label>Code: <input class="newcode" placeholder="Automatically generated"></label></h2>
 		<?php if(isset($base) && $base->hasCode()): ?>
-			<div class="inline-alert alert-info" role="alert">ℹ️&nbsp;This is a copy of <span class="code"><?= $base->getCode() ?></span>, remember to change serial numbers, notes, working status, etc...</div>
+			<div class="inline-alert alert-info" role="alert">ℹ️&nbsp;This is a copy of <span class="text-monospace"><?= $base->getCode() ?></span>, remember to change serial numbers, notes, working status, etc...</div>
 		<?php unset($noticeFeature); endif; ?>
 	</header>
 
