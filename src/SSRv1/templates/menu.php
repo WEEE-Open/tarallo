@@ -65,7 +65,7 @@ $hereSr = function($page, $current) {
 		<input required class="form-control mr-sm-1 to" id="quickmovelocation" type="text">
 		<button type="submit" class="btn btn-outline-secondary mt-2 mt-sm-0 do">Move</button>
 	</form>
-	<div class="nav-item alert alert-success ml-0 mr-auto my-auto d-none" role="alert"><a href="#">Ok</a></div>
+	<div class="nav-item alert alert-success ml-0 mr-auto my-auto d-none" role="alert"><a href="">Ok</a></div>
 	<div class="nav-item alert alert-danger col-12 my-2 d-none" role="alert">Error</div>
 	<div class="nav-item alert alert-warning col-12 my-2 d-none" role="alert">Fail</div>
 </nav>
