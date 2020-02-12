@@ -3,6 +3,7 @@
 /** @var int[] $locations */
 /** @var int[] $recentlyAdded */
 /** @var int[] $recentlyModified */
+/** @var int[] $recentlyMoved */
 $this->layout('main', ['title' => 'Stats', 'user' => $user, 'currentPage' => 'stats']);
 $this->insert('stats::menu', ['currentPage' => '']);
 date_default_timezone_set('Europe/Rome');
@@ -51,6 +52,27 @@ date_default_timezone_set('Europe/Rome');
 		</table>
 	</div>
 <?php endif ?>
+	<?php if(!empty($recentlyMoved)): ?>
+		<div class="col-md-6 col-lg-4">
+			<table class="table table-borderless stats">
+				<caption>Recently moved items</caption>
+				<thead class="thead-dark">
+				<tr>
+					<th scope="col">Item</th>
+					<th scope="col">Moved</th>
+				</tr>
+				</thead>
+				<tbody>
+				<?php foreach($recentlyMoved as $code => $time): ?>
+					<tr>
+						<td><a href="/item/<?=$code?>"><?=$code?></a></td>
+						<td><?=date('Y-m-d, H:i', $time)?></td>
+					</tr>
+				<?php endforeach ?>
+				</tbody>
+			</table>
+		</div>
+	<?php endif ?>
 <?php if(!empty($locations)): ?>
 	<div class="col-md-6 col-lg-4">
 		<table class="table table-borderless stats">

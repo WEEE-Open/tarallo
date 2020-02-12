@@ -370,8 +370,9 @@ class Controller implements RequestHandlerInterface {
 				$request = $request->withAttribute('Template', 'stats::main')->withAttribute(
 					'TemplateParameters', [
 						'locations' => $db->statsDAO()->getLocationsByItems(),
-						'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 40),
-						'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 40),
+						'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 50),
+						'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 50),
+						'recentlyMoved' => $db->auditDAO()->getRecentAuditByType('M', 50),
 					]
 				);
 				break;
