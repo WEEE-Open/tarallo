@@ -109,7 +109,7 @@ class ItemBuilder {
 	public static function addFeatures(array $features, ItemWithFeatures $item) {
 		foreach($features as $name => $value) {
 			try {
-				$item->addFeature(Feature::ofString($name, $value));
+				$item->addFeature(Feature::ofString($name, trim($value)));
 			} catch(\Throwable $e) {
 				throw new FeatureValidationException($name, $value, null, null, $e->getMessage());
 			}
