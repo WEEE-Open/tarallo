@@ -160,7 +160,7 @@
 
 		let handler, otherHandler;
 
-		// Enable the "X" button next to features
+		// Enable the delete button next to features
 		handler = deleteFeatureClick.bind(null, deletedFeatures);
 		for(let deleteButton of featuresElement.querySelectorAll('.delete')) {
 			deleteButton.addEventListener('click', handler);
@@ -248,7 +248,7 @@
 	 * @param ev Event
 	 */
 	function selectChanged(ev) {
-		let feature = ev.target.parentElement;
+		let feature = ev.currentTarget.parentElement;
 		fadeOutInlineErrors(feature);
 		// New elements don't have an initial value
 		if(!ev.target.dataset.initialValue) {
@@ -267,7 +267,7 @@
 	 * @param ev Event
 	 */
 	function numberChanged(ev) {
-		let feature = ev.target.parentElement;
+		let feature = ev.currentTarget.parentElement;
 		fixDiv(ev.target);
 		fadeOutInlineErrors(feature);
 		let value = ev.target.textContent;
@@ -341,9 +341,9 @@
 		let text = ev.clipboardData.getData("text/plain");
 		document.execCommand("insertHTML", false, text);
 		if(ev.target.classList.contains("value")) {
-			fixDiv(ev.target);
+			fixDiv(ev.currentTarget);
 		} else {
-			fixDiv(ev.target.parentElement);
+			fixDiv(ev.currentTarget.parentElement);
 		}
 	}
 
@@ -687,7 +687,7 @@
 	 * @param ev Event
 	 */
 	function deleteFeatureClick(set, ev) {
-		deleteFeature(ev.target.parentElement.parentElement, ev.target.dataset.name, set);
+		deleteFeature(ev.currentTarget.parentElement.parentElement, ev.currentTarget.dataset.name, set);
 	}
 
 	/**
@@ -700,7 +700,7 @@
 		let pressed = (ev.ctrlKey && ev.key === 'Delete') || (ev.altKey && ev.ctrlKey && (ev.key === 'z' || ev.key === 'Z'));
 		if(pressed) {
 			ev.preventDefault();
-			let row = ev.target.parentElement;
+			let row = ev.currentTarget.parentElement;
 			if(row.nextElementSibling && row.nextElementSibling.tagName === 'LI') {
 				row.nextElementSibling.querySelector('.value').focus();
 			}
@@ -970,10 +970,14 @@
 		newElement.appendChild(controlsElement);
 
 		let deleteButton = document.createElement('button');
-		deleteButton.classList.add('delete');
+		deleteButton.classList.add('btn', 'btn-danger', 'ml-2', 'delete');
 		deleteButton.dataset.name = name;
-		deleteButton.textContent = '❌';
 		deleteButton.tabIndex = -1;
+
+		let icon = document.createElement('i');
+		icon.classList.add('fa', 'fa-trash');
+		deleteButton.appendChild(icon);
+
 		deleteButton.addEventListener('click', deleteFeatureClick.bind(null, deletedFeatures));
 		valueElement.addEventListener('keydown', deleteFeatureKey.bind(null, deletedFeatures));
 		valueElement.addEventListener('keydown', textFormatKey);
@@ -1024,7 +1028,7 @@
 	function addNewClick(ev) {
 		ev.preventDefault();
 		let item = newItem();
-		ev.target.parentElement.parentElement.querySelector('.subitems').appendChild(item);
+		ev.currentTarget.parentElement.parentElement.querySelector('.subitems').appendChild(item);
 	}
 
 	/**
@@ -1033,7 +1037,7 @@
 	 * @param ev Event
 	 */
 	function removeEmptyFeaturesClick(ev) {
- 		let item = ev.target.parentElement.parentElement;
+ 		let item = ev.currentTarget.parentElement.parentElement;
  		let featuresElement;
  		// Avoids accidental depth-first search into other items
 		for(let el of item.children) {
@@ -1059,7 +1063,7 @@
 	 */
 	function removeNewClick(ev) {
 		ev.preventDefault();
-		ev.target.parentElement.parentElement.remove();
+		ev.currentTarget.parentElement.parentElement.remove();
 	}
 
 	/**
@@ -1327,7 +1331,7 @@
 
 	async function deleteClick(ev) {
 		ev.preventDefault();
-		let code = ev.target.parentElement.dataset.forItem;
+		let code = ev.currentTarget.parentElement.dataset.forItem;
 		let go = confirm(`Delete item ${code}: are you sure? Really? REALLY?`);
 		if(go) {
 			toggleButtons(true);
@@ -1367,7 +1371,7 @@
 	}
 
 	async function lostClick(ev) {
-		let code = ev.target.parentElement.dataset.forItem;
+		let code = ev.currentTarget.parentElement.dataset.forItem;
 		toggleButtons(true);
 
 		let method, uri;
