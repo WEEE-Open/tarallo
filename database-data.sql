@@ -315,7 +315,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('todo', 'replace-elec-components'), -- Replace faulty electronic components --
 	('todo', 'add-parts'), -- Add missing parts --
 	('todo', 'salvage-parts'), -- Salvage parts (dismantle) --
-    ('todo', 'thermal-paste'), -- Replace thermal paste --
+	('todo', 'thermal-paste'), -- Replace thermal paste --
 	('todo', 'replace-cmos-battery'), -- Replace CMOS battery --
 	('todo', 'finish-testing'), -- Finish testing --
 	('todo', 'finish-inventory'), -- Finish inventory of parts --
@@ -367,4 +367,3 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('psu-connector-cpu', '8pin8pin'), -- 8 pin + 8 pin --
 	('psu-connector-cpu', 'proprietary'); -- Proprietary --
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 18);

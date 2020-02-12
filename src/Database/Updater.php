@@ -658,6 +658,9 @@ END;");
 				case 17:
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('todo', 'thermal-paste'), ('check', 'wrong-data')");
 					break;
+				case 18:
+					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('cnr-sockets-n', 'sockets', 1)");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

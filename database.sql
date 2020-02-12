@@ -318,6 +318,6 @@ SELECT Code,
     COALESCE(ValueDouble_Item, ValueDouble_Product) AS ValueDouble
 FROM ProductItemFeature;
 
--- Append this insert statement at the end of file and update schemaversion value
-INSERT INTO `Configuration` (`Key`, `Value`)
-VALUES ('SchemaVersion', 16);
+-- Do not combine these lines, they're parsed by update.php... WITH A REGEX!
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 15);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 18);

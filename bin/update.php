@@ -24,12 +24,12 @@ if(isset($argv[1]) && $argv[1] === 'test_db') {
 }
 
 $database = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'database.sql');
-$databasedata = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'database-data.sql');
+//$databasedata = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'database-data.sql');
 
 preg_match("#\(.SchemaVersion., (\d+)\)#", $database, $matches);
 $schema = (int) $matches[1];
 
-preg_match("#\(.DataVersion., (\d+)\)#", $databasedata, $matches);
+preg_match("#\(.DataVersion., (\d+)\)#", $database, $matches);
 $data = (int) $matches[1];
 
 print("Last versions found in sql files: schema $schema, data $data");
