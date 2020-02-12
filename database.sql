@@ -320,4 +320,4 @@ FROM ProductItemFeature;
 
 -- Append this insert statement at the end of file and update schemaversion value
 INSERT INTO `Configuration` (`Key`, `Value`)
-VALUES ('SchemaVersion', 15);
+VALUES ('SchemaVersion', 16);
