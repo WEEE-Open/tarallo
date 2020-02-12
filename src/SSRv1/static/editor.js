@@ -976,6 +976,8 @@
 
 		let icon = document.createElement('i');
 		icon.classList.add('fa', 'fa-trash');
+		icon.setAttribute("role", "img");
+		icon.setAttribute("aria-label", "Delete");
 		deleteButton.appendChild(icon);
 
 		deleteButton.addEventListener('click', deleteFeatureClick.bind(null, deletedFeatures));

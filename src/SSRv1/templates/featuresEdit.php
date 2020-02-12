@@ -32,7 +32,7 @@ if(count($features) > 0):
 					<?php break; case WEEEOpen\Tarallo\BaseFeature::DOUBLE: ?>
 						<div class="value" data-internal-type="d" data-internal-name="<?= $ultra->name ?>" data-internal-value="<?= $ultra->value ?>" data-previous-value="<?= $ultra->value ?>" data-initial-value="<?= $ultra->value ?>" id="feature-edit-<?= $ultra->name ?>" contenteditable="true"><?=$this->contentEditableWrap($this->e($ultra->pvalue))?></div>
 					<?php endswitch; ?>
-					<div class="controls"><button data-name="<?= $ultra->name ?>" class="btn btn-danger ml-2 delete" tabindex="-1"><i class="fa fa-trash"></i></button></div>
+					<div class="controls"><button data-name="<?= $ultra->name ?>" class="btn btn-danger ml-2 delete" aria-roledescription="delete" tabindex="-1"><i class="fa fa-trash" role="img" aria-label="Delete"></i></button></div>
 				</li>
 			<?php endforeach; ?>
 		</ul>
