@@ -51,6 +51,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('pcie-power-pin-n', 'powerconnectors', 1), -- PCI Express power pins --
 	('pcie-sockets-n', 'sockets', 1), -- PCI Express --
 	('pci-sockets-n', 'sockets', 1), -- PCI --
+	('cnr-sockets-n', 'sockets', 1), -- CNR --
 	('power-connector', 'powerconnectors', 2), -- Power connector (external) --
 	('power-idle-watt', 'power', 1), -- Power consumption (idle) --
 	('power-rated-watt', 'power', 1), -- Power (rated) --
