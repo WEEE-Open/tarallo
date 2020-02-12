@@ -32,7 +32,8 @@ $schema = (int) $matches[1];
 preg_match("#\(.DataVersion., (\d+)\)#", $database, $matches);
 $data = (int) $matches[1];
 
-print("Last versions found in sql files: schema $schema, data $data");
+echo "Last versions found in sql files: schema $schema, data $data";
+echo PHP_EOL;
 
 try {
 	$db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);

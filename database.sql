@@ -319,5 +319,5 @@ SELECT Code,
 FROM ProductItemFeature;
 
 -- Do not combine these lines, they're parsed by update.php... WITH A REGEX!
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 15);
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 18);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 16);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 19);
