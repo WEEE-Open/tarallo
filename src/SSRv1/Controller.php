@@ -357,8 +357,8 @@ class Controller implements RequestHandlerInterface {
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
 		$parameters = $request->getAttribute('parameters');
-		// a nice default value: 'now - 1 year'
-		$startDateDefault = '2016-01-01';
+		// the default value is: 'now - 1 year'
+		$startDateDefault = date('Y-m-d', time() - (365 * 24 * 60 * 60));
 		$startDate = Validation::validateOptionalString($query, 'from', $startDateDefault, null);
 		$startDateSet = $startDate !== $startDateDefault;
 		/** @noinspection PhpUnhandledExceptionInspection */
