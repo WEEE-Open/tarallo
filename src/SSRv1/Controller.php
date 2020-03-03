@@ -477,6 +477,21 @@ class Controller implements RequestHandlerInterface {
 					]
 				);
 				break;
+			case 'cpu':
+				$locationDefault = 'Box12';
+				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
+				$locationSet = $location !== $locationDefault;
+				$location = $location === null ? null : new ItemCode($location);
+				$request = $request->withAttribute('Template', 'stats::cpus')->withAttribute(
+					'TemplateParameters', [
+						'startDate' => $startDate,
+						'startDateSet' => $startDateSet,
+						'byNcore' => $db->statsDAO()->getCountByFeature(
+							'core-n', new Feature('type', 'cpu'), $location, $startDate
+						),
+					]
+				);
+				break;
 			case 'products':
 				$request = $request->withAttribute('Template', 'stats::products')->withAttribute('TemplateParameters', [
 						'brandsProducts' => $db->statsDAO()->getProductsCountByBrand(),
