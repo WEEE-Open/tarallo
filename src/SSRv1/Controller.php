@@ -477,18 +477,24 @@ class Controller implements RequestHandlerInterface {
 					]
 				);
 				break;
-			case 'cpu':
+			case 'cpus':
 				$locationDefault = 'Box12';
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
 				$request = $request->withAttribute('Template', 'stats::cpus')->withAttribute(
 					'TemplateParameters', [
+						'location' => $location === null ? null : $location->getCode(),
+						'locationSet' => $locationSet,
 						'startDate' => $startDate,
 						'startDateSet' => $startDateSet,
 						'byNcore' => $db->statsDAO()->getCountByFeature(
-							'core-n', new Feature('type', 'cpu'), $location, $startDate
+							'core-n', new Feature('type', 'cpu'), $location
 						),
+						'byIsa' => $db->statsDAO()->getCountByFeature(
+							'isa', new Feature('type', 'cpu'), $location
+						),
+						'commonModels' => $db->statsDAO()->getCommonFeature('model', $location)
 					]
 				);
 				break;
