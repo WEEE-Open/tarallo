@@ -8,7 +8,7 @@
 /** @var int[] commmonBrands */
 /** @var bool $startDateSet */
 /** @var array[] $byTypeFrequency */
-$this->layout('main', ['title' => 'Stats: Cpus', 'user' => $user, 'currentPage' => 'stats']);
+$this->layout('main', ['title' => 'Stats: CPUs', 'user' => $user, 'currentPage' => 'stats']);
 $this->insert('stats::menu', ['currentPage' => 'cpus']);
 $this->insert('stats::header', ['location' => $location, 'locationSet' => $locationSet, 'allowDateSelection' => false]);
 ?>
