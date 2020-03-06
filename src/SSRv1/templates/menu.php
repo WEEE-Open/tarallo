@@ -24,6 +24,7 @@ $hereSr = function($page, $current) {
 				</a>
 				<div class="dropdown-menu" aria-labelledby="itemsDropdown">
 					<a class="dropdown-item <?= $hereClass('item new', $currentPage) ?>" href="/new/item">Create<?= $hereSr('item new', $currentPage) ?></a>
+					<a class="dropdown-item <?= $hereClass('item search', $currentPage) ?>" href="/search">Search<?= $hereSr('item search', $currentPage) ?></a>
 					<a class="dropdown-item <?= $hereClass('item bulk add', $currentPage) ?>" href="/bulk/add">Bulk add<?= $hereSr('item bulk add', $currentPage) ?></a>
 					<a class="dropdown-item <?= $hereClass('item bulk move', $currentPage) ?>" href="/bulk/move">Bulk move<?= $hereSr('item bulk move', $currentPage) ?></a>
 				</div>
@@ -38,31 +39,34 @@ $hereSr = function($page, $current) {
 				</div>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link" href="#" data-toggle="move" id="quickmovebutton">Move<span class="d-none"> (open)</span></a>
+				<a class="nav-link" data-toggle="collapse" href="#quickmove" role="button" aria-expanded="false" aria-controls="quickmove" id="quickmovebutton">Move</a>
 			</li>
 			<li class="nav-item">
 				<a class="nav-link <?= $hereClass('stats', $currentPage) ?>" href="/stats">Stats<?= $hereSr('stats', $currentPage) ?></a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link <?= $hereClass('options', $currentPage) ?>" href="/options">Options<?= $hereSr('options', $currentPage) ?></a>
 			</li>
 		</ul>
 
 		<form class="form-inline my-2 my-md-0" action="/search" method="post">
 			<input required class="form-control mx-0 mr-sm-2" type="search" aria-label="Search" name="search">
-			<button class="btn btn-outline-primary my-2 my-sm-0" type="submit">Search</button>
+			<button class="btn btn-outline-primary my-2 my-sm-0 mr-sm-2" type="submit">Search</button>
+			<a class="btn btn-secondary my-2 my-sm-0" href="/search">Advanced</a>
 		</form>
 	</div>
 </nav>
 
-<nav id="quickmove" class="navbar navbar-dark bg-dark d-none">
+<nav id="quickmove" class="navbar navbar-dark bg-dark collapse">
 	<form class="nav-item form-inline">
-		<label for="quickmovecode" class="navbar-text col-form-label">Move item:</label>
-		<input required class="form-control" name="code" id="quickmovecode" type="text"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>>
-		<button class="btn btn-outline-secondary swap" title="Swap" tabindex="-1">⇄</button>
-		<label for="quickmovelocation" class="navbar-text col-form-label">into:</label>
-		<input required class="form-control to" id="quickmovelocation" type="text">
-		<button type="submit" class="btn btn-outline-secondary do">Move</button>
+		<label for="quickmovecode" class="navbar-text mr-sm-1 col-form-label">Move item:</label>
+		<input required class="form-control mr-sm-1" name="code" id="quickmovecode" type="text"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>>
+		<button class="btn btn-outline-secondary mr-1 my-2 my-sm-0 swap" title="Swap" tabindex="-1">⇄</button>
+		<label for="quickmovelocation" class="navbar-text col-form-label mr-sm-1">into:</label>
+		<input required class="form-control mr-sm-1 to" id="quickmovelocation" type="text">
+		<button type="submit" class="btn btn-outline-secondary mt-2 mt-sm-0 do">Move</button>
 	</form>
-	<div class="nav-item alert alert-success ml-0 mr-auto my-auto d-none" role="alert"><a href="#">Ok</a></div>
+	<div class="nav-item alert alert-success ml-0 mr-auto my-auto d-none" role="alert"><a href="">Ok</a></div>
 	<div class="nav-item alert alert-danger col-12 my-2 d-none" role="alert">Error</div>
 	<div class="nav-item alert alert-warning col-12 my-2 d-none" role="alert">Fail</div>
 </nav>
-<script src="/static/menu.js"></script>

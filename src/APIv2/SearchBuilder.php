@@ -82,7 +82,7 @@ class SearchBuilder {
 
 			// Create a Feature to convert strings to int/double. Then discard it and recreate it in SearchTriplet.
 			// It's a waste but happens with very few features each time, so it's not a major problem.
-			$feature = Feature::ofString($triplet[0], $triplet[2]);
+			$feature = Feature::ofString($triplet[0], trim($triplet[2]));
 			$result[] = new SearchTriplet($triplet[0], $triplet[1], $feature->value);
 		}
 		return $result;

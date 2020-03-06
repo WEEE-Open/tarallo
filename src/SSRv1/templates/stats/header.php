@@ -8,23 +8,34 @@ if(!isset($allowDateSelection)) {
 	$allowDateSelection = true;
 }
 if($location === null): ?>
-	<p>All stats refer to <em>every possible location</em></p>
+	<p class="stats text">All stats refer to <em>every possible location</em></p>
 <?php else: ?>
-	<p>All stats refer to <em><?=$location?></em> only</p>
+	<p class="stats text">All stats refer to <em><?=$location?></em> only</p>
 <?php endif; ?>
+
 <?php if($allowDateSelection): ?>
-<div class="statsheader">
-	<form action="" method="GET">
-		<label>Start date<input type="date" name="from"></label>
-		<?php if($location !== null && $locationSet): ?><input type="hidden" name="where" value="<?= $this->e($location) ?>"><?php endif; ?>
-		<input type="submit" value="Filter">
-	</form>
-</div>
+<form action="" method="GET">
+	<div class="form-group row">
+		<label for="statsDate" class="col-sm-2 col-lg-1 col-form-label">Start&nbsp;date</label>
+		<div class="col-8 col-sm-5 col-md-4">
+			<input type="date" name="from" class="form-control" id="statsDate">
+		</div>
+		<div class="col-4 col-sm">
+			<input class="btn btn-secondary" type="submit" value="Filter">
+		</div>
+	</div>
+	<?php if($location !== null && $locationSet): ?><input type="hidden" name="where" value="<?= $this->e($location) ?>"><?php endif; ?>
+</form>
 <?php endif; ?>
-<div class="statsheader">
-	<form action="" method="GET">
-		<label>Location<input type="text" name="where" placeholder="<?= $this->e($location ?? '') ?>"></label>
-		<?php if($allowDateSelection): if($startDate !== null && $startDateSet): ?><input type="hidden" name="from" value="<?= $startDate->format('Y-m-s') ?>"><?php endif; endif; ?>
-		<input type="submit" value="Filter">
-	</form>
-</div>
+<form action="" method="GET">
+	<div class="form-group row">
+		<label for="statsWhere" class="col-sm-2 col-lg-1 col-form-label">Location</label>
+		<div class="col-8 col-sm-5 col-md-4">
+			<input type="text" name="where" class="form-control" id="statsWhere" placeholder="<?= $this->e($location ?? '') ?>">
+		</div>
+		<div class="col-4 col-sm">
+			<input class="btn btn-secondary" type="submit" value="Filter">
+		</div>
+	</div>
+	<?php if($allowDateSelection): if($startDate !== null && $startDateSet): ?><input type="hidden" name="from" value="<?= $startDate->format('Y-m-s') ?>"><?php endif; endif; ?>
+</form>

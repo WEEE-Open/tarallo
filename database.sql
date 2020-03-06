@@ -165,7 +165,7 @@ CREATE TABLE AuditProduct
         ON UPDATE CASCADE,
     INDEX (`Change`),
     CONSTRAINT check_change
-        CHECK (`Change` IN ('C', 'U', 'D'))
+        CHECK (`Change` IN ('C', 'R', 'U', 'D'))
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
@@ -318,6 +318,6 @@ SELECT Code,
     COALESCE(ValueDouble_Item, ValueDouble_Product) AS ValueDouble
 FROM ProductItemFeature;
 
--- Append this insert statement at the end of file and update schemaversion value
-INSERT INTO `Configuration` (`Key`, `Value`)
-VALUES ('SchemaVersion', 14);
+-- Do not combine these lines, they're parsed by update.php... WITH A REGEX!
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 16);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 19);

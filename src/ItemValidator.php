@@ -418,9 +418,10 @@ class ItemValidator {
 				return ['color'];
 			case 'graphics-card':
 				return [
-					'brand-manufacturer', 'capacity-byte', 'vga-ports-n', 'dvi-ports-n',
-					'dms-59-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'agp-sockets-n', 'pcie-sockets-n',
-					'pcie-power-pin-n','color'
+					'integrated-graphics-brand', 'integrated-graphics-model',
+					'capacity-byte', 'vga-ports-n', 'dvi-ports-n',
+					'dms-59-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'composite-video-ports-n',
+					'agp-sockets-n', 'pcie-sockets-n', 'pcie-power-pin-n','color'
 				];
 			case 'psu':
 				return [

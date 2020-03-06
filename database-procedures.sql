@@ -408,14 +408,27 @@ CREATE TRIGGER AuditRenameItem
 	FOR EACH ROW
 	BEGIN
 		IF(NEW.Code <> OLD.Code) THEN
-      UPDATE Audit SET `Code` = NEW.Code
-      WHERE `Code` = OLD.Code;
-      UPDATE Audit SET `Other` = NEW.Code
-      WHERE `Other` = OLD.Code;
-      INSERT INTO Audit(Code, `Change`, Other, `User`)
-      VALUES(NEW.Code, 'R', OLD.Code, @taralloAuditUsername);
+            UPDATE Audit SET `Code` = NEW.Code
+            WHERE `Code` = OLD.Code;
+            UPDATE Audit SET `Other` = NEW.Code
+            WHERE `Other` = OLD.Code;
+            INSERT INTO Audit(Code, `Change`, Other, `User`)
+            VALUES(NEW.Code, 'R', OLD.Code, @taralloAuditUsername);
 		END IF;
 	END $$
+DELIMITER ;
+
+-- Same for products, but foreign keys are handled correctly
+DROP TRIGGER IF EXISTS AuditRenameProduct;
+DELIMITER $$
+CREATE TRIGGER AuditRenameProduct
+    AFTER UPDATE
+    ON Product
+    FOR EACH ROW
+BEGIN
+    INSERT INTO AuditProduct(Brand, Model, Variant, `Change`, `User`)
+    VALUES(NEW.Brand, NEW.Model, NEW.Variant, 'R', @taralloAuditUsername);
+END $$
 DELIMITER ;
 
 -- Add a 'D' entry to audit table
@@ -494,6 +507,44 @@ CREATE EVENT `TokensCleanup`
     DELETE
     FROM `SessionToken`
     WHERE LastAccess < TIMESTAMPADD(MONTH, -6, NOW()) $$
+DELIMITER ;
+
+-- Product and Item features duplicates deleter --------------------------------
+
+-- Delete rows from ItemFeature that are exact duplicates (same feature and value) of ProductFeature rows, for the same item.
+-- Adding duplicate rows to ItemFeature is handled elsewhere (i.e. in the code), but creating a new product may yield such rows.
+-- Deleting these duplicates immediately may delete rows that intentionally override a feature value, if the incorrect value is applied to the product.
+-- To minimize this problem, we will delete such duplicates every 24 hours, only if both products and items haven't been modified in the last 24 hours.
+-- So duplicate features are actually deleted between 24 and 48 hours after they've been created.
+DROP EVENT IF EXISTS `DuplicateItemProductFeaturesCleanup`;
+DELIMITER $$
+CREATE EVENT `DuplicateItemProductFeaturesCleanup`
+    ON SCHEDULE EVERY '1' DAY
+    ON COMPLETION PRESERVE
+    ENABLE DO
+    DELETE ItemFeature.*
+    FROM Item
+    NATURAL JOIN ProductFeature
+    JOIN ItemFeature ON Item.Code = ItemFeature.Code AND ProductFeature.Feature = ItemFeature.Feature
+    WHERE
+    COALESCE(ProductFeature.Value, ProductFeature.ValueEnum, ProductFeature.ValueText, ProductFeature.ValueDouble) = COALESCE(ItemFeature.Value, ItemFeature.ValueEnum, ItemFeature.ValueText, ItemFeature.ValueDouble)
+    AND NOT EXISTS(
+        SELECT Audit.Code
+        FROM Audit
+        WHERE Item.Code = Audit.Code
+          AND Audit.Change IN ('C', 'U')
+          AND DATEDIFF(NOW(), Audit.Time) >= 1
+    )
+    AND NOT EXISTS(
+        SELECT AuditProduct.Brand, AuditProduct.Model, AuditProduct.Variant
+        FROM AuditProduct
+        WHERE Item.Brand = AuditProduct.Brand
+          AND Item.Model = AuditProduct.Model
+          AND Item.Variant = AuditProduct.Variant
+          AND AuditProduct.Change IN ('C', 'U')
+          AND DATEDIFF(NOW(), AuditProduct.Time) >= 1
+    )
+$$
 DELIMITER ;
 
 -- SET GLOBAL ------------------------------------------------------------------

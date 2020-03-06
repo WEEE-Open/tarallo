@@ -1,13 +1,14 @@
 <?php
 /** @var string $currentPage */
 ?>
-<nav class="menu submenu">
-	<ul>
-		<li><a href="/stats"<?= $currentPage === '' ? ' class="selected"' : '' ?>>Stats</a></li
-		><li><a href="/stats/attention"<?= $currentPage === 'attention' ? ' class="selected"' : '' ?>>Fix these</a></li
-		><li><a href="/stats/todo"<?= $currentPage === 'todo' ? ' class="selected"' : '' ?>>TODO</a></li
-		><li><a href="/stats/cases"<?= $currentPage === 'cases' ? ' class="selected"' : '' ?>>Cases</a></li
-		><li><a href="/stats/rams"<?= $currentPage === 'rams' ? ' class="selected"' : '' ?>>RAMs</a></li
-		><li><a href="/stats/cpus"<?= $currentPage === 'cpus' ? ' class="selected"' : '' ?>>CPUs</a></li>
-	</ul>
+<nav class="nav nav-pills submenu">
+	<a class="nav-link <?= $currentPage === '' ? 'active' : '' ?>" href="/stats">General</a>
+	<a class="nav-link <?= $currentPage === 'attention' ? 'active' : '' ?>" href="/stats/attention">Fix these</a>
+	<a class="nav-link <?= $currentPage === 'todo' ? 'active' : '' ?>" href="/stats/todo">TODO</a>
+	<a class="nav-link <?= $currentPage === 'cases' ? 'active' : '' ?>" href="/stats/cases">Cases</a>
+	<a class="nav-link <?= $currentPage === 'rams' ? 'active' : '' ?>" href="/stats/rams">RAMs</a>
+	<a class="nav-link disabled" href="/stats/cpus" tabindex="-1" aria-disabled="true">CPUs</a>
+	<a class="nav-link disabled" href="/stats/hdds" tabindex="-1" aria-disabled="true">HDDs</a>
+	<a class="nav-link disabled" href="/stats/users" tabindex="-1" aria-disabled="true">Users</a>
+	<a class="nav-link <?= $currentPage === 'products' ? 'active' : '' ?>" href="/stats/products">Products</a>
 </nav>

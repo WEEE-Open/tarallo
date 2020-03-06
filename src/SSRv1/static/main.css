@@ -2,23 +2,11 @@
 	color: #eeeeee;
 }
 
-input, button, select {
-	color: black;
-	background: white;
-	border: 1px solid #ccc;
-	border-radius: 0.3em;
-	margin: 0.2em;
-	padding: 0.2em 0.4em;
-	font-size: 100%;
-	font-family: inherit; /* I have no idea why is this needed */
-	transition: box-shadow,border-color 0.3s ease-out;
-}
-
 #main {
 	box-shadow: 0 0.3em 0.6em -0.3em rgba(0,0,0,0.29);
 	margin-bottom: 1.5em;
-	padding-top: 0;
-	padding-bottom: 0;
+	padding-top: 0.25rem;
+	padding-bottom: 0.25rem;
 }
 
 #quickmove {
@@ -33,40 +21,55 @@ input, button, select {
 	font-size: 6vw;
 }
 
-.message {
-	padding: .5em;
+.inline-alert {
+	padding: 0.6rem;
+	width: 100%;
 }
 
-.message.long {
-	margin-top: .5em;
-}
-
-.info.message {
+.alert-info {
 	color: #00529B;
 	background-color: #BDE5F8;
 }
-.success.message {
+.alert-success-old {
 	color: #4F8A10;
 	background-color: #DFF2BF;
 }
-.warning.message {
+.alert-warning {
 	color: #9F6000;
 	background-color: #FEEFB3;
 }
-
-.serious.message {
+.alert-serious {
 	color: #CC4100;
 	background-color: #FFCC89;
 }
 
-.error.message {
+.alert-danger {
 	color: #D8000C;
 	background-color: #FFBABA;
+}
+
+[data-toggle="tooltip"] {
+	text-decoration-line: underline;
+	text-decoration-style: dotted;
+}
+
+.tooltip-inner {
+	border-color: #333333;
+	background: #eeeeee;
+	color: #333333;
 }
 
 .code {
 	font-family: "Fira Mono", monospace;
 	font-weight: bold;
+}
+
+.item h2 label {
+	margin-bottom: 0;
+}
+
+.setlocation {
+
 }
 
 .breadbox {
@@ -108,49 +111,58 @@ ul.breadcrumbs li:not(:first-child)::before {
 	margin-right: 0.4em;
 }
 
-.summary span {
-	margin: 0 0.5rem;
-	font-size: smaller;
-	color: #555;
+.summary.open > span {
+	display: block;
 }
 
-table {
-	border-collapse: collapse;
-	width: 100%;
+.summary.open .sep {
+	display: none;
 }
 
-table > thead, .tablewrapper table .total.last {
-	background: #333;
-	color: #eee;
+.features del {
+	text-decoration-line: line-through;
+	text-decoration-style: wavy;
+	text-decoration-color: #D8000C;
+	/*text-decoration-color: #000000;*/
+	color: #aaaaaa;
 }
 
-table td {
-	padding: 0.3em 0.5em;
+.stats a {
+	text-decoration: underline;
 }
 
-.tablewrapper table .total {
-	background-color: #eee;
-}
-
-table a, .tablewrapper a {
+.stats.table .total {
+	background: #eee;
 	color: #333;
 }
 
-table a:visited, .tablewrapper a:visited {
-	color: #000;
+.stats.table caption {
+	caption-side: top;
+	color: #333;
+	font-weight: bolder;
+}
+
+.stats.table th, .stats.table td {
+	padding: .5rem;
+	font-weight: normal;
+}
+
+.stats.list p {
+	margin-top: 1rem;
+	margin-bottom: 0.5rem;
+	font-weight: bold;
+}
+
+.stats.list {
+	margin-bottom: 1rem;
+}
+
+.stats.text {
+	margin-top: 1rem;
 }
 
 #content > :not(.breadbox), .item {
 	margin: .5em;
-}
-
-#content > table.xl {
-	margin: 0;
-}
-
-#content nav.menu.submenu {
-	margin: -1.5em 0 1.5em;
-	box-shadow: 0 0.3em 0.6em -0.3em rgba(0,0,0,0.29);
 }
 
 .item + .item {
@@ -171,6 +183,7 @@ table a:visited, .tablewrapper a:visited {
 	background-color: #333;
 	color: #eee;
 	padding: 0.32em;
+	/* Secret vaporwave mode => background: linear-gradient(to bottom, rgba(255,113,205,1) 0%, rgba(1,203,254,1) 100%);*/
 }
 
 .deleted.item h2, .deleted.item .features {
@@ -313,19 +326,19 @@ label.searchby {
 	display: none;
 }
 
-.item.working.yes /*> header > h2*/ {
+.item.working.yes {
 	/*border-color: #4F8A10;*/
 	border-color: #DFF2BF;
 	box-shadow: 0 0 0.3em 0.2em #DFF2BF;
 }
 
-.item.working.maybe /*> header > h2*/ {
+.item.working.maybe {
 	/*border-color: #9F6000;*/
 	border-color: #FEEFB3;
 	box-shadow: 0 0 0.3em 0.2em #FEEFB3;
 }
 
-.item.working.no /*> header > h2*/ {
+.item.working.no {
 	/*border-color: #D8000C;*/
 	border-color: #FFBABA;
 	box-shadow: 0 0 0.3em 0.2em #FFBABA;
@@ -335,21 +348,8 @@ label.searchby {
 	margin-left: .2em;
 }
 
-.itembuttons {
-	display: flex;
-	flex-direction: column;
-	justify-content: flex-end;
-}
-
 .inside > div > .item {
 	margin-bottom: 1em;
-}
-
-#stats {
-	margin: .5em;
-	padding: .5em;
-	background-color: #333;
-	color: #eee;
 }
 
 /* #content is needed, or else this is not specific enough to override a margin above */
@@ -373,23 +373,6 @@ form.nice > .small {
 
 form.nice textarea {
 	resize: vertical;
-}
-
-.tablewrapper {
-	width: auto;
-	margin-bottom: 2em;
-}
-
-.tablewrapper p {
-	margin: 0 0 1em 0;
-}
-
-.tablewrapper table + p {
-	margin-top: 1em;
-}
-
-.tablewrapper div {
-	line-height: 1.5em;
 }
 
 .hidden {
@@ -420,54 +403,7 @@ form.nice textarea {
 	display: block;
 }
 
-@media only screen and (min-width: 400px) {
-	.itembuttons {
-		flex-direction: row;
-		justify-content: space-around;
-		flex-wrap: wrap;
-	}
-
-	.itembuttons.secondary {
-		justify-content: flex-end;
-	}
-}
-
-@media only screen and (min-width: 30em) {
-	.itembuttons {
-		flex-direction: row;
-		flex-wrap: nowrap;
-		float: right;
-	}
-
-	.itembuttons.secondary {
-		float: none;
-	}
-}
-
-@media only screen and (min-width: 54em) {
-
-	.statswrapperwrapper {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: space-between;
-		align-items: stretch;
-	}
-
-	.tablewrapper {
-		width: 24em;
-	}
-
-	.tablewrapper.large {
-		width: 100%;
-	}
-
-	.tablewrapper > table {
-		width: 100%;
-	}
-}
-
 @media only screen and (min-width: 34rem) {
-
 	.features ul > li {
 		grid-template-rows: auto auto auto;
 		grid-template-columns: 10rem auto 2rem;
@@ -513,5 +449,29 @@ form.nice textarea {
 
 	#searchcontrols .features ul > li > .value {
 		grid-column: -3;
+	}
+}
+
+@media (min-width: 576px) {
+	.w-sm-100 {
+		width: 100%;
+	}
+}
+
+@media (min-width: 768px) {
+	.w-md-100 {
+		width: 100%;
+	}
+}
+
+@media (min-width: 992px) {
+	.w-lg-100 {
+		width: 100%;
+	}
+}
+
+@media (min-width: 1200px) {
+	.w-xl-100 {
+		width: 100%;
 	}
 }

@@ -10,6 +10,19 @@ namespace WEEEOpen\Tarallo;
 class Product extends ProductCode implements \JsonSerializable, ItemWithFeatures {
 	use ItemTraitFeatures;
 
+	public static function fromItem(Item $item) {
+		$brand = $item->getFeatureValue('brand');
+		$model = $item->getFeatureValue('model');
+		$variant = $item->getFeatureValue('variant');
+		$product = new Product($brand, $model, $variant);
+		foreach($item->getOwnFeatures() as $feature) {
+			if(!isset(BaseFeature::itemOnlyFeatures[$feature->name])) {
+				$product->addFeature($feature);
+			}
+		}
+		return $product;
+	}
+
 	function jsonSerialize() {
 		$array = [];
 		$array['brand'] = $this->brand;

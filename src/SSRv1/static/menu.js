@@ -13,6 +13,28 @@
 		message.classList.add('d-none');
 	}
 
+	for(let el of document.querySelectorAll('.itembuttons .move')) {
+		el.addEventListener('click', moveButtonInItemListener);
+	}
+
+	for(let el of document.querySelectorAll('.features.collapse')) {
+		$(el).on('show.bs.collapse', toggleSummary);
+		$(el).on('hidden.bs.collapse', toggleSummary);
+	}
+
+	function focusQuickMove() {
+		let len = quickMoveCode.value.length;
+		if (len <= 0) {
+			quickMoveCode.focus();
+		} else {
+			quickMoveLocation.focus();
+			len = quickMoveLocation.value.length;
+			if (len > 0) {
+				quickMoveLocation.setSelectionRange(len, len);
+			}
+		}
+	}
+
 	quickMoveButton.addEventListener('click', ev => {
 		if(quickMoveButton.classList.contains("active")) {
 			quickMoveButton.classList.remove("active");
@@ -23,16 +45,7 @@
 			quickMove.classList.remove("d-none");
 			nav.classList.add("mb-0");
 
-			let len = quickMoveCode.value.length;
-			if(len <= 0) {
-				quickMoveCode.focus();
-			} else {
-				quickMoveLocation.focus();
-				len = quickMoveLocation.value.length;
-				if(len > 0) {
-					quickMoveLocation.setSelectionRange(len, len);
-				}
-			}
+			focusQuickMove();
 		}
 	});
 
@@ -132,6 +145,28 @@
 			e.preventDefault();
 			quickMoveSwap.click();
 		}
-	})
+	});
 
+	function moveButtonInItemListener(e) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		let button = document.getElementById('quickmovebutton');
+		let bar = document.getElementById('quickmove');
+
+		$(bar).collapse('show');
+		// This should be part of .collapse('show');, but it only happens sometimes. Forcing it makes the bar appear half through the animation and then jump to the end and do weird things instead of appearing smoothly, but there's no other way.
+		//bar.classList.remove('d-none');
+		button.classList.add('active');
+		button.setAttribute('aria-expanded', 'true');
+
+		quickMoveCode.value = e.target.dataset.code;
+
+		focusQuickMove();
+	}
+
+	function toggleSummary(e) {
+		let summary = e.target.parentElement.querySelector('.summary');
+		summary.classList.toggle('open');
+	}
 }());

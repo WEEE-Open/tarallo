@@ -4,9 +4,6 @@
 namespace WEEEOpen\Tarallo\Database;
 
 
-use phpDocumentor\Reflection\Types\Array_;
-use phpDocumentor\Reflection\Types\String_;
-use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\ItemWithProduct;
 use WEEEOpen\Tarallo\NotFoundException;
@@ -107,6 +104,45 @@ final class ProductDAO extends DAO{
 		} finally{
 			$statement->closeCursor();
 		}
+	}
+
+	/**
+	 * Rename a product. Supply the changed parts (brand and/or model and/or variant), null for the ones that didn't change.
+	 *
+	 * @param ProductCode $product The product to rename
+	 * @param string|null $brand
+	 * @param string|null $model
+	 * @param string|null $variant
+	 */
+	public function renameProduct(ProductCode $product, ?string $brand, ?string $model, ?string $variant) {
+		if($brand === null && $model === null && $variant === null) {
+			throw new \InvalidArgumentException('At least one of brand, model or variant should change when renaming a product');
+		}
+		$new = new ProductCode($brand ?? $product->getBrand(), $model ?? $product->getModel(), $variant ?? $product->getVariant());
+
+		$statement = $this->getPDO()->prepare('UPDATE Product SET `Brand` = ?, `Model` = ?, `Variant` = ? WHERE `Brand` = ?  AND `Model` = ? AND `Variant` = ?');
+		try {
+			$result = $statement->execute([
+				$new->getBrand(),
+				$new->getModel(),
+				$new->getVariant(),
+				$product->getBrand(),
+				$product->getModel(),
+				$product->getVariant()
+			]);
+			assert($result === true, 'rename product');
+			if($statement->rowCount() === 0) {
+				throw new NotFoundException();
+			}
+		} catch(\PDOException $e) {
+			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1062) {
+				throw new DuplicateItemCodeException((string) $product, 'Product already exists: ' . (string) $product);
+			}
+			throw $e;
+		} finally {
+			$statement->closeCursor();
+		}
+		return $new;
 	}
 
 	/**

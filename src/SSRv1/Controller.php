@@ -104,7 +104,6 @@ class Controller implements RequestHandlerInterface {
 	public static function getProductItems(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
-		$query = $request->getQueryParams();
 		$parameters = $request->getAttribute('parameters', []);
 
 		$brand = Validation::validateOptionalString($parameters, 'brand');
@@ -131,10 +130,14 @@ class Controller implements RequestHandlerInterface {
 	public static function getAllProducts(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
 
-		$products = $db->statsDAO()->getAllProducts();
+		$brand = Validation::validateOptionalString($parameters, 'brand', null, null);
+		$model = Validation::validateOptionalString($parameters, 'model', null, null);
 
-		$request = $request->withAttribute('Template', 'products')->withAttribute('TemplateParameters', ['products' => $products]);
+		$products = $db->statsDAO()->getAllProducts($brand, $model);
+
+		$request = $request->withAttribute('Template', 'products')->withAttribute('TemplateParameters', ['products' => $products, 'brand' => $brand, 'model' => $model]);
 
 		return $handler->handle($request);
 	}
@@ -243,17 +246,34 @@ class Controller implements RequestHandlerInterface {
 
 	public static function addProduct(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$query = $request->getQueryParams();
-//		$from = Validation::validateOptionalString($query, 'copy', null);
 
-		// TODO: allow cloning
-//		if($from === null) {
+		$split = Validation::validateOptionalString($query, 'split', null, null);
+		$copyBrand = Validation::validateOptionalString($query, 'copy-brand', null, null);
+		$copyModel = Validation::validateOptionalString($query, 'copy-model', null, null);
+		$copyVariant = Validation::validateOptionalString($query, 'copy-variant', null, null);
+
+		if($split === null) {
+			if($copyBrand === null || $copyModel === null || $copyVariant === null) {
+				$from = null;
+			} else {
+				$from = new ProductCode($copyBrand, $copyModel, $copyVariant);
+			}
+		} else {
+			$from = new ItemCode($split);
+		}
+
+		if($from === null) {
 			$from = new ProductIncomplete();
 			$from->addFeature(new BaseFeature('type'));
-//		} else {
-//			/** @var Database $db */
-//			$db = $request->getAttribute('Database');
-//			$from = $db->productDAO()->getProduct(new ItemCode($from));
-//		}
+		} else {
+			/** @var Database $db */
+			$db = $request->getAttribute('Database');
+			if($from instanceof ProductCode) {
+				$from = $db->productDAO()->getProduct($from);
+			} else {
+				$from = $db->itemDAO()->getItem($from);
+			}
+		}
 
 		$request = $request->withAttribute('Template', 'newProductPage')->withAttribute(
 			'TemplateParameters', [
@@ -287,8 +307,6 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
-		$sessionInfo = $request->getAttribute('SessionInfo', []);
-
 		$error = null;
 		$token = null;
 		if($body !== null && count($body) > 0) {
@@ -315,8 +333,7 @@ class Controller implements RequestHandlerInterface {
 			'TemplateParameters', [
 			'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
 			'newToken' => $token,
-			'error' => $error,
-			'sessionInfo' => $sessionInfo,
+			'error' => $error
 		]
 		);
 		return $handler->handle($request);
@@ -353,8 +370,9 @@ class Controller implements RequestHandlerInterface {
 				$request = $request->withAttribute('Template', 'stats::main')->withAttribute(
 					'TemplateParameters', [
 						'locations' => $db->statsDAO()->getLocationsByItems(),
-						'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 40),
-						'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 40),
+						'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 50),
+						'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 50),
+						'recentlyMoved' => $db->auditDAO()->getRecentAuditByType('M', 50),
 					]
 				);
 				break;
@@ -459,9 +477,15 @@ class Controller implements RequestHandlerInterface {
 					]
 				);
 				break;
-
+			case 'products':
+				$request = $request->withAttribute('Template', 'stats::products')->withAttribute('TemplateParameters', [
+						'brandsProducts' => $db->statsDAO()->getProductsCountByBrand(),
+						'incomplete' => $db->statsDAO()->getItemsWithIncompleteProducts(),
+						'splittable' => $db->statsDAO()->getSplittableItems(),
+					]
+				);
+				break;
 			default:
-				// TODO: if this gets used only for items (and the page suggesting items), change to something else
 				throw new NotFoundException();
 		}
 
@@ -792,6 +816,8 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/item/{id}/edit/{edit}', [User::AUTH_LEVEL_RW, 'Controller::getItem',]);
 				$r->get('/item/{id}/history', [User::AUTH_LEVEL_RO, 'Controller::getItemHistory',]);
 				$r->get('/product', [User::AUTH_LEVEL_RO, 'Controller::getAllProducts',]);
+				$r->get('/product/{brand}', [User::AUTH_LEVEL_RO, 'Controller::getAllProducts',]);
+				$r->get('/product/{brand}/{model}', [User::AUTH_LEVEL_RO, 'Controller::getAllProducts',]);
 				$r->get('/product/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct',]);
 				$r->get('/product/{brand}/{model}/{variant}/edit', [User::AUTH_LEVEL_RW, 'Controller::getProduct',]);
 				$r->get('/product/{brand}/{model}/{variant}/history', [User::AUTH_LEVEL_RO, 'Controller::getProductHistory',]);

@@ -7,48 +7,47 @@ $this->layout('main', ['title' => 'Stats: items that need attention', 'user' => 
 $this->insert('stats::menu', ['currentPage' => 'attention']);
 ?>
 
-<div class="statswrapperwrapper">
+<div class="row">
 <?php if(!empty($lost)): ?>
-	<div class="tablewrapper large">
-		<p>Most wanted, aka lost items (<?=count($lost)?>, max 100):</p>
+	<div class="stats list col-12">
+		<p>Most wanted, aka lost items (<?=count($lost)?> items, max 100 shown)</p>
 		<div>
 			<?php foreach($lost as $item): ?>
-				<a href="/item/<?=$item?>"><?=$item?></a>
+				<a href="/item/<?=$this->e($item)?>"><?=$this->e($item)?></a>
 			<?php endforeach ?>
 		</div>
 	</div>
 <?php endif ?>
 
 <?php if(!empty($missingData)): ?>
-	<div class="tablewrapper large">
-		<p>Items with missing data (<?=count($missingData)?>, max 500):</p>
+	<div class="stats list col-12">
+		<p>Items with missing data (<?=count($missingData)?> items, max 500 shown)</p>
 		<div>
 			<?php foreach($missingData as $item): ?>
-				<a href="/item/<?=$item?>"><?=$item?></a>
+				<a href="/item/<?=$this->e($item)?>"><?=$this->e($item)?></a>
 			<?php endforeach ?>
 		</div>
 	</div>
 <?php endif ?>
 
 <?php if(!empty($serials)): ?>
-	<div class="tablewrapper">
-		<p>Duplicate serial numbers:</p>
-		<table>
-			<thead>
+	<div class="col-12 col-md-8 col-lg-6">
+		<table class="table table-borderless stats">
+		<caption>Duplicate serial numbers</caption>
+		<thead class="thead-dark">
+		<tr>
+			<th scope="col">Serial</th>
+			<th scope="col">Quantity</th>
+		</tr>
+		</thead>
+		<tbody>
+		<?php foreach($serials as $serial => $count): ?>
 			<tr>
-				<td>Serial</td>
-				<td>Quantity</td>
+				<td><?=$this->e($serial)?></td>
+				<td><?=$this->e($count)?></td>
 			</tr>
-			</thead>
-			<tbody>
-			<?php foreach($serials as $serial => $count): ?>
-				<tr>
-					<td><?=$serial?></td>
-					<td><?=$count?></td>
-				</tr>
-			<?php endforeach ?>
-			</tbody>
-		</table>
+		<?php endforeach ?>
+		</tbody>
 	</div>
 <?php endif ?>
 </div>

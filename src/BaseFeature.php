@@ -67,6 +67,7 @@ class BaseFeature {
 		'pcie-power-pin-n' => self::INTEGER,
 		'pcie-sockets-n' => self::INTEGER,
 		'pci-sockets-n' => self::INTEGER,
+		'cnr-sockets-n' => self::INTEGER,
 		'power-connector' => ['other' => true, 'c13' => true, 'c19' => true, 'barrel' => true, 'miniusb' => true, 'microusb' => true, 'proprietary' => true, 'da-2' => true],
 		'power-idle-watt' => self::INTEGER,
 		'power-rated-watt' => self::INTEGER,
@@ -98,8 +99,8 @@ class BaseFeature {
 		'weight-gram' => self::INTEGER,
 		'spin-rate-rpm' => self::INTEGER,
 		'dms-59-ports-n' => self::INTEGER,
-		'check' => ['missing-data' => true, 'partial-inventory' => true],
-		'todo' => ['transplant' => true, 'container' => true, 'install-os' => true, 'finish-os-install' => true, 'replace-capacitors' => true, 'replace-temp-parts' => true, 'remove-from-computer' => true, 'replace-broken-parts' => true, 'replace-elec-components' => true, 'add-parts' => true, 'salvage-parts' => true, 'replace-cmos-battery' => true, 'finish-testing' => true, 'finish-inventory' => true],
+		'check' => ['missing-data' => true, 'partial-inventory' => true, 'wrong-data' => true],
+		'todo' => ['transplant' => true, 'container' => true, 'install-os' => true, 'finish-os-install' => true, 'replace-capacitors' => true, 'replace-temp-parts' => true, 'remove-from-computer' => true, 'replace-broken-parts' => true, 'replace-elec-components' => true, 'add-parts' => true, 'salvage-parts' => true, 'thermal-paste' => true, 'replace-cmos-battery' => true, 'finish-testing' => true, 'finish-inventory' => true],
 		'ram-ecc' => ['no' => true, 'yes' => true],
 		'other-code' => self::STRING,
 		'hdmi-ports-n' => self::INTEGER,
@@ -183,6 +184,7 @@ class BaseFeature {
 		'pcie-power-pin-n' => self::GROUP_powerconnectors,
 		'pcie-sockets-n' => self::GROUP_sockets,
 		'pci-sockets-n' => self::GROUP_sockets,
+		'cnr-sockets-n' => self::GROUP_sockets,
 		'power-connector' => self::GROUP_powerconnectors,
 		'power-idle-watt' => self::GROUP_power,
 		'power-rated-watt' => self::GROUP_power,
@@ -258,6 +260,32 @@ class BaseFeature {
 		'game-ports-n' => self::GROUP_ports,
 	];
 	// END GENERATED CODE
+
+	const itemOnlyFeatures = [
+		'brand' => true,
+		'model' => true,
+		'variant' => true,
+		'restrictions' => true,
+		'working' => true,
+		'cib-qr' => true,
+		'cib' => true,
+		'cib-old' => true,
+		'other-code' => true,
+		'os-license-version' => true,
+		'os-license-code' => true,
+		'mac' => true,
+		'sn' => true,
+		'wwn' => true,
+		'arrival-batch' => true,
+		'owner' => true,
+		'data-erased' => true,
+		'surface-scan' => true,
+		'smart-data' => true,
+		'software' => true,
+		'notes' => true,
+		'todo' => true,
+		'check' => true,
+	];
 
 	public static function featuresLastModified(): int {
 		return filemtime(__FILE__);

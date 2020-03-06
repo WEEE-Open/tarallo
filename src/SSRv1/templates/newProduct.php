@@ -1,23 +1,40 @@
 <?php
-/** @var \WEEEOpen\Tarallo\ProductIncomplete|\WEEEOpen\Tarallo\Product|null $base */
+/** @var \WEEEOpen\Tarallo\ProductIncomplete|\WEEEOpen\Tarallo\Product|\WEEEOpen\Tarallo\Item|null $base */
 
 $base = $base ?? null;
+if($base instanceof \WEEEOpen\Tarallo\Item) {
+	$baseItem = $base;
+	$base = \WEEEOpen\Tarallo\Product::fromItem($base);
+}
 ?>
 
-<article class="product item new editing root head">
-	<header>
-		<h2>
-		<label for="new-product-brand">Brand:</label><input class="newcode" maxlength="100" id="new-product-brand">
-		<label for="new-product-model">Model:</label><input class="newcode" maxlength="100" id="new-product-model">
-		<label for="new-product-variant">Variant:</label><input class="newcode" maxlength="100" id="new-product-variant">
+<article class="container product item new editing root head">
+	<header class="row">
+		<h2 class="col-12">
+		<label for="new-product-brand">Brand:</label><input value="<?= ($base instanceof \WEEEOpen\Tarallo\Product) ? $base->getBrand() : '' ?>" maxlength="100" id="new-product-brand">
+		<label for="new-product-model">Model:</label><input value="<?= ($base instanceof \WEEEOpen\Tarallo\Product) ? $base->getModel() : '' ?>" maxlength="100" id="new-product-model">
+		<label for="new-product-variant">Variant:</label><input value="<?= ($base instanceof \WEEEOpen\Tarallo\Product) ? $base->getVariant() : '' ?>" maxlength="100" id="new-product-variant">
 		</h2>
-		<?php if(isset($base) && $base instanceof \WEEEOpen\Tarallo\Product): ?>
-			<div class="info message">ℹ️&nbsp;This is a copy of <span class="code">...</span></div>
-		<?php unset($noticeFeature); endif; ?>
+		<?php if(isset($base)): ?>
+			<?php if(isset($baseItem)): ?>
+				<div class="inline-alert alert-info" role="alert">
+					<i class="fa fa-info-circle"></i>&nbsp;This product is split from <span class="text-monospace"><?= $this->e($baseItem->getCode()) ?></span>
+				</div>
+			<?php elseif($base instanceof \WEEEOpen\Tarallo\Product): ?>
+				<div class="inline-alert alert-info" role="alert">
+					<i class="fa fa-info-circle"></i>&nbsp;This is a copy of <?= $this->e($base->getBrand()) . ' ' . $this->e($base->getModel()) . rtrim(' ' . $this->e($base->getVariantOrEmpty())) ?>
+				</div>
+			<?php endif; ?>
+		<?php endif; ?>
 	</header>
 
-	<nav class="itembuttons">
-		<button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button>
+	<nav class="itembuttons row mx-2 mt-2 justify-content-end">
+		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
+			<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
+		</button>
+		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button">
+			💾&nbsp;Save
+		</button>
 	</nav>
 
 	<section class="own features editing">
@@ -33,9 +50,11 @@ $base = $base ?? null;
 		<button>Add</button>
 	</section>
 
-    <nav class="itembuttons secondary">
-        <button class="removeemptyfeatures" title="Remove empty features">🧽&nbsp;Clean</button>
-    </nav>
+	<nav class="itembuttons secondary row mx-2 mt-2 justify-content-end">
+		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto removeemptyfeatures" title="Remove empty features" role="button">
+			🧽&nbsp;Clean
+		</button>
+	</nav>
 </article>
 <script>const activate = true;</script>
 <?php $this->insert('editor'); ?>

@@ -183,11 +183,12 @@ final class FeatureDAO extends DAO {
 
 	/**
 	 * Set item features.
+	 * Automatically ignores features identical to a product feature, for items.
+	 * Automatically ignores updates of features that set the same value.
 	 *
 	 * @param ItemWithFeatures $item
 	 *
 	 * @return bool True if anything actually changed (and an U audit entry was generated), false otherwise.
-	 * @TODO: it would be cool if changing a feature to the value it already has still didn't generate an entry...
 	 */
 	public function setFeatures(ItemWithFeatures $item): bool {
 		// Own features, or else it duplicates product features
@@ -197,14 +198,18 @@ final class FeatureDAO extends DAO {
 			return false;
 		}
 
+		$changes = false;
 		foreach($features as $feature) {
-			$this->setFeature($item, $feature);
+			$changed = $this->setFeature($item, $feature);
+			$changes = $changes || $changed;
 		}
 
-		assert($item instanceof ItemWithCode || $item instanceof ProductCode);
-		$this->addAuditEntry($item);
+		if($changes) {
+			assert($item instanceof ItemWithCode || $item instanceof ProductCode);
+			$this->addAuditEntry($item);
+		}
 
-		return true;
+		return $changes;
 	}
 
 	/**
@@ -215,26 +220,39 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @return bool True if anything was deleted
 	 */
-	public function deleteFeatures(ItemWithFeatures $item, array $features) {
-		assert($item instanceof ItemWithCode);
+	public function deleteFeatures(ItemWithFeatures $item, array $features): bool {
 		if(empty($features)) {
 			return false;
 		}
-		// This never fails, even for items that don't exist
-		$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ? AND `Feature`= ?');
+		if($item instanceof ItemWithCode) {
+			// This never fails, even for items that don't exist
+			$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = :cod AND `Feature`= :f');
+			$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
+		} else {
+			/** @var ProductCode $item */
+			$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ProductFeature WHERE Brand = :brand AND Model = :model AND Variant = :variant AND `Feature`= :f');
+			$statement->bindValue(':brand', $item->getBrand(), \PDO::PARAM_STR);
+			$statement->bindValue(':model', $item->getModel(), \PDO::PARAM_STR);
+			$statement->bindValue(':variant', $item->getVariant(), \PDO::PARAM_STR);
+		}
+
 		try {
+			$rows = 0;
 			foreach($features as $feature) {
 				if(!is_string($feature)) {
 					throw new \InvalidArgumentException('Name of feature to be deleted should be a string');
 				}
 
-				$result = $statement->execute([$item->getCode(), $feature]);
+				$statement->bindValue(':f', $feature, \PDO::PARAM_STR);
+
+				$result = $statement->execute();
 				assert($result !== false, 'delete feature');
+				$rows += $statement->rowCount();
 			}
 		} finally {
 			$statement->closeCursor();
 		}
-		return true;
+		return $rows !== 0;
 	}
 
 
@@ -272,14 +290,26 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @param ItemWithFeatures|Product|ItemTraitFeatures $item
 	 * @param Feature $feature
+	 *
+	 * @return bool Something actually changed or not
 	 */
-	private function setFeature($item, Feature $feature): void {
+	private function setFeature($item, Feature $feature): bool {
 		$column = self::getColumn($feature->type);
 		$type = self::getPDOType($feature->type);
 
 		if($item instanceof Product) {
 			$statement = $this->setFeaturesQueryForProduct($item, $column);
 		} else {
+			if(method_exists($item, 'getProduct')) {
+				$product = $item->getProduct();
+				/** @var Product $product */
+				if($product !== null && $product->getFeatureValue($feature->name) == $feature->value) {
+					// Item feature = product feature
+					// If feature is being added, this will delete nothing and return false (no changes)
+					// If feature is being updated, this will delete old feature and return true (it changed)
+					return $this->deleteFeatures($item, [$feature->name]);
+				}
+			}
 			$statement = $this->setFeaturesQueryForItem($item, $column);
 		}
 		$statement->bindValue(':feature', $feature->name, \PDO::PARAM_STR);
@@ -288,6 +318,7 @@ final class FeatureDAO extends DAO {
 		try {
 			$result = $statement->execute();
 			assert($result !== false, 'set feature');
+			return $statement->rowCount() > 0;
 		} catch(\PDOException $e) {
 			// This error has ever been witnessed when master-master replication breaks, but apparently it's used
 			// to signify that there's no foreign key target thing for the primary key other thing.

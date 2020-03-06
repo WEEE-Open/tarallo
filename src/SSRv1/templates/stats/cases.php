@@ -13,10 +13,10 @@ $this->insert('stats::menu', ['currentPage' => 'cases']);
 date_default_timezone_set('Europe/Rome');
 $this->insert('stats::header', ['location' => $location, 'locationSet' => $locationSet, 'startDate' => $startDate, 'startDateSet' => $startDateSet]);
 ?>
-<div class="statswrapperwrapper">
+<div class="row">
 <?php if(!empty($ready)): ?>
-	<div class="tablewrapper large">
-		<p>Ready computers (total <?= count($ready) ?>):</p>
+	<div class="stats list col-12">
+		<p>Ready computers (total <?= count($ready) ?>)</p>
 		<div>
 			<?php foreach($ready as $item): ?>
 				<a href="/item/<?=$item?>"><?=$item?></a>
@@ -25,14 +25,14 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 	</div>
 <?php endif ?>
 <?php if(!empty($leastRecent)): ?>
-	<div class="tablewrapper">
-		<p>30 computers where no work has been done in a long time:</p>
-		<table>
-			<thead>
-			    <tr>
-				    <td>Case</td>
-				    <td>Last action</td>
-			    </tr>
+	<div class="col-md-6 col-xl-4">
+		<table class="table table-borderless stats">
+			<caption>30 computers where no work has been done in a long time</caption>
+			<thead class="thead-dark">
+				<tr>
+					<th scope="col">Case</th>
+					<th scope="col">Last action</th>
+				</tr>
 			</thead>
 			<tbody>
 			<?php foreach($leastRecent as $code => $time): ?>
@@ -46,13 +46,13 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 	</div>
 <?php endif ?>
 <?php if(!empty($mostRecent)): ?>
-	<div class="tablewrapper">
-		<p>30 computers where work has been done recently:</p>
-		<table>
-			<thead>
+	<div class="col-md-6 col-xl-4">
+		<table class="table table-borderless stats">
+			<caption>30 computers where work has been done recently</caption>
+			<thead class="thead-dark">
 			<tr>
-				<td>Case</td>
-				<td>Last action</td>
+				<th scope="col">Case</th>
+				<th scope="col">Last action</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -67,13 +67,13 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 	</div>
 <?php endif ?>
 <?php if(!empty($byOwner)): ?>
-	<div class="tablewrapper">
-		<p>Computers by owner<?php if($startDate !== null):?> (acquired after <?=$startDate->format('Y-m-d')?>)<?php endif; ?>:</p>
-		<table>
-			<thead>
+	<div class="col-md-6 col-xl-4">
+		<table class="table table-borderless stats">
+			<caption>Computers by owner<?php if($startDate !== null):?> (acquired after <?=$startDate->format('Y-m-d')?>)<?php endif; ?></caption>
+			<thead class="thead-dark">
 			<tr>
-				<td>Owner</td>
-				<td>Count</td>
+				<th scope="col">Owner</th>
+				<th scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -88,13 +88,13 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 	</div>
 <?php endif ?>
 <?php if(!empty($byMobo)): ?>
-	<div class="tablewrapper">
-		<p>Cases by motherboard form factor<?php if($startDate !== null):?> (acquired after <?=$startDate->format('Y-m-d')?>)<?php endif; ?>:</p>
-		<table>
-			<thead>
+	<div class="col-md-6 col-xl-4">
+		<table class="table table-borderless stats">
+			<caption>Cases by motherboard form factor<?php if($startDate !== null):?> (acquired after <?=$startDate->format('Y-m-d')?>)<?php endif; ?></caption>
+			<thead class="thead-dark">
 			<tr>
-				<td>Form factor</td>
-				<td>Count</td>
+				<th scope="col">Form factor</th>
+				<th scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -109,13 +109,13 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 	</div>
 <?php endif ?>
 <?php if(!empty($byDate)): ?>
-	<div class="tablewrapper">
-		<p>Owner by date:</p>
-		<table>
-			<thead>
+	<div class="col-md-6 col-xl-4">
+		<table class="table table-borderless stats">
+			<caption>Owner by date</caption>
+			<thead class="thead-dark">
 			<tr>
-				<td>Owner</td>
-				<td>Count</td>
+				<th scope="col">Owner</th>
+				<th scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>

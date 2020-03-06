@@ -2,60 +2,60 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var int[] $locations */
 /** @var int[] $recentlyAdded */
-$this->layout('main', ['title' => 'Home', 'user' => $user]) ?>
+$this->layout('main', ['title' => 'Home', 'user' => $user]);
+date_default_timezone_set('Europe/Rome');
+?>
 
-<article>
-	<h2>Useful key combinations</h2>
-	<p>In editor mode, select a feature and...</p>
-    <ul>
-        <li>Ctrl + Alt + Z: delete feature</li>
-        <li>Ctrl + Alt + U: CONVERT TO UPPERCASE</li>
-        <li>Ctrl + Alt + L: convert to lowercase</li>
-        <li>Ctrl + Alt + Y: Convert To Title Case</li>
-    </ul>
-    <h2>Random stats</h2>
-	<div class="statswrapperwrapper">
-	<?php if(!empty($locations)): ?>
-		<div class="tablewrapper">
-			<p>Available locations:</p>
-			<table>
-				<thead>
+<h2>Useful key combinations</h2>
+<p>In editor mode, select a feature and...</p>
+<ul class="list-unstyled">
+	<li><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Z</kbd> delete feature</li>
+	<li><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>U</kbd> CONVERT TO UPPERCASE</li>
+	<li><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>L</kbd> convert to lowercase</li>
+	<li><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Y</kbd> Convert To Title Case</li>
+</ul>
+<h2>Some statistics</h2>
+<div class="row">
+<?php if(!empty($locations)): ?>
+	<div class="col-md-6">
+		<table class="table table-borderless stats">
+			<caption>Available locations</caption>
+			<thead class="thead-dark">
 				<tr>
-					<td>Location</td>
-					<td>Items</td>
+					<th scope="col">Location</th>
+					<th scope="col">Items</th>
 				</tr>
-				</thead>
-				<tbody>
-				<?php foreach($locations as $code => $count): ?>
-					<tr>
-						<td><?=$code?></td>
-						<td><?=$count?></td>
-					</tr>
-				<?php endforeach ?>
-				</tbody>
-			</table>
-		</div>
-	<?php endif;
-	if(!empty($recentlyAdded)): ?>
-		<div class="tablewrapper">
-			<p>Last <?= count($recentlyAdded) ?> items added:</p>
-			<table>
-				<thead>
+			</thead>
+			<tbody>
+			<?php foreach($locations as $code => $count): ?>
 				<tr>
-					<td>Item</td>
-					<td>Added</td>
+					<td><?=$this->e($code)?></td>
+					<td><?=$count?></td>
 				</tr>
-				</thead>
-				<tbody>
-				<?php date_default_timezone_set('Europe/Rome'); foreach($recentlyAdded as $code => $time): ?>
-					<tr>
-						<td><a href="/item/<?=$code?>"><?=$code?></a></td>
-						<td><?=date('Y-m-d, H:i', $time)?></td>
-					</tr>
-				<?php endforeach ?>
-				</tbody>
-			</table>
-		</div>
-	<?php endif ?>
+			<?php endforeach ?>
+			</tbody>
+		</table>
 	</div>
-</article>
+<?php endif;
+if(!empty($recentlyAdded)): ?>
+	<div class="col-md-6">
+		<table class="table table-borderless stats">
+			<caption>Last <?= count($recentlyAdded) ?> items added</caption>
+			<thead class="thead-dark">
+				<tr>
+					<th scope="col">Item</th>
+					<th scope="col">Added</th>
+				</tr>
+			</thead>
+			<tbody>
+			<?php foreach($recentlyAdded as $code => $time): ?>
+				<tr>
+					<td><a href="/item/<?=$this->e($code)?>"><?=$this->e($code)?></a></td>
+					<td><?=date('Y-m-d, H:i', $time)?></td>
+				</tr>
+			<?php endforeach ?>
+			</tbody>
+		</table>
+	</div>
+<?php endif ?>
+</div>

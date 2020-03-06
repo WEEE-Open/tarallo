@@ -51,6 +51,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('pcie-power-pin-n', 'powerconnectors', 1), -- PCI Express power pins --
 	('pcie-sockets-n', 'sockets', 1), -- PCI Express --
 	('pci-sockets-n', 'sockets', 1), -- PCI --
+	('cnr-sockets-n', 'sockets', 1), -- CNR --
 	('power-connector', 'powerconnectors', 2), -- Power connector (external) --
 	('power-idle-watt', 'power', 1), -- Power consumption (idle) --
 	('power-rated-watt', 'power', 1), -- Power (rated) --
@@ -314,7 +315,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('todo', 'replace-elec-components'), -- Replace faulty electronic components --
 	('todo', 'add-parts'), -- Add missing parts --
 	('todo', 'salvage-parts'), -- Salvage parts (dismantle) --
-    ('todo', 'thermal-paste'), -- Replace thermal paste --
+	('todo', 'thermal-paste'), -- Replace thermal paste --
 	('todo', 'replace-cmos-battery'), -- Replace CMOS battery --
 	('todo', 'finish-testing'), -- Finish testing --
 	('todo', 'finish-inventory'), -- Finish inventory of parts --
@@ -366,4 +367,3 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('psu-connector-cpu', '8pin8pin'), -- 8 pin + 8 pin --
 	('psu-connector-cpu', 'proprietary'); -- Proprietary --
 
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 18);

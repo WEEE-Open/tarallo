@@ -4,24 +4,31 @@
 /** @var string[][] $history */
 /** @var bool $tooLong */
 $deletedAt = $item->getDeletedAt();
-$this->layout('main', ['title' => $item->getCode() . ' history', 'user' => $user, 'itembuttons' => true]);
+$this->layout('main', ['title' => $item->getCode() . ' history', 'user' => $user]);
+
+$code_rawurlencoded = $this->e(rawurlencode($item->getCode()));
+$code_escaped = $this->e($item->getCode());
 ?>
 
 <?php $this->insert('breadcrumbs', ['item' => $item]); ?>
 <article class="item root<?= $deletedAt === null ? '' : ' deleted' ?>"
-		data-code="<?=$this->e($item->getCode())?>">
+		data-code="<?=$code_escaped?>">
 	<header>
-		<h2 id="code-<?=$this->e($item->getCode())?>"><?=$this->e($item->getCode())?></h2>
+		<h2 id="code-<?=$code_escaped?>"><?=$code_escaped?></h2>
 		<?php if($deletedAt !== null): ?>
-            <div class="error message">❌️️&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
+            <div class="inline-alert alert-danger" role="alert">❌️️&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 		<?php endif; ?>
 	</header>
 
-	<nav class="itembuttons" data-for-item="<?=$this->e($item->getCode())?>">
-		<button class="view">🔍&nbsp;View</button>
+	<nav class="itembuttons row mx-2 mt-2 justify-content-end">
+		<a class="btn btn-outline-primary btn-item col-sm-auto" role="button" href="/item/<?= $code_rawurlencoded ?>">
+			<i class="fa fa-search"></i>&nbsp;View
+		</a>
 	</nav>
 
-	<section class="history">
-		<?= $this->insert('historyEntries', ['history' => $history, 'tooLong' => $tooLong]) ?>
+	<section class="history row">
+		<div class="col-12">
+			<?= $this->insert('historyEntries', ['history' => $history, 'tooLong' => $tooLong]) ?>
+		</div>
 	</section>
 </article>

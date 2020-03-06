@@ -10,19 +10,20 @@ use WEEEOpen\Tarallo\SearchTriplet;
 use WEEEOpen\Tarallo\User;
 
 final class SearchDAO extends DAO {
-	private static function getCompare(SearchTriplet $triplet, $id) {
+	private function getCompare(SearchTriplet $triplet) {
 		$feature = $triplet->getAsFeature();
 		$operator = $triplet->getCompare();
+		$value = $this->getPDO()->quote($feature->value);
 		switch($feature->type) {
 			case BaseFeature::STRING:
 				switch($operator) {
 					case '=':
 					case '<>':
-						return "ValueText $operator :param$id";
+						return "ValueText $operator $value";
 					case '~':
-						return "ValueText LIKE :param$id";
+						return "ValueText LIKE $value";
 					case '!~':
-						return "ValueText NOT LIKE :param$id";
+						return "ValueText NOT LIKE $value";
 				}
 				break;
 			case BaseFeature::INTEGER:
@@ -35,14 +36,14 @@ final class SearchDAO extends DAO {
 					case '<=':
 					case '<>':
 					case '=':
-						return "$column $operator :param$id";
+						return "$column $operator $value";
 				}
 				break;
 			case BaseFeature::ENUM:
 				switch($operator) {
 					case '=':
 					case '<>':
-						return "ValueEnum $operator :param$id";
+						return "ValueEnum $operator $value";
 				}
 				break;
 		}
@@ -116,8 +117,8 @@ final class SearchDAO extends DAO {
 	 * @TODO break up this function in smaller parts, it's huuuuuge
 	 */
 	public function search(Search $search, User $user, $previousSearchId = null) {
-		$i = 0;
 		$subqueries = [];
+		$pdo = $this->getPDO();
 
 		if($search->isSortOnly()) {
 			if($previousSearchId === null) {
@@ -137,52 +138,53 @@ final class SearchDAO extends DAO {
 		if($search->searchFeatures !== null) {
 			foreach($search->searchFeatures as $triplet) {
 				/** @var $triplet SearchTriplet */
-				$compare = self::getCompare($triplet, $i);
+				$compare = $this->getCompare($triplet);
+				$escaped = $pdo->quote($triplet->getAsFeature()->name);
 
 				$subqueries[] = /** @lang MySQL */
 					<<<EOQ
 				SELECT `Code`
 				FROM ProductItemFeatureUnified
-				WHERE Feature = :fn$i
+				WHERE Feature = $escaped
 				AND $compare
 EOQ;
-				$i++;
 			}
 		}
 
 		if($search->searchLocations !== null) {
 			foreach($search->searchLocations as $location) {
+				$escaped = $pdo->quote($location);
+
 				$subqueries[] = /** @lang MySQL */
 					<<<EOQ
 			SELECT `Descendant`
 			FROM Tree
-			WHERE Ancestor = :param$i
+			WHERE Ancestor = $escaped
 EOQ;
-				$i++;
 			}
 		}
 
 		if($search->searchAncestors !== null) {
-			foreach($search->searchAncestors as $ancestorTriplet) {
-				/** @var $ancestorTriplet SearchTriplet */
-				$compare = self::getCompare($ancestorTriplet, $i);
+			foreach($search->searchAncestors as $triplet) {
+				/** @var $triplet SearchTriplet */
+				$compare = $this->getCompare($triplet);
+				$escaped = $pdo->quote($triplet->getAsFeature()->name);
 
 				$subqueries[] = /** @lang MySQL */
 					<<<EOQ
 			SELECT `Descendant`
 			FROM ProductItemFeatureUnified, Tree
 			WHERE ProductItemFeatureUnified.Code=Tree.Ancestor
-			AND Feature = :fn$i
+			AND Feature = $escaped
 			AND $compare
 EOQ;
-				$i++;
 			}
 		}
 
 		if($search->searchCode === null) {
 			$codeSubquery = '';
 		} else {
-			$codeSubquery = 'Item.`Code` LIKE :cs';
+			$codeSubquery = 'Item.`Code` LIKE ' . $pdo->quote($search->searchCode);
 		}
 
 		$everything = '';
@@ -203,50 +205,20 @@ EOQ;
 		$everything = 'WHERE DeletedAt IS NULL ' . $everything;
 
 		if($previousSearchId) {
-			$megaquery = /** @lang MySQL */
-				<<<EOQ
+			$megaquery = "
 DELETE FROM SearchResult
-WHERE Search = :searchId AND Item NOT IN (SELECT `Code` FROM Item $everything);
-EOQ;
+WHERE Search = " . ((int) $id) . " AND Item NOT IN (SELECT `Code` FROM Item $everything);";
 		} else {
-			$megaquery = /** @lang MySQL */
-				<<<EOQ
+			$megaquery = "
 INSERT INTO SearchResult(Search, Item)
-SELECT DISTINCT :searchId, `Code`
+SELECT DISTINCT " . ((int) $id) . ", `Code`
 FROM Item
 $everything;
-EOQ;
+";
 		}
 
 		$statement = $this->getPDO()->prepare($megaquery);
-		$statement->bindValue(':searchId', $id, \PDO::PARAM_INT);
 
-		$i = 0;
-		if($search->searchFeatures !== null) {
-			foreach($search->searchFeatures as $triplet) {
-				$pdoType = $triplet->getAsFeature()->value === BaseFeature::INTEGER ? \PDO::PARAM_INT : \PDO::PARAM_STR;
-				$statement->bindValue(":fn$i", $triplet->getKey(), \PDO::PARAM_STR);
-				$statement->bindValue(":param$i", $triplet->getValue(), $pdoType);
-				$i++;
-			}
-		}
-		if($search->searchLocations !== null) {
-			foreach($search->searchLocations as $location) {
-				$statement->bindValue(":param$i", $location, \PDO::PARAM_STR);
-				$i++;
-			}
-		}
-		if($search->searchAncestors !== null) {
-			foreach($search->searchAncestors as $triplet) {
-				$pdoType = $triplet->getAsFeature()->value === BaseFeature::INTEGER ? \PDO::PARAM_INT : \PDO::PARAM_STR;
-				$statement->bindValue(":fn$i", $triplet->getKey(), \PDO::PARAM_STR);
-				$statement->bindValue(":param$i", $triplet->getValue(), $pdoType);
-				$i++;
-			}
-		}
-		if($search->searchCode !== null) {
-			$statement->bindValue(":cs", $search->searchCode);
-		}
 		$result = $statement->execute();
 		assert($result !== false, 'execute search');
 

@@ -4,15 +4,15 @@
 $this->layout('main', ['title' => 'Stats: TODOs', 'user' => $user, 'currentPage' => 'stats']);
 $this->insert('stats::menu', ['currentPage' => 'todo']);
 ?>
-<div class="statswrapperwrapper">
+<div class="row">
 <?php foreach($todos as $feature => $items): ?>
     <?php if(count($items) > 0): ?>
-    <div class="tablewrapper large">
+	<div class="stats list col-12">
         <p><?= WEEEOpen\Tarallo\SSRv1\FeaturePrinter::printableValue(new \WEEEOpen\Tarallo\Feature('todo',
-                $feature)) ?> (max 100 items):</p>
+                $feature)) ?> (<?= count($items) ?> items, max 100 shown)</p>
         <div>
             <?php foreach($items as $item): ?>
-                <a href="/item/<?= rawurlencode($item) ?>"><?= $this->e($item) ?></a>
+                <a href="/item/<?= $this->e(rawurlencode($item)) ?>"><?= $this->e($item) ?></a>
             <?php endforeach ?>
         </div>
     </div>

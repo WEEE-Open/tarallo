@@ -45,21 +45,6 @@ class Search {
 	}
 
 	/**
-	 * Set search code
-	 *
-	 * @param int $code
-	 *
-	 * @deprecated
-	 */
-	public function setCode(int $code) {
-		if($this->code === null) {
-			$this->code = $code;
-		} else {
-			throw new \LogicException('Cannot set search code twice');
-		}
-	}
-
-	/**
 	 * @return string|null
 	 * @deprecated
 	 */

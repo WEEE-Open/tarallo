@@ -519,23 +519,51 @@ GROUP BY $group WITH ROLLUP";
 
 	/**
 	 * Get all products in the database and a count of how many items are there for each one
+	 *
+	 * @param string|null $brand Get only products with this brand
+	 * @param string|null $model Get only products with this model (different variants)
+	 *
+	 * @return array Associative array with rows of [product, manufacturer|null, family|null, internal|null, items count]
 	 */
-	public function getAllProducts(): array {
+	public function getAllProducts(?string $brand, ?string $model): array {
+		$where = [];
+		if($brand !== null) {
+			$where[] = 'Product.Brand = :b';
+		}
+		if($model !== null) {
+			$where[] = 'Product.Model = :m';
+		}
+		if(count($where) > 0) {
+			$where = 'WHERE ' . implode(' AND ', $where);
+		} else {
+			$where = '';
+		}
+
 		$statement = $this->getPDO()->prepare(<<<EOQ
-		SELECT Brand, Model, Variant, COUNT(Code) AS Items
-		FROM Item
-		NATURAL RIGHT JOIN Product
-		GROUP BY Brand, Model, Variant
-		ORDER BY Brand, Model, Variant, Items DESC
+			SELECT Product.Brand, Product.Model, Product.Variant, pfManufacturer.ValueText AS Manufacturer, pfFamily.ValueText AS Family, pfInternal.ValueText AS Internal, COUNT(Code) AS Items
+			FROM Item
+			NATURAL RIGHT JOIN Product
+			LEFT OUTER JOIN ProductFeature AS pfManufacturer ON Product.Brand=pfManufacturer.Brand AND Product.Model=pfManufacturer.Model AND Product.Variant=pfManufacturer.Variant AND pfManufacturer.Feature = 'brand-manufacturer'
+			LEFT OUTER JOIN ProductFeature AS pfFamily ON Product.Brand=pfFamily.Brand AND Product.Model=pfFamily.Model AND Product.Variant=pfFamily.Variant AND pfFamily.Feature = 'family'
+			LEFT OUTER JOIN ProductFeature AS pfInternal ON Product.Brand=pfInternal.Brand AND Product.Model=pfInternal.Model AND Product.Variant=pfInternal.Variant AND pfInternal.Feature = 'internal-name'
+			$where
+			GROUP BY Product.Brand, Product.Model, Product.Variant
+			ORDER BY Product.Brand, Product.Model, Product.Variant, Items DESC
 EOQ
 		);
 		try {
+			if($brand !== null) {
+				$statement->bindValue(':b', $brand, \PDO::PARAM_STR);
+			}
+			if($model !== null) {
+				$statement->bindValue(':m', $model, \PDO::PARAM_STR);
+			}
 			$result = $statement->execute();
 			assert($result === true, 'get products and count');
 			$result = [];
 			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 				$product = new ProductCode($row['Brand'], $row['Model'], $row['Variant']);
-				$result[] = [$product, $row['Items']];
+				$result[] = [$product, $row['Manufacturer'], $row['Family'], $row['Internal'], $row['Items']];
 			}
 
 			return $result;
@@ -560,6 +588,70 @@ EOQ
 			}
 
 			return $result;
+		} finally{
+			$statement->closeCursor();
+		}
+	}
+
+	public function getProductsCountByBrand() {
+		$statement = $this->getPDO()->prepare(
+			<<<EOQ
+				SELECT Brand, COUNT(DISTINCT Model) AS Models, COUNT(*) AS Variants, COUNT(*)/COUNT(DISTINCT Model) AS VPP
+				FROM Product
+				GROUP BY Brand
+				ORDER BY Brand
+EOQ
+		);
+		try {
+			$result = $statement->execute();
+			assert($result === true, 'get products count by brand');
+
+			return $statement->fetchAll(\PDO::FETCH_ASSOC);
+		} finally{
+			$statement->closeCursor();
+		}
+	}
+
+	public function getItemsWithIncompleteProducts() {
+		$statement = $this->getPDO()->prepare(
+			<<<EOQ
+				SELECT Item.Code, Item.Brand, Item.Model, Item.Variant, COUNT(DISTINCT Product.Variant) AS NumVariants
+				FROM Item
+				LEFT JOIN Product ON Item.Brand = Product.Brand AND Item.Model = Product.Model
+				LEFT JOIN Product AS ProductAgain ON Item.Brand = ProductAgain.Brand AND Item.Model = ProductAgain.Model AND Item.Variant = ProductAgain.Variant
+				WHERE Item.Brand IS NOT NULL AND Item.Model IS NOT NULL AND ProductAgain.Brand IS NULL AND Item.DeletedAt IS NULL
+				GROUP BY Item.Code, Item.Brand, Item.Model, Item.Variant
+				ORDER BY Brand, Model, Variant, Code
+EOQ
+		);
+		try {
+			$result = $statement->execute();
+			assert($result === true, 'get incomplete products');
+
+			return $statement->fetchAll(\PDO::FETCH_ASSOC);
+		} finally{
+			$statement->closeCursor();
+		}
+	}
+
+	public function getSplittableItems() {
+		$statement = $this->getPDO()->prepare(
+			<<<EOQ
+				SELECT DISTINCT Item.Code, Item.Brand, Item.Model, Item.Variant, COUNT(Feature) AS Features
+				FROM ItemFeature
+				NATURAL JOIN Item
+				LEFT JOIN Product AS ProductAgain ON Item.Brand = ProductAgain.Brand AND Item.Model = ProductAgain.Model AND Item.Variant = ProductAgain.Variant
+				WHERE Item.Brand IS NOT NULL AND Item.Model IS NOT NULL AND ProductAgain.Brand IS NULL AND Item.DeletedAt IS NULL
+				AND Feature NOT IN ('brand', 'model', 'variant', 'restrictions', 'working', 'cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code', 'mac', 'sn', 'wwn', 'arrival-batch', 'owner', 'data-erased', 'surface-scan', 'smart-data', 'software', 'notes', 'todo', 'check')
+				GROUP BY Item.Code, Item.Brand, Item.Model, Item.Variant
+				ORDER BY Brand, Model, Variant, Code
+EOQ
+		);
+		try {
+			$result = $statement->execute();
+			assert($result === true, 'get splittable items');
+
+			return $statement->fetchAll(\PDO::FETCH_ASSOC);
 		} finally{
 			$statement->closeCursor();
 		}

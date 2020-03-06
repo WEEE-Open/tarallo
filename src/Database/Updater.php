@@ -505,6 +505,56 @@ SQL SECURITY INVOKER
 
 	END");
 					break;
+				case 14:
+					try {
+						$this->exec("ALTER TABLE AuditProduct DROP CONSTRAINT check_change;");
+					} catch (\PDOException $ignored) {
+
+					}
+					try {
+						$this->exec("ALTER TABLE AuditProduct DROP CONSTRAINT check_change_2;");
+					} catch (\PDOException $ignored) {
+
+					}
+					$this->exec("ALTER TABLE AuditProduct ADD CONSTRAINT check_change CHECK (`Change` IN ('C', 'R', 'U', 'D'));");
+					$this->exec("DROP TRIGGER IF EXISTS AuditRenameProduct;");
+					$this->exec("CREATE TRIGGER AuditRenameProduct
+    AFTER UPDATE
+    ON Product
+    FOR EACH ROW
+BEGIN
+    INSERT INTO AuditProduct(Brand, Model, Variant, `Change`, `User`)
+    VALUES(NEW.Brand, NEW.Model, NEW.Variant, 'R', @taralloAuditUsername);
+END;");
+					break;
+				case 15:
+					$this->exec("CREATE EVENT `DuplicateItemProductFeaturesCleanup`
+    ON SCHEDULE EVERY '1' DAY
+    ON COMPLETION PRESERVE
+    ENABLE DO
+    DELETE ItemFeature.*
+    FROM Item
+    NATURAL JOIN ProductFeature
+    JOIN ItemFeature ON Item.Code = ItemFeature.Code AND ProductFeature.Feature = ItemFeature.Feature
+    WHERE
+    COALESCE(ProductFeature.Value, ProductFeature.ValueEnum, ProductFeature.ValueText, ProductFeature.ValueDouble) = COALESCE(ItemFeature.Value, ItemFeature.ValueEnum, ItemFeature.ValueText, ItemFeature.ValueDouble)
+    AND NOT EXISTS(
+        SELECT Audit.Code
+        FROM Audit
+        WHERE Item.Code = Audit.Code
+          AND Audit.Change IN ('C', 'U')
+          AND DATEDIFF(NOW(), Audit.Time) >= 1
+    )
+    AND NOT EXISTS(
+        SELECT AuditProduct.Brand, AuditProduct.Model, AuditProduct.Variant
+        FROM AuditProduct
+        WHERE Item.Brand = AuditProduct.Brand
+          AND Item.Model = AuditProduct.Model
+          AND Item.Variant = AuditProduct.Variant
+          AND AuditProduct.Change IN ('C', 'U')
+          AND DATEDIFF(NOW(), AuditProduct.Time) >= 1
+    )");
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}
@@ -607,6 +657,9 @@ SQL SECURITY INVOKER
 					break;
 				case 17:
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('todo', 'thermal-paste'), ('check', 'wrong-data')");
+					break;
+				case 18:
+					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('cnr-sockets-n', 'sockets', 1)");
 					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');

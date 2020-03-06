@@ -5,12 +5,12 @@
 <?php if(empty($history)): ?>
 	<p>Nothing to show</p>
 <?php else: ?>
-	<table>
-		<thead>
+	<table class="table table-sm table-striped table-borderless">
+		<thead class="thead-dark">
 		<tr>
-			<td>Time</td>
-			<td>Operator</td>
-			<td>Action</td>
+			<th scope="col">Time</th>
+			<th scope="col">Operator</th>
+			<th scope="col">Action</th>
 		</tr>
 		</thead>
 		<tbody>
@@ -21,6 +21,7 @@
 				<td>
 					<?php switch($row['change']) {
 						case 'C': ?>Created<?php break;
+						case 'R': ?>Renamed<?php break;
 						case 'U': ?>Updated features<?php break;
 						case 'D': ?>Deleted item<?php break;
 						case 'M': ?>Moved to <a href="/item/<?= urlencode($this->e($row['other'])) ?>">

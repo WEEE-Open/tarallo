@@ -24,20 +24,37 @@ if($base === null) {
 // .head is the beginning of the edit/new subtree, .root is the root of the entire tree
 ?>
 
-<article class="item new editing <?=$recursion ? '' : 'root'?> <?=$innerrecursion ? '' : 'head'?>">
-	<header>
-		<h2><label>Code: <input class="newcode" placeholder="Automatically generated"></label></h2>
+<article class="container item new editing <?=$recursion ? '' : 'root'?> <?=$innerrecursion ? '' : 'head'?>">
+	<header class="row">
+		<h2 class="col-12"><label>Code: <input class="newcode" placeholder="Automatically generated"></label></h2>
 		<?php if(isset($base) && $base->hasCode()): ?>
-			<div class="info message">ℹ️&nbsp;This is a copy of <span class="code"><?= $base->getCode() ?></span>, remember to change serial numbers, notes, working status, etc...</div>
+			<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This is a copy of <span class="text-monospace"><?= $base->getCode() ?></span>, remember to change serial numbers, notes, working status, etc...</div>
 		<?php unset($noticeFeature); endif; ?>
 	</header>
 
-	<nav class="itembuttons">
-		<?php if(!$innerrecursion): ?><button class="save">💾&nbsp;Save</button><button class="cancel">🔙&nbsp;Cancel</button><?php else: ?><button class="removenew">❌&nbsp;Delete</button><?php endif ?><button class="addnew">🆕&nbsp;More</button>
+	<nav class="itembuttons row mx-2 mt-2 justify-content-end">
+		<?php if(!$innerrecursion): ?>
+			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
+				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
+			</button>
+			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button">
+				💾&nbsp;Save
+			</button>
+		<?php else: ?>
+			<button class="btn btn-outline-danger btn-item col-4 col-sm-auto removenew" role="button">
+				❌&nbsp;Delete
+			</button>
+		<?php endif ?>
+		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto addnew" role="button">
+			<i class="fa fa-plus-circle"></i>&nbsp;More
+		</button>
 	</nav>
 
 	<?php if(!$innerrecursion && !$recursion): ?>
-		<section class="setlocation"><label>Location: <input id="newparent"></label></section>
+		<section class="setlocation form-inline">
+			<label for="newparent" class="my-1 mr-2">Location</label>
+			<input id="newparent" class="form-control mb-2 mr-sm-2">
+		</section>
 	<?php endif ?>
 
 	<?php if($product !== null): ?>
@@ -61,9 +78,13 @@ if($base === null) {
 		<button>Add</button>
 	</section>
 
-    <nav class="itembuttons secondary">
-        <button class="removeemptyfeatures" title="Remove empty features">🧽&nbsp;Clean</button>
-        <button class="addnew">🆕&nbsp;More</button>
+	<nav class="itembuttons secondary row mx-2 mt-2 justify-content-end">
+		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto removeemptyfeatures" title="Remove empty features" role="button">
+			🧽&nbsp;Clean
+		</button>
+		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto addnew" role="button">
+			<i class="fa fa-plus-circle"></i>&nbsp;More
+		</button>
     </nav>
 
 	<section class="subitems">
