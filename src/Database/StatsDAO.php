@@ -657,46 +657,4 @@ EOQ
 		}
 	}
 
-	/**
-	 * Get a list of the most common feature
-	 *
-	 * @param String $filter Feature name
-	 * @param ItemWithCode $location
-	 * @param int $limit The number of feature returned
-	 *
-	 * @return array int[] value => count, sorted by count descending
-	 */
-	public function getCommonFeature(String $filter, ?ItemWithCode $location = null, int $limit = 5) : array {
-		$locationFilter = $this->filterLocation($location);
-
-		$statement = $this->getPDO()->prepare(
-			<<<EOQ
-				SELECT ValueText AS Isa, Count(Code) AS Quantity
-				FROM ItemFeature
-				WHERE Code IN (
-				    SELECT Code
-				    FROM ItemFeature
-				    WHERE Feature = 'type' AND
-				        ValueEnum = 'cpu'
-				    )
-				AND Feature = '$filter'
-				GROUP BY Isa
-				ORDER BY Quantity DESC
-				LIMIT $limit
-EOQ
-		);
-		$array = [];
-
-		try {
-			$success = $statement->execute();
-			assert($success, 'most common feature');
-			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-				$array[$row['Isa']] = $row['Quantity'];
-			}
-		} finally {
-			$statement->closeCursor();
-		}
-
-		return $array;
-	}
 }

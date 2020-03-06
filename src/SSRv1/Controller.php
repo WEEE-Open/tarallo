@@ -357,8 +357,7 @@ class Controller implements RequestHandlerInterface {
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
 		$parameters = $request->getAttribute('parameters');
-		// the default value is: 'now - 1 year'
-		$startDateDefault = date('Y-m-d', time() - (365 * 24 * 60 * 60));
+		$startDateDefault = '2016-01-01';
 		$startDate = Validation::validateOptionalString($query, 'from', $startDateDefault, null);
 		$startDateSet = $startDate !== $startDateDefault;
 		/** @noinspection PhpUnhandledExceptionInspection */
@@ -494,7 +493,7 @@ class Controller implements RequestHandlerInterface {
 						'byIsa' => $db->statsDAO()->getCountByFeature(
 							'isa', new Feature('type', 'cpu'), $location
 						),
-						'commonModels' => $db->statsDAO()->getCommonFeature('model', $location)
+						'commonModels' => $db->statsDAO()->getCountByFeature('model', new Feature('type', 'cpu'), $location, null, false, 5),
 					]
 				);
 				break;
