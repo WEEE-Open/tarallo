@@ -29,7 +29,7 @@ and you will get:
 * Xdebug enabled by default
 * Xdebug profiler enabled, start it via trigger (`?XDEBUG_PROFILE=1` or browser extensions), saves output to `xdebug` directory
 * Adminer at `127.0.0.1:8081/adminer.php` for database inspection (user: root, password: root, server: localhost:3306)
-* Database accessible externally by root at `127.0.0.1:3307` (note the non-standard port), connect PHPStorm to it!
+* Database (MySQL/MariaDB) accessible externally by root at `127.0.0.1:3307` (note the non-standard port), connect PHPStorm to it!
 * phpinfo at `127.0.0.1:8081/phpinfo.php`
 
 Ports may be changed from 8080/8081 to anything else by Vagrant, so pay attention to its output, especially at the beginning.
