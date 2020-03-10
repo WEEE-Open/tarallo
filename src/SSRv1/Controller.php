@@ -357,7 +357,6 @@ class Controller implements RequestHandlerInterface {
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
 		$parameters = $request->getAttribute('parameters');
-		// a nice default value: 'now - 1 year'
 		$startDateDefault = '2016-01-01';
 		$startDate = Validation::validateOptionalString($query, 'from', $startDateDefault, null);
 		$startDateSet = $startDate !== $startDateDefault;
@@ -474,6 +473,27 @@ class Controller implements RequestHandlerInterface {
 						'noSize' => $db->statsDAO()->getItemByNotFeature(
 							new Feature('type', 'ram'), 'capacity-byte', $location, 200
 						),
+					]
+				);
+				break;
+			case 'cpus':
+				$locationDefault = 'Box12';
+				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
+				$locationSet = $location !== $locationDefault;
+				$location = $location === null ? null : new ItemCode($location);
+				$request = $request->withAttribute('Template', 'stats::cpus')->withAttribute(
+					'TemplateParameters', [
+						'location' => $location === null ? null : $location->getCode(),
+						'locationSet' => $locationSet,
+						'startDate' => $startDate,
+						'startDateSet' => $startDateSet,
+						'byNcore' => $db->statsDAO()->getCountByFeature(
+							'core-n', new Feature('type', 'cpu'), $location
+						),
+						'byIsa' => $db->statsDAO()->getCountByFeature(
+							'isa', new Feature('type', 'cpu'), $location
+						),
+						'commonModels' => $db->statsDAO()->getCountByFeature('model', new Feature('type', 'cpu'), $location, null, false, 5),
 					]
 				);
 				break;
