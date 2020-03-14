@@ -553,7 +553,26 @@ END;");
           AND Item.Variant = AuditProduct.Variant
           AND AuditProduct.Change IN ('C', 'U')
           AND DATEDIFF(NOW(), AuditProduct.Time) >= 1
-    )");
+    )"
+					);
+				case 16:
+					$this->exec(
+						"CREATE TABLE `BulkTable`
+(
+`Identifier` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `BulkIdentifier` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Time` TIMESTAMP(6) DEFAULT NOW(6) NOT NULL,
+    `User` VARCHAR(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `Type` CHAR(1) COLLATE utf8mb4_bin NOT NULL,
+    `JSON` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+    PRIMARY KEY (`Identifier`),
+    INDEX (`Type`),
+        CONSTRAINT check_type
+            CHECK (`Type` IN ('I', 'P'))
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;)"
+					);
 					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
