@@ -507,7 +507,7 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($resultId);
 	}
 
-	public static function getLogs(ServerRequestInterface $request): ResponseInterface {
+	public static function getHistory(ServerRequestInterface $request): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -524,7 +524,7 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($data);
 	}
 
-	public static function getHistory(ServerRequestInterface $request): ResponseInterface {
+	public static function getItemHistory(ServerRequestInterface $request): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -767,7 +767,7 @@ class Controller implements RequestHandlerInterface {
 							}
 						);
 
-						$r->get('/logs[/page/{page}]', [User::AUTH_LEVEL_RO, 'Controller::getLogs']);
+						$r->get('/history[/page/{page}]', [User::AUTH_LEVEL_RO, 'Controller::getHistory']);
 
 						$r->get('/session', [User::AUTH_LEVEL_RW, 'Controller::sessionWhoami']);
 
