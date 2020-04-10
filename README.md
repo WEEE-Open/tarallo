@@ -81,7 +81,7 @@ This happens because of the combination of VirtualBox, SMB and Ansible trying to
 Anyway, there is a manual workaround which needs to be done *just once*:
 
 1. Go to the `config` directory on your machine (host)
-2. Create `config.php` as a copy of `config-example.php` 
+2. Create `config.php`
 3. Add this exact content:
 
 ```php
