@@ -648,10 +648,8 @@ class Controller implements RequestHandlerInterface {
 		$body = $request->getAttribute('ParsedBody');
 		if($overwrite === 'yes') {
 			$db->bulkDAO()->deleteBulkIdentifier($identifier);
-		} else {
-			if($db->bulkDAO()->checkDuplicatedIdentifier($identifier)) {
+		} else if($db->bulkDAO()->checkDuplicatedIdentifier($identifier)) {
 				throw new DuplicateBulkIdentifierException();
-			}
 		}
 		foreach($body as $item) {
 			$type = $item['type'];
