@@ -13,6 +13,7 @@ class Database {
 	private $featureDAO = null;
 	private $treeDAO = null;
 	private $productDAO = null;
+	private $bulkDAO = null;
 	private $username;
 	private $password;
 	private $dsn;
@@ -116,6 +117,15 @@ class Database {
 
 		return $this->productDAO;
 	}
+
+	public function bulkDAO(): BulkDAO {
+		if($this->bulkDAO === null) {
+			$this->bulkDAO = new BulkDAO($this, $this->callback);
+		}
+
+		return $this->bulkDAO;
+	}
+
 
 	public function updater() {
 		return new Updater($this, $this->callback);
