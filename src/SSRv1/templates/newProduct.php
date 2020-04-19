@@ -2,6 +2,7 @@
 /** @var \WEEEOpen\Tarallo\ProductIncomplete|\WEEEOpen\Tarallo\Product|\WEEEOpen\Tarallo\Item|null $base */
 
 $base = $base ?? null;
+/** @var int $importedFrom|null */
 if($base instanceof \WEEEOpen\Tarallo\Item) {
 	$baseItem = $base;
 	$base = \WEEEOpen\Tarallo\Product::fromItem($base);
@@ -20,11 +21,16 @@ if($base instanceof \WEEEOpen\Tarallo\Item) {
 				<div class="inline-alert alert-info" role="alert">
 					<i class="fa fa-info-circle"></i>&nbsp;This product is split from <span class="text-monospace"><?= $this->e($baseItem->getCode()) ?></span>
 				</div>
-			<?php elseif($base instanceof \WEEEOpen\Tarallo\Product): ?>
+			<?php elseif($base instanceof \WEEEOpen\Tarallo\Product && !isset($importedFrom)): ?>
 				<div class="inline-alert alert-info" role="alert">
 					<i class="fa fa-info-circle"></i>&nbsp;This is a copy of <?= $this->e($base->getBrand()) . ' ' . $this->e($base->getModel()) . rtrim(' ' . $this->e($base->getVariantOrEmpty())) ?>
 				</div>
-			<?php endif; ?>
+			<?php ?>
+
+			<?php elseif(isset($importedFrom)): ?>
+				<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This product is generated from a bulk import ( with Id = <span class="text-monospace"><?= $importedFrom ?> ) </span></div>
+				<?php endif; ?>
+
 		<?php endif; ?>
 	</header>
 
@@ -32,7 +38,8 @@ if($base instanceof \WEEEOpen\Tarallo\Item) {
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 			<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 		</button>
-		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button">
+		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button"
+			<?php if(isset($importedFrom)): echo 'id="importBtn" value="'. $importedFrom .'"'; endif;?>>
 			💾&nbsp;Save
 		</button>
 	</nav>

@@ -9,6 +9,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Relay\RelayBuilder;
 use WEEEOpen\Tarallo\BaseFeature;
+use WEEEOpen\Tarallo\Database\BulkDAO;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Database\TreeDAO;
 use WEEEOpen\Tarallo\ErrorHandler;
@@ -208,6 +209,11 @@ class Controller implements RequestHandlerInterface {
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
 
+		if( isset($payload['importId']) ){
+			$importId = array_pop($payload);
+			$db->bulkDAO()->deleteBulkImport($importId);
+		}
+
 		// Validation and fixupLocation requires the full parent item, which may not exist.
 		// Since this part is optional, its existence will be checked again later
 		if($parent instanceof ItemCode && ($fix || $validate)) {
@@ -264,6 +270,11 @@ class Controller implements RequestHandlerInterface {
 		$loopback = isset($query['loopback']);
 
 		$product = ProductBuilder::ofArray($payload, $brand, $model, $variant);
+
+		if( isset($payload['importId']) ){
+			$importId = array_pop($payload);
+			$db->bulkDAO()->deleteBulkImport($importId);
+		}
 
 		$db->productDAO()->addProduct($product);
 
