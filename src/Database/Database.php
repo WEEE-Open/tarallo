@@ -126,7 +126,6 @@ class Database {
 		return $this->bulkDAO;
 	}
 
-
 	public function updater() {
 		return new Updater($this, $this->callback);
 	}

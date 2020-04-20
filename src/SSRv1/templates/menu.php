@@ -25,8 +25,7 @@ $hereSr = function($page, $current) {
 				<div class="dropdown-menu" aria-labelledby="itemsDropdown">
 					<a class="dropdown-item <?= $hereClass('item new', $currentPage) ?>" href="/new/item">Create<?= $hereSr('item new', $currentPage) ?></a>
 					<a class="dropdown-item <?= $hereClass('item search', $currentPage) ?>" href="/search">Search<?= $hereSr('item search', $currentPage) ?></a>
-					<a class="dropdown-item <?= $hereClass('item bulk add', $currentPage) ?>" href="/bulk/add">Bulk add<?= $hereSr('item bulk add', $currentPage) ?></a>
-					<a class="dropdown-item <?= $hereClass('item bulk move', $currentPage) ?>" href="/bulk/move">Bulk move<?= $hereSr('item bulk move', $currentPage) ?></a>
+
 				</div>
 			</li>
 			<li class="nav-item dropdown">
@@ -46,6 +45,16 @@ $hereSr = function($page, $current) {
 			</li>
 			<li class="nav-item">
 				<a class="nav-link <?= $hereClass('options', $currentPage) ?>" href="/options">Options<?= $hereSr('options', $currentPage) ?></a>
+			</li>
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle <?= $hereClass('bulk actions', $currentPageShort) ?>" href="#" id="bulkDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Bulk Actions<?= $hereSr('product', $currentPageShort) ?>
+				</a>
+				<div class="dropdown-menu" aria-labelledby="productsDropdown">
+					<a class="dropdown-item <?= $hereClass('item bulk add', $currentPage) ?>" href="/bulk/add">Bulk add<?= $hereSr('item bulk add', $currentPage) ?></a>
+					<a class="dropdown-item <?= $hereClass('item bulk move', $currentPage) ?>" href="/bulk/move">Bulk move<?= $hereSr('item bulk move', $currentPage) ?></a>
+					<a class="dropdown-item <?= $hereClass('bulk import', $currentPage) ?>" href="/bulk/import">Import from Peracotta<?= $hereSr('bulk import', $currentPage) ?></a>
+				</div>
 			</li>
 		</ul>
 
