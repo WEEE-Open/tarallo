@@ -658,7 +658,7 @@ class Controller implements RequestHandlerInterface {
 		$identifier = Validation::validateOptionalString($parameters, 'identifier');
 		$body = $request->getAttribute('ParsedBody');
 		if($overwrite === 'yes') {
-			$db->bulkDAO()->deleteBulkIdentifier($identifier);
+			$db->bulkDAO()->deleteBulkImport($identifier);
 		} else if($db->bulkDAO()->checkDuplicatedIdentifier($identifier)) {
 				throw new DuplicateBulkIdentifierException();
 		}

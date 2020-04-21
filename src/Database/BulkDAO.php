@@ -42,13 +42,14 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 			$statement->execute();
 		} catch(\PDOException $e) {
 			$e->getMessage();
-      }
 			throw $e;
 		} finally {
 			$statement->closeCursor();
+		}
+	}
 
 	//Formats JSON in a readable form ( in case of minfied ones )
-	static function prettyPrint( $json )
+	public static function prettyPrint( $json )
 	{
 		$result = '';
 		$level = 0;
@@ -123,7 +124,6 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 		return $importElement;
 	}
 
-}
 
 	public function checkDuplicatedIdentifier(String $identifier): bool {
 		$statement = $this->getPDO()->prepare(
