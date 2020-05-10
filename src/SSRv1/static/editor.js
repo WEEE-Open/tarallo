@@ -1209,17 +1209,8 @@
 		let contents = [];
 		let importId = -1;
 
-		try {
-			counter = getNewFeaturesRecursively(root, delta, contents);
-			importId = root.children[1].children.namedItem("importBtn").value;
-		} catch(e) {
-			if(e instanceof EmptyFeatureValueError) {
-				displayInlineError(e.feature, "empty-input", root);
-				return;
-			} else {
-				throw e;
-			}
-		}
+		counter = getNewFeaturesRecursively(root, delta, contents);
+		importId = root.children[1].children.namedItem("importBtn").value;
 
 		if(counter <= 0) {
 			return;
@@ -1267,17 +1258,8 @@
 		let delta = {};
 		let importId = -1;
 
-		try {
-			counter = getNewFeaturesRecursively(root, delta, null);
-			importId = root.children[1].children.namedItem("importBtn").value;
-		} catch(e) {
-			if(e instanceof EmptyFeatureValueError) {
-				displayInlineError(e.feature, "empty-input", root);
-				return;
-			} else {
-				throw e;
-			}
-		}
+		counter = getNewFeaturesRecursively(root, delta, null);
+		importId = root.children[1].children.namedItem("importBtn").value;
 
 		if(counter <= 0) {
 			return;

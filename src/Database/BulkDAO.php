@@ -2,6 +2,8 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
+use WEEEOpen\Tarallo\DuplicateBulkIdentifierException;
+
 final class BulkDAO extends DAO {
 
 	public function addBulk(String $identifier, String $type, String $json) {
@@ -19,17 +21,17 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 			assert($result === true, 'Add bulk');
 		} catch(\PDOException $e) {
 			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1062) {
-				throw new DuplicateItemCodeException((string) $identifier, 'Bulk already exists: ' . (string) $identifier);
+				throw new DuplicateBulkIdentifierException((string) $identifier, 'Bulk already exists: ' . (string) $identifier);
 			}
 			throw $e;
 		} finally {
 			$statement->closeCursor();
 		}
 	}
-  
-  //Get all imports from BulkTable
+
+	//Get all imports from BulkTable
 	public function getBulkImports(): array {
-		$statement = $this->getPDO()->query('SELECT * FROM BulkTable');
+		$statement = $this->getPDO()->query('SELECT Identifier, BulkIdentifier, Time, User, Type, JSON FROM BulkTable');
 		$imports = $statement->fetchAll();
 		return $imports;
 	}
@@ -40,15 +42,12 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 		try {
 			$statement->bindValue(':id', $identifier, \PDO::PARAM_INT);
 			$statement->execute();
-		} catch(\PDOException $e) {
-			$e->getMessage();
-			throw $e;
 		} finally {
 			$statement->closeCursor();
 		}
 	}
 
-	//Formats JSON in a readable form ( in case of minfied ones )
+	/**Formats JSON in a readable form ( in case of minfied ones ) */
 	public static function prettyPrint( $json )
 	{
 		$result = '';
@@ -106,7 +105,7 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 		return $result;
 	}
 
-	//Get an import's JSON from BulkTable and decodes it
+	/**Get an import's JSON from BulkTable and decodes it*/
 	public function getDecodedJSON(int $Identifier): array {
 		$statement = $this->getPDO()->prepare('SELECT JSON FROM BulkTable WHERE Identifier = :id');
 		$importElement = null;
@@ -115,8 +114,6 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 			$statement->execute();
 			$importElement = $statement->fetch();
 			$importElement = json_decode($importElement["JSON"],JSON_OBJECT_AS_ARRAY);
-		} catch(\PDOException $e) {
-			$e->getMessage();
 		} finally {
 			$statement->closeCursor();
 		}
@@ -128,7 +125,7 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 	public function checkDuplicatedIdentifier(String $identifier): bool {
 		$statement = $this->getPDO()->prepare(
 			'
-		SELECT Identifier FROM BulkTable WHERE BulkIdentifier = :id
+		SELECT Identifier FROM BulkTable WHERE BulkIdentifier = :id FOR UPDATE
 		'
 		);
 		try {

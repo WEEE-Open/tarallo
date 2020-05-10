@@ -654,10 +654,10 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters');
-		$overwrite = $request->getQueryParams()['overwrite'] ?? 'no';
+		$overwrite = Validation::validateOptionalString($request->getQueryParams(), 'overwrite');
 		$identifier = Validation::validateOptionalString($parameters, 'identifier');
 		$body = $request->getAttribute('ParsedBody');
-		if($overwrite === 'yes') {
+		if($overwrite) {
 			$db->bulkDAO()->deleteBulkImport($identifier);
 		} else if($db->bulkDAO()->checkDuplicatedIdentifier($identifier)) {
 				throw new DuplicateBulkIdentifierException();
@@ -668,7 +668,7 @@ class Controller implements RequestHandlerInterface {
 			$json = json_encode($item);
 			$db->bulkDAO()->addBulk($identifier, $type, $json);
 		}
-		return new TextResponse('Inserito con successo gli oggetti ' . $identifier);
+		return new EmptyResponse();
 	}
 
 	private static function range(string $parameter, $value, ?int $min, ?int $max) {

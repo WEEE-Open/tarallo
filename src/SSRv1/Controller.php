@@ -681,40 +681,36 @@ class Controller implements RequestHandlerInterface {
 		$delete = null;
 		$import = null;
 		if( $body !== null && count($body) > 0){
-			try {
-				//Delete import handler
-				if(isset($body['delete'])){
-					$db->bulkDAO()->deleteBulkImport($body['delete']);
-					return new RedirectResponse('/bulk/import',303);
-				}
-				//Import handler
-				if(isset($body['import'])){
-					//Decoding JSON and redirecting to Item or Product add page
-					$importElement = $db->bulkDAO()->getDecodedJSON(intval($body['import']));
+			//Delete import handler
+			if(isset($body['delete'])){
+				$db->bulkDAO()->deleteBulkImport($body['delete']);
+				return new RedirectResponse('/bulk/import',303);
+			}
+			//Import handler
+			if(isset($body['import'])){
+				//Decoding JSON and redirecting to Item or Product add page
+				$importElement = $db->bulkDAO()->getDecodedJSON(intval($body['import']));
 
-					if( $importElement['type'] == 'I'){
-						//TODO: Serve che ritorni a bulk import?
-						$parent = null;
-						$newItem = ItemBuilder::ofArray($importElement,null,$parent);
-						$request = $request->withAttribute('Template', 'newItemPage')->withAttribute('TemplateParameters',[
-							'add' => true,
-							'base' => $newItem,
-							'importedFrom' => intval($body['import'])
-						]);
-						return $handler->handle($request);
-					}else if( $importElement['type'] == 'P'){
-						$importElement = ProductBuilder::ofArray($importElement,$importElement['brand'],$importElement['model'],$importElement['variant']);
-						$request = $request->withAttribute('Template', 'newProductPage')->withAttribute('TemplateParameters',[
-							'add' => true,
-							'base' => $importElement,
-							'importedFrom' => intval($body['import'])
-						]);
-						return $handler->handle($request);
-					}
-
+				if( $importElement['type'] == 'I'){
+					//TODO: Serve che ritorni a bulk import?
+					$parent = null;
+					$newItem = ItemBuilder::ofArray($importElement,null,$parent);
+					$request = $request->withAttribute('Template', 'newItemPage')->withAttribute('TemplateParameters',[
+						'add' => true,
+						'base' => $newItem,
+						'importedFrom' => intval($body['import'])
+					]);
+					return $handler->handle($request);
+				}else if( $importElement['type'] == 'P'){
+					$importElement = ProductBuilder::ofArray($importElement,$importElement['brand'],$importElement['model'],$importElement['variant']);
+					$request = $request->withAttribute('Template', 'newProductPage')->withAttribute('TemplateParameters',[
+						'add' => true,
+						'base' => $importElement,
+						'importedFrom' => intval($body['import'])
+					]);
+					return $handler->handle($request);
 				}
-			} catch( \Exception $e) {
-				$e->getMessage();
+
 			}
 		}
 		$request = $request->withAttribute('Template', 'bulk::import')->withAttribute('TemplateParameters',['imports' => $imports]);

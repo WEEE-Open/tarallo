@@ -2,12 +2,12 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var array|null $imports */
 $imports = $imports ?? null;
-$this->layout('main', ['title' => 'Import from Peracotta', 'user' => $user, 'currentPage' => 'bulk import']);
+$this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage' => 'bulk import']);
 ?>
 <div class="row">
 	<div class="col">
 		<table class="table table-borderless stats">
-			<caption>Bulk imports from PERACOTTA</caption>
+			<caption>Bulk imports</caption>
 			<thead class="thead-dark">
 			<tr>
 				<th scope="col">BulkIdentifier</th>
@@ -20,10 +20,10 @@ $this->layout('main', ['title' => 'Import from Peracotta', 'user' => $user, 'cur
 			<tbody>
 				<?php $id=0; foreach($imports as $import): ?>
 					<tr>
-						<td class="align-middle"><?php echo $import['BulkIdentifier']?></td>
-						<td class="align-middle"><?php echo $import['Time']?></td>
-						<td class="align-middle"><?php echo $import['User']?></td>
-						<td class="align-middle"><?php echo $import['Type']?></td>
+						<td class="align-middle"><?= $this->e($import['BulkIdentifier']) ?></td>
+						<td class="align-middle"><?= $this->e($import['Time']) ?></td>
+						<td class="align-middle"><?= $this->e($import['User']) ?></td>
+						<td class="align-middle"><?= $this->e($import['Type']) ?></td>
 						<!-- Actions Btns -->
 						<td>
 							<form class="text-center" method="post">
@@ -31,11 +31,11 @@ $this->layout('main', ['title' => 'Import from Peracotta', 'user' => $user, 'cur
 									JSON
 								</button>
 								<button class="btn btn-success" type="submit"
-										name="import" value=<?php echo '"'.$import["Identifier"].'"' ?>>
+										name="import" value="<?= (int) $import["Identifier"]?>">
 									Import
 								</button>
 								<button class="btn btn-danger" type="submit"
-										name="delete" value=<?php echo '"'.$import['Identifier'].'"' ?>>
+										name="import" value="<?= (int) $import["Identifier"]?>">
 									Delete
 								</button>
 							</form>

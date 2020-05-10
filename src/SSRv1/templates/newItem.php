@@ -35,7 +35,7 @@ if($base === null) {
 
 		<?php if(isset($importedFrom)): ?>
 			<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This item is generated from a bulk import ( with Id = <span class="text-monospace"><?= $importedFrom ?> ) </span></div>
-			<?php unset($noticeFeature); endif; ?>
+			<? endif; ?>
 	</header>
 
 	<nav class="itembuttons row mx-2 mt-2 justify-content-end">
