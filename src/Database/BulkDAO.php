@@ -29,14 +29,14 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 		}
 	}
 
-	//Get all imports from BulkTable
+	/**Get all imports from BulkTable*/
 	public function getBulkImports(): array {
 		$statement = $this->getPDO()->query('SELECT Identifier, BulkIdentifier, Time, User, Type, JSON FROM BulkTable');
 		$imports = $statement->fetchAll();
 		return $imports;
 	}
   
-  	//Delete a bulk import via identifier
+  	/**Delete a bulk import via identifier*/
 	public function deleteBulkImport(string $identifier) {
 		$statement = $this->getPDO()->prepare('DELETE FROM BulkTable WHERE Identifier = :id');
 		try {
@@ -45,64 +45,6 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 		} finally {
 			$statement->closeCursor();
 		}
-	}
-
-	/**Formats JSON in a readable form ( in case of minfied ones ) */
-	public static function prettyPrint( $json )
-	{
-		$result = '';
-		$level = 0;
-		$in_quotes = false;
-		$in_escape = false;
-		$ends_line_level = NULL;
-		$json_length = strlen( $json );
-
-		for( $i = 0; $i < $json_length; $i++ ) {
-			$char = $json[$i];
-			$new_line_level = NULL;
-			$post = "";
-			if( $ends_line_level !== NULL ) {
-				$new_line_level = $ends_line_level;
-				$ends_line_level = NULL;
-			}
-			if ( $in_escape ) {
-				$in_escape = false;
-			} else if( $char === '"' ) {
-				$in_quotes = !$in_quotes;
-			} else if( ! $in_quotes ) {
-				switch( $char ) {
-					case '}': case ']':
-					$level--;
-					$ends_line_level = NULL;
-					$new_line_level = $level;
-					break;
-
-					case '{': case '[':
-					$level++;
-					case ',':
-						$ends_line_level = $level;
-						break;
-
-					case ':':
-						$post = " ";
-						break;
-
-					case " ": case "\t": case "\n": case "\r":
-					$char = "";
-					$ends_line_level = $new_line_level;
-					$new_line_level = NULL;
-					break;
-				}
-			} else if ( $char === '\\' ) {
-				$in_escape = true;
-			}
-			if( $new_line_level !== NULL ) {
-				$result .= "\n".str_repeat( "\t", $new_line_level );
-			}
-			$result .= $char.$post;
-		}
-
-		return $result;
 	}
 
 	/**Get an import's JSON from BulkTable and decodes it*/
@@ -121,7 +63,7 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 		return $importElement;
 	}
 
-
+	/**Check if there are entries with the same identifier*/
 	public function checkDuplicatedIdentifier(String $identifier): bool {
 		$statement = $this->getPDO()->prepare(
 			'
