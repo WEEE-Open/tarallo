@@ -1207,17 +1207,10 @@
 
 		let delta = {};
 		let contents = [];
+		let importId = -1;
 
-		try {
-			counter = getNewFeaturesRecursively(root, delta, contents);
-		} catch(e) {
-			if(e instanceof EmptyFeatureValueError) {
-				displayInlineError(e.feature, "empty-input", root);
-				return;
-			} else {
-				throw e;
-			}
-		}
+		counter = getNewFeaturesRecursively(root, delta, contents);
+		importId = root.children[1].children.namedItem("importBtn").value;
 
 		if(counter <= 0) {
 			return;
@@ -1243,6 +1236,8 @@
 
 		request.features = delta;
 		request.contents = contents;
+		//To handle saving imported Items
+		request.importId = importId;
 
 		let method, uri;
 		if(code) {
@@ -1261,17 +1256,10 @@
 
 		let counter;
 		let delta = {};
+		let importId = -1;
 
-		try {
-			counter = getNewFeaturesRecursively(root, delta, null);
-		} catch(e) {
-			if(e instanceof EmptyFeatureValueError) {
-				displayInlineError(e.feature, "empty-input", root);
-				return;
-			} else {
-				throw e;
-			}
-		}
+		counter = getNewFeaturesRecursively(root, delta, null);
+		importId = root.children[1].children.namedItem("importBtn").value;
 
 		if(counter <= 0) {
 			return;
@@ -1286,6 +1274,8 @@
 		let variant = document.getElementById('new-product-variant').value;
 
 		request.features = delta;
+		//To handle saving imported Product
+		request.importId = importId;
 
 		let method = 'PUT';
 		let uri = '/v2/products/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant);

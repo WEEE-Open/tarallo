@@ -266,6 +266,21 @@ CREATE TABLE `SessionToken`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
+CREATE TABLE `BulkTable`
+(
+    `Identifier` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `BulkIdentifier` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Time` TIMESTAMP(6) DEFAULT NOW(6) NOT NULL,
+    `User` VARCHAR(100) NULL COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+    `Type` CHAR(1) COLLATE utf8mb4_bin NOT NULL,
+    `JSON` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+    PRIMARY KEY (`Identifier`),
+    INDEX (`Type`),
+        CONSTRAINT check_type
+            CHECK (`Type` IN ('I', 'P'))
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
 
 -- ProductFeature - ItemFeature View
 
@@ -319,5 +334,5 @@ SELECT Code,
 FROM ProductItemFeature;
 
 -- Do not combine these lines, they're parsed by update.php... WITH A REGEX!
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 16);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 17);
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 19);

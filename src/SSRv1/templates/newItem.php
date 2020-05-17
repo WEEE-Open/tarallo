@@ -1,10 +1,12 @@
 <?php
 /** @var \WEEEOpen\Tarallo\Item|null $base */
+/** @var int $importedFrom|null */
 /** @var bool $recursion */
 /** @var bool $innerrecursion */
 /** @var string[] $subitems */
 
 $base = $base ?? null;
+$importedFrom = $importedFrom ?? null;
 $innerrecursion = $innerrecursion ?? false;
 if($base === null) {
 	$subitems = [];
@@ -30,6 +32,10 @@ if($base === null) {
 		<?php if(isset($base) && $base->hasCode()): ?>
 			<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This is a copy of <span class="text-monospace"><?= $base->getCode() ?></span>, remember to change serial numbers, notes, working status, etc...</div>
 		<?php unset($noticeFeature); endif; ?>
+
+		<?php if(isset($importedFrom)): ?>
+			<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This item is generated from a bulk import ( with Id = <span class="text-monospace"><?= $importedFrom ?> ) </span></div>
+			<? endif; ?>
 	</header>
 
 	<nav class="itembuttons row mx-2 mt-2 justify-content-end">
@@ -37,7 +43,8 @@ if($base === null) {
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 			</button>
-			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button">
+			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button"
+					<?php if(isset($importedFrom)): echo 'id="importBtn" value="'. $importedFrom .'"'; endif;?>>
 				💾&nbsp;Save
 			</button>
 		<?php else: ?>

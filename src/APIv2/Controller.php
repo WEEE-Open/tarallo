@@ -3,14 +3,17 @@
 namespace WEEEOpen\Tarallo\APIv2;
 
 use FastRoute;
+use Laminas\Diactoros\Response\TextResponse;
 use PHPUnit\Util\Json;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Relay\RelayBuilder;
 use WEEEOpen\Tarallo\BaseFeature;
+use WEEEOpen\Tarallo\Database\BulkDAO;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Database\TreeDAO;
+use WEEEOpen\Tarallo\DuplicateBulkIdentifierException;
 use WEEEOpen\Tarallo\ErrorHandler;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
@@ -208,6 +211,11 @@ class Controller implements RequestHandlerInterface {
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
 
+		if( isset($payload['importId']) ){
+			$importId = array_pop($payload);
+			$db->bulkDAO()->deleteBulkImport($importId);
+		}
+
 		// Validation and fixupLocation requires the full parent item, which may not exist.
 		// Since this part is optional, its existence will be checked again later
 		if($parent instanceof ItemCode && ($fix || $validate)) {
@@ -264,6 +272,11 @@ class Controller implements RequestHandlerInterface {
 		$loopback = isset($query['loopback']);
 
 		$product = ProductBuilder::ofArray($payload, $brand, $model, $variant);
+
+		if( isset($payload['importId']) ){
+			$importId = array_pop($payload);
+			$db->bulkDAO()->deleteBulkImport($importId);
+		}
 
 		$db->productDAO()->addProduct($product);
 
@@ -637,6 +650,27 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($data);
 	}
 
+	public static function addBulk(ServerRequestInterface $request): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters');
+		$overwrite = Validation::validateOptionalString($request->getQueryParams(), 'overwrite');
+		$identifier = Validation::validateOptionalString($parameters, 'identifier');
+		$body = $request->getAttribute('ParsedBody');
+		if($overwrite) {
+			$db->bulkDAO()->deleteBulkImport($identifier);
+		} else if($db->bulkDAO()->checkDuplicatedIdentifier($identifier)) {
+				throw new DuplicateBulkIdentifierException();
+		}
+		foreach($body as $item) {
+			$type = $item['type'];
+			unset($item['type']);
+			$json = json_encode($item);
+			$db->bulkDAO()->addBulk($identifier, $type, $json);
+		}
+		return new EmptyResponse();
+	}
+
 	private static function range(string $parameter, $value, ?int $min, ?int $max) {
 		if($max !== null && $value > $max) {
 			throw new RangeException($parameter, $min, $max, "Maximum value is $max");
@@ -777,6 +811,12 @@ class Controller implements RequestHandlerInterface {
 								$r->get('/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]', [User::AUTH_LEVEL_RO, 'Controller::ItemsNotFeature']);
 								$r->get('/getRecentAuditByType/{type}[/{howMany}]', [User::AUTH_LEVEL_RO, 'Controller::RecentAuditByType']);
 								$r->get('/getCountByFeature/{feature}[/{filter}[/{location}[/{creation[/{deleted[/{cutoff}]]]]]', [User::AUTH_LEVEL_RO, 'Controller::CountByFeature']);
+							}
+						);
+						$r->addGroup(
+							'/bulk',
+							function(FastRoute\RouteCollector $r) {
+								$r->post('/add/{identifier}', [User::AUTH_LEVEL_RO, 'Controller::addBulk']);
 							}
 						);
 					}

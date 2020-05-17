@@ -7,6 +7,8 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Relay\RelayBuilder;
+use WEEEOpen\Tarallo\APIv2\ItemBuilder;
+use WEEEOpen\Tarallo\APIv2\ProductBuilder;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Database\TreeDAO;
@@ -630,7 +632,6 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-
 	public static function bulkAdd(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		///* @var Database $db */
 		//$db = $request->getAttribute('Database');
@@ -666,6 +667,53 @@ class Controller implements RequestHandlerInterface {
 				);
 			}
 		}
+
+		return $handler->handle($request);
+	}
+
+	public static function bulkImport(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		//Handling bulk import from peracotta
+		$body = $request->getParsedBody();
+		/* @var Database $db */
+		$db = $request->getAttribute('Database');
+		//Get all Bulk Imports from BulkTable
+		$imports = $db->bulkDAO()->getBulkImports();
+		$delete = null;
+		$import = null;
+		if( $body !== null && count($body) > 0){
+			//Delete import handler
+			if(isset($body['delete'])){
+				$db->bulkDAO()->deleteBulkImport($body['delete']);
+				return new RedirectResponse('/bulk/import',303);
+			}
+			//Import handler
+			if(isset($body['import'])){
+				//Decoding JSON and redirecting to Item or Product add page
+				$importElement = $db->bulkDAO()->getDecodedJSON(intval($body['import']));
+
+				if( $importElement['type'] == 'I'){
+					//TODO: Serve che ritorni a bulk import?
+					$parent = null;
+					$newItem = ItemBuilder::ofArray($importElement,null,$parent);
+					$request = $request->withAttribute('Template', 'newItemPage')->withAttribute('TemplateParameters',[
+						'add' => true,
+						'base' => $newItem,
+						'importedFrom' => intval($body['import'])
+					]);
+					return $handler->handle($request);
+				}else if( $importElement['type'] == 'P'){
+					$importElement = ProductBuilder::ofArray($importElement,$importElement['brand'],$importElement['model'],$importElement['variant']);
+					$request = $request->withAttribute('Template', 'newProductPage')->withAttribute('TemplateParameters',[
+						'add' => true,
+						'base' => $importElement,
+						'importedFrom' => intval($body['import'])
+					]);
+					return $handler->handle($request);
+				}
+
+			}
+		}
+		$request = $request->withAttribute('Template', 'bulk::import')->withAttribute('TemplateParameters',['imports' => $imports]);
 
 		return $handler->handle($request);
 	}
@@ -859,6 +907,8 @@ class Controller implements RequestHandlerInterface {
 				$r->post('/bulk/move', [User::AUTH_LEVEL_RW, 'Controller::bulkMove',]);
 				$r->get('/bulk/add', [User::AUTH_LEVEL_RO, 'Controller::bulkAdd',]);
 				$r->post('/bulk/add', [User::AUTH_LEVEL_RW, 'Controller::bulkAdd',]);
+				$r->get('/bulk/import', [User::AUTH_LEVEL_RO, 'Controller::bulkImport',]);
+				$r->post('/bulk/import', [User::AUTH_LEVEL_RW, 'Controller::bulkImport',]);
 				$r->addGroup(
 					'/stats', function(FastRoute\RouteCollector $r) {
 					$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getStats',]);
