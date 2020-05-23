@@ -8,5 +8,7 @@ fi
 ansible-galaxy install goozbach.EPEL
 ansible-galaxy install geerlingguy.nginx
 ansible-galaxy install bertvv.mariadb
+ansible-galaxy install geerlingguy.repo-remi
+ansible-galaxy install geerlingguy.php
 
 ansible-playbook --inventory="localhost," -c local /provision/playbook.yml
