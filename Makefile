@@ -10,7 +10,8 @@ vm:
 	ansible-galaxy install -p utils/provision/roles goozbach.EPEL
 	ansible-galaxy install -p utils/provision/roles geerlingguy.nginx
 	ansible-galaxy install -p utils/provision/roles bertvv.mariadb
-	#vagrant plugin install vagrant-vbguest
+	ansible-galaxy install -p utils/provision/roles geerlingguy.repo-remi
+	ansible-galaxy install -p utils/provision/roles geerlingguy.php
 
 .PHONY:
 features:

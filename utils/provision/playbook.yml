@@ -27,6 +27,33 @@
         general-log:
         general-log-file: queries.log
         log-output: file
+    php_webserver_daemon: "nginx"
+    php_enablerepo: "remi-php72"
+    php_packages:
+      - php-cli
+      - php-common
+      - php-fpm
+      - php-intl
+      - php-json
+      - php-mbstring
+      - php-mysqlnd
+      - php-opcache
+      - php-pdo
+      - php-dom
+      - php-pecl-xdebug
+    php_disable_functions:
+      - exec
+      - passthru
+      - shell_exec
+      - system
+      - proc_open
+      - popen
+      - parse_ini_file
+      - show_source
+    php_enable_php_fpm: true
+    php_enable_apc: false
+    php_max_execution_time: "-1"
+    php_date_timezone: "Europe/Rome"
 
     nginx_yum_repo_enabled: false
     nginx_remove_default_vhost: true
@@ -77,6 +104,8 @@
   roles:
     - role: bertvv.mariadb
     - role: goozbach.EPEL
+    - role: geerlingguy.repo-remi
+    - role: geerlingguy.php
     - role: geerlingguy.nginx
 
   handlers:
@@ -89,22 +118,8 @@
       name: php-fpm
       state: restarted
 
-  tasks:
-  - name: Create a directory for no reason
-    file: path=/home/vagrant/.phpstorm_helpers state=directory mode=0777
-
-  # https://github.com/iuscommunity/automation-examples/blob/ansible/enable-ius.yml
-  - set_fact:
-      ius_distribution_abbrev: "{{ (ansible_distribution == 'CentOS') | ternary('centos', 'rhel') }}"
-
-  # TODO: understand if it's downloading the file every single time (yes it is)
-  # TODO: prevent it somehow
-  - name: Enable IUS repo
-    yum:
-      name: "https://{{ ius_distribution_abbrev }}{{ ansible_distribution_major_version }}.iuscommunity.org/ius-release.rpm"
-      state: present
-
-  - name: Uninstall old PHP 7.0 (if updating VM)
+  pre_tasks:
+  - name: Uninstall old PHP versions (if updating VM)
     yum:
       state: absent
       name:
@@ -119,13 +134,6 @@
         - php70u-dom
         - php70u-mcrypt
         - php70u-intl
-    notify:
-      - stop php-fpm
-
-  - name: Install PHP 7.2
-    yum:
-      state: installed
-      name:
         - php72u-cli
         - php72u-common
         - php72u-fpm
@@ -133,6 +141,16 @@
         - php72u-mysqlnd
         - php72u-opcache
         - php72u-pdo
+        - php72u-pecl-xdebug
+        - php72u-mbstring
+        - php72u-dom
+        - php72u-intl
+    notify:
+      - stop php-fpm
+
+  tasks:
+  - name: Create a directory for no reason
+    file: path=/home/vagrant/.phpstorm_helpers state=directory mode=0777
 
   - name: Enable and start PHP-FPM
     service:
@@ -144,10 +162,6 @@
     yum:
       state: installed
       name:
-        - php72u-pecl-xdebug
-        - php72u-mbstring
-        - php72u-dom
-        - php72u-intl
         - unzip
 
   - name: Enable XDebug
@@ -198,7 +212,7 @@
 
   - name: Download Adminer
     get_url:
-      url: https://github.com/vrana/adminer/releases/download/v4.6.1/adminer-4.6.1-mysql-en.php
+      url: https://github.com/vrana/adminer/releases/download/v4.7.7/adminer-4.7.7-mysql-en.php
       dest: "{{ document_root }}/admin/adminer.php"
       mode: 0444
 
