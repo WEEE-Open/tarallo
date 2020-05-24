@@ -666,7 +666,6 @@ class Controller implements RequestHandlerInterface {
 		}
 		foreach($body as $item) {
 			$type = $item['type'];
-			unset($item['type']);
 			$json = json_encode($item);
 			$db->bulkDAO()->addBulk($identifier, $type, $json);
 		}
