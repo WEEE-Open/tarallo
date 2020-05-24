@@ -465,8 +465,10 @@ class Controller implements RequestHandlerInterface {
 			$model = Validation::validateOptionalString($parameters, 'model');
 			$variant = Validation::validateOptionalString($parameters, 'variant');
 			$thing = new Product($brand, $model, $variant);
+			$db->productDAO()->productMustExist($thing);
 		} else {
 			$thing = new Item($id);
+			$db->itemDAO()->itemMustExist($thing, true);
 		}
 		$loopback = isset($query['loopback']);
 

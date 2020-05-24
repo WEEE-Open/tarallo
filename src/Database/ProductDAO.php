@@ -169,4 +169,25 @@ final class ProductDAO extends DAO{
 
 		return $items;
 	}
+
+	/**
+	 * Ensure that a Product exists in the Product table and lock its row
+	 *
+	 * @param ProductCode $product
+	 *
+	 * @see ItemDAO::itemMustExist()
+	 */
+	public function productMustExist(ProductCode $product) {
+		$statement = $this
+			->getPDO()
+			->prepare('SELECT `Brand`, `Model`, `Variant` FROM Product WHERE `Brand` = :b, `Model` = :m, `Variant` = :v FOR UPDATE');
+		try {
+			$statement->execute([$product->getBrand(), $product->getModel(), $product->getVariant()]);
+			if($statement->rowCount() === 0) {
+				throw new NotFoundException();
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+	}
 }
