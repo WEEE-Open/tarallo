@@ -234,15 +234,36 @@ for($i = 250; $i < 230; $i++) {
 }
 $ram = (new Item('R69'))
 	->addFeature(new Feature('check', 'missing-data'))
-	->addFeature(new Feature('notes', 'RAM di esempio con dati mancati'))
+	->addFeature(new Feature('notes', 'example RAM with missing data'))
 	->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
 	->addFeature(new Feature('type', 'ram'));
 $rambox->addContent($ram);
+
+$ram = (new Item('R70'))
+	->addFeature(new Feature('capacity-byte', 1024 * 1024 * 1024))
+	->addFeature(new Feature('frequency-hertz', 667 * 1000 * 1000))
+	->addFeature(new Feature('color', 'yellow'))
+	->addFeature(new Feature('ram-ecc', 'no'))
+	->addFeature(new Feature('ram-type', 'ddr2'))
+	->addFeature(new Feature('ram-form-factor', 'sodimm'))
+	->addFeature(new Feature('type', 'ram'))
+	->addFeature(new Feature('notes', 'example RAM without brand/model/variant (1)'));
+$ram = (new Item('R70'))
+	->addFeature(new Feature('capacity-byte', 1024 * 1024 * 1024))
+	->addFeature(new Feature('frequency-hertz', 800 * 1000 * 1000))
+	->addFeature(new Feature('color', 'yellow'))
+	->addFeature(new Feature('ram-ecc', 'no'))
+	->addFeature(new Feature('ram-type', 'ddr2'))
+	->addFeature(new Feature('ram-form-factor', 'sodimm'))
+	->addFeature(new Feature('type', 'ram'))
+	->addFeature(new Feature('notes', 'example RAM without brand/model/variant (2)'));
+$rambox->addContent($ram);
+
 $ram666 = (new Item('R666'))
 	->addFeature(new Feature('brand', 'Samsung'))
 	->addFeature(new Feature('model', 'S667ABC1024'))
 	->addFeature(new Feature('variant', 'v1'))
-	->addFeature(new Feature('notes', 'RAM di esempio persa'))
+	->addFeature(new Feature('notes', 'example lost RAM'))
 	->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
 	->addFeature(new Feature('type', 'ram'));
 $rambox->addContent($ram666);
