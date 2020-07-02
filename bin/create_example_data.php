@@ -302,4 +302,12 @@ $chernobyl->addContent($pc20)->addContent($pc22)->addContent($pc55)->addContent(
 
 $db->itemDAO()->addItem($polito);
 $db->itemDAO()->loseItem($ram666);
+
+$json = json_decode('[{"type":"I","features":{"brand":"OilData","model":"Boulder 69000","variant":"default","type":"case","working":"yes"},"contents":[{"features":{"brand":"USAStek computer inc.","model":"P5KPL-VM","variant":"default","mac":"00:1a:22:52:a4:be","sn":"MT707BK05303585","type":"motherboard","working":"yes"},"contents":[{"code":"C251","features":{"brand":"Intel","model":"Core 2 Duo E8200","variant":"default","type":"cpu","working":"yes"}},{"features":{"brand":"Samsung","model":"M3 78T2863DZS-CF7","sn":"589442786","variant":"default","type":"ram","working":"yes"}},{"code":"R597","features":{"brand":"Samsung","model":"M3 78T2953EZ3-CF7","sn":"1231847313","variant":"default","type":"ram","working":"yes"}}]}]},{"type":"P","brand":"Samsung","model":"M3 78T2953EZ3-CF7","variant":"default","features":{"capacity-byte":1073741824,"color":"green","frequency-hertz":800000000,"ram-ecc":"no","ram-form-factor":"dimm","ram-timings":"6-6-6-18 as DDR2-800","ram-type":"ddr2","type":"ram"}},{"type":"P","brand":"Intel","model":"Core 2 Duo E8200","variant":"default","features":{"core-n":2,"cpu-socket":"lga775","frequency-hertz":2660000000,"isa":"x86-64","thread-n":2,"type":"cpu"}},{"type":"P","brand":"USAStek computer inc.","model":"P5KPL-VM","variant":"default","features":{"color":"golden","cpu-socket":"lga775","ethernet-ports-1000m-n":1,"ide-ports-n":1,"integrated-graphics-brand":"Intel","integrated-graphics-model":"82G33/G31 Express","key-bios-setup":"Del","mini-jack-ports-n":3,"motherboard-form-factor":"microatx","parallel-ports-n":1,"pci-sockets-n":2,"pcie-sockets-n":2,"ps2-ports-n":2,"psu-connector-cpu":"4pin","psu-connector-motherboard":"atx-24pin","ram-form-factor":"dimm","ram-type":"ddr2","sata-ports-n":4,"serial-ports-n":1,"type":"motherboard","usb-ports-n":4,"vga-ports-n":1}}]', true);
+foreach($json as $item){
+	$type = $item['type'];
+	$json = json_encode($item);
+	$db->bulkDAO()->addBulk('OilData on the table', $type, $json);
+}
+
 echo 'Example items created, last update ' . date('d-m-Y H:i:s', stat(__FILE__)[9]) . ' UTC' . PHP_EOL;
