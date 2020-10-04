@@ -660,13 +660,16 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters');
-		$overwrite = Validation::validateOptionalString($request->getQueryParams(), 'overwrite');
+		$query = $request->getQueryParams();
 		$identifier = Validation::validateOptionalString($parameters, 'identifier');
-		$body = $request->getAttribute('ParsedBody');
-		if($overwrite) {
+		$body = $request->getAttribute('ParsedBody', []);
+
+		// Locks the row, required for overwriting but also a good idea when adding
+		$isDuplicate = $db->bulkDAO()->checkIdentifierExistsAndLock($identifier);
+		if(isset($query['overwrite'])) {
 			$db->bulkDAO()->deleteBulkImport($identifier);
-		} else if($db->bulkDAO()->checkDuplicatedIdentifier($identifier)) {
-				throw new DuplicateBulkIdentifierException();
+		} else if($isDuplicate) {
+			throw new DuplicateBulkIdentifierException();
 		}
 		foreach($body as $item) {
 			$type = $item['type'];

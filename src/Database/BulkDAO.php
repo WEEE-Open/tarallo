@@ -6,7 +6,14 @@ use WEEEOpen\Tarallo\DuplicateBulkIdentifierException;
 
 final class BulkDAO extends DAO {
 
-	public function addBulk(String $identifier, String $type, String $json) {
+	/**
+	 * Add an entry to the bulk table
+	 *
+	 * @param string $identifier Bulk identifier
+	 * @param string $type P or I (product or item)
+	 * @param string $json The raw JSON
+	 */
+	public function addBulk(string $identifier, string $type, string $json) {
 
 		$statement = $this->getPDO()->prepare(
 			'
@@ -29,25 +36,40 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 		}
 	}
 
-	/**Get all imports from BulkTable*/
+	/**
+	 * Get all imports from BulkTable
+	 */
 	public function getBulkImports(): array {
 		$statement = $this->getPDO()->query('SELECT Identifier, BulkIdentifier, Time, User, Type, JSON FROM BulkTable');
 		$imports = $statement->fetchAll();
 		return $imports;
 	}
-  
-  	/**Delete a bulk import via identifier*/
-	public function deleteBulkImport(string $identifier) {
+
+	/**
+	 * Delete a bulk import via identifier
+	 *
+	 * @param string $identifier The identifier
+	 *
+	 * @return bool True if anything was deleted, false otherwise
+	 */
+	public function deleteBulkImport(string $identifier): bool {
 		$statement = $this->getPDO()->prepare('DELETE FROM BulkTable WHERE Identifier = :id');
 		try {
 			$statement->bindValue(':id', $identifier, \PDO::PARAM_INT);
 			$statement->execute();
+			return $statement->rowCount() > 0;
 		} finally {
 			$statement->closeCursor();
 		}
 	}
 
-	/**Get an import's JSON from BulkTable and decodes it*/
+	/**
+	 * Get an imported JSON from BulkTable and decodes it
+	 *
+	 * @param int $Identifier The identifier
+	 *
+	 * @return array The JSON as an array
+	 */
 	public function getDecodedJSON(int $Identifier): array {
 		$statement = $this->getPDO()->prepare('SELECT JSON FROM BulkTable WHERE Identifier = :id');
 		$importElement = null;
@@ -63,13 +85,15 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 		return $importElement;
 	}
 
-	/**Check if there are entries with the same identifier*/
-	public function checkDuplicatedIdentifier(String $identifier): bool {
-		$statement = $this->getPDO()->prepare(
-			'
-		SELECT Identifier FROM BulkTable WHERE BulkIdentifier = :id FOR UPDATE
-		'
-		);
+	/**
+	 * Check if there are entries with the same identifier and lock the rows for update
+	 *
+	 * @param string $identifier The identifier
+	 *
+	 * @return bool
+	 */
+	public function checkIdentifierExistsAndLock(string $identifier): bool {
+		$statement = $this->getPDO()->prepare('SELECT Identifier FROM BulkTable WHERE BulkIdentifier = :id FOR UPDATE');
 		try {
 			$statement->bindValue(':id', $identifier, \PDO::PARAM_STR);
 			$statement->execute();
