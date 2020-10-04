@@ -44,7 +44,7 @@ if($base === null) {
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 			</button>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button"
-					<?php if(isset($importedFrom)): echo 'id="importBtn" value="'. $importedFrom .'"'; endif;?>>
+					<?= isset($importedFrom) ? 'data-importId="' . (int) $importedFrom . '"' : '' ?>>
 				💾&nbsp;Save
 			</button>
 		<?php else: ?>

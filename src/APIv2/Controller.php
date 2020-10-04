@@ -212,6 +212,8 @@ class Controller implements RequestHandlerInterface {
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
 
 		if( isset($payload['importId']) ){
+			// TODO: fail if it doesn't exists (prevents double inserts)
+			// also requires locking the row for update and deleting later
 			$importId = array_pop($payload);
 			$db->bulkDAO()->deleteBulkImport($importId);
 		}
@@ -274,6 +276,8 @@ class Controller implements RequestHandlerInterface {
 		$product = ProductBuilder::ofArray($payload, $brand, $model, $variant);
 
 		if( isset($payload['importId']) ){
+			// TODO: fail if it doesn't exists (prevents double inserts)
+			// also requires locking the row for update and deleting later
 			$importId = array_pop($payload);
 			$db->bulkDAO()->deleteBulkImport($importId);
 		}

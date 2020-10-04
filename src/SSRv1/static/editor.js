@@ -1201,16 +1201,32 @@
 		}
 	}
 
+	function getImportId(root) {
+		let id = root.querySelector("button.save").dataset.importid;
+		if(typeof id === "undefined") {
+			return null;
+		}
+		return id;
+	}
+
 	async function saveNewItem() {
 		let counter;
 		let root = document.querySelector('.head.item.editing');
 
 		let delta = {};
 		let contents = [];
-		let importId = -1;
+		let importId = getImportId(root);
 
-		counter = getNewFeaturesRecursively(root, delta, contents);
-		importId = root.children[1].children.namedItem("importBtn").value;
+		try {
+			counter = getNewFeaturesRecursively(root, delta, contents);
+		} catch(e) {
+			if(e instanceof EmptyFeatureValueError) {
+				displayInlineError(e.feature, "empty-input", root);
+				return;
+			} else {
+				throw e;
+			}
+		}
 
 		if(counter <= 0) {
 			return;
@@ -1219,15 +1235,15 @@
 		let request = {};
 
 		let code = document.querySelector('.newcode').value;
-		let parentSelector = root.querySelector('.setlocation input');
-		if(parentSelector) {
-			if(parentSelector.value !== '') {
-				request.parent = parentSelector.value;
+		let locationSelector = root.querySelector('.setlocation input');
+		if(locationSelector) {
+			if(locationSelector.value !== '') {
+				request.parent = locationSelector.value;
 			}
 		} else {
-			let parent = root.parentElement.parentElement.dataset.code;
-			if(parent) {
-				request.parent = parent;
+			let location = root.parentElement.parentElement.dataset.code;
+			if(location) {
+				request.parent = location;
 			} else {
 				displayError('Internal error: cannot find location');
 				return;
@@ -1236,7 +1252,7 @@
 
 		request.features = delta;
 		request.contents = contents;
-		//To handle saving imported Items
+		//To handle saving imported Items (deletes the raw import)
 		request.importId = importId;
 
 		let method, uri;
@@ -1256,10 +1272,18 @@
 
 		let counter;
 		let delta = {};
-		let importId = -1;
+		let importId = getImportId(root);
 
-		counter = getNewFeaturesRecursively(root, delta, null);
-		importId = root.children[1].children.namedItem("importBtn").value;
+		try {
+			counter = getNewFeaturesRecursively(root, delta, null);
+		} catch(e) {
+			if(e instanceof EmptyFeatureValueError) {
+				displayInlineError(e.feature, "empty-input", root);
+				return;
+			} else {
+				throw e;
+			}
+		}
 
 		if(counter <= 0) {
 			return;
@@ -1274,7 +1298,7 @@
 		let variant = document.getElementById('new-product-variant').value;
 
 		request.features = delta;
-		//To handle saving imported Product
+		// To handle saving imported Product (deletes the raw import)
 		request.importId = importId;
 
 		let method = 'PUT';
