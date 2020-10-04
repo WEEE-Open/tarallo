@@ -46,13 +46,31 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 	}
 
 	/**
-	 * Delete a bulk import via identifier
+	 * Delete an entire bulk import via identifier
 	 *
-	 * @param string $identifier The identifier
+	 * @param string $identifier The bulk identifier
 	 *
 	 * @return bool True if anything was deleted, false otherwise
 	 */
 	public function deleteBulkImport(string $identifier): bool {
+		$statement = $this->getPDO()->prepare('DELETE FROM BulkTable WHERE BulkIdentifier = :id');
+		try {
+			$statement->bindValue(':id', $identifier, \PDO::PARAM_STR);
+			$statement->execute();
+			return $statement->rowCount() > 0;
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * Delete a bulk import via identifier
+	 *
+	 * @param int $identifier The identifier
+	 *
+	 * @return bool True if anything was deleted, false otherwise
+	 */
+	public function deleteImport(int $identifier): bool {
 		$statement = $this->getPDO()->prepare('DELETE FROM BulkTable WHERE Identifier = :id');
 		try {
 			$statement->bindValue(':id', $identifier, \PDO::PARAM_INT);
@@ -88,14 +106,35 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 	/**
 	 * Check if there are entries with the same identifier and lock the rows for update
 	 *
-	 * @param string $identifier The identifier
+	 * @param string $identifier The bulk identifier
 	 *
 	 * @return bool
 	 */
-	public function checkIdentifierExistsAndLock(string $identifier): bool {
+	public function bulkIdentifierExistsAndLocked(string $identifier): bool {
 		$statement = $this->getPDO()->prepare('SELECT Identifier FROM BulkTable WHERE BulkIdentifier = :id FOR UPDATE');
 		try {
 			$statement->bindValue(':id', $identifier, \PDO::PARAM_STR);
+			$statement->execute();
+			if($statement->rowCount() === 0) {
+				return false;
+			}
+			return true;
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * Check if an identifier (still) exists and lock the rows for update
+	 *
+	 * @param int $identifier The identifier
+	 *
+	 * @return bool
+	 */
+	public function identifierExistsAndLocked(int $identifier): bool {
+		$statement = $this->getPDO()->prepare('SELECT Identifier FROM BulkTable WHERE Identifier = :id FOR UPDATE');
+		try {
+			$statement->bindValue(':id', $identifier, \PDO::PARAM_INT);
 			$statement->execute();
 			if($statement->rowCount() === 0) {
 				return false;

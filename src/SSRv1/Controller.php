@@ -672,50 +672,72 @@ class Controller implements RequestHandlerInterface {
 	}
 
 	public static function bulkImport(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
-		//Handling bulk import from peracotta
-		$body = $request->getParsedBody();
+		// Handling bulk import from peracotta
 		/* @var Database $db */
 		$db = $request->getAttribute('Database');
-		//Get all Bulk Imports from BulkTable
+		$body = $request->getParsedBody();
+		// Get all Bulk Imports from BulkTable
 		$imports = $db->bulkDAO()->getBulkImports();
 		$delete = null;
 		$import = null;
-		if( $body !== null && count($body) > 0){
-			//Delete import handler
+
+		// Handle buttons
+		if($body !== null && count($body) > 0) {
+			// Delete
 			if(isset($body['delete'])){
-				$db->bulkDAO()->deleteBulkImport($body['delete']);
+				$db->bulkDAO()->deleteImport(intval($body['delete']));
 				return new RedirectResponse('/bulk/import',303);
 			}
-			//Import handler
+
+			// Import handler
 			if(isset($body['import'])){
-				//Decoding JSON and redirecting to Item or Product add page
-				$importElement = $db->bulkDAO()->getDecodedJSON(intval($body['import']));
-
-				if( $importElement['type'] == 'I'){
-					//TODO: Serve che ritorni a bulk import?
-					$parent = null;
-					$newItem = ItemBuilder::ofArray($importElement,null,$parent);
-					$request = $request->withAttribute('Template', 'newItemPage')->withAttribute('TemplateParameters',[
-						'add' => true,
-						'base' => $newItem,
-						'importedFrom' => intval($body['import'])
-					]);
-					return $handler->handle($request);
-				}else if( $importElement['type'] == 'P'){
-					$importElement = ProductBuilder::ofArray($importElement,$importElement['brand'],$importElement['model'],$importElement['variant']);
-					$request = $request->withAttribute('Template', 'newProductPage')->withAttribute('TemplateParameters',[
-						'add' => true,
-						'base' => $importElement,
-						'importedFrom' => intval($body['import'])
-					]);
-					return $handler->handle($request);
-				}
-
+				return new RedirectResponse('/bulk/import/' . intval($body['import']), 303);
 			}
 		}
 		$request = $request->withAttribute('Template', 'bulk::import')->withAttribute('TemplateParameters',['imports' => $imports]);
 
 		return $handler->handle($request);
+	}
+
+	public static function bulkImportAdd(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/* @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		// Decoding JSON and redirecting to Item or Product add page
+		$importElement = $db->bulkDAO()->getDecodedJSON($id);
+
+		if($importElement === null) {
+			throw new NotFoundException(null, 'Bulk import item/product not found');
+		}
+
+		if($importElement['type'] === 'I') {
+			$parent = null;
+			$newItem = ItemBuilder::ofArray($importElement,null,$parent);
+			$request = $request->withAttribute('Template', 'newItemPage')->withAttribute('TemplateParameters',[
+				'add' => true,
+				'base' => $newItem,
+				'importedFrom' => $id
+			]);
+			return $handler->handle($request);
+		} else if($importElement['type'] === 'P') {
+			$importElement = ProductBuilder::ofArray($importElement,$importElement['brand'],$importElement['model'],$importElement['variant']);
+			$request = $request->withAttribute('Template', 'newProductPage')->withAttribute('TemplateParameters',[
+				'add' => true,
+				'base' => $importElement,
+				'importedFrom' => $id
+			]);
+			return $handler->handle($request);
+		} else {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 501)
+				->withAttribute('TemplateParameters', ['reason' => 'Type is not I or P']);
+
+			return $handler->handle($request);
+		}
 	}
 
 	/**
@@ -909,6 +931,7 @@ class Controller implements RequestHandlerInterface {
 				$r->post('/bulk/add', [User::AUTH_LEVEL_RW, 'Controller::bulkAdd',]);
 				$r->get('/bulk/import', [User::AUTH_LEVEL_RO, 'Controller::bulkImport',]);
 				$r->post('/bulk/import', [User::AUTH_LEVEL_RW, 'Controller::bulkImport',]);
+				$r->get('/bulk/import/{id}', [User::AUTH_LEVEL_RW, 'Controller::bulkImportAdd',]);
 				$r->addGroup(
 					'/stats', function(FastRoute\RouteCollector $r) {
 					$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getStats',]);

@@ -34,7 +34,7 @@ if($base === null) {
 		<?php unset($noticeFeature); endif; ?>
 
 		<?php if(isset($importedFrom)): ?>
-			<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This item is generated from a bulk import (ID <span class="text-monospace"><a href="/bulk/import"><?= $importedFrom ?></a></span>)</div>
+			<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This item is generated from a bulk import</span></div>
 		<?php endif; ?>
 	</header>
 

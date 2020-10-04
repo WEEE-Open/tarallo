@@ -32,6 +32,7 @@ use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\RangeException;
 use WEEEOpen\Tarallo\SearchException;
+use WEEEOpen\Tarallo\StateChangedException;
 use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\ValidationException;
 use Laminas\Diactoros\Response\EmptyResponse;
@@ -208,14 +209,15 @@ class Controller implements RequestHandlerInterface {
 		$fix = !isset($query['nofix']);
 		$validate = !isset($query['novalidate']);
 		$loopback = isset($query['loopback']);
+		$importId = Validation::validateOptionalInt($query, 'import');
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
 
-		if( isset($payload['importId']) ){
-			// TODO: fail if it doesn't exists (prevents double inserts)
-			// also requires locking the row for update and deleting later
-			$importId = array_pop($payload);
-			$db->bulkDAO()->deleteBulkImport($importId);
+		if($importId) {
+			$exists = $db->bulkDAO()->identifierExistsAndLocked($importId);
+			if(!$exists) {
+				throw new StateChangedException('The imported product does not exist anymore, are you trying to create it twice or using an old version of the data?');
+			}
 		}
 
 		// Validation and fixupLocation requires the full parent item, which may not exist.
@@ -250,6 +252,11 @@ class Controller implements RequestHandlerInterface {
 			throw $e;
 		}
 
+		// Remove import once we are sure that product is added
+		if($importId) {
+			$db->bulkDAO()->deleteImport($importId);
+		}
+
 		if($loopback) {
 			$response = new JsonResponse($db->itemDAO()->getItem($item), 201);
 			$response = $response->withHeader('Location', '/v2/items/' . rawurlencode($item->getCode()));
@@ -272,17 +279,23 @@ class Controller implements RequestHandlerInterface {
 		$model = Validation::validateOptionalString($parameters, 'model');
 		$variant = Validation::validateOptionalString($parameters, 'variant');
 		$loopback = isset($query['loopback']);
+		$importId = $importId = Validation::validateOptionalInt($query, 'import');;
 
 		$product = ProductBuilder::ofArray($payload, $brand, $model, $variant);
 
-		if( isset($payload['importId']) ){
-			// TODO: fail if it doesn't exists (prevents double inserts)
-			// also requires locking the row for update and deleting later
-			$importId = array_pop($payload);
-			$db->bulkDAO()->deleteBulkImport($importId);
+		if($importId) {
+			$exists = $db->bulkDAO()->identifierExistsAndLocked($importId);
+			if(!$exists) {
+				throw new StateChangedException('The imported product does not exist anymore, are you trying to create it twice or using an old version of the data?');
+			}
 		}
 
 		$db->productDAO()->addProduct($product);
+
+		// Remove import once we are sure that product is added
+		if($importId) {
+			$db->bulkDAO()->deleteImport($importId);
+		}
 
 		if($loopback) {
 			$response = new JsonResponse($db->productDAO()->getProduct($product), 201);
@@ -665,7 +678,7 @@ class Controller implements RequestHandlerInterface {
 		$body = $request->getAttribute('ParsedBody', []);
 
 		// Locks the row, required for overwriting but also a good idea when adding
-		$isDuplicate = $db->bulkDAO()->checkIdentifierExistsAndLock($identifier);
+		$isDuplicate = $db->bulkDAO()->bulkIdentifierExistsAndLocked($identifier);
 		if(isset($query['overwrite'])) {
 			$db->bulkDAO()->deleteBulkImport($identifier);
 		} else if($isDuplicate) {

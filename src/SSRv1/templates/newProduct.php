@@ -1,8 +1,8 @@
 <?php
 /** @var \WEEEOpen\Tarallo\ProductIncomplete|\WEEEOpen\Tarallo\Product|\WEEEOpen\Tarallo\Item|null $base */
+/** @var int $importedFrom|null */
 
 $base = $base ?? null;
-/** @var int $importedFrom|null */
 if($base instanceof \WEEEOpen\Tarallo\Item) {
 	$baseItem = $base;
 	$base = \WEEEOpen\Tarallo\Product::fromItem($base);
@@ -28,8 +28,8 @@ if($base instanceof \WEEEOpen\Tarallo\Item) {
 			<?php ?>
 
 			<?php elseif(isset($importedFrom)): ?>
-				<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This product is generated from a bulk import ( with Id = <span class="text-monospace"><?= $importedFrom ?> ) </span></div>
-				<?php endif; ?>
+				<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This product is generated from a bulk import</span></div>
+			<?php endif; ?>
 
 		<?php endif; ?>
 	</header>
@@ -39,7 +39,7 @@ if($base instanceof \WEEEOpen\Tarallo\Item) {
 			<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 		</button>
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button"
-			<?= isset($importedFrom) ? 'data-importId="' . (int) $importedFrom . '"' : '' ?>>>
+			<?= isset($importedFrom) ? 'data-importId="' . (int) $importedFrom . '"' : '' ?>>
 			💾&nbsp;Save
 		</button>
 	</nav>

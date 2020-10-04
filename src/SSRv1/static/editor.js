@@ -1253,15 +1253,15 @@
 		request.features = delta;
 		request.contents = contents;
 		//To handle saving imported Items (deletes the raw import)
-		request.importId = importId;
+		let importUri = importId ? '?import=' + importId : '';
 
 		let method, uri;
 		if(code) {
 			method = 'PUT';
-			uri = '/v2/items/' + encodeURIComponent(code);
+			uri = '/v2/items/' + encodeURIComponent(code) + importUri;
 		} else {
 			method = 'POST';
-			uri = '/v2/items';
+			uri = '/v2/items' + importUri;
 		}
 
 		await saveNew(request, uri, method);
@@ -1299,10 +1299,10 @@
 
 		request.features = delta;
 		// To handle saving imported Product (deletes the raw import)
-		request.importId = importId;
+		let importUri = importId ? '?import=' + importId : '';
 
 		let method = 'PUT';
-		let uri = '/v2/products/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant);
+		let uri = '/v2/products/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant) + importUri;
 
 		await saveNew(request, uri, method);
 	}

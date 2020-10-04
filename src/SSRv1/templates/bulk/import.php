@@ -21,7 +21,7 @@ $this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage'
 			</tr>
 			</thead>
 			<tbody>
-				<?php $id=0; foreach($imports as $import): ?>
+				<?php $jsonid=0; foreach($imports as $import): ?>
 					<tr>
 						<td class="align-middle"><?= $this->e($import['BulkIdentifier']) ?></td>
 						<td class="align-middle"><?= $this->e($import['Time']) ?></td>
@@ -30,7 +30,7 @@ $this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage'
 						<!-- Actions Btns -->
 						<td>
 							<form class="text-center" method="post">
-								<button class="btn btn-primary" type="button" data-toggle="collapse" data-target=<?php echo '"#json'.$id.'"'; ?> aria-expanded="false" aria-controls=<?php echo '"json'.$id.'"'; ?>>
+							<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="<?= '#json'.$jsonid; ?>" aria-expanded="false" aria-controls="<?= '#json'.$jsonid; ?>">
 									JSON
 								</button>
 								<button class="btn btn-success" type="submit"
@@ -38,7 +38,7 @@ $this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage'
 									Import
 								</button>
 								<button class="btn btn-danger" type="submit"
-										name="import" value="<?= (int) $import["Identifier"]?>">
+										name="delete" value="<?= (int) $import["Identifier"]?>">
 									Delete
 								</button>
 							</form>
@@ -47,14 +47,14 @@ $this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage'
 				<!-- Hidden JSON -->
 					<tr>
 						<td colspan="5">
-							<div class="collapse" id=<?php echo '"json'.$id.'"'; ?>>
+							<div class="collapse" id="<?= 'json'.$jsonid; ?>">
 								<div>
-									<pre class="prettyprint"><?php echo TemplateUtilities::prettyPrint($import['JSON']);?></pre>
+									<pre class="prettyprint"><?= TemplateUtilities::prettyPrint($import['JSON']); ?></pre>
 								</div>
 							</div>
 						</td>
 					</tr>
-				<?php $id++; endforeach ?>
+				<?php $jsonid++; endforeach ?>
 			</tbody>
 		</table>
 	</div>

@@ -12,8 +12,8 @@ $innerrecursion = $innerrecursion ?? false; // Placed inside another NEW item
 
 $this->layout('main', ['title' => 'New item', 'currentPage' => 'item new']);
 $this->insert('newItem', [
-    'recursion' => $recursion,
-    'innerrecursion' => $innerrecursion,
-    'base' => $base,
+	'recursion' => $recursion,
+	'innerrecursion' => $innerrecursion,
+	'base' => $base,
 	'importedFrom' => $importedFrom,
 ]);
