@@ -1,7 +1,7 @@
 <?php
 
 
-namespace WEEEOpen\Tarallo;
+namespace WEEEOpen\Tarallo\APIv2;
 
 
 use Throwable;
