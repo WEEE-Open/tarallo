@@ -31,6 +31,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('color', 'physical', 2), -- Color --
 	('motherboard-form-factor', 'physical', 2), -- Form factor (motherboard) --
 	('notes', 'general', 0), -- Notes --
+	('gotcha', 'general', 0), -- Gotcha --
 	('agp-sockets-n', 'sockets', 1), -- AGP --
 	('arrival-batch', 'administrative', 0), -- Arrival batch --
 	('capacity-decibyte', 'features', 1), -- Capacity ("decimal" bytes) --
@@ -318,7 +319,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('todo', 'replace-cmos-battery'), -- Replace CMOS battery --
 	('todo', 'finish-testing'), -- Finish testing --
 	('todo', 'finish-inventory'), -- Finish inventory of parts --
-    ('todo', 'see-notes'), -- Finish inventory of parts --
+	('todo', 'see-notes'), -- See notes --
 	('ram-ecc', 'no'), -- No --
 	('ram-ecc', 'yes'), -- Yes --
 	('data-erased', 'yes'), -- Yes️ -- Just don't add the feature if it hasn't been erased...
