@@ -137,7 +137,7 @@
 				}
 			}
 
-			if(featuresElement && item.classList.contains('new')) {
+			if(featuresElement && item.classList.contains('new') && !item.classList.contains('clone')) {
 				let type = findFeatureElement('type', featuresElement);
 				if(type !== null) {
 					setTypeClick(featuresElement, type);

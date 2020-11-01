@@ -7,9 +7,10 @@ if($base instanceof \WEEEOpen\Tarallo\Item) {
 	$baseItem = $base;
 	$base = \WEEEOpen\Tarallo\Product::fromItem($base);
 }
+$isClone = $base instanceof \WEEEOpen\Tarallo\Product && !isset($importedFrom);
 ?>
 
-<article class="container product item new editing root head">
+<article class="container product item new editing root head <?= $isClone ? 'clone' : '' ?>">
 	<header class="row">
 		<h2 class="col-12">
 		<label for="new-product-brand">Brand:</label><input value="<?= ($base instanceof \WEEEOpen\Tarallo\Product) ? $base->getBrand() : '' ?>" maxlength="100" id="new-product-brand">
@@ -21,7 +22,7 @@ if($base instanceof \WEEEOpen\Tarallo\Item) {
 				<div class="inline-alert alert-info" role="alert">
 					<i class="fa fa-info-circle"></i>&nbsp;This product is split from <span class="text-monospace"><?= $this->e($baseItem->getCode()) ?></span>
 				</div>
-			<?php elseif($base instanceof \WEEEOpen\Tarallo\Product && !isset($importedFrom)): ?>
+			<?php elseif($isClone): ?>
 				<div class="inline-alert alert-info" role="alert">
 					<i class="fa fa-info-circle"></i>&nbsp;This is a copy of <?= $this->e($base->getBrand()) . ' ' . $this->e($base->getModel()) . rtrim(' ' . $this->e($base->getVariantOrEmpty())) ?>
 				</div>

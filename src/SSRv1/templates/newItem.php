@@ -21,15 +21,16 @@ if($base === null) {
 		$product = null;
 	}
 }
+$isClone = isset($base) && $base->hasCode();
 
 // to display new inner items, set their $recursion and $innerrecursion to true
 // .head is the beginning of the edit/new subtree, .root is the root of the entire tree
 ?>
 
-<article class="container item new editing <?=$recursion ? '' : 'root'?> <?=$innerrecursion ? '' : 'head'?>">
+<article class="container item new editing <?=$recursion ? '' : 'root'?> <?=$innerrecursion ? '' : 'head'?> <?= $isClone ? 'clone' : '' ?>">
 	<header class="row">
 		<h2 class="col-12"><label>Code: <input class="newcode" placeholder="Automatically generated"></label></h2>
-		<?php if(isset($base) && $base->hasCode()): ?>
+		<?php if($isClone): ?>
 			<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This is a copy of <span class="text-monospace"><?= $base->getCode() ?></span>, remember to change serial numbers, notes, working status, etc...</div>
 		<?php unset($noticeFeature); endif; ?>
 
