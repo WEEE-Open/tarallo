@@ -38,11 +38,11 @@
 	quickMoveButton.addEventListener('click', ev => {
 		if(quickMoveButton.classList.contains("active")) {
 			quickMoveButton.classList.remove("active");
-			quickMove.classList.add("d-none");
+			$(quickMove).collapse('hide');
 			nav.classList.remove("mb-0");
 		} else {
 			quickMoveButton.classList.add("active");
-			quickMove.classList.remove("d-none");
+			$(quickMove).collapse('show');
 			nav.classList.add("mb-0");
 
 			focusQuickMove();
@@ -155,8 +155,6 @@
 		let bar = document.getElementById('quickmove');
 
 		$(bar).collapse('show');
-		// This should be part of .collapse('show');, but it only happens sometimes. Forcing it makes the bar appear half through the animation and then jump to the end and do weird things instead of appearing smoothly, but there's no other way.
-		//bar.classList.remove('d-none');
 		button.classList.add('active');
 		button.setAttribute('aria-expanded', 'true');
 
