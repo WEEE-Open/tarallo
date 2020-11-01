@@ -4,10 +4,18 @@
 /** @var string|null $brand */
 /** @var string|null $model */
 
+if($brand === null && $model === null) {
+	$title = 'All products';
+} elseif($brand !== null && $model === null) {
+	$title = 'Products by ' . $this->e($brand);
+} else {
+	$title = 'Variants of ' . $this->e($brand ?? '') . ' ' . $this->e($model ?? '');
+}
+
 $this->layout(
 	'main',
 	[
-		'title' => 'All products',
+		'title' => $title,
 		'user' => $user,
 		'currentPage' => 'product list',
 	]
@@ -47,14 +55,7 @@ $summarize = function() use ($products) {
 };
 $products = $summarize();
 ?>
-<?php if($brand === null && $model === null): ?>
-	<h2>All products</h2>
-<?php elseif($brand !== null && $model === null): ?>
-	<h2>Products by <?= $this->e($brand) ?></h2>
-<?php else: ?>
-	<h2>Products of type <?= $this->e($brand ?? '') ?> <?= $this->e($model ?? '') ?></h2>
-<?php endif ?>
-
+<h2><?= $title ?></h2>
 <div class="row">
 	<div class="col-12">
 		<table class="table table-borderless stats table-hover">

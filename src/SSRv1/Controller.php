@@ -144,6 +144,19 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
+	public static function getProductsPage(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$brands = $db->statsDAO()->getAllBrands();
+
+		$request = $request->withAttribute('Template', 'productsBrands')->withAttribute('TemplateParameters', ['brands' => $brands]);
+
+		return $handler->handle($request);
+	}
+
+
 	public static function getItemHistory(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
@@ -905,6 +918,7 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/item/{id}/add/{add}', [User::AUTH_LEVEL_RW, 'Controller::getItem',]);
 				$r->get('/item/{id}/edit/{edit}', [User::AUTH_LEVEL_RW, 'Controller::getItem',]);
 				$r->get('/item/{id}/history', [User::AUTH_LEVEL_RO, 'Controller::getItemHistory',]);
+				$r->get('/products', [User::AUTH_LEVEL_RO, 'Controller::getProductsPage',]);
 				$r->get('/product', [User::AUTH_LEVEL_RO, 'Controller::getAllProducts',]);
 				$r->get('/product/{brand}', [User::AUTH_LEVEL_RO, 'Controller::getAllProducts',]);
 				$r->get('/product/{brand}/{model}', [User::AUTH_LEVEL_RO, 'Controller::getAllProducts',]);

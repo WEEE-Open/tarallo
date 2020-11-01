@@ -572,6 +572,28 @@ EOQ
 		}
 	}
 
+	/**
+	 * Get all brands in the database and a count of how many products (not items) are there for each one
+	 *
+	 * @return array Associative array with rows of [brand, products count]
+	 */
+	public function getAllBrands(): array {
+		$statement = $this->getPDO()->prepare(<<<EOQ
+			SELECT Brand, COUNT(*) AS Products
+			FROM Product
+			GROUP BY Brand
+			ORDER BY Brand
+EOQ
+		);
+		try {
+			$result = $statement->execute();
+			assert($result === true, 'get brands and count');
+			return $statement->fetchAll(\PDO::FETCH_NUM);
+		} finally{
+			$statement->closeCursor();
+		}
+	}
+
 	public function getAllItemsOfProduct(ProductCode $product): array {
 		$statement = $this->getPDO()->prepare(<<<EOQ
 		SELECT Code
