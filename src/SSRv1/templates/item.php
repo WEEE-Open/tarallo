@@ -50,7 +50,12 @@ $summary_escaped = array_map([$this, 'e'], explode(', ', $summary));
 unset($summary);
 
 $product = $item->getProduct();
-if($product !== null) {
+$missingProduct = false;
+if($product === null) {
+	if($item->getFeatureValue('brand') !== null && $item->getFeatureValue('model') !== null) {
+		$missingProduct = true;
+	}
+} else {
 	$productName = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) . rtrim(' ' . $this->e($product->getVariantOrEmpty()));
 }
 
@@ -65,6 +70,9 @@ $here = rtrim($self, '/') . '/';
 	<header class="row">
 		<h2 class="col-12" id="code-<?=$code_escaped?>"><?=$code_escaped?></h2>
 		<?php if($deletedAt === null): ?>
+			<?php if($missingProduct): ?>
+				<div class="inline-alert alert-serious" role="alert">🏷️️️&nbsp;This item has no product: <a href="/new/product?split=<?=$code_escaped?>">create it now!</a></div>
+			<?php endif ?>
             <?php if($item->getFeature('restrictions') !== null): ?>
                 <div class="inline-alert alert-info" role="alert">ℹ️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
                     ($item->getFeature('restrictions'), $lang ?? 'en'))->pvalue; ?></div>

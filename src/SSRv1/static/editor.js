@@ -106,14 +106,16 @@
 			}
 		}
 		// Page may contain some non-head new items open for editing.
-		// This happens mostly (possibly only) when cloning another item.
+		// This happens mostly (possibly only) when cloning another item that contains other ones.
 		// And we need to activate their buttons...
 		for(let clone of itemEditing.querySelectorAll('.item.new.editing:not(head)')) {
 			enableNewItemButtons(clone);
 		}
 
+		// Enable the cancel button
 		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack.bind(null, null, true));
 
+		// For each item open for editing
 		for(let item of document.querySelectorAll('.item.editing')) {
 			let featuresElement = null;
 			let addFeaturesElement = null;
@@ -135,7 +137,14 @@
 				}
 			}
 
-			// Find "add" button and add listener
+			if(featuresElement && item.classList.contains('new')) {
+				let type = findFeatureElement('type', featuresElement);
+				if(type !== null) {
+					setTypeClick(featuresElement, type);
+				}
+			}
+
+			// Find "add [feature]" button and add listener
 			if(addFeaturesElement) {
 				let addFeatureButton = addFeaturesElement.querySelector('button');
 				addFeatureButton.addEventListener('click', addFeatureClick.bind(null, addFeaturesElement.querySelector('select'), featuresElement, deletedFeatures));
@@ -855,7 +864,7 @@
 	 * Add empty features according to object type, if nothing other than type has been added.
 	 *
 	 * @param {HTMLElement} featuresElement - The "own features" element
-	 * @param {HTMLSelectElement} featureElement - The feature element itself, to get type
+	 * @param {HTMLElement|Element} featureElement - The feature element itself, to get type
 	 */
 	function setTypeClick(featuresElement, featureElement) {
 		let features;
