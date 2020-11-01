@@ -307,7 +307,6 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('todo', 'transplant'), -- Transplant into another case --
 	('todo', 'container'), -- Container for transplant --
 	('todo', 'install-os'), -- Install OS --
-	('todo', 'finish-os-install'), -- Finish OS installation 🍑 --
 	('todo', 'replace-capacitors'), -- Replace blown capacitors --
 	('todo', 'replace-temp-parts'), -- Replace temporary parts --
 	('todo', 'remove-from-computer'), -- Remove from computer --
@@ -319,6 +318,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('todo', 'replace-cmos-battery'), -- Replace CMOS battery --
 	('todo', 'finish-testing'), -- Finish testing --
 	('todo', 'finish-inventory'), -- Finish inventory of parts --
+    ('todo', 'see-notes'), -- Finish inventory of parts --
 	('ram-ecc', 'no'), -- No --
 	('ram-ecc', 'yes'), -- Yes --
 	('data-erased', 'yes'), -- Yes️ -- Just don't add the feature if it hasn't been erased...

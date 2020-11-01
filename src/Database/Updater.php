@@ -680,6 +680,11 @@ END;");
 				case 18:
 					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('cnr-sockets-n', 'sockets', 1)");
 					break;
+				case 19:
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('todo', 'see-note')");
+					$this->exec("UPDATE `ItemFeature` SET `ValueEnum`='install-os' WHERE `Feature`='todo' AND `ValueEnum`='finish-os-install'");
+					$this->exec("DELETE FROM `FeatureEnum` WHERE `Feature`='todo' AND `ValueEnum`='finish-os-install'");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

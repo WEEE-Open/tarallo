@@ -100,7 +100,7 @@ class BaseFeature {
 		'spin-rate-rpm' => self::INTEGER,
 		'dms-59-ports-n' => self::INTEGER,
 		'check' => ['missing-data' => true, 'partial-inventory' => true, 'wrong-data' => true],
-		'todo' => ['transplant' => true, 'container' => true, 'install-os' => true, 'finish-os-install' => true, 'replace-capacitors' => true, 'replace-temp-parts' => true, 'remove-from-computer' => true, 'replace-broken-parts' => true, 'replace-elec-components' => true, 'add-parts' => true, 'salvage-parts' => true, 'thermal-paste' => true, 'replace-cmos-battery' => true, 'finish-testing' => true, 'finish-inventory' => true],
+		'todo' => ['transplant' => true, 'container' => true, 'install-os' => true, 'replace-capacitors' => true, 'replace-temp-parts' => true, 'remove-from-computer' => true, 'replace-broken-parts' => true, 'replace-elec-components' => true, 'add-parts' => true, 'salvage-parts' => true, 'thermal-paste' => true, 'replace-cmos-battery' => true, 'finish-testing' => true, 'finish-inventory' => true],
 		'ram-ecc' => ['no' => true, 'yes' => true],
 		'other-code' => self::STRING,
 		'hdmi-ports-n' => self::INTEGER,
