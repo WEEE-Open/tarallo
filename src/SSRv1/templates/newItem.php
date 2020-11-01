@@ -83,7 +83,7 @@ $isClone = isset($base) && $base->hasCode();
 		<label>Feature:
 			<select class="allfeatures">
 			</select></label>
-		<button>Add</button>
+		<button class="btn btn-primary ml-2">Add</button>
 	</section>
 
 	<nav class="itembuttons secondary row mx-2 mt-2 justify-content-end">

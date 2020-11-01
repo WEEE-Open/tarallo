@@ -34,11 +34,11 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 		</div>
 		<div id="search-control-features" class="hidden">
 			<label class="searchby">Features:</label>
-			<div class="filter"><div class="own features"><ul></ul></div><div class="selector"><label>Feature:<select class="allfeatures"></select></label><button>Add</button></div></div>
+			<div class="filter"><div class="own features"><ul></ul></div><div class="selector"><label>Feature:<select class="allfeatures"></select></label><button class="btn btn-primary ml-2">Add</button></div></div>
 		</div>
 		<div id="search-control-ancestor" class="hidden">
 			<label class="searchby">Ancestor:</label>
-			<div class="filter"><div class="own features"><ul></ul></div><div class="selector"><label>Feature:<select class="allfeatures"></select></label><button>Add</button></div></div>
+			<div class="filter"><div class="own features"><ul></ul></div><div class="selector"><label>Feature:<select class="allfeatures"></select></label><button class="btn btn-primary ml-2">Add</button></div></div>
 		</div>
 		<div id="search-control-sort" class="hidden">
 			<label class="searchby" for="search-control-sort-input">Order by:</label>

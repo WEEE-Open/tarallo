@@ -80,7 +80,7 @@ $copyQuery = http_build_query([
 		<section class="addfeatures">
 			<label>Feature:
 				<select class="allfeatures">
-				</select></label><button>Add</button>
+				</select></label><button class="btn btn-primary ml-2">Add</button>
 		</section>
 	<?php else: ?>
 		<section class="features collapse" id="collapsible-features-product">

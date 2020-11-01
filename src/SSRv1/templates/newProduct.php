@@ -7,7 +7,7 @@ if($base instanceof \WEEEOpen\Tarallo\Item) {
 	$baseItem = $base;
 	$base = \WEEEOpen\Tarallo\Product::fromItem($base);
 }
-$isClone = $base instanceof \WEEEOpen\Tarallo\Product && !isset($importedFrom);
+$isClone = !isset($baseItem) && $base instanceof \WEEEOpen\Tarallo\Product && !isset($importedFrom);
 ?>
 
 <article class="container product item new editing root head <?= $isClone ? 'clone' : '' ?>">
@@ -55,7 +55,7 @@ $isClone = $base instanceof \WEEEOpen\Tarallo\Product && !isset($importedFrom);
 		<label>Feature:
 			<select class="allfeatures">
 			</select></label>
-		<button>Add</button>
+		<button class="btn btn-primary ml-2">Add</button>
 	</section>
 
 	<nav class="itembuttons secondary row mx-2 mt-2 justify-content-end">
