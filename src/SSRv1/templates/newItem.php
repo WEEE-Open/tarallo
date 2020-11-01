@@ -45,11 +45,11 @@ if($base === null) {
 			</button>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button"
 					<?= isset($importedFrom) ? 'data-importId="' . (int) $importedFrom . '"' : '' ?>>
-				💾&nbsp;Save
+				<i class="fa fa-save"></i>&nbsp;Save
 			</button>
 		<?php else: ?>
 			<button class="btn btn-outline-danger btn-item col-4 col-sm-auto removenew" role="button">
-				❌&nbsp;Delete
+				<i class="fa fa-trash"></i>&nbsp;Delete
 			</button>
 		<?php endif ?>
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto addnew" role="button">
@@ -87,7 +87,7 @@ if($base === null) {
 
 	<nav class="itembuttons secondary row mx-2 mt-2 justify-content-end">
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto removeemptyfeatures" title="Remove empty features" role="button">
-			🧽&nbsp;Clean
+			<i class="fa fa-eraser"></i>&nbsp;Clean
 		</button>
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto addnew" role="button">
 			<i class="fa fa-plus-circle"></i>&nbsp;More

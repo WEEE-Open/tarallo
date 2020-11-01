@@ -39,10 +39,10 @@ $copyQuery = http_build_query([
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 			</button>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button">
-				💾&nbsp;Save
+				<i class="fa fa-save"></i>&nbsp;Save
 			</button>
 			<button class="btn btn-outline-danger btn-item col-4 col-sm-auto removenew" role="button" disabled>
-				❌&nbsp;Delete
+				<i class="fa fa-trash"></i>&nbsp;Delete
 			</button>
 		<?php else: ?>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>edit?from=<?= $this->e(rawurlencode($here)) ?>">
@@ -55,7 +55,7 @@ $copyQuery = http_build_query([
 				<i class="fa fa-globe"></i>&nbsp;Details
 			</a>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/product/<?= $bmv_rawurlencoded ?>/items">
-				🖥&nbsp;Items
+				<i class="fa fa-cubes"></i>&nbsp;Items
 			</a>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/product/<?= $bmv_rawurlencoded ?>/history">
 				<i class="fa fa-users"></i>&nbsp;History

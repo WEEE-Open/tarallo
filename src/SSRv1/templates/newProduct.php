@@ -40,7 +40,7 @@ if($base instanceof \WEEEOpen\Tarallo\Item) {
 		</button>
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button"
 			<?= isset($importedFrom) ? 'data-importId="' . (int) $importedFrom . '"' : '' ?>>
-			💾&nbsp;Save
+			<i class="fa fa-save"></i>&nbsp;Save
 		</button>
 	</nav>
 
@@ -59,7 +59,7 @@ if($base instanceof \WEEEOpen\Tarallo\Item) {
 
 	<nav class="itembuttons secondary row mx-2 mt-2 justify-content-end">
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto removeemptyfeatures" title="Remove empty features" role="button">
-			🧽&nbsp;Clean
+			<i class="fa fa-eraser"></i>&nbsp;Clean
 		</button>
 	</nav>
 </article>

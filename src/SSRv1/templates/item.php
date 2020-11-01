@@ -71,25 +71,25 @@ $here = rtrim($self, '/') . '/';
 		<h2 class="col-12" id="code-<?=$code_escaped?>"><?=$code_escaped?></h2>
 		<?php if($deletedAt === null): ?>
 			<?php if($missingProduct): ?>
-				<div class="inline-alert alert-serious" role="alert">🏷️️️&nbsp;This item has no product: <a href="/new/product?split=<?=$code_escaped?>">create it now!</a></div>
+				<div class="inline-alert alert-serious" role="alert"><i class="fa fa-tag"></i>&nbsp;This item has no product: <a href="/new/product?split=<?=$code_escaped?>">create it now!</a></div>
 			<?php endif ?>
             <?php if($item->getFeature('restrictions') !== null): ?>
-                <div class="inline-alert alert-info" role="alert">ℹ️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
+                <div class="inline-alert alert-info" role="alert"><i class="fa fa-flag-checkered"></i>&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
                     ($item->getFeature('restrictions'), $lang ?? 'en'))->pvalue; ?></div>
             <?php endif; ?>
             <?php if($item->getFeature('check') !== null): ?>
-                <div class="inline-alert alert-warning" role="alert">⚠️️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
+                <div class="inline-alert alert-warning" role="alert"><i class="fa fa-exclamation-triangle"></i>&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
                     ($item->getFeature('check'), $lang ?? 'en'))->pvalue; ?></div>
             <?php endif; ?>
             <?php if($item->getFeature('todo') !== null): ?>
-                <div class="inline-alert alert-info" role="alert">➡️️️&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
+				<div class="inline-alert alert-info" role="alert"><i class="fa fa-hourglass-start"></i>&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
                     ($item->getFeature('todo'), $lang ?? 'en'))->pvalue; ?></div>
             <?php endif; ?>
 		<?php else: ?>
-			<div class="inline-alert alert-danger" role="alert">❌️️&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
+			<div class="inline-alert alert-danger" role="alert"><i class="fa fa-trash"></i>&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 		<?php endif; ?>
 		<?php if($lostAt !== null): ?>
-            <div class="inline-alert alert-serious" role="alert">🏷️️️&nbsp;This item has been lost on <?= $lostAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
+            <div class="inline-alert alert-serious" role="alert"><i class="fa fa-archive"></i>&nbsp;This item has been lost on <?= $lostAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 		<?php endif; ?>
 	</header>
 
@@ -99,14 +99,14 @@ $here = rtrim($self, '/') . '/';
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 			</button>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button">
-				💾&nbsp;Save
+				<i class="fa fa-save"></i>&nbsp;Save
 			</button>
 			<?php if(!$containsMore): ?>
 				<button class="btn btn-outline-primary btn-item col-4 col-sm-auto lost" role="button">
-					🏷&nbsp;Lost
+					<i class="fa fa-archive"></i>&nbsp;Lost
 				</button>
 				<button class="btn btn-outline-danger btn-item col-4 col-sm-auto delete" role="button">
-					❌&nbsp;Delete
+					<i class="fa fa-trash"></i>&nbsp;Delete
 				</button>
 			<?php endif ?>
 		<?php elseif(!$adding && !$editing): ?>
