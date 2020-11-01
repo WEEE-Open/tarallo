@@ -25,7 +25,7 @@ $copyQuery = http_build_query([
 	'copy-brand' => $product->getBrand(),
 	'copy-model' => $product->getModel(),
 	'copy-variant' => $product->getVariant(),
-]);
+], null, '&', PHP_QUERY_RFC3986);
 ?>
 
 <article class="container item root <?=$editing ? ' head editing' : ''?>" data-brand="<?=$this->e($product->getBrand())?>" data-model="<?=$this->e($product->getModel())?>" data-variant="<?=$this->e($product->getVariant())?>">
@@ -53,6 +53,9 @@ $copyQuery = http_build_query([
 			</a>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-product" role="button" aria-expanded="false" aria-controls="#collapsible-features-product">
 				<i class="fa fa-globe"></i>&nbsp;Details
+			</a>
+			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/item?<?= $this->e($copyQuery) ?>">
+				<i class="fa fa-cube"></i>&nbsp;Create Item
 			</a>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/product/<?= $bmv_rawurlencoded ?>/items">
 				<i class="fa fa-cubes"></i>&nbsp;Items

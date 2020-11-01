@@ -236,8 +236,24 @@ class Controller implements RequestHandlerInterface {
 	public static function addItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$query = $request->getQueryParams();
 		$from = Validation::validateOptionalString($query, 'copy', null);
+		$copyBrand = Validation::validateOptionalString($query, 'copy-brand', null, null);
+		$copyModel = Validation::validateOptionalString($query, 'copy-model', null, null);
+		$copyVariant = Validation::validateOptionalString($query, 'copy-variant', null, null);
 
-		if($from === null) {
+		if($copyBrand !== null && $copyModel !== null && $copyVariant !== null) {
+			/** @var Database $db */
+			$db = $request->getAttribute('Database');
+			$product = $db->productDAO()->getProduct(new ProductCode($copyBrand, $copyModel, $copyVariant));
+			$type = $product->getFeature('type');
+
+			$from = new ItemIncomplete(null);
+			$from->addFeature(new Feature('brand', $copyBrand));
+			$from->addFeature(new Feature('model', $copyModel));
+			$from->addFeature(new Feature('variant', $copyVariant));
+			if($type !== null) {
+				$from->addFeature($type);
+			}
+		} elseif($from === null) {
 			$from = new ItemIncomplete(null);
 			$from->addFeature(new BaseFeature('type'));
 			$from->addFeature(new BaseFeature('brand'));

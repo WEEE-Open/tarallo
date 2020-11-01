@@ -8,7 +8,18 @@ $title = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) .
 $this->layout('main', ['title' => "All $title", 'user' => $user]);
 ?>
 
-<h2><?= $title ?> (<?= count($items) ?> items)</h2>
+<h2><?= $title ?> (<?= count($items) ?> item<?= count($items) === 1 ? '' : 's' ?>)</h2>
+
+<?php
+$copyQuery = http_build_query([
+	'copy-brand' => $product->getBrand(),
+	'copy-model' => $product->getModel(),
+	'copy-variant' => $product->getVariant(),
+], null, '&', PHP_QUERY_RFC3986);
+?>
+<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/item?<?= $this->e($copyQuery) ?>">
+	<i class="fa fa-cube"></i>&nbsp;Create Item
+</a>
 
 <div class="results">
 	<?php foreach($items as $item) {
