@@ -49,7 +49,7 @@ $copyQuery = http_build_query([
 				<i class="fa fa-cogs"></i>&nbsp;Edit
 			</a>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/product?<?= $this->e($copyQuery) ?>">
-				<i class="fa fa-object-group"></i>&nbsp;Copy
+				<i class="fa fa-object-group"></i>&nbsp;Clone
 			</a>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-product" role="button" aria-expanded="false" aria-controls="#collapsible-features-product">
 				<i class="fa fa-globe"></i>&nbsp;Details

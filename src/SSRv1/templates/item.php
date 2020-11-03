@@ -118,7 +118,7 @@ $here = rtrim($self, '/') . '/';
 					<i class="fa fa-cogs"></i>&nbsp;Edit
 				</a>
 				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="/new/item?copy=<?= $code_rawurlencoded ?>">
-					<i class="fa fa-object-group"></i>&nbsp;Copy
+					<i class="fa fa-object-group"></i>&nbsp;Clone
 				</a>
 				<?php if($product === null && $item->getFeatureValue('brand') !== null && $item->getFeatureValue('model') !== null && $item->getFeatureValue('variant') !== null): ?>
 				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="/new/product?split=<?= $code_rawurlencoded ?>">
