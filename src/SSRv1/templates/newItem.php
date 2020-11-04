@@ -29,7 +29,11 @@ $isClone = isset($base) && $base->hasCode();
 
 <article class="container item new editing <?=$recursion ? '' : 'root'?> <?=$innerrecursion ? '' : 'head'?> <?= $isClone ? 'clone' : '' ?>">
 	<header class="row">
-		<h2 class="col-12"><label>Code: <input class="newcode" placeholder="Automatically generated"></label></h2>
+		<div class="col-12 row identity">
+			<div class="col-12 form-inline">
+				<label>Code:<input class="newcode form-control ml-sm-2" placeholder="Automatically generated"></label>
+			</div>
+		</div>
 		<?php if($isClone): ?>
 			<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This is a copy of <span class="text-monospace"><?= $base->getCode() ?></span>, remember to change serial numbers, notes, working status, etc...</div>
 		<?php unset($noticeFeature); endif; ?>

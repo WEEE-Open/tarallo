@@ -12,7 +12,7 @@ $isClone = !isset($baseItem) && $base instanceof \WEEEOpen\Tarallo\Product && !i
 
 <article class="container product item new editing root head <?= $isClone ? 'clone' : '' ?>">
 	<header class="row">
-		<div class="col-12 row productheader">
+		<div class="col-12 row identity">
 			<div class="form-group col-lg-4 col-12"><label for="new-product-brand" class="col-12">Brand:</label><input class="mx-1 col-12 form-control" value="<?= ($base instanceof \WEEEOpen\Tarallo\Product) ? $base->getBrand() : '' ?>" maxlength="100" id="new-product-brand"></div>
 			<div class="form-group col-lg-4 col-12"><label for="new-product-model" class="col-12">Model:</label><input class="mx-1 col-12 form-control" value="<?= ($base instanceof \WEEEOpen\Tarallo\Product) ? $base->getModel() : '' ?>" maxlength="100" id="new-product-model"></div>
 			<div class="form-group col-lg-4 col-12"><label for="new-product-variant" class="col-12">Variant:</label><input class="ml-1 col-12 form-control" value="<?= ($base instanceof \WEEEOpen\Tarallo\Product) ? $base->getVariant() : \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT ?>" maxlength="100" id="new-product-variant"></div>

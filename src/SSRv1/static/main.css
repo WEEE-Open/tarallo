@@ -186,16 +186,13 @@ ul.breadcrumbs li:not(:first-child)::before {
 	/* Secret vaporwave mode => background: linear-gradient(to bottom, rgba(255,113,205,1) 0%, rgba(1,203,254,1) 100%);*/
 }
 
-.item .productheader {
+.item .identity {
 	margin: 0;
 	font-size: 1.2rem;
 	background-color: #333;
 	color: #eee;
-	padding: 0.32em;
-}
-
-.item .productheader label {
-	padding-left: 5px;
+	padding-top: 0.5rem;
+	padding-bottom: 0.5rem;
 }
 
 .deleted.item h2, .deleted.item .features {
