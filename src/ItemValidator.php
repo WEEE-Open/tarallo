@@ -368,7 +368,7 @@ class ItemValidator {
 	}
 
 	/**
-	 * Get default feature names (i.e. most common ones) for an item type
+	 * Get default feature names (i.e. most common ones) for a product type
 	 *
 	 * @param string $type Item type
 	 *
@@ -500,7 +500,7 @@ class ItemValidator {
 			case 'monitor':
 				return [
 					'cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code',
-					'brand', 'model', 'variant', 'working', 'sn', 'arrival-batch', 'owner', 'notes',
+					'brand', 'model', 'working', 'sn', 'arrival-batch', 'owner', 'notes',
 				];
 			default: // Includes all these cases
 //			case 'cpu':
@@ -520,7 +520,7 @@ class ItemValidator {
 //			case 'keyboard':
 //			case 'mouse':
 				return [
-					'brand', 'model', 'variant', 'working', 'sn', 'owner'
+					'brand', 'model', 'working', 'sn', 'owner'
 				];
 			case 'motherboard':
 			case 'ethernet-card':
@@ -528,12 +528,12 @@ class ItemValidator {
 			case 'wifi-card':
 			case 'modem-router':
 				return [
-					'brand', 'model', 'variant', 'working', 'mac', 'sn', 'owner', 'notes'
+					'brand', 'model', 'working', 'mac', 'sn', 'owner', 'notes'
 				];
 			case 'hdd':
 			case 'ssd':
 				return [
-					'brand', 'model', 'variant', 'working', 'sn', 'wwn',
+					'brand', 'model', 'working', 'sn', 'wwn',
 					'data-erased', 'surface-scan', 'smart-data', 'software', 'owner',
 				];
 			case 'ports-bracket':
