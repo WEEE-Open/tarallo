@@ -24,6 +24,27 @@ class ProductDAOTest extends DatabaseTest {
 		$this->assertEquals($product, $gettedProduct);
 	}
 
+	public function testProductExists1() {
+		$db = $this->getDb();
+
+		$product = new Product('Intel', 'Centrino DellaNonna', 'SLABC');
+
+		$this->expectException(NotFoundException::class);
+		$db->productDAO()->productMustExist($product);
+	}
+
+	public function testProductExists2() {
+		$db = $this->getDb();
+
+		$product = new Product('Intel', 'Centrino DellaNonna', 'SLABC');
+
+		$db->productDAO()->addProduct($product);
+		$db->productDAO()->productMustExist($product);
+
+		$theProductAgain = $db->productDAO()->getProduct($product);
+		$this->assertEquals($product, $theProductAgain);
+	}
+
 	public function testProductDifferentObject() {
 		$db = $this->getDb();
 
