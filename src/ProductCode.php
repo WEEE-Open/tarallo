@@ -13,33 +13,24 @@ class ProductCode {
 	/**
 	 * Product constructor.
 	 *
-	 * @param string $brand
-	 * @param string $model
-	 * @param string $variant
+	 * @param string $brand Brand
+	 * @param string $model Model
+	 * @param string|null $variant Variant, if not set the default will be used
 	 */
-	public function __construct(string $brand, string $model, string $variant = self::DEFAULT_VARIANT) {
+	public function __construct(string $brand, string $model, ?string $variant = null) {
 		$this->brand = $brand;
 		$this->model = $model;
-		$this->variant = $variant;
+		$this->variant = $variant ?? self::DEFAULT_VARIANT;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getBrand(): string {
 		return $this->brand;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getModel(): string {
 		return $this->model;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getVariant(): string {
 		return $this->variant;
 	}
