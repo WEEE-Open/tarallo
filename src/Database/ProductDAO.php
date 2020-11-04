@@ -180,7 +180,7 @@ final class ProductDAO extends DAO{
 	public function productMustExist(ProductCode $product) {
 		$statement = $this
 			->getPDO()
-			->prepare('SELECT `Brand`, `Model`, `Variant` FROM Product WHERE `Brand` = :b, `Model` = :m, `Variant` = :v FOR UPDATE');
+			->prepare('SELECT `Brand`, `Model`, `Variant` FROM Product WHERE `Brand` = :b AND `Model` = :m AND `Variant` = :v FOR UPDATE');
 		try {
 			$statement->execute([$product->getBrand(), $product->getModel(), $product->getVariant()]);
 			if($statement->rowCount() === 0) {
