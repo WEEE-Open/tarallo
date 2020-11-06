@@ -3,7 +3,7 @@
 /** @var array $incomplete */
 /** @var array $splittable */
 /** @var int[] $brandsProducts */
-$this->layout('main', ['title' => 'Stats: items that need attention', 'user' => $user, 'currentPage' => 'stats', 'tooltips' => true]);
+$this->layout('main', ['title' => 'Stats: products', 'user' => $user, 'currentPage' => 'stats', 'tooltips' => true]);
 $this->insert('stats::menu', ['currentPage' => 'products']);
 ?>
 
