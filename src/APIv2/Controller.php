@@ -241,6 +241,10 @@ class Controller implements RequestHandlerInterface {
 			ItemValidator::validateFeatures($item);
 		}
 
+		if($item->getFeature('variant') === null) {
+			$item->addFeature(new Feature('variant', ProductCode::DEFAULT_VARIANT));
+		}
+
 		try {
 			$db->itemDAO()->addItem($item, $parent);
 		} catch(ItemPrefixerException $e) {
