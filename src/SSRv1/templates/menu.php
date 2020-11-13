@@ -34,7 +34,7 @@ $hereSr = function($page, $current) {
 				</a>
 				<div class="dropdown-menu" aria-labelledby="productsDropdown">
 					<a class="dropdown-item <?= $hereClass('product new', $currentPage) ?>" href="/new/product">Create<?= $hereSr('product new', $currentPage) ?></a>
-					<a class="dropdown-item <?= $hereClass('product list', $currentPage) ?>" href="/product">List<?= $hereSr('product list', $currentPage) ?></a>
+					<a class="dropdown-item <?= $hereClass('product list', $currentPage) ?>" href="/products">List<?= $hereSr('product list', $currentPage) ?></a>
 				</div>
 			</li>
 			<li class="nav-item">
