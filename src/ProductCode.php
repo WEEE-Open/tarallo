@@ -42,4 +42,8 @@ class ProductCode {
 			return $this->variant;
 		}
 	}
+
+	public function __toString() {
+		return "$this->brand $this->model $this->variant";
+	}
 }

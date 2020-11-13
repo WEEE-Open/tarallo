@@ -192,4 +192,30 @@ final class ProductDAO extends DAO{
 			$statement->closeCursor();
 		}
 	}
+
+	/**
+	 * Count how many items does the product and lock the corresponding rows in the items table
+	 * (also prevents inserts)
+	 *
+	 * @param ProductCode $product
+	 *
+	 * @return int Number of items
+	 * @see ProductDAO::productMustExist()
+	 */
+	public function countItemsAndLock(ProductCode $product): int {
+		// Oddly, this works.
+		// I've tested it from the console. It really works. It only locks the matching rows.
+		// They are really locked. The queries are waiting. They cannot be modified.
+		// Written in this form, it would throw an error on Postgres or Oracle, and yet it works on MariaDB...
+		$statement = $this
+			->getPDO()
+			->prepare('SELECT COUNT(*) FROM Item WHERE `Brand` = :b AND `Model` = :m AND `Variant` = :v FOR UPDATE');
+		try {
+			$statement->execute([$product->getBrand(), $product->getModel(), $product->getVariant()]);
+			$result = $statement->fetchAll(\PDO::FETCH_NUM);
+			return (int) $result[0][0];
+		} finally {
+			$statement->closeCursor();
+		}
+	}
 }

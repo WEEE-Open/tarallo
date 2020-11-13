@@ -27,6 +27,7 @@ use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ProductCode;
+use WEEEOpen\Tarallo\ProductException;
 use WEEEOpen\Tarallo\SearchException;
 use WEEEOpen\Tarallo\StateChangedException;
 use WEEEOpen\Tarallo\User;
@@ -358,6 +359,7 @@ class Controller implements RequestHandlerInterface {
 	public static function deleteProduct(ServerRequestInterface $request): ResponseInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
 		$parameters = $request->getAttribute('parameters', []);
 
 		$brand = Validation::validateOptionalString($parameters, 'brand');
@@ -365,6 +367,15 @@ class Controller implements RequestHandlerInterface {
 		$variant = Validation::validateOptionalString($parameters, 'variant');
 
 		$product = new ProductCode($brand, $model, $variant);
+
+		$db->productDAO()->productMustExist($product);
+
+		if(!isset($query['force'])) {
+			$count = $db->productDAO()->countItemsAndLock($product);
+			if($count > 0) {
+				throw new ProductException($product, "There are $count items of $product, you can only delete products that are not referenced by any item");
+			}
+		}
 
 		$found = $db->productDAO()->deleteProduct($product);
 
