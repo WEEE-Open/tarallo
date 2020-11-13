@@ -373,7 +373,12 @@ class Controller implements RequestHandlerInterface {
 		if(!isset($query['force'])) {
 			$count = $db->productDAO()->countItemsAndLock($product);
 			if($count > 0) {
-				throw new ProductException($product, "There are $count items of $product, you can only delete products that are not referenced by any item");
+				if($count === 1) {
+					$message = "There is 1 item of $product, you can only delete products that are not referenced by any item";
+				} else {
+					$message = "There are $count items of $product, you can only delete products that are not referenced by any item";
+				}
+				throw new ProductException($product, $message);
 			}
 		}
 
