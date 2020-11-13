@@ -1356,14 +1356,34 @@
 
 	async function deleteClick(ev) {
 		ev.preventDefault();
-		let code = ev.currentTarget.parentElement.dataset.forItem;
-		let go = confirm(`Delete item ${code}: are you sure? Really? REALLY?`);
+		let dataset = ev.currentTarget.parentElement.parentElement.dataset;
+		let code = dataset.code;
+		let brand = dataset.brand;
+		let model = dataset.model;
+		let variant = dataset.variant;
+		let variantIsDefault = dataset.variantIsDefault === 'true';
+
+		let isItem = typeof code !== 'undefined';
+
+		let go;
+
+		if(isItem) {
+			go = confirm(`Delete item ${code}: are you sure? Really? REALLY?`);
+		} else {
+			let variantDisplayed = variantIsDefault ? '' : (' ' + variant);
+			go = confirm(`Delete product ${brand} ${model}${variantDisplayed}: are you sure? Really? REALLY?`);
+		}
+
 		if(go) {
 			toggleButtons(true);
 
 			let method, uri;
 			method = 'DELETE';
-			uri = '/v2/items/' + encodeURIComponent(code);
+			if(isItem) {
+				uri = '/v2/items/' + encodeURIComponent(code);
+			} else {
+				uri = '/v2/products/' + encodeURIComponent(brand) + '/' + encodeURIComponent(model) + '/' + encodeURIComponent(variant);
+			}
 
 			try {
 				let response = await fetchWithTimeout(uri, {
@@ -1396,7 +1416,7 @@
 	}
 
 	async function lostClick(ev) {
-		let code = ev.currentTarget.parentElement.dataset.forItem;
+		let code = ev.currentTarget.parentElement.parentElement.dataset.code;
 		toggleButtons(true);
 
 		let method, uri;

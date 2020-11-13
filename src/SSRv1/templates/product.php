@@ -28,7 +28,7 @@ $copyQuery = http_build_query([
 ], null, '&', PHP_QUERY_RFC3986);
 ?>
 
-<article class="container item root <?=$editing ? ' head editing' : ''?>" data-brand="<?=$this->e($product->getBrand())?>" data-model="<?=$this->e($product->getModel())?>" data-variant="<?=$this->e($product->getVariant())?>">
+<article class="container item root <?=$editing ? ' head editing' : ''?>" data-brand="<?=$this->e($product->getBrand())?>" data-model="<?=$this->e($product->getModel())?>" data-variant="<?=$this->e($product->getVariant())?>" data-variant-is-default="<?= (string) (bool) ($product->getVariant() === \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT) ?>">
 	<header class="row">
 		<h2 class="col-12" id="code-<?=$this->e($product->getBrand())?>-<?=$this->e($product->getModel())?>-<?=$this->e($product->getVariant())?>"><?= $brandModel ?><small><?= $maybeVariant ?></small></h2>
 	</header>
@@ -41,7 +41,7 @@ $copyQuery = http_build_query([
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button">
 				<i class="fa fa-save"></i>&nbsp;Save
 			</button>
-			<button class="btn btn-outline-danger btn-item col-4 col-sm-auto removenew" role="button" disabled>
+			<button class="btn btn-outline-danger btn-item col-4 col-sm-auto delete" role="button">
 				<i class="fa fa-trash"></i>&nbsp;Delete
 			</button>
 		<?php else: ?>

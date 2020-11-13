@@ -93,7 +93,7 @@ $here = rtrim($self, '/') . '/';
 		<?php endif; ?>
 	</header>
 
-	<nav class="itembuttons row mx-md-2 mt-md-2" data-for-item="<?=$this->e($item->getCode())?>">
+	<nav class="itembuttons row mx-md-2 mt-md-2">
 		<?php if($editing && $target): ?>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
