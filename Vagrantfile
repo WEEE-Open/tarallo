@@ -55,7 +55,7 @@ Vagrant.configure("2") do |config|
     up.privileged = false
     up.inline = "php /var/www/html/server/bin/update.php test_db"
   end
-  config.vm.provision "example_data", type: "shell" do |up|
+  config.vm.provision "example_data", type: "shell", run: "always"  do |up|
     up.privileged = false
     up.inline = "php /var/www/html/server/bin/create_example_data.php"
   end
