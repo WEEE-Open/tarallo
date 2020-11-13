@@ -113,6 +113,8 @@ final class ProductDAO extends DAO{
 	 * @param string|null $brand
 	 * @param string|null $model
 	 * @param string|null $variant
+	 *
+	 * @return ProductCode New code
 	 */
 	public function renameProduct(ProductCode $product, ?string $brand, ?string $model, ?string $variant) {
 		if($brand === null && $model === null && $variant === null) {
