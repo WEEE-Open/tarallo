@@ -1395,7 +1395,12 @@
 				});
 
 				if(response.status === 204) {
-					goBack();
+					if(isItem) {
+						goBack();
+					} else {
+						// The product is gone forever, we have to go somewhere "random"
+						window.location.href = '/';
+					}
 				} else if(response.status === 401) {
 					displayError('Session expired or logged out. Open another tab, log in and try again.');
 				} else {
