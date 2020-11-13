@@ -122,6 +122,14 @@ If this is the first deployment you'll need to import `database.sql`, `database-
 
 ## More details
 
+### Examples
+
+There's a set of default items and products that can be used for tests.
+
+You get that by running `make examples`. It will reset the database, deleting any items or products that you added.
+
+There's not much more to it.
+
 ### Database
 
 The schema is located in `database.sql`.
