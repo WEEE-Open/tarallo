@@ -106,17 +106,16 @@ Now run `vagrant provision` again: it should notice that the file exists and is 
 
 ### Production
 
-The program doesn't really need to be built, but there's a Makefile that collects in a single directory named `build` all the files you'll need to upload, installs dependencies and builds an optimized autoloader. To do that, run:
+Make a git clone of this repo, then:
 
-    make
+```bash
+cp config/config-example.php config/config.php
+nano config/config.php # Set the actual values
+bin/build-cache
+composer install --no-dev --no-suggest --classmap-authoritative --optimize-autoloader
+```
 
-At the end you may get this warning (complete with shoddy warning signs):
-
-    /!\ No config/config-production.php found, add your own config.php in the build/config directory /!\
-
-Copy `config/config-example.php` to `build/config/config.php` and edit it to suit your needs.
-
-Or you could create a `config/db-production.php` file: when running `make` again, it will be copied to `build/config/config.php`.
+And configure MariaDB and nginx, too. Look at `utils/provision`, there's an Ansible playbook just for that. It's really similar to our production playbook.
 
 If this is the first deployment you'll need to import `database.sql`, `database-data.sql` and `database-procedures.sql` manually in the production database, if it is an update you may need to run the update script: use `php bin/update.php` on the server.
 
