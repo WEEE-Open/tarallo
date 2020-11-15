@@ -80,7 +80,9 @@ final class SessionDAO extends DAO {
 			$rows = $s->rowCount();
 			return $rows > 0;
 		} finally {
-			$s->closeCursor();
+			if(isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 
