@@ -25,7 +25,8 @@ and you will get:
 
 * T.A.R.A.L.L.O. instance accessible at `127.0.0.1:8080`
 * An example user (`dev.user`), that's generated on the fly for the development version and logs in automatically (you can't test the SSO component, sorry)
-* APIs at `127.0.0.1:8080/v2/` (also used internally by the HTML interface)
+* APIs at `127.0.0.1:8080/v2/`
+* A default token for APIs: `yoLeCHmEhNNseN0BlG0s3A:ksfPYziGg7ebj0goT0Zc7pbmQEIYvZpRTIkwuscAM_k` (see [documentation](https://github.com/WEEE-Open/tarallo/wiki/Managing-the-session-and-Authentication))
 * Xdebug enabled by default
 * Xdebug profiler enabled, start it via trigger (`?XDEBUG_PROFILE=1` or browser extensions), saves output to `xdebug` directory
 * Adminer at `127.0.0.1:8081/adminer.php` for database inspection (user: root, password: root, server: localhost:3306)

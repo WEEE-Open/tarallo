@@ -10,6 +10,14 @@ use WEEEOpen\Tarallo\ProductCode;
 require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
 
+if(!defined('TARALLO_DEVELOPMENT_ENVIRONMENT') || !TARALLO_DEVELOPMENT_ENVIRONMENT) {
+	echo 'TARALLO_DEVELOPMENT_ENVIRONMENT is not set or false, set it to true to generate example items. The database will remain empty otherwise.' . PHP_EOL;
+	exit(1);
+}
+
+$token = 'yoLeCHmEhNNseN0BlG0s3A:ksfPYziGg7ebj0goT0Zc7pbmQEIYvZpRTIkwuscAM_k';
+$tokenId = explode(':', $token, 2)[0];
+
 $pdo = new PDO(TARALLO_DB_DSN, TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, [
 	PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 	PDO::ATTR_CASE => PDO::CASE_NATURAL,
@@ -30,6 +38,11 @@ $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Item
 $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Product; SET FOREIGN_KEY_CHECKS = 1;");
 $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE SearchResult; SET FOREIGN_KEY_CHECKS = 1;");
 $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Search; SET FOREIGN_KEY_CHECKS = 1;");
+
+$pdo->beginTransaction();
+$pdo->exec(/** @lang MariaDB */ "DELETE FROM SessionToken WHERE Token = '$tokenId';");
+$pdo->exec(/** @lang MariaDB */ "INSERT INTO SessionToken(Token, Hash, Data, Owner) VALUES ('$tokenId', '\$2y\$10\$NiVbBb6pO3ck5ugXGKk2CeFEW83cmfDCCRjcda9f0DhAUoGPL71C6','O:29:\"WEEEOpen\\Tarallo\\SessionLocal\":3:{s:11:\"description\";s:10:\"See README\";s:5:\"level\";i:0;s:5:\"owner\";s:8:\"dev.user\";}', 'dev.user');");
+$pdo->commit();
 
 $db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);
 $db->sessionDAO()->setAuditUsername('ExampleScript');
@@ -311,3 +324,4 @@ foreach($json as $item){
 }
 
 echo 'Example items created, last update ' . date('d-m-Y H:i:s', stat(__FILE__)[9]) . ' UTC' . PHP_EOL;
+echo 'Default API token: ' . $token . PHP_EOL;
