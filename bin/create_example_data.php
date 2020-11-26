@@ -223,7 +223,7 @@ for($i = 100; $i < 250; $i++) {
 		->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'));
 	$rambox->addContent($ram);
 }
-for($i = 250; $i < 230; $i++) {
+for($i = 250; $i < 350; $i++) {
 	$ramSize = pow(2, rand(8, 11));
 	$ram = (new Item('R' . $i))
 		->addFeature(new Feature('brand', 'Samsung'))
@@ -286,6 +286,27 @@ $ram = (new Item('R6969'))
 	->addFeature(new Feature('sn', 'ASD' . substr(strtoupper(md5('512')), 0, 5) . '123456'))
 	->addFeature(new Feature('working', 'no'));
 $rambox->addContent($ram);
+
+///H.D.D generator (Huge Deficit Disks)
+for($i = 100; $i < 250; $i++){
+	$hdd = (new Item('HDD' . $i))
+		->addFeature(new Feature('brand', 'PrinceStone'))
+		->addFeature(new Feature('model', 'Ultrakek'))
+		->addFeature(new Feature('variant', 'v2'))
+		->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
+		->addFeature(new Feature('type', 'hdd'))
+		->addFeature(new Feature(rand(0, 1) ? 'ide-ports-n' : 'sata-ports-n', rand(1, 4)))
+		->addFeature(new Feature('capacity-decibyte', [40, 80, 160, 256, 512, 1024, 2048][rand(0, 6)] * 1000000000))
+		->addFeature(new Feature('hdd-form-factor', ['3.5','1.8-5mm', '2.5-9.5mm'][rand(0, 2)]))
+		->addFeature(new Feature('spin-rate-rpm', [7200, 5400, 10025][rand(0, 2)]));
+	if(rand(0, 1))
+		$hdd->addFeature(new Feature('data-erased', 'yes'));
+	if($i < 240){
+		$hdd->addFeature(new Feature('surface-scan', rand(0, 1) ? 'pass' : 'fail'))
+			->addFeature(new Feature('smart-data', ['ok', 'fail', 'old'][rand(0, 2)]));
+	}
+	$table->addContent($hdd);
+}
 
 $lonelyCpu = (new Item('C1'))
 	->addFeature(new Feature('brand', 'AMD'))
