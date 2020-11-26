@@ -527,6 +527,22 @@ class Controller implements RequestHandlerInterface {
 					]
 				);
 				break;
+			case 'hdds':
+				$request = $request->withAttribute('Template', 'stats::hdds')->withAttribute(
+					'TemplateParameters', [
+						'erased' => $db->statsDAO()->getCountByFeature('data-erased', new Feature('data-erased', 'yes')),
+						'smartData' => $db->statsDAO()->getCountByFeature(
+							'smart-data', new Feature('type', 'hdd')
+						),
+						//'withoutErased' => $db->statsDAO()->getItemByNotFeature('data-erased'),
+						'surfaceScan' => $db->statsDAO()->getCountByFeature('surface-scan', new Feature('type', 'hdd')),
+						'formAndRotation' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'hdd'), [
+							'hdd-form-factor',
+							'spin-rate-rpm'
+						])
+					]
+				);
+				break;
 			case 'products':
 				$request = $request->withAttribute('Template', 'stats::products')->withAttribute('TemplateParameters', [
 						'brandsProducts' => $db->statsDAO()->getProductsCountByBrand(),
