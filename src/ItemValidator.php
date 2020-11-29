@@ -586,50 +586,6 @@ class ItemValidator {
 		return $item;
 	}
 
-	public static function fixupFromPeracotta(ItemIncomplete $item) {
-		self::fixupFromPeracottaRecursive($item);
-	}
-
-	private static function fixupFromPeracottaRecursive(ItemIncomplete $item) {
-		self::doFixupFromPeracotta($item);
-
-		foreach($item->getContent() as $subitem) {
-			self::fixupFromPeracottaRecursive($subitem);
-		}
-
-		self::doFixupFromPeracotta($item);
-	}
-
-	private static function doFixupFromPeracotta(ItemIncomplete $item) {
-		$type = $item->getFeatureValue('type');
-
-		switch($type) {
-//			case 'motherboard':
-//				// TODO: do it on the client side?
-//				$ramType = self::getOrNull($item, 'ram-type');
-//				$ramSize = self::getOrNull($item, 'ram-form-factor');
-//				if($ramType === null || $ramSize === null) {
-//					$inside = $item->getContent();
-//					$rams = self::findAllByType($inside, 'ram');
-//					if(count($rams) > 0) {
-//
-//					}
-//				}
-//				break;
-			case 'case':
-				$ff = $item->getFeatureValue('motherboard-form-factor');
-				if($ff === 'proprietary-laptop') {
-					$item->removeFeatureByName('psu-form-factor');
-				} else {
-					$item->removeFeatureByName('psu-volt');
-					$item->removeFeatureByName('psu-ampere');
-					$item->removeFeatureByName('power-connector');
-				}
-				break;
-		}
-		return $type;
-	}
-
 	private static function validateFeaturesCase(ItemWithFeatures $case) {
 		$motherboardFF = $case->getFeatureValue('motherboard-form-factor');
 		switch($motherboardFF) {

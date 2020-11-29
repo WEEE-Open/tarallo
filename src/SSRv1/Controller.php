@@ -12,6 +12,7 @@ use WEEEOpen\Tarallo\APIv2\ProductBuilder;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Database\TreeDAO;
+use WEEEOpen\Tarallo\DuplicateBulkIdentifierException;
 use WEEEOpen\Tarallo\ErrorHandler;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
@@ -670,29 +671,33 @@ class Controller implements RequestHandlerInterface {
 			$request = $request->withAttribute('Template', 'bulk::add');
 		} else {
 			$add = json_decode((string) $body['add'], true);
+			$id = $body['id'] ?? 'Some computer ' . time();
+			$overwrite = boolval($body['overwrite'] ?? false);
+
 			if($add === null || json_last_error() !== JSON_ERROR_NONE) {
-				$request = $request->withAttribute('Template', 'bulk::add')->withAttribute('StatusCode', 400)->withAttribute('TemplateParameters', ['error' => json_last_error_msg()]);
+				$request = $request->withAttribute('Template', 'bulk::add')->withAttribute('StatusCode', 400)->withAttribute('TemplateParameters', ['error' => 'Peracotta output contains errors: ' . json_last_error_msg()]);
 			} else {
-				// TODO: move to an ItemBuilder class?
-				$items = [];
-				foreach($add as $stuff) {
-					$item = new ItemIncomplete(null);
-					foreach($stuff as $k => $v) {
-						$item->addFeature(new Feature($k, $v));
+				/* @var Database $db */
+				$db = $request->getAttribute('Database');
+				$isDuplicate = $db->bulkDAO()->bulkIdentifierExistsAndLocked($id);
+				$ok = true;
+
+				if($overwrite) {
+					$db->bulkDAO()->deleteBulkImport($id);
+				} else if($isDuplicate) {
+					$request = $request->withAttribute('Template', 'bulk::add')->withAttribute('StatusCode', 400)->withAttribute('TemplateParameters', ['error' => "Identifier $id already exists"]);
+					$ok = false;
+				}
+
+				if($ok) {
+					foreach($add as $item) {
+						// TODO: make an addAll function
+						$type = $item['type'];
+						$json = json_encode($item);
+						$db->bulkDAO()->addBulk($id, $type, $json);
 					}
-					$items[] = $item;
+					return new RedirectResponse('/bulk/import', 303);
 				}
-
-				foreach($items as $k => $item) {
-					$items[$k] = ItemValidator::fillWithDefaults($item);
-				}
-				unset($item);
-				$case = ItemValidator::treeify($items);
-				ItemValidator::fixupFromPeracotta($case);
-
-				$request = $request->withAttribute('Template', 'bulk::add')->withAttribute(
-					'TemplateParameters', ['item' => $case]
-				);
 			}
 		}
 
