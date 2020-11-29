@@ -756,7 +756,7 @@ class Controller implements RequestHandlerInterface {
 			]);
 			return $handler->handle($request);
 		} else if($importElement['type'] === 'P') {
-			$importElement = ProductBuilder::ofArray($importElement,$importElement['brand'],$importElement['model'],$importElement['variant']);
+			$importElement = ProductBuilder::ofArray($importElement, $importElement['brand'], $importElement['model'], $importElement['variant'] ?? ProductCode::DEFAULT_VARIANT);
 			$request = $request->withAttribute('Template', 'newProductPage')->withAttribute('TemplateParameters',[
 				'add' => true,
 				'base' => $importElement,
