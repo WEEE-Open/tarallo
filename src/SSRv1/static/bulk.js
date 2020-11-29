@@ -10,7 +10,7 @@
         bulkMoveButton.dataset.alternateText = temp;
 
         for(let el of bulkMove.getElementsByClassName('toggle')) {
-            el.classList.toggle("hidden");
+            el.classList.toggle("d-none");
         }
     });
 }());
