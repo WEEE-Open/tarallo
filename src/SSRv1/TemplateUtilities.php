@@ -22,6 +22,7 @@ class TemplateUtilities implements ExtensionInterface {
 		$engine->registerFunction('contentEditableWrap', [$this, 'contentEditableWrap']);
 		$engine->registerFunction('getOptions', [$this, 'getOptions']);
 		$engine->registerFunction('asTextContent', [$this, 'asTextContent']);
+		$engine->registerFunction('prettyPrintJson', [$this, 'prettyPrintJson']);
 	}
 
 	/**
@@ -135,8 +136,14 @@ class TemplateUtilities implements ExtensionInterface {
 		}
 	}
 
-	/**Formats JSON in a readable form ( in case of minfied ones )*/
-	public static function prettyPrint($json) {
+	/**
+	 * Formats JSON in a readable form (in case of minfied ones)
+	 *
+	 * @param string $json JSON as a string
+	 *
+	 * @return string
+	 */
+	public function prettyPrintJson(string $json) {
 		$result = '';
 		$level = 0;
 		$in_quotes = false;
@@ -167,7 +174,9 @@ class TemplateUtilities implements ExtensionInterface {
 								$new_line_level = $level;
 								break;
 
+							/** @noinspection PhpMissingBreakStatementInspection */
 							case '{':
+							/** @noinspection PhpMissingBreakStatementInspection */
 							case '[':
 								$level++;
 							case ',':
@@ -195,7 +204,7 @@ class TemplateUtilities implements ExtensionInterface {
 				}
 			}
 			if($new_line_level !== null) {
-				$result .= "\n" . str_repeat("\t", $new_line_level);
+				$result .= "\n" . str_repeat("  ", $new_line_level);
 			}
 			$result .= $char . $post;
 		}

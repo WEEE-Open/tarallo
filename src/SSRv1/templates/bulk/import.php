@@ -1,10 +1,8 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
-
-use WEEEOpen\Tarallo\SSRv1\TemplateUtilities;
-
 /** @var array|null $imports */
 $imports = $imports ?? null;
+$this->insert('bulk::menu', ['currentPage' => 'import']);
 $this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage' => 'bulk import']);
 ?>
 <div class="row">
@@ -49,7 +47,7 @@ $this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage'
 						<td colspan="5">
 							<div class="collapse" id="<?= 'json'.$jsonid; ?>">
 								<div>
-									<pre class="prettyprint"><?= TemplateUtilities::prettyPrint($import['JSON']); ?></pre>
+									<pre class="prettyprint"><?= $this->prettyPrintJson($import['JSON']); ?></pre>
 								</div>
 							</div>
 						</td>

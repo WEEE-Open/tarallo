@@ -51,9 +51,9 @@ $hereSr = function($page, $current) {
 					Bulk Actions<?= $hereSr('product', $currentPageShort) ?>
 				</a>
 				<div class="dropdown-menu" aria-labelledby="productsDropdown">
-					<a class="dropdown-item <?= $hereClass('item bulk add', $currentPage) ?>" href="/bulk/add">Bulk add<?= $hereSr('item bulk add', $currentPage) ?></a>
-					<a class="dropdown-item <?= $hereClass('item bulk move', $currentPage) ?>" href="/bulk/move">Bulk move<?= $hereSr('item bulk move', $currentPage) ?></a>
 					<a class="dropdown-item <?= $hereClass('bulk import', $currentPage) ?>" href="/bulk/import">Import<?= $hereSr('bulk import', $currentPage) ?></a>
+					<a class="dropdown-item <?= $hereClass('bulk add', $currentPage) ?>" href="/bulk/add">Bulk add<?= $hereSr('item bulk add', $currentPage) ?></a>
+					<a class="dropdown-item <?= $hereClass('bulk move', $currentPage) ?>" href="/bulk/move">Bulk move<?= $hereSr('item bulk move', $currentPage) ?></a>
 				</div>
 			</li>
 		</ul>
