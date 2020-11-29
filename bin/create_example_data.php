@@ -28,6 +28,7 @@ $pdo = new PDO(TARALLO_DB_DSN, TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, [
 $pdo->exec(/** @lang MariaDB */ "TRUNCATE TABLE Tree;");
 $pdo->exec(/** @lang MariaDB */ "TRUNCATE TABLE ItemFeature;");
 $pdo->exec(/** @lang MariaDB */ "TRUNCATE TABLE ProductFeature;");
+$pdo->exec(/** @lang MariaDB */ "TRUNCATE TABLE BulkTable;");
 // Cannot TRUNCATE tables that are referenced in a foreign key (doing a normal DELETE automatically is probably too much work)
 // Cannot DELETE too, because it deadlocks instantly when trying to clear the **empty** SearchResult table: "General error: 1205 Lock wait timeout exceeded;"
 // There are also a few "circular" foreign keys that every other DBMS on the planet can handle correctly but MariaDB/MySQL cannot (there's an explanation in a trigger in database-procedures.sql)
