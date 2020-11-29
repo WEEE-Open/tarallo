@@ -8,7 +8,11 @@
 /** @var \WEEEOpen\Tarallo\Item[]|null $results Items (only if searchId is not null) */
 $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'item search']);
 ?>
-<p class="alert alert-info" role="alert">Do you know the code already? Type it in the box in the upper right corner, instead!</p>
+
+<?php if(!$searchId): ?>
+<p class="alert alert-info" id="search-tip" role="alert">Do you know the code already? Type it in the box in the upper right corner, instead!</p>
+<?php endif; ?>
+<p class="alert alert-danger d-none" id="search-error" role="alert"></p>
 
 <?php if(!$searchId || !empty($results)): ?>
 <nav id="searcharea">
