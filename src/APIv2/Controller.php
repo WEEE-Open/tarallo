@@ -227,9 +227,12 @@ class Controller implements RequestHandlerInterface {
 			}
 		}
 
+		$flat = $item->getFlatContent();
+		ItemValidator::addAllVariants($flat);
+
 		// We need product features for fixup and validation
 		if($fix || $validate) {
-			$db->productDAO()->getProductsAll($item->getFlatContent());
+			$db->productDAO()->getProductsAll($flat);
 		}
 
 		if($fix) {
@@ -240,10 +243,6 @@ class Controller implements RequestHandlerInterface {
 		if($validate) {
 			ItemValidator::validateLocation($item, $parent);
 			ItemValidator::validateFeatures($item);
-		}
-
-		if($item->getFeature('variant') === null) {
-			$item->addFeature(new Feature('variant', ProductCode::DEFAULT_VARIANT));
 		}
 
 		try {

@@ -632,4 +632,19 @@ class ItemValidator {
 			}
 		}
 	}
+
+	/**
+	 * Add variants to all items (not recursively)
+	 *
+	 * @param Item[] $items all items
+	 *
+	 * @see Item::getFlatContent()
+	 */
+	public static function addAllVariants(array $items): void {
+		foreach($items as $item) {
+			if($item->getFeature('variant') === null) {
+				$item->addFeature(new Feature('variant', ProductCode::DEFAULT_VARIANT));
+			}
+		}
+	}
 }
