@@ -632,6 +632,38 @@ BEGIN
 END;"
 					);
 					break;
+					case 18:
+						$this->exec("DROP EVENT IF EXISTS `DuplicateItemProductFeaturesCleanup`;");
+						$this->exec(
+					"CREATE EVENT `DuplicateItemProductFeaturesCleanup`
+    ON SCHEDULE EVERY '2' HOUR STARTS '2020-01-01 00:30:00'
+    ON COMPLETION PRESERVE
+    ENABLE DO
+    DELETE ItemFeature.*
+    FROM Item
+    NATURAL JOIN ProductFeature
+    JOIN ItemFeature ON Item.Code = ItemFeature.Code AND ProductFeature.Feature = ItemFeature.Feature
+    WHERE
+    COALESCE(ProductFeature.Value, ProductFeature.ValueEnum, ProductFeature.ValueText, ProductFeature.ValueDouble) = COALESCE(ItemFeature.Value, ItemFeature.ValueEnum, ItemFeature.ValueText, ItemFeature.ValueDouble)
+    AND NOT EXISTS(
+        SELECT Audit.Code
+        FROM Audit
+        WHERE Item.Code = Audit.Code
+          AND Audit.Change IN ('C', 'U')
+          AND TIMESTAMPDIFF(HOUR, Audit.Time, NOW()) >= 2
+    )
+    AND NOT EXISTS(
+        SELECT AuditProduct.Brand, AuditProduct.Model, AuditProduct.Variant
+        FROM AuditProduct
+        WHERE Item.Brand = AuditProduct.Brand
+          AND Item.Model = AuditProduct.Model
+          AND Item.Variant = AuditProduct.Variant
+          AND AuditProduct.Change IN ('C', 'U')
+          AND TIMESTAMPDIFF(HOUR, AuditProduct.Time, NOW()) >= 2
+    )
+;"
+				);
+					break;
 
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');

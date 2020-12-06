@@ -578,7 +578,7 @@ DELIMITER ;
 DROP EVENT IF EXISTS `DuplicateItemProductFeaturesCleanup`;
 DELIMITER $$
 CREATE EVENT `DuplicateItemProductFeaturesCleanup`
-    ON SCHEDULE EVERY '1' DAY
+    ON SCHEDULE EVERY '2' HOUR STARTS '2020-01-01 00:30:00'
     ON COMPLETION PRESERVE
     ENABLE DO
     DELETE ItemFeature.*
@@ -592,7 +592,7 @@ CREATE EVENT `DuplicateItemProductFeaturesCleanup`
         FROM Audit
         WHERE Item.Code = Audit.Code
           AND Audit.Change IN ('C', 'U')
-          AND DATEDIFF(NOW(), Audit.Time) >= 1
+          AND TIMESTAMPDIFF(HOUR, Audit.Time, NOW()) >= 2
     )
     AND NOT EXISTS(
         SELECT AuditProduct.Brand, AuditProduct.Model, AuditProduct.Variant
@@ -601,7 +601,7 @@ CREATE EVENT `DuplicateItemProductFeaturesCleanup`
           AND Item.Model = AuditProduct.Model
           AND Item.Variant = AuditProduct.Variant
           AND AuditProduct.Change IN ('C', 'U')
-          AND DATEDIFF(NOW(), AuditProduct.Time) >= 1
+          AND TIMESTAMPDIFF(HOUR, AuditProduct.Time, NOW()) >= 2
     )
 $$
 DELIMITER ;
