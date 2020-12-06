@@ -671,7 +671,9 @@ class Controller implements RequestHandlerInterface {
 			$request = $request->withAttribute('Template', 'bulk::add');
 		} else {
 			$add = json_decode((string) $body['add'], true);
-			$id = $body['id'] ?? 'Some computer ' . time();
+			if(!isset($body['id']) || $body['id'] === '') {
+				$id = 'Import ' . strtoupper(substr(md5(time()), 0, 8));
+			}
 			$overwrite = boolval($body['overwrite'] ?? false);
 
 			if($add === null || json_last_error() !== JSON_ERROR_NONE) {
