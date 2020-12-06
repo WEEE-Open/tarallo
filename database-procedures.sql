@@ -431,6 +431,65 @@ BEGIN
 END $$
 DELIMITER ;
 
+-- Update Item too, this cannot be a foreign key probably (values may not correspond to a product)
+DROP TRIGGER IF EXISTS CascadeRenameProduct;
+DELIMITER $$
+CREATE TRIGGER CascadeRenameProduct
+    AFTER UPDATE
+    ON Product
+    FOR EACH ROW
+BEGIN
+    IF(NEW.Brand <> OLD.Brand) THEN
+        UPDATE ItemFeature
+        SET `ValueText` = NEW.Brand
+        WHERE Feature = 'brand'
+          AND `Code` IN (
+            -- Cannot SELECT Code from Item:
+            -- Error in query (1442): Can't update table 'Item' in stored function/trigger because it is already used by statement which invoked this stored function/trigger
+            SELECT f1.`Code`
+            FROM ItemFeature AS f1, ItemFeature AS f2, ItemFeature AS f3
+            WHERE f1.Code = f2.Code AND f2.Code = f3.Code
+              AND f1.Feature = 'brand' AND f2.Feature = 'model' AND f3.Feature = 'variant'
+              AND f1.ValueText = OLD.Brand
+              AND f2.ValueText = OLD.Model
+              AND f3.ValueText = OLD.Variant
+        );
+    END IF;
+    IF(NEW.Model <> OLD.Model) THEN
+        UPDATE ItemFeature
+        SET `ValueText` = NEW.Model
+        WHERE Feature = 'model'
+          AND `Code` IN (
+            -- Cannot SELECT Code from Item:
+            -- Error in query (1442): Can't update table 'Item' in stored function/trigger because it is already used by statement which invoked this stored function/trigger
+            SELECT f1.`Code`
+            FROM ItemFeature AS f1, ItemFeature AS f2, ItemFeature AS f3
+            WHERE f1.Code = f2.Code AND f2.Code = f3.Code
+              AND f1.Feature = 'brand' AND f2.Feature = 'model' AND f3.Feature = 'variant'
+              AND f1.ValueText = OLD.Brand
+              AND f2.ValueText = OLD.Model
+              AND f3.ValueText = OLD.Variant
+        );
+    END IF;
+    IF(NEW.Variant <> OLD.Variant) THEN
+        UPDATE ItemFeature
+        SET `ValueText` = NEW.Variant
+        WHERE Feature = 'variant'
+          AND `Code` IN (
+            -- Cannot SELECT Code from Item:
+            -- Error in query (1442): Can't update table 'Item' in stored function/trigger because it is already used by statement which invoked this stored function/trigger
+            SELECT f1.`Code`
+            FROM ItemFeature AS f1, ItemFeature AS f2, ItemFeature AS f3
+            WHERE f1.Code = f2.Code AND f2.Code = f3.Code
+              AND f1.Feature = 'brand' AND f2.Feature = 'model' AND f3.Feature = 'variant'
+              AND f1.ValueText = OLD.Brand
+              AND f2.ValueText = OLD.Model
+              AND f3.ValueText = OLD.Variant
+        );
+    END IF;
+END $$
+DELIMITER ;
+
 -- Add a 'D' entry to audit table
 DROP TRIGGER IF EXISTS AuditDeleteItem;
 DELIMITER $$
