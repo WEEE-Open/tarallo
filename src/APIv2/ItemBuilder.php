@@ -6,6 +6,7 @@ use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\FeatureValidationException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemCode;
+use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\ValidationException;
 
@@ -92,6 +93,30 @@ class ItemBuilder {
 			foreach($input['contents'] as $other) {
 				$item->addContent(self::ofArrayInternal($other, null, array_merge($path, [$id]), true));
 				$id++;
+			}
+		}
+
+		return $item;
+	}
+
+	/**
+	 * Generate an Item with features only, non-recursively too
+	 *
+	 * @param array $input Decoded JSON from the client
+	 *
+	 * @return ItemWithFeatures
+	 * @see ofArray
+	 */
+	public static function ofArrayFeatures(array $input): ?ItemWithFeatures {
+		$item = new ItemIncomplete(null);
+		if(isset($input['features'])) {
+			if(!is_array($input['features'])) {
+				return $item;
+			}
+			try {
+				self::addFeatures($input['features'], $item);
+			} catch(FeatureValidationException $e) {
+				return $item;
 			}
 		}
 

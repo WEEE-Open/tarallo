@@ -6,6 +6,7 @@ namespace WEEEOpen\Tarallo\SSRv1\Summary;
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ProductCode;
+use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class Summary {
 	public static function peel(ItemWithFeatures $item): ?string {
@@ -85,5 +86,16 @@ class Summary {
 		}
 
 		return [$brand, $family, $model, $variant, $aka];
+	}
+
+	public static function peelBulkItem(ItemWithFeatures $itemOrProduct): array {
+		$name = PartialSummaries::summarizeCommercial($itemOrProduct);
+		$type = $itemOrProduct->getFeature('type');
+		if($type !== null) {
+			$type = FeaturePrinter::printableValue($type);
+		} else {
+			$type = '';
+		}
+		return [$type, $name];
 	}
 }

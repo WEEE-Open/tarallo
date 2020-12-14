@@ -27,6 +27,8 @@ use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\ProductIncomplete;
 use WEEEOpen\Tarallo\SessionLocal;
+use WEEEOpen\Tarallo\SSRv1\Summary\Summarizer;
+use WEEEOpen\Tarallo\SSRv1\Summary\Summary;
 use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\UserSSO;
 use WEEEOpen\Tarallo\ValidationException;
@@ -708,11 +710,7 @@ class Controller implements RequestHandlerInterface {
 
 	public static function bulkImport(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		// Handling bulk import from peracotta
-		/* @var Database $db */
-		$db = $request->getAttribute('Database');
 		$body = $request->getParsedBody();
-		// Get all Bulk Imports from BulkTable
-		$imports = $db->bulkDAO()->getBulkImports();
 		$delete = null;
 		$import = null;
 
@@ -720,6 +718,8 @@ class Controller implements RequestHandlerInterface {
 		if($body !== null && count($body) > 0) {
 			// Delete
 			if(isset($body['delete'])){
+				/* @var Database $db */
+				$db = $request->getAttribute('Database');
 				$db->bulkDAO()->deleteImport(intval($body['delete']));
 				return new RedirectResponse('/bulk/import',303);
 			}
@@ -729,7 +729,33 @@ class Controller implements RequestHandlerInterface {
 				return new RedirectResponse('/bulk/import/' . intval($body['import']), 303);
 			}
 		}
-		$request = $request->withAttribute('Template', 'bulk::import')->withAttribute('TemplateParameters',['imports' => $imports]);
+		/* @var Database $db */
+		$db = $request->getAttribute('Database');
+		// Get all Bulk Imports from BulkTable
+		$imports = $db->bulkDAO()->getBulkImports();
+		$importsAggregated = [];
+		foreach($imports as $importElement) {
+			if(isset($importElement['JSON'])) {
+				$json = json_decode($importElement['JSON'], true);
+			} else {
+				$json = [];
+			}
+			if($importElement['Type'] === 'I') {
+				$parsed = ItemBuilder::ofArrayFeatures($json);
+			} else if($importElement['Type'] === 'P') {
+				if(isset($json['brand']) && is_string($json['brand']) && strlen($json['brand']) > 0 && isset($json['model']) && is_string($json['model']) && strlen($json['model']) > 0) {
+					$parsed = ProductBuilder::ofArray($json, $json['brand'], $json['model'], $json['variant'] ?? ProductCode::DEFAULT_VARIANT);
+				} else {
+					$parsed = new ItemIncomplete(null);
+				}
+			} else {
+				$parsed = new ItemIncomplete(null);
+			}
+			$importElement['SuperSummary'] = Summary::peelBulkItem($parsed);
+			$importsAggregated[$importElement['BulkIdentifier']][] = $importElement;
+		}
+
+		$request = $request->withAttribute('Template', 'bulk::import')->withAttribute('TemplateParameters',['imports' => $importsAggregated]);
 
 		return $handler->handle($request);
 	}

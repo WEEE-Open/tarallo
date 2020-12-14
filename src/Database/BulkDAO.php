@@ -40,7 +40,7 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 	 * Get all imports from BulkTable
 	 */
 	public function getBulkImports(): array {
-		$statement = $this->getPDO()->query('SELECT Identifier, BulkIdentifier, Time, User, Type, JSON FROM BulkTable');
+		$statement = $this->getPDO()->query('SELECT Identifier, BulkIdentifier, `Time`, `User`, `Type`, `JSON` FROM BulkTable');
 		$imports = $statement->fetchAll();
 		return $imports;
 	}

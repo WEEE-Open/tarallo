@@ -4,27 +4,40 @@
 $imports = $imports ?? null;
 $this->insert('bulk::menu', ['currentPage' => 'import']);
 $this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage' => 'bulk import']);
+
+$typize = function($type) {
+	if($type === 'I') {
+		return '<abbr title="Item">I</abbr>';
+	} else if($type === 'P') {
+		return '<abbr title="Product">P</abbr>';
+	} else {
+		return $this->e($type);
+	}
+}
 ?>
+<!--<h2>Bulk imports</h2>-->
+<?php foreach($imports as $bulkIdentifier => $import): ?>
 <div class="row">
 	<div class="col">
 		<table class="table table-borderless stats">
-			<caption>Bulk imports</caption>
+			<caption><?= $this->e($bulkIdentifier) ?></caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">BulkIdentifier</th>
-				<th scope="col">Time</th>
-				<th scope="col">User</th>
 				<th scope="col">Type</th>
+				<th scope="col">Item</th>
+				<th scope="col">Time and User</th>
 				<th style="text-align:center" scope="col">Actions</th>
 			</tr>
 			</thead>
 			<tbody>
-				<?php $jsonid=0; foreach($imports as $import): ?>
+				<?php $jsonid=0; foreach($import as $line): ?>
 					<tr>
-						<td class="align-middle"><?= $this->e($import['BulkIdentifier']) ?></td>
-						<td class="align-middle"><?= $this->e($import['Time']) ?></td>
-						<td class="align-middle"><?= $this->e($import['User']) ?></td>
-						<td class="align-middle"><?= $this->e($import['Type']) ?></td>
+						<td class="align-middle"><?= $typize($line['Type']) ?></td>
+						<td class="align-middle"><?= $this->e($line['SuperSummary'][0]) ?><?= $line['SuperSummary'][0] !== '' && $line['SuperSummary'][1] !== '' ? ' ' : '' ?><small class="text-muted"><?= $this->e($line['SuperSummary'][1]) ?></small></td>
+						<td class="align-middle">
+							<div><?= $this->e($line['Time']) ?></div>
+							<div><small class="text-muted">by <?= $this->e($line['User']) ?></small></div>
+						</td>
 						<!-- Actions Btns -->
 						<td>
 							<form class="text-center" method="post">
@@ -32,11 +45,11 @@ $this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage'
 									JSON
 								</button>
 								<button class="btn btn-success" type="submit"
-										name="import" value="<?= (int) $import["Identifier"]?>">
+										name="import" value="<?= (int) $line["Identifier"]?>">
 									Import
 								</button>
 								<button class="btn btn-danger" type="submit"
-										name="delete" value="<?= (int) $import["Identifier"]?>">
+										name="delete" value="<?= (int) $line["Identifier"]?>">
 									Delete
 								</button>
 							</form>
@@ -47,7 +60,7 @@ $this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage'
 						<td colspan="5">
 							<div class="collapse" id="<?= 'json'.$jsonid; ?>">
 								<div>
-									<pre class="prettyprint"><?= $this->prettyPrintJson($import['JSON']); ?></pre>
+									<pre class="prettyprint"><?= $this->prettyPrintJson($line['JSON']); ?></pre>
 								</div>
 							</div>
 						</td>
@@ -57,3 +70,4 @@ $this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage'
 		</table>
 	</div>
 </div>
+<?php endforeach; ?>

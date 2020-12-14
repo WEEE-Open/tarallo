@@ -55,21 +55,21 @@ class PartialSummaries {
 		return $concat;
 	}
 	
-	public static function summarizePorts(ItemWithFeatures $item, bool $compact = false, string $glue = ', ') {
+	public static function summarizePorts(ItemWithFeatures $item, bool $compact = false, string $glue = ', '): string {
 		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_ports);
 		$sequence = self::summarizeSequence($compact, $filtered);
 
 		return implode($glue, $sequence);
 	}
 
-	public static function summarizeSockets(ItemWithFeatures $item, bool $compact = false, string $glue = ', ') {
+	public static function summarizeSockets(ItemWithFeatures $item, bool $compact = false, string $glue = ', '): string {
 		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_sockets);
 		$sequence = self::summarizeSequence($compact, $filtered);
 
 		return implode($glue, $sequence);
 	}
 
-	public static function summarizePowerconnectors(ItemWithFeatures $item, bool $compact = false, string $glue = ', ') {
+	public static function summarizePowerconnectors(ItemWithFeatures $item, bool $compact = false, string $glue = ', '): string {
 		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_powerconnectors);
 		$sequence = self::summarizeSequence($compact, $filtered);
 
