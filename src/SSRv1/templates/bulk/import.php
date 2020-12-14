@@ -13,7 +13,9 @@ $typize = function($type) {
 	} else {
 		return $this->e($type);
 	}
-}
+};
+
+$jsonid = 0;
 ?>
 <!--<h2>Bulk imports</h2>-->
 <?php foreach($imports as $bulkIdentifier => $import): ?>
@@ -30,7 +32,7 @@ $typize = function($type) {
 			</tr>
 			</thead>
 			<tbody>
-				<?php $jsonid=0; foreach($import as $line): ?>
+				<?php foreach($import as $line): ?>
 					<tr>
 						<td class="align-middle"><?= $typize($line['Type']) ?></td>
 						<td class="align-middle"><?= $this->e($line['SuperSummary'][0]) ?><?= $line['SuperSummary'][0] !== '' && $line['SuperSummary'][1] !== '' ? ' ' : '' ?><small class="text-muted"><?= $this->e($line['SuperSummary'][1]) ?></small></td>
@@ -41,7 +43,7 @@ $typize = function($type) {
 						<!-- Actions Btns -->
 						<td>
 							<form class="text-center" method="post">
-							<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="<?= '#json'.$jsonid; ?>" aria-expanded="false" aria-controls="<?= '#json'.$jsonid; ?>">
+							<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="<?= '#bulkjson'.$jsonid; ?>" aria-expanded="false" aria-controls="<?= '#json'.$jsonid; ?>">
 									JSON
 								</button>
 								<button class="btn btn-success" type="submit"
@@ -58,7 +60,7 @@ $typize = function($type) {
 				<!-- Hidden JSON -->
 					<tr>
 						<td colspan="5">
-							<div class="collapse" id="<?= 'json'.$jsonid; ?>">
+							<div class="collapse" id="<?= 'bulkjson'.$jsonid; ?>">
 								<div>
 									<pre class="prettyprint"><?= $this->prettyPrintJson($line['JSON']); ?></pre>
 								</div>
