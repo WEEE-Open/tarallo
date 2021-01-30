@@ -35,7 +35,7 @@ $jsonid = 0;
 				<?php foreach($import as $line): ?>
 					<tr>
 						<td class="align-middle"><?= $typize($line['Type']) ?></td>
-						<td class="align-middle"><?= $this->e($line['SuperSummary'][0]) ?><?= $line['SuperSummary'][0] !== '' && $line['SuperSummary'][1] !== '' ? ' ' : '' ?><small class="text-muted"><?= $this->e($line['SuperSummary'][1]) ?></small></td>
+						<td class="align-middle"><?= $this->e($line['SuperSummary'][0]) ?><?= $line['SuperSummary'][0] !== '' && $line['SuperSummary'][1] !== '' ? ' ' : '' ?><small class="text-muted"><?php if($line['Exists']) { echo "<a class=\"text-muted\" href=\"${line['EncodedUrl']}\">"; } ?><?= $this->e($line['SuperSummary'][1]) ?><?php if($line['Exists']) { echo '</a>'; } ?></small><?php if($line['Exists']) { echo '&nbsp;<span title="Duplicate"><i class="fa fa-ban"></i></span>'; } ?></td>
 						<td class="align-middle">
 							<div><?= $this->e($line['Time']) ?></div>
 							<div><small class="text-muted">by <?= $this->e($line['User']) ?></small></div>
@@ -46,11 +46,11 @@ $jsonid = 0;
 							<button class="btn btn-primary" type="button" data-toggle="collapse" data-target="<?= '#bulkjson'.$jsonid; ?>" aria-expanded="false" aria-controls="<?= '#json'.$jsonid; ?>">
 									JSON
 								</button>
-								<button class="btn btn-success" type="submit"
+								<button class="btn <?= $line["Exists"] ? 'btn-outline-success' : 'btn-success' ?>" type="submit"
 										name="import" value="<?= (int) $line["Identifier"]?>">
 									Import
 								</button>
-								<button class="btn btn-danger" type="submit"
+								<button class="btn <?= $line["Exists"] ? 'btn-danger' : 'btn-outline-danger' ?>" type="submit"
 										name="delete" value="<?= (int) $line["Identifier"]?>">
 									Delete
 								</button>

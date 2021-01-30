@@ -131,6 +131,14 @@ ul.breadcrumbs li:not(:first-child)::before {
 	text-decoration: underline;
 }
 
+.stats a.underline-on-hover {
+	text-decoration: none;
+}
+
+a.underline-on-hover:hover {
+	text-decoration: underline;
+}
+
 .stats.table .total {
 	background: #eee;
 	color: #333;

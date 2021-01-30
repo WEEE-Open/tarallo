@@ -194,6 +194,29 @@ final class ProductDAO extends DAO{
 	}
 
 	/**
+	 * Check that a product exists. If you plan to write anything, anywhere, use productMustExist instead!
+	 *
+	 * @param ProductCode $product
+	 *
+	 * @return bool
+	 * @see ProductDAO::productMustExist
+	 */
+	public function productExists(ProductCode $product): bool {
+		$statement = $this
+			->getPDO()
+			->prepare('SELECT 1 FROM Product WHERE `Brand` = :b AND `Model` = :m AND `Variant` = :v');
+		try {
+			$statement->execute([$product->getBrand(), $product->getModel(), $product->getVariant()]);
+			if($statement->rowCount() === 0) {
+				return false;
+			}
+			return true;
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
 	 * Count how many items does the product and lock the corresponding rows in the items table
 	 * (also prevents inserts)
 	 *

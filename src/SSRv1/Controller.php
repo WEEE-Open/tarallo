@@ -742,14 +742,19 @@ class Controller implements RequestHandlerInterface {
 			}
 			if($importElement['Type'] === 'I') {
 				$parsed = ItemBuilder::ofArrayFeatures($json);
+				$importElement['Exists'] = false;
 			} else if($importElement['Type'] === 'P') {
 				if(isset($json['brand']) && is_string($json['brand']) && strlen($json['brand']) > 0 && isset($json['model']) && is_string($json['model']) && strlen($json['model']) > 0) {
 					$parsed = ProductBuilder::ofArray($json, $json['brand'], $json['model'], $json['variant'] ?? ProductCode::DEFAULT_VARIANT);
+					$importElement['Exists'] = $db->productDAO()->productExists($parsed);
+					$importElement['EncodedUrl'] = '/product/' . rawurlencode($parsed->getBrand()) . '/' . rawurlencode($parsed->getModel()) . '/' . rawurlencode($parsed->getVariant());
 				} else {
 					$parsed = new ItemIncomplete(null);
+					$importElement['Exists'] = false;
 				}
 			} else {
 				$parsed = new ItemIncomplete(null);
+				$importElement['Exists'] = false;
 			}
 			$importElement['SuperSummary'] = Summary::peelBulkItem($parsed);
 			$importsAggregated[$importElement['BulkIdentifier']][] = $importElement;
