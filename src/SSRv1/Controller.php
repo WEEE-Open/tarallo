@@ -717,7 +717,7 @@ class Controller implements RequestHandlerInterface {
 		// Handle buttons
 		if($body !== null && count($body) > 0) {
 			// Delete
-			if(isset($body['delete'])){
+			if(isset($body['delete'])) {
 				/* @var Database $db */
 				$db = $request->getAttribute('Database');
 				$db->bulkDAO()->deleteImport(intval($body['delete']));
@@ -725,8 +725,8 @@ class Controller implements RequestHandlerInterface {
 			}
 
 			// Import handler
-			if(isset($body['import'])){
-				return new RedirectResponse('/bulk/import/' . intval($body['import']), 303);
+			if(isset($body['import'])) {
+				return new RedirectResponse('/bulk/import/review/' . intval($body['import']), 303);
 			}
 		}
 		/* @var Database $db */
@@ -755,9 +755,46 @@ class Controller implements RequestHandlerInterface {
 			$importsAggregated[$importElement['BulkIdentifier']][] = $importElement;
 		}
 
-		$request = $request->withAttribute('Template', 'bulk::import')->withAttribute('TemplateParameters',['imports' => $importsAggregated]);
+		$request = $request->withAttribute('Template', 'bulk::import')->withAttribute('TemplateParameters', ['imports' => $importsAggregated]);
 
 		return $handler->handle($request);
+	}
+
+	public static function bulkImportReview(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/* @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		// Decoding JSON and redirecting to Item or Product add page
+		$importElement = $db->bulkDAO()->getDecodedJSON($id);
+
+		if($importElement === null) {
+			throw new NotFoundException(null, 'Bulk import item/product not found');
+		}
+
+		if($importElement['type'] === 'I') {
+			return new RedirectResponse('/bulk/import/new/' . $id, 303);
+		} else if($importElement['type'] === 'P') {
+			$importElement = ProductBuilder::ofArray($importElement, $importElement['brand'], $importElement['model'], $importElement['variant'] ?? ProductCode::DEFAULT_VARIANT);
+			try {
+				$product = $db->productDAO()->getProduct($importElement);
+			} catch(NotFoundException $e) {
+				return new RedirectResponse('/bulk/import/new/' . $id, 303);
+			}
+			$request = $request
+				->withAttribute('Template', 'bulk::review')
+				->withAttribute('TemplateParameters', [
+					'original' => $product,
+					'superSummary' => Summary::peelBulkItem($product),
+					'bulkId' => $id,
+				]);
+
+			return $handler->handle($request);
+		} else {
+			return new RedirectResponse('/bulk/import/new/' . $id, 303);
+		}
 	}
 
 	public static function bulkImportAdd(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
@@ -993,7 +1030,8 @@ class Controller implements RequestHandlerInterface {
 				$r->post('/bulk/add', [User::AUTH_LEVEL_RW, 'Controller::bulkAdd',]);
 				$r->get('/bulk/import', [User::AUTH_LEVEL_RO, 'Controller::bulkImport',]);
 				$r->post('/bulk/import', [User::AUTH_LEVEL_RW, 'Controller::bulkImport',]);
-				$r->get('/bulk/import/{id}', [User::AUTH_LEVEL_RW, 'Controller::bulkImportAdd',]);
+				$r->get('/bulk/import/review/{id}', [User::AUTH_LEVEL_RO, 'Controller::bulkImportReview',]);
+				$r->get('/bulk/import/new/{id}', [User::AUTH_LEVEL_RW, 'Controller::bulkImportAdd',]);
 				$r->addGroup(
 					'/stats', function(FastRoute\RouteCollector $r) {
 					$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getStats',]);

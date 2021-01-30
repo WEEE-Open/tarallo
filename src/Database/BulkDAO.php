@@ -86,16 +86,18 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 	 *
 	 * @param int $Identifier The identifier
 	 *
-	 * @return array The JSON as an array
+	 * @return array|null The JSON as an array
 	 */
-	public function getDecodedJSON(int $Identifier): array {
+	public function getDecodedJSON(int $Identifier): ?array {
 		$statement = $this->getPDO()->prepare('SELECT JSON FROM BulkTable WHERE Identifier = :id');
 		$importElement = null;
 		try {
 			$statement->bindValue(':id', $Identifier, \PDO::PARAM_INT);
 			$statement->execute();
-			$importElement = $statement->fetch();
-			$importElement = json_decode($importElement["JSON"],JSON_OBJECT_AS_ARRAY);
+			$result = $statement->fetch();
+			if($result !== false) {
+				$importElement = json_decode($result["JSON"],JSON_OBJECT_AS_ARRAY);
+			}
 		} finally {
 			$statement->closeCursor();
 		}
