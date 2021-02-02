@@ -675,6 +675,8 @@ class Controller implements RequestHandlerInterface {
 			$add = json_decode((string) $body['add'], true);
 			if(!isset($body['id']) || $body['id'] === '') {
 				$id = 'Import ' . strtoupper(substr(md5(time()), 0, 8));
+			} else {
+				$id = $body['id'];
 			}
 			$overwrite = boolval($body['overwrite'] ?? false);
 
