@@ -679,4 +679,109 @@ EOQ
 		}
 	}
 
+
+	public function getStatsByType(bool $returnCount, array $dict, string $filterName, ?string $filterValue = '', ?array $additionalFilter = []){
+		//Array with Feature=>name if filtered
+		//Feature=>null if not filtered
+		$pdo = $this->getPDO();
+
+
+		if($returnCount) {
+			$select = "COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) as Val, COUNT(*) AS Quantity";
+		}
+		else{
+			$select = "`Code`";
+		}
+
+
+		$filterCondition = '';
+
+		BaseFeature::validateFeatureName($filterName);
+		$filterCondition .= "Feature = " . $pdo->quote($filterName);
+		if($filterValue !== ''){
+			$filterCondition .= " AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = " . $pdo->quote($filterValue);
+		}
+
+		foreach($additionalFilter as $name => $value){
+			if($value === null){
+				$filterCondition .= "AND `Code` IN (
+				  SELECT `Code`
+				  FROM ProductItemFeatureUnified
+				  WHERE Feature = " . $pdo->quote($name) . ")";
+			}
+			else{
+				$filterCondition .= "AND `Code` IN (
+				  SELECT `Code`
+				  FROM ProductItemFeatureUnified
+				  WHERE Feature = " . $pdo->quote($name) .
+					" AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = " . $pdo->quote($value) . ")";
+			}
+		}
+
+		$notInCondition = '';
+		$inCondition = '';
+
+		foreach($dict as $featureName => $value){
+			BaseFeature::validateFeatureName($featureName);
+			if($value === null){
+				$notInCondition .=  "OR Feature = " . $pdo->quote($featureName);
+			}
+			else{
+				$inCondition .= "OR (Feature = " . $pdo->quote($featureName) .
+					" AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = " . $pdo->quote($value) . ")";
+			}
+		}
+
+		$condition = '';
+		if(!empty($notInCondition)){
+			//Remove the first OR
+			$notInCondition = substr($notInCondition, 3);
+			$condition .= " AND Code NOT IN (
+			SELECT `Code` 
+			FROM ProductItemFeatureUnified 
+			WHERE " . $notInCondition .
+				")";
+		}
+		if(!empty($inCondition)){
+			//Remove the first OR
+			$inCondition = substr($inCondition, 3);
+			$condition .= ' AND `Code` IN (
+				  SELECT `Code`
+				  FROM ProductItemFeatureUnified
+				  WHERE ' . $inCondition . ')';
+		}
+
+
+		$query = "SELECT " . $select . "
+		FROM ProductItemFeatureUnified
+		WHERE " . $filterCondition . $condition;
+
+		if($returnCount) {
+			$query .= " GROUP BY Val
+			ORDER BY Quantity DESC, Val ASC";
+		}
+
+		$statement = $this->getPDO()->prepare($query);
+		$array = [];
+
+		try {
+			$success = $statement->execute();
+			assert($success, 'stats by feature');
+			if($returnCount) {
+				while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+					$array[$row['Val']] = $row['Quantity'];
+				}
+			}
+			else{
+				while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+					$array[] = $row['Code'];
+				}
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $array;
+	}
+
 }
