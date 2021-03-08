@@ -547,7 +547,7 @@ class Controller implements RequestHandlerInterface {
 						'surfaceScan' => $db->statsDAO()->getCountByFeature('surface-scan', new Feature('type', 'hdd')),
 						*/
 						'byErased' => $db->statsDAO()->getStatsByType(
-							true, ['data-erased' => 'yes'], 'data-erased'
+							true, [], 'data-erased', 'yes'
 						),
 						'bySmartData' => $db->statsDAO()->getStatsByType(
 							true, ['type' => 'hdd'], 'smart-data'
@@ -555,7 +555,7 @@ class Controller implements RequestHandlerInterface {
 						'byCapacity' => $db->statsDAO()->getStatsByType(
 							true, ['type' => 'hdd'], 'capacity-decibyte'
 						),
-						'withoutErased' => $db->statsDAO()->getStatsByType(true, ['type' => 'hdd'], 'data-erased'),
+						'withoutErased' => $db->statsDAO()->getStatsByType(true, ['data-erased' => null], 'type', 'hdd'),
 						'surfaceScan' => $db->statsDAO()->getStatsByType(true, ['type' => 'hdd'], 'surface-scan'),
 						'formAndRotation' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'hdd'), [
 							'hdd-form-factor',

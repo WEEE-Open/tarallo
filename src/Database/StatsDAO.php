@@ -681,8 +681,8 @@ EOQ
 
 
 	public function getStatsByType(bool $returnCount, array $dict, string $filterName, ?string $filterValue = '', ?array $additionalFilter = []){
-		//Array with Feature=>name if filtered
-		//Feature=>null if not filtered
+		//Array with featureName=>featureValue if filtered
+		//featureName=>null if not filtered
 		$pdo = $this->getPDO();
 
 
