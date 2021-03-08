@@ -530,16 +530,44 @@ class Controller implements RequestHandlerInterface {
 			case 'hdds':
 				$request = $request->withAttribute('Template', 'stats::hdds')->withAttribute(
 					'TemplateParameters', [
-						'erased' => $db->statsDAO()->getCountByFeature('data-erased', new Feature('data-erased', 'yes')),
-						'smartData' => $db->statsDAO()->getCountByFeature(
+						/*'byErased' => $db->statsDAO()->getCountByFeature(
+							'data-erased', new Feature('data-erased', 'yes')
+						),
+						'bySmartData' => $db->statsDAO()->getCountByFeature(
 							'smart-data', new Feature('type', 'hdd')
 						),
-						//'withoutErased' => $db->statsDAO()->getItemByNotFeature('data-erased'),
+
+						'byCapacity' => $db->statsDAO()->getCountByFeature(
+							'capacity-decibyte', new Feature('type', 'hdd')
+						),
+						'withoutErased' => $db->statsDAO()->getCountByNotFeature(new Feature('type', 'hdd'), 'data-erased'),
 						'surfaceScan' => $db->statsDAO()->getCountByFeature('surface-scan', new Feature('type', 'hdd')),
+						*/
+						'byErased' => $db->statsDAO()->getStatsByType(
+							true, ['data-erased' => 'yes'], 'data-erased'
+						),
+						'bySmartData' => $db->statsDAO()->getStatsByType(
+							true, ['type' => 'hdd'], 'smart-data'
+						),
+						'byCapacity' => $db->statsDAO()->getStatsByType(
+							true, ['type' => 'hdd'], 'capacity-decibyte'
+						),
+						'withoutErased' => $db->statsDAO()->getStatsByType(true, ['type' => 'hdd'], 'data-erased'),
+						'surfaceScan' => $db->statsDAO()->getStatsByType(true, ['type' => 'hdd'], 'surface-scan'),
 						'formAndRotation' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'hdd'), [
 							'hdd-form-factor',
 							'spin-rate-rpm'
-						])
+						]),
+						'missingSmartOrSurfaceScan' =>$db->statsDAO()->getStatsByType(false,
+							['smart-data' => null,
+							'surface-scan' => null],
+							'type', 'hdd',
+							['working' => 'yes']),
+						'failedSmartOrSurfaceScan' =>$db->statsDAO()->getStatsByType(false,
+							['smart-data' => 'fail',
+							'surface-scan' => 'fail'],
+							'type', 'hdd',
+							['working' => 'yes'])
 					]
 				);
 				break;
