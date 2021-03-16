@@ -93,7 +93,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 <?php if(!empty($formAndRotation)): ?>
 	<div class="col-12 col-md-8 col-lg-6">
 		<table class="table table-borderless stats">
-			<caption>RAMs by type and frequency</caption>
+			<caption>HDDs by Form factor and Rotation speed</caption>
 			<thead class="thead-dark">
 			<tr>
 				<th scope="col">Form Factor</th>
