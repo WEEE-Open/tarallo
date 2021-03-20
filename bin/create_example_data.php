@@ -42,7 +42,7 @@ $pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Sear
 
 $pdo->beginTransaction();
 $pdo->exec(/** @lang MariaDB */ "DELETE FROM SessionToken WHERE Token = '$tokenId';");
-$pdo->exec(/** @lang MariaDB */ "INSERT INTO SessionToken(Token, Hash, Data, Owner) VALUES ('$tokenId', '\$2y\$10\$NiVbBb6pO3ck5ugXGKk2CeFEW83cmfDCCRjcda9f0DhAUoGPL71C6','O:29:\"WEEEOpen\\Tarallo\\SessionLocal\":3:{s:11:\"description\";s:10:\"See README\";s:5:\"level\";i:0;s:5:\"owner\";s:8:\"dev.user\";}', 'dev.user');");
+$pdo->exec(/** @lang MariaDB */ "INSERT INTO SessionToken(Token, Hash, Data, Owner) VALUES ('$tokenId', '\$2y\$10\$NiVbBb6pO3ck5ugXGKk2CeFEW83cmfDCCRjcda9f0DhAUoGPL71C6','O:29:\"WEEEOpen\\\Tarallo\\\SessionLocal\":3:{s:11:\"description\";s:10:\"See README\";s:5:\"level\";i:0;s:5:\"owner\";s:8:\"dev.user\";}', 'dev.user');");
 $pdo->commit();
 
 $db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);

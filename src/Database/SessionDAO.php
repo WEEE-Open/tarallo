@@ -32,7 +32,7 @@ final class SessionDAO extends DAO {
 		}
 	}
 
-	public function getRedirect(string $sessionId): string {
+	public function getRedirect(string $sessionId): ?string {
 		try {
 			$s = $this->getPDO()->prepare('SELECT `Redirect` FROM Session WHERE `Session` = ?');
 			$result = $s->execute([$sessionId]);
