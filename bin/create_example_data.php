@@ -329,6 +329,21 @@ $lonelyCpu = (new Item('C1'))
 	->setProduct($db->productDAO()->getProduct(new ProductCode('AMD', 'Opteron 3300', 'AJEJE')));
 $table->addContent($lonelyCpu);
 
+$lonelyMobo = (new Item('B100TEST'))
+	->addFeature(new Feature('brand', "Intel"))
+	->addFeature(new Feature('model', "MB346789"))
+	->addFeature(new Feature('variant', "v2.0"))
+	->addFeature(new Feature('sn', 'T35T11111111'))
+	->addFeature(new Feature('owner', 'DISAT'))
+	->setProduct($db->productDAO()->getProduct(new ProductCode("Intel", "MB346789", "v2.0")));
+$lonelyCpu = (new Item('C100TEST'))
+	->addFeature(new Feature('brand', "Intel"))
+	->addFeature(new Feature('model', "Centryno"))
+	->addFeature(new Feature('variant', "SL666"))
+	->addFeature(new Feature('owner', 'DISAT'))
+	->setProduct($db->productDAO()->getProduct(new ProductCode("Intel", "Centryno", "SL666")));
+$bluezone->addContent($lonelyMobo->addContent($lonelyCpu));
+
 foreach($testpcs as $testpc) {
 	$bluezone->addContent($testpc);
 }
