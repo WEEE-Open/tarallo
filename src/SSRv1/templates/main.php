@@ -20,7 +20,7 @@ $tooltips = $tooltips ?? false;
 <!--	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">-->
 	<link rel="stylesheet" href="/static/bootstrap.custom.min.css">
 	<link rel="stylesheet" href="/static/main.css">
-	<?php if(defined('TARALLO_DEVELOPMENT_ENVIRONMENT') && TARALLO_DEVELOPMENT_ENVIRONMENT): ?>
+	<?php if(defined('TARALLO_DEVELOPMENT_ENVIRONMENT') && TARALLO_DEVELOPMENT_ENVIRONMENT && (!defined('TARALLO_DEVELOPMENT_DISABLE_COLORS'))): ?>
 	<style>
 		.thead-dark th, .navbar-dark {
             background-color: darkorange !important;
