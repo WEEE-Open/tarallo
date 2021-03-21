@@ -574,6 +574,16 @@ class Controller implements RequestHandlerInterface {
 					]
 				);
 				break;
+			case 'users':
+				$request = $request->withAttribute('Template', 'stats::users')->withAttribute(
+					'TemplateParameters', [
+						'createdItems' => $db->statsDAO()->getUsersStats('C'),
+						'movedItems' => $db->statsDAO()->getUsersStats('M'),
+						'updatedItems' => $db->statsDAO()->getUsersStats('U'),
+						'overall' => $db->statsDAO()->getUsersStats()
+					]
+				);
+				break;
 			case 'products':
 				$request = $request->withAttribute('Template', 'stats::products')->withAttribute('TemplateParameters', [
 						'brandsProducts' => $db->statsDAO()->getProductsCountByBrand(),
