@@ -575,12 +575,13 @@ class Controller implements RequestHandlerInterface {
 				);
 				break;
 			case 'users':
+				$numUsers = Validation::validateOptionalString($query, 'top', 5);
 				$request = $request->withAttribute('Template', 'stats::users')->withAttribute(
 					'TemplateParameters', [
-						'createdItems' => $db->statsDAO()->getUsersStats('C'),
-						'movedItems' => $db->statsDAO()->getUsersStats('M'),
-						'updatedItems' => $db->statsDAO()->getUsersStats('U'),
-						'overall' => $db->statsDAO()->getUsersStats()
+						'createdItems' => $db->statsDAO()->getUsersStats('C', $numUsers),
+						'movedItems' => $db->statsDAO()->getUsersStats('M', $numUsers),
+						'updatedItems' => $db->statsDAO()->getUsersStats('U', $numUsers),
+						'overall' => $db->statsDAO()->getUsersStats('', $numUsers)
 					]
 				);
 				break;
