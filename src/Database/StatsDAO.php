@@ -786,7 +786,7 @@ EOQ
 
 	public function getUsersStats(string $change = '', ?int $limit = 5){
 		if(!ctype_alpha($change) && $change !== ''){
-			throw new \DomainException("Wrong input string: '" . $change . "' is not alphabetic");
+			throw new \DomainException("Wrong input string: $change is not alphabetic");
 		}
 		$change = strtoupper($change);
 		$pdo = $this->getPDO();
