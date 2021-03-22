@@ -785,10 +785,10 @@ EOQ
 	}
 
 	public function getUsersStats(string $change = '', ?int $limit = 5){
-		if($change !== 'C' && $change !== 'L' && $change !== 'M' && $change !== 'U' && $change !== ''){
-			throw new \Exception("Test Exception");
+		if(!ctype_alpha($change) && $change !== ''){
+			throw new \DomainException("Wrong input string: '" . $change . "' is not alphabetic");
 		}
-
+		$change = strtoupper($change);
 		$pdo = $this->getPDO();
 		$where = $change ?  " WHERE `Change` = " . $pdo->quote($change) : '';
 		$query = "SELECT User, COUNT(*) as Count
