@@ -784,4 +784,34 @@ EOQ
 		return $array;
 	}
 
+	public function getUsersStats(string $change = '', ?int $limit = 5){
+		if(!ctype_alpha($change) && $change !== ''){
+			throw new \DomainException("Wrong input string: $change is not alphabetic");
+		}
+		$change = strtoupper($change);
+		$pdo = $this->getPDO();
+		$where = $change ?  " WHERE `Change` = " . $pdo->quote($change) : '';
+		$query = "SELECT User, COUNT(*) as Count
+		FROM Audit" .
+			$where
+		. " GROUP BY User 
+		ORDER BY Count DESC
+		LIMIT " . $limit;
+
+		$statement = $this->getPDO()->prepare($query);
+		$array = [];
+
+		try {
+			$success = $statement->execute();
+			assert($success, 'Users stats');
+			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+				$array[$row['User']] = $row['Count'];
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $array;
+	}
+
 }
