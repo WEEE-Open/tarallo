@@ -593,6 +593,14 @@ class Controller implements RequestHandlerInterface {
 					]
 				);
 				break;
+			case 'history':
+				$numEntries = Validation::validateOptionalString($query, 'limit', 10);
+				$request = $request->withAttribute('Template', 'stats::history')->withAttribute(
+					'TemplateParameters', [
+						'lastEntries' => $db->statsDAO()->getLastAudit($numEntries)
+					]
+				);
+				break;
 			default:
 				throw new NotFoundException();
 		}

@@ -11,4 +11,5 @@
 	<a class="nav-link <?= $currentPage === 'hdds' ? 'active' : '' ?>" href="/stats/hdds">HDDs</a>
 	<a class="nav-link <?= $currentPage === 'users' ? 'active' : '' ?>" href="/stats/users">Users</a>
 	<a class="nav-link <?= $currentPage === 'products' ? 'active' : '' ?>" href="/stats/products">Products</a>
+	<a class="nav-link <?= $currentPage === 'history' ? 'active' : '' ?>" href="/stats/history">History</a>
 </nav>
