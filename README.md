@@ -5,9 +5,9 @@ Server in PHP e (My)SQL (anche se forse un NoSQL sarebbe stato più adatto) del 
 
 ## Installation
 
-### Developement
+### Development
 
-Install [Vagrant](http://vagrantup.com/) and [Ansible](http://ansible.com/) and run:
+Install [VirtualBox](https://www.virtualbox.org) or an alternative (such as Hyper-V), [Vagrant](http://vagrantup.com/) and [Ansible](http://ansible.com/) and run:
 
 	make vm
 
@@ -16,6 +16,8 @@ this will install the required Ansible roles.
 **If you're running Windows** you won't be able to run Ansible or `make`, see the "Developing on Windows" section below for instructions.
     
 If you want to do that manually check the `Makefile` to see what's needed.
+
+If you're using VirtualBox and you have a very different version of the Guest Additions on the host and on the guest, try `vagrant plugin install vagrant-vbguest --plugin-version 0.21` followed by `vagrant vbguest --do install`.
 
 Then do:
 	
