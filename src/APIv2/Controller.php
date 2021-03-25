@@ -692,9 +692,13 @@ class Controller implements RequestHandlerInterface {
 		$identifier = Validation::validateOptionalString($parameters, 'identifier');
 		$body = $request->getAttribute('ParsedBody', []);
 
-		// Locks the row, required for overwriting but also a good idea when adding
+		if($identifier === null) {
+			$identifier = 'Automated upload ' . strtoupper(substr(md5(time()), 0, 8));
+		}
+		$overwrite = boolval($query['overwrite'] ?? false);
+
 		$isDuplicate = $db->bulkDAO()->bulkIdentifierExistsAndLocked($identifier);
-		if(isset($query['overwrite'])) {
+		if($overwrite) {
 			$db->bulkDAO()->deleteBulkImport($identifier);
 		} else if($isDuplicate) {
 			throw new DuplicateBulkIdentifierException();
@@ -704,6 +708,7 @@ class Controller implements RequestHandlerInterface {
 			$json = json_encode($item);
 			$db->bulkDAO()->addBulk($identifier, $type, $json);
 		}
+
 		return new EmptyResponse();
 	}
 
@@ -852,7 +857,7 @@ class Controller implements RequestHandlerInterface {
 						$r->addGroup(
 							'/bulk',
 							function(FastRoute\RouteCollector $r) {
-								$r->post('/add/{identifier}', [User::AUTH_LEVEL_RO, 'Controller::addBulk']);
+								$r->post('/add[/{identifier}]', [User::AUTH_LEVEL_RO, 'Controller::addBulk']);
 							}
 						);
 					}
