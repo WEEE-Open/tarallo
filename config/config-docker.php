@@ -1,7 +1,7 @@
 <?php
-define('TARALLO_DB_USERNAME', 'tarallo');
-define('TARALLO_DB_PASSWORD', 'thisisnottheproductionpassword');
-define('TARALLO_DB_DSN', 'mysql:dbname=tarallo;host=localhost;charset=utf8mb4');
+define('TARALLO_DB_USERNAME', 'root');
+define('TARALLO_DB_PASSWORD', 'root');
+define('TARALLO_DB_DSN', 'mysql:dbname=tarallo;host=db;charset=utf8mb4');
 define('TARALLO_CACHE_ENABLED', false); // Set to true to enable FastRoute cache (use in production only, leave false in developement)
 define('TARALLO_DEVELOPMENT_ENVIRONMENT', true); // Set to false or delete in production
 define('TARALLO_POST_GRACE_TIME', 1800);

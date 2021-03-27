@@ -1,15 +1,16 @@
 FROM php:fpm
 
-RUN apt-get update && apt-get install -y git unzip
+RUN apt-get update && apt-get install -y git unzip && docker-php-ext-install pdo_mysql
+#RUN docker-php-ext-install pecl-xdebug
 
 RUN mkdir -p /var/www/html
 WORKDIR /var/www/html
 
 COPY composer.* ./
-COPY bin/* ./bin/
-COPY public/* ./public/
-COPY src/* ./src/
-COPY tests/* ./tests/
+COPY bin/ ./bin/
+COPY public/ ./public/
+COPY src/ ./src/
+COPY tests/ ./tests/
 
 RUN mkdir config
 COPY config/config-docker.php ./config/config.php
