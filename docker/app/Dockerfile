@@ -1,5 +1,7 @@
 FROM php:fpm
 
+RUN apt-get update && apt-get install -y git
+
 RUN mkdir -p /var/www/html
 WORKDIR /var/www/html
 
@@ -15,4 +17,4 @@ COPY ../../config/config-docker.php ./config/config.php
 # install composer
 RUN php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer
 # install dependencies
-RUN composer install --no-dev --no-suggest
+RUN composer install --no-dev
