@@ -7,6 +7,28 @@ Server in PHP e (My)SQL (anche se forse un NoSQL sarebbe stato più adatto) del 
 
 ### Development
 
+#### Beta method (use the tested method for the moment)
+
+Install `docker` (usually `docker.io` in package managers) and `docker-compose` (same name).  
+If you have macOS or Windows: go [here](https://www.docker.com/products/docker-desktop).  
+
+- `git clone git@github.com:WEEE-Open/tarallo.git`
+- `cd tarallo`
+- `docker-compose up -d`
+- go to http://localhost:8080 and eat some taralli 🍩 (this is the most similar emoji, don't judge me, okay?)
+
+When you're finished: `docker-compose down`.  
+
+If you have screwed up:  
+- `docker-compose down`
+- `docker volume rm tarallo_tarallo-web`
+- `docker-compose build --no-cache`
+- `docker-compose up -d`
+
+We are working on loading some default data into the database at the moment (see [this issue](https://github.com/WEEE-Open/tarallo/issues/181)), only the interface works as of now.
+
+#### Tested method
+
 Install [VirtualBox](https://www.virtualbox.org) or an alternative (such as Hyper-V), [Vagrant](http://vagrantup.com/) and [Ansible](http://ansible.com/) and run:
 
 	make vm
