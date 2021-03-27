@@ -8,12 +8,11 @@ COPY ../../bin/* ./bin/
 COPY ../../public/* ./public/
 COPY ../../src/* ./src/
 COPY ../../tests/* ./tests/
-COPY ../../utils/provision/composer.sh .
 
 RUN mkdir config
 COPY ../../config/config-docker.php ./config/config.php
 
 # install composer
-RUN ./composer.sh
+RUN php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer
 # install dependencies
 RUN composer install --no-dev --no-suggest
