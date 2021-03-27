@@ -10,7 +10,6 @@
 /** @var array[] $formAndRotation */
 /** @var int[] $surfaceScan */
 /** @var bool $startDateSet */
-/** @var array[] $byTypeFrequency */
 /** @var array[] $missingSmartOrSurfaceScan */
 /** @var array[] $failedSmartOrSurfaceScan */
 $this->layout('main', ['title' => 'Stats: HDDs', 'user' => $user, 'currentPage' => 'stats']);
@@ -69,7 +68,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		</table>
 	</div>
 <?php endif; ?>
-	<?php if(!empty(krsort($byCapacity))): ?>
+	<?php if(!empty($byCapacity)): krsort($byCapacity) ?>
 	<div class="col-12 col-md-8 col-lg-6">
 		<table class="table table-borderless stats">
 			<caption>HDDs by capacity</caption>
@@ -97,7 +96,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 			<thead class="thead-dark">
 			<tr>
 				<th scope="col">Form Factor</th>
-				<th scope="col">Frequency</th>
+				<th scope="col">Rotation speed</th>
 				<th scope="col">Count</th>
 			</tr>
 			</thead>
@@ -163,7 +162,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 <?php endif; ?>
 <?php if(!empty($failedSmartOrSurfaceScan)): ?>
 	<div class="stats list col-12">
-		<p>HDDs with failed SMART or Surface Scan (<?=count($failedSmartOrSurfaceScan)?>, max 200)</p>
+		<p>Working HDDs with failed SMART or Surface Scan: do they really work? (<?=count($failedSmartOrSurfaceScan)?>, max 200)</p>
 		<div>
 			<?php foreach($failedSmartOrSurfaceScan as $item): ?>
 				<a href="/item/<?=$item?>"><?=$item?></a>
@@ -173,7 +172,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 <?php endif ?>
 <?php if(!empty($missingSmartOrSurfaceScan)): ?>
 <div class="stats list col-12">
-	<p>HDDs with missing SMART or Surface Scan (<?=count($missingSmartOrSurfaceScan)?>, max 200)</p>
+	<p>Working HDDs with missing SMART or Surface Scan: test them! (<?=count($missingSmartOrSurfaceScan)?>, max 200)</p>
 	<div>
 		<?php foreach($missingSmartOrSurfaceScan as $item): ?>
 			<a href="/item/<?=$item?>"><?=$item?></a>

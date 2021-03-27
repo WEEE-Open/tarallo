@@ -310,7 +310,7 @@ for($i = 100; $i < 250; $i++){
 		->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
 		->addFeature(new Feature('type', 'hdd'))
 		->addFeature(new Feature(rand(0, 1) ? 'ide-ports-n' : 'sata-ports-n', rand(1, 4)))
-		->addFeature(new Feature('capacity-decibyte', [40, 80, 160, 256, 512, 1024, 2048][rand(0, 6)] * 1000000000))
+		->addFeature(new Feature('capacity-decibyte', [40, 80, 160, 320, 500, 1000, 256][rand(0, 6)] * 1000000000))
 		->addFeature(new Feature('hdd-form-factor', ['3.5','1.8-5mm', '2.5-9.5mm'][rand(0, 2)]))
 		->addFeature(new Feature('spin-rate-rpm', [7200, 5400, 10025][rand(0, 2)]));
 	if(rand(0, 1))
