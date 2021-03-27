@@ -43,7 +43,7 @@ up: up_internal dbupdate examples
 .PHONY:
 up_internal:
 	docker-compose up -d
-	sleep 5 # database takes a while to really start, the next command fails immediately otherwise
+	sleep 10 # database takes a while to really start, the next command fails immediately otherwise
 
 .PHONY:
 down:
