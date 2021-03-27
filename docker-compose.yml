@@ -15,7 +15,9 @@ services:
       - 3307:3306
 
   app:
-    build: ./docker/app
+    build:
+      context: ./
+      dockerfile: ./docker/app/Dockerfile
     volumes:
     - tarallo-web:/var/www/html
     depends_on:
