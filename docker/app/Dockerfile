@@ -7,6 +7,7 @@ RUN mkdir -p /var/www/html
 WORKDIR /var/www/html
 
 COPY composer.* ./
+COPY *.sql ./
 COPY bin/ ./bin/
 COPY public/ ./public/
 COPY src/ ./src/

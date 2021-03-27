@@ -23,7 +23,8 @@ abstract class DatabaseTest extends TestCase {
 	//}
 
 	protected function getPdo() {
-		return new \PDO('mysql:dbname=tarallo_test;host=localhost;charset=utf8mb4', 'root', 'root', [
+		require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
+		return new \PDO(TARALLO_DB_DSN, TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, [
 			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
 			\PDO::ATTR_CASE => \PDO::CASE_NATURAL,
 			\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
@@ -47,7 +48,8 @@ abstract class DatabaseTest extends TestCase {
 	 */
 	protected function getDb() {
 		if($this->db === null) {
-			$db = new Database('root', 'root', 'mysql:dbname=tarallo_test;host=127.0.0.1');
+			$this->getPdo();
+			$db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);
 			//$dbr = new \ReflectionObject($db);
 			//$prop = $dbr->getProperty('pdo');
 			//$prop->setAccessible(true);
