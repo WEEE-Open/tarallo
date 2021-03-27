@@ -12,6 +12,24 @@ services:
       MYSQL_PASSWORD: thisisnottheproductionpassword
       MYSQL_DATABASE: tarallo
     ports:
-      - "3307:3306"
+      - 3307:3306
 
+  app:
+    build: ./docker/app
+    volumes:
+    - tarallo-web:/var/www/html
+    depends_on:
+      - db
 
+  web:
+    build: ./docker/web
+    ports:
+      - 8080:80
+      - 8081:81
+    volumes:
+    - tarallo-web:/var/www/html:ro
+    depends_on:
+      - app
+
+volumes:
+  tarallo-web:
