@@ -1,0 +1,17 @@
+version: '3.4'
+services:
+  db:
+    image: mariadb:10.4  # 10.5 breaks with "ERROR 1901 (HY000) at line 70: Function or expression 'ValueEnum' cannot be used in the CHECK clause of `CONSTRAINT_1`"
+    volumes:
+      - ./database.sql:/docker-entrypoint-initdb.d/a.sql
+      - ./database-data.sql:/docker-entrypoint-initdb.d/b.sql
+      - ./database-procedures.sql:/docker-entrypoint-initdb.d/c.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: tarallo
+      MYSQL_PASSWORD: thisisnottheproductionpassword
+      MYSQL_DATABASE: tarallo
+    ports:
+      - "3307:3306"
+
+
