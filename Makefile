@@ -55,8 +55,8 @@ destroy: down
 
 .PHONY:
 dbupdate:
-	docker-compose exec app php /var/www/html/bin/update.php
+	docker-compose exec -T app php /var/www/html/bin/update.php
 
 .PHONY:
 examples:
-	docker-compose exec app php /var/www/html/bin/create_example_data.php
+	docker-compose exec -T app php /var/www/html/bin/create_example_data.php
