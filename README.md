@@ -2,7 +2,7 @@
 Tuttofare Assistente il Riuso di Aggeggi Logori e Localmente Opprimenti  
 (aka L'inventario Opportuno)
 
-An extremely granular inventory management software for computer hardware specifically, halway between a CMDB (configuration management database) and a PIM (product information management).
+An extremely granular inventory management software for computer hardware specifically, halfway between a CMDB (configuration management database) and a PIM (product information management).
 
 ## Installation
 
