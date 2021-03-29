@@ -1,7 +1,8 @@
 # T.A.R.A.L.L.O.
-Trabiccolo Amministrazione Rottami e Assistenza, Legalmente-noto-come L'inventario Opportuno
+Tuttofare Assistente il Riuso di Aggeggi Logori e Localmente Opprimenti  
+(aka L'inventario Opportuno)
 
-Server in PHP e (My)SQL (anche se forse un NoSQL sarebbe stato più adatto) del programma che usiamo per gestire l'inventario dei vecchi computer accatastati in laboratorio, nonché di quelli donati ad associazioni e scuole a cui facciamo assistenza.
+An extremely granular inventory management software for computer hardware specifically, halway between a CMDB (configuration management database) and a PIM (product information management).
 
 ## Installation
 
