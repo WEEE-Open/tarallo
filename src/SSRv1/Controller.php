@@ -597,7 +597,8 @@ class Controller implements RequestHandlerInterface {
 				$numEntries = Validation::validateOptionalString($query, 'limit', 10);
 				$request = $request->withAttribute('Template', 'stats::history')->withAttribute(
 					'TemplateParameters', [
-						'lastEntries' => $db->statsDAO()->getLastAudit($numEntries)
+						'lastItemEntries' => $db->statsDAO()->getLastAudit(false, $numEntries),
+						'lastProductEntries' => $db->statsDAO()->getLastAudit(true, $numEntries)
 					]
 				);
 				break;
