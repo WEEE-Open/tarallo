@@ -30,7 +30,7 @@ $now = new DateTime();
 							$sentence = ' updated';
 							break;
 						case 'M':
-							$sentence = ' moved to <a href="/item/' . $line['Other'] . '">' . $line['Other'] . "</a>";
+							$sentence = ' moved to <a href="/item/' . $line['Other'] . '">' . $this->e($line['Other']) . "</a>";
 							break;
 						case 'L':
 							$sentence = ' lost';
@@ -39,13 +39,13 @@ $now = new DateTime();
 							$sentence = ' deleted';
 							break;
 						default:
-							$sentence = ' unknown operation ' . $line['Change'] . ($line['Other'] ? ' with ' . $line['Other'] : '');
+							$sentence = ' unknown operation ' . $this->e($line['Change']) . ($line['Other'] ? ' with ' . $this->e($line['Other']) : '');
 					}?>
 					<?php $date = new DateTime($line['Time']);
 
 					$time = $date->diff($now)->days > 0 ? $date->format('\a\t H:i \o\n F j') : $date->format('\a\t H:i');
 					?>
-					<td class="align-middle"><a href="/item/<?=$line['Code']?>"><?=$line['Code']?></a><?=$sentence?>
+					<td class="align-middle"><a href="/item/<?=$line['Code']?>"><?=$this->e($line['Code'])?></a><?=$sentence?>
 						<small class="text-muted">by <?= $this->e($line['User']) ?> <?= $this->e($time)?></small>
 					</td>
 				</tr>
@@ -72,7 +72,7 @@ $now = new DateTime();
 							$sentence = ' updated';
 							break;
 						case 'M':
-							$sentence = ' moved to <a href="/product/' . $line['Other'] . '">' . $line['Other'] . "</a>";
+							$sentence = ' moved to <a href="/product/' . $line['Other'] . '">' . $this->e($line['Other']) . "</a>";
 							break;
 						case 'L':
 							$sentence = ' lost';
@@ -81,7 +81,7 @@ $now = new DateTime();
 							$sentence = ' deleted';
 							break;
 						default:
-							$sentence = ' unknown operation ' . $line['Change'] . ($line['Other'] ? ' with ' . $line['Other'] : '');
+							$sentence = ' unknown operation ' . $this->e($line['Change']) . ($line['Other'] ? ' with ' . $this->e($line['Other']) : '');
 					}?>
 					<?php $date = new DateTime($line['Time']);
 
@@ -89,7 +89,7 @@ $now = new DateTime();
 					?>
 					<td class="align-middle">
 						<a href="/product/<?=$line['Brand']?>/<?=$line['Model']?>/<?=$line['Variant']?>">
-							<?=$line['Brand'] . " " . $line['Model']?> <small><?=$line['Variant']?></small>
+							<?=$this->e($line['Brand']) . " " . $this->e($line['Model'])?> <small><?=$this->e($line['Variant'])?></small>
 						</a><?=$sentence?>
 						<small class="text-muted">by <?= $this->e($line['User']) ?> <?= $this->e($time)?></small>
 					</td>
