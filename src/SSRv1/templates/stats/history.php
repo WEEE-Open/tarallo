@@ -6,6 +6,7 @@
 $this->layout('main', ['title' => 'Stats: history', 'user' => $user, 'currentPage' => 'stats']);
 $this->insert('stats::menu', ['currentPage' => 'history']);
 
+$now = new DateTime();
 ?>
 
 <div class="row">
@@ -40,8 +41,12 @@ $this->insert('stats::menu', ['currentPage' => 'history']);
 						default:
 							$sentence = ' unknown operation ' . $line['Change'] . ($line['Other'] ? ' with ' . $line['Other'] : '');
 					}?>
+					<?php $date = new DateTime($line['Time']);
+
+					$time = $date->diff($now)->days > 0 ? $date->format('\a\t H:i \o\n F j') : $date->format('\a\t H:i');
+					?>
 					<td class="align-middle"><a href="/item/<?=$line['Code']?>"><?=$line['Code']?></a><?=$sentence?>
-						<small class="text-muted">by <?= $this->e($line['User']) ?> at <?= $this->e($line['Time'])?></small>
+						<small class="text-muted">by <?= $this->e($line['User']) ?> <?= $this->e($time)?></small>
 					</td>
 				</tr>
 				<?php endforeach ?>
@@ -78,11 +83,15 @@ $this->insert('stats::menu', ['currentPage' => 'history']);
 						default:
 							$sentence = ' unknown operation ' . $line['Change'] . ($line['Other'] ? ' with ' . $line['Other'] : '');
 					}?>
+					<?php $date = new DateTime($line['Time']);
+
+					$time = $date->diff($now)->days > 0 ? $date->format('\a\t H:i \o\n F j') : $date->format('\a\t H:i');
+					?>
 					<td class="align-middle">
 						<a href="/product/<?=$line['Brand']?>/<?=$line['Model']?>/<?=$line['Variant']?>">
 							<?=$line['Brand'] . " " . $line['Model']?> <small><?=$line['Variant']?></small>
 						</a><?=$sentence?>
-						<small class="text-muted">by <?= $this->e($line['User']) ?> at <?= $this->e($line['Time'])?></small>
+						<small class="text-muted">by <?= $this->e($line['User']) ?> <?= $this->e($time)?></small>
 					</td>
 				</tr>
 			<?php endforeach ?>
