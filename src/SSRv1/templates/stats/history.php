@@ -30,7 +30,7 @@ $now = new DateTime();
 							$sentence = ' updated';
 							break;
 						case 'M':
-							$sentence = ' moved to <a href="/item/' . $line['Other'] . '">' . $this->e($line['Other']) . "</a>";
+							$sentence = ' moved to <a href="/item/' . $this->e($line['Other']) . '">' . $this->e($line['Other']) . "</a>";
 							break;
 						case 'L':
 							$sentence = ' lost';
@@ -72,7 +72,7 @@ $now = new DateTime();
 							$sentence = ' updated';
 							break;
 						case 'M':
-							$sentence = ' moved to <a href="/product/' . $line['Other'] . '">' . $this->e($line['Other']) . "</a>";
+							$sentence = ' moved to <a href="/product/' . $this->e($line['Other']) . '">' . $this->e($line['Other']) . "</a>";
 							break;
 						case 'L':
 							$sentence = ' lost';
@@ -88,7 +88,7 @@ $now = new DateTime();
 					$time = $date->diff($now)->days > 0 ? $date->format('\a\t H:i \o\n F j') : $date->format('\a\t H:i');
 					?>
 					<td class="align-middle">
-						<a href="/product/<?=$line['Brand']?>/<?=$line['Model']?>/<?=$line['Variant']?>">
+						<a href="/product/<?=$this->e($line['Brand'])?>/<?=$this->e($line['Model'])?>/<?=$this->e($line['Variant'])?>">
 							<?=$this->e($line['Brand']) . " " . $this->e($line['Model'])?> <small><?=$this->e($line['Variant'])?></small>
 						</a><?=$sentence?>
 						<small class="text-muted">by <?= $this->e($line['User']) ?> <?= $this->e($time)?></small>
