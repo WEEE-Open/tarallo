@@ -97,7 +97,8 @@ class Controller implements RequestHandlerInterface {
 
 		$product = $db->productDAO()->getProduct(new ProductCode($brand, $model, $variant));
 
-		$editing = end(explode('/', $request->getUri()->getPath())) === 'edit';
+		$urlParts = explode('/', $request->getUri()->getPath());
+		$editing = end($urlParts) === 'edit';
 
 		$request = $request
 			->withAttribute('Template', 'product')
