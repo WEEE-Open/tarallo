@@ -38,6 +38,12 @@ build: $(wildcard docker/**/*)
 	docker-compose build --no-cache
 
 .PHONY:
+buildcached: $(wildcard docker/**/*)
+	docker-compose down || true
+	docker volume rm "$(notdir $(PWD))_tarallo-web" || true
+	docker-compose build
+
+.PHONY:
 up: up_internal dbupdate examples
 
 .PHONY:
