@@ -814,4 +814,26 @@ EOQ
 		return $array;
 	}
 
+	public function getLastAudit(?bool $productAudit = false ,?int $limit = 10){
+
+		$select = $productAudit ? "Brand, Model, Variant, `Change`, User, Time " : "Code, `Change`, Other, User, Time";
+
+		$query = "SELECT $select
+FROM " . ($productAudit ? 'AuditProduct' : 'Audit') . "
+ORDER BY Time DESC
+LIMIT " . $limit;
+
+		$statement = $this->getPDO()->prepare($query);
+
+		try {
+			$success = $statement->execute();
+			assert($success, 'Last audit');
+			$array = $statement->fetchAll(\PDO::FETCH_ASSOC);
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $array;
+	}
+
 }
