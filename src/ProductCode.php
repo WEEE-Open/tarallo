@@ -36,10 +36,14 @@ class ProductCode {
 	}
 
 	public function getVariantOrEmpty(): string {
-		if($this->variant === self::DEFAULT_VARIANT) {
+		return self::variantOrEmpty($this->variant);
+	}
+
+	public static function variantOrEmpty(string $variant): string {
+		if($variant === self::DEFAULT_VARIANT) {
 			return '';
 		} else {
-			return $this->variant;
+			return $variant;
 		}
 	}
 

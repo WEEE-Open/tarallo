@@ -1,7 +1,6 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var array $incomplete */
-/** @var array $splittable */
 /** @var int[] $brandsProducts */
 $this->layout('main', ['title' => 'Stats: products', 'user' => $user, 'currentPage' => 'stats', 'tooltips' => true]);
 $this->insert('stats::menu', ['currentPage' => 'products']);
@@ -39,34 +38,6 @@ $this->insert('stats::menu', ['currentPage' => 'products']);
 		</table>
 	</div>
 <?php endif ?>
-<?php if(!empty($splittable)): ?>
-	<div class="col-12 col-xl-6">
-		<table class="table table-borderless stats">
-			<caption>Items that can be split with a product</caption>
-			<thead class="thead-dark">
-			<tr>
-				<th scope="col">Code</th>
-				<th scope="col">Brand</th>
-				<th scope="col">Model</th>
-				<th scope="col">Variant</th>
-				<th scope="col" data-toggle="tooltip" data-placement="top" title="Features that can be moved to a product">Features</th>
-			</tr>
-			</thead>
-			<tbody>
-			<?php foreach($splittable as $row): ?>
-				<tr>
-					<td><a href="/item/<?= $this->e($row['Code']) ?>"><?=$this->e($row['Code'])?></a></td>
-					<td><?=$this->e($row['Brand'])?></td>
-					<td><?=$this->e($row['Model'])?></td>
-					<td><?=$this->e($row['Variant'] ?? '')?></td>
-					<td><?=$this->e($row['Features'])?></td>
-				</tr>
-			<?php endforeach ?>
-			</tbody>
-		</table>
-	</div>
-<?php endif ?>
-
 <?php if(!empty($brandsProducts)): ?>
 	<div class="col-12 col-xl-6">
 		<table class="table table-borderless stats">

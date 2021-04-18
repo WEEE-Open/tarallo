@@ -428,9 +428,8 @@ class Controller implements RequestHandlerInterface {
 				$request = $request->withAttribute('Template', 'stats::needAttention')->withAttribute(
 					'TemplateParameters', [
 						'serials' => $db->statsDAO()->getCountByFeature('sn', null, null, null, false, 2),
-						'missingData' => $db->statsDAO()->getItemsByFeatures(
-							new Feature('check', 'missing-data'), null, 500
-						),
+						'missingData' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'missing-data'), null, 500),
+						'splittable' => $db->statsDAO()->getSplittableItems(),
 						'lost' => $db->statsDAO()->getLostItems([], 100),
 					]
 				);
@@ -590,7 +589,6 @@ class Controller implements RequestHandlerInterface {
 				$request = $request->withAttribute('Template', 'stats::products')->withAttribute('TemplateParameters', [
 						'brandsProducts' => $db->statsDAO()->getProductsCountByBrand(),
 						'incomplete' => $db->statsDAO()->getItemsWithIncompleteProducts(),
-						'splittable' => $db->statsDAO()->getSplittableItems(),
 					]
 				);
 				break;
