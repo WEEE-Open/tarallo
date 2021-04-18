@@ -303,16 +303,23 @@ $rambox->addContent($ram);
 
 ///H.D.D generator (Huge Deficit Disks)
 for($i = 100; $i < 250; $i++){
+	$capacity = [40, 80, 160, 320, 500, 1000, 256][rand(0, 6)];
+	$rpm = [7200, 5400, 10025][rand(0, 2)];
+	$port = rand(0, 1);
+	$ff = rand(0, 2);
+	$model = ['FY', 'AS', '5D'][$ff] . $capacity . ['S', 'M'][$port] . substr((string) $ff, 0, 1) . substr((string) $rpm, 0, 2);
+	$port = $port ? 'ide-ports-n' : 'sata-ports-n';
+	$ff = ['3.5','1.8-5mm', '2.5-9.5mm'][$ff];
 	$hdd = (new Item('HDD' . $i))
-		->addFeature(new Feature('brand', 'PrinceStone'))
-		->addFeature(new Feature('model', 'Ultrakek'))
-		->addFeature(new Feature('variant', 'v2'))
+		->addFeature(new Feature('brand', 'Minstor'))
+		->addFeature(new Feature('model', $model))
+		->addFeature(new Feature('variant', 'default'))
 		->addFeature(new Feature('working', rand(0, 1) ? 'yes' : 'no'))
 		->addFeature(new Feature('type', 'hdd'))
-		->addFeature(new Feature(rand(0, 1) ? 'ide-ports-n' : 'sata-ports-n', rand(1, 4)))
-		->addFeature(new Feature('capacity-decibyte', [40, 80, 160, 320, 500, 1000, 256][rand(0, 6)] * 1000000000))
-		->addFeature(new Feature('hdd-form-factor', ['3.5','1.8-5mm', '2.5-9.5mm'][rand(0, 2)]))
-		->addFeature(new Feature('spin-rate-rpm', [7200, 5400, 10025][rand(0, 2)]));
+		->addFeature(new Feature($port, 1))
+		->addFeature(new Feature('capacity-decibyte', $capacity * 1000000000))
+		->addFeature(new Feature('hdd-form-factor', $ff))
+		->addFeature(new Feature('spin-rate-rpm', $rpm));
 	if(rand(0, 1))
 		$hdd->addFeature(new Feature('data-erased', 'yes'));
 	if($i < 240){
