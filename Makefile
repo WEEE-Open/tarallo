@@ -60,6 +60,9 @@ destroy: down
 	docker volume rm "$(notdir $(PWD))_tarallo-web" || true
 
 .PHONY:
+rebuild: down destroy build up
+
+.PHONY:
 dbupdate:
 	docker-compose exec -T app php /var/www/html/bin/update.php
 
