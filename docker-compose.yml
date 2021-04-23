@@ -18,10 +18,21 @@ services:
     build:
       context: ./
       dockerfile: ./docker/app/Dockerfile
+      args:
+      - XDEBUG=true
     volumes:
+    # Named volume to share data with the webserver
     - tarallo-web:/var/www/html
+
+    # Host directories get directly mapped to server directories
+    # Mountpoints are created within app's Dockerfile
+    - ./public:/var/www/html/public:ro
+    - ./src:/var/www/html/src:ro
+    - ./tests:/var/www/html/tests:ro
     depends_on:
       - db
+    ports:
+      - 9000:9000
 
   web:
     build: ./docker/web
@@ -29,7 +40,12 @@ services:
       - 8080:80
       - 8081:81
     volumes:
+    # Replicate volume structure of "app" but in read only
     - tarallo-web:/var/www/html:ro
+
+    - ./public:/var/www/html/public:ro
+    - ./src:/var/www/html/src:ro
+    - ./tests:/var/www/html/tests:ro
     depends_on:
       - app
 
