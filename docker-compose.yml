@@ -30,6 +30,9 @@ services:
     - ./public:/var/www/html/public:ro
     - ./src:/var/www/html/src:ro
     - ./tests:/var/www/html/tests:ro
+
+    # Directory for xdebug profiler traces
+    - ./utils/xdebug:/xdebug
     depends_on:
       - db
 

@@ -6,9 +6,16 @@ ARG XDEBUG=false
 RUN apt-get update && apt-get install -y git unzip iproute2 && docker-php-ext-install pdo_mysql
 #RUN docker-php-ext-install pecl-xdebug
 
+# Create Xdebug profiler traces directory
+RUN mkdir /xdebug
+
 # Create server root directory and enter it
 RUN mkdir -p /var/www/html
 WORKDIR /var/www/html
+
+# Add a phpinfo for good measure
+RUN mkdir admin
+RUN echo -n "<?php\nphpinfo();\n" > /var/www/html/admin/phpinfo.php
 
 # Create directories for served content
 # These will be filled in with content from the git tree on the host on docker-compose up
