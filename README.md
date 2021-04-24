@@ -54,7 +54,7 @@ If you have make on your machine:
 #### Workflow
 The directories of the git tree that contain the application's sources (`public`, `src` and `tests`) are directly mapped within the container, and changing any file in those directories will immediately reflect on the running instance inside the container.
 
-Xdebug is supported, but requires some extra steps use: please read the relative [instructions](XDEBUG.md).
+Xdebug is supported, but requires some extra steps to use: please read the relative [instructions](XDEBUG.md).
 
 #### Configuration
 Both Xdebug and its profiler can be enabled/disabled by tweaking the value of the `XDEBUG` and `PROFILER` ARGs for the `app` container inside the `docker-compose.yml` file.
