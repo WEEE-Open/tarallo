@@ -6,32 +6,62 @@ An extremely granular inventory management software for computer hardware specif
 
 ## Installation
 
-### Development
-
-#### Beta method (use the tested method for the moment)
+### Development (with docker-compose)
+> NOTE: This method is still work in progress. Please use the [tested method](#development-with-vagrant) for development purposes
 
 Install `docker` (usually `docker.io` in package managers) and `docker-compose` (same name).  
-If you have macOS or Windows: go [here](https://www.docker.com/products/docker-desktop).  
+If you have macOS or Windows go [here](https://www.docker.com/products/docker-desktop).
 
 - `git clone git@github.com:WEEE-Open/tarallo.git`
 - `cd tarallo`
 - `docker-compose up -d`
 - go to http://localhost:8080 and eat some taralli 🍩 (this is the most similar emoji, don't judge me, okay?)
 
-When you're finished: `docker-compose down`.  
+When you're finished: `docker-compose down`.
 
-If you have screwed up:  
-- `docker-compose down`
-- `docker volume rm tarallo_tarallo-web`
-- `docker-compose build --no-cache`
-- `docker-compose up -d`
+If you have screwed up:
 
+```bash
+# Stop the containers and network, remove permanent volumes.
+docker-compose down
+docker volume rm tarallo_tarallo-web
+
+# Rebuild the images (ignoring cache) and start the containers.
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+If you have make on your machine:
+- `make build` - (re)builds the development environment
+- `make rebuild` - shortcut for `make build && make up`
+- `make destroy` - cleans up the development environment
+- `make up` - start the development environment
+- `make down` - stop the development environment
+- `make dbupdate` - update the database schema (when instructed to)
+- `make examples` - resets database content with example items and products
+
+#### Features
+- T.A.R.A.L.L.O. development instance accessible at [`127.0.0.1:8080`](http://127.0.0.1:8080).
+- T.A.R.A.L.L.O. APIs at `127.0.0.1:8080/v2/`
+- A default user (`dev.user`) generated on the fly with automatic login enabled (you can't test the SSO component, sorry).
+- A default API Token: `yoLeCHmEhNNseN0BlG0s3A:ksfPYziGg7ebj0goT0Zc7pbmQEIYvZpRTIkwuscAM_k` (see the [documentation](https://github.com/WEEE-Open/tarallo/wiki/Managing-the-session-and-Authentication)).
+- Xdebug enabled by default with `debug` and `profile` modes (can be disabled in [docker-compose.yml](docker-compose.yml)).
+- Adminer at [`127.0.0.1:8081`](http://127.0.0.1:8081).
+- Database (MySQL/MariaDB) acessible externally by `root` at `127.0.0.1:3307` (note the non-standard port), connect PHPStorm to it!
+
+#### Workflow
+The directories of the git tree that contain the application's sources (`public`, `src` and `tests`) are directly mapped within the container, and changing any file in those directories will immediately reflect on the running instance inside the container.
+
+Xdebug is supported, but requires some extra steps use: please read the relative [instructions](XDEBUG.md).
+
+#### Issues
 We are working on loading some default data into the database at the moment (see [this issue](https://github.com/WEEE-Open/tarallo/issues/181)), only the interface works as of now.
 
-#### Tested method
 
-Use Vagrant. You know what to do. This method will be removed soon.
+### Development (with vagrant)
+> NOTE: This method is about to be discontinued (when the docker-compose setup is fully functional)
 
+Use Vagrant. You know what to do.  
 This is what you get, though:
 
 * T.A.R.A.L.L.O. instance accessible at `127.0.0.1:8080`
@@ -44,16 +74,17 @@ This is what you get, though:
 * Database (MySQL/MariaDB) accessible externally by root at `127.0.0.1:3307` (note the non-standard port), connect PHPStorm to it!
 * phpinfo at `127.0.0.1:8081/phpinfo.php`
 
-#### Useful commands
+### API Development
 
 If you need T.A.R.A.L.L.O. just for its APIs, not to develop it, here's a short list of some useful commands:
 
-* `make down` shuts down the containers
-* `make up` starts them again
-* `make destroy` deletes the containers
-* `make build` rebuilds the images
-* `make dbupdate` updates the database schema (when instructed to)
-* `make examples` resets database content with example items and products
+- `make build` - (re)builds the development environment
+- `make rebuild` - shortcut for `make build && make up`
+- `make destroy` - cleans up the development environment
+- `make up` - start the development environment
+- `make down` - stop the development environment
+- `make dbupdate` - update the database schema (when instructed to)
+- `make examples` - resets database content with example items and products
 
 If you're on Windows and you don't have make, open the Makefile and copy the raw commands, it's 1 or 2 commands for each one of these.
 
