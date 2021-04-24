@@ -46,7 +46,9 @@ If you have make on your machine:
 - A default user (`dev.user`) generated on the fly with automatic login enabled (you can't test the SSO component, sorry).
 - A default API Token: `yoLeCHmEhNNseN0BlG0s3A:ksfPYziGg7ebj0goT0Zc7pbmQEIYvZpRTIkwuscAM_k` (see the [documentation](https://github.com/WEEE-Open/tarallo/wiki/Managing-the-session-and-Authentication)).
 - Xdebug enabled by default with `debug` and `profile` modes (can be disabled in [docker-compose.yml](docker-compose.yml)).
+- Xdebug profiler traces are generated directly within utils/xdebug in the git tree on the host machine.
 - Adminer at [`127.0.0.1:8081`](http://127.0.0.1:8081).
+- PHP Info at [`127.0.0.1:8081/phpinfo.php`](http://127.0.0.1:8081/phpinfo.php)
 - Database (MySQL/MariaDB) acessible externally by `root` at `127.0.0.1:3307` (note the non-standard port), connect PHPStorm to it!
 
 #### Workflow
