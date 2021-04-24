@@ -35,12 +35,14 @@ vmexamples:
 build: $(wildcard docker/**/*)
 	docker-compose down || true
 	docker volume rm "$(notdir $(PWD))_tarallo-web" || true
+	docker volume rm "$(notdir $(PWD))_tarallo-db" || true
 	docker-compose build --no-cache
 
 .PHONY:
 buildcached: $(wildcard docker/**/*)
 	docker-compose down || true
 	docker volume rm "$(notdir $(PWD))_tarallo-web" || true
+	docker volume rm "$(notdir $(PWD))_tarallo-db" || true
 	docker-compose build
 
 .PHONY:
@@ -58,6 +60,7 @@ down:
 .PHONY:
 destroy: down
 	docker volume rm "$(notdir $(PWD))_tarallo-web" || true
+	docker volume rm "$(notdir $(PWD))_tarallo-db" || true
 
 .PHONY:
 rebuild: down destroy build up

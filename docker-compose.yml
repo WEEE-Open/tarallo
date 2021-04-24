@@ -6,6 +6,7 @@ services:
       - ./database.sql:/docker-entrypoint-initdb.d/a.sql
       - ./database-data.sql:/docker-entrypoint-initdb.d/b.sql
       - ./database-procedures.sql:/docker-entrypoint-initdb.d/c.sql
+      - tarallo-db:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
       #MYSQL_USER: tarallo
@@ -49,3 +50,4 @@ services:
 
 volumes:
   tarallo-web:
+  tarallo-db:
