@@ -2,6 +2,7 @@ FROM php:fpm
 
 # Disable xdebug by default
 ARG XDEBUG=false
+ARG PROFILER=false
 
 RUN apt-get update && apt-get install -y git unzip iproute2 && docker-php-ext-install pdo_mysql
 #RUN docker-php-ext-install pecl-xdebug
@@ -46,8 +47,13 @@ RUN if [ $XDEBUG = "true" ]; \
         && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
         && echo "xdebug.client_host=$(/sbin/ip route|awk '/default/ { print $3 }')" >> /usr/local/etc/php/conf.d/xdebug.ini \
         && echo 'xdebug.discover_client_host=true' >> /usr/local/etc/php/conf.d/xdebug.ini \
-        && echo 'xdebug.mode=debug,profile' >> /usr/local/etc/php/conf.d/xdebug.ini \
         && echo 'xdebug.xdebug.start_with_request=trigger' >> /usr/local/etc/php/conf.d/xdebug.ini \
         && echo 'xdebug.output_dir="/xdebug"' >> /usr/local/etc/php/conf.d/xdebug.ini \
         && echo 'xdebug.profiler_output_name = "cachegrind_%H_%t.out"' >> /usr/local/etc/php/conf.d/xdebug.ini; \
+    fi
+
+# Conditionally enable the profiler
+RUN if [ $XDEBUG = "true" -a $PROFILER = "true" ]; \
+        then echo 'xdebug.mode=debug,profile' >> /usr/local/etc/php/conf.d/xdebug.ini; \
+        else echo 'xdebug.mode=debug' >> /usr/local/etc/php/conf.d/xdebug.ini; \
     fi

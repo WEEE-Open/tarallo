@@ -21,6 +21,7 @@ services:
       dockerfile: ./docker/app/Dockerfile
       args:
       - XDEBUG=true
+      - PROFILER=false
     volumes:
     # Named volume to share data with the webserver
     - tarallo-web:/var/www/html
