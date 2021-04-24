@@ -56,6 +56,9 @@ The directories of the git tree that contain the application's sources (`public`
 
 Xdebug is supported, but requires some extra steps use: please read the relative [instructions](XDEBUG.md).
 
+#### Configuration
+Both Xdebug and its profiler can be enabled/disabled by tweaking the value of the `XDEBUG` and `PROFILER` ARGs for the `app` container inside the `docker-compose.yml` file.
+
 #### Issues
 We are working on loading some default data into the database at the moment (see [this issue](https://github.com/WEEE-Open/tarallo/issues/181)), only the interface works as of now.
 
