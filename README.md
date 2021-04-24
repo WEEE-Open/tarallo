@@ -23,12 +23,12 @@ If you have screwed up:
 
 ```bash
 # Stop the containers and network, remove permanent volumes.
-docker-compose down
-docker volume rm tarallo_tarallo-web
+$ docker-compose down
+$ docker volume rm tarallo_tarallo-web
 
 # Rebuild the images (ignoring cache) and start the containers.
-docker-compose build --no-cache
-docker-compose up -d
+$ docker-compose build --no-cache
+$ docker-compose up -d
 ```
 
 If you have make on your machine:
