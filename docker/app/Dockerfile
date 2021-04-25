@@ -33,7 +33,7 @@ RUN sed -i "s#'\.h(SERVER)\.'\" title#db\" title#g" /var/www/html/admin/index.ph
 RUN php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer
 
 # Install dependencies. Also install development dependencies if not in production
-RUN if [ $DEVELOPMENT = "false" ]; \
+RUN if [ $DEVELOPMENT = "true" ]; \
         then composer install; \
         else composer install --no-dev; \
     fi
