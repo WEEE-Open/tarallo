@@ -1,9 +1,5 @@
 FROM php:fpm
 
-# Disable xdebug by default
-ARG XDEBUG=false
-ARG PROFILER=false
-
 RUN apt-get update && apt-get install -y git unzip iproute2 && docker-php-ext-install pdo_mysql
 
 # Create server root directory and enter it
@@ -20,7 +16,15 @@ RUN DOCKER_HOST_IP=$(/sbin/ip route|awk '/default/ { print $3 }'); export DOCKER
 # install composer
 RUN php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer
 # install dependencies
-RUN composer install --no-dev
+RUN if [ $XDEBUG = "true" ]; \
+        then composer install; \
+        else composer install --no-dev; \
+    fi
+
+# Disable xdebug by default
+ARG XDEBUG=false
+ARG PROFILER=false
+
 # install xdebug
 # https://stackoverflow.com/questions/49907308/installing-xdebug-in-docker
 RUN if [ $XDEBUG = "true" ]; \
