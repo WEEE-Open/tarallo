@@ -1,7 +1,11 @@
 version: '3.4'
 services:
   db:
-    image: mariadb:10.4  # 10.5 breaks with "ERROR 1901 (HY000) at line 70: Function or expression 'ValueEnum' cannot be used in the CHECK clause of `CONSTRAINT_1`"
+    build:
+      context: ./
+      dockerfile: ./docker/db/Dockerfile
+      args:
+        DEVELOPMENT: ${DEVELOPMENT}
     volumes:
       - ./sql/database.sql:/docker-entrypoint-initdb.d/a.sql
       - ./sql/database-data.sql:/docker-entrypoint-initdb.d/b.sql
@@ -19,9 +23,10 @@ services:
     build:
       context: ./
       dockerfile: ./docker/app/Dockerfile
-      #args:
-      #- XDEBUG=true
-      #- PROFILER=false
+      args:
+        XDEBUG: ${XDEBUG}
+        PROFILER: ${PROFILER}
+        DEVELOPMENT: ${DEVELOPMENT}
     volumes:
     # Host directories get directly mapped to server directories
     # Mountpoints are created within app's Dockerfile
@@ -37,7 +42,11 @@ services:
       - db
 
   web:
-    build: ./docker/web
+    build:
+      context: ./
+      dockerfile: ./docker/web/Dockerfile
+      args:
+        DEVELOPMENT: ${DEVELOPMENT}
     ports:
       - 8080:80
       - 8081:81
