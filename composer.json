@@ -1,4 +1,6 @@
 {
+  "name": "weeeopen/tarallo",
+  "description": "Incredibly granular inventory management system",
   "type": "project",
   "license": "AGPL-3.0",
   "minimum-stability": "stable",
@@ -10,7 +12,7 @@
   },
   "config": {
     "platform": {
-      "php": "7.2.8"
+      "php": "7.4"
     }
   },
   "require": {
@@ -33,7 +35,7 @@
     "ext-apcu": "*"
   },
   "require-dev": {
-    "phpunit/phpunit": "~6.5.0",
-    "phpunit/dbunit": "^3.0.0"
+    "phpunit/phpunit": "~7.5.20",
+    "phpunit/dbunit": "~4.0.0"
   }
 }

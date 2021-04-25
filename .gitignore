@@ -1,10 +1,8 @@
 .idea/*
 !.idea/codeStyles/
-.vagrant/
 vendor/
 build/
-utils/provision/playbook.retry
-utils/provision/roles/
+admin/
 utils/xdebug/*
 !utils/xdebug/
 !utils/xdebug/readme.txt
@@ -15,3 +13,4 @@ router.cache
 config/config.php
 config/config-production.php
 public/adminer*
+.env

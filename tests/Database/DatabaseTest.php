@@ -23,7 +23,7 @@ abstract class DatabaseTest extends TestCase {
 	//}
 
 	protected function getPdo() {
-		require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
+		require_once __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
 		return new \PDO(TARALLO_DB_DSN, TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, [
 			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
 			\PDO::ATTR_CASE => \PDO::CASE_NATURAL,
