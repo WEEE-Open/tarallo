@@ -1,6 +1,5 @@
 .idea/*
 !.idea/codeStyles/
-!.idea/runConfigurations/
 vendor/
 build/
 admin/
