@@ -7,7 +7,7 @@ if($argc !== 2) {
 }
 
 $basedir = rtrim($argv[1], DIRECTORY_SEPARATOR);
-$data_filename = $basedir . DIRECTORY_SEPARATOR . 'database-data.sql';
+$data_filename = $basedir . DIRECTORY_SEPARATOR . 'sql' . DIRECTORY_SEPARATOR . 'database-data.sql';
 
 if(!is_file($data_filename)) {
 	echo "$data_filename is not a file";

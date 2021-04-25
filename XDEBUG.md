@@ -35,6 +35,7 @@ Then on the right pane, give a name to the server (the name is no important) and
 ![Step 4.b: Configure the server host](docs/xdebug-docker/images/5.png)
 
 Then tick the `Use path mappings` box and add the following mappings:
+- bin: `/var/www/html/bin`
 - public: `/var/www/html/public`
 - src: `/var/www/html/src`
 - tests: `/var/www/html/tests`
