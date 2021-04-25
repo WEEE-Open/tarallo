@@ -9,6 +9,11 @@ ENV XDEBUG=${XDEBUG}
 ENV PROFILER=${PROFILER}
 ENV DEVELOPMENT=${DEVELOPMENT}
 
+# Fail safe: if the user did not copy the sample.env file exit with an explicative error
+RUN if [ "$DEVELOPMENT" = "" ]; \
+        then echo "ERROR: Unable to find .env file. Make sure you copied 'sample.env' to '.env' and configured the contained options as desired as written in the README."; false; \
+    fi
+
 RUN apt-get update && apt-get install -y git unzip iproute2 && docker-php-ext-install pdo_mysql
 
 # Create server root directory and enter it
