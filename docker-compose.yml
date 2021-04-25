@@ -35,6 +35,7 @@ services:
     - ./public:/var/www/html/public:ro
     - ./src:/var/www/html/src:ro
     - ./tests:/var/www/html/tests:ro
+    - ./phpunit.xml:/var/www/html/phpunit.xml:ro
 
     # Directory for xdebug profiler traces
     - ./utils/xdebug:/xdebug

@@ -2,10 +2,10 @@
   <configuration default="false" name="TARALLO-PHP-Unit" type="PHPUnitRunConfigurationType" factoryName="PHPUnit">
     <CommandLine>
       <PhpTestInterpreterSettings>
-        <option name="interpreterName" value="DockerCompose" />
+        <option name="interpreterName" value="app" />
       </PhpTestInterpreterSettings>
     </CommandLine>
-    <TestRunner configuration_file="phpunit.xml" scope="XML" />
+    <TestRunner configuration_file="$PROJECT_DIR$/phpunit.xml" scope="XML" use_alternative_configuration_file="true" />
     <method v="2" />
   </configuration>
 </component>

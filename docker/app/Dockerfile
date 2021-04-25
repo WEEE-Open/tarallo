@@ -45,7 +45,7 @@ RUN if [ $DEVELOPMENT = "true" -a $XDEBUG = "true" ]; \
         && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
         && echo "xdebug.client_host=$(/sbin/ip route|awk '/default/ { print $3 }')" >> /usr/local/etc/php/conf.d/xdebug.ini \
         && echo 'xdebug.discover_client_host=true' >> /usr/local/etc/php/conf.d/xdebug.ini \
-        && echo 'xdebug.xdebug.start_with_request=trigger' >> /usr/local/etc/php/conf.d/xdebug.ini \
+        && echo 'xdebug.start_with_request=trigger' >> /usr/local/etc/php/conf.d/xdebug.ini \
         && echo 'xdebug.output_dir="/xdebug"' >> /usr/local/etc/php/conf.d/xdebug.ini \
         && echo 'xdebug.profiler_output_name = "cachegrind_%H_%t.out"' >> /usr/local/etc/php/conf.d/xdebug.ini; \
     fi
