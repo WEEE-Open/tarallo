@@ -1,4 +1,6 @@
 {
+  "name": "tarallo",
+  "description": "Incredibly granular inventory management system",
   "type": "project",
   "license": "AGPL-3.0",
   "minimum-stability": "stable",

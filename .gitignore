@@ -3,6 +3,7 @@
 .vagrant/
 vendor/
 build/
+admin/
 utils/provision/playbook.retry
 utils/provision/roles/
 utils/xdebug/*

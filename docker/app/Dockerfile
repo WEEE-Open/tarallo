@@ -5,30 +5,11 @@ ARG XDEBUG=false
 ARG PROFILER=false
 
 RUN apt-get update && apt-get install -y git unzip iproute2 && docker-php-ext-install pdo_mysql
-#RUN docker-php-ext-install pecl-xdebug
-
-# Create Xdebug profiler traces directory
-RUN mkdir /xdebug
 
 # Create server root directory and enter it
 RUN mkdir -p /var/www/html
 WORKDIR /var/www/html
-
-# Add a phpinfo for good measure
-RUN mkdir admin
-RUN echo -n "<?php\nphpinfo();\n" > /var/www/html/admin/phpinfo.php
-
-# Create directories for served content
-# These will be filled in with content from the git tree on the host on docker-compose up
-RUN mkdir public
-RUN mkdir src
-RUN mkdir tests
-
-COPY composer.* ./
-COPY *.sql ./
-COPY bin/ ./bin/
-
-RUN mkdir config
+COPY . .
 COPY config/config-docker.php ./config/config.php
 
 RUN mkdir -p /var/www/html/admin && curl -o /var/www/html/admin/index.php -L https://github.com/vrana/adminer/releases/download/v4.8.0/adminer-4.8.0-mysql-en.php
@@ -54,6 +35,6 @@ RUN if [ $XDEBUG = "true" ]; \
 
 # Conditionally enable the profiler
 RUN if [ $XDEBUG = "true" -a $PROFILER = "true" ]; \
-        then echo 'xdebug.mode=debug,profile' >> /usr/local/etc/php/conf.d/xdebug.ini; \
+        then mkdir /xdebug && echo 'xdebug.mode=debug,profile' >> /usr/local/etc/php/conf.d/xdebug.ini; \
         else echo 'xdebug.mode=debug' >> /usr/local/etc/php/conf.d/xdebug.ini; \
     fi

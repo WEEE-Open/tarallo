@@ -3,9 +3,9 @@ services:
   db:
     image: mariadb:10.4  # 10.5 breaks with "ERROR 1901 (HY000) at line 70: Function or expression 'ValueEnum' cannot be used in the CHECK clause of `CONSTRAINT_1`"
     volumes:
-      - ./database.sql:/docker-entrypoint-initdb.d/a.sql
-      - ./database-data.sql:/docker-entrypoint-initdb.d/b.sql
-      - ./database-procedures.sql:/docker-entrypoint-initdb.d/c.sql
+      - ./sql/database.sql:/docker-entrypoint-initdb.d/a.sql
+      - ./sql/database-data.sql:/docker-entrypoint-initdb.d/b.sql
+      - ./sql/database-procedures.sql:/docker-entrypoint-initdb.d/c.sql
       - tarallo-db:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -19,15 +19,14 @@ services:
     build:
       context: ./
       dockerfile: ./docker/app/Dockerfile
-      args:
-      - XDEBUG=true
-      - PROFILER=false
+      #args:
+      #- XDEBUG=true
+      #- PROFILER=false
     volumes:
-    # Named volume to share data with the webserver
-    - tarallo-web:/var/www/html
-
     # Host directories get directly mapped to server directories
     # Mountpoints are created within app's Dockerfile
+    - ./sql:/var/www/html/sql:ro
+    - ./bin:/var/www/html/bin:ro
     - ./public:/var/www/html/public:ro
     - ./src:/var/www/html/src:ro
     - ./tests:/var/www/html/tests:ro
@@ -44,14 +43,9 @@ services:
       - 8081:81
     volumes:
     # Replicate volume structure of "app" but in read only
-    - tarallo-web:/var/www/html:ro
-
-    - ./public:/var/www/html/public:ro
-    - ./src:/var/www/html/src:ro
-    - ./tests:/var/www/html/tests:ro
+    - .:/var/www/html:ro
     depends_on:
       - app
 
 volumes:
-  tarallo-web:
   tarallo-db:

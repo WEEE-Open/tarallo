@@ -106,7 +106,7 @@ composer install --no-dev --no-suggest --classmap-authoritative --optimize-autol
 
 And configure MariaDB and nginx, too. Look at `utils/provision`, there's an Ansible playbook just for that. It's really similar to our production playbook.
 
-If this is the first deployment you'll need to import `database.sql`, `database-data.sql` and `database-procedures.sql` manually in the production database, if it is an update you may need to run the update script: use `php bin/update.php` on the server.
+If this is the first deployment you'll need to import `sql/database.sql`, `sql/database-data.sql` and `sql/database-procedures.sql` manually in the production database, if it is an update you may need to run the update script: use `php bin/update.php` on the server.
 
 ## More details
 
@@ -120,7 +120,7 @@ There's not much more to it.
 
 ### Database
 
-The schema is located in `database.sql`.
+Files are in the `sql` directory. The schema is located in `database.sql`.
 
 `database-data.sql` contains some "static" data needed for the software to work. It can be edited, but you'll need to run `make features` afterwards.
 
@@ -128,7 +128,7 @@ The schema is located in `database.sql`.
 
 ### Feature list generation
 
-`generate-features /path/to/this/directory` reads the feature list from `database-data.sql`, converts it to PHP data structures and places it into `src/Database/Feature.php` and some other files (`generate-features` tells you which ones when it's finished).
+`generate-features /path/to/this/directory` reads the feature list from `sql/database-data.sql`, converts it to PHP data structures and places it into `src/Database/Feature.php` and some other files (`generate-features` tells you which ones when it's finished).
 
 The prefererred way to run this script is to use `make features` instead of calling it directly. This is a CLI script, you shouldn't upload it to a server or access it from the browser.
 

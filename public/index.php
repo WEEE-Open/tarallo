@@ -4,9 +4,9 @@ namespace WEEEOpen\Tarallo;
 
 use WEEEOpen\Tarallo\APIv2\ErrorResponse;
 use WEEEOpen\Tarallo\SSRv1;
-use Zend\Diactoros\Response\JsonResponse;
-use Zend\Diactoros\ServerRequestFactory;
-use Zend\HttpHandlerRunner\Emitter\SapiEmitter;
+use Laminas\Diactoros\Response\JsonResponse;
+use Laminas\Diactoros\ServerRequestFactory;
+use Laminas\HttpHandlerRunner\Emitter\SapiEmitter;
 
 // This is the entry point for the entire server.
 
