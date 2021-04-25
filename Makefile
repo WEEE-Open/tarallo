@@ -47,7 +47,7 @@ devbuild: $(wildcard docker/**/*)
 	docker-compose build --no-cache --build-arg XDEBUG=true
 
 .PHONY:
-profilebuild: $(wildcard docker/**/*)
+profilerbuild: $(wildcard docker/**/*)
 	docker-compose down || true
 	docker-compose build --no-cache --build-arg XDEBUG=true --build-arg PROFILER=true
 

@@ -1,11 +1,8 @@
 .idea/*
 !.idea/codeStyles/
-.vagrant/
 vendor/
 build/
 admin/
-utils/provision/playbook.retry
-utils/provision/roles/
 utils/xdebug/*
 !utils/xdebug/
 !utils/xdebug/readme.txt
