@@ -43,7 +43,8 @@ services:
       - 8081:81
     volumes:
     # Replicate volume structure of "app" but in read only
-    - .:/var/www/html:ro
+    - ./src:/var/www/html/src:ro
+    - ./public:/var/www/html/public:ro
     depends_on:
       - app
 
