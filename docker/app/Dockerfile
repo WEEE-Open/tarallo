@@ -9,6 +9,7 @@ COPY . .
 COPY config/config-docker.php ./config/config.php
 
 RUN mkdir -p /var/www/html/admin && curl -o /var/www/html/admin/index.php -L https://github.com/vrana/adminer/releases/download/v4.8.0/adminer-4.8.0-mysql-en.php
+RUN sed -i "s#'\.h(SERVER)\.'\" title#db\" title#g" /var/www/html/admin/index.php
 
 # Get IP address of the Docker host
 RUN DOCKER_HOST_IP=$(/sbin/ip route|awk '/default/ { print $3 }'); export DOCKER_HOST_IP
