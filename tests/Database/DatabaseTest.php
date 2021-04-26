@@ -30,9 +30,24 @@ abstract class DatabaseTest extends TestCase {
 	}
 
 	public static function setUpBeforeClass() {
-		$pdo = self::getPdo();
+		$pdo = null;
 		$retries = 0;
+		$started = false;
+		while($retries <= 20) {
+			try {
+				$pdo = self::getPdo();
+				$started = true;
+				break;
+			} catch(\PDOException $e) {
+				$retries++;
+				sleep(1);
+			}
+		}
+		if(!$started) {
+			throw new \RuntimeException("Database not up after $retries seconds");
+		}
 
+		$retries = 0;
 		$found = false;
 		while($retries <= 20) {
 			$result = $pdo->query("SHOW EVENTS LIKE 'DuplicateItemProductFeaturesCleanup'");
