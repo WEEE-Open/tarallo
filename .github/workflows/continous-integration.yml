@@ -1,0 +1,19 @@
+name: Continous Integration
+on: [push, pull_request]
+jobs:
+  run-tests:
+    name: Run PHPUnit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+      
+      - name: Copy sample.env to .env
+        run: cp sample.env .env
+
+      - name: Build and start the containers
+        run: make up
+      
+      - name: Run the tests inside the container
+        run: docker-compose exec -T app php vendor/phpunit/phpunit/phpunit --configuration phpunit.xml
+        

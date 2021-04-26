@@ -1,4 +1,4 @@
-# Using Xdebug with docker-compose
+# Using Xdebug with PHPStorm
 
 ## Setup
 To use debug with the `docker-compose` development environment, some extra steps are required.
