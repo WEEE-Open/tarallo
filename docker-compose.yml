@@ -1,6 +1,7 @@
 version: '3.4'
 services:
   db:
+    image: tarallo/db
     build:
       context: ./
       dockerfile: ./docker/db/Dockerfile
@@ -20,6 +21,7 @@ services:
       - 3307:3306
 
   app:
+    image: tarallo/app
     build:
       context: ./
       dockerfile: ./docker/app/Dockerfile
@@ -43,6 +45,7 @@ services:
       - db
 
   web:
+    image: tarallo/web
     build:
       context: ./
       dockerfile: ./docker/web/Dockerfile
