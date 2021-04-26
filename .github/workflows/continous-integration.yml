@@ -30,9 +30,9 @@ jobs:
       
       - name: Retag docker images
         run: >-
-          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app ${{ env.REPOSITORY }}/app || true) &&
-          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web ${{ env.REPOSITORY }}/web || true) &&
-          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  ${{ env.REPOSITORY }}/db  || true)        
+          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app tarallo/app || true) &&
+          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web tarallo/web || true) &&
+          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  tarallo/db  || true)        
 
       - name: Test2
         run: docker image ls
