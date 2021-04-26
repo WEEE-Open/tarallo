@@ -15,7 +15,16 @@ jobs:
         run: cp sample.env .env
       
       - name: Pull docker images
-        run: (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app && docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web && docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db) || true
+        run: >-
+          (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app || true) &&
+          (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web || true) &&
+          (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db) || true)
+      
+      - name: Retag docker images
+        run: >-
+          docker image tag docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app tarallo-app &&
+          docker image tag docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web tarallo-web &&
+          docker image tag docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db tarallo-db
 
       - name: Test
         run: docker image ls
@@ -26,10 +35,14 @@ jobs:
       - name: Run the tests inside the container
         run: docker-compose exec -T app php vendor/phpunit/phpunit/phpunit --configuration phpunit.xml
       
-      - name: Push docker images
-        run: docker tag tarallo-app docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app
-      - run: docker push docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app || true
-      - run: docker tag tarallo-db docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db
-      - run: docker push docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db || true
-      - run: docker tag tarallo-web docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web
-      - run: docker push docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web || true
+      - name: Tag docker images
+        run: >-
+          docker tag tarallo-app docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app &&
+          docker tag tarallo-db docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db   &&
+          docker tag tarallo-web docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web
+      
+      - name: Push the docker images
+        run: >-
+          (docker push docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app || true) &&
+          (docker push docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db  || true) &&
+          (docker push docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web || true)
