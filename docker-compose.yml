@@ -6,7 +6,7 @@ services:
       context: ./
       dockerfile: ./docker/db/Dockerfile
       cache_from:
-        - tarallo/db
+        - tarallo-db
       args:
         DEVELOPMENT: ${DEVELOPMENT}
     volumes:
@@ -28,7 +28,7 @@ services:
       context: ./
       dockerfile: ./docker/app/Dockerfile
       cache_from:
-        - tarallo/app
+        - tarallo-app
       args:
         XDEBUG: ${XDEBUG}
         PROFILER: ${PROFILER}
@@ -54,7 +54,7 @@ services:
       context: ./
       dockerfile: ./docker/web/Dockerfile
       cache_from:
-        - tarallo/web
+        - tarallo-web
       args:
         DEVELOPMENT: ${DEVELOPMENT}
     ports:

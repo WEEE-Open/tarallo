@@ -15,7 +15,7 @@ jobs:
         run: cp sample.env .env
       
       - name: Pull docker images
-        run: (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app tarallo/app && docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web tarallo/web && docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db tarallo/db) || true
+        run: (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app && docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web && docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db) || true
 
       - name: Build and start the containers
         run: make ci
