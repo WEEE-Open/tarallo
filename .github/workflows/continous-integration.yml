@@ -4,30 +4,32 @@ jobs:
   run-tests:
     name: Run PHPUnit tests
     runs-on: ubuntu-latest
+    env:
+      REGISTRY: docker.pkg.github.com
+      REPOSITORY: ${{ github.repository }}
+      USERNAME: ${{ github.actor }}
+      PASSWORD: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v2
       
       - name: Login to GitHub's docker registry
-        run: echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com -u $GITHUB_ACTOR --password-stdin
+        run: echo ${{ env.PASSWORD }} | docker login ${{ env.REGISTRY }} -u ${{ env.USERNAME }} --password-stdin
       
       - name: Copy sample.env to .env
         run: cp sample.env .env
       
       - name: Pull docker images
         run: >-
-          (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app || true) &&
-          (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web || true) &&
-          (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db  || true)
+          (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app || true) &&
+          (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web || true) &&
+          (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  || true)
       
       - name: Retag docker images
         run: >-
-          docker image tag docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app tarallo-app &&
-          docker image tag docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web tarallo-web &&
-          docker image tag docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db tarallo-db
-
-      - name: Test
-        run: docker image ls
+          docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app ${{ env.REPOSITORY }}/app &&
+          docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web ${{ env.REPOSITORY }}/web &&
+          docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  ${{ env.REPOSITORY }}/db
 
       - name: Build and start the containers
         run: make ci
@@ -37,12 +39,12 @@ jobs:
       
       - name: Tag docker images
         run: >-
-          docker tag tarallo-app docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app &&
-          docker tag tarallo-db docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db   &&
-          docker tag tarallo-web docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web
+          docker tag tarallo/app ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app  &&
+          docker tag tarallo/db  ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db   &&
+          docker tag tarallo/web ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web
       
       - name: Push the docker images
         run: >-
-          (docker push docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app || true) &&
-          (docker push docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db  || true) &&
-          (docker push docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web || true)
+          (docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app || true) &&
+          (docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  || true) &&
+          (docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web || true)
