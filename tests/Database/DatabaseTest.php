@@ -2,14 +2,11 @@
 
 namespace WEEEOpen\TaralloTest\Database;
 
-use PHPUnit\ExampleExtension\TestCaseTrait;
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Item;
 
 abstract class DatabaseTest extends TestCase {
-	use TestCaseTrait;
-
 	protected $db = null;
 
 	// this cannot be done, PLAIN AND SIMPLE. Even though it comes straight from an example inside documentation.
@@ -32,8 +29,7 @@ abstract class DatabaseTest extends TestCase {
 		]);
 	}
 
-	public static function setUpBeforeClass()
-	{
+	public static function setUpBeforeClass() {
 		$pdo = self::getPdo();
 		$retries = 0;
 
@@ -51,6 +47,10 @@ abstract class DatabaseTest extends TestCase {
 		if(!$found) {
 			throw new \RuntimeException("Database not ready after $retries seconds");
 		}
+	}
+
+	public function setUp() {
+		$pdo = self::getPdo();
 
 		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Audit; SET FOREIGN_KEY_CHECKS = 1;");
 		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE AuditProduct; SET FOREIGN_KEY_CHECKS = 1;");
