@@ -19,8 +19,17 @@ RUN apt-get update && apt-get install -y git unzip iproute2 && docker-php-ext-in
 # Create server root directory and enter it
 RUN mkdir -p /var/www/html
 WORKDIR /var/www/html
-COPY . .
+
+# Create mountpoints
+RUN mkdir ./sql
+RUN mkdir ./bin
+RUN mkdir ./public
+RUN mkdir ./src
+RUN mkdir ./tests
+
 COPY config/config-docker.php ./config/config.php
+COPY ./composer.json ./composer.json 
+COPY ./composer.lock ./composer.lock 
 
 # Download and install Adminer. Also substitute default server host from "localhost" to "db" for convenience
 RUN mkdir -p /var/www/html/admin && curl -o /var/www/html/admin/index.php -L https://github.com/vrana/adminer/releases/download/v4.8.0/adminer-4.8.0-mysql-en.php
