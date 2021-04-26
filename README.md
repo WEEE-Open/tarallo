@@ -1,4 +1,7 @@
 # T.A.R.A.L.L.O.
+
+[![Continous Integration](https://github.com/alecello/tarallo/actions/workflows/continous-integration.yml/badge.svg)](https://github.com/alecello/tarallo/actions/workflows/continous-integration.yml)
+
 Tuttofare Assistente il Riuso di Aggeggi Logori e Localmente Opprimenti  
 (aka L'inventario Opportuno)
 
