@@ -74,6 +74,12 @@ If you want to profile the application enable the profiler in the [configuration
 
 The directories of the git tree that contain the application's sources (`public`, `src` and `tests`) are directly mapped within the container, and changing any file in those directories will immediately reflect on the running instance inside the container.
 
+### Testing
+
+> **NOTE:** Coverage is currently broken due to dependency conflicts
+
+To run tests from PHPStorm, follow these [instructions](docs/tests/TESTS.md)
+
 ### Production
 
 Make a git clone of this repo, then:
