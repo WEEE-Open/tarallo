@@ -24,12 +24,18 @@ jobs:
           (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app || true) &&
           (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web || true) &&
           (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  || true)
+
+      - name: Test1
+        run: docker image ls
       
       - name: Retag docker images
         run: >-
           (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app ${{ env.REPOSITORY }}/app || true) &&
           (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web ${{ env.REPOSITORY }}/web || true) &&
-          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  ${{ env.REPOSITORY }}/db  || true)
+          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  ${{ env.REPOSITORY }}/db  || true)        
+
+      - name: Test2
+        run: docker image ls
 
       - name: Build and start the containers
         run: make ci
