@@ -42,7 +42,7 @@ refresh: $(wildcard docker/**/*)
 
 #################################### Continous Integration ####################################
 .PHONY:
-ci: buildcached up_internal dbupdate
+ci: build up_internal dbupdate
 
 ######################################### Environment #########################################
 .PHONY:
