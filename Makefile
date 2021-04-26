@@ -33,7 +33,7 @@ build: $(wildcard docker/**/*)
 	docker-compose build
 
 .PHONY:
-rebuild: down destroy build up
+rebuild: destroy build up
 
 .PHONY:
 refresh: $(wildcard docker/**/*)
@@ -42,7 +42,8 @@ refresh: $(wildcard docker/**/*)
 
 #################################### Continous Integration ####################################
 .PHONY:
-ci: build up_internal dbupdate
+ci: build
+	docker-compose up -d
 
 ######################################### Environment #########################################
 .PHONY:
@@ -52,6 +53,10 @@ up: up_internal dbupdate examples
 up_internal:
 	docker-compose up -d
 	sleep 10 # database takes a while to really start, the next command fails immediately otherwise
+
+.PHONY:
+destroy: down
+	docker volume rm "$(notdir $(PWD))_tarallo-db" || true
 
 .PHONY:
 down:

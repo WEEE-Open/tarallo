@@ -2,9 +2,8 @@
 
 namespace WEEEOpen\TaralloTest\Database;
 
-use PHPUnit\DbUnit\DataSet\YamlDataSet;
-use PHPUnit\DbUnit\TestCase;
-use PHPUnit\DbUnit\TestCaseTrait;
+use PHPUnit\ExampleExtension\TestCaseTrait;
+use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Item;
 
@@ -22,7 +21,7 @@ abstract class DatabaseTest extends TestCase {
 	// }
 	//}
 
-	protected function getPdo() {
+	protected static function getPdo(): \PDO {
 		require_once __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
 		return new \PDO(TARALLO_DB_DSN, TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, [
 			\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
@@ -33,20 +32,44 @@ abstract class DatabaseTest extends TestCase {
 		]);
 	}
 
-	public function getConnection() {
-		return $this->createDefaultDBConnection($this->getPdo(), 'tarallo_test');
-	}
+	public static function setUpBeforeClass()
+	{
+		$pdo = self::getPdo();
+		$retries = 0;
 
-	public function getDataSet() {
-		$file = dirname(__FILE__) . DIRECTORY_SEPARATOR . "data" . DIRECTORY_SEPARATOR . "database.yml";
+		$found = false;
+		while($retries <= 20) {
+			$result = $pdo->query("SHOW EVENTS LIKE 'DuplicateItemProductFeaturesCleanup'");
+			if($result !== false) {
+				$result->fetchAll(\PDO::FETCH_ASSOC);
+				$found = true;
+				break;
+			}
+			sleep(1);
+			$retries++;
+		}
+		if(!$found) {
+			throw new \RuntimeException("Database not ready after $retries seconds");
+		}
 
-		return new YamlDataSet($file);
+		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Audit; SET FOREIGN_KEY_CHECKS = 1;");
+		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE AuditProduct; SET FOREIGN_KEY_CHECKS = 1;");
+		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Item; SET FOREIGN_KEY_CHECKS = 1;");
+		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE ItemFeature; SET FOREIGN_KEY_CHECKS = 1;");
+		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Product; SET FOREIGN_KEY_CHECKS = 1;");
+		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE ProductFeature; SET FOREIGN_KEY_CHECKS = 1;");
+		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Tree; SET FOREIGN_KEY_CHECKS = 1;");
+		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Prefixes; SET FOREIGN_KEY_CHECKS = 1;");
+		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Product; SET FOREIGN_KEY_CHECKS = 1;");
+		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE SearchResult; SET FOREIGN_KEY_CHECKS = 1;");
+		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Search; SET FOREIGN_KEY_CHECKS = 1;");
+		$pdo->exec(/** @lang MariaDB */ "INSERT INTO Prefixes(Prefix, `Integer`) VALUES ('M', 10), ('T', 75), ('', 60);");
 	}
 
 	/**
 	 * @return Database
 	 */
-	protected function getDb() {
+	protected function getDb(): Database {
 		if($this->db === null) {
 			$this->getPdo();
 			$db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);
@@ -61,7 +84,7 @@ abstract class DatabaseTest extends TestCase {
 	}
 
 
-	protected static function itemCompare(Item $a, Item $b) {
+	protected static function itemCompare(Item $a, Item $b): bool {
 		if($a->getCode() !== $b->getCode()) {
 			return false;
 		}
@@ -78,7 +101,6 @@ abstract class DatabaseTest extends TestCase {
 		if(count($a->getContent()) !== count($b->getContent())) {
 			return false;
 		}
-		/** @var Item[] $bContent */
 		$bContent = $b->getContent();
 		foreach($a->getContent() as $item) {
 			$code = $item->getCode();

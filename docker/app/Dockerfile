@@ -9,34 +9,25 @@ ENV XDEBUG=${XDEBUG}
 ENV PROFILER=${PROFILER}
 ENV DEVELOPMENT=${DEVELOPMENT}
 
-# Fail safe: if the user did not copy the sample.env file exit with an explicative error
-RUN if [ "$DEVELOPMENT" = "" ]; \
-        then echo "ERROR: Unable to find .env file. Make sure you copied 'sample.env' to '.env' and configured the contained options as desired as written in the README."; false; \
-    fi
-
 RUN apt-get update && apt-get install -y git unzip iproute2 && docker-php-ext-install pdo_mysql
 
 # Create server root directory and enter it
 RUN mkdir -p /var/www/html
 WORKDIR /var/www/html
 
+# Download and install Adminer. Also substitute default server host from "localhost" to "db" for convenience
+RUN if [ $DEVELOPMENT = "true" ]; then\
+        mkdir -p /var/www/html/admin \
+        && curl -o /var/www/html/admin/index.php -L https://github.com/vrana/adminer/releases/download/v4.8.0/adminer-4.8.0-mysql-en.php \
+        && sed -i "s#'\.h(SERVER)\.'\" title#db\" title#g" /var/www/html/admin/index.php; \
+    fi
+
 # Create mountpoints
-RUN mkdir ./sql
-RUN mkdir ./bin
-RUN mkdir ./public
-RUN mkdir ./src
-RUN mkdir ./tests
+RUN mkdir ./sql ./bin ./public ./src ./tests
 
 COPY config/config-docker.php ./config/config.php
 COPY ./composer.json ./composer.json 
 COPY ./composer.lock ./composer.lock 
-
-# Download and install Adminer. Also substitute default server host from "localhost" to "db" for convenience
-RUN mkdir -p /var/www/html/admin && curl -o /var/www/html/admin/index.php -L https://github.com/vrana/adminer/releases/download/v4.8.0/adminer-4.8.0-mysql-en.php
-RUN sed -i "s#'\.h(SERVER)\.'\" title#db\" title#g" /var/www/html/admin/index.php
-
-# Get IP address of the Docker host
-# RUN DOCKER_HOST_IP=$(/sbin/ip route|awk '/default/ { print $3 }'); export DOCKER_HOST_IP
 
 # install composer
 RUN php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer
