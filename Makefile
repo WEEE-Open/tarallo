@@ -38,7 +38,7 @@ profilerbuild: $(wildcard docker/**/*)
 up: up_internal dbupdate examples
 
 .PHONY:
-ci: build up_internal dbupdate
+ci: buildcached up_internal dbupdate
 
 .PHONY:
 up_internal:
