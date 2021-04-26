@@ -11,11 +11,11 @@ jobs:
       - name: Login to GitHub's docker registry
         run: echo ${{ secrets.GITHUB_TOKEN }} | docker login docker.pkg.github.com -u $GITHUB_ACTOR --password-stdin
       
-      - name: Pull docker images
-        run: docker-compose pull db app web
-      
       - name: Copy sample.env to .env
         run: cp sample.env .env
+      
+      - name: Pull docker images
+        run: docker-compose pull db app web
 
       - name: Build and start the containers
         run: make ci
