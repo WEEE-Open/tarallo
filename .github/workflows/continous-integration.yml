@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REGISTRY: docker.pkg.github.com
-      REPOSITORY: ${{ github.repository }}
+      REPOSITORY: ${{ github.repository.name }}
       USERNAME: ${{ github.actor }}
       PASSWORD: ${{ secrets.GITHUB_TOKEN }}
     steps:
