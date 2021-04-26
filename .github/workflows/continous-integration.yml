@@ -8,6 +8,9 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v2
       
+      - name: Copy sample.env to .env
+        run: cp sample.env .env
+
       - name: Build and start the containers
         run: make up
       
