@@ -2,13 +2,14 @@ name: Continous Integration
 on: [push, pull_request]
 jobs:
   run-tests:
+    if: github.repository_owner == 'WEEE-Open'
     name: Run PHPUnit tests
     runs-on: ubuntu-latest
     env:
-      REGISTRY: docker.pkg.github.com
-      REPOSITORY: ${{ github.repository }}
-      USERNAME: ${{ github.actor }}
-      PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+      REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+      REPOSITORY: tarallo
+      USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v2
@@ -25,17 +26,11 @@ jobs:
           (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web || true) &&
           (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  || true)
 
-      - name: Test1
-        run: docker image ls
-      
       - name: Retag docker images
         run: >-
           (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app tarallo/app || true) &&
           (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web tarallo/web || true) &&
-          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  tarallo/db  || true)        
-
-      - name: Test2
-        run: docker image ls
+          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  tarallo/db  || true)
 
       - name: Build and start the containers
         run: make ci
