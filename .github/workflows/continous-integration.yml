@@ -15,4 +15,4 @@ jobs:
         run: make up
       
       - name: Run the tests inside the container
-        run: docker-compose exec app php vendor/phpunit/phpunit/phpunit --configuration phpunit.xml --teamcity
+        run: docker-compose exec -T app php vendor/phpunit/phpunit/phpunit --configuration phpunit.xml --teamcity
