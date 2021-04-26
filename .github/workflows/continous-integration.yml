@@ -27,9 +27,9 @@ jobs:
       
       - name: Retag docker images
         run: >-
-          docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app ${{ env.REPOSITORY }}/app &&
-          docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web ${{ env.REPOSITORY }}/web &&
-          docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  ${{ env.REPOSITORY }}/db
+          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app ${{ env.REPOSITORY }}/app || true) &&
+          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web ${{ env.REPOSITORY }}/web || true) &&
+          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  ${{ env.REPOSITORY }}/db  || true)
 
       - name: Build and start the containers
         run: make ci
