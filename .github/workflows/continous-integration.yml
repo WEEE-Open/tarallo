@@ -15,7 +15,7 @@ jobs:
         run: cp sample.env .env
       
       - name: Pull docker images
-        run: true || (docker pull tarallo/app && docker pull tarallo/web && docker pull tarallo/db)
+        run: (docker pull tarallo/app && docker pull tarallo/web && docker pull tarallo/db) || true
 
       - name: Build and start the containers
         run: make ci
