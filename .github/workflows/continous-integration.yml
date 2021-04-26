@@ -18,7 +18,7 @@ jobs:
         run: >-
           (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app || true) &&
           (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web || true) &&
-          (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db) || true)
+          (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db  || true)
       
       - name: Retag docker images
         run: >-
