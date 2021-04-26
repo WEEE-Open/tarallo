@@ -2,18 +2,50 @@ name: Continous Integration
 on: [push, pull_request]
 jobs:
   run-tests:
+    if: github.repository_owner == 'WEEE-Open'
     name: Run PHPUnit tests
     runs-on: ubuntu-latest
+    env:
+      REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+      REPOSITORY: tarallo
+      USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     steps:
       - name: Check out the repository
         uses: actions/checkout@v2
       
+      - name: Login to GitHub's docker registry
+        run: echo ${{ env.PASSWORD }} | docker login ${{ env.REGISTRY }} -u ${{ env.USERNAME }} --password-stdin
+      
       - name: Copy sample.env to .env
         run: cp sample.env .env
+      
+      - name: Pull docker images
+        run: >-
+          (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app || true) &&
+          (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web || true) &&
+          (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  || true)
+
+      - name: Retag docker images
+        run: >-
+          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app tarallo/app || true) &&
+          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web tarallo/web || true) &&
+          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  tarallo/db  || true)
 
       - name: Build and start the containers
-        run: make up
+        run: make ci
       
       - name: Run the tests inside the container
         run: docker-compose exec -T app php vendor/phpunit/phpunit/phpunit --configuration phpunit.xml
-        
+      
+      - name: Tag docker images
+        run: >-
+          (docker tag tarallo/app ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app || true)  &&
+          (docker tag tarallo/db  ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  || true)  &&
+          (docker tag tarallo/web ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web || true)
+      
+      - name: Push the docker images
+        run: >-
+          (docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app || true) &&
+          (docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  || true) &&
+          (docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web || true)
