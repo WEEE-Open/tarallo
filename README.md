@@ -67,10 +67,10 @@ If you only have to test out the application or interact with it, you're done!
 
 ### Development
 
-To connect PHPStorm to XDebug on the docker container, follow these [instructions](XDEBUG.md).
+To connect PHPStorm to XDebug on the docker container, follow these [instructions](docs/xdebug/XDEBUG.md).
 Also connect PHPStorm to the database on `127.0.0.1:3307` for maximum efficiency (note the non-standard port).
 
-If you want to profile the application enable the profiler in the [configuration](#Environment_configuration). XDebug profiler traces are generated directly within the `utils/xdebug` directory in the git tree on the host machine.
+If you want to profile the application enable the profiler in the [configuration](#environment-configuration). XDebug profiler traces are generated directly within the `utils/xdebug` directory in the git tree on the host machine.
 
 The directories of the git tree that contain the application's sources (`public`, `src` and `tests`) are directly mapped within the container, and changing any file in those directories will immediately reflect on the running instance inside the container.
 
