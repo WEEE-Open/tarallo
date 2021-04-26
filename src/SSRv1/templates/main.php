@@ -32,7 +32,7 @@ $tooltips = $tooltips ?? false;
 <body>
 
 <nav class="navbar navbar-dark bg-dark">
-	<a href="/" class="navbar-brand" title="Trabiccolo Amministrazione Rottami e Assistenza, Legalmente-noto-come L'inventario Opportuno">T.A.R.A.L.L.O.</a>
+	<a href="/" class="navbar-brand" title="Tuttofare Assistente il Riuso di Aggeggi Logori e Localmente Opprimenti">T.A.R.A.L.L.O.</a>
 
 	<?php if(defined('TARALLO_DEVELOPMENT_ENVIRONMENT') && TARALLO_DEVELOPMENT_ENVIRONMENT): ?>
 		<small class="navbar-text">Development version, this is running locally on your machine</small>
