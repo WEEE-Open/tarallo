@@ -44,13 +44,15 @@ The following commands might be used to interact with the development environmen
 
 > NOTE: If you don't have access to the `make` command, you can open the `Makefile` and execute the commands manually. There are at most a couple of commands for each target.
 
-- `make build` - create the development environment
+- `make build` - create the development environment (with caching)
+- `make rebuild` - shortcut for `make down destroy build up`
+- `make refresh` - create the development environment (without caching)
 - `make destroy` - clean up the development environment
 - `make up` - start the development environment
 - `make down` - stop the development environment
 - `make dbupdate` - update the database schema (when instructed to)
 - `make examples` - resets database content with example items and products
-- `make rebuild` - shortcut for `make down destroy build up`
+- `make ci` - used internally by CI: make build without the examples step
 
 Now go to http://localhost:8080 and eat some taralli 🍩 (this is the most similar emoji, don't judge me, okay?)
 
@@ -84,6 +86,10 @@ The directories of the git tree that contain the application's sources (`public`
 To run tests from PHPStorm, follow these [instructions](docs/tests/TESTS.md)
 
 ### Production
+
+#### Make targets
+
+There is a production-specific build target (`make cache`) that builds the php cache.
 
 Make a git clone of this repo, then:
 
