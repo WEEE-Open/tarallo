@@ -39,9 +39,9 @@ jobs:
       
       - name: Tag docker images
         run: >-
-          docker tag tarallo/app ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app  &&
-          docker tag tarallo/db  ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db   &&
-          docker tag tarallo/web ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web
+          (docker tag tarallo/app ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app || true)  &&
+          (docker tag tarallo/db  ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  || true)  &&
+          (docker tag tarallo/web ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web || true)
       
       - name: Push the docker images
         run: >-
