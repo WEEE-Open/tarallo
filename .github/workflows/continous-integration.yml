@@ -17,6 +17,9 @@ jobs:
       - name: Pull docker images
         run: (docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-app && docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-web && docker pull docker.pkg.github.com/$GITHUB_REPOSITORY/tarallo-db) || true
 
+      - name: Test
+        run: docker image ls
+
       - name: Build and start the containers
         run: make ci
       
