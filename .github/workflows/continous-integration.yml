@@ -1,0 +1,15 @@
+name: Continous Integration
+on: [push, pull_request]
+jobs:
+  run-tests:
+    name: Run PHPUnit tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v2
+      
+      - name: Build and start the containers
+        run: make up
+      
+      - name: Run the tests inside the container
+        run: docker exec tarallo_app_1 php /var/www/html/vendor/phpunit/phpunit/phpunit --configuration /var/www/html/phpunit.xml --teamcity
