@@ -11,6 +11,8 @@ class ItemCodeTest extends TestCase {
 		$pc77 = new ItemCode('PC77');
 		$this->assertEquals('PC77', (string) $pc77);
 		$this->assertEquals('PC77', $pc77->getCode());
+		$this->assertEquals('PC77', $pc77->peekCode());
+		$this->assertTrue($pc77->hasCode());
 	}
 
 	/**
@@ -61,5 +63,18 @@ class ItemCodeTest extends TestCase {
 		$i = new ItemCode("TEST");
 		$this->assertEquals('TEST', $i->jsonSerialize());
 		$this->assertEquals('"TEST"', json_encode($i));
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\ItemCode
+	 */
+	public function testCompareCode() {
+		$i1 = new ItemCode("TEST");
+		$i2 = new ItemCode("TEST");
+		$i3 = new ItemCode("TEST3");
+		$this->assertEquals(0, $i1->compareCode($i2));
+		$this->assertEquals(0, $i2->compareCode($i1));
+		$this->assertNotEquals(0, $i1->compareCode($i3));
+		$this->assertNotEquals(0, $i3->compareCode($i1));
 	}
 }
