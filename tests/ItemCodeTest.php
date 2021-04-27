@@ -40,6 +40,14 @@ class ItemCodeTest extends TestCase {
 	/**
 	 * @covers \WEEEOpen\Tarallo\ItemCode
 	 */
+	public function testItemWrongCode() {
+		$this->expectException(\WEEEOpen\Tarallo\ValidationException::class);
+		new ItemCode('PC_42');
+	}
+
+	/**
+	 * @covers \WEEEOpen\Tarallo\ItemCode
+	 */
 	public function testItemArrayCode() {
 		$this->expectException(\WEEEOpen\Tarallo\ValidationException::class);
 		/** @noinspection PhpParamsInspection it's part of the test */

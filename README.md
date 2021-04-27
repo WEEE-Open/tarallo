@@ -81,9 +81,9 @@ The directories of the git tree that contain the application's sources (`public`
 
 ### Testing
 
-> **NOTE:** Coverage is currently broken due to dependency conflicts
+To run tests from PHPStorm, follow these [instructions](docs/tests/TESTS.md).
 
-To run tests from PHPStorm, follow these [instructions](docs/tests/TESTS.md)
+Run with Coverage too, if you want.
 
 ### Production
 

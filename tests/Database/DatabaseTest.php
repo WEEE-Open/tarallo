@@ -29,7 +29,7 @@ abstract class DatabaseTest extends TestCase {
 		]);
 	}
 
-	public static function setUpBeforeClass() {
+	public static function setUpBeforeClass(): void {
 		$pdo = null;
 		$retries = 0;
 		$started = false;
@@ -64,7 +64,7 @@ abstract class DatabaseTest extends TestCase {
 		}
 	}
 
-	public function setUp() {
+	public function setUp(): void {
 		$pdo = self::getPdo();
 
 		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Audit; SET FOREIGN_KEY_CHECKS = 1;");
