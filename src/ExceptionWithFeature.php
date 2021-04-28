@@ -15,11 +15,11 @@ trait ExceptionWithFeature {
 	protected $featureValue = null;
 
 	/**
-	 * @param $feature
+	 * @param string|null $feature
 	 *
 	 * @return $this
 	 */
-	public function setFeature(?string $feature) {
+	public function setFeature(?string $feature): ExceptionWithFeature {
 		$this->feature = $feature;
 		return $this;
 	}
@@ -34,9 +34,9 @@ trait ExceptionWithFeature {
 	/**
 	 * @param mixed $featureValue
 	 *
-	 * @return ExceptionWithFeature
+	 * @return $this
 	 */
-	public function setFeatureValue($featureValue) {
+	public function setFeatureValue($featureValue): ExceptionWithFeature {
 		$this->featureValue = $featureValue;
 		return $this;
 	}
