@@ -71,7 +71,7 @@ class Summary {
 		$variant = $product->getVariantOrEmpty();
 
 		$family = $family === null ? '' : $family;
-		if(strpos($model, $family) !== false) {
+		if($family !== '' && $model !== '' && strpos($model, $family) !== false) {
 			$family = '';
 		}
 
