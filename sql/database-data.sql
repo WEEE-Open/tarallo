@@ -276,6 +276,8 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('odd-type', 'bd-r'), -- BD-R --
 	('odd-type', 'bd-rw'), -- BD-RW --
 	('power-connector', 'other'), -- Other --
+	('power-connector', 'c5'), -- C5/C6 --
+	('power-connector', 'c7'), -- C7/C8 --
 	('power-connector', 'c13'), -- C13/C14 -- C13 is the plug and C14 the inlet but they're "paired"
 	('power-connector', 'c19'), -- C19/C20 --
 	('power-connector', 'barrel'), -- Barrel --

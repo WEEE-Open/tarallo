@@ -69,7 +69,7 @@ class BaseFeature {
 		'pcie-sockets-n' => self::INTEGER,
 		'pci-sockets-n' => self::INTEGER,
 		'cnr-sockets-n' => self::INTEGER,
-		'power-connector' => ['other' => true, 'c13' => true, 'c19' => true, 'barrel' => true, 'miniusb' => true, 'microusb' => true, 'proprietary' => true, 'da-2' => true],
+		'power-connector' => ['other' => true, 'c5' => true, 'c7' => true, 'c13' => true, 'c19' => true, 'barrel' => true, 'miniusb' => true, 'microusb' => true, 'proprietary' => true, 'da-2' => true],
 		'power-idle-watt' => self::INTEGER,
 		'power-rated-watt' => self::INTEGER,
 		'ps2-ports-n' => self::INTEGER,

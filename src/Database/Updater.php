@@ -777,6 +777,9 @@ END;"
 					$this->exec("DELETE FROM `FeatureEnum` WHERE `Feature`='todo' AND `ValueEnum`='finish-os-install'");
 					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('gotcha', 'general', 0)");
 					break;
+				case 20:
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('power-connector', 'c5'), ('power-connector', 'c7')");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

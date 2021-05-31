@@ -136,7 +136,7 @@ class FeaturePrinter {
 		'odd-form-factor' => ['5.25' => '5.25 in.', 'laptop-odd-7mm' => 'SFF-8553 (7 mm)', 'laptop-odd-8.5mm' => 'SFF-8553 (8.5 mm)', 'laptop-odd-9.5mm' => 'SFF-8552 (9.5 mm standard cut corner)', 'laptop-odd-12.7mm' => 'SFF-8552 (12.7 mm cut corner)'],
 		'hdd-form-factor' => ['3.5' => '3.5 in.', '2.5-15mm' => '2.5 in. (15 mm uncommon)', '2.5-9.5mm' => '2.5 in. (9.5 mm)', '2.5-7mm' => '2.5 in. (7 mm)', '1.8-9.5mm' => '1.8 in. (9.5 mm)', '1.8-8mm' => '1.8 in. (8 mm)', '1.8-5mm' => '1.8 in. (5 mm)', 'm2' => 'M2', 'm2.2' => 'M2.2'],
 		'odd-type' => ['cd-r' => 'CD-R', 'cd-rw' => 'CD-RW', 'dvd-r' => 'DVD-R', 'dvd-rw' => 'DVD-RW', 'bd-r' => 'BD-R', 'bd-rw' => 'BD-RW'],
-		'power-connector' => ['other' => 'Other', 'c13' => 'C13/C14', 'c19' => 'C19/C20', 'barrel' => 'Barrel', 'miniusb' => 'Mini USB', 'microusb' => 'Micro USB', 'proprietary' => 'Proprietary', 'da-2' => 'Dell DA-2'],
+		'power-connector' => ['other' => 'Other', 'c5' => 'C5/C6', 'c7' => 'C7/C8', 'c13' => 'C13/C14', 'c19' => 'C19/C20', 'barrel' => 'Barrel', 'miniusb' => 'Mini USB', 'microusb' => 'Micro USB', 'proprietary' => 'Proprietary', 'da-2' => 'Dell DA-2'],
 		'psu-connector-motherboard' => ['proprietary' => 'Proprietary', 'at' => 'AT', 'atx-20pin' => 'ATX 20 pin', 'atx-24pin' => 'ATX 24 pin', 'atx-24pin-mini' => 'Mini ATX 24 pin', 'atx-20pin-aux' => 'ATX 20 pin + AUX'],
 		'ram-type' => ['simm' => 'SIMM', 'edo' => 'EDO', 'sdr' => 'SDR', 'ddr' => 'DDR', 'ddr2' => 'DDR2', 'ddr3' => 'DDR3', 'ddr4' => 'DDR4'],
 		'ram-form-factor' => ['simm' => 'SIMM', 'dimm' => 'DIMM', 'sodimm' => 'SODIMM', 'minidimm' => 'Mini DIMM', 'microdimm' => 'Micro DIMM', 'fbdimm' => 'FB-DIMM'],
