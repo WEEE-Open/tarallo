@@ -153,8 +153,10 @@ class ItemValidatorTest extends TestCase {
 
 		$box->addContent($ram)->addContent($mobo);
 		$unchanged = ItemValidator::fixupLocation($cpu, $box);
-		$this->assertEquals($box, $unchanged,
-			'Fixup shouldn\'t have changed parent, items don\'t move to random motherboards in random boxes');
+		$this->assertEquals(
+			$box, $unchanged,
+			'Fixup shouldn\'t have changed parent, items don\'t move to random motherboards in random boxes'
+		);
 		ItemValidator::validateLocation($cpu, $box);
 	}
 
@@ -457,5 +459,54 @@ class ItemValidatorTest extends TestCase {
 
 		ItemValidator::validateLocation($item, $mobo);
 		$this->assertTrue(true, 'No exceptions are thrown');
+	}
+
+	public function testCPUSocketCrossCompatAm2Am3Fm2() {
+		$a = ['am2', 'am3', 'fm2'];
+		$b = ['am2plus', 'am3plus', 'fm2plus'];
+
+		$count = 0;
+		for($i = 0; $i < count($a); $i++) {
+			$mobo = self::item('B42', 'motherboard');
+			$mobo->addFeature(new Feature('cpu-socket', $b[$i]));
+			$item = self::item('C555', 'cpu');
+			$item->addFeature(new Feature('cpu-socket', $a[$i]));
+
+			ItemValidator::validateLocation($item, $mobo);
+			$count++;
+		}
+
+		$this->assertGreaterThan(0, $count, 'At least one validation completed');
+		$this->assertTrue(true, 'No exceptions are thrown');
+	}
+
+	public function testCPUSocketCrossInompatAm2() {
+		$mobo = self::item('B42', 'motherboard');
+		$mobo->addFeature(new Feature('cpu-socket', 'am2'));
+		$item = self::item('C555', 'cpu');
+		$item->addFeature(new Feature('cpu-socket', 'am2plus'));
+
+		$this->expectException(ItemNestingException::class);
+		ItemValidator::validateLocation($item, $mobo);
+	}
+
+	public function testCPUSocketCrossInompatAm3() {
+		$mobo = self::item('B42', 'motherboard');
+		$mobo->addFeature(new Feature('cpu-socket', 'am3'));
+		$item = self::item('C555', 'cpu');
+		$item->addFeature(new Feature('cpu-socket', 'am3plus'));
+
+		$this->expectException(ItemNestingException::class);
+		ItemValidator::validateLocation($item, $mobo);
+	}
+
+	public function testCPUSocketCrossInompatFm2() {
+		$mobo = self::item('B42', 'motherboard');
+		$mobo->addFeature(new Feature('cpu-socket', 'fm2'));
+		$item = self::item('C555', 'cpu');
+		$item->addFeature(new Feature('cpu-socket', 'fm2plus'));
+
+		$this->expectException(ItemNestingException::class);
+		ItemValidator::validateLocation($item, $mobo);
 	}
 }

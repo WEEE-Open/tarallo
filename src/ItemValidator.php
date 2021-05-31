@@ -239,7 +239,16 @@ class ItemValidator {
 			if(!self::compareFeature($item, $container, 'cpu-socket')) {
 				$itemValue = $item->getFeatureValue('cpu-socket');
 				$parentValue = $container->getFeatureValue('cpu-socket');
-				throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, "Incompatible socket: CPU is $itemValue, motherboard is $parentValue");
+				if($itemValue !== null && $parentValue !== null) {
+					if(
+						!($itemValue === 'am2' && $parentValue === 'am2plus')
+						&& !($itemValue === 'am3' && $parentValue === 'am3plus')
+						//&& !($itemValue === 'am4' && $parentValue === 'am4plus')
+						&& !($itemValue === 'fm2' && $parentValue === 'fm2plus')
+					) {
+						throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, "Incompatible socket: CPU is $itemValue, motherboard is $parentValue");
+					}
+				}
 			}
 		}
 
