@@ -100,20 +100,22 @@ AND `Time` < FROM_UNIXTIME(" . $this->getPDO()->quote($creation->getTimestamp())
 	 *
 	 * @return array
 	 */
-	public function getLocationsByItems() {
+	public function getLocationsTree() {
 		$array = [];
 
 		$result = $this->getPDO()->query(
 		/** @lang MySQL */
 			<<<'EOQ'
-SELECT `Code` AS Location, COUNT(*) - 1 AS Descendants
-FROM ProductItemFeatureUnified, Tree
-WHERE ProductItemFeatureUnified.Code = Tree.Ancestor
-AND ProductItemFeatureUnified.Feature = 'type'
+SELECT Code AS Location, t.Ancestor AS Parent, COUNT(*) - 1 AS Items FROM
+(SELECT Ancestor, Descendant, Depth
+FROM Tree
+WHERE Depth = 1) AS t
+RIGHT JOIN ProductItemFeatureUnified ON ProductItemFeatureUnified.Code = t.Descendant
+JOIN Tree AS t2 ON ProductItemFeatureUnified.Code = t2.Ancestor
+WHERE ProductItemFeatureUnified.Feature = 'type'
 AND ProductItemFeatureUnified.ValueEnum = 'location'
 AND `Code` NOT IN (SELECT `Code` FROM Item WHERE DeletedAt IS NOT NULL)
-GROUP BY Tree.Ancestor
-ORDER BY COUNT(*) DESC, Location ASC;
+GROUP BY Location, t.Ancestor
 EOQ
 			,
 			\PDO::FETCH_ASSOC
@@ -122,14 +124,37 @@ EOQ
 		assert($result !== false, 'available locations');
 
 		try {
+			$array = [];
+			$counters = [];
+			$locations = [];
+			$roots = [];
 			foreach($result as $row) {
-				$array[$row['Location']] = $row['Descendants'];
+				$counters[$row['Location']] = $row['Items'];
+				if($row['Parent'] === null) {
+					$roots[] = $row['Location'];
+				} else {
+					$locations[$row['Parent']][] = $row['Location'];
+				}
+			}
+
+			foreach($roots as $root) {
+				//$array[] = [0, $root, $counters[$root]];
+				$this->parseLocationTree($array, 0, $root, $counters, $locations);
 			}
 		} finally {
 			$result->closeCursor();
 		}
 
 		return $array;
+	}
+
+	private function parseLocationTree(array &$array, int $level, string $name, array $counters, array $locations) {
+		$array[] = [$level, $name, $counters[$name]];
+		if(isset($locations[$name])) {
+			foreach($locations[$name] as $location) {
+				$this->parseLocationTree($array, $level + 1, $location, $counters, $locations);
+			}
+		}
 	}
 
 	/**

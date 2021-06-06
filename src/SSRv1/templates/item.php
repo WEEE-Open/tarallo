@@ -1,6 +1,7 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var \WEEEOpen\Tarallo\Item $item */
+/** @var int $depth */
 /** @var string|null $add */
 /** @var string|null $edit */
 /** @var bool $recursion */

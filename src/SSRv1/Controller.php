@@ -51,7 +51,7 @@ class Controller implements RequestHandlerInterface {
 		$id = Validation::validateOptionalString($parameters, 'id', null);
 		$edit = Validation::validateOptionalString($parameters, 'edit', null);
 		$add = Validation::validateOptionalString($parameters, 'add', null);
-		$depth = Validation::validateOptionalInt($query, 'depth', 20);
+		$depth = Validation::validateOptionalInt($query, 'depth', null);
 
 		try {
 			$ii = new ItemCode($id);
@@ -64,20 +64,14 @@ class Controller implements RequestHandlerInterface {
 		}
 
 		$item = $db->itemDAO()->getItem($ii, null, $depth);
-		$renderParameters = ['item' => $item];
-		// These should be mutually exclusive
-		if($edit !== null) {
-			$renderParameters['add'] = null;
-			$renderParameters['edit'] = $edit;
-		} else {
-			if($add !== null) {
-				$renderParameters['add'] = $add;
-				$renderParameters['edit'] = null;
-			} else {
-				$renderParameters['add'] = null;
-				$renderParameters['edit'] = null;
-			}
-		}
+		$renderParameters = [
+			'item' => $item,
+			'depth' => $depth,
+			];
+		// These should be mutually exclusive: either one (or both) is always null
+		assert($add === null || $edit == null);
+		$renderParameters['add'] = $add;
+		$renderParameters['edit'] = $edit;
 
 		$request = $request->withAttribute('Template', 'viewItem')->withAttribute(
 			'TemplateParameters', $renderParameters
@@ -378,7 +372,7 @@ class Controller implements RequestHandlerInterface {
 
 		$request = $request->withAttribute('Template', 'home')->withAttribute(
 			'TemplateParameters', [
-				'locations' => $locations = $db->statsDAO()->getLocationsByItems(),
+				'locations' => $locations = $db->statsDAO()->getLocationsTree(),
 				'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', max(20, count($locations))),
 			]
 		);
@@ -618,6 +612,7 @@ class Controller implements RequestHandlerInterface {
 	}
 
 	public static function search(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
 		$query = $request->getQueryParams();
@@ -625,7 +620,7 @@ class Controller implements RequestHandlerInterface {
 		$page = Validation::validateOptionalInt($parameters, 'page', 1);
 		$edit = Validation::validateOptionalString($parameters, 'edit', null);
 		$add = Validation::validateOptionalString($parameters, 'add', null);
-		$depth = Validation::validateOptionalInt($query, 'depth', 20);
+		$depth = Validation::validateOptionalInt($query, 'depth', null);
 
 		if($id === null) {
 			$templateParameters = ['searchId' => null];
@@ -641,14 +636,12 @@ class Controller implements RequestHandlerInterface {
 				'total' => $total,
 				'resultsPerPage' => $perPage,
 				'results' => $results,
+				'depth' => $depth,
 			];
-			if($add !== null) {
-				$templateParameters['add'] = $add;
-			} else {
-				if($edit !== null) {
-					$templateParameters['edit'] = $edit;
-				}
-			}
+			// These should be mutually exclusive: either one (or both) is always null
+			assert($add === null || $edit == null);
+			$templateParameters['add'] = $add;
+			$templateParameters['edit'] = $edit;
 		}
 
 		$request = $request

@@ -27,10 +27,10 @@ date_default_timezone_set('Europe/Rome');
 				</tr>
 			</thead>
 			<tbody>
-			<?php foreach($locations as $code => $count): ?>
+			<?php foreach($locations as $row): ?>
 				<tr>
-					<td><?=$this->e($code)?></td>
-					<td><?=$count?></td>
+					<td style="padding-left:<?=$this->e($row[0])?>rem"><a href="/item/<?=$this->e($row[1])?>?depth=1"><?=$this->e($row[1])?></a></td>
+					<td><?=(int) $row[2]?></td>
 				</tr>
 			<?php endforeach ?>
 			</tbody>

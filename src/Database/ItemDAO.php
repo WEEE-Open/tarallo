@@ -284,7 +284,7 @@ final class ItemDAO extends DAO {
 		}
 
 		if($depth === null) {
-			$depth = 10;
+			$depth = 20;
 		}
 
 		// TODO: we can also select Depth here, may be useful to select depth = maxdepth + 1 and see if there are items inside and discard them, but it's slow and unefficient...

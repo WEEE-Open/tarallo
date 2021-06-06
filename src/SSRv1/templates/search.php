@@ -1,5 +1,6 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
+/** @var int|null $depth */
 /** @var int|null $searchId */
 /** @var int|null $page Current page (only if searchId is not null) */
 /** @var int|null $pages Total number of pages (only if searchId is not null) */
@@ -13,6 +14,10 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 <p class="alert alert-info" id="search-tip" role="alert">Do you know the code already? Type it in the box in the upper right corner, instead!</p>
 <?php endif; ?>
 <p class="alert alert-danger d-none" id="search-error" role="alert"></p>
+
+<?php if(isset($depth)) {
+	$this->insert('depthWarning', ['depth' => $depth]);
+} ?>
 
 <?php if(!$searchId || !empty($results)): ?>
 <nav id="searcharea">

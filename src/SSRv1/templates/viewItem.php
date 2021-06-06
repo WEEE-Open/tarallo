@@ -1,6 +1,7 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var \WEEEOpen\Tarallo\Item $item */
+/** @var int|null $depth */
 /** @var string|null $add */
 /** @var string|null $edit */
 $this->layout(
@@ -11,6 +12,9 @@ $this->layout(
 		'moveDefaultFrom' => $item->getCode(),
 	]
 );
+if(isset($depth)) {
+	$this->insert('depthWarning', ['depth' => $depth]);
+}
 $this->insert(
 	'item',
 	[
