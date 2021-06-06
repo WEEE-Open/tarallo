@@ -270,7 +270,7 @@ final class ItemDAO extends DAO {
 	}
 
 	/**
-	 * Get a single item (and its content)
+	 * Get a single item, its content, all related products
 	 *
 	 * @param ItemWithCode $itemToGet
 	 * @param string|null $token

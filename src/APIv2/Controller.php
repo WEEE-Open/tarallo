@@ -452,22 +452,21 @@ class Controller implements RequestHandlerInterface {
 		$query = $request->getQueryParams();
 		$payload = $request->getAttribute('ParsedBody', []);
 		$parameters = $request->getAttribute('parameters', []);
-
-		Validation::validateRequestBodyIsArray($payload);
+		$validate = !isset($query['novalidate']);
+		$loopback = isset($query['loopback']);
 
 		$id = Validation::validateOptionalString($parameters, 'id', null);
-		if($id === null) {
-			$brand = Validation::validateOptionalString($parameters, 'brand');
-			$model = Validation::validateOptionalString($parameters, 'model');
-			$variant = Validation::validateOptionalString($parameters, 'variant');
-			$thing = new Product($brand, $model, $variant);
-		} else {
-			$thing = new Item($id);
-		}
-		$loopback = isset($query['loopback']);
+		Validation::validateRequestBodyIsArray($payload);
+
+		$thing = self::getProductOrItemForUpdate($db, $id, $parameters);
 
 		// PUT => delete every feature, replace with new ones
 		ItemBuilder::addFeatures($payload, $thing);
+
+		if($validate) {
+			ItemValidator::validateFeatures($thing);
+		}
+
 		$deleted = $db->featureDAO()->deleteFeaturesAll($thing);
 		$added = $db->featureDAO()->setFeatures($thing);
 
@@ -494,21 +493,12 @@ class Controller implements RequestHandlerInterface {
 		$payload = $request->getAttribute('ParsedBody', []);
 		$parameters = $request->getAttribute('parameters', []);
 		$validate = !isset($query['novalidate']);
-
-		Validation::validateRequestBodyIsArray($payload);
+		$loopback = isset($query['loopback']);
 
 		$id = Validation::validateOptionalString($parameters, 'id', null);
-		if($id === null) {
-			$brand = Validation::validateOptionalString($parameters, 'brand');
-			$model = Validation::validateOptionalString($parameters, 'model');
-			$variant = Validation::validateOptionalString($parameters, 'variant');
-			$thing = new Product($brand, $model, $variant);
-			$db->productDAO()->productMustExist($thing);
-		} else {
-			$thing = new Item($id);
-			$db->itemDAO()->itemMustExist($thing, true);
-		}
-		$loopback = isset($query['loopback']);
+		Validation::validateRequestBodyIsArray($payload);
+
+		$thing = self::getProductOrItemForUpdate($db, $id, $parameters);
 
 		// PATCH => specify features to update and to delete, other are left as they are
 		$delete = ItemBuilder::addFeaturesDelta($payload, $thing);
@@ -741,6 +731,27 @@ class Controller implements RequestHandlerInterface {
 		if($min !== null && $value < $min) {
 			throw new RangeException($parameter, $min, $max, "Minimum value is $min");
 		}
+	}
+
+	/**
+	 * @param Database $db
+	 * @param string|null $id
+	 * @param $parameters
+	 *
+	 * @return Item|Product
+	 */
+	private static function getProductOrItemForUpdate(Database $db, ?string $id, $parameters) {
+		if($id === null) {
+			$brand = Validation::validateOptionalString($parameters, 'brand');
+			$model = Validation::validateOptionalString($parameters, 'model');
+			$variant = Validation::validateOptionalString($parameters, 'variant');
+			$thing = new Product($brand, $model, $variant);
+			$db->productDAO()->productMustExist($thing);
+		} else {
+			$thing = new Item($id);
+			$db->itemDAO()->itemMustExist($thing, true);
+		}
+		return $thing;
 	}
 
 	public function handle(ServerRequestInterface $request): ResponseInterface {

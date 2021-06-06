@@ -165,7 +165,6 @@ class ItemValidator {
 	 * @param ItemWithFeatures $item Item to be checked
 	 *
 	 * @throws ValidationException if item contains invalid features
-	 * @TODO: make this thing work for PATCH requests...
 	 */
 	public static function validateFeatures(ItemWithFeatures $item) {
 		$type = $item->getFeatureValue('type');

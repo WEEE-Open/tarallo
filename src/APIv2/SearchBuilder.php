@@ -12,7 +12,7 @@ use WEEEOpen\Tarallo\ValidationException;
 
 class SearchBuilder {
 	/**
-	 * Build an Search, return it.
+	 * Build a Search, return it.
 	 *
 	 * @param array $input Decoded JSON from the client
 	 *

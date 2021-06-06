@@ -115,7 +115,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('psu-rails-most-power', 'power', 2), -- Rails with most power --
 	('psu-12v-rail-ampere', 'power', 3), -- Power on 12 V rail(s) --
 	('cib-old', 'administrative', 0), -- CIB (old) --
-	('integrated-graphics-brand', 'features', 0), -- Integrated graphics brand -- TODO: replace with brand & model, once namespaced features are implemented
+	('integrated-graphics-brand', 'features', 0), -- Integrated graphics brand --
 	('integrated-graphics-model', 'features', 0), -- Integrated graphics model --
 	('restrictions', 'general', 2), -- Restrictions --
 	('displayport-ports-n', 'ports', 1), -- DisplayPort --
