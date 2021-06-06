@@ -15,7 +15,7 @@ final class TreeDAO extends DAO {
 		ItemWithCode $newParent,
 		bool $fix,
 		bool $validate
-	): bool {
+	): array {
 		// We'll need the full item in any case, not just an ItemIncomplete
 		$item = $db->itemDAO()->getItem($what, null, 0);
 		$oldParent = $item->getParent();
@@ -56,7 +56,7 @@ final class TreeDAO extends DAO {
 			$db->treeDAO()->moveItem($item, $newParent);
 			$moved = true;
 		}
-		return $oldParent === null && $moved ? true : false;
+		return [$oldParent, $newParent, $moved];
 	}
 
 	/**

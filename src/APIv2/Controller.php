@@ -24,6 +24,7 @@ use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemPrefixerException;
 use WEEEOpen\Tarallo\ItemValidator;
+use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ProductCode;
@@ -158,13 +159,14 @@ class Controller implements RequestHandlerInterface {
 		}
 
 		$db->itemDAO()->undelete($item);
-		$created = TreeDAO::moveWithValidation($db, $item, $newParent, $fix, $validate);
+		[$oldParent, $newParentActual, $moved] = TreeDAO::moveWithValidation($db, $item, $newParent, $fix, $validate);
+		$created = $oldParent === null && $moved;
 
+		$response = self::generateMoveResponse($item, $moved, $newParent, $newParentActual, $oldParent);
 		if($created) {
-			// TODO: return the item itself, maybe?
-			return new EmptyResponse(201);
+			return new JsonResponse($response,201);
 		} else {
-			return new EmptyResponse(204);
+			return new JsonResponse($response);
 		}
 	}
 
@@ -419,13 +421,14 @@ class Controller implements RequestHandlerInterface {
 			throw new NotFoundException($payload);
 		}
 
-		$created = TreeDAO::moveWithValidation($db, $item, $newParent, $fix, $validate);
+		[$oldParent, $newParentActual, $moved] = TreeDAO::moveWithValidation($db, $item, $newParent, $fix, $validate);
+		$created = $oldParent === null && $moved;
 
+		$response = self::generateMoveResponse($item, $moved, $newParent, $newParentActual, $oldParent);
 		if($created) {
-			// TODO: return the item parent, maybe?
-			return new EmptyResponse(201);
+			return new JsonResponse($response,201);
 		} else {
-			return new EmptyResponse(204);
+			return new JsonResponse($response);
 		}
 	}
 
@@ -752,6 +755,19 @@ class Controller implements RequestHandlerInterface {
 			$db->itemDAO()->itemMustExist($thing, true);
 		}
 		return $thing;
+	}
+
+	protected static function generateMoveResponse(ItemWithCode $item, $moved, ItemCode $newParent, $newParentActual, $oldParent): array {
+		$response = [
+			'code' => $item->getCode(),
+			'from' => $oldParent,
+			'to' => $newParent->getCode(),
+			'moved' => $moved,
+		];
+		if($newParent->compareCode($newParentActual) !== 0) {
+			$response['actual'] = $newParentActual->getCode();
+		}
+		return $response;
 	}
 
 	public function handle(ServerRequestInterface $request): ResponseInterface {
