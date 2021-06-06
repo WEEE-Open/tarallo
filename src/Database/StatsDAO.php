@@ -116,6 +116,7 @@ WHERE ProductItemFeatureUnified.Feature = 'type'
 AND ProductItemFeatureUnified.ValueEnum = 'location'
 AND `Code` NOT IN (SELECT `Code` FROM Item WHERE DeletedAt IS NOT NULL)
 GROUP BY Location, t.Ancestor
+ORDER BY Items DESC
 EOQ
 			,
 			\PDO::FETCH_ASSOC
