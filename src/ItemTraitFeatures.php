@@ -42,11 +42,9 @@ trait ItemTraitFeatures {
 	 * @param Feature $feature
 	 *
 	 * @return $this
+	 * @noinspection PhpMissingReturnTypeInspection Returning a traits breaks everything
 	 */
 	public function addFeature($feature) {
-		if(isset($this->features[$feature->name])) {
-			throw new \InvalidArgumentException('Feature ' . $feature->name . ' already added to ' . (string) $this);
-		}
 		$this->features[$feature->name] = $feature;
 
 		return $this;
@@ -58,6 +56,7 @@ trait ItemTraitFeatures {
 	 * @param string $featureName
 	 *
 	 * @return $this
+	 * @noinspection PhpMissingReturnTypeInspection Returning a traits breaks everything
 	 */
 	public function removeFeatureByName(string $featureName) {
 		unset($this->features[$featureName]);

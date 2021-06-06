@@ -278,8 +278,9 @@ class Controller implements RequestHandlerInterface {
 		$brand = Validation::validateOptionalString($parameters, 'brand');
 		$model = Validation::validateOptionalString($parameters, 'model');
 		$variant = Validation::validateOptionalString($parameters, 'variant');
+		$importId = Validation::validateOptionalInt($query, 'import');;
 		$loopback = isset($query['loopback']);
-		$importId = $importId = Validation::validateOptionalInt($query, 'import');;
+		$validate = !isset($query['novalidate']);
 
 		$product = ProductBuilder::ofArray($payload, $brand, $model, $variant);
 
@@ -288,6 +289,10 @@ class Controller implements RequestHandlerInterface {
 			if(!$exists) {
 				throw new StateChangedException('The imported product does not exist anymore, are you trying to create it twice or using an old version of the data?');
 			}
+		}
+
+		if($validate) {
+			ItemValidator::validateFeatures($product);
 		}
 
 		$db->productDAO()->addProduct($product);
@@ -488,6 +493,7 @@ class Controller implements RequestHandlerInterface {
 		$query = $request->getQueryParams();
 		$payload = $request->getAttribute('ParsedBody', []);
 		$parameters = $request->getAttribute('parameters', []);
+		$validate = !isset($query['novalidate']);
 
 		Validation::validateRequestBodyIsArray($payload);
 
@@ -506,6 +512,22 @@ class Controller implements RequestHandlerInterface {
 
 		// PATCH => specify features to update and to delete, other are left as they are
 		$delete = ItemBuilder::addFeaturesDelta($payload, $thing);
+
+		if($validate) {
+			if($id === null) {
+				$thingWithFullFeatures = $db->productDAO()->getProduct($thing);
+			} else {
+				$thingWithFullFeatures = $db->itemDAO()->getItem($thing);
+			}
+
+			foreach($delete as $deleteThis) {
+				$thingWithFullFeatures->removeFeatureByName($deleteThis);
+			}
+			foreach($thing->getFeatures() as $addThis) {
+				$thingWithFullFeatures->addFeature($addThis);
+			}
+			ItemValidator::validateFeatures($thingWithFullFeatures);
+		}
 
 		$deleted = $db->featureDAO()->deleteFeatures($thing, $delete);
 		$changed = $db->featureDAO()->setFeatures($thing);

@@ -168,7 +168,6 @@ class ItemValidator {
 	 * @TODO: make this thing work for PATCH requests...
 	 */
 	public static function validateFeatures(ItemWithFeatures $item) {
-		assert($item instanceof ItemWithContent);
 		$type = $item->getFeatureValue('type');
 
 		switch($type) {
@@ -180,8 +179,10 @@ class ItemValidator {
 				break;
 		}
 
-		foreach($item->getContent() as $subitem) {
-			self::validateFeatures($subitem);
+		if($item instanceof ItemWithContent) {
+			foreach($item->getContent() as $subitem) {
+				self::validateFeatures($subitem);
+			}
 		}
 	}
 

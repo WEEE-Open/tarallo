@@ -190,10 +190,12 @@ class ItemTest extends TestCase {
 	 * @covers \WEEEOpen\Tarallo\Item
 	 * @uses   \WEEEOpen\Tarallo\ItemCode
 	 */
-	public function testInvalidFeatureDuplicate() {
+	public function testFeatureReplace() {
 		$item = (new Item('TEST'))->addFeature(new Feature('capacity-byte', 500));
-		$this->expectException(InvalidArgumentException::class);
+		$this->assertEquals(500, $item->getFeatureValue('capacity-byte'));
+
 		$item->addFeature(new Feature('capacity-byte', 123));
+		$this->assertEquals(123, $item->getFeatureValue('capacity-byte'));
 	}
 
 	/**
