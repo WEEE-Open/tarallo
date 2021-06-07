@@ -11,7 +11,7 @@ date_default_timezone_set('Europe/Rome');
 
 <div class="row">
 <?php if(!empty($recentlyAdded)): ?>
-	<div class="col-md-6 col-lg-4">
+	<div class="col-md-6">
 		<table class="table table-borderless stats">
 			<caption>Recently added items</caption>
 			<thead class="thead-dark">
@@ -32,7 +32,7 @@ date_default_timezone_set('Europe/Rome');
 	</div>
 <?php endif ?>
 <?php if(!empty($recentlyModified)): ?>
-	<div class="col-md-6 col-lg-4">
+	<div class="col-md-6">
 		<table class="table table-borderless stats">
 			<caption>Recently modified items</caption>
 			<thead class="thead-dark">
@@ -53,7 +53,7 @@ date_default_timezone_set('Europe/Rome');
 	</div>
 <?php endif ?>
 	<?php if(!empty($recentlyMoved)): ?>
-		<div class="col-md-6 col-lg-4">
+		<div class="col-md-6">
 			<table class="table table-borderless stats">
 				<caption>Recently moved items</caption>
 				<thead class="thead-dark">
@@ -74,7 +74,7 @@ date_default_timezone_set('Europe/Rome');
 		</div>
 	<?php endif ?>
 <?php if(!empty($locations)): ?>
-	<div class="col-md-6 col-lg-4">
+	<div class="col-md-6">
 		<table class="table table-borderless stats">
 			<caption>Items per location</caption>
 			<thead class="thead-dark">
