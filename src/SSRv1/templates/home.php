@@ -1,6 +1,6 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
-/** @var int[] $locations */
+/** @var array $locations */
 /** @var int[] $recentlyAdded */
 $this->layout('main', ['title' => 'Home', 'user' => $user]);
 date_default_timezone_set('Europe/Rome');

@@ -396,7 +396,7 @@ class Controller implements RequestHandlerInterface {
 			case '':
 				$request = $request->withAttribute('Template', 'stats::main')->withAttribute(
 					'TemplateParameters', [
-						'locations' => $db->statsDAO()->getLocationsByItems(),
+						'locations' => $db->statsDAO()->getLocationsTree(),
 						'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 50),
 						'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 50),
 						'recentlyMoved' => $db->auditDAO()->getRecentAuditByType('M', 50),

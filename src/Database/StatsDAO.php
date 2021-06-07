@@ -125,7 +125,6 @@ EOQ
 		assert($result !== false, 'available locations');
 
 		try {
-			$array = [];
 			$counters = [];
 			$locations = [];
 			$roots = [];
