@@ -89,7 +89,7 @@ $now = new DateTime();
 					?>
 					<td class="align-middle">
 						<a href="/product/<?=$this->e($line['Brand'])?>/<?=$this->e($line['Model'])?>/<?=$this->e($line['Variant'])?>">
-							<?=$this->e($line['Brand']) . " " . $this->e($line['Model'])?> <small><?=$this->e($line['Variant'])?></small>
+							<?=$this->e($line['Brand']) . " " . $this->e($line['Model'])?> <small><?= $line['Variant'] === \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT ? '' : $this->e($line['Variant']) ?></small>
 						</a><?=$sentence?>
 						<small class="text-muted">by <?= $this->e($line['User']) ?> <?= $this->e($time)?></small>
 					</td>
