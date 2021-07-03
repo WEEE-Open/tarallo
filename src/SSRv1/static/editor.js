@@ -1,10 +1,6 @@
 (async function() {
 	"use strict";
 
-	// For search: these methods are called from there, even though the editor is not active
-	window.newFeature = createFeatureElement;
-	window.focusFeatureValueInput = focusFeatureValueInput;
-
 	// To generate unique IDs for features
 	let featureIdsCounter = 0;
 
@@ -1184,6 +1180,9 @@
 		return counter;
 	}
 
+	/**
+	 * @returns {AbortController}
+	 */
 	function getTimeoutController() {
 		let controller = new AbortController();
 		setTimeout(() => controller.abort(), 30000);
@@ -1254,7 +1253,7 @@
 			if(location) {
 				request.parent = location;
 			} else {
-				displayError('Internal error: cannot find location');
+				alert('Internal error: cannot find location');
 				return;
 			}
 		}
@@ -1626,4 +1625,12 @@
 			}
 		}
 	}
+
+	// For search
+	window.featureTypes = featureTypes;
+	window.featureValues = featureValues;
+	window.featureValuesTranslated = featureValuesTranslated;
+	window.unitValueToPrintable = valueToPrintable;
+	window.unitPrintableToValue = printableToValue;
+	window.unitNameToType = nameToType;
 }());

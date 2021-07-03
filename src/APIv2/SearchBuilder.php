@@ -16,11 +16,9 @@ class SearchBuilder {
 	 *
 	 * @param array $input Decoded JSON from the client
 	 *
-	 * @TODO: support for multiple locations? The rest of the server supports it, in theory...
-	 *
 	 * @return Search
 	 */
-	public static function ofArray(array $input) {
+	public static function ofArray(array $input): Search {
 		$code = $input['code'] ?? null;
 
 		if(isset($input['locations'])) {

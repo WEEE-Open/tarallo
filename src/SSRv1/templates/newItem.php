@@ -83,9 +83,9 @@ $isClone = isset($base) && $base->hasCode();
 		?>
 	</section>
 
-	<section class="addfeatures">
+	<section class="addfeatures form-inline">
 		<label>Feature:
-			<select class="allfeatures">
+			<select class="allfeatures ml-2 form-control">
 			</select></label>
 		<button class="btn btn-primary ml-2">Add</button>
 	</section>

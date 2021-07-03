@@ -48,7 +48,7 @@
 	background-color: #FFBABA;
 }
 
-[data-toggle="tooltip"] {
+span[data-tippy-content] {
 	text-decoration-line: underline;
 	text-decoration-style: dotted;
 }
