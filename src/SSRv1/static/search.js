@@ -401,16 +401,20 @@
 
 		let value;
 		let element = row.querySelector('.comparisonvalue').firstElementChild;
-		switch(element.dataset.internalType) {
-			case 'e':
-			case 's':
-			default:
-				value = element.value;
-				break;
-			case 'i':
-			case 'd':
-				value = element.dataset.internalValue;
-				break;
+		if(element.disabled) {
+			value = null;
+		} else {
+			switch (element.dataset.internalType) {
+				case 'e':
+				case 's':
+				default:
+					value = element.value;
+					break;
+				case 'i':
+				case 'd':
+					value = element.dataset.internalValue;
+					break;
+			}
 		}
 
 		return [name, comparison, value];

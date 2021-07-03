@@ -78,10 +78,16 @@ class SearchBuilder {
 				throw new SearchException(null, null, "Triplet should contain 3 elements, not " . count($triplet));
 			}
 
-			// Create a Feature to convert strings to int/double. Then discard it and recreate it in SearchTriplet.
-			// It's a waste but happens with very few features each time, so it's not a major problem.
-			$feature = Feature::ofString($triplet[0], trim($triplet[2]));
-			$result[] = new SearchTriplet($triplet[0], $triplet[1], $feature->value);
+			if($triplet[2] === null) {
+				$valueOfTheCorrectType = null;
+			} else {
+				// Create a Feature to convert strings to int/double. Then discard it and recreate it in SearchTriplet.
+				// It's a waste but happens with very few features each time, so it's not a major problem.
+				$feature = Feature::ofString($triplet[0], trim($triplet[2]));
+				$valueOfTheCorrectType = $feature->value;
+			}
+
+			$result[] = new SearchTriplet($triplet[0], $triplet[1], $valueOfTheCorrectType);
 		}
 		return $result;
 	}
