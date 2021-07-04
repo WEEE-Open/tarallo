@@ -12,6 +12,7 @@ $this->layout(
 	[
 		'title' => $brandModel . $maybeVariant,
 		'user' => $user,
+		'tooltips' => $editing,
 	]
 );
 

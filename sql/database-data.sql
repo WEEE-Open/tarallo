@@ -166,8 +166,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('type', 'tv-card'), -- TV tuner card --
 	('working', 'no'), -- No --
 	('working', 'yes'), -- Yes --
-	('working', 'maybe'), -- Sometimes or unclear --
-	('working', 'to-be-tested'), -- Needs to be tested --
+	('working', 'maybe'), -- Sometimes --
 	('isa', 'x86-32'), -- x86 32 bit --
 	('isa', 'x86-64'), -- x86 64 bit --
 	('isa', 'ia-64'), -- IA-64 --

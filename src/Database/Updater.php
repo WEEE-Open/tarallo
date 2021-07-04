@@ -780,6 +780,11 @@ END;"
 				case 20:
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('power-connector', 'c5'), ('power-connector', 'c7')");
 					break;
+				case 21:
+					$this->exec("DELETE FROM ItemFeature WHERE Feature = 'working' AND ValueEnum = 'to-be-tested'");
+					$this->exec("DELETE FROM ProductFeature WHERE Feature = 'working' AND ValueEnum = 'to-be-tested'");
+					$this->exec("DELETE FROM FeatureEnum WHERE Feature = 'working' AND ValueEnum = 'to-be-tested'");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

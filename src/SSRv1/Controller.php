@@ -991,6 +991,7 @@ class Controller implements RequestHandlerInterface {
 			'features' => FeaturePrinter::getAllFeatures(),
 			'defaults' => $defaults,
 			'products' => $defaults2,
+			'explains' => FeaturePrinter::getAllExplanations(),
 		];
 
 		return new JsonResponse($json, 200, $responseHeaders);

@@ -48,7 +48,7 @@
 	background-color: #FFBABA;
 }
 
-span[data-tippy-content] {
+[data-tippy-content]:not(.fa) {
 	text-decoration-line: underline;
 	text-decoration-style: dotted;
 }
