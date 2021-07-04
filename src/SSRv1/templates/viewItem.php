@@ -1,6 +1,7 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var \WEEEOpen\Tarallo\Item $item */
+/** @var string $url */
 /** @var int|null $depth */
 /** @var string|null $add */
 /** @var string|null $edit */
@@ -13,7 +14,7 @@ $this->layout(
 	]
 );
 if(isset($depth)) {
-	$this->insert('depthWarning', ['depth' => $depth]);
+	$this->insert('depthWarning', ['depth' => $depth, 'viewAllUrl' => $url]);
 }
 $this->insert(
 	'item',

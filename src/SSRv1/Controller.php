@@ -73,6 +73,8 @@ class Controller implements RequestHandlerInterface {
 		$renderParameters['add'] = $add;
 		$renderParameters['edit'] = $edit;
 
+		$renderParameters['url'] = $request->getUri()->getPath();
+
 		$request = $request->withAttribute('Template', 'viewItem')->withAttribute(
 			'TemplateParameters', $renderParameters
 		);
@@ -642,6 +644,7 @@ class Controller implements RequestHandlerInterface {
 			assert($add === null || $edit == null);
 			$templateParameters['add'] = $add;
 			$templateParameters['edit'] = $edit;
+			$templateParameters['noDepthUrl'] = $request->getUri()->getPath();
 		}
 
 		$request = $request

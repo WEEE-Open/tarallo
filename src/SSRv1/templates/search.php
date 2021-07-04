@@ -1,6 +1,7 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var int|null $depth */
+/** @var string $noDepthUrl */
 /** @var int|null $searchId */
 /** @var int|null $page Current page (only if searchId is not null) */
 /** @var int|null $pages Total number of pages (only if searchId is not null) */
@@ -17,8 +18,8 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 <?php endif; ?>
 <p class="alert alert-danger d-none" id="search-error" role="alert"></p>
 
-<?php if(isset($depth)) {
-	$this->insert('depthWarning', ['depth' => $depth]);
+<?php if($searchId && isset($depth)) {
+	$this->insert('depthWarning', ['depth' => $depth, 'viewAllUrl' => $noDepthUrl]);
 } ?>
 
 <template id="search-template-code">
