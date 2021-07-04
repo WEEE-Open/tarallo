@@ -11,6 +11,7 @@ $this->layout(
 		'title' => $item->getCode(),
 		'user' => $user,
 		'moveDefaultFrom' => $item->getCode(),
+		'tooltips' => isset($edit) || isset($add),
 	]
 );
 if(isset($depth)) {
