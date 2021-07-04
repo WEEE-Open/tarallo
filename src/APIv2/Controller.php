@@ -55,7 +55,7 @@ class Controller implements RequestHandlerInterface {
 
 		$id = Validation::validateOptionalString($parameters, 'id');
 		$token = Validation::validateOptionalString($parameters, 'token');
-		$depth = Validation::validateOptionalString($parameters, 'depth');
+		$depth = Validation::validateOptionalString($query, 'depth');
 
 		if($id === null) {
 			throw new \LogicException('Not implemented');
@@ -565,8 +565,30 @@ class Controller implements RequestHandlerInterface {
 		$search = SearchBuilder::ofArray($payload);
 		$resultId = $db->searchDAO()->search($search, $user, $id);
 
-		// TODO: wrap into something
 		return new JsonResponse($resultId);
+	}
+
+	public static function getSearch(ServerRequestInterface $request): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+		$query = $request->getQueryParams();
+
+		$id = Validation::validateHasString($parameters, 'id');
+		$page = Validation::validateOptionalInt($parameters, 'page', 1);
+		$depth = Validation::validateOptionalInt($query, 'depth');
+		$perPage = Validation::validateOptionalInt($query, 'perPage', 10);
+
+		if($page <= 0) {
+			$page = 1;
+		}
+		if($perPage <= 0) {
+			$perPage = 10;
+		}
+
+		$results = $db->searchDAO()->getResults($id, $page, $perPage, $depth);
+
+		return new JsonResponse($results);
 	}
 
 	public static function getHistory(ServerRequestInterface $request): ResponseInterface {
