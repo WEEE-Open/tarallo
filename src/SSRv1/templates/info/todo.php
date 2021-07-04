@@ -16,7 +16,7 @@ if(isset($included) && $included) {
 <div class="row">
 <?php foreach($todos as $feature => $items): ?>
     <?php if(count($items) > 0): ?>
-	<div class="stats list col-12">
+	<div class="stats list col-12" style="box-shadow: 0 0.2rem 0.4rem #b9b9b9">
         <p<?=$pclass?>><?= WEEEOpen\Tarallo\SSRv1\FeaturePrinter::printableValue(new \WEEEOpen\Tarallo\Feature('todo',
 				$feature)) ?> <small>(<?= count($items) ?> items, max 100 shown)</small></p>
         <div>
@@ -30,7 +30,7 @@ if(isset($included) && $included) {
 </div>
 <div class="row">
 <?php if(!empty($missingSmartOrSurfaceScan)): ?>
-	<div class="stats list col-12">
+	<div class="stats list col-12" style="box-shadow: 0 0.2rem 0.4rem #b9b9b9">
 		<p<?=$pclass?>>Working HDDs with missing SMART or Surface Scan: use the turbofresa on them! <small>(<?=count($missingSmartOrSurfaceScan)?> HDDs, max 200 shown)</small></p>
 		<div>
 			<?php foreach($missingSmartOrSurfaceScan as $item): ?>
