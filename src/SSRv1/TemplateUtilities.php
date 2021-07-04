@@ -94,8 +94,8 @@ class TemplateUtilities implements ExtensionInterface {
 	}
 
 	public function colorToHtml(string $color): string {
-		$from = ['sip-brown', 'brown', 'golden', 'yellowed', '-'];
-		$to   = ['#CB8', 'saddlebrown', 'gold', 'lightyellow', ''];
+		$from = ['sip-brown', 'brown', 'orange', 'golden', 'yellowed', '-'];
+		$to   = ['#CB8', 'saddlebrown', 'darkorange', 'gold', 'lightyellow', ''];
 		return str_replace($from, $to, $color);
 	}
 
