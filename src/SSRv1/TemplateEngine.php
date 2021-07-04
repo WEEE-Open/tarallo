@@ -15,6 +15,7 @@ class TemplateEngine implements MiddlewareInterface {
 		$engine = new Engine(__DIR__ . DIRECTORY_SEPARATOR . 'templates');
 		$engine->addFolder('stats', $engine->getDirectory() . DIRECTORY_SEPARATOR . 'stats');
 		$engine->addFolder('bulk', $engine->getDirectory() . DIRECTORY_SEPARATOR . 'bulk');
+		$engine->addFolder('info', $engine->getDirectory() . DIRECTORY_SEPARATOR . 'info');
 		$engine->addData(
 			[
 				'lang' => 'en',

@@ -40,6 +40,16 @@ $hereSr = function($page, $current) {
 			<li class="nav-item">
 				<a class="nav-link" data-toggle="collapse" href="#quickmove" role="button" aria-expanded="false" aria-controls="quickmove" id="quickmovebutton">Move</a>
 			</li>
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle <?= $hereClass('bulk', $currentPageShort) ?>" href="#" id="bulkDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Bulk Actions<?= $hereSr('bulk', $currentPageShort) ?>
+				</a>
+				<div class="dropdown-menu" aria-labelledby="bulkDropdown">
+					<a class="dropdown-item <?= $hereClass('bulk import', $currentPage) ?>" href="/bulk/import">Import<?= $hereSr('bulk import', $currentPage) ?></a>
+					<a class="dropdown-item <?= $hereClass('bulk add', $currentPage) ?>" href="/bulk/add">Bulk add<?= $hereSr('item bulk add', $currentPage) ?></a>
+					<a class="dropdown-item <?= $hereClass('bulk move', $currentPage) ?>" href="/bulk/move">Bulk move<?= $hereSr('item bulk move', $currentPage) ?></a>
+				</div>
+			</li>
 			<li class="nav-item">
 				<a class="nav-link <?= $hereClass('stats', $currentPage) ?>" href="/stats">Stats<?= $hereSr('stats', $currentPage) ?></a>
 			</li>
@@ -47,13 +57,11 @@ $hereSr = function($page, $current) {
 				<a class="nav-link <?= $hereClass('options', $currentPage) ?>" href="/options">Options<?= $hereSr('options', $currentPage) ?></a>
 			</li>
 			<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle <?= $hereClass('bulk actions', $currentPageShort) ?>" href="#" id="bulkDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					Bulk Actions<?= $hereSr('product', $currentPageShort) ?>
+				<a class="nav-link dropdown-toggle <?= $hereClass('info', $currentPageShort) ?>" href="#" id="infoDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Help<?= $hereSr('info', $currentPageShort) ?>
 				</a>
-				<div class="dropdown-menu" aria-labelledby="productsDropdown">
-					<a class="dropdown-item <?= $hereClass('bulk import', $currentPage) ?>" href="/bulk/import">Import<?= $hereSr('bulk import', $currentPage) ?></a>
-					<a class="dropdown-item <?= $hereClass('bulk add', $currentPage) ?>" href="/bulk/add">Bulk add<?= $hereSr('item bulk add', $currentPage) ?></a>
-					<a class="dropdown-item <?= $hereClass('bulk move', $currentPage) ?>" href="/bulk/move">Bulk move<?= $hereSr('item bulk move', $currentPage) ?></a>
+				<div class="dropdown-menu" aria-labelledby="infoDropdown">
+					<a class="dropdown-item <?= $hereClass('info locations', $currentPage) ?>" href="/info/locations">Locations<?= $hereSr('bulk import', $currentPage) ?></a>
 				</div>
 			</li>
 		</ul>

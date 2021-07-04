@@ -1057,6 +1057,21 @@ class Controller implements RequestHandlerInterface {
 		return $relay->handle($request);
 	}
 
+	public static function infoLocations(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$request = $request
+			->withAttribute('Template', 'info::locations')
+			->withAttribute(
+				'TemplateParameters', [
+					'locations' => $db->statsDAO()->getLocationsTree(),
+				]
+			);
+
+		return $handler->handle($request);
+	}
+
 	private function route(ServerRequestInterface $request): array {
 		$dispatcher = FastRoute\cachedDispatcher(
 			function(FastRoute\RouteCollector $r) {
@@ -1105,6 +1120,7 @@ class Controller implements RequestHandlerInterface {
 					$r->get('/{which}', [User::AUTH_LEVEL_RO, 'Controller::getStats',]);
 				}
 				);
+				$r->get('/info/locations', [User::AUTH_LEVEL_RO, 'Controller::infoLocations',]);
 			}, [
 				'cacheFile' => self::cachefile,
 				'cacheDisabled' => !TARALLO_CACHE_ENABLED,
