@@ -30,9 +30,12 @@ $this->layout('main', ['title' => 'Locations', 'user' => $user, 'currentPage' =>
 //						} else {
 							$borderClass = 'class="rootitem"';
 //						}
-					} ?>
+					}
+					$color = isset($row[4]) ? '<i class="fa fa-square ml-1" title="' . $this->e(\WEEEOpen\Tarallo\SSRv1\FeaturePrinter::printableValue(new \WEEEOpen\Tarallo\Feature('color', $row[4]))) . '" style="color:' . $this->colorToHtml($row[4]) . '"></i>' : '';
+
+				?>
 					<tr <?= $borderClass ?>>
-						<td style="padding-left:<?=(int) $row[0]?>rem"><a href="/item/<?=$this->e($row[1])?>?depth=1"><?=$this->e($row[1])?></a></td>
+						<td style="padding-left:<?=(int) $row[0]?>rem;"><a href="/item/<?=$this->e($row[1])?>?depth=1"><?=$this->e($row[1])?></a><?=$color?></td>
 						<td><?= $this->e($row[3]) ?></td>
 						<td><?=(int) $row[2]?></td>
 					</tr>

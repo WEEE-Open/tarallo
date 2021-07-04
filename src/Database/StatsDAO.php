@@ -105,7 +105,7 @@ AND `Time` < FROM_UNIXTIME(" . $this->getPDO()->quote($creation->getTimestamp())
 
 		$notesQuery = $this->getPDO()->query(
 			<<<'EOQ'
-SELECT Code, ValueText
+SELECT Code, ValueText, ValueEnum
 FROM ItemFeature
 WHERE Code IN (
     SELECT Code
@@ -113,7 +113,7 @@ WHERE Code IN (
     WHERE Feature = 'type'
     AND ValueEnum = 'location'
 )
-AND Feature = 'notes'
+AND (Feature = 'notes' OR Feature = 'color')
 EOQ
 			,
 			\PDO::FETCH_NUM
@@ -122,9 +122,14 @@ EOQ
 		assert($notesQuery !== false, 'location notes');
 
 		$notes = [];
+		$colors = [];
 		try {
 			foreach($notesQuery as $row) {
-				$notes[$row[0]] = $row[1];
+				if(isset($row[1])) {
+					$notes[$row[0]] = $row[1];
+				} else {
+					$colors[$row[0]] = $row[2];
+				}
 			}
 		} finally {
 			$notesQuery->closeCursor();
@@ -166,7 +171,7 @@ EOQ
 
 			foreach($roots as $root) {
 				//$array[] = [0, $root, $counters[$root]];
-				$this->parseLocationTree($array, 0, $root, $counters, $locations, $notes);
+				$this->parseLocationTree($array, 0, $root, $counters, $locations, $notes, $colors);
 			}
 		} finally {
 			$result->closeCursor();
@@ -175,11 +180,11 @@ EOQ
 		return $array;
 	}
 
-	private function parseLocationTree(array &$array, int $level, string $name, array $counters, array $locations, array $notes) {
-		$array[] = [$level, $name, $counters[$name], $notes[$name] ?? ''];
+	private function parseLocationTree(array &$array, int $level, string $name, array $counters, array $locations, array $notes, array $colors) {
+		$array[] = [$level, $name, $counters[$name], $notes[$name] ?? '', $colors[$name] ?? null];
 		if(isset($locations[$name])) {
 			foreach($locations[$name] as $location) {
-				$this->parseLocationTree($array, $level + 1, $location, $counters, $locations, $notes);
+				$this->parseLocationTree($array, $level + 1, $location, $counters, $locations, $notes, $colors);
 			}
 		}
 	}
