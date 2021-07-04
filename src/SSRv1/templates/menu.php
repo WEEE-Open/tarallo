@@ -37,6 +37,15 @@ $hereSr = function($page, $current) {
 					<a class="dropdown-item <?= $hereClass('product list', $currentPage) ?>" href="/products">List<?= $hereSr('product list', $currentPage) ?></a>
 				</div>
 			</li>
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle <?= $hereClass('info', $currentPageShort) ?>" href="#" id="infoDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Info<?= $hereSr('info', $currentPageShort) ?>
+				</a>
+				<div class="dropdown-menu" aria-labelledby="infoDropdown">
+					<a class="dropdown-item <?= $hereClass('info locations', $currentPage) ?>" href="/info/locations">Locations<?= $hereSr('info locations', $currentPage) ?></a>
+					<a class="dropdown-item <?= $hereClass('info todo', $currentPage) ?>" href="/info/todo">TODO<?= $hereSr('info todo', $currentPage) ?></a>
+				</div>
+			</li>
 			<li class="nav-item">
 				<a class="nav-link" data-toggle="collapse" href="#quickmove" role="button" aria-expanded="false" aria-controls="quickmove" id="quickmovebutton">Move</a>
 			</li>
@@ -55,14 +64,6 @@ $hereSr = function($page, $current) {
 			</li>
 			<li class="nav-item">
 				<a class="nav-link <?= $hereClass('options', $currentPage) ?>" href="/options">Options<?= $hereSr('options', $currentPage) ?></a>
-			</li>
-			<li class="nav-item dropdown">
-				<a class="nav-link dropdown-toggle <?= $hereClass('info', $currentPageShort) ?>" href="#" id="infoDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-					Help<?= $hereSr('info', $currentPageShort) ?>
-				</a>
-				<div class="dropdown-menu" aria-labelledby="infoDropdown">
-					<a class="dropdown-item <?= $hereClass('info locations', $currentPage) ?>" href="/info/locations">Locations<?= $hereSr('bulk import', $currentPage) ?></a>
-				</div>
 			</li>
 		</ul>
 

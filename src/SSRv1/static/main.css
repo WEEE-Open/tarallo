@@ -161,6 +161,10 @@ a.underline-on-hover:hover {
 	font-weight: bold;
 }
 
+.stats.list p small {
+	font-weight: bold;
+}
+
 .stats.list {
 	margin-bottom: 1rem;
 }
