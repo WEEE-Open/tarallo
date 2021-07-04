@@ -4,6 +4,7 @@
 
 $this->layout('main', ['title' => 'Locations', 'user' => $user, 'currentPage' => 'info locations']);
 //date_default_timezone_set('Europe/Rome');
+//$first = true;
 ?>
 
 <h2>All locations</h2>
@@ -21,7 +22,16 @@ $this->layout('main', ['title' => 'Locations', 'user' => $user, 'currentPage' =>
 				</thead>
 				<tbody>
 				<?php foreach($locations as $row): ?>
-					<tr>
+				<?php
+					$borderClass = '';
+					if((int) $row[0] === 0) {
+//						if($first) {
+//							$first = false;
+//						} else {
+							$borderClass = 'class="rootitem"';
+//						}
+					} ?>
+					<tr <?= $borderClass ?>>
 						<td style="padding-left:<?=(int) $row[0]?>rem"><a href="/item/<?=$this->e($row[1])?>?depth=1"><?=$this->e($row[1])?></a></td>
 						<td><?= $this->e($row[3]) ?></td>
 						<td><?=(int) $row[2]?></td>

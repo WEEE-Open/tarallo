@@ -169,6 +169,10 @@ a.underline-on-hover:hover {
 	margin-top: 1rem;
 }
 
+tr.rootitem {
+	background: #eee;
+}
+
 #content > :not(.breadbox), .item {
 	margin: .5em;
 }
