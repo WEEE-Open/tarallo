@@ -53,7 +53,7 @@ $isClone = !isset($baseItem) && $base instanceof \WEEEOpen\Tarallo\Product && !i
 
 	<section class="addfeatures">
 		<label>Feature:
-			<select class="allfeatures">
+			<select class="allfeatures ml-2 form-control">
 			</select></label>
 		<button class="btn btn-primary ml-2">Add</button>
 	</section>

@@ -10,7 +10,6 @@
 /** @var array[] $formAndRotation */
 /** @var int[] $surfaceScan */
 /** @var bool $startDateSet */
-/** @var array[] $missingSmartOrSurfaceScan */
 /** @var array[] $failedSmartOrSurfaceScan */
 $this->layout('main', ['title' => 'Stats: HDDs', 'user' => $user, 'currentPage' => 'stats']);
 $this->insert('stats::menu', ['currentPage' => 'hdds']);
@@ -169,14 +168,4 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 			<?php endforeach ?>
 		</div>
 	</div>
-<?php endif ?>
-<?php if(!empty($missingSmartOrSurfaceScan)): ?>
-<div class="stats list col-12">
-	<p>Working HDDs with missing SMART or Surface Scan: test them! (<?=count($missingSmartOrSurfaceScan)?>, max 200)</p>
-	<div>
-		<?php foreach($missingSmartOrSurfaceScan as $item): ?>
-			<a href="/item/<?=$item?>"><?=$item?></a>
-		<?php endforeach ?>
-	</div>
-</div>
 <?php endif ?>

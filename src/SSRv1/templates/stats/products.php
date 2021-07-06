@@ -17,7 +17,7 @@ $this->insert('stats::menu', ['currentPage' => 'products']);
 				<th scope="col">Brand</th>
 				<th scope="col">Model</th>
 				<th scope="col">Variant</th>
-				<th scope="col" data-toggle="tooltip" data-placement="top" title="Products that could be suitable for this item, i.e. available variants">Products</th>
+				<th scope="col" data-tippy-content="Products that could be suitable for this item, i.e. available variants">Products</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -47,7 +47,7 @@ $this->insert('stats::menu', ['currentPage' => 'products']);
 				<th scope="col">Brand</th>
 				<th scope="col">Models</th>
 				<th scope="col">Variants</th>
-				<th scope="col" data-toggle="tooltip" data-placement="top" title="Variants per product">VPP</th>
+				<th scope="col" data-tippy-content="Variants per product">VPP</th>
 			</tr>
 			</thead>
 			<tbody>

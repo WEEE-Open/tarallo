@@ -48,7 +48,7 @@
 	background-color: #FFBABA;
 }
 
-[data-toggle="tooltip"] {
+[data-tippy-content]:not(.fa) {
 	text-decoration-line: underline;
 	text-decoration-style: dotted;
 }
@@ -161,12 +161,20 @@ a.underline-on-hover:hover {
 	font-weight: bold;
 }
 
+.stats.list p small {
+	font-weight: bold;
+}
+
 .stats.list {
 	margin-bottom: 1rem;
 }
 
 .stats.text {
 	margin-top: 1rem;
+}
+
+tr.rootitem {
+	background: #eee;
 }
 
 #content > :not(.breadbox), .item {

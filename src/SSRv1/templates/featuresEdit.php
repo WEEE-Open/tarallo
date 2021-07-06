@@ -15,9 +15,15 @@ if(count($features) > 0):
 	<section>
 		<h3><?=$groupTitle?></h3>
 		<ul>
-			<?php foreach($group as $ultra): /** @var $ultra \WEEEOpen\Tarallo\SSRv1\UltraFeature */ ?>
-				<li class="feature-edit-<?= $ultra->name ?> feature-edit">
-					<div class="name"><label for="feature-el-<?= $ultra->name ?>"><?=$ultra->pname?></label></div>
+			<?php foreach($group as $ultra): /** @var $ultra \WEEEOpen\Tarallo\SSRv1\UltraFeature */
+				$help = $this->printExplanation($ultra);
+				if($help !== '') {
+					$help = $this->e($help);
+					$help = "<i class=\"fa fa-question-circle ml-1\" data-tippy-content=\"$help\"></i>";
+				}
+
+				?><li class="feature-edit-<?= $ultra->name ?> feature-edit">
+					<div class="name"><label for="feature-el-<?= $ultra->name ?>"><?=$ultra->pname?><?=$help?></label></div>
 					<?php switch($ultra->type): case WEEEOpen\Tarallo\BaseFeature::ENUM: ?>
 						<select class="value" autocomplete="off" data-internal-name="<?= $ultra->name ?>" data-internal-type="e" data-initial-value="<?= $this->e($ultra->value, 'asTextContent')?>" id="feature-el-<?= $ultra->name ?>">
 							<?php if($ultra->value == null): ?><option value="" disabled selected></option><?php endif; ?>

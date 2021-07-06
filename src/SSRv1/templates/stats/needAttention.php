@@ -19,7 +19,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 				<th scope="col">Brand</th>
 				<th scope="col">Model</th>
 				<th scope="col">Variant</th>
-				<th scope="col" data-toggle="tooltip" data-placement="top" title="Features that can be moved to a product">Features</th>
+				<th scope="col" data-tippy-content="Features that can be moved to a product">Features</th>
 			</tr>
 			</thead>
 			<tbody>

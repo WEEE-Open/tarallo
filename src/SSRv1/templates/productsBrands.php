@@ -23,7 +23,7 @@ $this->layout(
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($brands as $row): /** @var string $brand */ $brand = $row[0]; $count = $row[1]; $summary = $row[2]; ?>
+			<?php foreach($brands as $row): /** @var string $brand */ $brand = $row[0]; $count = $row[1]; ?>
 				<tr>
 					<td><a href="/product/<?=$this->e(rawurlencode($brand))?>"><?= $this->e($brand) ?></a></td>
 					<?php if($count === 0): ?>

@@ -5,7 +5,7 @@ $base = $base ?? null;
 /** @var int $importedFrom|null */
 $importedFrom = $importedFrom ?? null;
 
-$this->layout('main', ['title' => 'New product', 'currentPage' => 'product new']);
+$this->layout('main', ['title' => 'New product', 'currentPage' => 'product new', 'tooltips' => true]);
 $this->insert('newProduct', [
     'base' => $base,
 	'importedFrom' => $importedFrom,

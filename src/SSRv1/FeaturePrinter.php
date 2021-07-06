@@ -128,7 +128,7 @@ class FeaturePrinter {
 	];
 	const featuresEnum = [
 		'type' => ['location' => 'Location', 'case' => 'Case', 'motherboard' => 'Motherboard', 'cpu' => 'CPU', 'graphics-card' => 'Graphics card', 'ram' => 'RAM', 'hdd' => 'HDD', 'ssd' => 'SSD', 'odd' => 'ODD', 'psu' => 'PSU', 'audio-card' => 'Audio card', 'ethernet-card' => 'Ethernet card', 'monitor' => 'Monitor', 'mouse' => 'Mouse', 'keyboard' => 'Keyboard', 'network-switch' => 'Network switch', 'network-hub' => 'Network hub', 'modem-router' => 'Modem/router', 'fdd' => 'FDD', 'ports-bracket' => 'Bracket with ports', 'card-reader' => 'Card reader', 'other-card' => 'Other internal card', 'fan-controller' => 'Fan controller (rheobus)', 'modem-card' => 'Modem card', 'storage-card' => 'Storage card', 'wifi-card' => 'WiFi card', 'bluetooth-card' => 'Bluetooth card', 'external-psu' => 'External PSU', 'zip-drive' => 'ZIP drive', 'printer' => 'Printer', 'scanner' => 'Scanner', 'inventoried-object' => 'Other (with invetory sticker)', 'adapter' => 'Adapter', 'usbhub' => 'USB hub', 'tv-card' => 'TV tuner card'],
-		'working' => ['no' => 'No', 'yes' => 'Yes', 'maybe' => 'Sometimes or unclear', 'to-be-tested' => 'Needs to be tested'],
+		'working' => ['no' => 'No', 'yes' => 'Yes', 'maybe' => 'Sometimes'],
 		'isa' => ['x86-32' => 'x86 32 bit', 'x86-64' => 'x86 64 bit', 'ia-64' => 'IA-64', 'arm' => 'ARM'],
 		'color' => ['black' => 'Black', 'white' => 'White', 'green' => 'Green', 'yellow' => 'Yellow', 'red' => 'Red', 'blue' => 'Blue', 'grey' => 'Grey', 'silver' => 'Silver', 'darkgrey' => 'Dark grey', 'lightgrey' => 'Light grey', 'pink' => 'Pink', 'transparent' => 'Transparent', 'brown' => 'Brown', 'orange' => 'Orange', 'violet' => 'Violet', 'sip-brown' => 'SIP brown', 'lightblue' => 'Light blue', 'yellowed' => 'Yellowed', 'transparent-dark' => 'Transparent (dark)', 'golden' => 'Golden'],
 		'motherboard-form-factor' => ['atx' => 'ATX', 'miniatx' => 'Mini ATX (not standard)', 'microatx' => 'Micro ATX', 'miniitx' => 'Mini ITX', 'proprietary' => 'Proprietary (desktop)', 'btx' => 'BTX (slots ≤ 7)', 'microbtx' => 'Micro BTX (slots ≤ 4)', 'nanobtx' => 'Nano BTX (slots ≤ 2)', 'picobtx' => 'Pico BTX (slots ≤ 1)', 'wtx' => 'WTX', 'flexatx' => 'Flex ATX', 'proprietary-laptop' => 'Laptop', 'eatx' => 'Extended ATX'],
@@ -168,6 +168,16 @@ class FeaturePrinter {
 		BaseFeature::GROUP_powerconnectors => 'Power connectors',
 		BaseFeature::GROUP_codes => 'Codes',
 		BaseFeature::GROUP_software => 'Software',
+	];
+
+	const featureExplanations = [
+		'brand-manufacturer' => 'Only if different from brand',
+		'working' => 'Not tested yet? Do not set this feature at all!',
+		'data-erased' => 'Not erased yet? Do not set this feature at all!',
+		'surface-scan' => 'Not tested yet? Do not set this feature at all!',
+		'smart-data' => 'Not checked yet? Do not set this feature at all!',
+		'cib-old' => 'CIB with a department name, usually with blue border',
+		'owner' => 'Department or area, not a person',
 	];
 
 	/**
@@ -343,6 +353,10 @@ class FeaturePrinter {
 		return $feature->value;
 	}
 
+	public static function printableExplanation(BaseFeature $feature) {
+		return self::featureExplanations[$feature->name] ?? null;
+	}
+
 	/**
 	 * Get printable group name
 	 *
@@ -427,5 +441,9 @@ class FeaturePrinter {
 		}
 
 		return $array;
+	}
+
+	public static function getAllExplanations(): array {
+		return self::featureExplanations;
 	}
 }

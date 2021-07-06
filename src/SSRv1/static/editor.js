@@ -1,15 +1,12 @@
 (async function() {
 	"use strict";
 
-	// For search: these methods are called from there, even though the editor is not active
-	window.newFeature = createFeatureElement;
-	window.focusFeatureValueInput = focusFeatureValueInput;
-
 	// To generate unique IDs for features
 	let featureIdsCounter = 0;
 
 	// Beamed from the server to here in a giant JSON
 	let featureNames = new Map();
+	let featureExplainers = new Map();
 	let featureTypes = new Map();
 	let featureValues = new Map();
 	let featureValuesTranslated = new Map();
@@ -45,11 +42,17 @@
 				featureTypes.set(feature.name, feature.type);
 				// noinspection JSUnresolvedVariable
 				featureNames.set(feature.name, feature.printableName);
+				// noinspection JSUnresolvedVariable
 				if(feature.type === 'e') {
 					featureValues.set(feature.name, Object.keys(feature.values));
 					featureValuesTranslated.set(feature.name, Object.values(feature.values));
 				}
 			}
+		}
+
+		let explanations = payload["explains"];
+		for(let feature of Object.keys(explanations)) {
+			featureExplainers.set(feature, explanations[feature])
 		}
 
 		let defaults = payload["defaults"];
@@ -908,6 +911,15 @@
 		let labelElement = document.createElement("label");
 		labelElement.htmlFor = id;
 		labelElement.textContent = featureNames.get(name);
+		if(featureExplainers.has(name)) {
+			let questionMark = document.createElement('i');
+			questionMark.classList.add('fa', 'fa-question-circle', 'ml-1')
+			questionMark.dataset.tippyContent = featureExplainers.get(name);
+			labelElement.appendChild(questionMark);
+			tippy(questionMark);
+			//labelElement.dataset.tippyContent = featureExplainers.get(name);
+			//tippy(labelElement);
+		}
 		nameElement.appendChild(labelElement);
 
 		if(getComparison !== null) {
@@ -1184,6 +1196,9 @@
 		return counter;
 	}
 
+	/**
+	 * @returns {AbortController}
+	 */
 	function getTimeoutController() {
 		let controller = new AbortController();
 		setTimeout(() => controller.abort(), 30000);
@@ -1254,7 +1269,7 @@
 			if(location) {
 				request.parent = location;
 			} else {
-				displayError('Internal error: cannot find location');
+				alert('Internal error: cannot find location');
 				return;
 			}
 		}
@@ -1626,4 +1641,12 @@
 			}
 		}
 	}
+
+	// For search
+	window.featureTypes = featureTypes;
+	window.featureValues = featureValues;
+	window.featureValuesTranslated = featureValuesTranslated;
+	window.unitValueToPrintable = valueToPrintable;
+	window.unitPrintableToValue = printableToValue;
+	window.unitNameToType = nameToType;
 }());

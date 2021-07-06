@@ -73,6 +73,8 @@ class Controller implements RequestHandlerInterface {
 		$renderParameters['add'] = $add;
 		$renderParameters['edit'] = $edit;
 
+		$renderParameters['url'] = $request->getUri()->getPath();
+
 		$request = $request->withAttribute('Template', 'viewItem')->withAttribute(
 			'TemplateParameters', $renderParameters
 		);
@@ -370,11 +372,18 @@ class Controller implements RequestHandlerInterface {
 	public static function getHome(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		$db = $request->getAttribute('Database');
 
+		$templateParameters = [
+			'todos' => self::getTodos($db),
+			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(false,
+				['smart-data' => null, 'surface-scan' => null],
+				'type', 'hdd', ['working' => 'yes']),
+		];
+
+		$request = $request->withAttribute('Template', 'info::todo')
+			->withAttribute('TemplateParameters', $templateParameters);
+
 		$request = $request->withAttribute('Template', 'home')->withAttribute(
-			'TemplateParameters', [
-				'locations' => $locations = $db->statsDAO()->getLocationsTree(),
-				'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', max(20, count($locations))),
-			]
+			'TemplateParameters', $templateParameters
 		);
 
 		return $handler->handle($request);
@@ -401,20 +410,6 @@ class Controller implements RequestHandlerInterface {
 						'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 50),
 						'recentlyMoved' => $db->auditDAO()->getRecentAuditByType('M', 50),
 					]
-				);
-				break;
-
-			case 'todo':
-				$todos = [];
-				$possibileTodos = array_keys(BaseFeature::features['todo']);
-				foreach($possibileTodos as $possibileTodo) {
-					$todos[$possibileTodo] = $db->statsDAO()->getItemsByFeatures(
-						new Feature('todo', $possibileTodo), null, 100
-					);
-				}
-
-				$request = $request->withAttribute('Template', 'stats::todo')->withAttribute(
-					'TemplateParameters', ['todos' => $todos]
 				);
 				break;
 
@@ -542,11 +537,6 @@ class Controller implements RequestHandlerInterface {
 							'hdd-form-factor',
 							'spin-rate-rpm'
 						]),
-						'missingSmartOrSurfaceScan' =>$db->statsDAO()->getStatsByType(false,
-							['smart-data' => null,
-							'surface-scan' => null],
-							'type', 'hdd',
-							['working' => 'yes']),
 						'failedSmartOrSurfaceScan' =>$db->statsDAO()->getStatsByType(false,
 							['smart-data' => 'fail',
 							'surface-scan' => 'fail'],
@@ -629,6 +619,7 @@ class Controller implements RequestHandlerInterface {
 			assert($add === null || $edit == null);
 			$templateParameters['add'] = $add;
 			$templateParameters['edit'] = $edit;
+			$templateParameters['noDepthUrl'] = $request->getUri()->getPath();
 		}
 
 		$request = $request
@@ -975,9 +966,26 @@ class Controller implements RequestHandlerInterface {
 			'features' => FeaturePrinter::getAllFeatures(),
 			'defaults' => $defaults,
 			'products' => $defaults2,
+			'explains' => FeaturePrinter::getAllExplanations(),
 		];
 
 		return new JsonResponse($json, 200, $responseHeaders);
+	}
+
+	/**
+	 * @param Database $db
+	 *
+	 * @return array
+	 */
+	private static function getTodos(Database $db): array {
+		$todos = [];
+		$possibileTodos = array_keys(BaseFeature::features['todo']);
+		foreach($possibileTodos as $possibileTodo) {
+			$todos[$possibileTodo] = $db->statsDAO()->getItemsByFeatures(
+				new Feature('todo', $possibileTodo), null, 100
+			);
+		}
+		return $todos;
 	}
 
 	public function handle(ServerRequestInterface $request): ResponseInterface {
@@ -1040,6 +1048,40 @@ class Controller implements RequestHandlerInterface {
 		return $relay->handle($request);
 	}
 
+	public static function infoLocations(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$request = $request
+			->withAttribute('Template', 'info::locations')
+			->withAttribute(
+				'TemplateParameters', [
+					'locations' => $db->statsDAO()->getLocationsTree(),
+				]
+			);
+
+		return $handler->handle($request);
+	}
+
+	public static function infoTodo(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$templateParameters = [
+			'todos' => self::getTodos($db),
+			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(false,
+				['smart-data' => null,
+					'surface-scan' => null],
+				'type', 'hdd',
+				['working' => 'yes']),
+		];
+
+		$request = $request->withAttribute('Template', 'info::todo')
+			->withAttribute('TemplateParameters', $templateParameters);
+
+		return $handler->handle($request);
+	}
+
 	private function route(ServerRequestInterface $request): array {
 		$dispatcher = FastRoute\cachedDispatcher(
 			function(FastRoute\RouteCollector $r) {
@@ -1088,6 +1130,8 @@ class Controller implements RequestHandlerInterface {
 					$r->get('/{which}', [User::AUTH_LEVEL_RO, 'Controller::getStats',]);
 				}
 				);
+				$r->get('/info/locations', [User::AUTH_LEVEL_RO, 'Controller::infoLocations',]);
+				$r->get('/info/todo', [User::AUTH_LEVEL_RO, 'Controller::infoTodo',]);
 			}, [
 				'cacheFile' => self::cachefile,
 				'cacheDisabled' => !TARALLO_CACHE_ENABLED,

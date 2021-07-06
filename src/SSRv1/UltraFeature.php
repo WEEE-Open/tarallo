@@ -45,7 +45,11 @@ class UltraFeature {
 		return $that;
 	}
 
-	public static function printableValue(Feature $feature, string $language) {
+	public static function printableValue(Feature $feature, string $language): string {
 		return FeaturePrinter::printableValue($feature);
+	}
+
+	public function printableExplanation(string $language): ?string {
+		return FeaturePrinter::printableExplanation($this->feature);
 	}
 }

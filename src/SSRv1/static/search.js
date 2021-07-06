@@ -1,23 +1,25 @@
 (async function() {
 	"use strict";
 
+	let rowCounter = 0;
+	let searchRows = document.getElementById("searchrows");
+
 	// For comparison in feature selectors (used for searches only)
-	const operatorsStandard = new Map([['=', '='], ['<>', '≠']]);
+	const operatorsStandard = new Map([['=', '='], ['<>', '≠'], ['*', 'Any'], ['!', 'Not set']]);
 	const operatorsOrdering = new Map([['>', '>'], ['>=', '≥'], ['<=', '≤'], ['<', '<']]);
 	const operatorsPartial = new Map([['~', '≈'], ['!~', '≉']]);
 
-	let searchButton = document.getElementById('searchbutton');
 	document.getElementById('searchbuttons').addEventListener('click', buttonsClick);
-	searchButton.addEventListener('click', searchButtonClick);
+	document.getElementById('searchform').addEventListener('submit', searchButtonClick);
+	let searchButton = document.getElementById('searchbutton');
+	let searchCodeButton = document.getElementById('search-control-code');
+	let searchLocationButton = document.getElementById('search-control-location');
 
-	for(let id of ['search-control-features', 'search-control-ancestor']) {
-		let controls = document.getElementById(id);
-		// noinspection JSUnresolvedFunction
-		controls.querySelector('.selector button').addEventListener('click', addFeatureClick.bind(null, controls.querySelector('.selector select'), controls.querySelector('.own.features ul')));
-	}
+	// Disable search button, since browser keep its state in memory even if the page is refreshed
+	toggleSearchButton();
 
 	/**
-	 * Handle clicking the search buttons area
+	 * Handle clicking the "Add..." search buttons
 	 *
 	 * @param ev Event
 	 */
@@ -26,37 +28,147 @@
 			return;
 		}
 
-		let id = ev.target.dataset.for;
+		// Create search row from template
+		let templateName = ev.target.dataset.template;
+		let template = document.importNode(document.getElementById(templateName).content, true);
 
-		document.getElementById(id).classList.toggle('hidden');
+		searchRows.appendChild(template);
+		rowCounter++;
+
+		// Set new ids
+		let inserted = searchRows.querySelector("#search-row-container-new");
+		inserted.id = "search-row-container-" + rowCounter;
+		let replace = inserted.querySelectorAll('[for="search-row-new"], [id="search-row-new"]');
+		let rowElCounter = 1;
+		for(let el of replace) {
+			if(typeof el.attributes["for"] !== "undefined" && el.attributes["for"].nodeValue === "search-row-new") {
+				el.attributes["for"].nodeValue = "search-row-" + rowCounter + "-" + rowElCounter;
+			}
+			if(typeof el.attributes["id"] !== "undefined" && el.attributes["id"].nodeValue === "search-row-new") {
+				el.attributes["id"].nodeValue = "search-row-" + rowCounter + "-" + rowElCounter++;
+			}
+		}
+
+		// Add features list to dropdown, if present
+		let features = inserted.querySelector('.allfeatures');
+		if(features) {
+			features.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
+			let comparison = inserted.querySelector('.comparison');
+			if(comparison) {
+				features.addEventListener('change', (ev) => {updateSearchRowFromFeature(ev.target.closest('.searchrow'), ev.target)})
+				comparison.addEventListener('change', (ev) => {
+					updateSearchRowFromComparison(ev.target.closest('.searchrow'), ev.target, features)
+				})
+				updateSearchRowFromFeature(inserted, features);
+			}
+		}
+		// Listen to the delete button
+		inserted.querySelector('button.delete').addEventListener('click', (ev) => { inserted.remove(); toggleSearchButton(); });
+
+		// Enable tooltips
+		tippy('[data-tippy-content]');
+
+		// Enable search button
+		toggleSearchButton();
 	}
 
-	function addFeatureClick(select, featuresElement, deletedFeatures = null) {
-		let name = select.value;
-		addFeature(featuresElement, name, deletedFeatures);
+	function toggleSearchButton() {
+		searchButton.disabled = searchRows.childElementCount <= 0;
+		let codes = 0, locations = 0;
+		for(let el of searchRows.children) {
+			if(el.classList.contains("search-code")) {
+				codes++;
+			}
+			if(el.classList.contains("search-location")) {
+				locations++;
+			}
+		}
+
+		searchCodeButton.disabled = codes > 0;
+		searchLocationButton.disabled = locations > 0;
 	}
 
 	/**
-	 * Add a feature, or focus it if it already exists.
+	 * Update selectors and inputs when the selected feature changes
 	 *
-	 * @param {HTMLElement} featuresElement - The "own features" element
-	 * @param {string} name - Feature name
-	 * @param {Set<string>|null} deletedFeatures - Deleted features set, can be null if not tracked
+	 * @param {HTMLElement} rowContainer The row
+	 * @param {HTMLSelectElement|null} features Optional, there's only one in each rowContainer anyway
 	 */
-	function addFeature(featuresElement, name, deletedFeatures = null) {
-		let pseudoId = 'feature-edit-' + name;
-
-		let duplicates = featuresElement.getElementsByClassName(pseudoId);
-		if(duplicates.length > 0) {
-			// There should be only one, hopefully
-			focusFeatureValueInput(duplicates[0]);
-			return;
+	function updateSearchRowFromFeature(rowContainer, features = null) {
+		if(!features) {
+			features = rowContainer.querySelector('.allfeatures');
 		}
 
-		let newElement = newFeature(name, pseudoId, null, getComparison);
-		featuresElement.appendChild(newElement);
+		let comparisonElement = rowContainer.querySelector('.comparison');
+		let type = window.featureTypes.get(features.value);
 
-		focusFeatureValueInput(newElement);
+		if(comparisonElement.dataset.type !== type) {
+			while(comparisonElement.lastChild) {
+				comparisonElement.removeChild(comparisonElement.lastChild);
+			}
+
+			if (type === 'i' || type === 'd') {
+				optionsFromOperators(operatorsOrdering, comparisonElement);
+			} else if (type === 's') {
+				optionsFromOperators(operatorsPartial, comparisonElement);
+			}
+			optionsFromOperators(operatorsStandard, comparisonElement);
+			comparisonElement.dataset.type = type;
+		}
+
+		updateSearchRowFromComparison(rowContainer, comparisonElement, features)
+	}
+
+	function defaultOption() {
+		let defaultOption = document.createElement('option');
+		defaultOption.value = "";
+		defaultOption.disabled = true;
+		defaultOption.selected = true;
+		defaultOption.hidden = true;
+		return defaultOption;
+	}
+
+	/**
+	 * Update selectors and inputs when the selected comparison changes
+	 *
+	 * @param {HTMLElement} rowContainer The row
+	 * @param {HTMLSelectElement|null} comparisonElement Optional, there's only one in each rowContainer anyway
+	 * @param {HTMLSelectElement|null} features Optional, there's only one in each rowContainer anyway
+	 */
+	function updateSearchRowFromComparison(rowContainer, comparisonElement = null, features = null) {
+		if(!features) {
+			features = rowContainer.querySelector('.allfeatures');
+		}
+
+		if(!comparisonElement) {
+			comparisonElement = rowContainer.querySelector('.comparison');
+		}
+
+		let comparisonValue = rowContainer.querySelector('.comparisonvalue');
+
+		while(comparisonValue.lastChild) {
+			comparisonValue.removeChild(comparisonValue.lastChild);
+		}
+
+		let compare = comparisonElement.value;
+		if(compare === '*' || compare === '!') {
+			let blank = document.createElement('input');
+			blank.classList.add('form-control');
+			blank.setAttribute('aria-label', "Value");
+			blank.type = 'text';
+			blank.disabled = true;
+			comparisonValue.appendChild(blank);
+		} else {
+			let type = window.featureTypes.get(features.value);
+			let name = features.value;
+			if(type === 'e') {
+				let select = createFeatureValueSelector(type, name);
+				comparisonValue.appendChild(select);
+			} else {
+				let input = createFeatureValueSelector(type, name);
+				comparisonValue.appendChild(input);
+			}
+		}
 	}
 
 	/**
@@ -74,34 +186,15 @@
 		}
 	}
 
-	/**
-	 * Get comparison dropdown menu, for a specific feature
-	 *
-	 * @param {string} type - Feature type (s, i, d, e)
-	 *
-	 * @return {HTMLElement}
-	 */
-	function getComparison(type) {
-		let wrappingDiv = document.createElement('div');
-		wrappingDiv.classList.add("comparison");
-
-		let pointlessLabel = document.createElement('label');
-		wrappingDiv.appendChild(pointlessLabel);
-
-		let comparisonElement = document.createElement('select');
-		if(type === 'i' || type === 'd') {
-			optionsFromOperators(operatorsOrdering, comparisonElement);
-		} else if(type === 's') {
-			optionsFromOperators(operatorsPartial, comparisonElement);
-		}
-		optionsFromOperators(operatorsStandard, comparisonElement);
-
-		pointlessLabel.appendChild(comparisonElement);
-
-		return wrappingDiv;
-	}
-
 	async function searchButtonClick(ev) {
+		// The answers that did it: https://stackoverflow.com/a/39470019
+		// Thanks vzr, you're the only one that has figured this out in the entire universe
+		if(ev.target.checkValidity()) {
+			ev.preventDefault();
+		} else {
+			return;
+		}
+
 		let error = document.getElementById('search-error');
 		let tip = document.getElementById('search-tip');
 		error.classList.add('d-none');
@@ -113,37 +206,41 @@
 		}
 
 		let query = {};
+		// query.code = [];
+		query.locations = [];
+		query.features = [];
+		query.ancestor = [];
+		query.sort = {};
 
-		if(!document.getElementById('search-control-code').classList.contains('hidden')) {
-			query.code = document.getElementById('search-control-code-input').value;
-			if(query.code === '') {
-				delete query.code;
+		let rows = searchRows.querySelectorAll('.searchrow');
+		for(let row of rows) {
+			if(row.classList.contains('search-code')) {
+				query.code = row.querySelector('.comparisonvalue').value;
+			} else if(row.classList.contains('search-location')) {
+				query.locations.push(row.querySelector('.comparisonvalue').value);
+			} else if(row.classList.contains('search-features')) {
+				query.features.push(getSelectedFeatures(row));
+			} else if(row.classList.contains('search-ancestor')) {
+				query.ancestor.push(getSelectedFeatures(row));
+			} else if(row.classList.contains('search-sort')) {
+				query.sort[row.querySelector('.allfeatures').value] = row.querySelector('.sorting').value
 			}
 		}
-		// TODO: support multiple locations?
-		if(!document.getElementById('search-control-location').classList.contains('hidden')) {
-			let location = document.getElementById('search-control-location-input').value;
-			if(location !== '') {
-				query.locations = [location];
-			}
+
+		// if(query.code.length <= 0) {
+		// 	delete query.code;
+		// }
+		if(query.locations.length <= 0) {
+			delete query.locations;
 		}
-		if(!document.getElementById('search-control-features').classList.contains('hidden')) {
-			query.features = getSelectedFeatures('search-control-features');
-			if(query.features.length <= 0) {
-				delete query.features;
-			}
+		if(query.features.length <= 0) {
+			delete query.features;
 		}
-		if(!document.getElementById('search-control-ancestor').classList.contains('hidden')) {
-			query.ancestor = getSelectedFeatures('search-control-ancestor');
-			if(query.ancestor.length <= 0) {
-				delete query.ancestor;
-			}
+		if(query.ancestor.length <= 0) {
+			delete query.ancestor;
 		}
-		if(!document.getElementById('search-control-sort').classList.contains('hidden')) {
-			let orderby = document.getElementById('search-control-sort-input').value;
-			let direction = document.getElementById('search-control-sort-direction-input').value;
-			query.sort = {};
-			query.sort[orderby] = direction;
+		if(query.sort.length <= 0) {
+			delete query.sort;
 		}
 
 		let uri, method;
@@ -155,6 +252,8 @@
 			uri = '/v2/search/' + id;
 			method = 'PATCH';
 		}
+
+		console.log(JSON.stringify(query));
 
 		let oldbeforeunload = window.onbeforeunload;
 		window.onbeforeunload = undefined;
@@ -202,35 +301,123 @@
 		window.location.href = '/search' + idFragment + pageFragment + query + hash;
 	}
 
-	function getSelectedFeatures(id) {
-		let result = [];
-		let featuresElements = document.getElementById(id).querySelectorAll('.features li');
-		for(let li of featuresElements) {
-			let value;
-			let element = li.getElementsByClassName('value')[0];
-			let name = element.dataset.internalName;
-			switch(element.dataset.internalType) {
+	function createFeatureValueSelector(type, name) {
+		let valueElement;
+		switch(type) {
+			case 'e':
+				let options = window.featureValues.get(name);
+				let optionsTranslated = window.featureValuesTranslated.get(name);
+				let optionsArray = [];
+				for(let i = 0; i < options.length; i++) {
+					let option = document.createElement('option');
+					option.value = options[i];
+					option.textContent = optionsTranslated[i];
+					optionsArray.push(option);
+				}
+				optionsArray.sort((a, b) => a.textContent.localeCompare(b.textContent, 'en'));
+
+				valueElement = document.createElement('select');
+				valueElement.classList.add('form-control');
+				valueElement.setAttribute('aria-label', "Value");
+				valueElement.appendChild(defaultOption());
+				valueElement.required = true;
+
+				for(let option of optionsArray) {
+					valueElement.appendChild(option);
+				}
+				break;
+			case 'i':
+			case 'd':
+				valueElement = document.createElement('input');
+				valueElement.dataset.internalValue = '';
+				valueElement.classList.add('form-control');
+				valueElement.type = 'text';
+				valueElement.required = true;
+				valueElement.setAttribute('aria-label', "Value");
+				valueElement.addEventListener('blur', numberChanged);
+
+				break;
+			case 's':
+			default:
+				valueElement = document.createElement('input');
+				valueElement.classList.add('form-control');
+				valueElement.type = 'text';
+				valueElement.required = true;
+				valueElement.setAttribute('aria-label', "Value");
+				break;
+		}
+
+		valueElement.dataset.internalType = type;
+		valueElement.dataset.internalName = name;
+		valueElement.classList.add("value");
+		valueElement.classList.add("changed");
+
+		return valueElement;
+	}
+
+	/**
+	 * Handle changing content of an editable div containing numbers
+	 *
+	 * @param ev Event
+	 */
+	function numberChanged(ev) {
+		let unit;
+		if(ev.target.dataset.unit) {
+			unit = ev.target.dataset.unit;
+		} else {
+			// Extreme caching techniques
+			unit = window.unitNameToType(ev.target.dataset.internalName);
+			ev.target.dataset.unit = unit;
+		}
+		try {
+			let newValue = window.unitPrintableToValue(unit, ev.target.value);
+			if(ev.target.dataset.internalType === 'i' && (newValue % 1 !== 0)) {
+				// noinspection ExceptionCaughtLocallyJS
+				throw new Error("Value must represent an integer");
+			}
+			// Store new value
+			ev.target.dataset.internalValue = newValue.toString();
+			// Print it
+			ev.target.value = window.unitValueToPrintable(unit, newValue);
+		} catch(e) {
+			// Rollback
+			if(ev.target.dataset.internalValue === '') {
+				ev.target.value = '';
+			} else {
+				ev.target.value = window.unitValueToPrintable(unit, parseInt(ev.target.dataset.internalValue));
+			}
+			// Display error message
+			tippy(ev.target, {
+				content: e.message,
+				showOnCreate: true,
+				onHidden(instance) { instance.destroy() },
+			});
+		}
+	}
+
+	function getSelectedFeatures(row) {
+		let name = row.querySelector('.allfeatures').value;
+		let comparison = row.querySelector('.comparison').value;
+
+		let value;
+		let element = row.querySelector('.comparisonvalue').firstElementChild;
+		if(element.disabled) {
+			value = null;
+		} else {
+			switch (element.dataset.internalType) {
 				case 'e':
+				case 's':
+				default:
 					value = element.value;
 					break;
 				case 'i':
 				case 'd':
 					value = element.dataset.internalValue;
 					break;
-				case 's':
-				default:
-					let paragraphs = element.getElementsByTagName('DIV');
-					let lines = [];
-					for(let paragraph of paragraphs) {
-						lines.push(paragraph.textContent);
-					}
-					value = lines.join('\n');
 			}
-
-			let comparison = li.querySelector('.comparison select').value;
-
-			result.push([name, comparison, value]);
 		}
-		return result;
+
+		return [name, comparison, value];
 	}
+
 }());

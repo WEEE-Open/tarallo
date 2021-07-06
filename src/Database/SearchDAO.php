@@ -138,16 +138,7 @@ final class SearchDAO extends DAO {
 		if($search->searchFeatures !== null) {
 			foreach($search->searchFeatures as $triplet) {
 				/** @var $triplet SearchTriplet */
-				$compare = $this->getCompare($triplet);
-				$escaped = $pdo->quote($triplet->getAsFeature()->name);
-
-				$subqueries[] = /** @lang MySQL */
-					<<<EOQ
-				SELECT `Code`
-				FROM ProductItemFeatureUnified
-				WHERE Feature = $escaped
-				AND $compare
-EOQ;
+				$subqueries[] = $this->getFeatureSubquery($triplet, $pdo);
 			}
 		}
 
@@ -403,5 +394,39 @@ EOQ;
 		$result = $this->getPDO()->exec("CALL RefreshSearch($id)");
 		// may be 0 for number of affected rows, or false on failure
 		assert($result !== false, 'update expiration date for search');
+	}
+
+	protected function getFeatureSubquery(SearchTriplet $triplet, \PDO $pdo): string {
+		$escaped = $pdo->quote($triplet->getAsFeature()->name);
+		switch($triplet->getCompare()) {
+			case '*':
+				return /** @lang MySQL */
+					<<<EOQ
+			    SELECT `Code`
+			    FROM ProductItemFeatureUnified
+			    WHERE Feature = $escaped
+EOQ;
+			case '!':
+				return /** @lang MySQL */
+					<<<EOQ
+				SELECT `Code`
+				FROM Item
+				WHERE `Code` NOT IN (
+				    SELECT `Code`
+				    FROM ProductItemFeatureUnified
+				    WHERE Feature = $escaped
+				)
+EOQ;
+			default:
+				$compareString = $this->getCompare($triplet);
+
+				return /** @lang MySQL */
+					<<<EOQ
+				SELECT `Code`
+				FROM ProductItemFeatureUnified
+				WHERE Feature = $escaped
+				AND $compareString
+EOQ;
+		}
 	}
 }

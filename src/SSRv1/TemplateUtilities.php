@@ -19,6 +19,8 @@ class TemplateUtilities implements ExtensionInterface {
 		$engine->registerFunction('getUltraFeatures', [$this, 'getUltraFeatures']);
 		$engine->registerFunction('getGroupedFeatures', [$this, 'getGroupedFeatures']);
 		$engine->registerFunction('printFeature', [$this, 'printFeature']);
+		$engine->registerFunction('printExplanation', [$this, 'printExplanation']);
+		$engine->registerFunction('colorToHtml', [$this, 'colorToHtml']);
 		$engine->registerFunction('contentEditableWrap', [$this, 'contentEditableWrap']);
 		$engine->registerFunction('getOptions', [$this, 'getOptions']);
 		$engine->registerFunction('asTextContent', [$this, 'asTextContent']);
@@ -34,7 +36,6 @@ class TemplateUtilities implements ExtensionInterface {
 		$result = [];
 
 		foreach($features as $feature) {
-			/** @noinspection PhpUndefinedMethodInspection It's there. */
 			$ultra = UltraFeature::fromFeature($feature, $this->template->data()['lang'] ?? 'en');
 			$result[] = $ultra;
 		}
@@ -84,8 +85,18 @@ class TemplateUtilities implements ExtensionInterface {
 	 *
 	 * @return string nice printable value
 	 */
-	public function printFeature(string $feature, $value, ?string $lang): string {
+	public function printFeature(string $feature, $value, ?string $lang = null): string {
 		return UltraFeature::printableValue(new Feature($feature, $value), $lang ?? 'en');
+	}
+
+	public function printExplanation(UltraFeature $ultra, ?string $lang = null): string {
+		return $ultra->printableExplanation($lang ?? 'en') ?? '';
+	}
+
+	public function colorToHtml(string $color): string {
+		$from = ['sip-brown', 'brown', 'darkgrey', 'orange', 'golden', 'yellowed', '-'];
+		$to   = ['#CB8', 'saddlebrown', 'dimgrey', 'darkorange', 'gold', 'lightyellow', ''];
+		return str_replace($from, $to, $color);
 	}
 
 	/**
