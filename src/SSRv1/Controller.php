@@ -527,19 +527,6 @@ class Controller implements RequestHandlerInterface {
 			case 'hdds':
 				$request = $request->withAttribute('Template', 'stats::hdds')->withAttribute(
 					'TemplateParameters', [
-						/*'byErased' => $db->statsDAO()->getCountByFeature(
-							'data-erased', new Feature('data-erased', 'yes')
-						),
-						'bySmartData' => $db->statsDAO()->getCountByFeature(
-							'smart-data', new Feature('type', 'hdd')
-						),
-
-						'byCapacity' => $db->statsDAO()->getCountByFeature(
-							'capacity-decibyte', new Feature('type', 'hdd')
-						),
-						'withoutErased' => $db->statsDAO()->getCountByNotFeature(new Feature('type', 'hdd'), 'data-erased'),
-						'surfaceScan' => $db->statsDAO()->getCountByFeature('surface-scan', new Feature('type', 'hdd')),
-						*/
 						'byErased' => $db->statsDAO()->getStatsByType(
 							true, [], 'data-erased', 'yes'
 						),
