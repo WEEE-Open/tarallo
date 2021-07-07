@@ -15,7 +15,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 			<p>Items with missing data (<?=count($missingData)?> items, max 500 shown)</p>
 			<div>
 				<?php foreach($missingData as $item): ?>
-					<a href="/item/<?=$this->e($item)?>"><?=$this->e($item)?></a>
+					<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
 				<?php endforeach ?>
 			</div>
 		</div>
@@ -27,7 +27,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 			<p>Working HDDs with failed SMART or Surface Scan: do they really work? (<?=count($failedSmartOrSurfaceScan)?>, max 200)</p>
 			<div>
 				<?php foreach($failedSmartOrSurfaceScan as $item): ?>
-					<a href="/item/<?=$item?>"><?=$item?></a>
+					<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
 				<?php endforeach ?>
 			</div>
 		</div>
@@ -39,7 +39,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 			<p>Most wanted, aka lost items (<?=count($lost)?> items, max 100 shown)</p>
 			<div>
 				<?php foreach($lost as $item): ?>
-					<a href="/item/<?=$this->e($item)?>"><?=$this->e($item)?></a>
+					<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
 				<?php endforeach ?>
 			</div>
 		</div>

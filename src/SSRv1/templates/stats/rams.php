@@ -154,7 +154,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		<p>Untested RAMs (<?=count($noWorking)?>, max 200)</p>
 		<div>
 			<?php foreach($noWorking as $item): ?>
-				<a href="/item/<?=$item?>"><?=$item?></a>
+				<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
 			<?php endforeach ?>
 		</div>
 	</div>
@@ -164,7 +164,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		<p>RAMs with unknown frequency (<?=count($noFrequency)?>, max 200)</p>
 		<div>
 			<?php foreach($noFrequency as $item): ?>
-				<a href="/item/<?=$item?>"><?=$item?></a>
+				<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
 			<?php endforeach ?>
 		</div>
 	</div>
@@ -174,7 +174,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		<p>RAMs with unknown size (<?=count($noSize)?>, max 200)</p>
 		<div>
 			<?php foreach($noSize as $item): ?>
-				<a href="/item/<?=$item?>"><?=$item?></a>
+				<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
 			<?php endforeach ?>
 		</div>
 	</div>

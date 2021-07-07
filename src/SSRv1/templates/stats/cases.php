@@ -19,7 +19,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 		<p>Ready computers (total <?= count($ready) ?>)</p>
 		<div>
 			<?php foreach($ready as $item): ?>
-				<a href="/item/<?=$item?>"><?=$item?></a>
+				<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
 			<?php endforeach ?>
 		</div>
 	</div>
