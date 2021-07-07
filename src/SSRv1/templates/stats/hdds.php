@@ -3,14 +3,14 @@
 /** @var string $location */
 /** @var bool $locationSet */
 /** @var DateTime $startDate */
-/** @var int[] $byErased */
 /** @var int[] $bySmartData */
 /** @var int[] $byCapacity */
-/** @var int[] $withoutErased */
+/** @var int $byErased */
+/** @var int $withoutErased */
+/** @var string[] $withoutErasedList */
 /** @var array[] $formAndRotation */
 /** @var int[] $surfaceScan */
 /** @var bool $startDateSet */
-/** @var array[] $failedSmartOrSurfaceScan */
 $this->layout('main', ['title' => 'Stats: HDDs', 'user' => $user, 'currentPage' => 'stats']);
 $this->insert('stats::menu', ['currentPage' => 'hdds']);
 
@@ -23,7 +23,24 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		return "<td>$printable</td>";
 	}
 };
+
+$erasedSum = $byErased + $withoutErased;
+$byErasedPercent = $erasedSum > 0 ? sprintf(" (%.1f %%)",$byErased / (double) $erasedSum  * 100) : '';
+$withoutErasedPercent = $erasedSum > 0 ? sprintf(" (%.1f %%)",$withoutErased / (double) $erasedSum * 100) : '';
 ?>
+<div class="row">
+	<div class="stats list col-12">
+		<p>HDDs to erase (max 200 shown)</p>
+		<div>
+		<?php foreach($withoutErasedList as $withoutErasedDisk): ?>
+			<a href="/item/<?= $this->e($withoutErasedDisk) ?>"><?= $this->e($withoutErasedDisk) ?></a>
+		<?php endforeach; ?>
+		</div>
+		<div class="mt-1">
+			<small><?= $withoutErased ?><?= $withoutErasedPercent ?> not erased and <?= $byErased ?><?= $byErasedPercent ?> erased.</small>
+		</div>
+	</div>
+</div>
 <div class="row">
 <?php if(!empty($surfaceScan)): ?>
 	<div class="col-12 col-md-8 col-lg-6">
@@ -123,49 +140,3 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		</table>
 	</div>
 <?php endif; ?>
-<?php if(!empty($byErased)): ?>
-	<div class="col-12 col-md-8 col-lg-6">
-		<table class="table table-borderless stats">
-			<caption>HDDs erased</caption>
-			<thead class="thead-dark">
-			<tr>
-				<th scope="col">Count</th>
-			</tr>
-			</thead>
-			<tbody>
-			<?php foreach($byErased as $num => $count): ?>
-				<tr>
-					<td><?=$count?></td>
-				</tr>
-			<?php endforeach ?>
-			</tbody>
-		</table>
-	</div>
-<?php endif; ?>
-	<?php if(!empty($withoutErased)): ?>
-	<div class="col-12 col-md-8 col-lg-6">
-		<table class="table table-borderless stats">
-			<caption>HDDs without erased</caption>
-			<thead class="thead-dark">
-			<tr>
-				<th scope="col">Count</th>
-			</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td><?=$withoutErased['hdd']?></td>
-				</tr>
-			</tbody>
-		</table>
-	</div>
-<?php endif; ?>
-<?php if(!empty($failedSmartOrSurfaceScan)): ?>
-	<div class="stats list col-12">
-		<p>Working HDDs with failed SMART or Surface Scan: do they really work? (<?=count($failedSmartOrSurfaceScan)?>, max 200)</p>
-		<div>
-			<?php foreach($failedSmartOrSurfaceScan as $item): ?>
-				<a href="/item/<?=$item?>"><?=$item?></a>
-			<?php endforeach ?>
-		</div>
-	</div>
-<?php endif ?>

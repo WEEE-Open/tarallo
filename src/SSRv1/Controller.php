@@ -405,7 +405,6 @@ class Controller implements RequestHandlerInterface {
 			case '':
 				$request = $request->withAttribute('Template', 'stats::main')->withAttribute(
 					'TemplateParameters', [
-						'locations' => $db->statsDAO()->getLocationsTree(),
 						'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 50),
 						'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 50),
 						'recentlyMoved' => $db->auditDAO()->getRecentAuditByType('M', 50),
@@ -420,6 +419,10 @@ class Controller implements RequestHandlerInterface {
 						'missingData' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'missing-data'), null, 500),
 						'splittable' => $db->statsDAO()->getSplittableItems(),
 						'lost' => $db->statsDAO()->getLostItems([], 100),
+						'failedSmartOrSurfaceScan' =>$db->statsDAO()->getStatsByType(false,
+							['smart-data' => 'fail', 'surface-scan' => 'fail'],
+							'type', 'hdd',
+							['working' => 'yes']),
 					]
 				);
 				break;
@@ -469,9 +472,9 @@ class Controller implements RequestHandlerInterface {
 						'byFormFactor' => $db->statsDAO()->getCountByFeature(
 							'ram-form-factor', new Feature('type', 'ram'), $location
 						),
-						'bySize' => $db->statsDAO()->getCountByFeature(
-							'capacity-byte', new Feature('type', 'ram'), $location
-						),
+//						'bySize' => $db->statsDAO()->getCountByFeature(
+//							'capacity-byte', new Feature('type', 'ram'), $location
+//						),
 						'byTypeFrequency' => $db->statsDAO()->getRollupCountByFeature(
 							new Feature('type', 'ram'), [
 							'ram-type',
@@ -520,6 +523,14 @@ class Controller implements RequestHandlerInterface {
 				);
 				break;
 			case 'hdds':
+				$withoutErased = $db->statsDAO()->getStatsByType(true, ['data-erased' => null], 'type', 'hdd');
+				$withoutErased = reset($withoutErased);
+				$withoutErased = $withoutErased === false ? 0 : $withoutErased;
+
+				$byErased = $db->statsDAO()->getStatsByType(true, [], 'data-erased', 'yes');
+				$byErased = reset($byErased);
+				$byErased = $byErased === false ? 0 : $byErased;
+
 				$request = $request->withAttribute('Template', 'stats::hdds')->withAttribute(
 					'TemplateParameters', [
 						/*'byErased' => $db->statsDAO()->getCountByFeature(
@@ -535,8 +546,10 @@ class Controller implements RequestHandlerInterface {
 						'withoutErased' => $db->statsDAO()->getCountByNotFeature(new Feature('type', 'hdd'), 'data-erased'),
 						'surfaceScan' => $db->statsDAO()->getCountByFeature('surface-scan', new Feature('type', 'hdd')),
 						*/
-						'byErased' => $db->statsDAO()->getStatsByType(
-							true, [], 'data-erased', 'yes'
+						'byErased' => $byErased,
+						'withoutErased' => $withoutErased,
+						'withoutErasedList' => $db->statsDAO()->getItemByNotFeature(
+							new Feature('type', 'hdd'), 'data-erased', null, 200
 						),
 						'bySmartData' => $db->statsDAO()->getStatsByType(
 							true, ['type' => 'hdd'], 'smart-data'
@@ -544,17 +557,11 @@ class Controller implements RequestHandlerInterface {
 						'byCapacity' => $db->statsDAO()->getStatsByType(
 							true, ['type' => 'hdd'], 'capacity-decibyte'
 						),
-						'withoutErased' => $db->statsDAO()->getStatsByType(true, ['data-erased' => null], 'type', 'hdd'),
 						'surfaceScan' => $db->statsDAO()->getStatsByType(true, ['type' => 'hdd'], 'surface-scan'),
 						'formAndRotation' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'hdd'), [
 							'hdd-form-factor',
 							'spin-rate-rpm'
 						]),
-						'failedSmartOrSurfaceScan' =>$db->statsDAO()->getStatsByType(false,
-							['smart-data' => 'fail',
-							'surface-scan' => 'fail'],
-							'type', 'hdd',
-							['working' => 'yes'])
 					]
 				);
 				break;

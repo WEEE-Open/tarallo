@@ -8,7 +8,6 @@
 /** @var array[] $byTypeSize */
 /** @var int[] $byType */
 /** @var int[] $byFormFactor */
-/** @var int[] $bySize */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $noWorking */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $noFrequency */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $noSize */
@@ -146,27 +145,6 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 				endif;
 
 			endforeach; ?>
-			</tbody>
-		</table>
-	</div>
-<?php endif; ?>
-<?php if(!empty($bySize)): ?>
-	<div class="col-12 col-md-8 col-lg-6">
-		<table class="table table-borderless stats">
-			<caption>RAMs by size</caption>
-			<thead class="thead-dark">
-			<tr>
-				<th scope="col">Type</th>
-				<th scope="col">Count</th>
-			</tr>
-			</thead>
-			<tbody>
-			<?php foreach($bySize as $type => $count): ?>
-				<tr>
-					<td><?=$this->printFeature('capacity-byte', $type, $lang ?? 'en')?></td>
-					<td><?=$count?></td>
-				</tr>
-			<?php endforeach ?>
 			</tbody>
 		</table>
 	</div>

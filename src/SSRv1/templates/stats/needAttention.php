@@ -2,12 +2,49 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var int[] $serials */
 /** @var array $splittable */
+/** @var array[] $failedSmartOrSurfaceScan */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $missingData */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $lost */
 $this->layout('main', ['title' => 'Stats: items that need attention', 'user' => $user, 'currentPage' => 'stats']);
 $this->insert('stats::menu', ['currentPage' => 'attention']);
 ?>
 
+<div class="row">
+	<?php if(!empty($missingData)): ?>
+		<div class="stats list col-12">
+			<p>Items with missing data (<?=count($missingData)?> items, max 500 shown)</p>
+			<div>
+				<?php foreach($missingData as $item): ?>
+					<a href="/item/<?=$this->e($item)?>"><?=$this->e($item)?></a>
+				<?php endforeach ?>
+			</div>
+		</div>
+	<?php endif ?>
+</div>
+<div class="row">
+	<?php if(!empty($failedSmartOrSurfaceScan)): ?>
+		<div class="stats list col-12">
+			<p>Working HDDs with failed SMART or Surface Scan: do they really work? (<?=count($failedSmartOrSurfaceScan)?>, max 200)</p>
+			<div>
+				<?php foreach($failedSmartOrSurfaceScan as $item): ?>
+					<a href="/item/<?=$item?>"><?=$item?></a>
+				<?php endforeach ?>
+			</div>
+		</div>
+	<?php endif ?>
+</div>
+<div class="row">
+	<?php if(!empty($lost)): ?>
+		<div class="stats list col-12">
+			<p>Most wanted, aka lost items (<?=count($lost)?> items, max 100 shown)</p>
+			<div>
+				<?php foreach($lost as $item): ?>
+					<a href="/item/<?=$this->e($item)?>"><?=$this->e($item)?></a>
+				<?php endforeach ?>
+			</div>
+		</div>
+	<?php endif ?>
+</div>
 <div class="row">
 <?php if(!empty($splittable)): ?>
 	<div class="col-12 col-lg-6">
@@ -55,30 +92,6 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 			<?php endforeach ?>
 			</tbody>
 		</table>
-	</div>
-<?php endif ?>
-</div>
-<div class="row">
-<?php if(!empty($missingData)): ?>
-	<div class="stats list col-12">
-		<p>Items with missing data (<?=count($missingData)?> items, max 500 shown)</p>
-		<div>
-			<?php foreach($missingData as $item): ?>
-				<a href="/item/<?=$this->e($item)?>"><?=$this->e($item)?></a>
-			<?php endforeach ?>
-		</div>
-	</div>
-<?php endif ?>
-</div>
-<div class="row">
-<?php if(!empty($lost)): ?>
-	<div class="stats list col-12">
-		<p>Most wanted, aka lost items (<?=count($lost)?> items, max 100 shown)</p>
-		<div>
-			<?php foreach($lost as $item): ?>
-				<a href="/item/<?=$this->e($item)?>"><?=$this->e($item)?></a>
-			<?php endforeach ?>
-		</div>
 	</div>
 <?php endif ?>
 </div>
