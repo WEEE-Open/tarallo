@@ -370,17 +370,16 @@ class Controller implements RequestHandlerInterface {
 	}
 
 	public static function getHome(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
 		$templateParameters = [
 			'todos' => self::getTodos($db),
+			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(false,
 				['smart-data' => null, 'surface-scan' => null],
 				'type', 'hdd', ['working' => 'yes']),
 		];
-
-		$request = $request->withAttribute('Template', 'info::todo')
-			->withAttribute('TemplateParameters', $templateParameters);
 
 		$request = $request->withAttribute('Template', 'home')->withAttribute(
 			'TemplateParameters', $templateParameters
@@ -1008,6 +1007,31 @@ class Controller implements RequestHandlerInterface {
 		return $todos;
 	}
 
+	private static function getToTest(Database $db): array {
+		return [
+			'RAMs' => $db->statsDAO()->getItemByNotFeature(
+				new Feature('type', 'ram'),
+				'working',
+				new ItemCode('Chernobyl')
+			),
+			'HDDs' => $db->statsDAO()->getItemByNotFeature(
+				new Feature('type', 'hdd'),
+				'working',
+				new ItemCode('Chernobyl')
+			),
+			'Motherboards' => $db->statsDAO()->getItemByNotFeature(
+				new Feature('type', 'motherboard'),
+				'working',
+				new ItemCode('Chernobyl')
+			),
+			'PSUs' => $db->statsDAO()->getItemByNotFeature(
+				new Feature('type', 'psu'),
+				'working',
+				new ItemCode('Chernobyl')
+			),
+		];
+	}
+
 	public function handle(ServerRequestInterface $request): ResponseInterface {
 		$route = $this->route($request);
 
@@ -1089,6 +1113,7 @@ class Controller implements RequestHandlerInterface {
 
 		$templateParameters = [
 			'todos' => self::getTodos($db),
+			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(false,
 				['smart-data' => null,
 					'surface-scan' => null],
