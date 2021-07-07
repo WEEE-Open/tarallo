@@ -24,7 +24,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 <div class="row">
 	<?php if(!empty($failedSmartOrSurfaceScan)): ?>
 		<div class="stats list col-12">
-			<p>Working HDDs with failed SMART or Surface Scan: do they really work? (<?=count($failedSmartOrSurfaceScan)?>, max 200)</p>
+			<p>Working HDDs with failed SMART or Surface Scan: do they really work? (<?=count($failedSmartOrSurfaceScan)?> items, max 200 shown)</p>
 			<div>
 				<?php foreach($failedSmartOrSurfaceScan as $item): ?>
 					<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
