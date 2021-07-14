@@ -353,9 +353,13 @@ class Controller implements RequestHandlerInterface {
 					$token = SessionLocal::generateToken();
 					$db->sessionDAO()->setDataForToken($token, $data);
 				}
+				elseif(isset($body['location']) && isset($body['default'])){
+					$db->statsDAO()->setDefaultLocation($body['default'], $body['location']);
+				}
 			} catch(\Exception $e) {
 				$error = $e->getMessage();
 			}
+
 		}
 
 		$request = $request->withAttribute('Template', 'options');
@@ -363,6 +367,7 @@ class Controller implements RequestHandlerInterface {
 			'TemplateParameters', [
 			'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
 			'newToken' => $token,
+			'defaultLocations' => $db->statsDAO()->getDefaultLocations(),
 			'error' => $error
 		]
 		);
@@ -452,7 +457,7 @@ class Controller implements RequestHandlerInterface {
 				break;
 
 			case 'rams':
-				$locationDefault = 'Rambox';
+				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultRams'] ?? '';
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);

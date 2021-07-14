@@ -1,10 +1,13 @@
 <?php
-/** @var \WEEEOpen\Tarallo\User $user */
+/** @var User $user */
 /** @var \WEEEOpen\Tarallo\SessionLocal $tokens */
 /** @var string|null $newToken */
 /** @var string|null $error */
+/** @var string[] $defaultLocations */
+use WEEEOpen\Tarallo\User;
 $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options']);
 ?>
+<?php $locationNames = ['DefaultRam', 'test2', 'test3', 'test4'];?>
 
 <?php if($error !== null): ?>
 <div class="col-12">
@@ -66,3 +69,20 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 			</div>
 	</form>
 </div>
+<?php if($user->getLevel() === User::AUTH_LEVEL_ADMIN): ?>
+<h3>Edit default locations</h3>
+<?php foreach($locationNames as $location):?>
+<form method="post">
+	<div class="form-group row">
+			<label for="inputLocation" class="col-sm-2 col-lg-1 col-form-label mb-1"><?=$this->e($location)?></label>
+		<div class="col">
+			<input type="text" id="inputLocation" name="location" class="form-control mb-2" placeholder=<?= $defaultLocations[$location] ?? '' ?>>
+		</div>
+		<div class="col-lg-2">
+			<button type="submit" class="btn btn-primary mb-2 w-lg-100" name="default" value=<?=$location?>>Save</button>
+		</div>
+	</div>
+</form>
+<?php endforeach; ?>
+<?php endif; ?>
+

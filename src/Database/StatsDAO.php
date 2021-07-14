@@ -893,4 +893,57 @@ LIMIT " . $limit;
 		return $array;
 	}
 
+	public function getDefaultLocations(){
+		//this will cause a massive bug later lmao
+		$query = "SELECT `Key`, Value
+FROM Configuration C
+WHERE `Key` != 'DataVersion' AND
+        `Key` != 'SchemaVersion'";
+
+		$statement = $this->getPDO()->prepare($query);
+
+		try {
+			$success = $statement->execute();
+			assert($success, 'Default location');
+			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+				$array[$row['Key']] = $row['Value'];
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+		return $array;
+	}
+
+	public function setDefaultLocation(string $key, string $value){
+		if(isset($this->getDefaultLocations()[$key])) {
+			$pdo = $this->getPDO();
+			$query = "UPDATE Configuration
+SET Value = " . $pdo->quote($value) .
+				"WHERE `Key` = " . $pdo->quote($key);
+
+			$statement = $this->getPDO()->prepare($query);
+
+			try {
+				$success = $statement->execute();
+				assert($success, 'Set location');
+			} finally {
+				$statement->closeCursor();
+			}
+		}
+		else{ //create a new row
+			$pdo = $this->getPDO();
+			$query = "
+INSERT INTO Configuration (`Key`, Value) VALUES (" . $pdo->quote($key) . "," . $pdo->quote($value) . ")";
+
+			$statement = $this->getPDO()->prepare($query);
+
+			try {
+				$success = $statement->execute();
+				assert($success, 'New location');
+			} finally {
+				$statement->closeCursor();
+			}
+		}
+	}
+
 }
