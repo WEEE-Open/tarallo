@@ -1,10 +1,9 @@
 <?php
-/** @var User $user */
+/** @var \WEEEOpen\Tarallo\User $user */
 /** @var \WEEEOpen\Tarallo\SessionLocal $tokens */
 /** @var string|null $newToken */
 /** @var string|null $error */
 /** @var string[] $defaultLocations */
-use WEEEOpen\Tarallo\User;
 $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options']);
 ?>
 <?php $locationNames = ['DefaultRam', 'test2', 'test3', 'test4'];?>
@@ -69,7 +68,7 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 			</div>
 	</form>
 </div>
-<?php if($user->getLevel() === User::AUTH_LEVEL_ADMIN): ?>
+<?php if($user->getLevel() === \WEEEOpen\Tarallo\User::AUTH_LEVEL_ADMIN): ?>
 <h3>Edit default locations</h3>
 <?php foreach($locationNames as $location):?>
 <form method="post">

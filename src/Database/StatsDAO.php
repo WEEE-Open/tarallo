@@ -918,11 +918,12 @@ WHERE `Key` != 'DataVersion' AND
 		if(isset($this->getDefaultLocations()[$key])) {
 			$pdo = $this->getPDO();
 			$query = "UPDATE Configuration
-SET Value = " . $pdo->quote($value) .
-				"WHERE `Key` = " . $pdo->quote($key);
+SET Value = :v
+WHERE `Key` = :k";
 
 			$statement = $this->getPDO()->prepare($query);
-
+			$statement->bindValue(':v', $value);
+			$statement->bindValue(':k', $key);
 			try {
 				$success = $statement->execute();
 				assert($success, 'Set location');
@@ -933,9 +934,11 @@ SET Value = " . $pdo->quote($value) .
 		else{ //create a new row
 			$pdo = $this->getPDO();
 			$query = "
-INSERT INTO Configuration (`Key`, Value) VALUES (" . $pdo->quote($key) . "," . $pdo->quote($value) . ")";
+INSERT INTO Configuration (`Key`, Value) VALUES (:k, :v)";
 
 			$statement = $this->getPDO()->prepare($query);
+			$statement->bindValue(':v', $value);
+			$statement->bindValue(':k', $key);
 
 			try {
 				$success = $statement->execute();
