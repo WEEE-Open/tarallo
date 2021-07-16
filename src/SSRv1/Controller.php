@@ -353,9 +353,13 @@ class Controller implements RequestHandlerInterface {
 					$token = SessionLocal::generateToken();
 					$db->sessionDAO()->setDataForToken($token, $data);
 				}
+				elseif(isset($body['location']) && isset($body['default'])){
+					$db->statsDAO()->setDefaultLocation($body['default'], $body['location']);
+				}
 			} catch(\Exception $e) {
 				$error = $e->getMessage();
 			}
+
 		}
 
 		$request = $request->withAttribute('Template', 'options');
@@ -363,6 +367,7 @@ class Controller implements RequestHandlerInterface {
 			'TemplateParameters', [
 			'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
 			'newToken' => $token,
+			'defaultLocations' => $db->statsDAO()->getDefaultLocations(),
 			'error' => $error
 		]
 		);
@@ -454,7 +459,7 @@ class Controller implements RequestHandlerInterface {
 				break;
 
 			case 'rams':
-				$locationDefault = 'Rambox';
+				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultRams'] ?? '';
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
@@ -532,19 +537,6 @@ class Controller implements RequestHandlerInterface {
 
 				$request = $request->withAttribute('Template', 'stats::hdds')->withAttribute(
 					'TemplateParameters', [
-						/*'byErased' => $db->statsDAO()->getCountByFeature(
-							'data-erased', new Feature('data-erased', 'yes')
-						),
-						'bySmartData' => $db->statsDAO()->getCountByFeature(
-							'smart-data', new Feature('type', 'hdd')
-						),
-
-						'byCapacity' => $db->statsDAO()->getCountByFeature(
-							'capacity-decibyte', new Feature('type', 'hdd')
-						),
-						'withoutErased' => $db->statsDAO()->getCountByNotFeature(new Feature('type', 'hdd'), 'data-erased'),
-						'surfaceScan' => $db->statsDAO()->getCountByFeature('surface-scan', new Feature('type', 'hdd')),
-						*/
 						'byErased' => $byErased,
 						'withoutErased' => $withoutErased,
 						'withoutErasedList' => $db->statsDAO()->getItemByNotFeature(
