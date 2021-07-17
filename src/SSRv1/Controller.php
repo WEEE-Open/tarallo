@@ -258,6 +258,7 @@ class Controller implements RequestHandlerInterface {
 			$from->addFeature(new BaseFeature('type'));
 			$from->addFeature(new BaseFeature('brand'));
 			$from->addFeature(new BaseFeature('model'));
+			$from->addFeature(new Feature('variant', ProductCode::DEFAULT_VARIANT));
 		} else {
 			/** @var Database $db */
 			$db = $request->getAttribute('Database');

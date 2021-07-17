@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\SSRv1;
 
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
+use WEEEOpen\Tarallo\ProductCode;
 
 class FeaturePrinter {
 	// BEGIN GENERATED CODE
@@ -178,6 +179,7 @@ class FeaturePrinter {
 		'smart-data' => 'Not checked yet? Do not set this feature at all!',
 		'cib-old' => 'CIB with a department name, usually with blue border',
 		'owner' => 'Department or area, not a person',
+		'variant' => 'Board revisions or similar if relevant, write "'.ProductCode::DEFAULT_VARIANT.'" if not or unknown'
 	];
 
 	/**
