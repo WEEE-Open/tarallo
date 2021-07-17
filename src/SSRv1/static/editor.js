@@ -916,7 +916,11 @@
 			questionMark.classList.add('fa', 'fa-question-circle', 'ml-1')
 			questionMark.dataset.tippyContent = featureExplainers.get(name);
 			labelElement.appendChild(questionMark);
+			// if(typeof tippy === 'undefined') {
+			// 	console.error("tippy is not loaded");
+			// } else {
 			tippy(questionMark);
+			// }
 			//labelElement.dataset.tippyContent = featureExplainers.get(name);
 			//tippy(labelElement);
 		}

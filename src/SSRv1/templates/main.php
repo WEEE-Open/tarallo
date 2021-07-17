@@ -16,10 +16,13 @@ $tooltips = $tooltips ?? false;
 	<meta http-equiv="x-ua-compatible" content="ie=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="shortcut icon" type="image/png" href="/static/favicon.png"/>
-<!--	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/css/bootstrap.min.css">-->
-<!--	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">-->
 	<link rel="stylesheet" href="/static/bootstrap.custom.min.css">
 	<link rel="stylesheet" href="/static/main.css">
+	<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+	<script src="https://unpkg.com/@popperjs/core@2"></script>
+	<script src="https://unpkg.com/tippy.js@6"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 	<?php if(defined('TARALLO_DEVELOPMENT_ENVIRONMENT') && TARALLO_DEVELOPMENT_ENVIRONMENT && (!defined('TARALLO_DEVELOPMENT_DISABLE_COLORS'))): ?>
 	<style>
 		.thead-dark th, .navbar-dark {
@@ -51,15 +54,6 @@ $tooltips = $tooltips ?? false;
 <section class="container">
 	<?=$this->section('content')?>
 </section>
-<!--<script src="https://cdn.jsdelivr.net/npm/bootstrap.native@2/dist/bootstrap-native-v4.min.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/combine/npm/jquery@3/dist/jquery.slim.min.js,npm/@popperjs/core@2/dist/umd/popper.min.js,npm/bootstrap@4/dist/js/bootstrap.min.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.slim.min.js"></script>-->
-<!--<script src="https://cdn.jsdelivr.net/npm/jquery@3/dist/jquery.slim.min.js"></script>-->
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
-<script src="https://unpkg.com/@popperjs/core@2"></script>
-<script src="https://unpkg.com/tippy.js@6"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4/dist/js/bootstrap.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
 <?php if($tooltips): ?><script>tippy('[data-tippy-content]')</script><?php endif; ?>
 <?php if(isset($user)): ?>
 	<script src="/static/menu.js"></script>
