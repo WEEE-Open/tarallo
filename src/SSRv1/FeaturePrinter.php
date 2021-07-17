@@ -178,6 +178,7 @@ class FeaturePrinter {
 		'surface-scan' => 'Not tested yet? Do not set this feature at all!',
 		'smart-data' => 'Not checked yet? Do not set this feature at all!',
 		'cib-old' => 'CIB with a department name, usually with blue border',
+		'cib' => 'Border is often faded and appears orange',
 		'owner' => 'Department or area, not a person',
 		'variant' => 'Board revisions or similar if relevant, write "'.ProductCode::DEFAULT_VARIANT.'" if not or unknown'
 	];
