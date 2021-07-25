@@ -10,7 +10,7 @@ use WEEEOpen\Tarallo\SearchTriplet;
 use WEEEOpen\Tarallo\User;
 
 final class SearchDAO extends DAO {
-	private function getCompare(SearchTriplet $triplet) {
+	private function getCompare(SearchTriplet $triplet): string {
 		$feature = $triplet->getAsFeature();
 		$operator = $triplet->getCompare();
 		$value = $this->getPDO()->quote($feature->value);
@@ -55,7 +55,7 @@ final class SearchDAO extends DAO {
 	 *
 	 * @return int
 	 */
-	public function getResultsCount(int $previousSearchId) {
+	public function getResultsCount(int $previousSearchId): int {
 		$s = $this->getPDO()->prepare('SELECT ResultsCount FROM Search WHERE Code = ?;');
 		$result = $s->execute([$previousSearchId]);
 		assert($result !== false, 'get results count');
@@ -77,7 +77,7 @@ final class SearchDAO extends DAO {
 	 *
 	 * @return string
 	 */
-	public function getOwnerUsername(int $searchId) {
+	public function getOwnerUsername(int $searchId): string {
 		$s = $this->getPDO()->prepare('SELECT Owner FROM Search WHERE Code = ?;');
 		$result = $s->execute([$searchId]);
 		assert($result !== false, 'get search owner username');
@@ -100,7 +100,7 @@ final class SearchDAO extends DAO {
 	 *
 	 * @return int
 	 */
-	private function newSearch(User $user) {
+	private function newSearch(User $user): int {
 		$s = $this->getPDO()->prepare('INSERT INTO Search(`Owner`) VALUES (?)');
 		$result = $s->execute([$user->uid]);
 		assert($result !== false, 'start search');
@@ -115,8 +115,9 @@ final class SearchDAO extends DAO {
 	 * @return int Search ID, previous or new
 	 *
 	 * @TODO break up this function in smaller parts, it's huuuuuge
+	 * @noinspection PhpCastIsUnnecessaryInspection
 	 */
-	public function search(Search $search, User $user, $previousSearchId = null) {
+	public function search(Search $search, User $user, ?int $previousSearchId = null): int {
 		$subqueries = [];
 		$pdo = $this->getPDO();
 
@@ -358,11 +359,11 @@ EOQ;
 	 *
 	 * @return Item[]
 	 */
-	public function getResults(int $id, int $page, int $perPage, ?int $depth = null) {
+	public function getResults(int $id, int $page, int $perPage, ?int $depth = null): array {
 		$this->refresh($id);
 
 		$statement = /** @lang MySQL */
-			'SELECT `Item` FROM SearchResult WHERE Search = :id ORDER BY `Order` ASC LIMIT :offs, :cnt';
+			'SELECT `Item` FROM SearchResult WHERE Search = :id ORDER BY `Order` LIMIT :offs, :cnt';
 
 		$statement = $this->getPDO()->prepare($statement);
 		$items = [];
