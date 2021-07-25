@@ -66,6 +66,7 @@ final class SearchDAO extends DAO {
 
 	private function ancestorIsReversed(SearchTriplet $triplet): string {
 		$operator = $triplet->getCompare();
+		// ! is handled elsewhere
 		return $operator === '<>' || $operator === '!~';
 	}
 
@@ -180,21 +181,7 @@ EOQ;
 			foreach($search->searchAncestors as $triplet) {
 				/** @var $triplet SearchTriplet */
 				$reversed = $this->ancestorIsReversed($triplet);
-				if($reversed) {
-					$compare = $this->getCompareReversed($triplet);
-				} else {
-					$compare = $this->getCompare($triplet);
-				}
-				$escaped = $pdo->quote($triplet->getAsFeature()->name);
-
-				$ancestorSubquery = /** @lang MySQL */
-					<<<EOQ
-			SELECT `Descendant`
-			FROM ProductItemFeatureUnified, Tree
-			WHERE ProductItemFeatureUnified.Code=Tree.Ancestor
-			AND Feature = $escaped
-			AND $compare
-EOQ;
+				$ancestorSubquery = $this->getAncestorSubquery($triplet, $reversed, $pdo);
 				if($reversed) {
 					$subqueriesNotIn[] = $ancestorSubquery;
 				} else {
@@ -461,6 +448,47 @@ EOQ;
 				SELECT `Code`
 				FROM ProductItemFeatureUnified
 				WHERE Feature = $escaped
+				AND $compareString
+EOQ;
+		}
+	}
+
+	protected function getAncestorSubquery(SearchTriplet $triplet, bool $reversed, \PDO $pdo): string {
+		$escaped = $pdo->quote($triplet->getAsFeature()->name);
+
+		switch($triplet->getCompare()) {
+			case '*':
+				return /** @lang MySQL */
+					<<<EOQ
+				SELECT `Descendant`
+				FROM ProductItemFeatureUnified, Tree
+				WHERE ProductItemFeatureUnified.Code=Tree.Ancestor
+				AND Feature = $escaped
+EOQ;
+			case '!':
+				return /** @lang MySQL */
+					<<<EOQ
+				SELECT `Code`
+				FROM Item
+				WHERE `Code` NOT IN (
+					SELECT `Descendant`
+					FROM ProductItemFeatureUnified, Tree
+					WHERE ProductItemFeatureUnified.Code=Tree.Ancestor
+					AND Feature = $escaped
+				)
+EOQ;
+			default:
+				if($reversed) {
+					$compareString = $this->getCompareReversed($triplet);
+				} else {
+					$compareString = $this->getCompare($triplet);
+				}
+				return /** @lang MySQL */
+					<<<EOQ
+				SELECT `Descendant`
+				FROM ProductItemFeatureUnified, Tree
+				WHERE ProductItemFeatureUnified.Code=Tree.Ancestor
+				AND Feature = $escaped
 				AND $compareString
 EOQ;
 		}
