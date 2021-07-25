@@ -463,6 +463,7 @@ EOQ;
 				SELECT `Descendant`
 				FROM ProductItemFeatureUnified, Tree
 				WHERE ProductItemFeatureUnified.Code=Tree.Ancestor
+			    AND Tree.Depth > 0
 				AND Feature = $escaped
 EOQ;
 			case '!':
@@ -474,6 +475,7 @@ EOQ;
 					SELECT `Descendant`
 					FROM ProductItemFeatureUnified, Tree
 					WHERE ProductItemFeatureUnified.Code=Tree.Ancestor
+					AND Tree.Depth > 0
 					AND Feature = $escaped
 				)
 EOQ;
@@ -489,6 +491,7 @@ EOQ;
 				FROM ProductItemFeatureUnified, Tree
 				WHERE ProductItemFeatureUnified.Code=Tree.Ancestor
 				AND Feature = $escaped
+			    AND Tree.Depth > 0
 				AND $compareString
 EOQ;
 		}
