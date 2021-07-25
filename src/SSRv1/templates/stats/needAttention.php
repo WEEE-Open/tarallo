@@ -12,7 +12,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 <div class="row">
 	<?php if(!empty($missingData)): ?>
 		<div class="stats list col-12">
-			<p>Items with missing data (<?=count($missingData)?> items, max 500 shown)</p>
+			<p>Items with missing data <small>(<?=count($missingData)?>, max 500 shown)</small></p>
 			<div>
 				<?php foreach($missingData as $item): ?>
 					<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
@@ -24,7 +24,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 <div class="row">
 	<?php if(!empty($failedSmartOrSurfaceScan)): ?>
 		<div class="stats list col-12">
-			<p>Working HDDs with failed SMART or Surface Scan: do they really work? (<?=count($failedSmartOrSurfaceScan)?> items, max 200 shown)</p>
+			<p>Working HDDs with failed SMART or Surface Scan: do they really work? <small>(<?=count($failedSmartOrSurfaceScan)?>, max 200 shown)</small></p>
 			<div>
 				<?php foreach($failedSmartOrSurfaceScan as $item): ?>
 					<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
@@ -36,7 +36,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 <div class="row">
 	<?php if(!empty($lost)): ?>
 		<div class="stats list col-12">
-			<p>Most wanted, aka lost items (<?=count($lost)?> items, max 100 shown)</p>
+			<p>Most wanted, aka lost items <small>(<?=count($lost)?>, max 100 shown)</small></p>
 			<div>
 				<?php foreach($lost as $item): ?>
 					<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>

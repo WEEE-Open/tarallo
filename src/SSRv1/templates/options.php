@@ -6,7 +6,7 @@
 /** @var string[] $defaultLocations */
 $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options']);
 ?>
-<?php $locationNames = ['DefaultRam', 'test2', 'test3', 'test4'];?>
+<?php $locationNames = ['DefaultRamLocation', 'DefaultCpuLocation', 'DefaultLabLocation'];?>
 
 <?php if($error !== null): ?>
 <div class="col-12">

@@ -30,7 +30,7 @@ $withoutErasedPercent = $erasedSum > 0 ? sprintf(" (%.1f %%)",$withoutErased / (
 ?>
 <div class="row">
 	<div class="stats list col-12">
-		<p>HDDs to erase (max 200 shown)</p>
+		<p>HDDs to erase <small>(max 200 shown)</small></p>
 		<div>
 		<?php foreach($withoutErasedList as $withoutErasedDisk): ?>
 			<a href="/item/<?= $this->e($withoutErasedDisk) ?>"><?= $this->e($withoutErasedDisk) ?></a>

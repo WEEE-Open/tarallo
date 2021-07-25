@@ -460,7 +460,7 @@ class Controller implements RequestHandlerInterface {
 				break;
 
 			case 'rams':
-				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultRams'] ?? '';
+				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultRamLocation'] ?? null;
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
@@ -493,9 +493,6 @@ class Controller implements RequestHandlerInterface {
 							'ram-form-factor',
 							'capacity-byte',
 						], $location
-						),
-						'noWorking' => $db->statsDAO()->getItemByNotFeature(
-							new Feature('type', 'ram'), 'working', $location, 200
 						),
 						'noFrequency' => $db->statsDAO()->getItemByNotFeature(
 							new Feature('type', 'ram'), 'frequency-hertz', $location, 200

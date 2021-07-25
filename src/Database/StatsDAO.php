@@ -893,13 +893,14 @@ LIMIT " . $limit;
 		return $array;
 	}
 
-	public function getDefaultLocations(){
+	public function getDefaultLocations(): array {
 		//this will cause a massive bug later lmao
 		$query = "SELECT `Key`, Value
 FROM Configuration C
 WHERE `Key` != 'DataVersion' AND
         `Key` != 'SchemaVersion'";
 
+		$array = [];
 		$statement = $this->getPDO()->prepare($query);
 
 		try {

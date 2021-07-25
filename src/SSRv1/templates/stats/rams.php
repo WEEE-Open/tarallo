@@ -8,7 +8,6 @@
 /** @var array[] $byTypeSize */
 /** @var int[] $byType */
 /** @var int[] $byFormFactor */
-/** @var \WEEEOpen\Tarallo\ItemCode[] $noWorking */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $noFrequency */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $noSize */
 /** @var bool $allowDateSelection */
@@ -149,19 +148,9 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		</table>
 	</div>
 <?php endif; ?>
-<?php if(!empty($noWorking)): ?>
-	<div class="stats list col-12">
-		<p>Untested RAMs (<?=count($noWorking)?>, max 200)</p>
-		<div>
-			<?php foreach($noWorking as $item): ?>
-				<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
-			<?php endforeach ?>
-		</div>
-	</div>
-<?php endif ?>
 <?php if(!empty($noFrequency)): ?>
 	<div class="stats list col-12">
-		<p>RAMs with unknown frequency (<?=count($noFrequency)?>, max 200)</p>
+		<p>RAMs with unknown frequency <small>(<?=count($noFrequency)?>, max 200)</small></p>
 		<div>
 			<?php foreach($noFrequency as $item): ?>
 				<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
@@ -171,7 +160,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 <?php endif ?>
 <?php if(!empty($noSize)): ?>
 	<div class="stats list col-12">
-		<p>RAMs with unknown size (<?=count($noSize)?>, max 200)</p>
+		<p>RAMs with unknown size <small>(<?=count($noSize)?>, max 200)</small></p>
 		<div>
 			<?php foreach($noSize as $item): ?>
 				<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>

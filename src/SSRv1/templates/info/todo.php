@@ -27,7 +27,7 @@ ksort($todosWithHumanReadableFeatures);
 <?php foreach($todosWithHumanReadableFeatures as $feature => $items): ?>
     <?php if(count($items) > 0): ?>
 	<div class="stats list col-12 py-2"<?= $divclass ?>>
-        <p<?=$pclass?>><?= $feature ?> <small>(<?= count($items) ?> items, max 100 shown)</small></p>
+        <p<?=$pclass?>><?= $feature ?> <small>(<?= count($items) ?>, max 100 shown)</small></p>
         <div>
             <?php foreach($items as $item): ?>
                 <a href="/item/<?= $this->e(rawurlencode($item)) ?>"><?= $this->e($item) ?></a>
@@ -40,7 +40,7 @@ ksort($todosWithHumanReadableFeatures);
 <div class="row">
 <?php if(!empty($missingSmartOrSurfaceScan)): ?>
 	<div class="stats list col-12 py-2"<?= $divclass ?>>
-		<p<?=$pclass?>>Working HDDs with missing SMART or Surface Scan: use the turbofresa on them! <small>(<?=count($missingSmartOrSurfaceScan)?> HDDs, max 200 shown)</small></p>
+		<p<?=$pclass?>>Working HDDs with missing SMART or Surface Scan: use the turbofresa on them! <small>(<?=count($missingSmartOrSurfaceScan)?>, max 200 shown)</small></p>
 		<div>
 			<?php foreach($missingSmartOrSurfaceScan as $item): ?>
 				<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
@@ -53,7 +53,7 @@ ksort($todosWithHumanReadableFeatures);
 	<?php if(!empty($toTest)): ?>
 	<?php foreach($toTest as $type => $items): ?>
 		<div class="stats list col-md-6 py-2">
-			<p<?=$pclass?>><?= $this->e($type) ?> to be tested (<?=count($items)?>, max 100)</p>
+			<p<?=$pclass?>><?= $this->e($type) ?> to be tested <small>(<?=count($items)?>, max 100)</small></p>
 			<div>
 				<?php foreach($items as $item): ?>
 					<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
