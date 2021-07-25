@@ -739,7 +739,14 @@ EOQ
 	}
 
 
-	public function getStatsByType(bool $returnCount, array $dict, string $filterName, ?string $filterValue = '', ?ItemCode $location = null, ?array $additionalFilter = []): array {
+	public function getStatsByType(
+		bool $returnCount,
+		array $dict,
+		string $filterName,
+		?string $filterValue = '',
+		?ItemCode $location = null,
+		?array $additionalFilter = [],
+		bool $deleted = false): array {
 		//Array with featureName=>featureValue if filtered
 		//featureName=>null if not filtered
 		$pdo = $this->getPDO();
@@ -757,7 +764,7 @@ EOQ
 
 		BaseFeature::validateFeatureName($filterName);
 		$filterCondition .= "Feature = " . $pdo->quote($filterName);
-		if($filterValue !== ''){
+		if($filterValue !== '') {
 			$filterCondition .= " AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = " . $pdo->quote($filterValue);
 		}
 
@@ -792,7 +799,7 @@ EOQ
 		}
 
 		$condition = '';
-		if(!empty($notInCondition)){
+		if(!empty($notInCondition)) {
 			//Remove the first OR
 			$notInCondition = substr($notInCondition, 3);
 			$condition .= " AND Code NOT IN (
@@ -801,7 +808,7 @@ EOQ
 			WHERE " . $notInCondition .
 				")";
 		}
-		if(!empty($inCondition)){
+		if(!empty($inCondition)) {
 			//Remove the first OR
 			$inCondition = substr($inCondition, 3);
 			$condition .= ' AND `Code` IN (
@@ -811,10 +818,11 @@ EOQ
 		}
 
 		$condition .=  ' ' . $this->filterLocation($location);
+		$deletedFilter = $deleted ? '' : $this->filterDeletedLost();
 
 		$query = "SELECT " . $select . "
 		FROM ProductItemFeatureUnified
-		WHERE " . $filterCondition . $condition;
+		WHERE " . $filterCondition . $condition . $deletedFilter;
 
 		if($returnCount) {
 			$query .= " GROUP BY Val
