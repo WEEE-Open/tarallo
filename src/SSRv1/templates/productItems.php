@@ -30,6 +30,7 @@ $copyQuery = http_build_query([
 		} else if(isset($edit)) {
 			$parameters['edit'] = $edit;
 		}
+		$parameters['showProductButton'] = false;
 		$this->insert('item', $parameters);
 	}
 	?>

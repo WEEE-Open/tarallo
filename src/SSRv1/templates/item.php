@@ -6,6 +6,8 @@
 /** @var string|null $edit */
 /** @var bool $recursion */
 /** @var string $self */
+/** @var bool showProductButton */
+$showProductButton = $showProductButton ?? true;
 $recursion = $recursion ?? false;
 $features = $item->getFeatures();
 $lostAt = $item->getLostAt();
@@ -136,7 +138,7 @@ $here = rtrim($self, '/') . '/';
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="/item/<?= $code_rawurlencoded ?>/history">
 				<i class="fa fa-users"></i>&nbsp;History
 			</a>
-			<?php if($product !== null): ?>
+			<?php if($showProductButton && $product !== null): ?>
 				<a class="btn btn-outline-primary btn-item col-12 col-sm-8 col-md-10 col-lg-auto" role="button" href="/product/<?=$this->e(rawurlencode($product->getBrand()))?>/<?=$this->e(rawurlencode($product->getModel()))?>/<?=$this->e(rawurlencode($product->getVariant()))?>">
 					<i class="fa fa-briefcase"></i>&nbsp;View <?= $this->e($productName) ?>
 				</a>
