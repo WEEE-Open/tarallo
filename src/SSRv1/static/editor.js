@@ -1541,6 +1541,7 @@
 				displayError('Session expired or logged out. Open another tab, log in and try again.');
 			} else {
 				let json = await response.json();
+				console.log(json);
 				let message = json.message || "Unknown error, status: " + response.status;
 				displayError(message)
 			}
