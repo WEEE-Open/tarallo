@@ -10,7 +10,7 @@ use WEEEOpen\Tarallo\SearchTriplet;
 use WEEEOpen\Tarallo\User;
 
 final class SearchDAO extends DAO {
-	private function getCompare(SearchTriplet $triplet): string {
+	private function getCompareArray(SearchTriplet $triplet): array {
 		$feature = $triplet->getAsFeature();
 		$operator = $triplet->getCompare();
 		$value = $this->getPDO()->quote($feature->value);
@@ -19,11 +19,11 @@ final class SearchDAO extends DAO {
 				switch($operator) {
 					case '=':
 					case '<>':
-						return "ValueText $operator $value";
+						return ['ValueText', $operator, $value];
 					case '~':
-						return "ValueText LIKE $value";
+						return ['ValueText', 'LIKE', $value];
 					case '!~':
-						return "ValueText NOT LIKE $value";
+						return ['ValueText', 'NOT LIKE', $value];
 				}
 				break;
 			case BaseFeature::INTEGER:
@@ -36,18 +36,37 @@ final class SearchDAO extends DAO {
 					case '<=':
 					case '<>':
 					case '=':
-						return "$column $operator $value";
+						return [$column, $operator, $value];
 				}
 				break;
 			case BaseFeature::ENUM:
 				switch($operator) {
 					case '=':
 					case '<>':
-						return "ValueEnum $operator $value";
+						return ['ValueEnum', $operator, $value];
 				}
 				break;
 		}
 		throw new \InvalidArgumentException("Cannot apply filter $triplet");
+	}
+
+	private function getCompare(SearchTriplet $triplet): string {
+		return implode(' ', $this->getCompareArray($triplet));
+	}
+
+	private function getCompareReversed(SearchTriplet $triplet): string {
+		$pieces = $this->getCompareArray($triplet);
+		if($pieces[1] === 'NOT LIKE') {
+			$pieces[1] = 'LIKE';
+		} else if($pieces[1] === '<>') {
+			$pieces[1] = '=';
+		}
+		return implode(' ', $pieces);
+	}
+
+	private function ancestorIsReversed(SearchTriplet $triplet): string {
+		$operator = $triplet->getCompare();
+		return $operator === '<>' || $operator === '!~';
 	}
 
 	/**
@@ -119,6 +138,7 @@ final class SearchDAO extends DAO {
 	 */
 	public function search(Search $search, User $user, ?int $previousSearchId = null): int {
 		$subqueries = [];
+		$subqueriesNotIn = [];
 		$pdo = $this->getPDO();
 
 		if($search->isSortOnly()) {
@@ -159,10 +179,15 @@ EOQ;
 		if($search->searchAncestors !== null) {
 			foreach($search->searchAncestors as $triplet) {
 				/** @var $triplet SearchTriplet */
-				$compare = $this->getCompare($triplet);
+				$reversed = $this->ancestorIsReversed($triplet);
+				if($reversed) {
+					$compare = $this->getCompareReversed($triplet);
+				} else {
+					$compare = $this->getCompare($triplet);
+				}
 				$escaped = $pdo->quote($triplet->getAsFeature()->name);
 
-				$subqueries[] = /** @lang MySQL */
+				$ancestorSubquery = /** @lang MySQL */
 					<<<EOQ
 			SELECT `Descendant`
 			FROM ProductItemFeatureUnified, Tree
@@ -170,6 +195,11 @@ EOQ;
 			AND Feature = $escaped
 			AND $compare
 EOQ;
+				if($reversed) {
+					$subqueriesNotIn[] = $ancestorSubquery;
+				} else {
+					$subqueries[] = $ancestorSubquery;
+				}
 			}
 		}
 
@@ -182,6 +212,11 @@ EOQ;
 		$everything = '';
 		foreach($subqueries as $subquery) {
 			$everything .= "AND Item.`Code` IN (\n";
+			$everything .= $subquery;
+			$everything .= "\n)";
+		}
+		foreach($subqueriesNotIn as $subquery) {
+			$everything .= "AND Item.`Code` NOT IN (\n";
 			$everything .= $subquery;
 			$everything .= "\n)";
 		}
