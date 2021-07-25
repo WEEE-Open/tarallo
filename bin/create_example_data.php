@@ -81,6 +81,17 @@ $db->productDAO()->addProduct((new Product("Intel", "MB346789", "v2.0"))
 	->addFeature(new Feature('ram-form-factor', 'dimm'))
 	->addFeature(new Feature('ram-type', 'ddr2'))
 	->addFeature(new Feature('type', 'motherboard')));
+$db->productDAO()->addProduct((new Product("MacroStarInternational", "P4P8P12", "default"))
+	->addFeature(new Feature('color', 'yellow'))
+	->addFeature(new Feature('cpu-socket', 'lga775'))
+	->addFeature(new Feature('motherboard-form-factor', 'atx'))
+	->addFeature(new Feature('parallel-ports-n', 1))
+	->addFeature(new Feature('serial-ports-n', 1))
+	->addFeature(new Feature('ps2-ports-n', 1))
+	->addFeature(new Feature('usb-ports-n', 4))
+	->addFeature(new Feature('ram-form-factor', 'dimm'))
+	->addFeature(new Feature('ram-type', 'ddr2'))
+	->addFeature(new Feature('type', 'motherboard')));
 $db->productDAO()->addProduct((new Product("Foo Bar Industrial Motherboards", "K987AB", "v1.1"))
 	->addFeature(new Feature('color', 'red'))
 	->addFeature(new Feature('internal-name', 'MS-427682'))
@@ -140,6 +151,7 @@ $bluezone = (new Item('BlueZone'))->addFeature(new Feature('type', 'location'))-
 $chernobyl->addContent($table);
 $rambox = (new Item('RamBox'))->addFeature(new Feature('type', 'location'))->addFeature(new Feature('color', 'red'));
 $table->addContent($rambox);
+$school = (new Item('SomeSchool'))->addFeature(new Feature('type', 'location'));
 
 $pc20 = (new Item('PC20'))
 	->addFeature(new Feature('brand', 'Dill'))
@@ -154,6 +166,94 @@ $pc90 = (new Item('PC90'))
 	->addFeature(new Feature('todo', 'install-os'))
 	->addFeature(new Feature('owner', 'DISAT'))
 	->addFeature(new Feature('working', 'yes'));
+$pc12 = (new Item('12'))
+	->addFeature(new Feature('brand', 'Dill'))
+	->addFeature(new Feature('model', 'PessimPlex DI-360'))
+	->addFeature(new Feature('variant', 'SFF'))
+	->addFeature(new Feature('todo', 'install-os'))
+	->addFeature(new Feature('owner', 'DISAT'))
+	->addFeature(new Feature('working', 'yes'))
+	->addContent((new Item(null))
+		->addFeature(new Feature('brand', 'MacroStarInternational'))
+		->addFeature(new Feature('model', 'P4P8P12'))
+		->addFeature(new Feature('variant', 'default'))
+		->addFeature(new Feature('type', 'motherboard'))
+		->addFeature(new Feature('owner', 'DISAT'))
+		->addFeature(new Feature('sn', '1' . strtoupper(substr(crc32(512), 0, 5) . rand(100000, 999999) . dechex(rand(0,255)))))
+		->addFeature(new Feature('working', 'yes'))
+		->addContent((new Item(null))
+			->addFeature(new Feature('brand', 'Samsung'))
+			->addFeature(new Feature('model', 'S667ABC512'))
+			->addFeature(new Feature('variant', 'v1'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('owner', 'DAUIN'))
+			->addFeature(new Feature('sn', 'ASD' . strtoupper(substr(crc32(512), 0, 5) . rand(100000, 999999) . dechex(rand(0,255)))))
+			->addFeature(new Feature('working', 'yes'))
+		)
+		->addContent((new Item(null))
+			->addFeature(new Feature('brand', 'Samsung'))
+			->addFeature(new Feature('model', 'S667ABC512'))
+			->addFeature(new Feature('variant', 'v1'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('owner', 'DAUIN'))
+			->addFeature(new Feature('sn', 'ASD' . strtoupper(substr(crc32(512), 0, 5) . rand(100000, 999999) . dechex(rand(0,255)))))
+			->addFeature(new Feature('working', 'yes'))
+		)
+	)
+	->addContent((new Item('H20'))
+		->addFeature(new Feature('brand', 'EyeBeeEm'))
+		->addFeature(new Feature('model', 'DeathStar 69K'))
+		->addFeature(new Feature('variant', 'default'))
+		->addFeature(new Feature('type', 'hdd'))
+		->addFeature(new Feature('sata-ports-n', 1))
+		->addFeature(new Feature('capacity-decibyte', 40 * 1000000000))
+		->addFeature(new Feature('hdd-form-factor', '3.5'))
+		->addFeature(new Feature('spin-rate-rpm', 5400))
+	);
+$pc13 = (new Item('13'))
+	->addFeature(new Feature('brand', 'Dill'))
+	->addFeature(new Feature('model', 'PessimPlex DI-360'))
+	->addFeature(new Feature('variant', 'SFF'))
+	->addFeature(new Feature('todo', 'install-os'))
+	->addFeature(new Feature('owner', 'DISAT'))
+	->addFeature(new Feature('working', 'yes'))
+	->addContent((new Item(null))
+		->addFeature(new Feature('brand', 'MacroStarInternational'))
+		->addFeature(new Feature('model', 'P4P8P12'))
+		->addFeature(new Feature('variant', 'default'))
+		->addFeature(new Feature('type', 'motherboard'))
+		->addFeature(new Feature('owner', 'DISAT'))
+		->addFeature(new Feature('sn', '1' . strtoupper(substr(crc32(512), 0, 5) . rand(100000, 999999) . dechex(rand(0,255)))))
+		->addFeature(new Feature('working', 'yes'))
+		->addContent((new Item(null))
+			->addFeature(new Feature('brand', 'Samsung'))
+			->addFeature(new Feature('model', 'S667ABC512'))
+			->addFeature(new Feature('variant', 'v1'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('owner', 'DAUIN'))
+			->addFeature(new Feature('sn', 'ASD' . strtoupper(substr(crc32(512), 0, 5) . rand(100000, 999999) . dechex(rand(0,255)))))
+		)
+		->addContent((new Item(null))
+			->addFeature(new Feature('brand', 'Samsung'))
+			->addFeature(new Feature('model', 'S667ABC512'))
+			->addFeature(new Feature('variant', 'v1'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('owner', 'DAUIN'))
+			->addFeature(new Feature('sn', 'ASD' . strtoupper(substr(crc32(512), 0, 5) . rand(100000, 999999) . dechex(rand(0,255)))))
+			->addFeature(new Feature('working', 'maybe'))
+		)
+	)
+	->addContent((new Item('H21'))
+		->addFeature(new Feature('brand', 'EyeBeeEm'))
+		->addFeature(new Feature('model', 'DeathStar 69K'))
+		->addFeature(new Feature('variant', 'default'))
+		->addFeature(new Feature('working', 'yes'))
+		->addFeature(new Feature('type', 'hdd'))
+		->addFeature(new Feature('sata-ports-n', 1))
+		->addFeature(new Feature('capacity-decibyte', 40 * 1000000000))
+		->addFeature(new Feature('hdd-form-factor', '3.5'))
+		->addFeature(new Feature('spin-rate-rpm', 5400))
+	);
 $pc55 = (new Item('PC55'))
 	->addFeature(new Feature('brand', 'TI'))
 	->addFeature(new Feature('model', 'GreyPC-\'98'))
@@ -244,6 +344,9 @@ for($i = 250; $i < 350; $i++) {
 		->addFeature(new Feature('model', 'S667ABC' . $ramSize))
 		->addFeature(new Feature('variant', 'v1'))
 		->addFeature(new Feature('sn', 'ASD' . strtoupper(substr(crc32($ramSize), 0, 5) . rand(100000, 999999) . dechex(rand(0,255)))));
+	if($i < 300) {
+		$ram->addFeature(new Feature('working', 'maybe'));
+	}
 	$rambox->addContent($ram);
 }
 $ram = (new Item('R69'))
@@ -356,8 +459,10 @@ foreach($testpcs as $testpc) {
 }
 $table->addContent($SCHIFOMACCHINA);
 $chernobyl->addContent($pc20)->addContent($pc22)->addContent($pc55)->addContent($pc90)->addContent($bluezone);
+$school->addContent($pc12)->addContent($pc13);
 
 $db->itemDAO()->addItem($polito);
+$db->itemDAO()->addItem($school);
 $db->itemDAO()->loseItem($ram666);
 
 $multijson = [

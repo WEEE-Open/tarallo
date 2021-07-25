@@ -739,7 +739,7 @@ EOQ
 	}
 
 
-	public function getStatsByType(bool $returnCount, array $dict, string $filterName, ?string $filterValue = '', ?array $additionalFilter = []): array {
+	public function getStatsByType(bool $returnCount, array $dict, string $filterName, ?string $filterValue = '', ?ItemCode $location = null, ?array $additionalFilter = []): array {
 		//Array with featureName=>featureValue if filtered
 		//featureName=>null if not filtered
 		$pdo = $this->getPDO();
@@ -810,6 +810,7 @@ EOQ
 				  WHERE ' . $inCondition . ')';
 		}
 
+		$condition .=  ' ' . $this->filterLocation($location);
 
 		$query = "SELECT " . $select . "
 		FROM ProductItemFeatureUnified

@@ -22,6 +22,7 @@ use WEEEOpen\Tarallo\HTTP\TransactionWrapper;
 use WEEEOpen\Tarallo\HTTP\Validation;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemIncomplete;
+use WEEEOpen\Tarallo\ItemTraitCode;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ProductCode;
@@ -384,7 +385,7 @@ class Controller implements RequestHandlerInterface {
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(false,
 				['smart-data' => null, 'surface-scan' => null],
-				'type', 'hdd', ['working' => 'yes']),
+				'type', 'hdd', new ItemCode('Polito'), ['working' => 'yes']),
 		];
 
 		$request = $request->withAttribute('Template', 'home')->withAttribute(
@@ -427,6 +428,7 @@ class Controller implements RequestHandlerInterface {
 						'failedSmartOrSurfaceScan' =>$db->statsDAO()->getStatsByType(false,
 							['smart-data' => 'fail', 'surface-scan' => 'fail'],
 							'type', 'hdd',
+							null,
 							['working' => 'yes']),
 					]
 				);
@@ -991,7 +993,7 @@ class Controller implements RequestHandlerInterface {
 		$possibileTodos = array_keys(BaseFeature::features['todo']);
 		foreach($possibileTodos as $possibileTodo) {
 			$todos[$possibileTodo] = $db->statsDAO()->getItemsByFeatures(
-				new Feature('todo', $possibileTodo), null, 100
+				new Feature('todo', $possibileTodo), new ItemCode('Polito'), 100
 			);
 		}
 		return $todos;
@@ -1002,22 +1004,22 @@ class Controller implements RequestHandlerInterface {
 			'RAMs' => $db->statsDAO()->getItemByNotFeature(
 				new Feature('type', 'ram'),
 				'working',
-				new ItemCode('Chernobyl')
+				new ItemCode('Polito')
 			),
 			'HDDs' => $db->statsDAO()->getItemByNotFeature(
 				new Feature('type', 'hdd'),
 				'working',
-				new ItemCode('Chernobyl')
+				new ItemCode('Polito')
 			),
 			'Motherboards' => $db->statsDAO()->getItemByNotFeature(
 				new Feature('type', 'motherboard'),
 				'working',
-				new ItemCode('Chernobyl')
+				new ItemCode('Polito')
 			),
 			'PSUs' => $db->statsDAO()->getItemByNotFeature(
 				new Feature('type', 'psu'),
 				'working',
-				new ItemCode('Chernobyl')
+				new ItemCode('Polito')
 			),
 		];
 	}
@@ -1108,7 +1110,7 @@ class Controller implements RequestHandlerInterface {
 				['smart-data' => null,
 					'surface-scan' => null],
 				'type', 'hdd',
-				['working' => 'yes']),
+				new ItemCode('Polito'), ['working' => 'yes']),
 		];
 
 		$request = $request->withAttribute('Template', 'info::todo')
