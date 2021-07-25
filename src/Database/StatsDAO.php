@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpCastIsUnnecessaryInspection */
 
 namespace WEEEOpen\Tarallo\Database;
 
@@ -17,7 +17,7 @@ final class StatsDAO extends DAO {
 	 *
 	 * @return string part of a query
 	 */
-	private function filterLocation(?ItemWithCode $location, string $alias = '') {
+	private function filterLocation(?ItemWithCode $location, string $alias = ''): string {
 		if($location === null) {
 			return '';
 		}
@@ -42,7 +42,7 @@ WHERE Ancestor = " . $this->getPDO()->quote($location->getCode()) . "
 	 *
 	 * @return string part of a query
 	 */
-	private function filterCreated(?\DateTime $creation, string $alias = '') {
+	private function filterCreated(?\DateTime $creation, string $alias = ''): string {
 		if($creation === null) {
 			return '';
 		}
@@ -66,7 +66,7 @@ AND `Time` < FROM_UNIXTIME(" . $this->getPDO()->quote($creation->getTimestamp())
 	 *
 	 * @return string part of a query
 	 */
-	private static function filterDeletedLost(string $alias = '') {
+	private static function filterDeletedLost(string $alias = ''): string {
 		if($alias !== '') {
 			$alias .= '.';
 		}
@@ -100,7 +100,7 @@ AND `Time` < FROM_UNIXTIME(" . $this->getPDO()->quote($creation->getTimestamp())
 	 *
 	 * @return array
 	 */
-	public function getLocationsTree() {
+	public function getLocationsTree(): array {
 		$array = [];
 
 		$notesQuery = $this->getPDO()->query(
@@ -197,12 +197,12 @@ EOQ
 	 * Any attempt to make the function more generic failed miserably or was escessively complex, but consider
 	 * that this is a very specific kind of stat to begin with...
 	 *
-	 * @param ItemWithCode $location Where to look, null to search everywhere
+	 * @param ItemWithCode|null $location Where to look, null to search everywhere
 	 * @param bool $recent True for more recently modified items first, false for least recently modified
 	 * @param int $limit rows to return
 	 *
 	 * @return int[] code => timestamp
-	 *@todo parametrize the "in-use" exclusion, maybe? So the "most recently modified" makes more sense
+	 * @todo parametrize the "in-use" exclusion, maybe? So the "most recently modified" makes more sense
 	 * @todo try to parametrize the "type=case" filter
 	 *
 	 */
@@ -266,7 +266,7 @@ LIMIT ' . (int) $limit;
 	 *
 	 * @param string $feature Feature name
 	 * @param Feature|null $filter Feature that must match, useful to select items by type
-	 * @param ItemWithCode $location Consider only this subtree
+	 * @param ItemWithCode|null $location Consider only this subtree
 	 * @param null|\DateTime $creation Creation date (starts from here)
 	 * @param bool $deleted Also count deleted/lost items, defaults to false (don't count them)
 	 * @param int $cutoff Report features only if count is greater than (or equal to) this number,
@@ -281,7 +281,7 @@ LIMIT ' . (int) $limit;
 		?\DateTime $creation = null,
 		bool $deleted = false,
 		int $cutoff = 1
-	) {
+	): array {
 		BaseFeature::validateFeatureName($feature);
 		$pdo = $this->getPDO();
 
@@ -309,7 +309,7 @@ $deletedFilter
 $createdFilter
 GROUP BY Val
 HAVING Quantity >= " . $pdo->quote($cutoff) . "
-ORDER BY Quantity DESC, Val ASC";
+ORDER BY Quantity DESC, Val";
 
 		$statement = $this->getPDO()->prepare($query);
 
@@ -331,8 +331,8 @@ ORDER BY Quantity DESC, Val ASC";
 	 * For anything more complicated use SearchDAO facilities.
 	 *
 	 * @param Feature $feature Feature and value to search
-	 * @param int $limit Maximum number of results
 	 * @param null|ItemWithCode $location
+	 * @param int|null $limit Maximum number of results
 	 * @param null|\DateTime $creation creation date (starts from here)
 	 * @param bool $deleted Also count deleted/lost items, defaults to false (don't count them)
 	 *
@@ -385,7 +385,7 @@ LIMIT " . (int) $limit;
 	 *
 	 * @return array
 	 */
-	public function getLostItems(array $features = [], ?int $limit = null, $deleted = false): array {
+	public function getLostItems(array $features = [], ?int $limit = null, bool $deleted = false): array {
 		$pdo = $this->getPDO();
 		$deletedFilter = $deleted ? '' : 'AND DeletedAt IS NULL';
 
@@ -406,7 +406,7 @@ $limitFilter";
 
 		try {
 			$success = $statement->execute();
-			assert($success, 'get items by features');
+			assert($success, 'get lost items');
 			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 				$result[] = new ItemCode($row['Code']);
 			}
@@ -610,9 +610,11 @@ EOQ
 		);
 		try {
 			if($brand !== null) {
+				/** @noinspection PhpRedundantOptionalArgumentInspection */
 				$statement->bindValue(':b', $brand, \PDO::PARAM_STR);
 			}
 			if($model !== null) {
+				/** @noinspection PhpRedundantOptionalArgumentInspection */
 				$statement->bindValue(':m', $model, \PDO::PARAM_STR);
 			}
 			$result = $statement->execute();
@@ -672,7 +674,7 @@ EOQ
 		}
 	}
 
-	public function getProductsCountByBrand() {
+	public function getProductsCountByBrand(): array {
 		$statement = $this->getPDO()->prepare(
 			<<<EOQ
 				SELECT Brand, COUNT(DISTINCT Model) AS Models, COUNT(*) AS Variants, COUNT(*)/COUNT(DISTINCT Model) AS VPP
@@ -691,7 +693,7 @@ EOQ
 		}
 	}
 
-	public function getItemsWithIncompleteProducts() {
+	public function getItemsWithIncompleteProducts(): array {
 		$statement = $this->getPDO()->prepare(
 			<<<EOQ
 				SELECT Item.Code, Item.Brand, Item.Model, Item.Variant, COUNT(DISTINCT Product.Variant) AS NumVariants
@@ -713,7 +715,7 @@ EOQ
 		}
 	}
 
-	public function getSplittableItems() {
+	public function getSplittableItems(): array {
 		$statement = $this->getPDO()->prepare(
 			<<<EOQ
 				SELECT DISTINCT Item.Code, Item.Brand, Item.Model, Item.Variant, COUNT(Feature) AS Features
@@ -737,7 +739,7 @@ EOQ
 	}
 
 
-	public function getStatsByType(bool $returnCount, array $dict, string $filterName, ?string $filterValue = '', ?array $additionalFilter = []){
+	public function getStatsByType(bool $returnCount, array $dict, string $filterName, ?string $filterValue = '', ?array $additionalFilter = []): array {
 		//Array with featureName=>featureValue if filtered
 		//featureName=>null if not filtered
 		$pdo = $this->getPDO();
@@ -841,13 +843,14 @@ EOQ
 		return $array;
 	}
 
-	public function getUsersStats(string $change = '', ?int $limit = 5){
+	public function getUsersStats(string $change = '', ?int $limit = 5): array {
 		if(!ctype_alpha($change) && $change !== ''){
 			throw new \DomainException("Wrong input string: $change is not alphabetic");
 		}
 		$change = strtoupper($change);
 		$pdo = $this->getPDO();
 		$where = $change ?  " WHERE `Change` = " . $pdo->quote($change) : '';
+		/** @noinspection SqlResolve */
 		$query = "SELECT User, COUNT(*) as Count
 		FROM Audit" .
 			$where
@@ -871,10 +874,11 @@ EOQ
 		return $array;
 	}
 
-	public function getLastAudit(?bool $productAudit = false ,?int $limit = 10){
+	public function getLastAudit(?bool $productAudit = false ,?int $limit = 10): array {
 
 		$select = $productAudit ? "Brand, Model, Variant, `Change`, User, Time " : "Code, `Change`, Other, User, Time";
 
+		/** @noinspection SqlResolve */
 		$query = "SELECT $select
 FROM " . ($productAudit ? 'AuditProduct' : 'Audit') . "
 ORDER BY Time DESC
@@ -915,14 +919,14 @@ WHERE `Key` != 'DataVersion' AND
 		return $array;
 	}
 
-	public function setDefaultLocation(string $key, string $value){
+	public function setDefaultLocation(string $key, string $value) {
+		$pdo = $this->getPDO();
 		if(isset($this->getDefaultLocations()[$key])) {
-			$pdo = $this->getPDO();
 			$query = "UPDATE Configuration
 SET Value = :v
 WHERE `Key` = :k";
 
-			$statement = $this->getPDO()->prepare($query);
+			$statement =$pdo->prepare($query);
 			$statement->bindValue(':v', $value);
 			$statement->bindValue(':k', $key);
 			try {
@@ -931,13 +935,12 @@ WHERE `Key` = :k";
 			} finally {
 				$statement->closeCursor();
 			}
-		}
-		else{ //create a new row
-			$pdo = $this->getPDO();
+		} else {
+			//$pdo = $this->getPDO();
 			$query = "
 INSERT INTO Configuration (`Key`, Value) VALUES (:k, :v)";
 
-			$statement = $this->getPDO()->prepare($query);
+			$statement = $pdo->prepare($query);
 			$statement->bindValue(':v', $value);
 			$statement->bindValue(':k', $key);
 
@@ -949,5 +952,4 @@ INSERT INTO Configuration (`Key`, Value) VALUES (:k, :v)";
 			}
 		}
 	}
-
 }
