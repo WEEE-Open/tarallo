@@ -6,7 +6,12 @@
 /** @var string[] $defaultLocations */
 $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options']);
 ?>
-<?php $locationNames = ['DefaultRamLocation', 'DefaultCpuLocation', 'DefaultLabLocation'];?>
+<?php $locationNames = [
+	'DefaultRamLocation' => 'Default location for RAM stats',
+	'DefaultCpuLocation' => 'Default location for CPU stats',
+	'DefaultLabLocation' => 'Lab name, for stats',
+];
+?>
 
 <?php if($error !== null): ?>
 <div class="col-12">
@@ -69,16 +74,16 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 	</form>
 </div>
 <?php if($user->getLevel() === \WEEEOpen\Tarallo\User::AUTH_LEVEL_ADMIN): ?>
-<h3>Edit default locations</h3>
-<?php foreach($locationNames as $location):?>
+<h2>Global options</h2>
+<?php foreach($locationNames as $location => $name):?>
 <form method="post">
 	<div class="form-group row">
-			<label for="inputLocation" class="col-sm-2 col-lg-1 col-form-label mb-1"><?=$this->e($location)?></label>
+			<label for="inputLocation" class="col-sm-2 col-lg-1 col-form-label mb-1"><?=$this->e($name)?></label>
 		<div class="col">
-			<input type="text" id="inputLocation" name="location" class="form-control mb-2" placeholder=<?= $defaultLocations[$location] ?? '' ?>>
+			<input type="text" id="inputLocation" name="location" class="form-control mb-2" value="<?= $this->e($defaultLocations[$location] ?? '') ?>">
 		</div>
 		<div class="col-lg-2">
-			<button type="submit" class="btn btn-primary mb-2 w-lg-100" name="default" value=<?=$location?>>Save</button>
+			<button type="submit" class="btn btn-primary mb-2 w-lg-100" name="default" value="<?=$this->e($location)?>">Save</button>
 		</div>
 	</div>
 </form>
