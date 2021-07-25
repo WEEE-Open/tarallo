@@ -64,12 +64,12 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 	<h3>Create a new token</h3>
 	<form method="post">
 		<div class="form-group row">
-			<label class="col-sm-2 col-lg-1 col-form-label mb-1" for="description">Description</label>
-			<div class="col-sm-10 col-lg-9">
-				<input type="text" class="form-control mb-2" id="description" name="description">
+			<label class="col col-form-label" for="description">Description</label>
+			<div class="col">
+				<input type="text" class="form-control" id="description" name="description">
 			</div>
-			<div class="col-lg-2">
-				<button class="btn btn-primary mb-2 w-lg-100" type="submit" name="new" value="true">Get token</button>
+			<div class="col">
+				<button class="btn btn-primary" type="submit" name="new" value="true">Get token</button>
 			</div>
 	</form>
 </div>
@@ -78,12 +78,12 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 <?php foreach($locationNames as $location => $name):?>
 <form method="post">
 	<div class="form-group row">
-			<label for="inputLocation" class="col-sm-2 col-lg-1 col-form-label mb-1"><?=$this->e($name)?></label>
+		<label for="inputLocation" class="col col-form-label"><?=$this->e($name)?></label>
 		<div class="col">
-			<input type="text" id="inputLocation" name="location" class="form-control mb-2" value="<?= $this->e($defaultLocations[$location] ?? '') ?>">
+			<input type="text" id="inputLocation" name="location" class="form-control" value="<?= $this->e($defaultLocations[$location] ?? '') ?>">
 		</div>
-		<div class="col-lg-2">
-			<button type="submit" class="btn btn-primary mb-2 w-lg-100" name="default" value="<?=$this->e($location)?>">Save</button>
+		<div class="col">
+			<button type="submit" class="btn btn-primary" name="default" value="<?=$this->e($location)?>">Save</button>
 		</div>
 	</div>
 </form>
