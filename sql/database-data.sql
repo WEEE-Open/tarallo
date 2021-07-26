@@ -257,7 +257,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'lga1151'), -- LGA1151 (Socket H4) --
 	('cpu-socket', 'lga2066'), -- LGA2066 --
 	('cpu-socket', 'lga3647'), -- LGA3647 --
-    ('cpu-socket', 'soldered'), -- Soldered BGA --
+	('cpu-socket', 'soldered'), -- Soldered BGA --
 	('odd-form-factor', '5.25'), -- 5.25 in. --
 	('odd-form-factor', 'laptop-odd-7mm'), -- SFF-8553 (7 mm) -- Physical dimensions specified in SFF-8553
 	('odd-form-factor', 'laptop-odd-8.5mm'), -- SFF-8553 (8.5 mm) -- Physical dimensions specified in SFF-8553
