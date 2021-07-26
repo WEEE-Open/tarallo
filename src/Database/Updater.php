@@ -785,6 +785,9 @@ END;"
 					$this->exec("DELETE FROM ProductFeature WHERE Feature = 'working' AND ValueEnum = 'to-be-tested'");
 					$this->exec("DELETE FROM FeatureEnum WHERE Feature = 'working' AND ValueEnum = 'to-be-tested'");
 					break;
+				case 22:
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('cpu-socket', 's1'), ('cpu-socket', 'fs1'), ('cpu-socket', 'socket563'), ('cpu-socket', 'soldered')");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}
