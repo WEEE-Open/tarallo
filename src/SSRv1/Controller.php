@@ -435,7 +435,7 @@ class Controller implements RequestHandlerInterface {
 				break;
 
 			case 'cases':
-				$locationDefault = 'Chernobyl';
+				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultCaseLocation'] ?? null;
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
@@ -506,7 +506,7 @@ class Controller implements RequestHandlerInterface {
 				);
 				break;
 			case 'cpus':
-				$locationDefault = 'Box12';
+				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultCpuLocation'] ?? null;
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
