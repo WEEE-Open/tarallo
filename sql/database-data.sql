@@ -174,9 +174,12 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('color', 'black'), -- Black --
 	('color', 'white'), -- White --
 	('color', 'green'), -- Green --
+	('color', 'darkgreen'), -- Dark green --
+	('color', 'olivedrab'), -- Olive (drab) --
 	('color', 'yellow'), -- Yellow --
 	('color', 'red'), -- Red --
 	('color', 'blue'), -- Blue --
+	('color', 'teal'), -- Teal --
 	('color', 'grey'), -- Grey --
 	('color', 'silver'), -- Silver --
 	('color', 'darkgrey'), -- Dark grey --
