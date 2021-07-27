@@ -2,7 +2,6 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var string $location */
 /** @var bool $locationSet */
-/** @var DateTime $startDate */
 /** @var int[] $bySmartData */
 /** @var int[] $byCapacity */
 /** @var int $byErased */
