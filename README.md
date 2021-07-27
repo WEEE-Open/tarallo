@@ -42,7 +42,7 @@ DEVELOPMENT=true
 
 The following commands might be used to interact with the development environment:
 
-> NOTE: If you don't have access to the `make` command, you can open the `Makefile` and execute the commands manually. There are at most a couple of commands for each target.
+> NOTE: If you don't have access to the `make` command, open the `Makefile` and execute the commands manually. There are at most a couple of commands for each target. If you're on Windows, you can use `docker_up.bat` to bring up the server.
 
 - `make build` - create the development environment (with caching)
 - `make rebuild` - shortcut for `make down destroy build up`
