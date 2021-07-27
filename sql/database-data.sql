@@ -174,9 +174,12 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('color', 'black'), -- Black --
 	('color', 'white'), -- White --
 	('color', 'green'), -- Green --
+	('color', 'darkgreen'), -- Dark green --
+	('color', 'olivedrab'), -- Olive (drab) --
 	('color', 'yellow'), -- Yellow --
 	('color', 'red'), -- Red --
 	('color', 'blue'), -- Blue --
+	('color', 'teal'), -- Teal --
 	('color', 'grey'), -- Grey --
 	('color', 'silver'), -- Silver --
 	('color', 'darkgrey'), -- Dark grey --
@@ -211,6 +214,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'g2'), -- G2 --
 	('cpu-socket', 'socket3'), -- Socket 3 --
 	('cpu-socket', 'socket7'), -- Socket 7 --
+	('cpu-socket', 's1'), -- Socket S1 --
 	('cpu-socket', 'p'), -- P -- which has 478 pins but it's completely different from socket 478
 	('cpu-socket', 'am1'), -- AM1 --
 	('cpu-socket', 'am2'), -- AM2 --
@@ -218,6 +222,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'am3'), -- AM3 --
 	('cpu-socket', 'am3plus'), -- AM3+ --
 	('cpu-socket', 'am4'), -- AM4 --
+	('cpu-socket', 'fs1'), -- FS1 --
 	('cpu-socket', 'fm1'), -- FM1 --
 	('cpu-socket', 'fm2'), -- FM2 --
 	('cpu-socket', 'fm2plus'), -- FM2+ --
@@ -232,10 +237,11 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'socket423'), -- 423 --
 	('cpu-socket', 'socket478'), -- 478 (desktop, mPGA478B) --
 	-- There are 3 sockets with multiple names and each one is also called socket 479. And they have 478 pins. Mechanically identical, electrically incompatible.
-	('cpu-socket', 'socket479a'), -- 479 (mobile, mPGA478A) --
-	('cpu-socket', 'socket479c'), -- 479 (mobile, mPGA478C) --
-	('cpu-socket', 'socket479m'), -- 479 (mobile, socket M) --
+	('cpu-socket', 'socket479a'), -- 479 (mobile mPGA478A) --
+	('cpu-socket', 'socket479c'), -- 479 (mobile mPGA478C) --
+	('cpu-socket', 'socket479m'), -- 479 (mobile socket M) --
 	('cpu-socket', 'socket495'), -- 495 --
+	('cpu-socket', 'socket563'), -- 563 --
 	('cpu-socket', 'socket603'), -- 603 --
 	('cpu-socket', 'socket604'), -- 604 --
 	('cpu-socket', 'socket615'), -- 615 --
@@ -254,6 +260,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'lga1151'), -- LGA1151 (Socket H4) --
 	('cpu-socket', 'lga2066'), -- LGA2066 --
 	('cpu-socket', 'lga3647'), -- LGA3647 --
+	('cpu-socket', 'soldered'), -- Soldered BGA --
 	('odd-form-factor', '5.25'), -- 5.25 in. --
 	('odd-form-factor', 'laptop-odd-7mm'), -- SFF-8553 (7 mm) -- Physical dimensions specified in SFF-8553
 	('odd-form-factor', 'laptop-odd-8.5mm'), -- SFF-8553 (8.5 mm) -- Physical dimensions specified in SFF-8553
