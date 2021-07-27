@@ -380,12 +380,16 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
+		$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultHddLocation'] ?? null;
+		$location = Validation::validateOptionalString($request->getQueryParams(), 'where', $locationDefault, null);
+		$location = $location === null ? null : new ItemCode($location);
+
 		$templateParameters = [
 			'todos' => self::getTodos($db),
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(false,
 				['smart-data' => null, 'surface-scan' => null],
-				'type', 'hdd', new ItemCode('Polito'), ['working' => 'yes']),
+				'type', 'hdd', $location, ['working' => 'yes']),
 		];
 
 		$request = $request->withAttribute('Template', 'home')->withAttribute(
@@ -1112,6 +1116,10 @@ class Controller implements RequestHandlerInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
+		$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultHddLocation'] ?? null;
+		$location = Validation::validateOptionalString($request->getQueryParams(), 'where', $locationDefault, null);
+		$location = $location === null ? null : new ItemCode($location);
+
 		$templateParameters = [
 			'todos' => self::getTodos($db),
 			'toTest' => self::getToTest($db),
@@ -1119,7 +1127,7 @@ class Controller implements RequestHandlerInterface {
 				['smart-data' => null,
 					'surface-scan' => null],
 				'type', 'hdd',
-				new ItemCode('Polito'), ['working' => 'yes']),
+				$location, ['working' => 'yes']),
 		];
 
 		$request = $request->withAttribute('Template', 'info::todo')
