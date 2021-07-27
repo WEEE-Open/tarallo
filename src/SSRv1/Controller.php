@@ -1002,11 +1002,15 @@ class Controller implements RequestHandlerInterface {
 	 * @return array
 	 */
 	private static function getTodos(Database $db): array {
+
+		$location = $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null;
+		$location = $location === null ? null : new ItemCode($location);
+
 		$todos = [];
 		$possibileTodos = array_keys(BaseFeature::features['todo']);
 		foreach($possibileTodos as $possibileTodo) {
 			$todos[$possibileTodo] = $db->statsDAO()->getItemsByFeatures(
-				new Feature('todo', $possibileTodo), new ItemCode('Polito'), 100
+				new Feature('todo', $possibileTodo), $location, 100
 			);
 		}
 		return $todos;
