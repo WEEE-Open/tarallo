@@ -2,7 +2,6 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var string $location */
 /** @var bool $locationSet */
-/** @var DateTime $startDate */
 /** @var int[] byNcore */
 /** @var int[] byIsa */
 /** @var int[] commmonBrands */

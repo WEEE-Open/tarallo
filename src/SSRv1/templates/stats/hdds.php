@@ -2,7 +2,6 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var string $location */
 /** @var bool $locationSet */
-/** @var DateTime $startDate */
 /** @var int[] $bySmartData */
 /** @var int[] $byCapacity */
 /** @var int $byErased */
@@ -13,6 +12,7 @@
 /** @var bool $startDateSet */
 $this->layout('main', ['title' => 'Stats: HDDs', 'user' => $user, 'currentPage' => 'stats']);
 $this->insert('stats::menu', ['currentPage' => 'hdds']);
+$this->insert('stats::header', ['location' => $location, 'locationSet' => $locationSet, 'allowDateSelection' => false]);
 
 $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 	if($row[$feature] === null) {
