@@ -527,32 +527,41 @@ class Controller implements RequestHandlerInterface {
 				);
 				break;
 			case 'hdds':
-				$withoutErased = $db->statsDAO()->getStatsByType(true, ['data-erased' => null], 'type', 'hdd');
+				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultHddLocation'] ?? null;
+				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
+				$locationSet = $location !== $locationDefault;
+				$location = $location === null ? null : new ItemCode($location);
+
+				$withoutErased = $db->statsDAO()->getStatsByType(true, ['data-erased' => null], 'type', 'hdd', $location);
 				$withoutErased = reset($withoutErased);
 				$withoutErased = $withoutErased === false ? 0 : $withoutErased;
 
-				$byErased = $db->statsDAO()->getStatsByType(true, [], 'data-erased', 'yes');
+				$byErased = $db->statsDAO()->getStatsByType(true, [], 'data-erased', 'yes', $location);
 				$byErased = reset($byErased);
 				$byErased = $byErased === false ? 0 : $byErased;
 
 				$request = $request->withAttribute('Template', 'stats::hdds')->withAttribute(
 					'TemplateParameters', [
+						'location' => $location === null ? null : $location->getCode(),
+						'locationSet' => $locationSet,
 						'byErased' => $byErased,
 						'withoutErased' => $withoutErased,
 						'withoutErasedList' => $db->statsDAO()->getItemByNotFeature(
-							new Feature('type', 'hdd'), 'data-erased', null, 200
+							new Feature('type', 'hdd'), 'data-erased', $location, 200
 						),
 						'bySmartData' => $db->statsDAO()->getStatsByType(
-							true, ['type' => 'hdd'], 'smart-data'
+							true, ['type' => 'hdd'], 'smart-data', "", $location
 						),
 						'byCapacity' => $db->statsDAO()->getStatsByType(
-							true, ['type' => 'hdd'], 'capacity-decibyte'
+							true, ['type' => 'hdd'], 'capacity-decibyte', "", $location
 						),
-						'surfaceScan' => $db->statsDAO()->getStatsByType(true, ['type' => 'hdd'], 'surface-scan'),
+						'surfaceScan' => $db->statsDAO()->getStatsByType(
+							true, ['type' => 'hdd'], 'surface-scan', "", $location
+						),
 						'formAndRotation' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'hdd'), [
 							'hdd-form-factor',
 							'spin-rate-rpm'
-						]),
+						], $location),
 					]
 				);
 				break;
