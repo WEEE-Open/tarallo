@@ -511,6 +511,10 @@ class ItemValidator {
 					'cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code',
 					'brand', 'model', 'working', 'sn', 'arrival-batch', 'owner', 'notes',
 				];
+			case 'cpu':
+				return [
+					'brand', 'model', 'working', 'owner'
+				];
 			default: // Includes all these cases
 //			case 'cpu':
 //			case 'ram':
