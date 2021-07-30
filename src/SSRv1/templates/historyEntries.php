@@ -21,7 +21,7 @@
 				<td>
 					<?php switch($row['change']) {
 						case 'C': ?>Created<?php break;
-						case 'R': ?>Renamed<?php break;
+						case 'R': ?>Renamed from <?= $this->e($row['other']) ?><?php break;
 						case 'U': ?>Updated features<?php break;
 						case 'D': ?>Deleted item<?php break;
 						case 'M': ?>Moved to <a href="/item/<?= urlencode($this->e($row['other'])) ?>">
