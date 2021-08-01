@@ -17,7 +17,9 @@ if(isset($included) && $included) {
 }
 
 $todosWithHumanReadableFeatures = [];
+$sortFunction = function(\WEEEOpen\Tarallo\ItemCode $a, \WEEEOpen\Tarallo\ItemCode $b) { return strnatcasecmp($a->getCode(), $b->getCode()); };
 foreach($todos as $feature => $items) {
+	usort($items, $sortFunction);
 	$todosWithHumanReadableFeatures[WEEEOpen\Tarallo\SSRv1\FeaturePrinter::printableValue(new \WEEEOpen\Tarallo\Feature('todo', $feature))] =
 		$items;
 }
@@ -25,6 +27,7 @@ ksort($todosWithHumanReadableFeatures);
 
 $checksWithHumanReadableFeatures = [];
 foreach($checks as $feature => $items) {
+	usort($items, $sortFunction);
 	$checksWithHumanReadableFeatures[WEEEOpen\Tarallo\SSRv1\FeaturePrinter::printableValue(new \WEEEOpen\Tarallo\Feature('check', $feature))] =
 		$items;
 }
@@ -73,7 +76,7 @@ ksort($checksWithHumanReadableFeatures);
 </div>
 <div class="row"<?= $divclass ?>>
 	<?php if(!empty($toTest)): ?>
-	<?php foreach($toTest as $type => $items): ?>
+	<?php foreach($toTest as $type => $items): usort($items, $sortFunction); ?>
 		<div class="stats list col-md-6 py-2">
 			<p<?=$pclass?>><?= $this->e($type) ?> to be tested <small>(<?=count($items)?>, max 100)</small></p>
 			<div>
