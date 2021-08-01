@@ -15,7 +15,9 @@ use WEEEOpen\Tarallo\Database\TreeDAO;
 use WEEEOpen\Tarallo\DuplicateBulkIdentifierException;
 use WEEEOpen\Tarallo\ErrorHandler;
 use WEEEOpen\Tarallo\Feature;
+use WEEEOpen\Tarallo\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
+use WEEEOpen\Tarallo\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\HTTP\AuthValidator;
 use WEEEOpen\Tarallo\HTTP\DatabaseConnection;
 use WEEEOpen\Tarallo\HTTP\TransactionWrapper;
@@ -355,8 +357,12 @@ class Controller implements RequestHandlerInterface {
 					$token = SessionLocal::generateToken();
 					$db->sessionDAO()->setDataForToken($token, $data);
 				}
-				elseif(isset($body['location']) && isset($body['default'])){
-					$db->statsDAO()->setDefaultLocation($body['default'], $body['location']);
+				elseif(isset($body['location']) && isset($body['default'])) {
+					if($user->getLevel() === $user::AUTH_LEVEL_ADMIN) {
+						$db->statsDAO()->setDefaultLocation($body['default'], $body['location']);
+					} else {
+						throw new AuthorizationException('Only admins can do that');
+					}
 				}
 			} catch(\Exception $e) {
 				$error = $e->getMessage();
