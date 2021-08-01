@@ -3,7 +3,7 @@
 /** @var \WEEEOpen\Tarallo\ProductCode $product */
 /** @var string[][] $history */
 /** @var bool $tooLong */
-$title = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) . rtrim(' ' . $this->e($product->getVariantOrEmpty()));
+$title = $this->e($product->getFullName());
 
 $this->layout('main', ['title' => $title . ' history', 'user' => $user]);
 $bmv_rawurlencoded = $this->e(rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));

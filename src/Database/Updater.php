@@ -793,7 +793,7 @@ END;"
 					break;
 				case 24:
 					$this->exec("UPDATE `ItemFeature` SET `ValueEnum`='showcase' WHERE `Feature`='restrictions' AND `ValueEnum`='training'");
-					$this->exec("UPDATE `ItemFeature` SET `ValueEnum`='missing-content' WHERE `Feature`='check' AND `ValueEnum`='missing-content'");
+					$this->exec("UPDATE `ItemFeature` SET `ValueEnum`='missing-content' WHERE `Feature`='check' AND `ValueEnum`='partial-inventory'");
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('check', 'wrong-content')");
 					break;
 				default:

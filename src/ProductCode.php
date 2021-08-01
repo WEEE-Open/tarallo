@@ -39,6 +39,14 @@ class ProductCode {
 		return self::variantOrEmpty($this->variant);
 	}
 
+	public function getFullName(): string {
+		if($this->variant === self::DEFAULT_VARIANT) {
+			return "$this->brand $this->model";
+		} else {
+			return "$this->brand $this->model $this->variant";
+		}
+	}
+
 	public static function variantOrEmpty(string $variant): string {
 		if($variant === self::DEFAULT_VARIANT) {
 			return '';

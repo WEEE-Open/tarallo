@@ -3,7 +3,7 @@
 /** @var \WEEEOpen\Tarallo\ProductCode $product */
 /** @var \WEEEOpen\Tarallo\Item[] $items */
 
-$title = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) . rtrim(' ' . $this->e($product->getVariantOrEmpty()));
+$title = "Items of $this->e($product->getFullName())";
 
 $this->layout('main', ['title' => "All $title", 'user' => $user, 'tooltips' => isset($edit)]);
 ?>

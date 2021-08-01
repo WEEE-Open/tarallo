@@ -59,7 +59,7 @@ if($product === null) {
 		$missingProduct = true;
 	}
 } else {
-	$productName = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel()) . rtrim(' ' . $this->e($product->getVariantOrEmpty()));
+	$productName = $this->e($product->getFullName());
 }
 
 $code_rawurlencoded = $this->e(rawurlencode($item->getCode()));

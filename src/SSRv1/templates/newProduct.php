@@ -24,7 +24,7 @@ $isClone = !isset($baseItem) && $base instanceof \WEEEOpen\Tarallo\Product && !i
 				</div>
 			<?php elseif($isClone): ?>
 				<div class="inline-alert alert-info" role="alert">
-					<i class="fa fa-info-circle"></i>&nbsp;This is a copy of <?= $this->e($base->getBrand()) . ' ' . $this->e($base->getModel()) . rtrim(' ' . $this->e($base->getVariantOrEmpty())) ?>
+					<i class="fa fa-info-circle"></i>&nbsp;This is a copy of <?= $this->e($base->getFullName()) ?>
 				</div>
 			<?php ?>
 
