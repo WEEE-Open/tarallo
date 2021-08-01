@@ -311,8 +311,9 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('ram-form-factor', 'microdimm'), -- Micro DIMM --
 	('ram-form-factor', 'fbdimm'), -- FB-DIMM --
 	('check', 'missing-data'), -- Missing data --
-	('check', 'partial-inventory'), -- Partially inventoried --
+	('check', 'missing-content'), -- Missing items inside --
 	('check', 'wrong-data'), -- Wrong/conflicting data --
+	('check', 'wrong-content'), -- Wrong items inside --
 	('todo', 'transplant'), -- Transplant into another case --
 	('todo', 'container'), -- Container for transplant --
 	('todo', 'install-os'), -- Install OS --
@@ -359,7 +360,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('restrictions', 'loan'), -- Loaned (to be returned) -- borrowed items that should be returned to owner, can't be donated
 	('restrictions', 'in-use'), -- In use -- items that shouldn't be donated right now because we're using them (e.g. switch, pc used for invetory management, server)
 	('restrictions', 'bought'), -- Bought -- items bought with funds from our annual budget, can't be donated at all ever
-	('restrictions', 'training'), -- Training/demonstrations -- PCs to be used for training and demonstrations (because they're old, slow and with the case full of scratches, mostly), but still working and that can be potentially donated
+	('restrictions', 'showcase'), -- Showcase/events -- PCs to be displayed at events
 	('restrictions', 'ready'), -- Ready -- Completely "restored", cleaned, OS installed, ready for donation, so don't mess them up
 	('restrictions', 'other'), -- Other (cannot be donated) -- "other" also means "cannot be donated right now"
 	('pci-low-profile', 'no'), -- No --

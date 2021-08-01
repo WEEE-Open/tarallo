@@ -141,7 +141,7 @@ class FeaturePrinter {
 		'psu-connector-motherboard' => ['proprietary' => 'Proprietary', 'at' => 'AT', 'atx-20pin' => 'ATX 20 pin', 'atx-24pin' => 'ATX 24 pin', 'atx-24pin-mini' => 'Mini ATX 24 pin', 'atx-20pin-aux' => 'ATX 20 pin + AUX'],
 		'ram-type' => ['simm' => 'SIMM', 'edo' => 'EDO', 'sdr' => 'SDR', 'ddr' => 'DDR', 'ddr2' => 'DDR2', 'ddr3' => 'DDR3', 'ddr4' => 'DDR4'],
 		'ram-form-factor' => ['simm' => 'SIMM', 'dimm' => 'DIMM', 'sodimm' => 'SODIMM', 'minidimm' => 'Mini DIMM', 'microdimm' => 'Micro DIMM', 'fbdimm' => 'FB-DIMM'],
-		'check' => ['missing-data' => 'Missing data', 'partial-inventory' => 'Partially inventoried', 'wrong-data' => 'Wrong/conflicting data'],
+		'check' => ['missing-data' => 'Missing data', 'missing-content' => 'Missing items inside', 'wrong-data' => 'Wrong/conflicting data', 'wrong-content' => 'Wrong items inside'],
 		'todo' => ['transplant' => 'Transplant into another case', 'container' => 'Container for transplant', 'install-os' => 'Install OS', 'replace-capacitors' => 'Replace blown capacitors', 'replace-temp-parts' => 'Replace temporary parts', 'remove-from-computer' => 'Remove from computer', 'replace-broken-parts' => 'Replace parts marked as not working', 'replace-elec-components' => 'Replace faulty electronic components', 'add-parts' => 'Add missing parts', 'salvage-parts' => 'Salvage parts (dismantle)', 'thermal-paste' => 'Replace thermal paste', 'replace-cmos-battery' => 'Replace CMOS battery', 'finish-testing' => 'Finish testing', 'finish-inventory' => 'Finish inventory of parts', 'see-notes' => 'See notes'],
 		'ram-ecc' => ['no' => 'No', 'yes' => 'Yes'],
 		'data-erased' => ['yes' => 'Yes️'],
@@ -150,7 +150,7 @@ class FeaturePrinter {
 		'wireless-receiver' => ['inside' => 'Inside the peripheral', 'near' => 'Near the peripheral', 'missing' => 'Missing'],
 		'psu-form-factor' => ['atx' => 'ATX', 'cfx' => 'CFX', 'lfx' => 'LFX', 'sfx-lowprofile' => 'SFX Low Profile', 'sfx-topfan' => 'SFX Topfan', 'sfx-topfan-reduceddepth' => 'SFX Topfan reduced depth', 'sfx' => 'SFX', 'sfx-ps3' => 'SFX PS3', 'sfx-l' => 'SFX-L', 'tfx' => 'TFX', 'flexatx' => 'Flex ATX', 'proprietary' => 'Proprietary', 'eps' => 'EPS'],
 		'psu-rails-most-power' => ['12v' => '12 V (modern)', '5v' => '5 V (old)', 'balanced' => 'Equal balance between 5 and 12 V'],
-		'restrictions' => ['loan' => 'Loaned (to be returned)', 'in-use' => 'In use', 'bought' => 'Bought', 'training' => 'Training/demonstrations', 'ready' => 'Ready', 'other' => 'Other (cannot be donated)'],
+		'restrictions' => ['loan' => 'Loaned (to be returned)', 'in-use' => 'In use', 'bought' => 'Bought', 'showcase' => 'Showcase/events', 'ready' => 'Ready', 'other' => 'Other (cannot be donated)'],
 		'pci-low-profile' => ['no' => 'No', 'possibile' => 'Possible (no bracket)', 'dual' => 'Yes (both brackets)', 'yes' => 'Yes (low profile only)'],
 		'psu-connector-cpu' => ['none' => 'None', '4pin' => '4 pin', '6pin-hp' => '6 pin (HP, 1 purple + 1 blue)', '6pin-hp-brown' => '6 pin (HP, 2 brown)', '6pin' => '6 pin (other)', '8pin' => '8 pin', '8pin4pin' => '8 pin + 4 pin', '8pin8pin' => '8 pin + 8 pin', 'proprietary' => 'Proprietary'],
 	];
