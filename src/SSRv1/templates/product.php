@@ -61,6 +61,7 @@ $copyQuery = http_build_query([
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/product/<?= $bmv_rawurlencoded ?>/items">
 				<i class="fa fa-cubes"></i>&nbsp;Items
 			</a>
+			<?php $this->insert('manualsButton', ['class' => 'btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto', 'product' => $product]) ?>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/product/<?= $bmv_rawurlencoded ?>/history">
 				<i class="fa fa-users"></i>&nbsp;History
 			</a>

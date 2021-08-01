@@ -3,7 +3,7 @@
 /** @var \WEEEOpen\Tarallo\ProductCode $product */
 /** @var \WEEEOpen\Tarallo\Item[] $items */
 
-$title = "Items of $this->e($product->getFullName())";
+$title = 'Items of ' . $this->e($product->getFullName());
 
 $this->layout('main', ['title' => "All $title", 'user' => $user, 'tooltips' => isset($edit)]);
 ?>
@@ -20,6 +20,7 @@ $copyQuery = http_build_query([
 <a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/item?<?= $this->e($copyQuery) ?>">
 	<i class="fa fa-cube"></i>&nbsp;Create Item
 </a>
+<?php $this->insert('manualsButton', ['class' => 'btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto', 'product' => $product]) ?>
 
 <div class="results">
 	<?php foreach($items as $item) {
