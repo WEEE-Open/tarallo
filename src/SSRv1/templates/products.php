@@ -67,9 +67,9 @@ $products = $summarize();
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($products as $row): /** @var \WEEEOpen\Tarallo\ProductCode $product */ $product = $row[0]; $count = $row[1]; $summary = $row[2]; $aka = $row[3] ?>
+			<?php foreach($products as $row): /** @var \WEEEOpen\Tarallo\ProductCode $product */ $product = $row[0]; $count = $row[1]; $summary = $row[2]; $aka = $row[3]; ?>
 				<tr>
-					<td><a href="/product/<?=$this->e(rawurlencode($product->getBrand()))?>/<?=$this->e(rawurlencode($product->getModel()))?>/<?=$this->e(rawurlencode($product->getVariant()))?>"><?= $summary ?></small></a></td>
+					<td><a href="/product/<?=$this->e(rawurlencode($product->getBrand()))?>/<?=$this->e(rawurlencode($product->getModel()))?>/<?=$this->e(rawurlencode($product->getVariant()))?>"><?= $summary ?></a></td>
 					<td><?= $row[3] ?></td>
 					<?php if($count === 0): ?>
 					<td>0</td>
