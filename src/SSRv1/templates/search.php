@@ -133,7 +133,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 	if($searchId):
 		if(empty($results)): ?>
 			<p>Nothing found :(</p>
-			<p><!--suppress HtmlUnknownTarget --><a href="/search" class="btn btn-primary">New search</a></p>
+			<p><!--suppress HtmlUnknownTarget --><a href="/search/advanced" class="btn btn-primary">New search</a></p>
 		<?php else:
 			$this->insert('pagination', ['page' => $page, 'pages' => $pages, 'searchId' => $searchId]);
 			foreach($results as $item) {

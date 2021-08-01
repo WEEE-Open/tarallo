@@ -127,7 +127,7 @@ ul.breadcrumbs li:not(:first-child)::before {
 	color: #aaaaaa;
 }
 
-.stats a {
+.stats a, .underlinelinks a {
 	text-decoration: underline;
 }
 

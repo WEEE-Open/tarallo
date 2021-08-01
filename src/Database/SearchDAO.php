@@ -5,6 +5,8 @@ namespace WEEEOpen\Tarallo\Database;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemCode;
+use WEEEOpen\Tarallo\Product;
+use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\Search;
 use WEEEOpen\Tarallo\SearchTriplet;
 use WEEEOpen\Tarallo\User;
@@ -494,6 +496,44 @@ EOQ;
 			    AND Tree.Depth > 0
 				AND $compareString
 EOQ;
+		}
+	}
+
+	public function getBrandsLike(string $brand, int $limit = 10): array {
+		$search = str_replace(' ', '', $brand);
+		$statement = $this->getPDO()
+			->prepare("SELECT DISTINCT Brand, LENGTH(REPLACE(Brand, ' ', '')) - ? AS Distance FROM Product WHERE REPLACE(Brand, ' ', '') LIKE ? ORDER BY Distance LIMIT ?");
+		try {
+			$statement->bindValue(1, strlen($brand), \PDO::PARAM_INT);
+			$statement->bindValue(2, "%$brand%", \PDO::PARAM_STR);
+			$statement->bindValue(3, $limit, \PDO::PARAM_INT);
+			$statement->execute();
+			return $statement->fetchAll(\PDO::FETCH_NUM);
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	public function getProductsLike(string $search, int $limit = 10): array {
+		$search = str_replace(' ', '', $search);
+		$statement = $this->getPDO()
+			->prepare("SELECT DISTINCT Brand, Model, Variant, LENGTH(CONCAT(REPLACE(Brand, ' ', ''),REPLACE(Model, ' ', ''),REPLACE(IF(Variant = :default,'',Variant), ' ', ''))) - :strlen AS Distance FROM Product WHERE CONCAT(REPLACE(Brand, ' ', ''),REPLACE(Model, ' ', ''),REPLACE(IF(Variant = :default2,'',Variant), ' ', '')) LIKE :search ORDER BY Distance LIMIT :limit");
+		try {
+			$statement->bindValue(':default', ProductCode::DEFAULT_VARIANT, \PDO::PARAM_STR);
+			$statement->bindValue(':default2', ProductCode::DEFAULT_VARIANT, \PDO::PARAM_STR);
+			$statement->bindValue(':strlen', strlen($search), \PDO::PARAM_INT);
+			$statement->bindValue(':search', "%$search%", \PDO::PARAM_STR);
+			$statement->bindValue(':limit', $limit, \PDO::PARAM_INT);
+			$statement->execute();
+
+			$result = [];
+			$statement->setFetchMode(\PDO::FETCH_NUM);
+			foreach($statement as $row) {
+				$result[] = [new ProductCode($row[0], $row[1], $row[2]), $row[3]];
+			}
+			return $result;
+		} finally {
+			$statement->closeCursor();
 		}
 	}
 }

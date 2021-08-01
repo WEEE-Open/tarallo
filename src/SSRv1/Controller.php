@@ -611,12 +611,46 @@ class Controller implements RequestHandlerInterface {
 	}
 
 	public static function quickSearch(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$body = $request->getParsedBody();
 
 		$search = Validation::validateHasString($body, 'search');
 
-		return new RedirectResponse('/item/' . rawurlencode($search), 303);
+		return new RedirectResponse('/search/name/' . rawurlencode($search), 303);
+	}
+
+	public static function quickSearchName(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+		$query = $request->getQueryParams();
+		$name = rawurldecode(Validation::validateHasString($parameters, 'name'));
+		$limit = Validation::validateOptionalInt($query, 'limit', 10);
+
+
+		$request = $request->withAttribute('Template', 'searchName');
+		$request = $request->withAttribute(
+			'TemplateParameters', [
+				'searchTerm' => $name,
+				'limit' => $limit,
+				'item' => $db->itemDAO()->getActualItemCode($name),
+				'brands' => $db->searchDAO()->getBrandsLike($name),
+				'products' => $db->searchDAO()->getProductsLike($name),
+			]
+		);
+		return $handler->handle($request);
+	}
+
+	public static function quickSearchValue(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+		/** @var Database $db */
+		// $db = $request->getAttribute('Database');
+
+		$request = $request
+			->withAttribute('Template', 'error')
+			->withAttribute('ResponseCode', 501)
+			->withAttribute('TemplateParameters', ['reason' => 'Search by value coming in a future update']);
+		return $handler->handle($request);
 	}
 
 	public static function search(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
@@ -1154,11 +1188,13 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/new/item', [User::AUTH_LEVEL_RO, 'Controller::addItem',]);
 				$r->get('/new/product', [User::AUTH_LEVEL_RO, 'Controller::addProduct',]);
 				$r->post('/search', [User::AUTH_LEVEL_RO, 'Controller::quickSearch',]);
-				$r->get('/search[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [User::AUTH_LEVEL_RO, 'Controller::search',]);
-				$r->get('/search/{id:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
-				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
-				$r->get('/search/{id:[0-9]+}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
-				$r->get('/search/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
+				$r->get('/search/name/{name}', [User::AUTH_LEVEL_RO, 'Controller::quickSearchName',]);
+				$r->get('/search/value/{value}', [User::AUTH_LEVEL_RO, 'Controller::quickSearchValue',]);
+				$r->get('/search/advanced[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [User::AUTH_LEVEL_RO, 'Controller::search',]);
+				$r->get('/search/advanced/{id:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
+				$r->get('/search/advanced/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
+				$r->get('/search/advanced/{id:[0-9]+}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
+				$r->get('/search/advanced/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
 				$r->get('/options', [User::AUTH_LEVEL_RO, 'Controller::options',]);
 				$r->post('/options', [User::AUTH_LEVEL_RO, 'Controller::options',]);
 				$r->get('/bulk', [User::AUTH_LEVEL_RO, 'Controller::bulk',]);

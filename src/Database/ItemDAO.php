@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\Database;
 
 use WEEEOpen\Tarallo\Item;
+use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\ItemPrefixer;
 use WEEEOpen\Tarallo\ItemWithCode;
@@ -105,7 +106,7 @@ final class ItemDAO extends DAO {
 	 * @param ItemWithCode $item
 	 *
 	 * @return bool|null tri-state: true if marked as deleted, false if not marked but exists, null if doesn't exist
-	 *@deprecated This just doesn't cut it anymore with lost items
+	 * @deprecated This just doesn't cut it anymore with lost items
 	 */
 	private function itemIsDeleted(ItemWithCode $item) {
 		$statement = $this->getPDO()
@@ -169,7 +170,7 @@ final class ItemDAO extends DAO {
 	 * @param bool $allowDeleted True if a deleted item is acceptable as "existing", false if deleted items should be
 	 * ignored
 	 */
-	public function itemMustExist(ItemWithCode $item, $allowDeleted = false) {
+	public function itemMustExist(ItemWithCode $item, bool $allowDeleted = false) {
 		// Use Item instead of ProductItemFeatures because we need to check DeletedAt, and we will modify Item anyway
 		if($allowDeleted) {
 			$statement = $this->getPDO()
@@ -182,6 +183,37 @@ final class ItemDAO extends DAO {
 			$statement->execute([$item->getCode()]);
 			if($statement->rowCount() === 0) {
 				throw new NotFoundException();
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * Get an Item code, if the item exists. Useful to normalize case.
+	 * Use itemMustExist if you're going to modify the item in any way.
+	 *
+	 * @param string $itemCode
+	 * @param bool $allowDeleted True if a deleted item is acceptable as "existing", false if deleted items should be
+	 * ignored
+	 *
+	 * @return ItemCode|null
+	 * @see itemMustExist
+	 */
+	public function getActualItemCode(string $itemCode, bool $allowDeleted = false): ?ItemCode {
+		if($allowDeleted) {
+			$statement = $this->getPDO()
+				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod');
+		} else {
+			$statement = $this->getPDO()
+				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod and `DeletedAt` IS NULL');
+		}
+		try {
+			$statement->execute([$itemCode]);
+			if($statement->rowCount() === 0) {
+				return null;
+			} else {
+				return new ItemCode($statement->fetchAll(\PDO::FETCH_NUM)[0][0]);
 			}
 		} finally {
 			$statement->closeCursor();

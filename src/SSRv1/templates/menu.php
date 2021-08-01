@@ -24,7 +24,7 @@ $hereSr = function($page, $current) {
 				</a>
 				<div class="dropdown-menu" aria-labelledby="itemsDropdown">
 					<a class="dropdown-item <?= $hereClass('item new', $currentPage) ?>" href="/new/item">Create<?= $hereSr('item new', $currentPage) ?></a>
-					<a class="dropdown-item <?= $hereClass('item search', $currentPage) ?>" href="/search">Search<?= $hereSr('item search', $currentPage) ?></a>
+					<a class="dropdown-item <?= $hereClass('item search', $currentPage) ?>" href="/search/advanced">Search<?= $hereSr('item search', $currentPage) ?></a>
 
 				</div>
 			</li>
@@ -70,7 +70,7 @@ $hereSr = function($page, $current) {
 		<form class="form-inline my-2 my-md-0" action="/search" method="post">
 			<input required class="form-control mx-0 mr-sm-2" type="search" aria-label="Search" name="search">
 			<button class="btn btn-outline-primary my-2 my-sm-0 mr-sm-2" type="submit">Search</button>
-			<a class="btn btn-secondary my-2 my-sm-0" href="/search">Advanced</a>
+			<a class="btn btn-secondary my-2 my-sm-0" href="/search/advanced">Advanced</a>
 		</form>
 	</div>
 </nav>
