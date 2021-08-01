@@ -327,6 +327,77 @@ ORDER BY Quantity DESC, Val";
 	}
 
 	/**
+	 * Get items for each value of a feature
+	 *
+	 * e.g. with feature name = "color":
+	 * - red: ['R124', 'R252']
+	 * - yellow: ['B13', 'B14', 'B42', 'G42']
+	 * - grey: ['A46']
+	 * - ...and so on.
+	 *
+	 * If some (enum) values aren't assigned to an item they're not reported.
+	 *
+	 * @param string $feature Feature name
+	 * @param Feature|null $filter Feature that must match, useful to select items by type
+	 * @param ItemWithCode|null $location Consider only this subtree
+	 * @param null|\DateTime $creation Creation date (starts from here)
+	 * @param bool $deleted Also count deleted/lost items, defaults to false (don't count them)
+	 *
+	 * @return ItemCode[][] value => array of ItemCode
+	 */
+	public function getItemsForEachValue(
+		string $feature,
+		?Feature $filter,
+		?ItemWithCode $location = null,
+		?\DateTime $creation = null,
+		bool $deleted = false
+	): array {
+		BaseFeature::validateFeatureName($feature);
+		$pdo = $this->getPDO();
+
+		$locationFilter = $this->filterLocation($location);
+		$deletedFilter = $deleted ? '' : $this->filterDeletedLost();
+		$createdFilter = $this->filterCreated($creation);
+		if($filter === null) {
+			$featureFilter = '';
+		} else {
+			$featureFilter = /** @lang MySQL */ 'AND `Code` IN (
+  SELECT `Code`
+  FROM ProductItemFeatureUnified
+  WHERE Feature = ' . $pdo->quote($filter->name) . ' AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = ' . $pdo->quote($filter->value) . '
+)';
+		}
+
+		$query = "SELECT Code, COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) as Val
+FROM ProductItemFeatureUnified
+WHERE Feature = " . $pdo->quote($feature) . "
+$featureFilter
+$locationFilter
+$deletedFilter
+$createdFilter
+";
+
+		$statement = $this->getPDO()->prepare($query);
+
+		$array = [];
+
+		try {
+			$success = $statement->execute();
+			assert($success, 'count by feature');
+			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+				if(!isset($array[$row['Val']])) {
+					$array[$row['Val']] = [];
+				}
+				$array[$row['Val']][] = new ItemCode($row['Code']);
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $array;
+	}
+
+	/**
 	 * Get all items that have a certain value (exact match) for a feature.
 	 * For anything more complicated use SearchDAO facilities.
 	 *

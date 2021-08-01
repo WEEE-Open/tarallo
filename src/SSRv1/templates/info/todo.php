@@ -1,6 +1,7 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
-/** @var string[][] $todos */
+/** @var \WEEEOpen\Tarallo\ItemCode[][] $todos */
+/** @var \WEEEOpen\Tarallo\ItemCode[][] $checks */
 /** @var array[] $missingSmartOrSurfaceScan */
 /** @var bool|null $included */
 /** @var array[] $toTest */
@@ -21,21 +22,42 @@ foreach($todos as $feature => $items) {
 		$items;
 }
 ksort($todosWithHumanReadableFeatures);
+
+$checksWithHumanReadableFeatures = [];
+foreach($checks as $feature => $items) {
+	$checksWithHumanReadableFeatures[WEEEOpen\Tarallo\SSRv1\FeaturePrinter::printableValue(new \WEEEOpen\Tarallo\Feature('check', $feature))] =
+		$items;
+}
+ksort($checksWithHumanReadableFeatures);
 ?>
 <h2>What's to do?</h2>
 <div class="row">
 <?php foreach($todosWithHumanReadableFeatures as $feature => $items): ?>
     <?php if(count($items) > 0): ?>
 	<div class="stats list col-12 py-2"<?= $divclass ?>>
-        <p<?=$pclass?>><?= $feature ?> <small>(<?= count($items) ?>, max 100 shown)</small></p>
+		<p<?=$pclass?>><span class="fa fa-hourglass-start mr-2 text-info"></span><?= $feature ?> <small>(<?= count($items) ?> items)</small></p>
         <div>
             <?php foreach($items as $item): ?>
-                <a href="/item/<?= $this->e(rawurlencode($item)) ?>"><?= $this->e($item) ?></a>
+                <a href="/item/<?= $this->e(rawurlencode($item)) ?>"><?= $this->e($item->getCode()) ?></a>
             <?php endforeach ?>
         </div>
     </div>
     <?php endif ?>
 <?php endforeach ?>
+</div>
+<div class="row">
+	<?php foreach($checksWithHumanReadableFeatures as $feature => $items): ?>
+		<?php if(count($items) > 0): ?>
+			<div class="stats list col-12 py-2"<?= $divclass ?>>
+				<p<?=$pclass?>><span class="fa fa-exclamation-triangle mr-2 text-warning"></span><?= $feature ?> <small>(<?= count($items) ?> items)</small></p>
+				<div>
+					<?php foreach($items as $item): ?>
+						<a href="/item/<?= $this->e(rawurlencode($item)) ?>"><?= $this->e($item->getCode()) ?></a>
+					<?php endforeach ?>
+				</div>
+			</div>
+		<?php endif ?>
+	<?php endforeach ?>
 </div>
 <div class="row">
 <?php if(!empty($missingSmartOrSurfaceScan)): ?>

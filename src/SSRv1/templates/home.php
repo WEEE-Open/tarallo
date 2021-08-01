@@ -1,6 +1,7 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var string[][] $todos */
+/** @var string[][] $checks */
 /** @var array[] $missingSmartOrSurfaceScan */
 /** @var array[] $toTest */
 $this->layout('main', ['title' => 'Home', 'user' => $user]);
@@ -15,4 +16,4 @@ $this->layout('main', ['title' => 'Home', 'user' => $user]);
 	<li><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>L</kbd> convert to lowercase</li>
 	<li><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Y</kbd> Convert To Title Case</li>
 </ul>
-<?php $this->insert('info::todo', ['todos' => $todos, 'missingSmartOrSurfaceScan' => $missingSmartOrSurfaceScan, 'toTest' => $toTest, 'included' => true]) ?>
+<?php $this->insert('info::todo', ['todos' => $todos, 'checks' => $checks, 'missingSmartOrSurfaceScan' => $missingSmartOrSurfaceScan, 'toTest' => $toTest, 'included' => true]) ?>

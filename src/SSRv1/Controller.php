@@ -385,7 +385,8 @@ class Controller implements RequestHandlerInterface {
 		$location = $location === null ? null : new ItemCode($location);
 
 		$templateParameters = [
-			'todos' => self::getTodos($db),
+			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
+			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(false,
 				['smart-data' => null, 'surface-scan' => null],
@@ -996,26 +997,6 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($json, 200, $responseHeaders);
 	}
 
-	/**
-	 * @param Database $db
-	 *
-	 * @return array
-	 */
-	private static function getTodos(Database $db): array {
-
-		$location = $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null;
-		$location = $location === null ? null : new ItemCode($location);
-
-		$todos = [];
-		$possibileTodos = array_keys(BaseFeature::features['todo']);
-		foreach($possibileTodos as $possibileTodo) {
-			$todos[$possibileTodo] = $db->statsDAO()->getItemsByFeatures(
-				new Feature('todo', $possibileTodo), $location, 100
-			);
-		}
-		return $todos;
-	}
-
 	private static function getToTest(Database $db): array {
 		return [
 			'RAMs' => $db->statsDAO()->getItemByNotFeature(
@@ -1125,7 +1106,8 @@ class Controller implements RequestHandlerInterface {
 		$location = $location === null ? null : new ItemCode($location);
 
 		$templateParameters = [
-			'todos' => self::getTodos($db),
+			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
+			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(false,
 				['smart-data' => null,
