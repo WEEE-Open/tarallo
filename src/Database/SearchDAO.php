@@ -517,12 +517,15 @@ EOQ;
 	public function getProductsLike(string $search, int $limit = 10): array {
 		$search = str_replace(' ', '', $search);
 		$statement = $this->getPDO()
-			->prepare("SELECT DISTINCT Brand, Model, Variant, LENGTH(CONCAT(REPLACE(Brand, ' ', ''),REPLACE(Model, ' ', ''),REPLACE(IF(Variant = :default,'',Variant), ' ', ''))) - :strlen AS Distance FROM Product WHERE CONCAT(REPLACE(Brand, ' ', ''),REPLACE(Model, ' ', ''),REPLACE(IF(Variant = :default2,'',Variant), ' ', '')) LIKE :search ORDER BY Distance LIMIT :limit");
+			// - LENGTH(REPLACE(LOWER(Brand),:brandfilter,'')) + LENGTH(Brand)
+			->prepare("SELECT DISTINCT Brand, Model, Variant, LENGTH(CONCAT(REPLACE(Brand, ' ', ''),REPLACE(Model, ' ', ''),REPLACE(IF(Variant = :default,'',Variant), ' ', ''))) - :strlen + IF(Brand LIKE :search2, LENGTH(Brand), 0) AS Distance FROM Product WHERE CONCAT(REPLACE(Brand, ' ', ''),REPLACE(Model, ' ', ''),REPLACE(IF(Variant = :default2,'',Variant), ' ', '')) LIKE :search ORDER BY Distance LIMIT :limit");
 		try {
 			$statement->bindValue(':default', ProductCode::DEFAULT_VARIANT, \PDO::PARAM_STR);
 			$statement->bindValue(':default2', ProductCode::DEFAULT_VARIANT, \PDO::PARAM_STR);
 			$statement->bindValue(':strlen', strlen($search), \PDO::PARAM_INT);
 			$statement->bindValue(':search', "%$search%", \PDO::PARAM_STR);
+			$statement->bindValue(':search2', "%$search%", \PDO::PARAM_STR);
+//			$statement->bindValue(':brandfilter', $search, \PDO::PARAM_STR);
 			$statement->bindValue(':limit', $limit, \PDO::PARAM_INT);
 			$statement->execute();
 
