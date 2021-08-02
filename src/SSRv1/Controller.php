@@ -628,6 +628,13 @@ class Controller implements RequestHandlerInterface {
 		$name = rawurldecode(Validation::validateHasString($parameters, 'name'));
 		$limit = Validation::validateOptionalInt($query, 'limit', 10);
 
+		$item = $db->itemDAO()->getActualItemCode($name);
+
+		if(isset($item)) {
+			return new RedirectResponse('/item/' . rawurlencode($item->getCode()), 303);
+		}
+
+		$name = trim($name);
 
 		$request = $request->withAttribute('Template', 'searchName');
 		$request = $request->withAttribute(
