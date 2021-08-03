@@ -194,6 +194,8 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('color', 'yellowed'), -- Yellowed --
 	('color', 'transparent-dark'), -- Transparent (dark) --
 	('color', 'golden'), -- Golden --
+	('color', 'copper'), -- Copper --
+	('color', 'weeerde'), -- WEEErde --
 	('motherboard-form-factor', 'atx'), -- ATX --
 	('motherboard-form-factor', 'miniatx'), -- Mini ATX (not standard) --
 	('motherboard-form-factor', 'microatx'), -- Micro ATX --
