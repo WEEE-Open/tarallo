@@ -796,7 +796,7 @@ END;"
 					$this->exec("UPDATE `ItemFeature` SET `ValueEnum`='missing-content' WHERE `Feature`='check' AND `ValueEnum`='partial-inventory'");
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('check', 'wrong-content')");
 					break;
-				case 24:
+				case 25:
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('color', 'copper'), ('color', 'weeerde')");
 					break;
 				default:
