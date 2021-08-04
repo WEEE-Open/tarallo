@@ -231,7 +231,13 @@ label.searchby {
 }
 
 .item > section {
-	padding: 0.6rem;
+	padding-top: 0.6rem;
+	padding-bottom: 0.6rem;
+}
+
+.item > .row {
+	margin-left: 0;
+	margin-right: 0;
 }
 
 .features ul, #searchcontrols {
