@@ -193,9 +193,7 @@ tr.rootitem {
 	border: .1em solid #ccc;
 }
 
-.item h2 {
-	margin: 0;
-	font-size: x-large;
+.item header {
 	background-color: #333;
 	color: #eee;
 	padding: 0.32em;

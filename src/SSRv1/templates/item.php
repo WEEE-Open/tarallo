@@ -136,7 +136,7 @@ $here = rtrim($self, '/') . '/';
 				<i class="fa fa-globe"></i>&nbsp;Details
 			</a>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="/item/<?= $code_rawurlencoded ?>/history">
-				<i class="fa fa-users"></i>&nbsp;History
+				<i class="fa fa-history"></i>&nbsp;History
 			</a>
 			<?php if($showProductButton && $product !== null): ?>
 				<a class="btn btn-outline-primary btn-item col-12 col-sm-8 col-md-10 col-lg-auto" role="button" href="/product/<?=$this->e(rawurlencode($product->getBrand()))?>/<?=$this->e(rawurlencode($product->getModel()))?>/<?=$this->e(rawurlencode($product->getVariant()))?>">

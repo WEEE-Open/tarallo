@@ -31,15 +31,27 @@ $copyQuery = http_build_query([
 
 <article class="container item root <?=$editing ? ' head editing' : ''?>" data-brand="<?=$this->e($product->getBrand())?>" data-model="<?=$this->e($product->getModel())?>" data-variant="<?=$this->e($product->getVariant())?>" data-variant-is-default="<?= (string) (bool) ($product->getVariant() === \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT) ?>">
 	<header class="row">
-		<h2 class="col-12" id="code-<?=$this->e($product->getBrand())?>-<?=$this->e($product->getModel())?>-<?=$this->e($product->getVariant())?>"><?= $brandModel ?><small><?= $maybeVariant ?></small></h2>
+		<h4 class="col-12 col-md mb-0 pl-md-2 pl-0" id="code-<?=$this->e($product->getBrand())?>-<?=$this->e($product->getModel())?>-<?=$this->e($product->getVariant())?>"><?= $brandModel ?><small><?= $maybeVariant ?></small></h4>
+		<nav class="itembuttons">
+		<?php if($editing): ?>
+			<a class="btn btn-outline-secondary btn-sm btn-item disabled" role="button" href="#">
+				<i class="fa fa-pencil-alt"></i>&nbsp;Rename
+			</a>
+		<?php else: ?>
+		<?php $this->insert('manualsButton', ['class' => 'btn btn-outline-secondary btn-sm btn-item', 'product' => $product]) ?>
+		<a class="btn btn-outline-secondary btn-sm btn-item" role="button" href="/product/<?= $bmv_rawurlencoded ?>/history">
+			<i class="fa fa-history"></i>&nbsp;History
+		</a>
+		<?php endif ?>
+		</nav>
 	</header>
 
-	<nav class="itembuttons row mx-md-2 mt-md-2">
+	<nav class="itembuttons row mt-md-2 mt-1">
 		<?php if($editing): ?>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 			</button>
-			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button">
+			<button class="btn btn-success btn-item col-4 col-sm-auto save" role="button">
 				<i class="fa fa-save"></i>&nbsp;Save
 			</button>
 			<button class="btn btn-outline-danger btn-item col-4 col-sm-auto delete" role="button">
@@ -47,29 +59,26 @@ $copyQuery = http_build_query([
 			</button>
 		<?php else: ?>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>edit?from=<?= $this->e(rawurlencode($here)) ?>">
-				<i class="fa fa-cogs"></i>&nbsp;Edit
+				<i class="fa fa-edit"></i>&nbsp;Edit
 			</a>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/product?<?= $this->e($copyQuery) ?>">
-				<i class="fa fa-object-group"></i>&nbsp;Clone
+				<i class="fa fa-clone"></i>&nbsp;Clone
 			</a>
-			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-product" role="button" aria-expanded="false" aria-controls="#collapsible-features-product">
-				<i class="fa fa-globe"></i>&nbsp;Details
-			</a>
+<!--			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-product" role="button" aria-expanded="false" aria-controls="#collapsible-features-product">-->
+<!--				<i class="fa fa-globe"></i>&nbsp;Details-->
+<!--			</a>-->
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/item?<?= $this->e($copyQuery) ?>">
 				<i class="fa fa-cube"></i>&nbsp;Create Item
 			</a>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/product/<?= $bmv_rawurlencoded ?>/items">
 				<i class="fa fa-cubes"></i>&nbsp;Items
 			</a>
-			<?php $this->insert('manualsButton', ['class' => 'btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto', 'product' => $product]) ?>
-			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/product/<?= $bmv_rawurlencoded ?>/history">
-				<i class="fa fa-users"></i>&nbsp;History
-			</a>
 		<?php endif ?>
 	</nav>
 
 	<?php if(count($summary_escaped) > 0 && !$editing): ?>
-		<section class="summary open">
+<!--		<section class="summary open">-->
+		<section class="summary">
 			<span><?= implode('<span class="sep">, </span></span><span>', $summary_escaped) ?></span>
 		</section>
 	<?php endif; ?>
@@ -86,7 +95,8 @@ $copyQuery = http_build_query([
 			<button class="btn btn-primary ml-2">Add</button>
 		</section>
 	<?php else: ?>
-		<section class="features collapse" id="collapsible-features-product">
+<!--		<section class="features collapse" id="collapsible-features-product">-->
+		<section class="features">
 			<?php $this->insert('features', ['features' => $features]) ?>
 		</section>
 	<?php endif ?>
