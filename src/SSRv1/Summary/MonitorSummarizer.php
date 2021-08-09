@@ -30,7 +30,6 @@ class MonitorSummarizer implements Summarizer {
 		$power .= $powerPorts ? " $powerPorts" : '';
 		$power = $power ? ",$power" : '';
 
-		$pretty = $type . $ports . $power . $commercial;
-		return $pretty;
+		return $type . $ports . $power . $commercial;
 	}
 }

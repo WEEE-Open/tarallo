@@ -30,8 +30,6 @@ class PsuSummarizer implements Summarizer {
 		$commercial = $commercial ? ", $commercial" : '';
 
 		// TODO: finish this
-		$pretty = "$type" . "$power" . "$color" . "$commercial";
-
-		return $pretty;
+		return $type . $power . $color . $commercial;
 	}
 }

@@ -28,8 +28,6 @@ class SimplePortsSummarizer implements Summarizer {
 		if($commercial !== '') {
 			$pieces[] = $commercial;
 		}
-		$pretty = implode(', ', $pieces);
-
-		return $pretty;
+		return implode(', ', $pieces);
 	}
 }

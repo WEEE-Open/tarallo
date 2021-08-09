@@ -15,8 +15,6 @@ class CpuSummarizer implements Summarizer {
 		$numCores = $item->getFeature('core-n');
 		$numThreads = $item->getFeature('thread-n');
 		$frequency = $item->getFeature('frequency-hertz');
-		$brand = $item->getFeature('brand');
-		$model = $item->getFeature('model');
 		$socket = $item->getFeature('cpu-socket');
 
 		$architecture = FeaturePrinter::printableValue($type);

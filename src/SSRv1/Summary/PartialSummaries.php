@@ -64,6 +64,7 @@ class PartialSummaries {
 
 	public static function summarizeSockets(ItemWithFeatures $item, bool $compact = false, string $glue = ', '): string {
 		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_sockets);
+		unset($filtered['cpu-socket']);
 		$sequence = self::summarizeSequence($compact, $filtered);
 
 		return implode($glue, $sequence);
@@ -89,7 +90,7 @@ class PartialSummaries {
 			if($feature instanceof Feature
 				&& isset(BaseFeature::groups[$feature->name])
 				&& BaseFeature::groups[$feature->name] === $group) {
-				$filtered[] = $feature;
+				$filtered[$feature->name] = $feature;
 			}
 		}
 		return $filtered;

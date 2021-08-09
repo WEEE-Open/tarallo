@@ -21,9 +21,6 @@ class HddSummarizer implements Summarizer {
 		$dataErased = $item->getFeature('data-erased');
 		$smartData = $item->getFeature('smart-data');
 		$surfaceScan = $item->getFeature('surface-scan');
-		$brand = $item->getFeature('brand');
-		$family = $item->getFeature('family');
-		$model = $item->getFeature('model');
 		$os = $item->getFeature('software');
 
 

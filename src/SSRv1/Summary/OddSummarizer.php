@@ -27,7 +27,6 @@ class OddSummarizer implements Summarizer {
 		$ports = PartialSummaries::summarizePorts($item, true, ' ');
 		$ports = $ports ? ", $ports" : '';
 
-		$pretty = $type . $ports . $color . $commercial;
-		return $pretty;
+		return $type . $ports . $color . $commercial;
 	}
 }

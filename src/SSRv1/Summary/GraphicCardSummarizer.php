@@ -13,7 +13,6 @@ class GraphicCardSummarizer implements Summarizer {
 		$capacity = $item->getFeature('capacity-byte');
 		$color = $item->getFeature('color');
 
-
 		$type = FeaturePrinter::printableValue($type);
 		$socket = PartialSummaries::summarizeSockets($item, true);
 		$type .= $socket ? " $socket" : '';
@@ -27,9 +26,6 @@ class GraphicCardSummarizer implements Summarizer {
 		$commercial = PartialSummaries::summarizeCommercial($item);
 		$commercial = $commercial ? ", $commercial" : '';
 
-
-		$pretty = $type . $ports . $color . $commercial;
-
-		return $pretty;
+		return $type . $ports . $color . $commercial;
 	}
 }
