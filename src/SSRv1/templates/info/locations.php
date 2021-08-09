@@ -2,7 +2,7 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var array $locations */
 
-$this->layout('main', ['title' => 'Locations', 'user' => $user, 'currentPage' => 'info locations']);
+$this->layout('main', ['title' => 'Locations', 'user' => $user, 'currentPage' => 'info locations', 'container' => true]);
 //date_default_timezone_set('Europe/Rome');
 //$first = true;
 ?>

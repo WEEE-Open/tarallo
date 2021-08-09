@@ -4,7 +4,7 @@
 /** @var array[] $movedItems */
 /** @var array[] $updatedItems */
 /** @var array[] $overall */
-$this->layout('main', ['title' => 'Stats: Users', 'user' => $user, 'currentPage' => 'stats']);
+$this->layout('main', ['title' => 'Stats: Users', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
 $this->insert('stats::menu', ['currentPage' => 'users']);
 ?>
 

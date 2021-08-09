@@ -9,7 +9,7 @@ $groups = $this->getGroupedFeatures($this->getUltraFeatures($features));
 if(count($features) > 0): ?>
 	<?php foreach($groups as $groupTitle => $group): ?>
 	<section>
-		<h3><?=$groupTitle?></h3>
+		<h5><?=$groupTitle?></h5>
 		<ul>
 			<?php foreach($group as $feature): /** @var $feature \WEEEOpen\Tarallo\SSRv1\UltraFeature */ ?>
 				<li>

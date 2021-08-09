@@ -71,37 +71,52 @@ $here = rtrim($self, '/') . '/';
 <article class="container item<?=$recursion ? '' : ' root'?><?=$working?><?=$editing && $target ? ' head editing' : ''?><?= $deletedAt === null ? '' : ' deleted' ?>"
 		data-code="<?=$code_escaped?>">
 	<header class="row">
-		<h2 class="col-12" id="code-<?=$code_escaped?>"><?=$code_escaped?></h2>
-		<?php if($deletedAt === null): ?>
-			<?php if($missingProduct): ?>
-				<div class="inline-alert alert-serious" role="alert"><i class="fa fa-tag"></i>&nbsp;This item has no product: <a href="/new/product?split=<?=$code_escaped?>">create it now!</a></div>
+		<h4 class="p-2 col-12 col-md m-0" id="code-<?=$code_escaped?>"><?=$code_escaped?></h4>
+		<nav class="p-2 m-0 itembuttons">
+			<?php if($editing): ?>
+				<a class="btn btn-outline-secondary btn-sm btn-item disabled" role="button" href="#">
+					<i class="fa fa-pencil-alt"></i>&nbsp;Rename
+				</a>
+			<?php else: ?>
+				<button class="btn btn-outline-secondary btn-sm btn-item move" role="button" data-code="<?= $code_escaped ?>">
+					<i class="fa fa-map-pin"></i>&nbsp;Move
+				</button>
+				<a class="btn btn-outline-secondary btn-sm btn-item" role="button" href="/item/<?= $code_rawurlencoded ?>/history">
+					<i class="fa fa-history"></i>&nbsp;History
+				</a>
 			<?php endif ?>
-            <?php if($item->getFeature('restrictions') !== null): ?>
-                <div class="inline-alert alert-info" role="alert"><i class="fa fa-flag-checkered"></i>&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
-                    ($item->getFeature('restrictions'), $lang ?? 'en'))->pvalue; ?></div>
-            <?php endif; ?>
-            <?php if($item->getFeature('check') !== null): ?>
-                <div class="inline-alert alert-warning" role="alert"><i class="fa fa-exclamation-triangle"></i>&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
-                    ($item->getFeature('check'), $lang ?? 'en'))->pvalue; ?></div>
-            <?php endif; ?>
-            <?php if($item->getFeature('todo') !== null): ?>
-				<div class="inline-alert alert-info" role="alert"><i class="fa fa-hourglass-start"></i>&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
-                    ($item->getFeature('todo'), $lang ?? 'en'))->pvalue; ?></div>
-            <?php endif; ?>
-		<?php else: ?>
-			<div class="inline-alert alert-danger" role="alert"><i class="fa fa-trash"></i>&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
-		<?php endif; ?>
-		<?php if($lostAt !== null): ?>
-            <div class="inline-alert alert-serious" role="alert"><i class="fa fa-archive"></i>&nbsp;This item has been lost on <?= $lostAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
-		<?php endif; ?>
+		</nav>
 	</header>
 
-	<nav class="itembuttons row mx-md-2 mt-md-2">
+	<?php if($deletedAt === null): ?>
+		<?php if($missingProduct): ?>
+			<div class="inline-alert w-auto alert-serious" role="alert"><i class="fa fa-tag"></i>&nbsp;This item has no product: <a href="/new/product?split=<?=$code_escaped?>">create it now!</a></div>
+		<?php endif ?>
+		<?php if($item->getFeature('restrictions') !== null): ?>
+			<div class="inline-alert w-auto alert-info" role="alert"><i class="fa fa-flag-checkered"></i>&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
+				($item->getFeature('restrictions'), $lang ?? 'en'))->pvalue; ?></div>
+		<?php endif; ?>
+		<?php if($item->getFeature('check') !== null): ?>
+			<div class="inline-alert w-auto alert-warning" role="alert"><i class="fa fa-exclamation-triangle"></i>&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
+				($item->getFeature('check'), $lang ?? 'en'))->pvalue; ?></div>
+		<?php endif; ?>
+		<?php if($item->getFeature('todo') !== null): ?>
+			<div class="inline-alert w-auto alert-info" role="alert"><i class="fa fa-hourglass-start"></i>&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature
+				($item->getFeature('todo'), $lang ?? 'en'))->pvalue; ?></div>
+		<?php endif; ?>
+	<?php else: ?>
+		<div class="inline-alert w-auto alert-danger" role="alert"><i class="fa fa-trash"></i>&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
+	<?php endif; ?>
+	<?php if($lostAt !== null): ?>
+		<div class="inline-alert w-auto alert-serious" role="alert"><i class="fa fa-archive"></i>&nbsp;This item has been lost on <?= $lostAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
+	<?php endif; ?>
+
+	<nav class="itembuttons row mx-0 mt-2">
 		<?php if($editing && $target): ?>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 			</button>
-			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button">
+			<button class="btn btn-success btn-item col-4 col-sm-auto save" role="button">
 				<i class="fa fa-save"></i>&nbsp;Save
 			</button>
 			<?php if(!$containsMore): ?>
@@ -114,29 +129,23 @@ $here = rtrim($self, '/') . '/';
 			<?php endif ?>
 		<?php elseif(!$adding && !$editing): ?>
 			<?php if($deletedAt === null): ?>
-				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="<?= $here ?>add/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
+				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>edit/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
+					<i class="fa fa-edit"></i>&nbsp;Edit
+				</a>
+				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/item?copy=<?= $code_rawurlencoded ?>">
+					<i class="fa fa-clone"></i>&nbsp;Clone
+				</a>
+				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>add/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
 					<i class="fa fa-plus-circle"></i>&nbsp;Add
 				</a>
-				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="<?= $here ?>edit/<?= $code_rawurlencoded ?>?from=<?= rawurlencode($here) ?>">
-					<i class="fa fa-cogs"></i>&nbsp;Edit
-				</a>
-				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="/new/item?copy=<?= $code_rawurlencoded ?>">
-					<i class="fa fa-object-group"></i>&nbsp;Clone
-				</a>
 				<?php if($product === null && $item->getFeatureValue('brand') !== null && $item->getFeatureValue('model') !== null && $item->getFeatureValue('variant') !== null): ?>
-				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="/new/product?split=<?= $code_rawurlencoded ?>">
+				<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="/new/product?split=<?= $code_rawurlencoded ?>">
 					<i class="fa fa-adjust"></i>&nbsp;Split
 				</a>
 				<?php endif ?>
-				<button class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto move" data-code="<?= $code_escaped ?>" role="button">
-					<i class="fa fa-map-pin"></i>&nbsp;Move
-				</button>
 			<?php endif ?>
-			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" data-toggle="collapse" href="#collapsible-features-<?=$code_escaped?>" role="button" aria-expanded="false" aria-controls="#collapsible-features-<?=$code_escaped?>">
+			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-<?=$code_escaped?>" role="button" aria-expanded="false" aria-controls="#collapsible-features-<?=$code_escaped?>">
 				<i class="fa fa-globe"></i>&nbsp;Details
-			</a>
-			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-2 col-lg-auto" role="button" href="/item/<?= $code_rawurlencoded ?>/history">
-				<i class="fa fa-history"></i>&nbsp;History
 			</a>
 			<?php if($showProductButton && $product !== null): ?>
 				<a class="btn btn-outline-primary btn-item col-12 col-sm-8 col-md-10 col-lg-auto" role="button" href="/product/<?=$this->e(rawurlencode($product->getBrand()))?>/<?=$this->e(rawurlencode($product->getModel()))?>/<?=$this->e(rawurlencode($product->getVariant()))?>">
@@ -147,7 +156,7 @@ $here = rtrim($self, '/') . '/';
 	</nav>
 
 	<?php if(!$editing || !$target): ?>
-        <section class="summary <?=$working?> open">
+        <section class="mx-2 summary <?=$working?> open">
 			<span><?= implode('<span class="sep">, </span></span><span>', $summary_escaped) ?></span>
         </section>
 

@@ -14,7 +14,7 @@ if($original instanceof \WEEEOpen\Tarallo\Product) {
 $whatever = $this->e($whatever);
 
 $this->insert('bulk::menu', ['currentPage' => 'import']);
-$this->layout('main', ['title' => 'Review ' . $superSummary[0], 'user' => $user, 'currentPage' => 'bulk import']);
+$this->layout('main', ['title' => 'Review ' . $superSummary[0], 'user' => $user, 'currentPage' => 'bulk import', 'container' => true]);
 
 
 ?>

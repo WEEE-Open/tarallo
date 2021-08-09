@@ -8,7 +8,7 @@
 /** @var DateTime $startDate */
 /** @var bool $startDateSet */
 /** @var string[] $ready */
-$this->layout('main', ['title' => 'Stats: cases (computers)', 'user' => $user, 'currentPage' => 'stats']);
+$this->layout('main', ['title' => 'Stats: cases (computers)', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
 $this->insert('stats::menu', ['currentPage' => 'cases']);
 date_default_timezone_set('Europe/Rome');
 $this->insert('stats::header', ['location' => $location, 'locationSet' => $locationSet, 'startDate' => $startDate, 'startDateSet' => $startDateSet]);

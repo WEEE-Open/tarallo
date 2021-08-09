@@ -3,7 +3,7 @@
 /** @var array|null $imports */
 $imports = $imports ?? null;
 $this->insert('bulk::menu', ['currentPage' => 'import']);
-$this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage' => 'bulk import']);
+$this->layout('main', ['title' => 'Bulk imports', 'user' => $user, 'currentPage' => 'bulk import', 'container' => true]);
 
 $typize = function($type) {
 	if($type === 'I') {

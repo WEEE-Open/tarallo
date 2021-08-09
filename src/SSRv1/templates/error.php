@@ -4,7 +4,7 @@
 /** @var string $reason optional */
 /** @var string $reasonNoEscape optional and not escaped */
 $reasonPhrase = $this->fetch('reasonPhrase', ['statusCode' => $statusCode]);
-$this->layout('main', ['title' => $statusCode . ' ' . $reasonPhrase]); ?>
+$this->layout('main', ['title' => $statusCode . ' ' . $reasonPhrase, 'container' => true]); ?>
 
 <section id="content">
 	<p class="httperror">

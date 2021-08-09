@@ -4,7 +4,7 @@
 /** @var string|null $newToken */
 /** @var string|null $error */
 /** @var string[] $defaultLocations */
-$this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options']);
+$this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options', 'container' => true]);
 ?>
 <?php $locationNames = [
 	'DefaultRamLocation' => 'Default location for RAM stats',

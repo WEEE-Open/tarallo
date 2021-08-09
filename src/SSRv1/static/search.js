@@ -298,7 +298,7 @@
 		let idFragment = code === null ? '' : '/' + code;
 		let pageFragment = page === null ? '' : '/page/' + page;
 
-		window.location.href = '/search' + idFragment + pageFragment + query + hash;
+		window.location.href = '/search/advanced' + idFragment + pageFragment + query + hash;
 	}
 
 	function createFeatureValueSelector(type, name) {

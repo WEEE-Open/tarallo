@@ -8,6 +8,7 @@ $this->layout(
 		'title' => 'All products by brand',
 		'user' => $user,
 		'currentPage' => 'product list',
+		'container' => true,
 	]
 ); ?>
 

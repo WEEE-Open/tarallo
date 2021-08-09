@@ -5,6 +5,7 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var string $currentPage|null */
 /** @var bool $tooltips */
+/** @var bool $container */
 $currentPage = $currentPage ?? null;
 $moveDefaultFrom = $moveDefaultFrom ?? null;
 $tooltips = $tooltips ?? false;
@@ -51,7 +52,7 @@ $tooltips = $tooltips ?? false;
 	echo $this->fetch('menu', ['moveDefaultFrom' => $moveDefaultFrom, 'currentPage' => $currentPage]);
 } ?>
 
-<section class="container">
+<section class="container <?= isset($container) && $container ? '' : 'p-0'?>">
 	<?=$this->section('content')?>
 </section>
 <?php if($tooltips): ?><script>tippy('[data-tippy-content]')</script><?php endif; ?>

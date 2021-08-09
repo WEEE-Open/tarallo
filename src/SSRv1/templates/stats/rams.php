@@ -11,7 +11,7 @@
 /** @var \WEEEOpen\Tarallo\ItemCode[] $noFrequency */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $noSize */
 /** @var bool $allowDateSelection */
-$this->layout('main', ['title' => 'Stats: RAMs', 'user' => $user, 'currentPage' => 'stats']);
+$this->layout('main', ['title' => 'Stats: RAMs', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
 $this->insert('stats::menu', ['currentPage' => 'rams']);
 $this->insert('stats::header', [
 	'location' => $location,

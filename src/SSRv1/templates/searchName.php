@@ -5,7 +5,7 @@
 /** @var \WEEEOpen\Tarallo\ItemCode|null $item */
 /** @var array $brands */
 /** @var array $products */
-$this->layout('main', ['title' => 'Search ' . $this->e($searchTerm) . ' in names', 'user' => $user, 'currentPage' => 'search name']);
+$this->layout('main', ['title' => 'Search ' . $this->e($searchTerm) . ' in names', 'user' => $user, 'currentPage' => 'search name', 'container' => true]);
 ?>
 <h5>Item <small>(exact match only)</small></h5>
 <?php if(isset($item)): ?>

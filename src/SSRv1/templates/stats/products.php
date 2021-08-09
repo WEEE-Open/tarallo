@@ -2,7 +2,7 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var array $incomplete */
 /** @var int[] $brandsProducts */
-$this->layout('main', ['title' => 'Stats: products', 'user' => $user, 'currentPage' => 'stats', 'tooltips' => true]);
+$this->layout('main', ['title' => 'Stats: products', 'user' => $user, 'currentPage' => 'stats', 'tooltips' => true, 'container' => true]);
 $this->insert('stats::menu', ['currentPage' => 'products']);
 ?>
 

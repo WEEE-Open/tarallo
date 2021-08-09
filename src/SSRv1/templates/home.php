@@ -4,7 +4,7 @@
 /** @var string[][] $checks */
 /** @var array[] $missingSmartOrSurfaceScan */
 /** @var array[] $toTest */
-$this->layout('main', ['title' => 'Home', 'user' => $user]);
+$this->layout('main', ['title' => 'Home', 'user' => $user, 'container' => true]);
 //date_default_timezone_set('Europe/Rome');
 ?>
 

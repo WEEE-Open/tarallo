@@ -13,7 +13,7 @@ if(count($features) > 0):
 
 	foreach($groups as $groupTitle => $group): ?>
 	<section>
-		<h3><?=$groupTitle?></h3>
+		<h5><?=$groupTitle?></h5>
 		<ul>
 			<?php foreach($group as $ultra): /** @var $ultra \WEEEOpen\Tarallo\SSRv1\UltraFeature */
 				$help = $this->printExplanation($ultra);
@@ -22,7 +22,7 @@ if(count($features) > 0):
 					$help = "<i class=\"fa fa-question-circle ml-1\" data-tippy-content=\"$help\"></i>";
 				}
 
-				?><li class="feature-edit-<?= $ultra->name ?> feature-edit">
+				?><li class="feature-edit-<?= $ultra->name ?> feature-edit pr-4">
 					<div class="name"><label for="feature-el-<?= $ultra->name ?>"><?=$ultra->pname?><?=$help?></label></div>
 					<?php switch($ultra->type): case WEEEOpen\Tarallo\BaseFeature::ENUM: ?>
 						<select class="value" autocomplete="off" data-internal-name="<?= $ultra->name ?>" data-internal-type="e" data-initial-value="<?= $this->e($ultra->value, 'asTextContent')?>" id="feature-el-<?= $ultra->name ?>">
@@ -47,7 +47,7 @@ if(count($features) > 0):
 	endforeach;
 endif;
 ?>
-<section class="newfeatures">
-	<h3>New features</h3>
+<section class="newfeatures pr-4">
+	<h5>New features</h5>
 	<ul></ul>
 </section>

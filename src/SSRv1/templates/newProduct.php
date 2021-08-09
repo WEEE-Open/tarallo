@@ -35,7 +35,7 @@ $isClone = !isset($baseItem) && $base instanceof \WEEEOpen\Tarallo\Product && !i
 		<?php endif; ?>
 	</header>
 
-	<nav class="itembuttons row mx-2 mt-2 justify-content-end">
+	<nav class="itembuttons row mx-0 mt-2 justify-content-end">
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 			<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 		</button>
@@ -58,7 +58,7 @@ $isClone = !isset($baseItem) && $base instanceof \WEEEOpen\Tarallo\Product && !i
 		<button class="btn btn-primary ml-2">Add</button>
 	</section>
 
-	<nav class="itembuttons secondary row mx-2 mt-2 justify-content-end">
+	<nav class="itembuttons secondary row mx-0 mt-2 justify-content-end">
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto removeemptyfeatures" title="Remove empty features" role="button">
 			<i class="fa fa-eraser"></i>&nbsp;Clean
 		</button>

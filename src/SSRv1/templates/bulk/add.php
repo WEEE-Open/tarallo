@@ -4,7 +4,7 @@
 /** @var string|null $error */
 $item = $item ?? null;
 $this->insert('bulk::menu', ['currentPage' => 'add']);
-$this->layout('main', ['title' => 'Bulk add', 'user' => $user, 'currentPage' => 'bulk add']);
+$this->layout('main', ['title' => 'Bulk add', 'user' => $user, 'currentPage' => 'bulk add', 'container' => true]);
 ?>
 
 <div class="row">

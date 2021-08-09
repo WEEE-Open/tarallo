@@ -7,7 +7,7 @@
 /** @var array[] $toTest */
 
 if(!isset($included) || !$included) {
-	$this->layout('main', ['title' => 'TODO', 'user' => $user, 'currentPage' => 'info todo']);
+	$this->layout('main', ['title' => 'TODO', 'user' => $user, 'currentPage' => 'info todo', 'container' => true]);
 }
 $pclass = '';
 $divclass = '';

@@ -5,7 +5,7 @@
 /** @var array[] $failedSmartOrSurfaceScan */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $missingData */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $lost */
-$this->layout('main', ['title' => 'Stats: items that need attention', 'user' => $user, 'currentPage' => 'stats']);
+$this->layout('main', ['title' => 'Stats: items that need attention', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
 $this->insert('stats::menu', ['currentPage' => 'attention']);
 ?>
 

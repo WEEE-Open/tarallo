@@ -72,10 +72,6 @@
 
 }
 
-.breadbox {
-	margin: .5em .5em 0 .5em;
-}
-
 ul.breadcrumbs {
 	margin: 0;
 	padding: 0;
@@ -177,27 +173,26 @@ tr.rootitem {
 	background: #eee;
 }
 
-#content > :not(.breadbox), .item {
-	margin: .5em;
-}
-
 .item + .item {
 	margin-top: 2em;
-}
-
-.breadbox + .item {
-	margin-top: 0 !important;
 }
 
 .item:not(.root) {
 	border: .1em solid #ccc;
 }
 
+.item > header, .item > .inline-alert, .item > .itembuttons {
+	margin-left: -15px;
+	margin-right: -15px;
+}
+
 .item header {
 	background-color: #333;
 	color: #eee;
-	padding: 0.32em;
-	/* Secret vaporwave mode => background: linear-gradient(to bottom, rgba(255,113,205,1) 0%, rgba(1,203,254,1) 100%);*/
+}
+
+.vaporwave .item header, .vaporwave .navbar {
+	background: linear-gradient(to bottom, rgba(255,113,205,1) 0%, rgba(1,203,254,1) 100%);
 }
 
 .item .identity {
@@ -218,8 +213,8 @@ tr.rootitem {
 	padding: 0.5rem;
 }
 
-.features section h3 {
-	margin: 0.5rem;
+.features section h5 {
+	margin: 0.5rem 0;
 	font-size: 100%;
 	font-weight: bold;
 	color: #333;
@@ -233,11 +228,6 @@ label.searchby {
 .item > section {
 	padding-top: 0.6rem;
 	padding-bottom: 0.6rem;
-}
-
-.item > .row {
-	margin-left: 0;
-	margin-right: 0;
 }
 
 .features ul, #searchcontrols {
@@ -303,10 +293,6 @@ label.searchby {
 
 .features:not(.editing) ul > li > .value {
 	grid-column: -3 / span 2;
-}
-
-.features ul > li > .name > *, .features ul > li > .value > div {
-	padding: .5rem;
 }
 
 .features ul > li > .name > * {
@@ -478,6 +464,10 @@ form.nice textarea {
 
 	#searchcontrols .features ul > li > .value {
 		grid-column: -3;
+	}
+
+	.features ul > li > .name > *, .features ul > li > .value > div {
+		padding: .5rem;
 	}
 }
 

@@ -4,7 +4,7 @@
 /** @var string|null $error */
 /** @var array|null $moved */
 $this->layout('main', ['title' => 'Bulk operations', 'user' => $user, 'currentPage' => 'bulk move']);
-$this->insert('bulk::menu', ['currentPage' => 'move']);
+$this->insert('bulk::menu', ['currentPage' => 'move', 'container' => true]);
 ?>
 
 <div class="row">

@@ -10,7 +10,7 @@
 /** @var array[] $formAndRotation */
 /** @var int[] $surfaceScan */
 /** @var bool $startDateSet */
-$this->layout('main', ['title' => 'Stats: HDDs', 'user' => $user, 'currentPage' => 'stats']);
+$this->layout('main', ['title' => 'Stats: HDDs', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
 $this->insert('stats::menu', ['currentPage' => 'hdds']);
 $this->insert('stats::header', ['location' => $location, 'locationSet' => $locationSet, 'allowDateSelection' => false]);
 

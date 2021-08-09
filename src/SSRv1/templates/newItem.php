@@ -43,12 +43,12 @@ $isClone = isset($base) && $base->hasCode();
 		<?php endif; ?>
 	</header>
 
-	<nav class="itembuttons row mx-2 mt-2 justify-content-end">
+	<nav class="itembuttons row mx-0 mt-2 justify-content-end">
 		<?php if(!$innerrecursion): ?>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 			</button>
-			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button"
+			<button class="btn btn-success btn-item col-4 col-sm-auto save" role="button"
 					<?= isset($importedFrom) ? 'data-importId="' . (int) $importedFrom . '"' : '' ?>>
 				<i class="fa fa-save"></i>&nbsp;Save
 			</button>
@@ -57,9 +57,9 @@ $isClone = isset($base) && $base->hasCode();
 				<i class="fa fa-trash"></i>&nbsp;Delete
 			</button>
 		<?php endif ?>
-		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto addnew" role="button">
-			<i class="fa fa-plus-circle"></i>&nbsp;More
-		</button>
+<!--		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto addnew" role="button">-->
+<!--			<i class="fa fa-plus-circle"></i>&nbsp;More-->
+<!--		</button>-->
 	</nav>
 
 	<?php if(!$innerrecursion && !$recursion): ?>
@@ -90,7 +90,7 @@ $isClone = isset($base) && $base->hasCode();
 		<button class="btn btn-primary ml-2">Add</button>
 	</section>
 
-	<nav class="itembuttons secondary row mx-2 mt-2 justify-content-end">
+	<nav class="itembuttons secondary row mx-0 mt-2 justify-content-end">
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto removeemptyfeatures" title="Remove empty features" role="button">
 			<i class="fa fa-eraser"></i>&nbsp;Clean
 		</button>

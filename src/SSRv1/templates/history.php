@@ -11,20 +11,22 @@ $code_escaped = $this->e($item->getCode());
 ?>
 
 <?php $this->insert('breadcrumbs', ['item' => $item]); ?>
-<article class="item root<?= $deletedAt === null ? '' : ' deleted' ?>"
+<article class="container item root<?= $deletedAt === null ? '' : ' deleted' ?>"
 		data-code="<?=$code_escaped?>">
-	<header>
-		<h2 id="code-<?=$code_escaped?>"><?=$code_escaped?></h2>
-		<?php if($deletedAt !== null): ?>
-            <div class="inline-alert alert-danger" role="alert"><i class="fa fa-trash"></i>&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
-		<?php endif; ?>
+	<header class="row">
+		<h4 class="p-2 col-12 col-md m-0" id="code-<?=$code_escaped?>"><?=$code_escaped?></h4>
+		<nav class="p-2 m-0 itembuttons">
+			<a class="btn btn-outline-secondary btn-sm btn-item" role="button" href="/item/<?= $code_rawurlencoded ?>">
+				<i class="fa fa-search"></i>&nbsp;View
+			</a>
+		</nav>
 	</header>
+	<?php if($deletedAt !== null): ?>
+		<div class="inline-alert w-auto alert-danger" role="alert"><i class="fa fa-trash"></i>&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
+	<?php endif; ?>
 
-	<nav class="itembuttons row mx-2 mt-2 justify-content-end">
-		<a class="btn btn-outline-primary btn-item col-sm-auto" role="button" href="/item/<?= $code_rawurlencoded ?>">
-			<i class="fa fa-search"></i>&nbsp;View
-		</a>
-	</nav>
+<!--	<nav class="itembuttons row mx-0 mt-2 justify-content-end">-->
+<!--	</nav>-->
 
 	<section class="history row">
 		<div class="col-12">

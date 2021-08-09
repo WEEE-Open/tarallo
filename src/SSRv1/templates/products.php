@@ -18,6 +18,7 @@ $this->layout(
 		'title' => $title,
 		'user' => $user,
 		'currentPage' => 'product list',
+		'container' => true,
 	]
 );
 
