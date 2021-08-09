@@ -195,22 +195,8 @@ tr.rootitem {
 	background: linear-gradient(to bottom, rgba(255,113,205,1) 0%, rgba(1,203,254,1) 100%);
 }
 
-.item .identity {
-	margin: 0;
-	font-size: 1.2rem;
-	background-color: #333;
-	color: #eee;
-	padding-top: 0.5rem;
-	padding-bottom: 0.5rem;
-}
-
-.deleted.item h2, .deleted.item .features {
+.deleted.item h4, .deleted.item .features {
 	text-decoration: line-through;
-}
-
-.new.item h2 {
-	font-size: large;
-	padding: 0.5rem;
 }
 
 .features section h5 {

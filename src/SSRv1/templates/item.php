@@ -78,9 +78,11 @@ $here = rtrim($self, '/') . '/';
 					<i class="fa fa-pencil-alt"></i>&nbsp;Rename
 				</a>
 			<?php else: ?>
+				<?php if($deletedAt === null): ?>
 				<button class="btn btn-outline-secondary btn-sm btn-item move" role="button" data-code="<?= $code_escaped ?>">
 					<i class="fa fa-map-pin"></i>&nbsp;Move
 				</button>
+				<?php endif ?>
 				<a class="btn btn-outline-secondary btn-sm btn-item" role="button" href="/item/<?= $code_rawurlencoded ?>/history">
 					<i class="fa fa-history"></i>&nbsp;History
 				</a>
@@ -156,7 +158,7 @@ $here = rtrim($self, '/') . '/';
 	</nav>
 
 	<?php if(!$editing || !$target): ?>
-        <section class="mx-2 summary <?=$working?> open">
+        <section class="summary <?=$working?> open">
 			<span><?= implode('<span class="sep">, </span></span><span>', $summary_escaped) ?></span>
         </section>
 
