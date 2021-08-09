@@ -27,7 +27,7 @@ class MotherboardSummarizerTest extends TestCase {
 
 		$summary = MotherboardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop, mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, Compaq D845GVFT',
+			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, Compaq D845GVFT',
 			$summary
 		);
 
@@ -71,7 +71,7 @@ class MotherboardSummarizerTest extends TestCase {
 
 		$summary = MotherboardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop, mPGA478B), 1× PCI 3× PCI Express, Red, Compaq D845GVFT',
+			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, Red, Compaq D845GVFT',
 			$summary
 		);
 
@@ -95,7 +95,7 @@ class MotherboardSummarizerTest extends TestCase {
 
 		$summary = MotherboardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop, mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Compaq D845GVFT',
+			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Compaq D845GVFT',
 			$summary
 		);
 
@@ -117,7 +117,7 @@ class MotherboardSummarizerTest extends TestCase {
 
 		$summary = MotherboardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop, mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA',
+			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA',
 			$summary
 		);
 
@@ -141,7 +141,7 @@ class MotherboardSummarizerTest extends TestCase {
 
 		$summary = MotherboardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Motherboard Socket 478 (desktop, mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, Compaq D845GVFT',
+			'Motherboard Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, Compaq D845GVFT',
 			$summary
 		);
 
@@ -165,7 +165,7 @@ class MotherboardSummarizerTest extends TestCase {
 
 		$summary = MotherboardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop, mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, D845GVFT',
+			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, D845GVFT',
 			$summary
 		);
 
@@ -189,7 +189,7 @@ class MotherboardSummarizerTest extends TestCase {
 
 		$summary = MotherboardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop, mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, Compaq',
+			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, Compaq',
 			$summary
 		);
 
@@ -212,7 +212,7 @@ class MotherboardSummarizerTest extends TestCase {
 
 		$summary = MotherboardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop, mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red',
+			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red',
 			$summary
 		);
 
@@ -231,7 +231,7 @@ class MotherboardSummarizerTest extends TestCase {
 
 		$summary = MotherboardSummarizer::summarize($item);
 		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop, mPGA478B), 1× PCI 3× PCI Express',
+			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express',
 			$summary
 		);
 

@@ -237,7 +237,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('cpu-socket', 'socket370'), -- 370 --
 	('cpu-socket', 'socket462a'), -- 462 (Socket A) -- A aka 462
 	('cpu-socket', 'socket423'), -- 423 --
-	('cpu-socket', 'socket478'), -- 478 (desktop, mPGA478B) --
+	('cpu-socket', 'socket478'), -- 478 (desktop mPGA478B) --
 	-- There are 3 sockets with multiple names and each one is also called socket 479. And they have 478 pins. Mechanically identical, electrically incompatible.
 	('cpu-socket', 'socket479a'), -- 479 (mobile mPGA478A) --
 	('cpu-socket', 'socket479c'), -- 479 (mobile mPGA478C) --
