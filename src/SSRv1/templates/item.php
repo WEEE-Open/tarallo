@@ -71,8 +71,8 @@ $here = rtrim($self, '/') . '/';
 <article class="container item<?=$recursion ? '' : ' root'?><?=$working?><?=$editing && $target ? ' head editing' : ''?><?= $deletedAt === null ? '' : ' deleted' ?>"
 		data-code="<?=$code_escaped?>">
 	<header class="row">
-		<h4 class="p-2 col-12 col-md m-0" id="code-<?=$code_escaped?>"><?=$code_escaped?></h4>
-		<nav class="p-2 m-0 itembuttons">
+		<h4 class="p-2 col m-0" id="code-<?=$code_escaped?>"><?=$code_escaped?></h4>
+		<nav class="p-2 m-0 ml-auto itembuttons">
 			<?php if($editing): ?>
 				<a class="btn btn-outline-secondary btn-sm btn-item disabled" role="button" href="#">
 					<i class="fa fa-pencil-alt"></i>&nbsp;Rename

@@ -29,8 +29,8 @@ $isClone = isset($base) && $base->hasCode();
 
 <article class="container item new editing <?=$recursion ? '' : 'root'?> <?=$innerrecursion ? '' : 'head'?> <?= $isClone ? 'clone' : '' ?>">
 	<header class="row">
-		<div class="col-12 row identity">
-			<div class="col-12 form-inline">
+		<div class="p-2 col m-0 row identity">
+			<div class="form-inline">
 				<label>Code:<input class="newcode form-control ml-sm-2" placeholder="Automatically generated"></label>
 			</div>
 		</div>
