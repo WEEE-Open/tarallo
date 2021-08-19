@@ -1,11 +1,14 @@
 <?php
 
+namespace WEEEOpen\TaralloTest;
+
 use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\FeatureValidationException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemNestingException;
 use WEEEOpen\Tarallo\ItemValidator;
+use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ValidationException;
 
 /**
@@ -14,6 +17,12 @@ use WEEEOpen\Tarallo\ValidationException;
 class ItemValidatorTest extends TestCase {
 	private static function item(string $code, string $type): Item {
 		$item = new Item($code);
+		$item->addFeature(new Feature('type', $type));
+		return $item;
+	}
+
+	private static function product(string $b, string $m, string $v, string $type): Product {
+		$item = new Product($b, $m, $v);
 		$item->addFeature(new Feature('type', $type));
 		return $item;
 	}
@@ -190,6 +199,22 @@ class ItemValidatorTest extends TestCase {
 			$this->assertEquals('PC42', $e->getItem());
 			$this->assertEquals('psu-volt', $e->getFeature());
 			$this->assertEquals(19.0, $e->getFeatureValue());
+			throw $e;
+		}
+	}
+
+	public function testInvalidFeatureVProduct() {
+		$pc = self::product('Dill', 'Magneticplex 960', 'SFF', 'case');
+		$pc->addFeature(new Feature('motherboard-form-factor', 'atx'));
+		$pc->addFeature(new Feature('psu-volt', 220.0));
+
+		$this->expectException(FeatureValidationException::class);
+		try {
+			ItemValidator::validateFeatures($pc);
+		} catch(FeatureValidationException $e) {
+			$this->assertEquals(null, $e->getItem());
+			$this->assertEquals('psu-volt', $e->getFeature());
+			$this->assertEquals(220.0, $e->getFeatureValue());
 			throw $e;
 		}
 	}
