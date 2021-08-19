@@ -605,25 +605,25 @@ class ItemValidator {
 			case 'proprietary-laptop':
 				// It's a laptop, reject features that make sense only in desktops.
 				if($case->getFeatureValue('usb-ports-n') !== null) {
-					throw new FeatureValidationException('usb-ports-n', $case->getFeatureValue('usb-ports-n'), null, $case->peekCode(), 'A laptop does not have USB ports on the case, but on the motherboard only. Remove the "USB ports" feature from the case or change the motherboard form factor.');
+					throw new FeatureValidationException('usb-ports-n', $case->getFeatureValue('usb-ports-n'), null, null, 'A laptop does not have USB ports on the case, but on the motherboard only. Remove the "USB ports" feature from the case or change the motherboard form factor.');
 				}
 				if($case->getFeatureValue('psu-form-factor') !== null) {
 					if($case->getFeatureValue('psu-form-factor') !== 'proprietary') {
 						// Well, it may contain a power supply, if it's something really old... but it won't be standard anyway.
-						throw new FeatureValidationException('psu-form-factor', $case->getFeatureValue('psu-form-factor'), null, $case->peekCode(), 'A laptop does not have a standard internal PSU. Remove the "PSU form factor" feature from the case or change the motherboard form factor.');
+						throw new FeatureValidationException('psu-form-factor', $case->getFeatureValue('psu-form-factor'), null, null, 'A laptop does not have a standard internal PSU. Remove the "PSU form factor" feature from the case or change the motherboard form factor.');
 					}
 				}
 				break;
 			default:
 				// It's a desktop, reject features that make sense only in laptops
 				if($case->getFeatureValue('power-connector') !== null) {
-					throw new FeatureValidationException('power-connector', $case->getFeatureValue('power-connector'), null, $case->peekCode(), 'A desktop computer case does not have any power connector. Remove that feature or change the motherboard form factor.');
+					throw new FeatureValidationException('power-connector', $case->getFeatureValue('power-connector'), null, null, 'A desktop computer case does not have any power connector. Remove that feature or change the motherboard form factor.');
 				}
 				if($case->getFeatureValue('psu-volt') !== null) {
-					throw new FeatureValidationException('psu-volt', $case->getFeatureValue('psu-volt'), null, $case->peekCode(), 'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply voltage" feature or change the motherboard form factor.');
+					throw new FeatureValidationException('psu-volt', $case->getFeatureValue('psu-volt'), null, null, 'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply voltage" feature or change the motherboard form factor.');
 				}
 				if($case->getFeatureValue('psu-ampere') !== null) {
-					throw new FeatureValidationException('psu-ampere', $case->getFeatureValue('psu-ampere'), null, $case->peekCode(), 'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply current" feature or change the motherboard form factor.');
+					throw new FeatureValidationException('psu-ampere', $case->getFeatureValue('psu-ampere'), null, null, 'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply current" feature or change the motherboard form factor.');
 				}
 				break;
 			case null:
