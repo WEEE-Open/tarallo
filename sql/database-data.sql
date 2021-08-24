@@ -366,7 +366,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('restrictions', 'ready'), -- Ready -- Completely "restored", cleaned, OS installed, ready for donation, so don't mess them up
 	('restrictions', 'other'), -- Other (cannot be donated) -- "other" also means "cannot be donated right now"
 	('pci-low-profile', 'no'), -- No --
-	('pci-low-profile', 'possibile'), -- Possible (no bracket) -- no low profile metal thing but the card itself is low profile
+	('pci-low-profile', 'possibile'), -- Possible but no bracket -- no low profile metal thing but the card itself is low profile
 	('pci-low-profile', 'dual'), -- Yes (both brackets) -- we've got both the full height and low profile thing
 	('pci-low-profile', 'yes'), -- Yes (low profile only) --
 	('psu-connector-cpu', 'none'), -- None --

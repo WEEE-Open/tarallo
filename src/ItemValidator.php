@@ -430,7 +430,7 @@ class ItemValidator {
 					'integrated-graphics-brand', 'integrated-graphics-model',
 					'capacity-byte', 'vga-ports-n', 'dvi-ports-n',
 					'dms-59-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'composite-video-ports-n',
-					'agp-sockets-n', 'pcie-sockets-n', 'pcie-power-pin-n','color'
+					'agp-sockets-n', 'pcie-sockets-n', 'pcie-power-pin-n', 'pci-low-profile', 'color'
 				];
 			case 'psu':
 				return [
@@ -446,31 +446,29 @@ class ItemValidator {
 				return [
 					'pcie-sockets-n', 'pci-sockets-n', 'ethernet-ports-1000m-n',
 					'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n',
-					'ethernet-ports-10base5-aui-n'
+					'ethernet-ports-10base5-aui-n', 'pci-low-profile'
 				];
 			case 'audio-card':
 				return [
-					'mini-jack-ports-n', 'pcie-sockets-n', 'pci-sockets-n', 'color',
+					'mini-jack-ports-n', 'pcie-sockets-n', 'pci-sockets-n','pci-low-profile', 'color',
 				];
-				break;
 			case 'modem-card':
 				return [
-					'rj11-ports-n', 'pcie-sockets-n', 'pci-sockets-n', 'color',
+					'rj11-ports-n', 'pcie-sockets-n', 'pci-sockets-n','pci-low-profile', 'color',
 				];
-				break;
 			case 'other-card':
 			case 'tv-card':
-				return ['pcie-sockets-n', 'pci-sockets-n', 'color'];
+				return ['pcie-sockets-n', 'pci-sockets-n','pci-low-profile', 'color'];
 			case 'storage-card':
 				return ['sata-ports-n', 'ide-ports-n', 'scsi-sca2-ports-n',
 					'scsi-db68-ports-n', 'pcie-sockets-n', 'sas-sff-8087-ports-n', 'sas-sff-8088-ports-n',
-					'sas-sata-ports-n', 'pci-sockets-n', 'color'
+					'sas-sata-ports-n', 'pci-sockets-n', 'pci-low-profile', 'color'
 				];
 			case 'bluetooth-card':
 			case 'wifi-card':
 				return [
 					'pcie-sockets-n', 'pci-sockets-n', 'mini-pcie-sockets-n',
-					'mini-pci-sockets-n', 'color'
+					'mini-pci-sockets-n', 'pci-low-profile', 'color'
 				];
 			case 'network-switch':
 			case 'network-hub':
@@ -482,7 +480,7 @@ class ItemValidator {
 				];
 			case 'keyboard':
 			case 'mouse':
-				return ['brand-manufacturer', 'ps2-ports-n', 'usb-ports-n', 'color'];
+				return ['brand-manufacturer', 'ps2-ports-n', 'usb-ports-n', 'wireless-receiver', 'color'];
 			case 'monitor':
 				return [
 					'diagonal-inch', 'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n',
@@ -515,24 +513,29 @@ class ItemValidator {
 				return [
 					'brand', 'model', 'working', 'owner'
 				];
+			case 'keyboard':
+			case 'mouse':
+				return [
+					'brand', 'model', 'wireless-receiver', 'working', 'sn', 'owner'
+				];
+			case 'graphics-card':
+			case 'audio-card':
+			case 'modem-card':
+			case 'other-card':
+			case 'tv-card':
+			case 'storage-card':
+				return [
+					'brand', 'model', 'pci-low-profile', 'working', 'sn', 'owner',
+				];
 			default: // Includes all these cases
-//			case 'cpu':
 //			case 'ram':
 //			case 'odd':
 //			case 'fdd':
-//			case 'graphics-card':
 //			case 'psu':
 //			case 'external-psu':
-//			case 'audio-card':
-//			case 'modem-card':
-//			case 'other-card':
-//			case 'tv-card':
-//			case 'storage-card':
 //			case 'network-switch':
 //			case 'network-hub':
-//			case 'keyboard':
-//			case 'mouse':
-				return [
+			return [
 					'brand', 'model', 'working', 'sn', 'owner'
 				];
 			case 'motherboard':

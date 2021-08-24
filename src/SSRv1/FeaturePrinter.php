@@ -151,7 +151,7 @@ class FeaturePrinter {
 		'psu-form-factor' => ['atx' => 'ATX', 'cfx' => 'CFX', 'lfx' => 'LFX', 'sfx-lowprofile' => 'SFX Low Profile', 'sfx-topfan' => 'SFX Topfan', 'sfx-topfan-reduceddepth' => 'SFX Topfan reduced depth', 'sfx' => 'SFX', 'sfx-ps3' => 'SFX PS3', 'sfx-l' => 'SFX-L', 'tfx' => 'TFX', 'flexatx' => 'Flex ATX', 'proprietary' => 'Proprietary', 'eps' => 'EPS'],
 		'psu-rails-most-power' => ['12v' => '12 V (modern)', '5v' => '5 V (old)', 'balanced' => 'Equal balance between 5 and 12 V'],
 		'restrictions' => ['loan' => 'Loaned (to be returned)', 'in-use' => 'In use', 'bought' => 'Bought', 'showcase' => 'Showcase/events', 'ready' => 'Ready', 'other' => 'Other (cannot be donated)'],
-		'pci-low-profile' => ['no' => 'No', 'possibile' => 'Possible (no bracket)', 'dual' => 'Yes (both brackets)', 'yes' => 'Yes (low profile only)'],
+		'pci-low-profile' => ['no' => 'No', 'possibile' => 'Possible but no bracket', 'dual' => 'Yes (both brackets)', 'yes' => 'Yes (low profile only)'],
 		'psu-connector-cpu' => ['none' => 'None', '4pin' => '4 pin', '6pin-hp' => '6 pin (HP, 1 purple + 1 blue)', '6pin-hp-brown' => '6 pin (HP, 2 brown)', '6pin' => '6 pin (other)', '8pin' => '8 pin', '8pin4pin' => '8 pin + 4 pin', '8pin8pin' => '8 pin + 8 pin', 'proprietary' => 'Proprietary'],
 	];
 	// END GENERATED CODE
@@ -177,6 +177,7 @@ class FeaturePrinter {
 		'data-erased' => 'Not erased yet? Do not set this feature at all!',
 		'surface-scan' => 'Not tested yet? Do not set this feature at all!',
 		'smart-data' => 'Not checked yet? Do not set this feature at all!',
+		'wireless-receiver' => 'If it\'s not wireless, remove this feature',
 		'cib-old' => 'CIB with a department name, usually with blue border',
 		'cib' => 'Border is often faded and appears orange',
 		'owner' => 'Department or area, not a person',
