@@ -39,7 +39,7 @@ $isClone = !isset($baseItem) && $base instanceof \WEEEOpen\Tarallo\Product && !i
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 			<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 		</button>
-		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto save" role="button"
+		<button class="btn btn-success btn-item col-4 col-sm-auto save" role="button"
 			<?= isset($importedFrom) ? 'data-importId="' . (int) $importedFrom . '"' : '' ?>>
 			<i class="fa fa-save"></i>&nbsp;Save
 		</button>
