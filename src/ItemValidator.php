@@ -15,9 +15,7 @@ class ItemValidator {
 	 * @return ItemWithFeatures|null Correct location (or the given one if unchanged, or null if null was given)
 	 */
 	public static function fixupLocation(ItemWithFeatures $item, ?ItemWithFeatures $parent): ?ItemWithFeatures {
-		$parent = self::reparentAll($item, $parent);
-
-		return $parent;
+		return self::reparentAll($item, $parent);
 	}
 
 	/**
@@ -141,25 +139,6 @@ class ItemValidator {
 	}
 
 	/**
-	 * @param ItemWithFeatures[]|ItemIncomplete[] $items
-	 *
-	 * @return ItemWithFeatures|ItemIncomplete
-	 */
-	public static function treeify(array $items) {
-		$case = self::findByType($items, 'case', true);
-		if($case === null) {
-			throw new ValidationException(null, null, 'Cannot find case in items');
-		}
-		foreach($items as $item) {
-			$case->addContent($item);
-		}
-
-		self::fixupLocation($case, null);
-		self::fixupFeatures($case, true, true);
-		return $case;
-	}
-
-	/**
 	 * Check that item features make sense
 	 *
 	 * @param ItemWithFeatures $item Item to be checked
@@ -189,7 +168,7 @@ class ItemValidator {
 	 * Check that item nesting makes sense (e.g. no CPUs inside HDDs)
 	 *
 	 * @param ItemWithFeatures $item Item to be checked
-	 * @param ItemWithFeatures $parent Its parent, or none if a root item
+	 * @param ItemWithFeatures|null $parent Its parent, or none if a root item
 	 *
 	 * @throws ItemNestingException if items are invalidly nested
 	 * @throws ValidationException if item cannot be a root item and has a null parent
@@ -302,7 +281,8 @@ class ItemValidator {
 	public static function checkRoot(ItemWithFeatures $item) {
 		$type = $item->getFeatureValue('type');
 		if($type !== null && $type !== 'location') {
-			throw new ValidationException($item->peekCode(), null, 'Set a location for this item or mark it as a location itself, this type cannot be a root item');
+			$code = $item instanceof ItemWithCode ? $item->peekCode() : null;
+			throw new ValidationException($code, null, 'Set a location for this item or mark it as a location itself, this type cannot be a root item');
 		}
 	}
 
@@ -310,7 +290,7 @@ class ItemValidator {
 		return $type === 'cpu' || $type === 'ram' || self::isExpansionCard($type);
 	}
 
-	private static function isExpansionCard(string $type) {
+	private static function isExpansionCard(string $type): bool {
 		return strlen($type) > 5 && substr($type, -5) === '-card';
 	}
 
@@ -324,7 +304,7 @@ class ItemValidator {
 	 *
 	 * @return bool If the feature is the same or one of them is null
 	 */
-	private static function compareFeature(ItemWithFeatures $item, ItemWithFeatures $container, string $feature) {
+	private static function compareFeature(ItemWithFeatures $item, ItemWithFeatures $container, string $feature): bool {
 		$itemFeature = $item->getFeatureValue($feature);
 		$parentFeature = $container->getFeatureValue($feature);
 
@@ -343,9 +323,9 @@ class ItemValidator {
 	 * @param string $type
 	 * @param bool $remove Remove item from array
 	 *
-	 * @return Item|null Item, or null if not found
+	 * @return ItemWithFeatures|null Item, or null if not found
 	 */
-	private static function findByType(array &$items, string $type, bool $remove = false) {
+	private static function findByType(array &$items, string $type, bool $remove = false): ?ItemWithFeatures {
 		foreach($items as $k => $maybe) {
 			if($maybe->getFeatureValue('type') === $type) {
 				if($remove) {
@@ -355,25 +335,6 @@ class ItemValidator {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Find items by type inside another one, e.g. RAMs inside a motherboard.
-	 * Search is only one level deep.
-	 *
-	 * @param ItemWithFeatures[] $items
-	 * @param string $type
-	 *
-	 * @return Item[] Item, or empty array if not found
-	 */
-	private static function findAllByType(array &$items, string $type): array {
-		$found = [];
-		foreach($items as $maybe) {
-			if($maybe->getFeatureValue('type') === $type) {
-				$found[] = $maybe;
-			}
-		}
-		return $found;
 	}
 
 	/**
@@ -591,17 +552,6 @@ class ItemValidator {
 //	private static function fixFeatures(ItemWithFeatures $item) {
 //	}
 
-	public static function fillWithDefaults(ItemIncomplete $item): ItemIncomplete {
-		$type = $item->getFeatureValue('type');
-		if($type === null) {
-			return $item;
-		}
-		foreach(self::getItemDefaultFeatures($type) as $feature) {
-			$item->addFeature(new BaseFeature($feature));
-		}
-		return $item;
-	}
-
 	private static function validateFeaturesCase(ItemWithFeatures $case) {
 		$motherboardFF = $case->getFeatureValue('motherboard-form-factor');
 		$code = null;
@@ -646,9 +596,11 @@ class ItemValidator {
 		$power = $monitor->getFeatureValue('power-connector');
 		if($power === 'c13' || $power === 'c19') {
 			if($monitor->getFeatureValue('psu-volt') !== null) {
-				throw new FeatureValidationException('psu-volt', $monitor->getFeatureValue('psu-volt'), null, $monitor->peekCode(), 'A monitor with a 220 V power connector should not require specific voltages and currents. Remove "Power supply voltage" or select another power connector type.');
+				$code = $monitor instanceof ItemWithCode ? $monitor->peekCode() : null;
+				throw new FeatureValidationException('psu-volt', $monitor->getFeatureValue('psu-volt'), null, $code, 'A monitor with a 220 V power connector should not require specific voltages and currents. Remove "Power supply voltage" or select another power connector type.');
 			} else if($monitor->getFeatureValue('psu-ampere') !== null) {
-				throw new FeatureValidationException('psu-ampere', $monitor->getFeatureValue('psu-ampere'), null, $monitor->peekCode(), 'A monitor with a 220 V power connector should not require specific voltages and currents. Remove "Power supply current" or select another power connector type.');
+				$code = $monitor instanceof ItemWithCode ? $monitor->peekCode() : null;
+				throw new FeatureValidationException('psu-ampere', $monitor->getFeatureValue('psu-ampere'), null, $code, 'A monitor with a 220 V power connector should not require specific voltages and currents. Remove "Power supply current" or select another power connector type.');
 			}
 		}
 	}
