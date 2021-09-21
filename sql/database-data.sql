@@ -339,6 +339,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('smart-data', 'fail'), -- Failed --
 	('smart-data', 'old'), -- Old -- old and tired HDDs, but still no reallocated sectors or other serious warnings
 	('smart-data', 'ok'), -- Ok --
+	('smart-data', 'sus'), -- Suspicious --
 	-- Wireless receiver: located inside, nearby or missing, making the peripheral completely useless since these are always proprietary
 	('wireless-receiver', 'inside'), -- Inside the peripheral --
 	('wireless-receiver', 'near'), -- Near the peripheral --

@@ -146,7 +146,7 @@ class FeaturePrinter {
 		'ram-ecc' => ['no' => 'No', 'yes' => 'Yes'],
 		'data-erased' => ['yes' => 'Yes️'],
 		'surface-scan' => ['fail' => 'Failed', 'pass' => 'Passed'],
-		'smart-data' => ['fail' => 'Failed', 'old' => 'Old', 'ok' => 'Ok'],
+		'smart-data' => ['fail' => 'Failed', 'old' => 'Old', 'ok' => 'Ok', 'sus' => 'Suspicious'],
 		'wireless-receiver' => ['inside' => 'Inside the peripheral', 'near' => 'Near the peripheral', 'missing' => 'Missing'],
 		'psu-form-factor' => ['atx' => 'ATX', 'cfx' => 'CFX', 'lfx' => 'LFX', 'sfx-lowprofile' => 'SFX Low Profile', 'sfx-topfan' => 'SFX Topfan', 'sfx-topfan-reduceddepth' => 'SFX Topfan reduced depth', 'sfx' => 'SFX', 'sfx-ps3' => 'SFX PS3', 'sfx-l' => 'SFX-L', 'tfx' => 'TFX', 'flexatx' => 'Flex ATX', 'proprietary' => 'Proprietary', 'eps' => 'EPS'],
 		'psu-rails-most-power' => ['12v' => '12 V (modern)', '5v' => '5 V (old)', 'balanced' => 'Equal balance between 5 and 12 V'],

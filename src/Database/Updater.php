@@ -799,6 +799,9 @@ END;"
 				case 25:
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('color', 'copper'), ('color', 'weeerde')");
 					break;
+				case 26:
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('smart-data', 'sus')");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

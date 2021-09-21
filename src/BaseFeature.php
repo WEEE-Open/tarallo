@@ -110,7 +110,7 @@ class BaseFeature {
 		'mini-ide-ports-n' => self::INTEGER,
 		'data-erased' => ['yes' => true],
 		'surface-scan' => ['fail' => true, 'pass' => true],
-		'smart-data' => ['fail' => true, 'old' => true, 'ok' => true],
+		'smart-data' => ['fail' => true, 'old' => true, 'ok' => true, 'sus' => true],
 		'wireless-receiver' => ['inside' => true, 'near' => true, 'missing' => true],
 		'rj11-ports-n' => self::INTEGER,
 		'ethernet-ports-10base5-aui-n' => self::INTEGER,
