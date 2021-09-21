@@ -542,9 +542,9 @@ EOQ;
 	}
 
 	public function getFeaturesLike(string $search, int $limit = 10): array {
-		$search = str_replace(' ', '', $search);
+//		$search = str_replace(' ', '', $search);
 		$statement = $this->getPDO()
-			->prepare("SELECT Code, Feature, ValueText, LENGTH(REPLACE(ValueText, ' ', '')) - :strlen AS Distance FROM ItemFeature WHERE REPLACE(ValueText, ' ', '') LIKE :search AND Feature NOT IN ('brand', 'model', 'variant') ORDER BY Distance, Code DESC LIMIT :limit");
+			->prepare("SELECT Code, Feature, ValueText, LENGTH(ValueText) - :strlen AS Distance FROM ItemFeature WHERE ValueText LIKE :search AND Feature NOT IN ('brand', 'model', 'variant') ORDER BY Distance, Code DESC LIMIT :limit");
 		try {
 			$statement->bindValue(':strlen', strlen($search), \PDO::PARAM_INT);
 			$statement->bindValue(':search', "%$search%", \PDO::PARAM_STR);
