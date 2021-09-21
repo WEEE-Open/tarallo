@@ -644,21 +644,22 @@ class Controller implements RequestHandlerInterface {
 				'item' => $db->itemDAO()->getActualItemCode($name),
 				'brands' => $db->searchDAO()->getBrandsLike($name),
 				'products' => $db->searchDAO()->getProductsLike($name),
+				'features' => $db->searchDAO()->getFeaturesLike($name),
 			]
 		);
 		return $handler->handle($request);
 	}
 
-	public static function quickSearchValue(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
-		/** @var Database $db */
-		// $db = $request->getAttribute('Database');
-
-		$request = $request
-			->withAttribute('Template', 'error')
-			->withAttribute('ResponseCode', 501)
-			->withAttribute('TemplateParameters', ['reason' => 'Search by value coming in a future update']);
-		return $handler->handle($request);
-	}
+//	public static function quickSearchValue(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+//		/** @var Database $db */
+//		// $db = $request->getAttribute('Database');
+//
+//		$request = $request
+//			->withAttribute('Template', 'error')
+//			->withAttribute('ResponseCode', 501)
+//			->withAttribute('TemplateParameters', ['reason' => 'Search by value coming in a future update']);
+//		return $handler->handle($request);
+//	}
 
 	public static function search(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
 		/** @var Database $db */
@@ -1196,7 +1197,7 @@ class Controller implements RequestHandlerInterface {
 				$r->get('/new/product', [User::AUTH_LEVEL_RO, 'Controller::addProduct',]);
 				$r->post('/search', [User::AUTH_LEVEL_RO, 'Controller::quickSearch',]);
 				$r->get('/search/name/{name}', [User::AUTH_LEVEL_RO, 'Controller::quickSearchName',]);
-				$r->get('/search/value/{value}', [User::AUTH_LEVEL_RO, 'Controller::quickSearchValue',]);
+//				$r->get('/search/value/{value}', [User::AUTH_LEVEL_RO, 'Controller::quickSearchValue',]);
 				$r->get('/search/advanced[/{id:[0-9]+}[/page/{page:[0-9]+}]]', [User::AUTH_LEVEL_RO, 'Controller::search',]);
 				$r->get('/search/advanced/{id:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search',]);
 				$r->get('/search/advanced/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, 'Controller::search',]);

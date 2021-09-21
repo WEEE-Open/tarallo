@@ -5,6 +5,7 @@
 /** @var \WEEEOpen\Tarallo\ItemCode|null $item */
 /** @var array $brands */
 /** @var array $products */
+/** @var array $features */
 $this->layout('main', ['title' => 'Search ' . $this->e($searchTerm) . ' in names', 'user' => $user, 'currentPage' => 'search name', 'container' => true]);
 ?>
 <h5>Item <small>(exact match only)</small></h5>
@@ -34,4 +35,12 @@ $this->layout('main', ['title' => 'Search ' . $this->e($searchTerm) . ' in names
 	</ul>
 <?php endif ?>
 
-<p class="text-muted"><button disabled class="btn btn-primary">Search in features</button> (not implemented yet)</p>
+<?php if(count($features) > 0): ?>
+	<h5>Features <small>(<?= count($features) ?>, max <?= (int) $limit ?>)</small></h5>
+	<ul class="list-unstyled underlinelinks">
+		<?php foreach($features as $row):  $item = $row[0]; $feature = $row[1]; $ultra = $this->getUltraFeatures([$feature])[0]; /** @var \WEEEOpen\Tarallo\ItemCode $item */ /** @var \WEEEOpen\Tarallo\Feature $feature */ /** @var \WEEEOpen\Tarallo\SSRv1\UltraFeature $ultra */ ?>
+			<li><a href="/item/<?= $this->e($item->getCode()) ?>"><?= $this->e($item->getCode()) ?></a>, <span class="text-muted"><?= $this->e($ultra->pname) ?></span> is <?= $this->e($ultra->pvalue) ?> <?= $row[2] === 0 ? ' <small>(exact match)</small>' : '' ?></li>
+		<?php endforeach ?>
+	</ul>
+<?php endif ?>
+<!--<p class="text-muted"><button disabled class="btn btn-primary">Search in features</button> (not implemented yet)</p>-->

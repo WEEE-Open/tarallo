@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\Database;
 
 use WEEEOpen\Tarallo\BaseFeature;
+use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\Product;
@@ -500,7 +501,7 @@ EOQ;
 	}
 
 	public function getBrandsLike(string $brand, int $limit = 10): array {
-		$search = str_replace(' ', '', $brand);
+		$brand = str_replace(' ', '', $brand);
 		$statement = $this->getPDO()
 			->prepare("SELECT DISTINCT Brand, LENGTH(REPLACE(Brand, ' ', '')) - ? AS Distance FROM Product WHERE REPLACE(Brand, ' ', '') LIKE ? ORDER BY Distance LIMIT ?");
 		try {
@@ -533,6 +534,27 @@ EOQ;
 			$statement->setFetchMode(\PDO::FETCH_NUM);
 			foreach($statement as $row) {
 				$result[] = [new ProductCode($row[0], $row[1], $row[2]), $row[3]];
+			}
+			return $result;
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	public function getFeaturesLike(string $search, int $limit = 10): array {
+		$search = str_replace(' ', '', $search);
+		$statement = $this->getPDO()
+			->prepare("SELECT Code, Feature, ValueText, LENGTH(REPLACE(ValueText, ' ', '')) - :strlen AS Distance FROM ItemFeature WHERE REPLACE(ValueText, ' ', '') LIKE :search AND Feature NOT IN ('brand', 'model', 'variant') ORDER BY Distance, Code DESC LIMIT :limit");
+		try {
+			$statement->bindValue(':strlen', strlen($search), \PDO::PARAM_INT);
+			$statement->bindValue(':search', "%$search%", \PDO::PARAM_STR);
+			$statement->bindValue(':limit', $limit, \PDO::PARAM_INT);
+			$statement->execute();
+
+			$result = [];
+			$statement->setFetchMode(\PDO::FETCH_NUM);
+			foreach($statement as $row) {
+				$result[] = [new ItemCode($row[0]), new Feature($row[1], $row[2]), $row[3]];
 			}
 			return $result;
 		} finally {
