@@ -642,9 +642,9 @@ class Controller implements RequestHandlerInterface {
 				'searchTerm' => $name,
 				'limit' => $limit,
 				'item' => $db->itemDAO()->getActualItemCode($name),
-				'brands' => $db->searchDAO()->getBrandsLike($name),
-				'products' => $db->searchDAO()->getProductsLike($name),
-				'features' => $db->searchDAO()->getFeaturesLike($name),
+				'brands' => $db->searchDAO()->getBrandsLike($name, $limit),
+				'products' => $db->searchDAO()->getProductsLike($name, $limit),
+				'features' => $db->searchDAO()->getFeaturesLike($name, $limit),
 			]
 		);
 		return $handler->handle($request);
