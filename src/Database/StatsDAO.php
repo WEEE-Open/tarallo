@@ -407,7 +407,7 @@ $createdFilter
 	 * @param null|\DateTime $creation creation date (starts from here)
 	 * @param bool $deleted Also count deleted/lost items, defaults to false (don't count them)
 	 *
-	 * @return ItemWithCode[] Items that have that feature (or empty array if none)
+	 * @return ItemCode[] Items that have that feature (or empty array if none)
 	 */
 	public function getItemsByFeatures(
 		Feature $feature,

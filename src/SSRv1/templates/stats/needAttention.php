@@ -86,7 +86,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 			<tbody>
 			<?php foreach($serials as $serial => $count): ?>
 				<tr>
-					<td><?=$this->e($serial)?></td>
+					<td><a href="/search/feature/sn/<?=$this->e($serial)?>"><?=$this->e($serial)?></a></td>
 					<td><?=$this->e($count)?></td>
 				</tr>
 			<?php endforeach ?>
