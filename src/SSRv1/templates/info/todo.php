@@ -65,7 +65,7 @@ ksort($checksWithHumanReadableFeatures);
 <div class="row">
 <?php if(!empty($missingSmartOrSurfaceScan)): ?>
 	<div class="stats list col-12 py-2"<?= $divclass ?>>
-		<p<?=$pclass?>>Working HDDs with missing SMART or Surface Scan: use the turbofresa on them! <small>(<?=count($missingSmartOrSurfaceScan)?>, max 200 shown)</small></p>
+		<p<?=$pclass?>>Working HDDs with missing SMART or Surface Scan: use pesto on them! <small>(<?=count($missingSmartOrSurfaceScan)?>, max 200 shown)</small></p>
 		<div>
 			<?php foreach($missingSmartOrSurfaceScan as $item): ?>
 				<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
