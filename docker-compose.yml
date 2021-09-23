@@ -1,3 +1,4 @@
+---
 version: '3.4'
 services:
   db:
@@ -16,16 +17,16 @@ services:
       - tarallo-db:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-      #MYSQL_USER: tarallo
-      #MYSQL_PASSWORD: thisisnottheproductionpassword
+      # MYSQL_USER: tarallo
+      # MYSQL_PASSWORD: thisisnottheproductionpassword
       MYSQL_DATABASE: tarallo
     ports:
       - 3307:3306
-	healthcheck:
-      test: ["CMD-SHELL", 'mariadb-admin ping']
-      interval: 1s
-      timeout: 2s
-      retries: 60
+  healthcheck:
+    test: ["CMD-SHELL", 'mariadb-admin ping']
+    interval: 1s
+    timeout: 2s
+    retries: 60
 
   app:
     image: tarallo/app
@@ -39,17 +40,17 @@ services:
         PROFILER: ${PROFILER}
         DEVELOPMENT: ${DEVELOPMENT}
     volumes:
-    # Host directories get directly mapped to server directories
-    # Mountpoints are created within app's Dockerfile
-    - ./sql:/var/www/html/sql:ro
-    - ./bin:/var/www/html/bin:ro
-    - ./public:/var/www/html/public:ro
-    - ./src:/var/www/html/src:ro
-    - ./tests:/var/www/html/tests:ro
-    - ./phpunit.xml:/var/www/html/phpunit.xml:ro
+      # Host directories get directly mapped to server directories
+      # Mountpoints are created within app's Dockerfile
+      - ./sql:/var/www/html/sql:ro
+      - ./bin:/var/www/html/bin:ro
+      - ./public:/var/www/html/public:ro
+      - ./src:/var/www/html/src:ro
+      - ./tests:/var/www/html/tests:ro
+      - ./phpunit.xml:/var/www/html/phpunit.xml:ro
 
-    # Directory for xdebug profiler traces
-    - ./utils/xdebug:/xdebug
+      # Directory for xdebug profiler traces
+      - ./utils/xdebug:/xdebug
     depends_on:
       - db
 
@@ -66,9 +67,9 @@ services:
       - 8080:80
       - 8081:81
     volumes:
-    # Replicate volume structure of "app" but in read only
-    - ./src:/var/www/html/src:ro
-    - ./public:/var/www/html/public:ro
+      # Replicate volume structure of "app" but in read only
+      - ./src:/var/www/html/src:ro
+      - ./public:/var/www/html/public:ro
     depends_on:
       - app
 
