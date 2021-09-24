@@ -1,0 +1,71 @@
+#!/usr/bin/php
+<?php
+
+require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
+
+function big_wait(): bool {
+	$pdo = new PDO(TARALLO_DB_DSN, TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, [
+		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+		PDO::ATTR_CASE => PDO::CASE_NATURAL,
+		PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+		PDO::ATTR_AUTOCOMMIT => false,
+		PDO::ATTR_EMULATE_PREPARES => false,
+	]);
+	
+	try {
+		$stmt = $pdo->query(/** @lang MariaDB */ "SELECT 'Hi' AS Test");
+		if($stmt->rowCount() <= 0) {
+			return false;
+		}
+	} finally {
+		$stmt->closeCursor();
+	}
+
+	try {
+		$stmt = $pdo->query(/** @lang MariaDB */ "SHOW EVENTS LIKE 'DuplicateItemProductFeaturesCleanup'");
+		if($stmt->rowCount() <= 0) {
+			return false;
+		}
+	} finally {
+		$stmt->closeCursor();
+	}
+	
+	return true;
+}
+
+$start = time();
+
+$retry = true;
+$triesCounter = 0;
+$successCounter = 0;
+$nextsleep = 1000;
+
+while($retry) {
+	try {
+		$success = big_wait();
+		if($success) {
+			$successCounter++;
+			$nextsleep = 100;
+		} else {
+			$nextsleep = 1000;
+		}
+	} catch(Throwable $e) {
+		// echo $e->getMessage() . PHP_EOL;
+	}
+	usleep($nextsleep);
+	if($successCounter >= 2 || $triesCounter > 120) {
+		$retry = false;
+	}
+}
+
+$end = time() - $start;
+
+if($successCounter >= 2) {
+	echo "Database up in $end seconds, at last";
+	exit(0);
+} else {
+	echo "Database did not start";
+	exit(1);
+}
+

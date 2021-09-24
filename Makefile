@@ -52,7 +52,8 @@ up: up_internal dbupdate examples
 .PHONY:
 up_internal:
 	docker-compose up -d
-	sleep 10 # database takes a while to really start, the next command fails immediately otherwise
+	# database takes a while to really start, the next command fails immediately otherwise
+	docker-compose exec -T app php /var/www/html/bin/wait-for-db
 
 .PHONY:
 destroy: down
