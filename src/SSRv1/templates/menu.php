@@ -78,7 +78,7 @@ $hereSr = function($page, $current) {
 <nav id="quickmove" class="navbar navbar-dark bg-dark collapse">
 	<form class="nav-item form-inline">
 		<label for="quickmovecode" class="navbar-text mr-sm-1 col-form-label">Move item:</label>
-		<input required class="form-control mr-sm-1" name="code" id="quickmovecode" type="text"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>>
+		<input required class="form-control basicAutoComplete mr-sm-1" name="code" id="quickmovecode" type="text" autocomplete="off" data-url="/features.json"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>>
 		<button class="btn btn-outline-secondary mr-1 my-2 my-sm-0 swap" title="Swap" tabindex="-1">⇄</button>
 		<label for="quickmovelocation" class="navbar-text col-form-label mr-sm-1">into:</label>
 		<input required class="form-control mr-sm-1 to" id="quickmovelocation" type="text">
@@ -88,3 +88,5 @@ $hereSr = function($page, $current) {
 	<div class="nav-item alert alert-danger col-12 my-2 d-none" role="alert">Error</div>
 	<div class="nav-item alert alert-warning col-12 my-2 d-none" role="alert">Fail</div>
 </nav>
+<script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
+<script>$('.basicAutoComplete').autoComplete();</script>
