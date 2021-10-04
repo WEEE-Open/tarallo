@@ -78,10 +78,10 @@ $hereSr = function($page, $current) {
 <nav id="quickmove" class="navbar navbar-dark bg-dark collapse">
 	<form class="nav-item form-inline">
 		<label for="quickmovecode" class="navbar-text mr-sm-1 col-form-label">Move item:</label>
-		<input required class="form-control basicAutoComplete mr-sm-1" name="code" id="quickmovecode" type="text" autocomplete="off" data-url="/v2/autosuggest"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>>
+		<input required class="form-control basicAutoComplete mr-sm-1" name="code" id="quickmovecode" type="text" autocomplete="off" data-url="/v2/autosuggest/code"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>>
 		<button class="btn btn-outline-secondary mr-1 my-2 my-sm-0 swap" title="Swap" tabindex="-1">⇄</button>
 		<label for="quickmovelocation" class="navbar-text col-form-label mr-sm-1">into:</label>
-		<input required class="form-control basicAutoComplete mr-sm-1 to" id="quickmovelocation" type="text" autocomplete="off" data-url="/v2/autosuggest">
+		<input required class="form-control basicAutoComplete mr-sm-1 to" id="quickmovelocation" type="text" autocomplete="off" data-url="/v2/autosuggest/code">
 		<button type="submit" class="btn btn-outline-secondary mt-2 mt-sm-0 do">Move</button>
 	</form>
 	<div class="nav-item alert alert-success col-12 my-2 d-none" role="alert" style="display: flex; justify-content: space-between;">Ok</div>
@@ -89,9 +89,4 @@ $hereSr = function($page, $current) {
 	<div class="nav-item alert alert-warning col-12 my-2 d-none" role="alert">Fail</div>
 </nav>
 <script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
-<script>$('.basicAutoComplete').autoComplete({
-		minLength: 1,
-        resolverSettings: {
-            requestThrottling: 420
-        }
-	});</script>
+<script>$('.basicAutoComplete').autoComplete({minLength:1,resolverSettings:{requestThrottling:420}});</script>
