@@ -755,6 +755,11 @@ class Controller implements RequestHandlerInterface {
 		$query = $request->getQueryParams();
 		$search = Validation::validateHasString($query, 'q');
 
+		$min = 3;
+		if(strlen($search) < $min) {
+			throw new RangeException($parameter, $min, null, "Minimum length for autocomplete is $min");
+		}
+
 		$json = $db->itemDAO()->getItemsForAutosuggest($search);
 		return new JsonResponse($json);
 	}
