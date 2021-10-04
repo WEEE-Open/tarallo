@@ -81,7 +81,7 @@ $hereSr = function($page, $current) {
 		<input required class="form-control basicAutoComplete mr-sm-1" name="code" id="quickmovecode" type="text" autocomplete="off" data-url="/v2/autosuggest"<?= $moveDefaultFrom === null ? '' : ' value="' . $this->e($moveDefaultFrom) . '"' ?>>
 		<button class="btn btn-outline-secondary mr-1 my-2 my-sm-0 swap" title="Swap" tabindex="-1">⇄</button>
 		<label for="quickmovelocation" class="navbar-text col-form-label mr-sm-1">into:</label>
-		<input required class="form-control mr-sm-1 to" id="quickmovelocation" type="text">
+		<input required class="form-control basicAutoComplete mr-sm-1 to" id="quickmovelocation" type="text" autocomplete="off" data-url="/v2/autosuggest">
 		<button type="submit" class="btn btn-outline-secondary mt-2 mt-sm-0 do">Move</button>
 	</form>
 	<div class="nav-item alert alert-success col-12 my-2 d-none" role="alert" style="display: flex; justify-content: space-between;">Ok</div>

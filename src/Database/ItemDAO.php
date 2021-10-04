@@ -442,10 +442,10 @@ EOQ
 			->prepare(
 		"SELECT Code
 FROM Item
-WHERE DeletedAt IS NULL AND Code LIKE :f%
+WHERE DeletedAt IS NULL AND Code LIKE :f
 LIMIT 15");
 		try {
-			$statement->bindValue(':f', $code);
+			$statement->bindValue(':f', "%$code%");
 			$success = $statement->execute();
 			assert($success, 'Get all items');
 			$array = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);

@@ -752,7 +752,7 @@ class Controller implements RequestHandlerInterface {
 	public static function getItems(ServerRequestInterface $request){
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
-		$search = Validation::validateString($query, 'q');
+		$search = Validation::validateHasString($query, 'q');
 		$json = $db->itemDAO()->getItems($search);
 		return new JsonResponse($json);
 	}
