@@ -437,20 +437,32 @@ EOQ
 
 	}
 
-	public function getItems(string $code){
+	public function getItemsForAutosuggest(string $code, bool $secondTry = false): array {
+		$limit = 10;
+		if($secondTry) {
+			$limit *= 2;
+			$value = "%$code%";
+		} else {
+			$value = "$code%";
+		}
+
 		$statement = $this->getPDO()
 			->prepare(
 		"SELECT Code
 FROM Item
 WHERE DeletedAt IS NULL AND Code LIKE :f
-LIMIT 15");
+LIMIT $limit");
 		try {
-			$statement->bindValue(':f', "%$code%");
+			$statement->bindValue(':f', $value);
 			$success = $statement->execute();
-			assert($success, 'Get all items');
+			assert($success, 'get items for autosuggest');
 			$array = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
 		} finally {
 			$statement->closeCursor();
+		}
+		if(count($array) < $limit && !$secondTry) {
+			$more = $this->getItemsForAutosuggest($code, true);
+			$array = array_merge($array, array_diff($more, $array));
 		}
 		return $array;
 	}

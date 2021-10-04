@@ -749,12 +749,18 @@ class Controller implements RequestHandlerInterface {
 		return new EmptyResponse();
 	}
 
-	public static function getItems(ServerRequestInterface $request){
+	public static function getItemsAutosuggest(ServerRequestInterface $request) {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
 		$search = Validation::validateHasString($query, 'q');
-		$json = $db->itemDAO()->getItems($search);
+
+		$min = 3;
+		if(strlen($search) < $min) {
+			throw new RangeException($parameter, $min, null, "Minimum length for autocomplete is $min");
+		}
+
+		$json = $db->itemDAO()->getItemsForAutosuggest($search);
 		return new JsonResponse($json);
 	}
 
@@ -925,7 +931,7 @@ class Controller implements RequestHandlerInterface {
 						$r->get('/history[/page/{page}]', [User::AUTH_LEVEL_RO, 'Controller::getHistory']);
 
 						$r->get('/session', [User::AUTH_LEVEL_RW, 'Controller::sessionWhoami']);
-						$r->get('/autosuggest', [User::AUTH_LEVEL_RO, 'Controller::getItems']);
+						$r->get('/autosuggest/code', [User::AUTH_LEVEL_RO, 'Controller::getItemsAutosuggest']);
 
 						$r->addGroup(
 							'/stats',
