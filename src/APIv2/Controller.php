@@ -749,6 +749,14 @@ class Controller implements RequestHandlerInterface {
 		return new EmptyResponse();
 	}
 
+	public static function getItems(ServerRequestInterface $request){
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+		$search = Validation::validateHasString($query, 'q');
+		$json = $db->itemDAO()->getItems($search);
+		return new JsonResponse($json);
+	}
+
 	private static function range(string $parameter, $value, ?int $min, ?int $max) {
 		if($max !== null && $value > $max) {
 			throw new RangeException($parameter, $min, $max, "Maximum value is $max");
@@ -916,6 +924,7 @@ class Controller implements RequestHandlerInterface {
 						$r->get('/history[/page/{page}]', [User::AUTH_LEVEL_RO, 'Controller::getHistory']);
 
 						$r->get('/session', [User::AUTH_LEVEL_RW, 'Controller::sessionWhoami']);
+						$r->get('/autosuggest', [User::AUTH_LEVEL_RO, 'Controller::getItems']);
 
 						$r->addGroup(
 							'/stats',

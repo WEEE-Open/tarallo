@@ -436,4 +436,22 @@ EOQ
 		}
 
 	}
+
+	public function getItems(string $code){
+		$statement = $this->getPDO()
+			->prepare(
+		"SELECT Code
+FROM Item
+WHERE DeletedAt IS NULL AND Code LIKE :f
+LIMIT 15");
+		try {
+			$statement->bindValue(':f', "%$code%");
+			$success = $statement->execute();
+			assert($success, 'Get all items');
+			$array = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
+		} finally {
+			$statement->closeCursor();
+		}
+		return $array;
+	}
 }
