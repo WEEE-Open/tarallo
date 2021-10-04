@@ -750,6 +750,7 @@ class Controller implements RequestHandlerInterface {
 	}
 
 	public static function getItems(ServerRequestInterface $request){
+		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
 		$search = Validation::validateHasString($query, 'q');
