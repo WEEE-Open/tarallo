@@ -749,11 +749,13 @@ class Controller implements RequestHandlerInterface {
 		return new EmptyResponse();
 	}
 
-	public static function getItemsAutosuggest(ServerRequestInterface $request){
+	public static function getItemsAutosuggest(ServerRequestInterface $request) {
+		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
 		$search = Validation::validateHasString($query, 'q');
-		$json = $db->itemDAO()->getItems($search);
+
+		$json = $db->itemDAO()->getItemsForAutosuggest($search);
 		return new JsonResponse($json);
 	}
 
