@@ -26,11 +26,11 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 <?php endif ?>
 <?php if(!empty($leastRecent)): ?>
 	<div class="col-md-6 col-xl-4">
-		<table class="table table-borderless stats">
+		<table class="table table-borderless stats" data-search="true">
 			<caption>30 computers where no work has been done in a long time</caption>
 			<thead class="thead-dark">
 				<tr>
-					<th scope="col">Case</th>
+					<th data-sortable="true" scope="col">Case</th>
 					<th scope="col">Last action</th>
 				</tr>
 			</thead>

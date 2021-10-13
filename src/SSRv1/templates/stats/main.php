@@ -3,10 +3,11 @@
 /** @var int[] $recentlyAdded */
 /** @var int[] $recentlyModified */
 /** @var int[] $recentlyMoved */
-$this->layout('main', ['title' => 'Stats', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
+$this->layout('main', ['title' => 'Stats', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'test' => true]);
 $this->insert('stats::menu', ['currentPage' => '']);
 date_default_timezone_set('Europe/Rome');
 ?>
+
 
 <div class="row">
 <?php if(!empty($recentlyAdded)): ?>
@@ -15,8 +16,8 @@ date_default_timezone_set('Europe/Rome');
 			<caption>Recently added items</caption>
 			<thead class="thead-dark">
 				<tr>
-					<th scope="col">Item</th>
-					<th scope="col">Added</th>
+					<th data-sortable="true">Item</th>
+					<th data-sortable="true" scope="col">Added</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -36,8 +37,8 @@ date_default_timezone_set('Europe/Rome');
 			<caption>Recently modified items</caption>
 			<thead class="thead-dark">
 				<tr>
-					<th scope="col">Item</th>
-					<th scope="col">Modified</th>
+					<th data-sortable="true" scope="col">Item</th>
+					<th data-sortable="true" scope="col">Modified</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -57,8 +58,8 @@ date_default_timezone_set('Europe/Rome');
 				<caption>Recently moved items</caption>
 				<thead class="thead-dark">
 				<tr>
-					<th scope="col">Item</th>
-					<th scope="col">Moved</th>
+					<th data-sortable="true" scope="col">Item</th>
+					<th data-sortable="true" scope="col">Moved</th>
 				</tr>
 				</thead>
 				<tbody>

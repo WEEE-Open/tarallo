@@ -31,6 +31,8 @@ $tooltips = $tooltips ?? false;
         }
     </style>
 	<?php endif; ?>
+	<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
+	<script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
 	<title><?=$this->e($title)?> - T.A.R.A.L.L.O.</title>
 </head>
 <body>
@@ -55,9 +57,14 @@ $tooltips = $tooltips ?? false;
 <section class="container <?= isset($container) && $container ? '' : 'p-0'?>">
 	<?=$this->section('content')?>
 </section>
+<?php if(isset($bootstrapTable) && $bootstrapTable): ?>
+	<script>$(document.getElementsByTagName("table")).bootstrapTable();</script>
+<?php endif; ?>
 <?php if($tooltips): ?><script>tippy('[data-tippy-content]')</script><?php endif; ?>
+
 <?php if(isset($user)): ?>
 	<script src="/static/menu.js"></script>
 <?php endif ?>
+
 </body>
 </html>

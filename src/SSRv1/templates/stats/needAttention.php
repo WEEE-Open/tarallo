@@ -5,7 +5,7 @@
 /** @var array[] $failedSmartOrSurfaceScan */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $missingData */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $lost */
-$this->layout('main', ['title' => 'Stats: items that need attention', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
+$this->layout('main', ['title' => 'Stats: items that need attention', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'bootstrapTable' => true]);
 $this->insert('stats::menu', ['currentPage' => 'attention']);
 ?>
 
@@ -52,11 +52,11 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 			<caption>Items that can be split with a product</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Code</th>
-				<th scope="col">Brand</th>
-				<th scope="col">Model</th>
-				<th scope="col">Variant</th>
-				<th scope="col" data-tippy-content="Features that can be moved to a product">Features</th>
+				<th data-sortable="true" scope="col">Code</th>
+				<th data-sortable="true" scope="col">Brand</th>
+				<th data-sortable="true" scope="col">Model</th>
+				<th data-sortable="true" scope="col">Variant</th>
+				<th data-sortable="true" scope="col" data-tippy-content="Features that can be moved to a product">Features</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -79,8 +79,8 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 			<caption>Duplicate serial numbers</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Serial</th>
-				<th scope="col">Quantity</th>
+				<th data-sortable="true" scope="col">Serial</th>
+				<th data-sortable="true" scope="col">Quantity</th>
 			</tr>
 			</thead>
 			<tbody>
