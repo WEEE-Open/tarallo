@@ -730,7 +730,7 @@ class Controller implements RequestHandlerInterface {
 		$body = $request->getAttribute('ParsedBody', []);
 
 		if($identifier === null) {
-			$identifier = 'Automated upload ' . strtoupper(substr(md5(time()), 0, 8));
+			$identifier = 'Automated upload ' . strtoupper(substr(md5(microtime()), 0, 10));
 		}
 		$overwrite = boolval($query['overwrite'] ?? false);
 
