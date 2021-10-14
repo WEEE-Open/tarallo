@@ -3,7 +3,7 @@
 /** @var int[] $recentlyAdded */
 /** @var int[] $recentlyModified */
 /** @var int[] $recentlyMoved */
-$this->layout('main', ['title' => 'Stats', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'test' => true]);
+$this->layout('main', ['title' => 'Stats', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'bootstrapTable' => true]);
 $this->insert('stats::menu', ['currentPage' => '']);
 date_default_timezone_set('Europe/Rome');
 ?>

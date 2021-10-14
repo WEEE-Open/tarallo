@@ -10,7 +10,7 @@
 /** @var array[] $formAndRotation */
 /** @var int[] $surfaceScan */
 /** @var bool $startDateSet */
-$this->layout('main', ['title' => 'Stats: HDDs', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
+$this->layout('main', ['title' => 'Stats: HDDs', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'bootstrapTable' => true]);
 $this->insert('stats::menu', ['currentPage' => 'hdds']);
 $this->insert('stats::header', ['location' => $location, 'locationSet' => $locationSet, 'allowDateSelection' => false]);
 
@@ -49,7 +49,7 @@ $withoutErasedPercent = $erasedSum > 0 ? sprintf(" (%.1f %%)",$withoutErased / (
 			<thead class="thead-dark">
 			<tr>
 				<th scope="col">Surface scan</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -70,7 +70,7 @@ $withoutErasedPercent = $erasedSum > 0 ? sprintf(" (%.1f %%)",$withoutErased / (
 			<thead class="thead-dark">
 			<tr>
 				<th scope="col">Smart Data</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -90,8 +90,8 @@ $withoutErasedPercent = $erasedSum > 0 ? sprintf(" (%.1f %%)",$withoutErased / (
 			<caption>HDDs by capacity</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Capacity</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">Capacity</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>

@@ -2,7 +2,7 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var array $incomplete */
 /** @var int[] $brandsProducts */
-$this->layout('main', ['title' => 'Stats: products', 'user' => $user, 'currentPage' => 'stats', 'tooltips' => true, 'container' => true]);
+$this->layout('main', ['title' => 'Stats: products', 'user' => $user, 'currentPage' => 'stats', 'tooltips' => true, 'container' => true, 'bootstrapTable' => true]);
 $this->insert('stats::menu', ['currentPage' => 'products']);
 ?>
 
@@ -13,11 +13,11 @@ $this->insert('stats::menu', ['currentPage' => 'products']);
 			<caption>Items without a product, that could however have one</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Code</th>
-				<th scope="col">Brand</th>
-				<th scope="col">Model</th>
-				<th scope="col">Variant</th>
-				<th scope="col" data-tippy-content="Products that could be suitable for this item, i.e. available variants">Products</th>
+				<th data-sortable="true" scope="col">Code</th>
+				<th data-sortable="true" scope="col">Brand</th>
+				<th data-sortable="true" scope="col">Model</th>
+				<th data-sortable="true" scope="col">Variant</th>
+				<th data-sortable="true" scope="col" data-tippy-content="Products that could be suitable for this item, i.e. available variants">Products</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -44,10 +44,10 @@ $this->insert('stats::menu', ['currentPage' => 'products']);
 			<caption>Products count per brand</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Brand</th>
-				<th scope="col">Models</th>
-				<th scope="col">Variants</th>
-				<th scope="col" data-tippy-content="Variants per product">VPP</th>
+				<th data-sortable="true" scope="col">Brand</th>
+				<th data-sortable="true" scope="col">Models</th>
+				<th data-sortable="true" scope="col">Variants</th>
+				<th data-sortable="true" scope="col" data-tippy-content="Variants per product">VPP</th>
 			</tr>
 			</thead>
 			<tbody>

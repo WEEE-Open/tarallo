@@ -7,7 +7,7 @@
 /** @var int[] commmonBrands */
 /** @var bool $startDateSet */
 /** @var array[] $byTypeFrequency */
-$this->layout('main', ['title' => 'Stats: CPUs', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
+$this->layout('main', ['title' => 'Stats: CPUs', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'bootstrapTable' => true]);
 $this->insert('stats::menu', ['currentPage' => 'cpus']);
 $this->insert('stats::header', ['location' => $location, 'locationSet' => $locationSet, 'allowDateSelection' => false]);
 ?>
@@ -19,8 +19,8 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 		<caption>CPUs by number of cores</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Core number</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">Core number</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -40,8 +40,8 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 			<caption>CPUs by architecture</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Isa</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">Isa</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -61,8 +61,8 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 		<caption>CPUs by most common models</caption>
 		<thead class="thead-dark">
 		<tr>
-			<th scope="col">Model</th>
-			<th scope="col">Count</th>
+			<th data-sortable="true" scope="col">Model</th>
+			<th data-sortable="true" scope="col">Count</th>
 		</tr>
 		</thead>
 		<tbody>

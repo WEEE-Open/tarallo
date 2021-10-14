@@ -11,7 +11,7 @@
 /** @var \WEEEOpen\Tarallo\ItemCode[] $noFrequency */
 /** @var \WEEEOpen\Tarallo\ItemCode[] $noSize */
 /** @var bool $allowDateSelection */
-$this->layout('main', ['title' => 'Stats: RAMs', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
+$this->layout('main', ['title' => 'Stats: RAMs', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'bootstrapTable' => true]);
 $this->insert('stats::menu', ['currentPage' => 'rams']);
 $this->insert('stats::header', [
 	'location' => $location,
@@ -38,8 +38,8 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 		<caption>RAMs by type/standard</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Type</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">Type</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -59,8 +59,8 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 			<caption>RAMs by form factor</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Type</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">Type</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -80,7 +80,7 @@ $rollupTd = function(array $row, string $feature, &$emptyCounter) {
 			<caption>RAMs by type and size</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Type</th>
+				<th  scope="col">Type</th>
 				<th scope="col">Form Factor</th>
 				<th scope="col">Capacity</th>
 				<th scope="col">Count</th>

@@ -8,7 +8,7 @@
 /** @var DateTime $startDate */
 /** @var bool $startDateSet */
 /** @var string[] $ready */
-$this->layout('main', ['title' => 'Stats: cases (computers)', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
+$this->layout('main', ['title' => 'Stats: cases (computers)', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'bootstrapTable' => true]);
 $this->insert('stats::menu', ['currentPage' => 'cases']);
 date_default_timezone_set('Europe/Rome');
 $this->insert('stats::header', ['location' => $location, 'locationSet' => $locationSet, 'startDate' => $startDate, 'startDateSet' => $startDateSet]);
@@ -26,12 +26,12 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 <?php endif ?>
 <?php if(!empty($leastRecent)): ?>
 	<div class="col-md-6 col-xl-4">
-		<table class="table table-borderless stats" data-search="true">
+		<table class="table table-borderless stats">
 			<caption>30 computers where no work has been done in a long time</caption>
 			<thead class="thead-dark">
 				<tr>
 					<th data-sortable="true" scope="col">Case</th>
-					<th scope="col">Last action</th>
+					<th data-sortable="true" scope="col">Last action</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -51,8 +51,8 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 			<caption>30 computers where work has been done recently</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Case</th>
-				<th scope="col">Last action</th>
+				<th data-sortable="true" scope="col">Case</th>
+				<th data-sortable="true" scope="col">Last action</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -72,8 +72,8 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 			<caption>Computers by owner<?php if($startDate !== null):?> (acquired after <?=$startDate->format('Y-m-d')?>)<?php endif; ?></caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Owner</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">Owner</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -93,8 +93,8 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 			<caption>Cases by motherboard form factor<?php if($startDate !== null):?> (acquired after <?=$startDate->format('Y-m-d')?>)<?php endif; ?></caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Form factor</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">Form factor</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -114,8 +114,8 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 			<caption>Owner by date</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">Owner</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">Owner</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
