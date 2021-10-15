@@ -3,7 +3,7 @@
 /** @var array[] $lastItemEntries */
 /** @var array[] $lastProductEntries */
 
-$this->layout('main', ['title' => 'Stats: history', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
+$this->layout('main', ['title' => 'Stats: history', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'bootstrapTable' => true]);
 $this->insert('stats::menu', ['currentPage' => 'history']);
 
 $now = new DateTime();

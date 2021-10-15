@@ -4,7 +4,7 @@
 /** @var array[] $movedItems */
 /** @var array[] $updatedItems */
 /** @var array[] $overall */
-$this->layout('main', ['title' => 'Stats: Users', 'user' => $user, 'currentPage' => 'stats', 'container' => true]);
+$this->layout('main', ['title' => 'Stats: Users', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'bootstrapTable' => true]);
 $this->insert('stats::menu', ['currentPage' => 'users']);
 ?>
 
@@ -15,8 +15,8 @@ $this->insert('stats::menu', ['currentPage' => 'users']);
 			<caption>Top users that have created items</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">User</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">User</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -36,8 +36,8 @@ $this->insert('stats::menu', ['currentPage' => 'users']);
 			<caption>Top users that have moved items</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">User</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">User</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -57,8 +57,8 @@ $this->insert('stats::menu', ['currentPage' => 'users']);
 			<caption>Top users that have updated items</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">User</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">User</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
@@ -78,8 +78,8 @@ $this->insert('stats::menu', ['currentPage' => 'users']);
 			<caption>Top users overall</caption>
 			<thead class="thead-dark">
 			<tr>
-				<th scope="col">User</th>
-				<th scope="col">Count</th>
+				<th data-sortable="true" scope="col">User</th>
+				<th data-sortable="true" scope="col">Count</th>
 			</tr>
 			</thead>
 			<tbody>
