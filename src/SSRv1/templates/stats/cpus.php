@@ -2,9 +2,9 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var string $location */
 /** @var bool $locationSet */
-/** @var int[] byNcore */
-/** @var int[] byIsa */
-/** @var int[] commmonBrands */
+/** @var int[] $byNcore */
+/** @var int[] $byIsa */
+/** @var int[] $commmonModels */
 /** @var bool $startDateSet */
 /** @var array[] $byTypeFrequency */
 $this->layout('main', ['title' => 'Stats: CPUs', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'bootstrapTable' => true]);
