@@ -612,7 +612,9 @@ class Controller implements RequestHandlerInterface {
                 $request = $request->withAttribute('Template', 'stats::cool')->withAttribute('TemplateParameters',
                 [
                     'cpusByBrand'=> $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'cpu')),
-                    'hddsByBrand' => $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'hdd'))
+                    'hddsByBrand' => $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'hdd')),
+                    'itemsByColor' => $db->statsDAO()->getCountByFeature('color',null),
+
                 ]);
                 break;
 			default:
