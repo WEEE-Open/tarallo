@@ -404,8 +404,39 @@ $ram = (new Item('R6969'))
 	->addFeature(new Feature('working', 'no'));
 $rambox->addContent($ram);
 
+// CPU generator
+for($i = 5; $i <= 9; $i++) {
+	for($j = 5; $j <= 9; $j++) {
+		$cores = [2, 4][rand(0, 1)];
+		$db->productDAO()->addProduct((new Product("Intel", "Core 3 Trio E${i}${j}00", ProductCode::DEFAULT_VARIANT))
+			->addFeature(new Feature('frequency-hertz', rand(25,32) * 100000000))
+			->addFeature(new Feature('isa', 'x86-64'))
+			->addFeature(new Feature('cpu-socket', 'lga775'))
+			->addFeature(new Feature('core-n', $cores))
+			->addFeature(new Feature('thread-n', $cores * rand(1, 2)))
+			->addFeature(new Feature('type', 'cpu')));
+	}
+}
+$cpubox = (new Item('CpuBox'))
+	->addFeature(new Feature('type', 'location'));
+$chernobyl->addContent($cpubox);
+for($i = 100; $i <= 250; $i++) {
+	$a = rand(5, 9);
+	$b = rand(5, 9);
+	$model = "Core 3 Trio E${a}${b}00";
+	$cpu = new Item("C$i");
+	$cpu
+		->addFeature(new Feature('brand', 'Intel'))
+		->addFeature(new Feature('model', $model))
+		->addFeature(new Feature('variant', ProductCode::DEFAULT_VARIANT))
+		->addFeature(new Feature('working', 'yes'))
+		->addFeature(new Feature('owner', ['DISAT', 'DAUIN', 'Area IT'][rand(0, 2)]))
+	;
+	$cpubox->addContent($cpu);
+}
+
 ///H.D.D generator (Huge Deficit Disks)
-for($i = 100; $i < 250; $i++){
+for($i = 100; $i < 250; $i++) {
 	$capacity = [40, 80, 160, 320, 500, 1000, 256][rand(0, 6)];
 	$rpm = [7200, 5400, 10025][rand(0, 2)];
 	$port = rand(0, 1);

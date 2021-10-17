@@ -26,7 +26,7 @@ $this->insert('stats::menu', ['currentPage' => 'products']);
 					<td><a href="/item/<?= $this->e($row['Code']) ?>"><?=$this->e($row['Code'])?></a></td>
 					<td><?=$this->e($row['Brand'])?></td>
 					<td><?=$this->e($row['Model'])?></td>
-					<td><?=$this->e($row['Variant'] ?? '')?></td>
+					<td <?= ($row['Variant'] ?? '') === \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT ? 'class="text-muted"' : '' ?>><?=$this->e($row['Variant'] ?? '')?></td>
 					<?php if($row['NumVariants'] > 0): ?>
 						<td><a href="/product/<?= $this->e($row['Brand']) ?>/<?= $this->e($row['Model']) ?>"><?=$this->e($row['NumVariants'])?></a></td>
 					<?php else: ?>
