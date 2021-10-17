@@ -998,7 +998,7 @@ WHERE `Key` != 'DataVersion' AND
 		}
 		return $array;
 	}
-
+    //public function getItems
 	public function setDefaultLocation(string $key, string $value) {
 		$pdo = $this->getPDO();
 		if(isset($this->getDefaultLocations()[$key])) {
