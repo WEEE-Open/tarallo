@@ -412,7 +412,7 @@ $createdFilter
 	public function getItemsByFeatures(
 		Feature $feature,
 		?ItemWithCode $location = null,
-		?int $limit = null, // TODO: $limit === null won't work (see getLostItem to do it correctly)
+		?int $limit = null,
 		?\DateTime $creation = null,
 		bool $deleted = false
 	): array {
@@ -420,6 +420,7 @@ $createdFilter
 		$locationFilter = self::filterLocation($location);
 		$deletedFilter = $deleted ? '' : self::filterDeletedLost();
 		$createdFilter = self::filterCreated($creation);
+        $limitFilter = $limit === null ? '' : 'LIMIT ' . (int) $limit;
 
 		/** @noinspection SqlResolve */
 		$query = "SELECT `Code`
@@ -429,7 +430,7 @@ AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = " . $pdo->quote($feat
 $locationFilter
 $deletedFilter
 $createdFilter
-LIMIT " . (int) $limit;
+$limitFilter";
 		$statement = $pdo->prepare($query);
 
 		$result = [];
