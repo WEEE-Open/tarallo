@@ -113,9 +113,9 @@ There's not much more to it.
 ### Database
 
 Database files are found in the `sql` directory.
-- `database.sql`: schema.  
-- `database-data.sql`: "static" data needed for the software to work. It can be edited, but you'll need to run `make features` afterwards.  
-- `database-procedures.sql`: some procedures and triggers, all of these are needed for the entire thing to work.
+- `database.sql`: schema. 
+- `database-data.sql`: "static" data needed for the software to work. It can be edited, but you'll need to run `make features` afterwards.
+- `database-procedures.sql`: some procedures and triggers, all of these are needed for the entire thing to work. 
 
 ### Feature list generation
 
