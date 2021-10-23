@@ -88,12 +88,12 @@ $this->insert('stats::menu', ['currentPage' => 'cool']);
                     <tr>
                         <td>HDDs</td>
                         <td><?=$this->printFeature('capacity-decibyte', $hddsCapacity['totalCapacity'], $lang ?? 'en')?></td>
-                        <td><?=$this->printFeature('capacity-decibyte', (int) $hddsCapacity['averageCapacity'], $lang ?? 'en')?></td>
+                        <td><?=round((float) $this->printFeature('capacity-decibyte', (int) $hddsCapacity['averageCapacity'], $lang ?? 'en'),1)." ".preg_replace("/[^a-zA-Z]+/","",$this->printFeature('capacity-decibyte', (int) $hddsCapacity['averageCapacity'], $lang ?? 'en'))?></td>
                     </tr>
                     <tr>
                         <td>RAMs</td>
                         <td><?=$this->printFeature('capacity-byte', $ramsCapacity['totalCapacity'], $lang ?? 'en')?></td>
-                        <td><?=$this->printFeature('capacity-byte', (int) $ramsCapacity['averageCapacity'], $lang ?? 'en')?></td>
+                        <td><?= round((float) $this->printFeature('capacity-byte', (int) $ramsCapacity['averageCapacity'], $lang ?? 'en'),1)." ".preg_replace("/[^a-zA-Z]+/", "",$this->printFeature('capacity-byte', (int) $ramsCapacity['averageCapacity'], $lang ?? 'en'))?></td>
                     </tr>
                 </tbody>
             </table>
