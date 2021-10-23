@@ -1000,6 +1000,33 @@ WHERE `Key` != 'DataVersion' AND
 		return $array;
 	}
 
+    /**
+     * get the total and average capacity of hdds or rams
+     * @param array $hddsOrRams must have property 'quantity' for each item
+     * @param string $propertyToSum must be 'capacity-decibyte' or 'capacity-byte'
+     * @return array
+     */
+	public function getTotalAndAverageCapacity(array $hddsOrRams,string $propertyToSum):
+    array {
+        $sumOfCapacity = 0;
+        $numberOfItems = 0;
+        foreach($hddsOrRams as $item)
+        {
+            // se non possiede , l'oggetto, la proprietà quantity oppure la proprietà 'capacity-decibyte' o 'capacity-byte' cade in errore
+            if(!array_key_exists('Quantity', $item) or !array_key_exists($propertyToSum, $item))
+            {
+                throw new \InvalidArgumentException("In Array passed, a item doesn't have the property 'Capacity' or the property inserted is not equal to 'capacity-byte' or to 'capacity-decibyte'" );
+            }
+            if(!$item[$propertyToSum]) continue;
+            $sumOfCapacity += ( $item[$propertyToSum] * $item['Quantity'] );
+            $numberOfItems += $item['Quantity'];
+        }
+        return [
+            'totalCapacity' => $sumOfCapacity,
+            'averageCapacity' => ( $sumOfCapacity / $numberOfItems )
+        ];
+    }
+
 	public function setDefaultLocation(string $key, string $value) {
 		$pdo = $this->getPDO();
 		if(isset($this->getDefaultLocations()[$key])) {
