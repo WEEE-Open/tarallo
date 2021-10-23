@@ -614,6 +614,12 @@ class Controller implements RequestHandlerInterface {
                     'cpusByBrand'=> $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'cpu')),
                     'hddsByBrand' => $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'hdd')),
                     'itemsByColor' => $db->statsDAO()->getCountByFeature('color',null),
+                    'hddsCapacity' => $db->statsDAO()->getTotalAndAverageCapacity($db->statsDAO()->getRollupCountByFeature(new Feature('type', 'hdd'), [
+                        'capacity-decibyte',
+                    ], $location),'capacity-decibyte'),
+                    'ramsCapacity' => $db->statsDAO()->getTotalAndAverageCapacity($db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), [
+                        'capacity-byte',
+                    ], $location),'capacity-byte'),
 
                 ]);
                 break;
