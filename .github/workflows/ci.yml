@@ -34,6 +34,7 @@ jobs:
 
       - uses: getong/mariadb-action@v1.1
         with:
+          host port: 3306
           container port: 3306
           mariadb version: '10.4'
           mysql database: 'tarallo'
@@ -42,9 +43,9 @@ jobs:
       # sudo apt-get install mariadb-client
       - name: Import database
         run: |
-          sudo mysql –-user=root --password=root --database=tarallo -h 127.0.0.1 < sql/database.sql
-          sudo mysql –-user=root --password=root --database=tarallo -h 127.0.0.1 < sql/database-data.sql
-          sudo mysql –-user=root --password=root --database=tarallo -h 127.0.0.1 < sql/database-procedures.sql
+          sudo mysql –-user=root --password=root --database=tarallo --host=127.0.0.1 < sql/database.sql
+          sudo mysql –-user=root --password=root --database=tarallo --host=127.0.0.1 < sql/database-data.sql
+          sudo mysql –-user=root --password=root --database=tarallo --host=127.0.0.1 < sql/database-procedures.sql
 
 #      - name: Run msgfmt
 #        run: |
