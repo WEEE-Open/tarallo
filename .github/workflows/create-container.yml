@@ -1,7 +1,12 @@
-name: Continous Integration
-on: [push, pull_request]
+name: Create container
+on:
+  push:
+  workflow_dispatch:
+  release:
+    types: [ published, created, edited, prereleased, released ]
+
 jobs:
-  run-tests:
+  build-container:
     if: github.repository_owner == 'WEEE-Open'
     name: Run PHPUnit tests
     runs-on: ubuntu-latest
@@ -37,7 +42,7 @@ jobs:
       
       - name: Run the tests inside the container
         run: docker-compose exec -T app php vendor/phpunit/phpunit/phpunit --configuration phpunit.xml
-      
+
       - name: Tag docker images
         run: >-
           (docker tag tarallo/app ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app || true)  &&

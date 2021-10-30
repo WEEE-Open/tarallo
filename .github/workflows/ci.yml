@@ -1,0 +1,58 @@
+name: CI
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '27 10 1 * *'
+
+jobs:
+  run-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['7.3', '8.0', 'latest']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v2
+        with:
+          path: /tmp/composer-cache
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+
+      - name: Install dependencies
+        uses: php-actions/composer@v6
+        with:
+          # If you use the PHPUnit action, uncomment this and comment php_extensions
+          # args: --ignore-platform-reqs
+          php_extensions: json mysqlnd pdo
+          php_version: "${{ matrix.php }}"
+
+      - uses: getong/mariadb-action@v1.1
+        with:
+          container port: 3306
+          mariadb version: '10.4'
+          mysql database: 'tarallo'
+          mysql root password: 'root'
+
+      - name: Create config.php
+        run: cp config/config-ci.php config/config.php
+
+      - name: Import database
+        run: |
+          sudo apt-get install mariadb-client
+          sudo mysql –uroot -proot tarallo < sql/database.sql
+          sudo mysql –uroot -proot tarallo < sql/database-data.sql
+          sudo mysql –uroot -proot tarallo < sql/database-procedures.sql
+
+#      - name: Run msgfmt
+#        run: |
+#          sudo apt-get install gettext
+#          msgfmt resources/locale/en-US/LC_MESSAGES/messages.po --output-file=resources/locale/en-US/LC_MESSAGES/messages.mo
+
+#      - name: PHPCS linting
+#        run: vendor/bin/phpcs --report=summary src public templates
+
+      - name: PHPUnit Tests
+        run: vendor/bin/phpunit --configuration tests/phpunit.xml --coverage-text
