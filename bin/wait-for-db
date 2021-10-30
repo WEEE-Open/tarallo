@@ -43,6 +43,8 @@ $triesCounter = 0;
 $successCounter = 0;
 $nextsleep = 1000;
 
+$verbose = in_array('--verbose', $argv);
+
 while($retry) {
 	try {
 		$success = big_wait(!in_array('--no-import', $argv));
@@ -53,7 +55,9 @@ while($retry) {
 			$nextsleep = 1000;
 		}
 	} catch(Throwable $e) {
-		// echo $e->getMessage() . PHP_EOL;
+		if($verbose) {
+			echo $e->getMessage() . PHP_EOL;
+		}
 	}
 	usleep($nextsleep);
 	if($successCounter >= 2 || $triesCounter > 120) {

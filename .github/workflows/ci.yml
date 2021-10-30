@@ -47,7 +47,8 @@ jobs:
       # sudo apt-get install mariadb-client
       - name: Import database
         run: |
-          bin/wait-for-db --no-import
+          mysqladmin ping
+          bin/wait-for-db --no-import --verbose
           sudo mysql –-user=test --password=test --host=127.0.0.1 --protocol=tcp --port=3306 -e "CREATE DATABASE tarallo;"
           sudo mysql –-user=test --password=test --database=tarallo --host=localhost --protocol=tcp --port=127.0.0.1 < sql/database.sql
           sudo mysql –-user=test --password=test --database=tarallo --host=localhost --protocol=tcp --port=127.0.0.1 < sql/database-data.sql
