@@ -9,12 +9,10 @@ jobs:
   run-test:
     runs-on: ubuntu-latest
     services:
-      mariadb:
+      db:
         image: mariadb:10.4
         env:
-          MYSQL_RANDOM_ROOT_PASSWORD: true
-          MYSQL_USER: test
-          MYSQL_PASSWORD: test
+          MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: tarallo
         ports:
           - 3306:3306
@@ -42,17 +40,17 @@ jobs:
           php_version: "${{ matrix.php }}"
 
       - name: Create config.php
-        run: cp config/config-ci.php config/config.php
+        run: cp config/config-docker.php config/config.php
 
       # sudo apt-get install mariadb-client
-      # mysqladmin ping –-user=test --password=test --host=127.0.0.1 --protocol=tcp --port=3306
+      # mysqladmin ping –-user=root --password=root --host=db --protocol=tcp --port=3306
       # bin/wait-for-db --no-import --verbose
       - name: Import database
         run: |
-          sudo mysql –-user=test --password=test --host=127.0.0.1 --protocol=tcp --port=3306 -e "CREATE DATABASE tarallo;"
-          sudo mysql –-user=test --password=test --host=127.0.0.1 --protocol=tcp --port=3306 --database=tarallo < sql/database.sql
-          sudo mysql –-user=test --password=test --host=127.0.0.1 --protocol=tcp --port=3306 --database=tarallo < sql/database-data.sql
-          sudo mysql –-user=test --password=test --host=127.0.0.1 --protocol=tcp --port=3306 --database=tarallo < sql/database-procedures.sql
+          sudo mysql –-user=root --password=root --host=db --protocol=tcp --port=3306 -e "CREATE DATABASE tarallo;"
+          sudo mysql –-user=root --password=root --host=db --protocol=tcp --port=3306 --database=tarallo < sql/database.sql
+          sudo mysql –-user=root --password=root --host=db --protocol=tcp --port=3306 --database=tarallo < sql/database-data.sql
+          sudo mysql –-user=root --password=root --host=db --protocol=tcp --port=3306 --database=tarallo < sql/database-procedures.sql
 
 #      - name: Run msgfmt
 #        run: |
