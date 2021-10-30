@@ -39,9 +39,9 @@ jobs:
       - name: Create config.php
         run: cp config/config-ci.php config/config.php
 
+      # sudo apt-get install mariadb-client
       - name: Import database
         run: |
-          sudo apt-get install mariadb-client
           sudo mysql –uroot -proot tarallo < sql/database.sql
           sudo mysql –uroot -proot tarallo < sql/database-data.sql
           sudo mysql –uroot -proot tarallo < sql/database-procedures.sql
