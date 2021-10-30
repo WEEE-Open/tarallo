@@ -42,9 +42,9 @@ jobs:
       # sudo apt-get install mariadb-client
       - name: Import database
         run: |
-          sudo mysql –uroot -proot tarallo < sql/database.sql
-          sudo mysql –uroot -proot tarallo < sql/database-data.sql
-          sudo mysql –uroot -proot tarallo < sql/database-procedures.sql
+          sudo mysql –-user=root --password=root --database=tarallo < sql/database.sql
+          sudo mysql –-user=root --password=root --database=tarallo < sql/database-data.sql
+          sudo mysql –-user=root --password=root --database=tarallo < sql/database-procedures.sql
 
 #      - name: Run msgfmt
 #        run: |
