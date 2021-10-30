@@ -4,7 +4,7 @@
 require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
 require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
 
-function big_wait(): bool {
+function big_wait(bool $waitForImport = true): bool {
 	$pdo = new PDO(TARALLO_DB_DSN, TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, [
 		PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
 		PDO::ATTR_CASE => PDO::CASE_NATURAL,
@@ -22,15 +22,17 @@ function big_wait(): bool {
 		$stmt->closeCursor();
 	}
 
-	try {
-		$stmt = $pdo->query(/** @lang MariaDB */ "SHOW EVENTS LIKE 'DuplicateItemProductFeaturesCleanup'");
-		if($stmt->rowCount() <= 0) {
-			return false;
+	if(!$waitForImport) {
+		try {
+			$stmt = $pdo->query(/** @lang MariaDB */ "SHOW EVENTS LIKE 'DuplicateItemProductFeaturesCleanup'");
+			if($stmt->rowCount() <= 0) {
+				return false;
+			}
+		} finally {
+			$stmt->closeCursor();
 		}
-	} finally {
-		$stmt->closeCursor();
 	}
-	
+
 	return true;
 }
 
@@ -43,7 +45,7 @@ $nextsleep = 1000;
 
 while($retry) {
 	try {
-		$success = big_wait();
+		$success = big_wait(!in_array('--no-import', $argv));
 		if($success) {
 			$successCounter++;
 			$nextsleep = 100;
