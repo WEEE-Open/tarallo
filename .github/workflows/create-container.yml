@@ -41,7 +41,7 @@ jobs:
         run: make ci
       
       - name: Run the tests inside the container
-        run: docker-compose exec -T app php vendor/phpunit/phpunit/phpunit --configuration phpunit.xml
+        run: docker-compose exec -T app php vendor/phpunit/phpunit/phpunit --configuration tests/phpunit.xml
 
       - name: Tag docker images
         run: >-
