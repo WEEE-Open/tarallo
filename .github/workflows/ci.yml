@@ -8,6 +8,15 @@ on:
 jobs:
   run-test:
     runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:10.4
+        env:
+          MYSQL_ROOT_PASSWORD: password
+        ports:
+          - 3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     strategy:
       matrix:
         php: ['7.3', '8.0', 'latest']
@@ -32,20 +41,13 @@ jobs:
       - name: Create config.php
         run: cp config/config-ci.php config/config.php
 
-      - uses: getong/mariadb-action@v1.1
-        with:
-          mariadb version: '10.4'
-          mysql database: 'tarallo'
-          mysql root password: 'password'
-          mysql user: 'user'
-          mysql password: 'password'
-
       # sudo apt-get install mariadb-client
       - name: Import database
         run: |
-          sudo mysql –-user=root --password=password --database=tarallo --host=localhost --protocol=tcp --port=3306 < sql/database.sql
-          sudo mysql –-user=root --password=password --database=tarallo --host=localhost --protocol=tcp --port=3306 < sql/database-data.sql
-          sudo mysql –-user=root --password=password --database=tarallo --host=localhost --protocol=tcp --port=3306 < sql/database-procedures.sql
+          echo "CREATE DATABASE tarallo;" | sudo mysql –-user=root --password=password --database=tarallo --host=localhost --protocol=tcp --port=3306 < sql/database.sql
+          sudo mysql –-user=root --password=password --database=tarallo --host=localhost --protocol=tcp --port=3306 tarallo < sql/database.sql
+          sudo mysql –-user=root --password=password --database=tarallo --host=localhost --protocol=tcp --port=3306 tarallo < sql/database-data.sql
+          sudo mysql –-user=root --password=password --database=tarallo --host=localhost --protocol=tcp --port=3306 tarallo < sql/database-procedures.sql
 
 #      - name: Run msgfmt
 #        run: |
