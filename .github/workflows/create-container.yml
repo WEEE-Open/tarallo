@@ -1,6 +1,5 @@
 name: Create container
 on:
-  push:
   workflow_dispatch:
   release:
     types: [ published, created, edited, prereleased, released ]
@@ -8,13 +7,14 @@ on:
 jobs:
   build-container:
     if: github.repository_owner == 'WEEE-Open'
-    name: Run PHPUnit tests
     runs-on: ubuntu-latest
+
     env:
       REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
       REPOSITORY: tarallo
       USERNAME: ${{ secrets.DOCKER_USERNAME }}
       PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
     steps:
       - name: Check out the repository
         uses: actions/checkout@v2
@@ -24,18 +24,6 @@ jobs:
       
       - name: Copy sample.env to .env
         run: cp sample.env .env
-      
-      - name: Pull docker images
-        run: >-
-          (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app || true) &&
-          (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web || true) &&
-          (docker pull ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  || true)
-
-      - name: Retag docker images
-        run: >-
-          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/app tarallo/app || true) &&
-          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/web tarallo/web || true) &&
-          (docker image tag ${{ env.REGISTRY }}/${{ env.REPOSITORY }}/db  tarallo/db  || true)
 
       - name: Build and start the containers
         run: make ci
