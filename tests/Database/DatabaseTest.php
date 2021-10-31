@@ -60,7 +60,7 @@ abstract class DatabaseTest extends TestCase {
 			$retries++;
 		}
 		if(!$found) {
-			throw new \RuntimeException("Database not ready after $retries seconds");
+			throw new \RuntimeException("Database not ready after $retries seconds (2)");
 		}
 	}
 

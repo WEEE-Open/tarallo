@@ -39,14 +39,12 @@ jobs:
           php_extensions: json mysqlnd pdo
           php_version: "${{ matrix.php }}"
 
-      - name: Create config.php
-        run: cp config/config-docker.php config/config.php
-
       # sudo apt-get install mariadb-client
       # mysqladmin ping --user=root --password=root --host=127.0.0.1 --protocol=tcp --port=3306
       # bin/wait-for-db --no-import --verbose
-      - name: Import database
+      - name: Configure app and database
         run: |
+          cp config/config-ci.php config/config.php
           sudo mysql --user=root --password=root --host=127.0.0.1 --protocol=tcp --port=3306 -e "DROP DATABASE IF EXISTS tarallo; CREATE DATABASE tarallo;"
           sudo mysql --user=root --password=root --host=127.0.0.1 --protocol=tcp --port=3306 --database=tarallo < sql/database.sql
           sudo mysql --user=root --password=root --host=127.0.0.1 --protocol=tcp --port=3306 --database=tarallo < sql/database-data.sql
