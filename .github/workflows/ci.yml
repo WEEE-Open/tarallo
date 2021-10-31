@@ -60,5 +60,6 @@ jobs:
 #      - name: PHPCS linting
 #        run: vendor/bin/phpcs --report=summary src public templates
 
+      # --coverage-text
       - name: PHPUnit Tests
-        run: vendor/bin/phpunit --configuration tests/phpunit.xml --coverage-text
+        run: vendor/bin/phpunit --configuration tests/phpunit.xml
