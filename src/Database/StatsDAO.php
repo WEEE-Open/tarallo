@@ -1035,23 +1035,21 @@ WHERE `Key` != 'DataVersion' AND
     array {
         $pdo = $this->getPDO();
         $array = [];
-        $queryToSelectItemWithSn = "SELECT  ValueEnum as Type , Item.Code, COUNT(*) AS Quantità  FROM Item 
-        RIGHT JOIN ProductItemFeatureUnified ON ProductItemFeatureUnified.Feature = 'type'
-        WHERE Item.Code IN (
-            SELECT ProductItemFeatureUnified.Code 
+        $queryToSelectItemWithSn = " SELECT ValueEnum as Type, Count(*) as Quantità FROM ProductItemFeatureUnified 
+        RIGHT JOIN Item ON Item.Code = ProductItemFeatureUnified.Code
+        WHERE ProductItemFeatureUnified.Feature = 'type' AND Item.Code IN (
+            SELECT ProductItemFeatureUnified.Code
             FROM ProductItemFeatureUnified
-            WHERE Feature = 'sn'
+            WHERE ProductItemFeatureUnified.Feature = 'sn'
         )
         GROUP BY Type
-
         ";
-        $queryToSelectItemWithoutSn = "
-        SELECT  ValueEnum as Type , Item.Code, COUNT(*) AS Quantità  FROM Item 
-            RIGHT JOIN ProductItemFeatureUnified ON ProductItemFeatureUnified.Feature = 'type'
-            WHERE Item.Code IN (
-                SELECT ProductItemFeatureUnified.Code 
-                FROM ProductItemFeatureUnified
-                WHERE Feature != 'sn'
+        $queryToSelectItemWithoutSn = "SELECT ValueEnum as Type, Count(*) as Quantità FROM ProductItemFeatureUnified 
+        RIGHT JOIN Item ON Item.Code = ProductItemFeatureUnified.Code
+        WHERE ProductItemFeatureUnified.Feature = 'type' AND Item.Code NOT IN (
+            SELECT ProductItemFeatureUnified.Code
+            FROM ProductItemFeatureUnified
+            WHERE ProductItemFeatureUnified.Feature = 'sn'
         )
         GROUP BY Type
         ";

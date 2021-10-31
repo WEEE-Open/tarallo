@@ -77,7 +77,7 @@ $this->insert('stats::menu', ['currentPage' => 'cool']);
     <?php if(!empty($itemWithAndWithoutSerialNumber)): ?>
         <div class="col-12 col-xl-6">
             <table class="table table-borderless stats">
-                <caption>Items count by Color</caption>
+                <caption>Items count by Serial Number</caption>
                 <thead class="thead-dark">
                 <tr>
                     <th data-sortable="true" scope="col">Type</th>
@@ -89,8 +89,8 @@ $this->insert('stats::menu', ['currentPage' => 'cool']);
                 <?php foreach($itemWithAndWithoutSerialNumber as $type => $value): ?>
                     <tr>
                         <td><?=$this->e(ucfirst($type))?></td>
-                        <td><?=$this->e(ucfirst($value['withSn']))?></td>
-                        <td><?=$this->e(ucfirst($value['withoutSn']))?></td>
+                        <td><?=array_key_exists('withSn',$value) ? $this->e(ucfirst($value['withSn'])) : 'None'?></td>
+                        <td><?=array_key_exists('withoutSn',$value) ? $this->e(ucfirst($value['withoutSn'])) : 'None'?></td>
                     </tr>
                 <?php endforeach ?>
                 </tbody>
