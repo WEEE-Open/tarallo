@@ -4,8 +4,13 @@ namespace WEEEOpen\Tarallo;
 
 use Throwable;
 
-class ItemNestingException extends \RuntimeException {
-	use ExceptionWithItem, ExceptionWithOtherItem, ExceptionWithPath, ExceptionWithFeature;
+class ItemNestingException extends \RuntimeException
+{
+	use ExceptionWithItem;
+	use ExceptionWithOtherItem;
+	use ExceptionWithPath;
+	use ExceptionWithFeature;
+
 	public $status = 400;
 
 	/**
@@ -18,12 +23,13 @@ class ItemNestingException extends \RuntimeException {
 	 * @param int $code
 	 * @param Throwable|null $previous
 	 */
-	public function __construct(?string $item = null, ?string $parent = null, ?array $path = null, $message = null, $code = 0, Throwable $previous = null) {
-		if($item === null && $parent === null) {
+	public function __construct(?string $item = null, ?string $parent = null, ?array $path = null, $message = null, $code = 0, Throwable $previous = null)
+	{
+		if ($item === null && $parent === null) {
 			parent::__construct($message ?? "Cannot place item there", $code, $previous);
-		} elseif($item === null) {
+		} elseif ($item === null) {
 			parent::__construct($message ?? "Cannot place that kind of item inside $parent", $code, $previous);
-		} elseif($parent === null) {
+		} elseif ($parent === null) {
 			parent::__construct($message ?? "Cannot place $item inside that kind of item", $code, $previous);
 		} else {
 			parent::__construct($message ?? "Cannot place $item inside $parent", $code, $previous);

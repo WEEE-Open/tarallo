@@ -8,7 +8,8 @@ use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\NotFoundException;
 
-final class TreeDAO extends DAO {
+final class TreeDAO extends DAO
+{
 	public static function moveWithValidation(
 		Database $db,
 		ItemWithCode $what,
@@ -20,28 +21,28 @@ final class TreeDAO extends DAO {
 		$item = $db->itemDAO()->getItem($what, null, 0);
 		$oldParent = $item->getParent();
 		// Also the parent, in these cases
-		if($fix || $validate) {
+		if ($fix || $validate) {
 			try {
 				$newParent = $db->itemDAO()->getItem($newParent, null, 1);
-			} catch(NotFoundException $e) {
+			} catch (NotFoundException $e) {
 				throw new NotFoundException($newParent->getCode());
 			}
 		}
 
 		// We need product features for fixup and validation
-		if($fix || $validate) {
+		if ($fix || $validate) {
 			$db->productDAO()->getProductsAll($item->getFlatContent());
 		}
 
-		if($fix) {
+		if ($fix) {
 			$newParent = ItemValidator::fixupLocation($item, $newParent);
 		}
 
-		if($validate) {
+		if ($validate) {
 			ItemValidator::validateLocation($item, $newParent);
 		}
-		
-		if($newParent === null) {
+
+		if ($newParent === null) {
 			throw new \LogicException(
 				'Moving to "null" is not implemented, move an item into itself to make it a root'
 			);
@@ -49,9 +50,10 @@ final class TreeDAO extends DAO {
 		$moved = false;
 		// if $newParent === null will ever be supported, add a check here
 		// if(from nowhere to somewhere || from somewhere to somewhere else (including itself, which removes parent))
-		if(($oldParent === null && $newParent->compareCode($item) !== 0)
-			|| ($oldParent !== null && $newParent->compareCode($oldParent) !== 0)) {
-
+		if (
+			($oldParent === null && $newParent->compareCode($item) !== 0)
+			|| ($oldParent !== null && $newParent->compareCode($oldParent) !== 0)
+		) {
 			// Throws NotFoundException (when needed, obv)
 			$db->treeDAO()->moveItem($item, $newParent);
 			$moved = true;
@@ -65,17 +67,18 @@ final class TreeDAO extends DAO {
 	 * @param ItemWithCode $child new Item
 	 * @param ItemWithCode|null $parent some existing Item as parent, NULL if it has no parent (root Item)
 	 */
-	public function addToTree(ItemWithCode $child, ItemWithCode $parent = null) {
-		if($parent !== null && !$this->database->itemDAO()->itemVisible($parent)) {
+	public function addToTree(ItemWithCode $child, ItemWithCode $parent = null)
+	{
+		if ($parent !== null && !$this->database->itemDAO()->itemVisible($parent)) {
 			throw new NotFoundException($parent->getCode());
 		}
 
-		if(!$this->database->itemDAO()->itemVisible($child)) {
+		if (!$this->database->itemDAO()->itemVisible($child)) {
 			throw new NotFoundException($child->getCode());
 		}
 
 		$this->addItemAsRoot($child);
-		if($parent !== null) {
+		if ($parent !== null) {
 			$this->setParent($parent, $child);
 		}
 	}
@@ -87,23 +90,24 @@ final class TreeDAO extends DAO {
 	 * @param ItemWithCode|null $newParent some existing Item as parent, NULL if parent should be removed (turn into
 	 *     root Item)
 	 */
-	public function moveItem(ItemWithCode $item, ItemWithCode $newParent = null) {
-		if(!$this->database->itemDAO()->itemVisible($newParent)) {
+	public function moveItem(ItemWithCode $item, ItemWithCode $newParent = null)
+	{
+		if (!$this->database->itemDAO()->itemVisible($newParent)) {
 			throw new NotFoundException($newParent->getCode());
 		}
 
-		if(!$this->database->itemDAO()->itemVisible($item)) {
+		if (!$this->database->itemDAO()->itemVisible($item)) {
 			throw new NotFoundException($item->getCode());
 		}
 
 		// If it is an ItemCode or something else that doesn't have the LostAt property fetched, unlose it
 		// If it's marked as lost and we know it, unlose it
-		if(!($item instanceof Item) || ($item instanceof Item && $item->getLostAt() !== null)) {
+		if (!($item instanceof Item) || ($item instanceof Item && $item->getLostAt() !== null)) {
 			$this->database->itemDAO()->unlose($item);
 		}
 
 		$this->splitSubtree($item);
-		if($newParent !== null) {
+		if ($newParent !== null) {
 			$this->setParent($newParent, $item);
 		}
 	}
@@ -114,7 +118,8 @@ final class TreeDAO extends DAO {
 	 *
 	 * @param Item $item
 	 */
-	public function getPathTo(Item $item) {
+	public function getPathTo(Item $item)
+	{
 		$item->addAncestors($this->getPathToArray($item));
 	}
 
@@ -125,7 +130,8 @@ final class TreeDAO extends DAO {
 	 *
 	 * @return ItemWithCode[] 0 is direct parent, 1 is parent's parent, and so on
 	 */
-	private function getPathToArray(ItemWithCode $item) {
+	private function getPathToArray(ItemWithCode $item)
+	{
 		$statement = $this->getPDO()->prepare('SELECT Ancestor FROM Tree WHERE Descendant = ? ORDER BY Depth DESC');
 
 		try {
@@ -133,13 +139,13 @@ final class TreeDAO extends DAO {
 
 			$result = [];
 
-			while(($row = $statement->fetch(\PDO::FETCH_ASSOC)) !== false) {
+			while (($row = $statement->fetch(\PDO::FETCH_ASSOC)) !== false) {
 				$result[] = new ItemCode($row['Ancestor']);
 			}
 
-			if(!empty($result)) {
+			if (!empty($result)) {
 				$lastcode = array_pop($result)->getCode();
-				if($lastcode !== $item->getCode()) {
+				if ($lastcode !== $item->getCode()) {
 					throw new \LogicException('Path to ' . $item->getCode() . " terminates at $lastcode instead");
 				}
 			}
@@ -150,8 +156,9 @@ final class TreeDAO extends DAO {
 		}
 	}
 
-	public function removeFromTree(ItemWithCode $item) {
-		if(!$this->database->itemDAO()->itemVisible($item)) {
+	public function removeFromTree(ItemWithCode $item)
+	{
+		if (!$this->database->itemDAO()->itemVisible($item)) {
 			throw new NotFoundException($item->getCode());
 		}
 
@@ -185,7 +192,8 @@ final class TreeDAO extends DAO {
 	 *
 	 * @param ItemWithCode $item
 	 */
-	private function addItemAsRoot(ItemWithCode $item) {
+	private function addItemAsRoot(ItemWithCode $item)
+	{
 		$pdo = $this->getPDO();
 		$statement = $pdo->prepare('INSERT INTO Tree (Ancestor, Descendant, Depth) VALUES (?, ?, 0)');
 		$id = $item->getCode();
@@ -202,11 +210,12 @@ final class TreeDAO extends DAO {
 	 *@see addToTree
 	 *
 	 */
-	private function setParent(ItemWithCode $parent, ItemWithCode $child) {
+	private function setParent(ItemWithCode $parent, ItemWithCode $child)
+	{
 		$parentID = $parent->getCode();
 		$childID = $child->getCode();
 
-		if($parentID === $childID) {
+		if ($parentID === $childID) {
 			// Adding an item into itself "works", unfortunately.
 			// It doesn't add a row with Depth=0, it places an item into itself and creates new useless paths, which doesn't make any sense.
 			// So we need to check it here
@@ -233,7 +242,8 @@ final class TreeDAO extends DAO {
 	 *
 	 * @param ItemWithCode $item the item
 	 */
-	private function splitSubtree(ItemWithCode $item) {
+	private function splitSubtree(ItemWithCode $item)
+	{
 		// straight from Bill Karwin's post (https://www.percona.com/blog/2011/02/14/moving-subtrees-in-closure-table/)
 		// other solutions exist, but they don't work in MySQL BECAUSE MYSQL, THAT'S WHY.
 		$statement = $this->getPDO()->prepare(

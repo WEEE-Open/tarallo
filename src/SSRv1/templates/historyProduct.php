@@ -1,4 +1,5 @@
 <?php
+
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var \WEEEOpen\Tarallo\ProductCode $product */
 /** @var string[][] $history */

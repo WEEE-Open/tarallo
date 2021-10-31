@@ -13,7 +13,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 ?>
 
 <div class="row">
-<?php if(!empty($byNcore)): ?>
+<?php if (!empty($byNcore)) : ?>
 	<div class="col-12 col-md-8 col-lg-6">
 		<table class="table table-borderless stats">
 		<caption>CPUs by number of cores</caption>
@@ -24,7 +24,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($byNcore as $nCore => $count): ?>
+			<?php foreach ($byNcore as $nCore => $count) : ?>
 				<tr>
 					<td><?=$this->printFeature('core-n', $nCore, $lang ?? 'en')?></td>
 					<td><?=$count?></td>
@@ -34,7 +34,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 		</table>
 	</div>
 <?php endif; ?>
-<?php if(!empty($byIsa)): ?>
+<?php if (!empty($byIsa)) : ?>
 	<div class="col-12 col-md-8 col-lg-6">
 		<table class="table table-borderless stats">
 			<caption>CPUs by architecture</caption>
@@ -45,7 +45,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($byIsa as $isa => $count): ?>
+			<?php foreach ($byIsa as $isa => $count) : ?>
 				<tr>
 					<td><?=$this->printFeature('isa', $isa, $lang ?? 'en')?></td>
 					<td><?=$count?></td>
@@ -55,7 +55,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 		</table>
 	</div>
 <?php endif; ?>
-<?php if(!empty($commonModels)): ?>
+<?php if (!empty($commonModels)) : ?>
 <div class="col-12 col-md-8 col-lg-6">
 	<table class="table table-borderless stats">
 		<caption>CPUs by most common models</caption>
@@ -66,7 +66,7 @@ $this->insert('stats::header', ['location' => $location, 'locationSet' => $locat
 		</tr>
 		</thead>
 		<tbody>
-		<?php foreach($commonModels as $models => $count): ?>
+		<?php foreach ($commonModels as $models => $count) : ?>
 			<tr>
 				<td><?=$this->printFeature('model', $models, $lang ?? 'en')?></td>
 				<td><?=$count?></td>

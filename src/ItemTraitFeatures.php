@@ -2,8 +2,8 @@
 
 namespace WEEEOpen\Tarallo;
 
-
-trait ItemTraitFeatures {
+trait ItemTraitFeatures
+{
 	protected $features = [];
 
 	/**
@@ -13,9 +13,10 @@ trait ItemTraitFeatures {
 	 *
 	 * @return Feature|BaseFeature|null
 	 */
-	public function getFeature(string $name) {
+	public function getFeature(string $name)
+	{
 		$features = $this->getFeatures();
-		if(isset($features[$name])) {
+		if (isset($features[$name])) {
 			return $features[$name];
 		} else {
 			return null;
@@ -29,9 +30,10 @@ trait ItemTraitFeatures {
 	 *
 	 * @return string|int|double|null
 	 */
-	public function getFeatureValue(string $name) {
+	public function getFeatureValue(string $name)
+	{
 		$feature = $this->getFeature($name);
-		if($feature === null) {
+		if ($feature === null) {
 			return null;
 		} else {
 			return $feature->value;
@@ -44,7 +46,8 @@ trait ItemTraitFeatures {
 	 * @return $this
 	 * @noinspection PhpMissingReturnTypeInspection Returning a traits breaks everything
 	 */
-	public function addFeature($feature) {
+	public function addFeature($feature)
+	{
 		$this->features[$feature->name] = $feature;
 
 		return $this;
@@ -58,7 +61,8 @@ trait ItemTraitFeatures {
 	 * @return $this
 	 * @noinspection PhpMissingReturnTypeInspection Returning a traits breaks everything
 	 */
-	public function removeFeatureByName(string $featureName) {
+	public function removeFeatureByName(string $featureName)
+	{
 		unset($this->features[$featureName]);
 
 		return $this;
@@ -67,8 +71,9 @@ trait ItemTraitFeatures {
 	/**
 	 * @return Feature[]
 	 */
-	public function getFeatures(): array {
-		if(isset($this->product)) {
+	public function getFeatures(): array
+	{
+		if (isset($this->product)) {
 			$product = $this->product;
 			/** @var Product $product */
 			return array_merge($product->getFeatures(), $this->features);
@@ -80,8 +85,8 @@ trait ItemTraitFeatures {
 	/**
 	 * @return Feature[]
 	 */
-	public function getOwnFeatures(): array {
+	public function getOwnFeatures(): array
+	{
 		return $this->features;
 	}
-
 }

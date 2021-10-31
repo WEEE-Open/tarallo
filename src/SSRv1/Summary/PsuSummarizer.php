@@ -2,13 +2,14 @@
 
 namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
-
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
-class PsuSummarizer implements Summarizer {
+class PsuSummarizer implements Summarizer
+{
 
-	public static function summarize(ItemWithFeatures $item): string {
+	public static function summarize(ItemWithFeatures $item): string
+	{
 		$type = $item->getFeature('type');
 		$formFactor = $item->getFeature('psu-form-factor');
 		$powerWatt = $item->getFeature('power-rated-watt');

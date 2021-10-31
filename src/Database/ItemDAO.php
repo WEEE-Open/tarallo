@@ -11,7 +11,8 @@ use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ValidationException;
 
-final class ItemDAO extends DAO {
+final class ItemDAO extends DAO
+{
 	/**
 	 * Insert a single item into the database
 	 *
@@ -20,9 +21,10 @@ final class ItemDAO extends DAO {
 	 *
 	 * @throws DuplicateItemCodeException If any item with same code already exists
 	 */
-	public function addItem(ItemWithFeatures $item, ItemWithCode $parent = null) {
+	public function addItem(ItemWithFeatures $item, ItemWithCode $parent = null)
+	{
 		assert($item instanceof ItemIncomplete || $item instanceof Item);
-		if(!$item->hasCode()) {
+		if (!$item->hasCode()) {
 			$prefix = ItemPrefixer::get($item);
 			$code = $this->getNewCode($prefix);
 			$item->setCode($code);
@@ -35,8 +37,8 @@ final class ItemDAO extends DAO {
 			$statement->bindValue(':tok', $item->getToken(), \PDO::PARAM_STR);
 			$result = $statement->execute();
 			assert($result !== false, 'insert item');
-		} catch(\PDOException $e) {
-			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1062) {
+		} catch (\PDOException $e) {
+			if ($e->getCode() === '23000' && $statement->errorInfo()[1] === 1062) {
 				throw new DuplicateItemCodeException($item->getCode());
 			}
 			throw $e;
@@ -49,7 +51,7 @@ final class ItemDAO extends DAO {
 		$this->database->treeDAO()->addToTree($item, $parent);
 
 		$childItems = $item->getContent();
-		foreach($childItems as $childItem) {
+		foreach ($childItems as $childItem) {
 			// yay recursion!
 			$this->addItem($childItem, $item);
 		}
@@ -62,14 +64,15 @@ final class ItemDAO extends DAO {
 	 *
 	 * @throws ValidationException if item contains other items (cannot be deleted)
 	 */
-	public function deleteItem(ItemWithCode $item) {
+	public function deleteItem(ItemWithCode $item)
+	{
 		$this->itemMustExist($item);
 		$statement = $this->getPDO()->prepare('UPDATE Item SET DeletedAt = NOW() WHERE `Code` = ?');
 
 		try {
 			$statement->execute([$item->getCode()]);
-		} catch(\PDOException $e) {
-			if($e->getCode() === '45000' && $statement->errorInfo()[2] === 'Cannot delete an item while contains other items') {
+		} catch (\PDOException $e) {
+			if ($e->getCode() === '45000' && $statement->errorInfo()[2] === 'Cannot delete an item while contains other items') {
 				throw new ValidationException($item->getCode(), null, 'Cannot delete an item while contains other items', 0, $e);
 			}
 			throw $e;
@@ -83,15 +86,18 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param ItemWithCode $item
 	 */
-	public function loseItem(ItemWithCode $item) {
+	public function loseItem(ItemWithCode $item)
+	{
 		$this->itemMustExist($item);
 		$statement = $this->getPDO()->prepare('UPDATE Item SET LostAt = NOW() WHERE `Code` = ?');
 
 		try {
 			$statement->execute([$item->getCode()]);
-		} catch(\PDOException $e) {
-			if($e->getCode() === '45000'
-				&& $statement->errorInfo()[2] === 'Cannot mark an item as lost while it contains other items') {
+		} catch (\PDOException $e) {
+			if (
+				$e->getCode() === '45000'
+				&& $statement->errorInfo()[2] === 'Cannot mark an item as lost while it contains other items'
+			) {
 				throw new ValidationException($item->getCode(), null, 'Cannot mark an item as lost while it contains other items');
 			}
 			throw $e;
@@ -108,19 +114,19 @@ final class ItemDAO extends DAO {
 	 * @return bool|null tri-state: true if marked as deleted, false if not marked but exists, null if doesn't exist
 	 * @deprecated This just doesn't cut it anymore with lost items
 	 */
-	private function itemIsDeleted(ItemWithCode $item) {
+	private function itemIsDeleted(ItemWithCode $item)
+	{
 		$statement = $this->getPDO()
 			->prepare('SELECT IF(DeletedAt IS NULL, FALSE, TRUE) FROM Item WHERE `Code` = :cod');
 		try {
 			$statement->execute([$item->getCode()]);
-			if($statement->rowCount() === 0) {
+			if ($statement->rowCount() === 0) {
 				return null;
 			}
 			$result = $statement->fetch(\PDO::FETCH_NUM);
 			$exists = (bool) $result[0];
 
 			return $exists;
-
 		} finally {
 			$statement->closeCursor();
 		}
@@ -135,9 +141,10 @@ final class ItemDAO extends DAO {
 	 * @deprecated Use in tests only, replace with itemMustExist
 	 * @see itemVisible to see if item is visible or marked as deleted
 	 */
-	public function itemExists(ItemWithCode $item): bool {
+	public function itemExists(ItemWithCode $item): bool
+	{
 		$deleted = $this->itemIsDeleted($item);
-		if($deleted === null) {
+		if ($deleted === null) {
 			return false;
 		}
 
@@ -154,9 +161,10 @@ final class ItemDAO extends DAO {
 	 * @deprecated Use in tests only, replace with itemMustExist
 	 * @see itemExists to check wether item exists at all or not
 	 */
-	public function itemVisible(ItemWithCode $item): bool {
+	public function itemVisible(ItemWithCode $item): bool
+	{
 		$deleted = $this->itemIsDeleted($item);
-		if($deleted === false) {
+		if ($deleted === false) {
 			return true;
 		}
 
@@ -170,9 +178,10 @@ final class ItemDAO extends DAO {
 	 * @param bool $allowDeleted True if a deleted item is acceptable as "existing", false if deleted items should be
 	 * ignored
 	 */
-	public function itemMustExist(ItemWithCode $item, bool $allowDeleted = false) {
+	public function itemMustExist(ItemWithCode $item, bool $allowDeleted = false)
+	{
 		// Use Item instead of ProductItemFeatures because we need to check DeletedAt, and we will modify Item anyway
-		if($allowDeleted) {
+		if ($allowDeleted) {
 			$statement = $this->getPDO()
 				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod FOR UPDATE');
 		} else {
@@ -181,7 +190,7 @@ final class ItemDAO extends DAO {
 		}
 		try {
 			$statement->execute([$item->getCode()]);
-			if($statement->rowCount() === 0) {
+			if ($statement->rowCount() === 0) {
 				throw new NotFoundException();
 			}
 		} finally {
@@ -200,8 +209,9 @@ final class ItemDAO extends DAO {
 	 * @return ItemCode|null
 	 * @see itemMustExist
 	 */
-	public function getActualItemCode(string $itemCode, bool $allowDeleted = false): ?ItemCode {
-		if($allowDeleted) {
+	public function getActualItemCode(string $itemCode, bool $allowDeleted = false): ?ItemCode
+	{
+		if ($allowDeleted) {
 			$statement = $this->getPDO()
 				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod');
 		} else {
@@ -210,7 +220,7 @@ final class ItemDAO extends DAO {
 		}
 		try {
 			$statement->execute([$itemCode]);
-			if($statement->rowCount() === 0) {
+			if ($statement->rowCount() === 0) {
 				return null;
 			} else {
 				return new ItemCode($statement->fetchAll(\PDO::FETCH_NUM)[0][0]);
@@ -228,11 +238,12 @@ final class ItemDAO extends DAO {
 	 * @return null|string
 	 * @deprecated use getExtraData instead
 	 */
-	public function itemDeletedAt(ItemWithCode $item) {
+	public function itemDeletedAt(ItemWithCode $item)
+	{
 		$statement = $this->getPDO()->prepare('SELECT DeletedAt FROM Item WHERE `Code` = ?');
 		try {
 			$statement->execute([$item->getCode()]);
-			if($statement->rowCount() === 0) {
+			if ($statement->rowCount() === 0) {
 				return null;
 			}
 			$result = $statement->fetch(\PDO::FETCH_NUM);
@@ -249,11 +260,12 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param ItemWithCode $item
 	 */
-	public function undelete(ItemWithCode $item) {
+	public function undelete(ItemWithCode $item)
+	{
 		$statement = $this->getPDO()->prepare('UPDATE Item SET DeletedAt = NULL WHERE `Code` = ?');
 		try {
 			$statement->execute([$item->getCode()]);
-			if($statement->rowCount() === 0) {
+			if ($statement->rowCount() === 0) {
 				throw new NotFoundException();
 			}
 		} finally {
@@ -267,7 +279,8 @@ final class ItemDAO extends DAO {
 	 *
 	 * @param ItemWithCode $item
 	 */
-	public function unlose(ItemWithCode $item) {
+	public function unlose(ItemWithCode $item)
+	{
 		$statement = $this->getPDO()->prepare('UPDATE Item SET LostAt = NULL WHERE `Code` = ?');
 		try {
 			$statement->execute([$item->getCode()]);
@@ -283,7 +296,8 @@ final class ItemDAO extends DAO {
 	 *
 	 * @return string
 	 */
-	private function getNewCode($prefix) {
+	private function getNewCode($prefix)
+	{
 		$statement = $this->getPDO()->prepare(
 		/** @lang MySQL */
 			'SELECT GenerateCode(?)'
@@ -291,7 +305,7 @@ final class ItemDAO extends DAO {
 		try {
 			$statement->execute([$prefix]);
 			$code = $statement->fetch(\PDO::FETCH_NUM)[0];
-			if($code === null) {
+			if ($code === null) {
 				throw new \LogicException("Cannot generate code for prefix $prefix, NULL returned");
 			}
 
@@ -310,12 +324,13 @@ final class ItemDAO extends DAO {
 	 *
 	 * @return Item
 	 */
-	public function getItem(ItemWithCode $itemToGet, $token = null, int $depth = null) {
-		if($token !== null && !$this->checkToken($itemToGet, $token)) {
+	public function getItem(ItemWithCode $itemToGet, $token = null, int $depth = null)
+	{
+		if ($token !== null && !$this->checkToken($itemToGet, $token)) {
 			throw new NotFoundException($itemToGet->peekCode());
 		}
 
-		if($depth === null) {
+		if ($depth === null) {
 			$depth = 20;
 		}
 
@@ -328,7 +343,7 @@ final class ItemDAO extends DAO {
 			AND Depth <= ?
 			ORDER BY Depth ASC, `Code` ASC
 EOQ
-		// Adding "CHAR_LENGTH(`Code`) ASC" to ORDER BY makes it sort items like "R54, C124, R252, R253"...
+			// Adding "CHAR_LENGTH(`Code`) ASC" to ORDER BY makes it sort items like "R54, C124, R252, R253"...
 		);
 
 
@@ -342,7 +357,7 @@ EOQ
 			assert($result !== false, 'get root item (in a subtree)');
 
 			// First Item is the head Item
-			if(($row = $statement->fetch(\PDO::FETCH_ASSOC)) === false) {
+			if (($row = $statement->fetch(\PDO::FETCH_ASSOC)) === false) {
 				throw new NotFoundException($itemToGet->getCode());
 			} else {
 				// Now we have the real code, with correct case (database is case-insensitive)
@@ -352,9 +367,9 @@ EOQ
 			}
 
 			// Other items
-			while(($row = $statement->fetch(\PDO::FETCH_ASSOC)) !== false) {
+			while (($row = $statement->fetch(\PDO::FETCH_ASSOC)) !== false) {
 				$parent = $flat[$row['Parent']];
-				if(!isset($parent)) {
+				if (!isset($parent)) {
 					throw new \LogicException(
 						'Broken tree: got ' . $row['Code'] . ' before its parent ' . $row['Parent']
 					);
@@ -383,7 +398,8 @@ EOQ
 	 *
 	 * @return bool true if possible, false if wrong token or item doesn't exist
 	 */
-	private function checkToken(ItemWithCode $item, string $token) {
+	private function checkToken(ItemWithCode $item, string $token)
+	{
 		$tokenquery = $this->getPDO()->prepare(
 			<<<EOQ
 			SELECT IF(COUNT(*) > 0, TRUE, FALSE)
@@ -409,7 +425,8 @@ EOQ
 	 *
 	 * @param Item $head
 	 */
-	private function getExtraData(Item &$head) {
+	private function getExtraData(Item &$head)
+	{
 		// TODO: race conditions with other queries?
 		$statement = $this->getPDO()
 			->prepare(
@@ -417,29 +434,29 @@ EOQ
 			);
 		try {
 			$statement->execute([$head->getCode()]);
-			if($statement->rowCount() === 0) {
+			if ($statement->rowCount() === 0) {
 				throw new \LogicException('Item disappeared during a query');
 			}
 			$result = $statement->fetch(\PDO::FETCH_ASSOC);
 			try {
-				if($result['DeletedAt'] !== null) {
+				if ($result['DeletedAt'] !== null) {
 					$head->setDeletedAt(\DateTime::createFromFormat('U.u', $result['DeletedAt']));
 				}
-				if($result['LostAt'] !== null) {
+				if ($result['LostAt'] !== null) {
 					$head->setLostAt(\DateTime::createFromFormat('U.u', $result['LostAt']));
 				}
-			} catch(\Exception $e) {
+			} catch (\Exception $e) {
 				throw new \LogicException("Cannot create datetime", 0, $e);
 			}
 		} finally {
 			$statement->closeCursor();
 		}
-
 	}
 
-	public function getItemsForAutosuggest(string $code, bool $secondTry = false): array {
+	public function getItemsForAutosuggest(string $code, bool $secondTry = false): array
+	{
 		$limit = 10;
-		if($secondTry) {
+		if ($secondTry) {
 			$limit *= 2;
 			$value = "%$code%";
 		} else {
@@ -448,10 +465,11 @@ EOQ
 
 		$statement = $this->getPDO()
 			->prepare(
-		"SELECT Code
+				"SELECT Code
 FROM Item
 WHERE DeletedAt IS NULL AND Code LIKE :f
-LIMIT $limit");
+LIMIT $limit"
+			);
 		try {
 			$statement->bindValue(':f', $value);
 			$success = $statement->execute();
@@ -460,7 +478,7 @@ LIMIT $limit");
 		} finally {
 			$statement->closeCursor();
 		}
-		if(count($array) < $limit && !$secondTry) {
+		if (count($array) < $limit && !$secondTry) {
 			$more = $this->getItemsForAutosuggest($code, true);
 			$array = array_merge($array, array_diff($more, $array));
 		}

@@ -19,10 +19,10 @@ $now = new DateTime();
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($lastItemEntries as $line): ?>
+			<?php foreach ($lastItemEntries as $line) : ?>
 				<tr>
 					<?php $sentence = '';
-					switch($line['Change']){
+					switch ($line['Change']) {
 						case 'C':
 							$sentence = ' created';
 							break;
@@ -49,7 +49,7 @@ $now = new DateTime();
 						<small class="text-muted">by <?= $this->e($line['User']) ?> <?= $this->e($time)?></small>
 					</td>
 				</tr>
-				<?php endforeach ?>
+			<?php endforeach ?>
 			</tbody>
 		</table>
 	</div>	<div class="col">
@@ -61,10 +61,10 @@ $now = new DateTime();
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($lastProductEntries as $line): ?>
+			<?php foreach ($lastProductEntries as $line) : ?>
 				<tr>
 					<?php $sentence = '';
-					switch($line['Change']){
+					switch ($line['Change']) {
 						case 'C':
 							$sentence = ' created';
 							break;

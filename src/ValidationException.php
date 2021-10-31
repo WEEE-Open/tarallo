@@ -7,12 +7,16 @@ use Throwable;
 /**
  * When items are invalid other than for their location.
  */
-class ValidationException extends \RuntimeException {
-	use ExceptionWithItem, ExceptionWithPath;
+class ValidationException extends \RuntimeException
+{
+	use ExceptionWithItem;
+	use ExceptionWithPath;
+
 	public $status = 400;
 
-	public function __construct(?string $item = null, ?array $path = null, $message = null, $code = 0, Throwable $previous = null) {
-		if($item === null) {
+	public function __construct(?string $item = null, ?array $path = null, $message = null, $code = 0, Throwable $previous = null)
+	{
+		if ($item === null) {
 			parent::__construct($message ?? "Validation failed", $code, $previous);
 		} else {
 			parent::__construct($message ?? "$item is invalid", $code, $previous);

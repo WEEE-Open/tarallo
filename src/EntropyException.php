@@ -1,8 +1,7 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-class EntropyException extends \RuntimeException {
+class EntropyException extends \RuntimeException
+{
 }

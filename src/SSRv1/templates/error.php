@@ -8,12 +8,12 @@ $this->layout('main', ['title' => $statusCode . ' ' . $reasonPhrase, 'container'
 
 <section id="content">
 	<p class="httperror">
-        <strong class="status"><?= $statusCode ?></strong><span class="status">
-            <?= $reasonPhrase ?></span>
-    </p>
-	<?php if(isset($reason)): ?>
+		<strong class="status"><?= $statusCode ?></strong><span class="status">
+			<?= $reasonPhrase ?></span>
+	</p>
+	<?php if (isset($reason)) : ?>
 		<p><?= $this->e($reason) ?></p>
-	<?php elseif(isset($reasonNoEscape)): ?>
-        <p><?= $reasonNoEscape ?></p>
+	<?php elseif (isset($reasonNoEscape)) : ?>
+		<p><?= $reasonNoEscape ?></p>
 	<?php endif; ?>
 </section>

@@ -13,8 +13,8 @@ use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ProductCode;
 
-
-final class FeatureDAO extends DAO {
+final class FeatureDAO extends DAO
+{
 	/**
 	 * Obtain \PDO::PARAM_... constant from feature name
 	 *
@@ -24,8 +24,9 @@ final class FeatureDAO extends DAO {
 	 * @see getType
 	 *
 	 */
-	public static function getPDOType(int $type): int {
-		switch($type) {
+	public static function getPDOType(int $type): int
+	{
+		switch ($type) {
 			case BaseFeature::ENUM:
 			case BaseFeature::DOUBLE:
 			case BaseFeature::STRING:
@@ -46,8 +47,9 @@ final class FeatureDAO extends DAO {
 	 * @see getType
 	 *
 	 */
-	public static function getColumn(int $type): string {
-		switch($type) {
+	public static function getColumn(int $type): string
+	{
+		switch ($type) {
 			case BaseFeature::STRING:
 				return 'ValueText';
 			case BaseFeature::INTEGER:
@@ -68,8 +70,9 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @return ItemWithFeatures[]|Item[]|Product[] same array
 	 */
-	public function getFeaturesAll(array $items) {
-		foreach($items as $item) {
+	public function getFeaturesAll(array $items)
+	{
+		foreach ($items as $item) {
 			$this->addFeaturesTo($item);
 		}
 
@@ -83,8 +86,9 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @return ItemWithFeatures|Item|Product same item/product
 	 */
-	public function addFeaturesTo(ItemWithFeatures $item): ItemWithFeatures {
-		if($item instanceof ItemWithCode) {
+	public function addFeaturesTo(ItemWithFeatures $item): ItemWithFeatures
+	{
+		if ($item instanceof ItemWithCode) {
 			// No need to search ProductItemFeature
 			$statement = $this->getPDO()->prepare(
 				'SELECT Feature, COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) AS `Value`
@@ -108,8 +112,8 @@ final class FeatureDAO extends DAO {
 
 		try {
 			$statement->execute();
-			if($statement->rowCount() > 0) {
-				foreach($statement as $row) {
+			if ($statement->rowCount() > 0) {
+				foreach ($statement as $row) {
 					/** @var Item[] $items */
 					$item->addFeature(Feature::ofString($row['Feature'], $row['Value']));
 				}
@@ -128,7 +132,8 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @return Product same product
 	 */
-	public function getProductFeatures(Product $product): Product {
+	public function getProductFeatures(Product $product): Product
+	{
 		// No need to search in ProductItemFeature
 		// TODO: memoize results, cache them, do something (getting the same item may query the same product multiple times from the database)
 		$statement = $this->getPDO()->prepare(
@@ -143,8 +148,8 @@ final class FeatureDAO extends DAO {
 
 		try {
 			$statement->execute();
-			if($statement->rowCount() > 0) {
-				foreach($statement as $row) {
+			if ($statement->rowCount() > 0) {
+				foreach ($statement as $row) {
 					/** @var Item[] $items */
 					$product->addFeature(Feature::ofString($row['Feature'], $row['Value']));
 				}
@@ -161,8 +166,9 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @param ItemWithCode|ProductCode $item Item or product
 	 */
-	public function addAuditEntry($item) {
-		if($item instanceof ItemWithCode) {
+	public function addAuditEntry($item)
+	{
+		if ($item instanceof ItemWithCode) {
 			$statement = $this->getPDO()->prepare('INSERT INTO Audit (`Code`, `Change`, `User`) VALUES (?, \'U\', @taralloAuditUsername)');
 			$statement->bindValue(1, $item->getCode());
 		} else {
@@ -190,21 +196,22 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @return bool True if anything actually changed (and an U audit entry was generated), false otherwise.
 	 */
-	public function setFeatures(ItemWithFeatures $item): bool {
+	public function setFeatures(ItemWithFeatures $item): bool
+	{
 		// Own features, or else it duplicates product features
 		$features = $item->getOwnFeatures();
 
-		if(empty($features)) {
+		if (empty($features)) {
 			return false;
 		}
 
 		$changes = false;
-		foreach($features as $feature) {
+		foreach ($features as $feature) {
 			$changed = $this->setFeature($item, $feature);
 			$changes = $changes || $changed;
 		}
 
-		if($changes) {
+		if ($changes) {
 			assert($item instanceof ItemWithCode || $item instanceof ProductCode);
 			$this->addAuditEntry($item);
 		}
@@ -220,11 +227,12 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @return bool True if anything was deleted
 	 */
-	public function deleteFeatures(ItemWithFeatures $item, array $features): bool {
-		if(empty($features)) {
+	public function deleteFeatures(ItemWithFeatures $item, array $features): bool
+	{
+		if (empty($features)) {
 			return false;
 		}
-		if($item instanceof ItemWithCode) {
+		if ($item instanceof ItemWithCode) {
 			// This never fails, even for items that don't exist
 			$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = :cod AND `Feature`= :f');
 			$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
@@ -238,8 +246,8 @@ final class FeatureDAO extends DAO {
 
 		try {
 			$rows = 0;
-			foreach($features as $feature) {
-				if(!is_string($feature)) {
+			foreach ($features as $feature) {
+				if (!is_string($feature)) {
 					throw new \InvalidArgumentException('Name of feature to be deleted should be a string');
 				}
 
@@ -263,8 +271,9 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @return bool True if anything was deleted, false otherwise
 	 */
-	public function deleteFeaturesAll($item): bool {
-		if($item instanceof ItemWithCode) {
+	public function deleteFeaturesAll($item): bool
+	{
+		if ($item instanceof ItemWithCode) {
 			$statement = $this->getPDO()->prepare('DELETE IGNORE FROM ItemFeature WHERE `Code` = ?');
 			$statement->bindValue(1, $item->getCode());
 		} else {
@@ -293,17 +302,18 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @return bool Something actually changed or not
 	 */
-	private function setFeature($item, Feature $feature): bool {
+	private function setFeature($item, Feature $feature): bool
+	{
 		$column = self::getColumn($feature->type);
 		$type = self::getPDOType($feature->type);
 
-		if($item instanceof Product) {
+		if ($item instanceof Product) {
 			$statement = $this->setFeaturesQueryForProduct($item, $column);
 		} else {
-			if(method_exists($item, 'getProduct')) {
+			if (method_exists($item, 'getProduct')) {
 				$product = $item->getProduct();
 				/** @var Product $product */
-				if($product !== null && $product->getFeatureValue($feature->name) == $feature->value) {
+				if ($product !== null && $product->getFeatureValue($feature->name) == $feature->value) {
 					// Item feature = product feature
 					// If feature is being added, this will delete nothing and return false (no changes)
 					// If feature is being updated, this will delete old feature and return true (it changed)
@@ -319,14 +329,14 @@ final class FeatureDAO extends DAO {
 			$result = $statement->execute();
 			assert($result !== false, 'set feature');
 			return $statement->rowCount() > 0;
-		} catch(\PDOException $e) {
+		} catch (\PDOException $e) {
 			// This error has ever been witnessed when master-master replication breaks, but apparently it's used
 			// to signify that there's no foreign key target thing for the primary key other thing.
 			// That is: inserting/updating a row for an item that doesn't exist.
-			if($e->getCode() === 'HY000' && $statement->errorInfo()[1] === 1032 && $statement->errorInfo()[2] === 'Can\'t find record in \'ItemFeature\'') {
+			if ($e->getCode() === 'HY000' && $statement->errorInfo()[1] === 1032 && $statement->errorInfo()[2] === 'Can\'t find record in \'ItemFeature\'') {
 				throw new NotFoundException();
 			} else {
-				if($e->getCode() === '23000' && $statement->errorInfo()[0] === '23000' && $statement->errorInfo()[1] === 1452) {
+				if ($e->getCode() === '23000' && $statement->errorInfo()[0] === '23000' && $statement->errorInfo()[1] === 1452) {
 					throw new NotFoundException();
 				}
 			}
@@ -342,7 +352,8 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @return bool|PDOStatement
 	 */
-	private function setFeaturesQueryForItem(ItemWithFeatures $item, string $column) {
+	private function setFeaturesQueryForItem(ItemWithFeatures $item, string $column)
+	{
 		assert($item instanceof ItemWithCode);
 		$statement = $this->getPDO()->prepare("INSERT INTO ItemFeature (Feature, `Code`, `$column`) VALUES (:feature, :item, :val) ON DUPLICATE KEY UPDATE `$column`=:val2");
 		$statement->bindValue(':item', $item->getCode(), \PDO::PARAM_STR);
@@ -355,7 +366,8 @@ final class FeatureDAO extends DAO {
 	 *
 	 * @return bool|PDOStatement
 	 */
-	private function setFeaturesQueryForProduct(Product $product, string $column) {
+	private function setFeaturesQueryForProduct(Product $product, string $column)
+	{
 		$statement = $this->getPDO()->prepare("INSERT INTO ProductFeature (Feature, Brand, Model, Variant, `$column`) VALUES (:feature, :b, :m, :v, :val) ON DUPLICATE KEY UPDATE `$column`=:val2");
 		$statement->bindValue(':b', $product->getBrand(), \PDO::PARAM_STR);
 		$statement->bindValue(':m', $product->getModel(), \PDO::PARAM_STR);

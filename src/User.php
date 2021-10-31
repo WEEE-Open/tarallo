@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-class User {
+class User
+{
 	public $uid;
 	public $cn;
 	protected $level;
@@ -12,8 +11,9 @@ class User {
 	const AUTH_LEVEL_RW = 2;
 	const AUTH_LEVEL_RO = 3;
 
-	public function getLevel(): int {
-		if($this->level === null) {
+	public function getLevel(): int
+	{
+		if ($this->level === null) {
 			throw new \LogicException('Level is null');
 		}
 		return $this->level;

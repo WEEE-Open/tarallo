@@ -1,31 +1,30 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-class BaseFeature {
-	const STRING = 0;
-	const INTEGER = 1;
-	const ENUM = 2;
-	const DOUBLE = 3;
+class BaseFeature
+{
+	public const STRING = 0;
+	public const INTEGER = 1;
+	public const ENUM = 2;
+	public const DOUBLE = 3;
 
 	// Change these numbers for a different sorting
-	const GROUP_commercial = 1;
-	const GROUP_general = 2;
-	const GROUP_hddprocedures = 3;
-	const GROUP_physical = 4;
-	const GROUP_features = 5;
-	const GROUP_ports = 6;
-	const GROUP_sockets = 7;
-	const GROUP_power = 8;
-	const GROUP_powerconnectors = 9;
-	const GROUP_codes = 10;
-	const GROUP_administrative = 11;
-	const GROUP_software = 12;
+	public const GROUP_commercial = 1;
+	public const GROUP_general = 2;
+	public const GROUP_hddprocedures = 3;
+	public const GROUP_physical = 4;
+	public const GROUP_features = 5;
+	public const GROUP_ports = 6;
+	public const GROUP_sockets = 7;
+	public const GROUP_power = 8;
+	public const GROUP_powerconnectors = 9;
+	public const GROUP_codes = 10;
+	public const GROUP_administrative = 11;
+	public const GROUP_software = 12;
 
 	// BEGIN GENERATED CODE
-	const features = [
+	public const features = [
 		'brand' => self::STRING,
 		'model' => self::STRING,
 		'internal-name' => self::STRING,
@@ -143,7 +142,7 @@ class BaseFeature {
 		'jae-ports-n' => self::INTEGER,
 		'game-ports-n' => self::INTEGER,
 	];
-	const groups = [
+	public const groups = [
 		'brand' => self::GROUP_commercial,
 		'model' => self::GROUP_commercial,
 		'internal-name' => self::GROUP_commercial,
@@ -263,7 +262,7 @@ class BaseFeature {
 	];
 	// END GENERATED CODE
 
-	const itemOnlyFeatures = [
+	public const itemOnlyFeatures = [
 		'brand' => true,
 		'model' => true,
 		'variant' => true,
@@ -289,7 +288,8 @@ class BaseFeature {
 		'check' => true,
 	];
 
-	public static function featuresLastModified(): int {
+	public static function featuresLastModified(): int
+	{
 		return filemtime(__FILE__);
 	}
 
@@ -307,7 +307,8 @@ class BaseFeature {
 	 */
 	public $type;
 
-	public function __construct($name) {
+	public function __construct($name)
+	{
 		self::validateFeatureName($name);
 		$this->name = $name;
 		$this->type = self::getType($name);
@@ -320,8 +321,9 @@ class BaseFeature {
 	 *
 	 * @return int
 	 */
-	public static function getGroup($name) {
-		if(!isset(self::groups[$name])) {
+	public static function getGroup($name)
+	{
+		if (!isset(self::groups[$name])) {
 			throw new \InvalidArgumentException("Cannot get group for feature $name: doesn't exist");
 		}
 		return self::groups[$name];
@@ -332,11 +334,12 @@ class BaseFeature {
 	 *
 	 * @param string $name
 	 */
-	public static function validateFeatureName($name) {
-		if(!is_string($name)) {
+	public static function validateFeatureName($name)
+	{
+		if (!is_string($name)) {
 			throw new \InvalidArgumentException('Feature name must be a string, ' . gettype($name) . ' given');
 		}
-		if(!isset(self::features[$name])) {
+		if (!isset(self::features[$name])) {
 			throw new \InvalidArgumentException('Unknown feature name: ' . $name);
 		}
 	}
@@ -348,8 +351,9 @@ class BaseFeature {
 	 *
 	 * @return int
 	 */
-	public static function getType(string $name): int {
-		if(!isset(self::features[$name])) {
+	public static function getType(string $name): int
+	{
+		if (!isset(self::features[$name])) {
 			throw new \InvalidArgumentException("Cannot get type for feature $name: doesn't exist");
 		}
 		return is_int(self::features[$name]) ? self::features[$name] : self::ENUM;
@@ -362,19 +366,22 @@ class BaseFeature {
 	 *
 	 * @return boolean[] map from feature value to true, because reasons.
 	 */
-	public static function getOptions(string $name): array {
-		if(self::getType($name) !== self::ENUM) {
+	public static function getOptions(string $name): array
+	{
+		if (self::getType($name) !== self::ENUM) {
 			throw new \InvalidArgumentException("Feature $name is not an enum");
 		}
 		return self::features[$name];
 	}
 
 
-	public function __set($name, $value) {
+	public function __set($name, $value)
+	{
 		throw new \LogicException('Feature values are read-only');
 	}
 
-	public function __toString() {
+	public function __toString()
+	{
 		return (string) $this->name;
 	}
 }

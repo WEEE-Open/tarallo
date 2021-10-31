@@ -2,8 +2,8 @@
 
 namespace WEEEOpen\Tarallo;
 
-
-class Feature extends BaseFeature {
+class Feature extends BaseFeature
+{
 	/**
 	 * Feature value
 	 *
@@ -17,7 +17,8 @@ class Feature extends BaseFeature {
 	 * @param string $name
 	 * @param mixed $value
 	 */
-	public function __construct($name, $value) {
+	public function __construct($name, $value)
+	{
 		parent::__construct($name);
 		self::validateValue($name, $value);
 		$this->value = $value;
@@ -32,27 +33,28 @@ class Feature extends BaseFeature {
 	 *
 	 * @return Feature
 	 */
-	public static function ofString(string $name, $value) {
+	public static function ofString(string $name, $value)
+	{
 		BaseFeature::validateFeatureName($name);
-		if($value === '') {
+		if ($value === '') {
 			throw new \InvalidArgumentException("Feature $name cannot be an empty string");
 		}
-		switch(BaseFeature::getType($name)) {
+		switch (BaseFeature::getType($name)) {
 			case BaseFeature::INTEGER:
-				if(!is_numeric($value)) {
+				if (!is_numeric($value)) {
 					throw new \InvalidArgumentException("Cannot cast feature $name to integer: $value is not numeric");
 				}
 				$value = (int) $value;
-				if($value === 0) {
+				if ($value === 0) {
 					throw new \InvalidArgumentException("Feature $name = 0 has no meaning");
 				}
 				break;
 			case BaseFeature::DOUBLE:
-				if(!is_numeric($value)) {
+				if (!is_numeric($value)) {
 					throw new \InvalidArgumentException("Cannot cast feature $name to double: $value is not numeric");
 				}
 				$value = (double) $value;
-				if($value === 0) {
+				if ($value === 0) {
 					throw new \InvalidArgumentException("Feature $name = 0 has no meaning");
 				}
 				break;
@@ -66,42 +68,43 @@ class Feature extends BaseFeature {
 	 * @param string $name Feature name
 	 * @param string|int|double $value Value
 	 */
-	private static function validateValue($name, $value) {
+	private static function validateValue($name, $value)
+	{
 		$type = BaseFeature::getType($name);
-		switch($type) {
+		switch ($type) {
 			case BaseFeature::STRING:
-				if(!is_string($value)) {
+				if (!is_string($value)) {
 					throw new \InvalidArgumentException(
 						'Feature value for ' . $name . ' must be string, ' . gettype($value) . ' given'
 					);
 				}
 				break;
 			case BaseFeature::INTEGER:
-				if(!is_int($value)) {
+				if (!is_int($value)) {
 					throw new \InvalidArgumentException(
 						'Feature value for ' . $name . ' must be integer, ' . gettype($value) . ' given'
 					);
 				}
-				if($value < 0) {
+				if ($value < 0) {
 					throw new \InvalidArgumentException(
 						'Feature value for ' . $name . ' must be a positive integer, ' . $value . ' given'
 					);
 				}
 				break;
 			case BaseFeature::DOUBLE:
-				if(!is_double($value)) {
+				if (!is_double($value)) {
 					throw new \InvalidArgumentException(
 						'Feature value for ' . $name . ' must be double, ' . gettype($value) . ' given'
 					);
 				}
-				if($value < 0) {
+				if ($value < 0) {
 					throw new \InvalidArgumentException(
 						'Feature value for ' . $name . ' must be a positive double, ' . $value . ' given'
 					);
 				}
 				break;
 			case BaseFeature::ENUM:
-				if(!isset(BaseFeature::features[$name][$value])) {
+				if (!isset(BaseFeature::features[$name][$value])) {
 					throw new \InvalidArgumentException(
 						'Feature value for ' . $name . ' is not among acceptable ones: ' . $value . ' given'
 					);
@@ -112,7 +115,8 @@ class Feature extends BaseFeature {
 		}
 	}
 
-	public function __toString() {
+	public function __toString()
+	{
 		return (string) $this->value;
 	}
 }

@@ -1,4 +1,5 @@
 <?php
+
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var \WEEEOpen\Tarallo\ProductIncomplete|\WEEEOpen\Tarallo\Product|null $base */
 $base = $base ?? null;
@@ -7,6 +8,6 @@ $importedFrom = $importedFrom ?? null;
 
 $this->layout('main', ['title' => 'New product', 'currentPage' => 'product new', 'tooltips' => true]);
 $this->insert('newProduct', [
-    'base' => $base,
+	'base' => $base,
 	'importedFrom' => $importedFrom,
 ]);

@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-interface ItemWithCode {
+interface ItemWithCode
+{
 	public function getCode(): string;
 	public function peekCode(): ?string;
 	public function hasCode(): bool;

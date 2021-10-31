@@ -1,15 +1,15 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo\SSRv1\Summary;
-
 
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
-class OddSummarizer implements Summarizer {
+class OddSummarizer implements Summarizer
+{
 
-	public static function summarize(ItemWithFeatures $item): string {
+	public static function summarize(ItemWithFeatures $item): string
+	{
 		$type = $item->getFeature('type');
 		$oddType = $item->getFeature('odd-type');
 		$formFactor = $item->getFeature('odd-form-factor');

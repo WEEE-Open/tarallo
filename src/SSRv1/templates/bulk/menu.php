@@ -1,4 +1,5 @@
 <?php
+
 /** @var string $currentPage */
 ?>
 <nav class="nav nav-pills submenu">

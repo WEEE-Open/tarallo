@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-class ProductCode {
+class ProductCode
+{
 	protected $brand;
 	protected $model;
 	protected $variant;
@@ -17,45 +16,53 @@ class ProductCode {
 	 * @param string $model Model
 	 * @param string|null $variant Variant, if not set the default will be used
 	 */
-	public function __construct(string $brand, string $model, ?string $variant = null) {
+	public function __construct(string $brand, string $model, ?string $variant = null)
+	{
 		$this->brand = $brand;
 		$this->model = $model;
 		$this->variant = $variant ?? self::DEFAULT_VARIANT;
 	}
 
-	public function getBrand(): string {
+	public function getBrand(): string
+	{
 		return $this->brand;
 	}
 
-	public function getModel(): string {
+	public function getModel(): string
+	{
 		return $this->model;
 	}
 
-	public function getVariant(): string {
+	public function getVariant(): string
+	{
 		return $this->variant;
 	}
 
-	public function getVariantOrEmpty(): string {
+	public function getVariantOrEmpty(): string
+	{
 		return self::variantOrEmpty($this->variant);
 	}
 
-	public function getFullName(): string {
-		if($this->variant === self::DEFAULT_VARIANT) {
+	public function getFullName(): string
+	{
+		if ($this->variant === self::DEFAULT_VARIANT) {
 			return "$this->brand $this->model";
 		} else {
 			return "$this->brand $this->model $this->variant";
 		}
 	}
 
-	public static function variantOrEmpty(string $variant): string {
-		if($variant === self::DEFAULT_VARIANT) {
+	public static function variantOrEmpty(string $variant): string
+	{
+		if ($variant === self::DEFAULT_VARIANT) {
 			return '';
 		} else {
 			return $variant;
 		}
 	}
 
-	public function __toString() {
+	public function __toString()
+	{
 		return "$this->brand $this->model $this->variant";
 	}
 }

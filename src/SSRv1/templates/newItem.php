@@ -8,14 +8,14 @@
 $base = $base ?? null;
 $importedFrom = $importedFrom ?? null;
 $innerrecursion = $innerrecursion ?? false;
-if($base === null) {
+if ($base === null) {
 	$subitems = [];
 	$features = [];
 	$product = null;
 } else {
 	$subitems = $base->getContent();
 	$features = $base->getOwnFeatures();
-	if($base instanceof \WEEEOpen\Tarallo\ItemWithProduct) {
+	if ($base instanceof \WEEEOpen\Tarallo\ItemWithProduct) {
 		$product = $base->getProduct();
 	} else {
 		$product = null;
@@ -34,17 +34,18 @@ $isClone = isset($base) && $base->hasCode();
 				<label>Code:<input class="newcode form-control ml-sm-2" placeholder="Automatically generated"></label>
 			</div>
 		</div>
-		<?php if($isClone): ?>
+		<?php if ($isClone) : ?>
 			<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This is a copy of <span class="text-monospace"><?= $base->getCode() ?></span>, remember to change serial numbers, notes, working status, etc...</div>
-		<?php unset($noticeFeature); endif; ?>
+			<?php unset($noticeFeature);
+		endif; ?>
 
-		<?php if(isset($importedFrom)): ?>
+		<?php if (isset($importedFrom)) : ?>
 			<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This item is generated from a bulk import</span></div>
 		<?php endif; ?>
 	</header>
 
 	<nav class="itembuttons row mx-0 mt-2 justify-content-end">
-		<?php if(!$innerrecursion): ?>
+		<?php if (!$innerrecursion) : ?>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 			</button>
@@ -52,7 +53,7 @@ $isClone = isset($base) && $base->hasCode();
 					<?= isset($importedFrom) ? 'data-importId="' . (int) $importedFrom . '"' : '' ?>>
 				<i class="fa fa-save"></i>&nbsp;Save
 			</button>
-		<?php else: ?>
+		<?php else : ?>
 			<button class="btn btn-outline-danger btn-item col-4 col-sm-auto removenew" role="button">
 				<i class="fa fa-trash"></i>&nbsp;Delete
 			</button>
@@ -62,14 +63,14 @@ $isClone = isset($base) && $base->hasCode();
 <!--		</button>-->
 	</nav>
 
-	<?php if(!$innerrecursion && !$recursion): ?>
+	<?php if (!$innerrecursion && !$recursion) : ?>
 		<section class="setlocation form-inline">
 			<label for="newparent" class="my-1 mr-2">Location</label>
 			<input id="newparent" class="form-control mb-2 mr-sm-2">
 		</section>
 	<?php endif ?>
 
-	<?php if($product !== null): ?>
+	<?php if ($product !== null) : ?>
 		<section class="product features">
 			<?php
 			$this->insert('features', ['features' => $product->getFeatures()]);
@@ -97,18 +98,18 @@ $isClone = isset($base) && $base->hasCode();
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto addnew" role="button">
 			<i class="fa fa-plus-circle"></i>&nbsp;More
 		</button>
-    </nav>
+	</nav>
 
 	<section class="subitems">
 		<?php
 			// Used when cloning, empty otherwise
-			foreach($subitems as $subitem) {
-				$this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'base' => $subitem]);
-			}
+		foreach ($subitems as $subitem) {
+			$this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'base' => $subitem]);
+		}
 		?>
 	</section>
 </article>
-<?php if(!$innerrecursion) {
+<?php if (!$innerrecursion) {
 	?><script>const activate = true;</script><?php
 	$this->insert('editor');
 } ?>

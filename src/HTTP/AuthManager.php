@@ -16,7 +16,8 @@ use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\UserSSO;
 use Laminas\Diactoros\Response\RedirectResponse;
 
-class AuthManager implements MiddlewareInterface {
+class AuthManager implements MiddlewareInterface
+{
 	const COOKIE_NAME = 'tsessionsso';
 	const KEYSPACE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
 	const KEYSPACE_STRLEN = 64;
@@ -25,7 +26,8 @@ class AuthManager implements MiddlewareInterface {
 	/**
 	 * @param bool $browser The client is a browser that can be redirect to the SSO server
 	 */
-	public function __construct($browser = true) {
+	public function __construct($browser = true)
+	{
 		$this->browser = $browser;
 	}
 
@@ -35,11 +37,13 @@ class AuthManager implements MiddlewareInterface {
 	 * @param $newContent
 	 * @param $expire
 	 */
-	protected static function setCookie(string $newContent, int $expire) {
+	protected static function setCookie(string $newContent, int $expire)
+	{
 		setcookie(self::COOKIE_NAME, $newContent, $expire, '', '', !TARALLO_DEVELOPMENT_ENVIRONMENT, true);
 	}
 
-	private static function oidc() {
+	private static function oidc()
+	{
 		$oidc = new OpenIDConnectClient(TARALLO_OIDC_ISSUER, TARALLO_OIDC_CLIENT_KEY, TARALLO_OIDC_CLIENT_SECRET);
 		$oidc->addScope(['openid', 'profile']);
 		return $oidc;
@@ -53,10 +57,11 @@ class AuthManager implements MiddlewareInterface {
 	 *
 	 * @return string
 	 */
-	private static function newUniqueIdentifier(Database $db) {
+	private static function newUniqueIdentifier(Database $db)
+	{
 		do {
 			$id = self::newIdentifier();
-		} while($db->sessionDAO()->sessionExists($id));
+		} while ($db->sessionDAO()->sessionExists($id));
 
 		return $id;
 	}
@@ -67,12 +72,13 @@ class AuthManager implements MiddlewareInterface {
 	 * @return string
 	 * @see newUniqueIdentifier
 	 */
-	private static function newIdentifier() {
+	private static function newIdentifier()
+	{
 		$str = '';
-		for($i = 0; $i < 32; $i++) {
+		for ($i = 0; $i < 32; $i++) {
 			try {
 				$str .= self::KEYSPACE[random_int(0, self::KEYSPACE_STRLEN - 1)];
-			} catch(\Exception $e) {
+			} catch (\Exception $e) {
 				// Okay PHPStorm, will you stop complaining now? Please?
 				echo 'Not enough entropy';
 				exit(1);
@@ -90,28 +96,30 @@ class AuthManager implements MiddlewareInterface {
 	 *
 	 * @return bool True if it should be graced, false if it shouldn't
 	 */
-	private static function withinGrace(ServerRequestInterface $request, int $expiry): bool {
-		if(time() + TARALLO_POST_GRACE_TIME < $expiry) {
+	private static function withinGrace(ServerRequestInterface $request, int $expiry): bool
+	{
+		if (time() + TARALLO_POST_GRACE_TIME < $expiry) {
 			return false;
 		}
 		$method = $request->getMethod();
-		if($method !== 'POST' && $method !== 'PUT' && $method !== 'PATCH') {
+		if ($method !== 'POST' && $method !== 'PUT' && $method !== 'PATCH') {
 			return false;
 		}
 		return true;
 	}
 
-	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		// User is already set (by another authentication handler), skip ahead
-		if($request->getAttribute('User', null) !== null) {
+		if ($request->getAttribute('User', null) !== null) {
 			return $handler->handle($request);
 		}
 
 		$path = $request->getUri()->getPath();
 		// These paths are in the SSR thing
-		if($path === '/auth' && $this->browser) {
+		if ($path === '/auth' && $this->browser) {
 			return $this->handleAuthResponse($request, $handler);
-		} else if($path === '/logout' && $this->browser) {
+		} elseif ($path === '/logout' && $this->browser) {
 			return $this->terminate($request, $handler);
 		}
 
@@ -119,11 +127,11 @@ class AuthManager implements MiddlewareInterface {
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
-		if(isset($cookie[self::COOKIE_NAME])) {
+		if (isset($cookie[self::COOKIE_NAME])) {
 			$id = $cookie[self::COOKIE_NAME];
 			$session = $db->sessionDAO()->getSession($id);
 
-			if($session === null) {
+			if ($session === null) {
 				// Failed login or very old expired session or some kind of attack, delete the cookie
 				self::setCookie($id, 1);
 				$db->beginTransaction();
@@ -132,15 +140,15 @@ class AuthManager implements MiddlewareInterface {
 
 				$session = null;
 				$user = null;
-			} else if(time() < $session->idTokenExpiry || self::withinGrace($request, $session->idTokenExpiry)) {
+			} elseif (time() < $session->idTokenExpiry || self::withinGrace($request, $session->idTokenExpiry)) {
 				// We're good to go, the sessions is valid (or within grace time)
 				$user = UserSSO::fromSession($session);
-			} else if(time() < $session->refreshTokenExpiry) {
+			} elseif (time() < $session->refreshTokenExpiry) {
 				// Ok, ID Token expired, but Refresh Token is still valid
 
 				$refreshedSession = $this->performRefresh($session);
 
-				if($refreshedSession === null) {
+				if ($refreshedSession === null) {
 					// Refresh failed, discard all tokens and begin a new session
 					self::setCookie($id, 1);
 					$db->beginTransaction();
@@ -160,7 +168,6 @@ class AuthManager implements MiddlewareInterface {
 					$session = $refreshedSession;
 					$user = UserSSO::fromSession($refreshedSession);
 				}
-
 			} else {
 				// Everything expired, delete the old session and begin a new one
 				self::setCookie($id, 1);
@@ -180,9 +187,9 @@ class AuthManager implements MiddlewareInterface {
 
 		try {
 			$response = $handler->handle($request->withAttribute('User', $user));
-		} catch(AuthenticationException $e) {
+		} catch (AuthenticationException $e) {
 			//error_log('Caught AuthenticationException');
-			if(!$this->browser) {
+			if (!$this->browser) {
 				throw $e;
 			}
 			// We need to authenticate.
@@ -202,7 +209,7 @@ class AuthManager implements MiddlewareInterface {
 			self::setCookie($id, 0);
 
 			// Done, see you at /auth!
-			if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
+			if (TARALLO_DEVELOPMENT_ENVIRONMENT) {
 				//error_log('DEV: Bypassing authentication step 1');
 
 				http_response_code(303);
@@ -229,16 +236,16 @@ class AuthManager implements MiddlewareInterface {
 		$cookie = $request->getCookieParams();
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
-		if(isset($cookie[self::COOKIE_NAME]) && (isset($_REQUEST["code"]) || isset($_REQUEST["error"]))) {
+		if (isset($cookie[self::COOKIE_NAME]) && (isset($_REQUEST["code"]) || isset($_REQUEST["error"]))) {
 			$id = $cookie[self::COOKIE_NAME];
 			$redirect = $db->sessionDAO()->getRedirect($id);
 
-			if($redirect === null) {
+			if ($redirect === null) {
 				// Nowhere to go, probably something is missing
 				$request = $request->withAttribute('User', null);
 			} else {
 				// We have everything! Probably!
-				if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
+				if (TARALLO_DEVELOPMENT_ENVIRONMENT) {
 					//error_log('DEV: Bypassing authentication step 2');
 
 					$session = new SessionSSO();
@@ -262,7 +269,7 @@ class AuthManager implements MiddlewareInterface {
 					$session->idToken = $oidc->getIdToken();
 					$session->idTokenExpiry = $oidc->getVerifiedClaims('exp');
 					$session->idTokenValidityTime = $session->idTokenExpiry - time();
-					if($oidc->getRefreshToken() === null) {
+					if ($oidc->getRefreshToken() === null) {
 						$session->refreshToken = null;
 						$session->refreshTokenExpiry = 0;
 						$session->refreshTokenValidityTime = 0;
@@ -303,12 +310,12 @@ class AuthManager implements MiddlewareInterface {
 		$cookie = $request->getCookieParams();
 
 		// Logout done. Really really done. Just render the logout page!
-		if(isset($request->getQueryParams()['done']) && !isset($cookie[self::COOKIE_NAME])) {
+		if (isset($request->getQueryParams()['done']) && !isset($cookie[self::COOKIE_NAME])) {
 			return $handler->handle($request);
 		}
 
 		// Or let's logout and redirect!
-		if(isset($cookie[self::COOKIE_NAME])) {
+		if (isset($cookie[self::COOKIE_NAME])) {
 			// Get session data
 			$id = $cookie[self::COOKIE_NAME];
 			/** @var Database $db */
@@ -326,7 +333,7 @@ class AuthManager implements MiddlewareInterface {
 			$token = null;
 		}
 
-		if(TARALLO_DEVELOPMENT_ENVIRONMENT) {
+		if (TARALLO_DEVELOPMENT_ENVIRONMENT) {
 			//error_log('DEV: Bypassing logout');
 			return new RedirectResponse($request->getUri()->withQuery('done=true'), 302);
 		} else {
@@ -336,7 +343,8 @@ class AuthManager implements MiddlewareInterface {
 		}
 	}
 
-	private function performRefresh(SessionSSO $previousSession): ?SessionSSO {
+	private function performRefresh(SessionSSO $previousSession): ?SessionSSO
+	{
 		$oidc = new OpenIDConnectRefreshClient(TARALLO_OIDC_ISSUER, TARALLO_OIDC_CLIENT_KEY, TARALLO_OIDC_CLIENT_SECRET);
 		$oidc->addScope(['openid', 'profile']);
 		$json = $oidc->refreshToken($previousSession->refreshToken);
@@ -354,17 +362,17 @@ class AuthManager implements MiddlewareInterface {
 		// What can we do?
 		//
 		// Let's see if refresh happened, first of all...
-		if(isset($json->error)) {
+		if (isset($json->error)) {
 			error_log('Error while refreshing: ' . $json->error);
 			return null;
 		}
 		// Do we have a new ID token?
-		if(!isset($json->id_token)) {
+		if (!isset($json->id_token)) {
 			error_log('SSO server did not provide an ID token after refresh');
 			return null;
 		}
 		// We also need an access token
-		if(!isset($json->access_token)) {
+		if (!isset($json->access_token)) {
 			error_log('SSO server did not provide an access token after refresh');
 			return null;
 		}
@@ -372,10 +380,10 @@ class AuthManager implements MiddlewareInterface {
 		try {
 			// Validate the ID token signature
 			$valid = $oidc->verifyJWTsignature($json->id_token);
-			if(!$valid) {
+			if (!$valid) {
 				return null;
 			}
-		} catch(OpenIDConnectClientException $e) {
+		} catch (OpenIDConnectClientException $e) {
 			return null;
 		}
 
@@ -395,13 +403,13 @@ class AuthManager implements MiddlewareInterface {
 			$method = new ReflectionMethod($oidc, 'verifyJWTclaims');
 			$method->setAccessible(true);
 			$valid = $method->invoke($oidc, $claims, $json->access_token);
-			if(!$valid) {
+			if (!$valid) {
 				error_log('verifyJWTclaims failed');
 				return null;
 			}
-		} catch(\ReflectionException $e) {
+		} catch (\ReflectionException $e) {
 			return null;
-		} /** @noinspection PhpRedundantCatchClauseInspection */ catch(OpenIDConnectClientException $e) {
+		} /** @noinspection PhpRedundantCatchClauseInspection */ catch (OpenIDConnectClientException $e) {
 			error_log('JWT claims validation failed: ' . $e->getMessage());
 			return null;
 		}
@@ -419,7 +427,7 @@ class AuthManager implements MiddlewareInterface {
 		// Guess an expiry time, if not available
 		$session->idTokenExpiry = $claims['exp'] ?? $now + $session->idTokenValidityTime;
 		$session->idTokenValidityTime = $session->idTokenExpiry - $now;
-		if($oidc->getRefreshToken() === null) {
+		if ($oidc->getRefreshToken() === null) {
 			// No new refresh token? We'll try the old one next time, the worst that could happen is that the server
 			// rejects it
 			$session->refreshToken = $previousSession->refreshToken;

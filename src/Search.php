@@ -2,8 +2,8 @@
 
 namespace WEEEOpen\Tarallo;
 
-
-class Search {
+class Search
+{
 	private $code = null;
 	public $results = 0;
 	public $searchCode;
@@ -48,18 +48,20 @@ class Search {
 	 * @return string|null
 	 * @deprecated
 	 */
-	public function getCode() {
+	public function getCode()
+	{
 		return $this->code;
 	}
 
 	/**
 	 * @param string[]|null $sorts Map (associative array) from feature name to order (+ or -)
 	 */
-	private function sort(array $sorts = null) {
-		if($sorts !== null) {
-			if(count($sorts) > 1) {
+	private function sort(array $sorts = null)
+	{
+		if ($sorts !== null) {
+			if (count($sorts) > 1) {
 				throw new \InvalidArgumentException('Sorting by more than one field is currently unsupported');
-			} else if(count($sorts) === 0) {
+			} elseif (count($sorts) === 0) {
 				$sorts = null;
 			}
 		}
@@ -71,7 +73,8 @@ class Search {
 	 *
 	 * @return bool
 	 */
-	public function isSortOnly(): bool {
+	public function isSortOnly(): bool
+	{
 		return $this->sortOnly;
 	}
 
@@ -80,27 +83,28 @@ class Search {
 	 *
 	 * @see filter
 	 */
-	private function validate() {
+	private function validate()
+	{
 		$searchSomething = false;
 
-		if($this->searchCode !== null) {
+		if ($this->searchCode !== null) {
 			$searchSomething = true;
 		}
 
-		if($this->searchFeatures !== null) {
+		if ($this->searchFeatures !== null) {
 			$searchSomething = true;
 		}
 
-		if($this->searchAncestors !== null) {
+		if ($this->searchAncestors !== null) {
 			$searchSomething = true;
 		}
 
-		if($this->searchLocations !== null) {
+		if ($this->searchLocations !== null) {
 			$searchSomething = true;
 		}
 
-		if(!$searchSomething) {
-			if($this->sort === null) {
+		if (!$searchSomething) {
+			if ($this->sort === null) {
 				throw new \InvalidArgumentException('Nothing to search');
 			} else {
 				$this->sortOnly = true;

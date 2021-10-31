@@ -2,13 +2,14 @@
 
 namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
-
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
-class CpuSummarizer implements Summarizer {
+class CpuSummarizer implements Summarizer
+{
 
-	public static function summarize(ItemWithFeatures $item): string {
+	public static function summarize(ItemWithFeatures $item): string
+	{
 
 		$type = $item->getFeature('type');
 		$isa = $item->getFeature('isa');
@@ -18,7 +19,7 @@ class CpuSummarizer implements Summarizer {
 		$socket = $item->getFeature('cpu-socket');
 
 		$architecture = FeaturePrinter::printableValue($type);
-		if($isa) {
+		if ($isa) {
 			$architecture .= ' ' . FeaturePrinter::printableValue($isa);
 		} else {
 			$architecture .= ' (' . FeaturePrinter::printableName('isa') . '?)';
@@ -27,7 +28,7 @@ class CpuSummarizer implements Summarizer {
 		$coreStats = '';
 		$coreStats .= $numCores ? ' ' . $numCores . ' ' . FeaturePrinter::printableName('core-n') : '';
 		$coreStats .= $numThreads ? ' ' . $numThreads . ' ' . FeaturePrinter::printableName('thread-n') : '';
-		if($coreStats === '') {
+		if ($coreStats === '') {
 			$at = '';
 		} else {
 			$at = ' @';
@@ -36,25 +37,25 @@ class CpuSummarizer implements Summarizer {
 
 		$commercial = PartialSummaries::summarizeCommercial($item);
 
-		if($socket) {
+		if ($socket) {
 			$socket = FeaturePrinter::printableValue($socket);
 			$socket = explode(' (', $socket)[0];
 		} else {
 			$socket = '';
 		}
 
-		if(empty($coreStats) && empty($commercial) && empty($socket))
+		if (empty($coreStats) && empty($commercial) && empty($socket)) {
 			$pretty = FeaturePrinter::printableValue($type);
-		else {
+		} else {
 			$pretty = $architecture;
-			if($coreStats !== '') {
+			if ($coreStats !== '') {
 				$pretty .= ",$coreStats";
 			}
-			if($socket !== '') {
+			if ($socket !== '') {
 				$theWordSocketLiterally = str_replace(' (CPU)', '', FeaturePrinter::printableName('cpu-socket'));
 				$pretty .= ', ' . $theWordSocketLiterally . ' ' . $socket;
 			}
-			if($commercial !== '') {
+			if ($commercial !== '') {
 				$pretty .= ", $commercial";
 			}
 		}

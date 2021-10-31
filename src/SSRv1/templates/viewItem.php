@@ -1,4 +1,5 @@
 <?php
+
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var \WEEEOpen\Tarallo\Item $item */
 /** @var string $url */
@@ -14,7 +15,7 @@ $this->layout(
 		'tooltips' => isset($edit) || isset($add),
 	]
 );
-if(isset($depth)) {
+if (isset($depth)) {
 	$this->insert('depthWarning', ['depth' => $depth, 'viewAllUrl' => $url]);
 }
 $this->insert(

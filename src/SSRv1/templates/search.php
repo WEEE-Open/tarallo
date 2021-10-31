@@ -13,12 +13,12 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 // placeholder="?= $placeholder[array_rand($placeholder)] ?"
 ?>
 
-<?php if(!$searchId): ?>
+<?php if (!$searchId) : ?>
 	<p class="alert alert-info" id="search-tip" role="alert"><i class="fa fa-lightbulb mr-2"></i>Do you know the code already? Type it in the box in the upper right corner, instead!</p>
 <?php endif; ?>
 <p class="alert alert-danger d-none" id="search-error" role="alert"></p>
 
-<?php if($searchId && isset($depth)) {
+<?php if ($searchId && isset($depth)) {
 	$this->insert('depthWarning', ['depth' => $depth, 'viewAllUrl' => $noDepthUrl]);
 } ?>
 
@@ -97,9 +97,8 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 	</div>
 </template>
 
-<?php if($searchId === null || !empty($results)): ?>
-
-<form id="searchform" class="search-refine-collapse <?= $searchId === null ? '' : 'collapse' ?>" <?= $searchId === null ?: 'data-search-id="'.(int)$searchId.'"' ?> >
+<?php if ($searchId === null || !empty($results)) : ?>
+<form id="searchform" class="search-refine-collapse <?= $searchId === null ? '' : 'collapse' ?>" <?= $searchId === null ?: 'data-search-id="' . (int)$searchId . '"' ?> >
 	<p>Select one or more filters. Only items that match <em>all</em> the filters are returned.</p>
 	<div class="mb-2">
 		Add...
@@ -117,31 +116,31 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 	</div>
 </form>
 
-<?php if($searchId !== null): ?>
+	<?php if ($searchId !== null) : ?>
 	<button class="btn btn-primary search-refine-collapse collapse show" id="#refinecollapsebutton" data-toggle="collapse" data-target=".search-refine-collapse" role="button" aria-expanded="false" aria-controls="searchform refinecollapsebutton">
 		Refine search
 	</button>
-<?php endif; ?>
+	<?php endif; ?>
 
 <?php endif; ?>
 
-<?php if(!empty($results)): ?>
+<?php if (!empty($results)) : ?>
 	<div id="stats"><?= $total ?> results, showing <?= $resultsPerPage ?> (page <?= $page ?> of <?= $pages ?>).</div>
 <?php endif ?>
 <div class="results">
 	<?php
-	if($searchId):
-		if(empty($results)): ?>
+	if ($searchId) :
+		if (empty($results)) : ?>
 			<p>Nothing found :(</p>
 			<p><!--suppress HtmlUnknownTarget --><a href="/search/advanced" class="btn btn-primary">New search</a></p>
-		<?php else:
+		<?php else :
 			$this->insert('pagination', ['page' => $page, 'pages' => $pages, 'searchId' => $searchId]);
-			foreach($results as $item) {
+			foreach ($results as $item) {
 				/* the editor is activated by item or newItem (called by item) */
 				$parameters = ['item' => $item, 'recursion' => false];
-				if(isset($add)) {
+				if (isset($add)) {
 					$parameters['add'] = $add;
-				} else if(isset($edit)) {
+				} elseif (isset($edit)) {
 					$parameters['edit'] = $edit;
 				}
 				$this->insert('item', $parameters);
@@ -152,7 +151,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 	?>
 </div>
 
-<?php if(!isset($edit)):
-    $this->insert('editor');
+<?php if (!isset($edit)) :
+	$this->insert('editor');
 endif; ?>
 <script src="/static/search.js"></script>

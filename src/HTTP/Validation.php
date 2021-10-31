@@ -6,7 +6,8 @@ use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ValidationException;
 
-class Validation {
+class Validation
+{
 	/**
 	 * Check that key exists and it's a non-empty string.
 	 * If it's not a string, it will be cast to a string: this is used for query parameters and FastRoute parameters,
@@ -18,12 +19,13 @@ class Validation {
 	 * @return string the string
 	 * @throws MissingMandatoryParameterException
 	 */
-	public static function validateHasString(array $payload, string $key): string {
-		if(!isset($payload[$key])) {
+	public static function validateHasString(array $payload, string $key): string
+	{
+		if (!isset($payload[$key])) {
 			throw new MissingMandatoryParameterException($key);
 		}
 		$value = $payload[$key];
-		if(is_string($value)) {
+		if (is_string($value)) {
 			return $value;
 		} else {
 			return (string) $value;
@@ -50,11 +52,11 @@ class Validation {
 		?string $default = null,
 		?string $emptyString = ''
 	) {
-		if(!isset($payload[$key])) {
+		if (!isset($payload[$key])) {
 			return $default;
 		}
 		$value = $payload[$key];
-		if($value === '') {
+		if ($value === '') {
 			return $emptyString;
 		}
 		return rawurldecode($value);
@@ -71,8 +73,9 @@ class Validation {
 	 *
 	 * @return int|null Whatever the value is, or $default
 	 */
-	public static function validateOptionalInt(array $payload, string $key, ?int $default = null) {
-		if(isset($payload[$key])) {
+	public static function validateOptionalInt(array $payload, string $key, ?int $default = null)
+	{
+		if (isset($payload[$key])) {
 			return (int) $payload[$key];
 		} else {
 			return $default;
@@ -86,11 +89,12 @@ class Validation {
 	 *
 	 * @throws InvalidRequestBodyException
 	 */
-	public static function validateRequestBodyIsArray($possiblyArray) {
-		if(!is_array($possiblyArray)) {
+	public static function validateRequestBodyIsArray($possiblyArray)
+	{
+		if (!is_array($possiblyArray)) {
 			throw new InvalidRequestBodyException('Invalid request body, send some JSON instead');
 		}
-		if(empty($possiblyArray)) {
+		if (empty($possiblyArray)) {
 			throw new InvalidRequestBodyException('Empty request body, add something to that JSON array/object instead');
 		}
 	}
@@ -102,14 +106,15 @@ class Validation {
 	 *
 	 * @throws InvalidRequestBodyException
 	 */
-	public static function validateRequestBodyIsString($possiblyString) {
-		if(is_int($possiblyString)) {
+	public static function validateRequestBodyIsString($possiblyString)
+	{
+		if (is_int($possiblyString)) {
 			$possiblyString = (string) $possiblyString;
 		}
-		if(!is_string($possiblyString)) {
+		if (!is_string($possiblyString)) {
 			throw new InvalidRequestBodyException('Invalid request body, send a string instead');
 		}
-		if(trim($possiblyString) === '') {
+		if (trim($possiblyString) === '') {
 			throw new InvalidRequestBodyException('Empty request body, send a string instead');
 		}
 	}
@@ -121,9 +126,10 @@ class Validation {
 	 *
 	 * @return array ['feature', 'value']
 	 */
-	public static function explodeFeatureValuePair(string $pair) {
+	public static function explodeFeatureValuePair(string $pair)
+	{
 		$explosion = explode('=', $pair);
-		if(sizeof($explosion) !== 2) {
+		if (sizeof($explosion) !== 2) {
 			throw new \InvalidArgumentException('Invalid format for feature and value: ' . $explosion);
 		}
 		return $explosion;

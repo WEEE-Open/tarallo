@@ -9,12 +9,12 @@ $this->insert('bulk::menu', ['currentPage' => 'move', 'container' => true]);
 
 <div class="row">
 	<div class="col-12">
-	    <?php
-			if($error !== null || $moved !== null) {
-				if($error === null) {
-					$count = count($moved);
-					?><p class="alert alert-success" role="alert"><?= "Moved $count items"; ?></p><?php
-					?>
+		<?php
+		if ($error !== null || $moved !== null) {
+			if ($error === null) {
+				$count = count($moved);
+				?><p class="alert alert-success" role="alert"><?= "Moved $count items"; ?></p><?php
+?>
 						<div class="tablewrapper">
 							<table class="table table-borderless stats">
 								<thead class="thead-dark">
@@ -24,20 +24,20 @@ $this->insert('bulk::menu', ['currentPage' => 'move', 'container' => true]);
 								</tr>
 								</thead>
 								<tbody>
-								<?php foreach($moved as $code => $location): ?>
+							<?php foreach ($moved as $code => $location) : ?>
 									<tr>
 										<td><a href="/item/<?=$this->e($code)?>"><?=$this->e($code)?></a></td>
 										<td><a href="/item/<?=$this->e($location)?>"><?=$this->e($location)?></a></td>
 									</tr>
-								<?php endforeach ?>
+							<?php endforeach ?>
 								</tbody>
 							</table>
 						</div>
 					<?php
-				} else {
-					?><p class="alert alert-danger" role="alert"><?= $this->e($error) ?></p><?php
-				}
+			} else {
+				?><p class="alert alert-danger" role="alert"><?= $this->e($error) ?></p><?php
 			}
+		}
 		?>
 		<form action="/bulk/move" method="POST" enctype="multipart/form-data" id="bulk-move" class="mt-3">
 			<p>Format is "ITEM:LOCATION" or codes only (using the location below), one per line or separated by

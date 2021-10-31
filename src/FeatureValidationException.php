@@ -7,17 +7,22 @@ use Throwable;
 /**
  * When items are invalid other than for their location.
  */
-class FeatureValidationException extends \RuntimeException {
-	use ExceptionWithItem, ExceptionWithPath, ExceptionWithFeature;
+class FeatureValidationException extends \RuntimeException
+{
+	use ExceptionWithItem;
+	use ExceptionWithPath;
+	use ExceptionWithFeature;
+
 	public $status = 400;
 
-	public function __construct($feature = null, $value = null, ?array $itemPath = null, ?string $item = null, $message =	null, $code = 0, Throwable $previous = null) {
-		if($item === null && $feature === null) {
+	public function __construct($feature = null, $value = null, ?array $itemPath = null, ?string $item = null, $message = null, $code = 0, Throwable $previous = null)
+	{
+		if ($item === null && $feature === null) {
 			parent::__construct($message ?? 'Validation failed', $code, $previous);
-		} elseif($feature === null) {
+		} elseif ($feature === null) {
 			parent::__construct($message ?? "Item $item is invalid", $code, $previous);
 			$this->item = $item;
-		} elseif($item === null) {
+		} elseif ($item === null) {
 			parent::__construct($message ?? "Feature $feature is invalid", $code, $previous);
 			$this->feature = $feature;
 		} else {

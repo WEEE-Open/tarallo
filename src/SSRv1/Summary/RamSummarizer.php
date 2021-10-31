@@ -2,19 +2,20 @@
 
 namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
-
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
-class RamSummarizer implements Summarizer {
+class RamSummarizer implements Summarizer
+{
 
-	public static function summarize(ItemWithFeatures $item): string {
+	public static function summarize(ItemWithFeatures $item): string
+	{
 		$ecc = $item->getFeature('ram-ecc');
-		if($ecc === null) {
+		if ($ecc === null) {
 			$ecc = '(ECC?)';
-		} else if($ecc->value === 'yes') {
+		} elseif ($ecc->value === 'yes') {
 			$ecc = 'ECC';
-		} else if($ecc->value === 'no') {
+		} elseif ($ecc->value === 'no') {
 			$ecc = null;
 		} else {
 			$ecc = '(ECC?)';
@@ -25,7 +26,7 @@ class RamSummarizer implements Summarizer {
 		$capacity = $item->getFeature('capacity-byte');
 		$freq = $item->getFeature('frequency-hertz');
 
-		if($type && $ff && $type->value === 'simm' && $ff->value === 'simm') {
+		if ($type && $ff && $type->value === 'simm' && $ff->value === 'simm') {
 			// Avoid "RAM SIMM SIMM something, ...", one "SIMM" is enough
 			$ff = null;
 		}
@@ -39,13 +40,13 @@ class RamSummarizer implements Summarizer {
 
 		$commercial = PartialSummaries::summarizeCommercial($item);
 
-		if($technical === 'RAM (ECC?)') {
+		if ($technical === 'RAM (ECC?)') {
 			// Looks nicer
 			$technical = 'RAM';
 		}
-		if($technical !== '' && $commercial !== '') {
+		if ($technical !== '' && $commercial !== '') {
 			$pretty = "$technical, $commercial";
-		} else if($technical !== '') {
+		} elseif ($technical !== '') {
 			$pretty = $technical;
 		} else {
 			$pretty = $commercial;

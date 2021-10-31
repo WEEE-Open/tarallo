@@ -1,6 +1,7 @@
 <?php
+
 /** @var int $statusCode */
-switch($statusCode) {
+switch ($statusCode) {
 	case 400:
 		echo 'Bad Request';
 		break;

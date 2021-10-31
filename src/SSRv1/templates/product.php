@@ -33,12 +33,12 @@ $copyQuery = http_build_query([
 	<header class="row">
 		<h4 class="p-2 col m-0" id="code-<?=$this->e($product->getBrand())?>-<?=$this->e($product->getModel())?>-<?=$this->e($product->getVariant())?>"><?= str_replace(' ', '&nbsp;', $brandModel) ?><small><?= $maybeVariant ?></small></h4>
 		<nav class="p-2 m-0 ml-auto itembuttons">
-		<?php if($editing): ?>
+		<?php if ($editing) : ?>
 			<a class="btn btn-outline-secondary btn-sm btn-item disabled" role="button" href="#">
 				<i class="fa fa-pencil-alt"></i>&nbsp;Rename
 			</a>
-		<?php else: ?>
-		<?php $this->insert('manualsButton', ['class' => 'btn btn-outline-secondary btn-sm btn-item', 'product' => $product]) ?>
+		<?php else : ?>
+			<?php $this->insert('manualsButton', ['class' => 'btn btn-outline-secondary btn-sm btn-item', 'product' => $product]) ?>
 		<a class="btn btn-outline-secondary btn-sm btn-item" role="button" href="/product/<?= $bmv_rawurlencoded ?>/history">
 			<i class="fa fa-history"></i>&nbsp;History
 		</a>
@@ -47,7 +47,7 @@ $copyQuery = http_build_query([
 	</header>
 
 	<nav class="itembuttons row mx-0 mt-2">
-		<?php if($editing): ?>
+		<?php if ($editing) : ?>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 			</button>
@@ -57,7 +57,7 @@ $copyQuery = http_build_query([
 			<button class="btn btn-outline-danger btn-item col-4 col-sm-auto delete" role="button">
 				<i class="fa fa-trash"></i>&nbsp;Delete
 			</button>
-		<?php else: ?>
+		<?php else : ?>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" role="button" href="<?= $here ?>edit?from=<?= $this->e(rawurlencode($here)) ?>">
 				<i class="fa fa-edit"></i>&nbsp;Edit
 			</a>
@@ -76,14 +76,14 @@ $copyQuery = http_build_query([
 		<?php endif ?>
 	</nav>
 
-	<?php if(count($summary_escaped) > 0 && !$editing): ?>
+	<?php if (count($summary_escaped) > 0 && !$editing) : ?>
 <!--		<section class="summary open">-->
 		<section class="summary">
 			<span><?= implode('<span class="sep">, </span></span><span>', $summary_escaped) ?></span>
 		</section>
 	<?php endif; ?>
 
-	<?php if($editing): ?>
+	<?php if ($editing) : ?>
 		<section class="own features editing">
 			<?php $this->insert('featuresEdit', ['features' => $features]); ?>
 		</section>
@@ -94,14 +94,14 @@ $copyQuery = http_build_query([
 				</select></label>
 			<button class="btn btn-primary ml-2">Add</button>
 		</section>
-	<?php else: ?>
+	<?php else : ?>
 <!--		<section class="features collapse" id="collapsible-features-product">-->
 		<section class="features">
 			<?php $this->insert('features', ['features' => $features]) ?>
 		</section>
 	<?php endif ?>
 </article>
-<?php if($editing): ?>
+<?php if ($editing) : ?>
 	<script>const activate = true;</script>
 	<?php $this->insert('editor');
 endif;

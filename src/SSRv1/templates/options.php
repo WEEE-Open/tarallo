@@ -13,12 +13,12 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 ];
 ?>
 
-<?php if($error !== null): ?>
+<?php if ($error !== null) : ?>
 <div class="col-12">
 	<p class="alert alert-danger" role="alert"><?= $this->e($error) ?></p>
 </div>
 <?php endif; ?>
-<?php if($newToken !== null): ?>
+<?php if ($newToken !== null) : ?>
 <div class="col-12">
 	<p class="alert alert-success" role="alert">Here is your new token: <?= $this->e($newToken) ?></p>
 </div>
@@ -38,7 +38,7 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 		</tr>
 		</thead>
 		<tbody>
-		<?php foreach($tokens as $token): ?>
+		<?php foreach ($tokens as $token) : ?>
 		<tr>
 			<?php /** @var $session \WEEEOpen\Tarallo\SessionLocal */
 			$session = $token['Session']; ?>
@@ -54,7 +54,7 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 					<button type="submit" name="delete" value="true" class="btn btn-danger btn-sm">Delete</button>
 				</form>
 			</td>
-			<?php endforeach; ?>
+		<?php endforeach; ?>
 		</tr>
 		</tbody>
 	</table>
@@ -73,9 +73,9 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 			</div>
 	</form>
 </div>
-<?php if($user->getLevel() === \WEEEOpen\Tarallo\User::AUTH_LEVEL_ADMIN): ?>
+<?php if ($user->getLevel() === \WEEEOpen\Tarallo\User::AUTH_LEVEL_ADMIN) : ?>
 <h2>Global options</h2>
-<?php foreach($locationNames as $location => $name):?>
+	<?php foreach ($locationNames as $location => $name) :?>
 <form method="post">
 	<div class="form-group row">
 		<label for="inputLocation" class="col col-form-label"><?=$this->e($name)?></label>
@@ -87,6 +87,6 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 		</div>
 	</div>
 </form>
-<?php endforeach; ?>
+	<?php endforeach; ?>
 <?php endif; ?>
 

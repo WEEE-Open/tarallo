@@ -1,4 +1,5 @@
 <?php
+
 /** @var int $depth */
 /** @var string $viewAllUrl */
 ?>

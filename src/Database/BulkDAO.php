@@ -4,7 +4,8 @@ namespace WEEEOpen\Tarallo\Database;
 
 use WEEEOpen\Tarallo\DuplicateBulkIdentifierException;
 
-final class BulkDAO extends DAO {
+final class BulkDAO extends DAO
+{
 
 	/**
 	 * Add an entry to the bulk table
@@ -13,7 +14,8 @@ final class BulkDAO extends DAO {
 	 * @param string $type P or I (product or item)
 	 * @param string $json The raw JSON
 	 */
-	public function addBulk(string $identifier, string $type, string $json) {
+	public function addBulk(string $identifier, string $type, string $json)
+	{
 
 		$statement = $this->getPDO()->prepare(
 			'
@@ -26,8 +28,8 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 			$statement->bindValue(':json', $json, \PDO::PARAM_STR);
 			$result = $statement->execute();
 			assert($result === true, 'Add bulk');
-		} catch(\PDOException $e) {
-			if($e->getCode() === '23000' && $statement->errorInfo()[1] === 1062) {
+		} catch (\PDOException $e) {
+			if ($e->getCode() === '23000' && $statement->errorInfo()[1] === 1062) {
 				throw new DuplicateBulkIdentifierException((string) $identifier, 'Bulk already exists: ' . (string) $identifier);
 			}
 			throw $e;
@@ -39,7 +41,8 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 	/**
 	 * Get all imports from BulkTable
 	 */
-	public function getBulkImports(): array {
+	public function getBulkImports(): array
+	{
 		$statement = $this->getPDO()->query('SELECT Identifier, BulkIdentifier, `Time`, `User`, `Type`, `JSON` FROM BulkTable');
 		$imports = $statement->fetchAll();
 		return $imports;
@@ -52,7 +55,8 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 	 *
 	 * @return bool True if anything was deleted, false otherwise
 	 */
-	public function deleteBulkImport(string $identifier): bool {
+	public function deleteBulkImport(string $identifier): bool
+	{
 		$statement = $this->getPDO()->prepare('DELETE FROM BulkTable WHERE BulkIdentifier = :id');
 		try {
 			$statement->bindValue(':id', $identifier, \PDO::PARAM_STR);
@@ -70,7 +74,8 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 	 *
 	 * @return bool True if anything was deleted, false otherwise
 	 */
-	public function deleteImport(int $identifier): bool {
+	public function deleteImport(int $identifier): bool
+	{
 		$statement = $this->getPDO()->prepare('DELETE FROM BulkTable WHERE Identifier = :id');
 		try {
 			$statement->bindValue(':id', $identifier, \PDO::PARAM_INT);
@@ -88,15 +93,16 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 	 *
 	 * @return array|null The JSON as an array
 	 */
-	public function getDecodedJSON(int $Identifier): ?array {
+	public function getDecodedJSON(int $Identifier): ?array
+	{
 		$statement = $this->getPDO()->prepare('SELECT JSON FROM BulkTable WHERE Identifier = :id');
 		$importElement = null;
 		try {
 			$statement->bindValue(':id', $Identifier, \PDO::PARAM_INT);
 			$statement->execute();
 			$result = $statement->fetch();
-			if($result !== false) {
-				$importElement = json_decode($result["JSON"],JSON_OBJECT_AS_ARRAY);
+			if ($result !== false) {
+				$importElement = json_decode($result["JSON"], JSON_OBJECT_AS_ARRAY);
 			}
 		} finally {
 			$statement->closeCursor();
@@ -112,12 +118,13 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 	 *
 	 * @return bool
 	 */
-	public function bulkIdentifierExistsAndLocked(string $identifier): bool {
+	public function bulkIdentifierExistsAndLocked(string $identifier): bool
+	{
 		$statement = $this->getPDO()->prepare('SELECT Identifier FROM BulkTable WHERE BulkIdentifier = :id FOR UPDATE');
 		try {
 			$statement->bindValue(':id', $identifier, \PDO::PARAM_STR);
 			$statement->execute();
-			if($statement->rowCount() === 0) {
+			if ($statement->rowCount() === 0) {
 				return false;
 			}
 			return true;
@@ -133,12 +140,13 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 	 *
 	 * @return bool
 	 */
-	public function identifierExistsAndLocked(int $identifier): bool {
+	public function identifierExistsAndLocked(int $identifier): bool
+	{
 		$statement = $this->getPDO()->prepare('SELECT Identifier FROM BulkTable WHERE Identifier = :id FOR UPDATE');
 		try {
 			$statement->bindValue(':id', $identifier, \PDO::PARAM_INT);
 			$statement->execute();
-			if($statement->rowCount() === 0) {
+			if ($statement->rowCount() === 0) {
 				return false;
 			}
 			return true;

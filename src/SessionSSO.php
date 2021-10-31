@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-class SessionSSO {
+class SessionSSO
+{
 	public $uid;
 	public $cn;
 	public $groups;

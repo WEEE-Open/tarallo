@@ -8,6 +8,7 @@ namespace WEEEOpen\Tarallo;
  *
  * @package WEEEOpen\Tarallo
  */
-class ItemCode implements \JsonSerializable, ItemWithCode {
+class ItemCode implements \JsonSerializable, ItemWithCode
+{
 	use ItemTraitCode;
 }

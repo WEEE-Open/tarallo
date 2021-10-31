@@ -1,19 +1,20 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-trait ItemTraitProduct {
+trait ItemTraitProduct
+{
 	/** @var Product|null */
 	private $product;
 
-	public function setProduct(?Product $product) {
+	public function setProduct(?Product $product)
+	{
 		$this->product = $product;
 		return $this;
 	}
 
-	public function getProduct(): ?Product {
+	public function getProduct(): ?Product
+	{
 		return $this->product;
 	}
 }

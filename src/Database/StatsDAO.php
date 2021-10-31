@@ -1,4 +1,6 @@
-<?php /** @noinspection PhpCastIsUnnecessaryInspection */
+<?php
+
+/** @noinspection PhpCastIsUnnecessaryInspection */
 
 namespace WEEEOpen\Tarallo\Database;
 
@@ -8,7 +10,8 @@ use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\ProductCode;
 
-final class StatsDAO extends DAO {
+final class StatsDAO extends DAO
+{
 	/**
 	 * Get an AND for a WHERE clause that filters items by their location.
 	 *
@@ -17,12 +20,13 @@ final class StatsDAO extends DAO {
 	 *
 	 * @return string part of a query
 	 */
-	private function filterLocation(?ItemWithCode $location, string $alias = ''): string {
-		if($location === null) {
+	private function filterLocation(?ItemWithCode $location, string $alias = ''): string
+	{
+		if ($location === null) {
 			return '';
 		}
 
-		if($alias !== '') {
+		if ($alias !== '') {
 			$alias .= '.';
 		}
 
@@ -42,12 +46,13 @@ WHERE Ancestor = " . $this->getPDO()->quote($location->getCode()) . "
 	 *
 	 * @return string part of a query
 	 */
-	private function filterCreated(?\DateTime $creation, string $alias = ''): string {
-		if($creation === null) {
+	private function filterCreated(?\DateTime $creation, string $alias = ''): string
+	{
+		if ($creation === null) {
 			return '';
 		}
 
-		if($alias !== '') {
+		if ($alias !== '') {
 			$alias .= '.';
 		}
 
@@ -66,8 +71,9 @@ AND `Time` < FROM_UNIXTIME(" . $this->getPDO()->quote($creation->getTimestamp())
 	 *
 	 * @return string part of a query
 	 */
-	private static function filterDeletedLost(string $alias = ''): string {
-		if($alias !== '') {
+	private static function filterDeletedLost(string $alias = ''): string
+	{
+		if ($alias !== '') {
 			$alias .= '.';
 		}
 
@@ -81,9 +87,10 @@ AND `Time` < FROM_UNIXTIME(" . $this->getPDO()->quote($creation->getTimestamp())
 	 *
 	 * @return string AND `Code` IN (...) AND `Code` IN (...) ...
 	 */
-	private function filterFeatures(array $features): string {
+	private function filterFeatures(array $features): string
+	{
 		$sqlFilter = '';
-		foreach($features as $feature) {
+		foreach ($features as $feature) {
 			$sqlFilter .= "AND `Code` IN (
 			  SELECT `Code`
 			  FROM ProductItemFeatureUnified
@@ -100,7 +107,8 @@ AND `Time` < FROM_UNIXTIME(" . $this->getPDO()->quote($creation->getTimestamp())
 	 *
 	 * @return array
 	 */
-	public function getLocationsTree(): array {
+	public function getLocationsTree(): array
+	{
 		$array = [];
 
 		$notesQuery = $this->getPDO()->query(
@@ -124,8 +132,8 @@ EOQ
 		$notes = [];
 		$colors = [];
 		try {
-			foreach($notesQuery as $row) {
-				if(isset($row[1])) {
+			foreach ($notesQuery as $row) {
+				if (isset($row[1])) {
 					$notes[$row[0]] = $row[1];
 				} else {
 					$colors[$row[0]] = $row[2];
@@ -160,16 +168,16 @@ EOQ
 			$counters = [];
 			$locations = [];
 			$roots = [];
-			foreach($result as $row) {
+			foreach ($result as $row) {
 				$counters[$row['Location']] = $row['Items'];
-				if($row['Parent'] === null) {
+				if ($row['Parent'] === null) {
 					$roots[] = $row['Location'];
 				} else {
 					$locations[$row['Parent']][] = $row['Location'];
 				}
 			}
 
-			foreach($roots as $root) {
+			foreach ($roots as $root) {
 				//$array[] = [0, $root, $counters[$root]];
 				$this->parseLocationTree($array, 0, $root, $counters, $locations, $notes, $colors);
 			}
@@ -180,10 +188,11 @@ EOQ
 		return $array;
 	}
 
-	private function parseLocationTree(array &$array, int $level, string $name, array $counters, array $locations, array $notes, array $colors) {
+	private function parseLocationTree(array &$array, int $level, string $name, array $counters, array $locations, array $notes, array $colors)
+	{
 		$array[] = [$level, $name, $counters[$name], $notes[$name] ?? '', $colors[$name] ?? null];
-		if(isset($locations[$name])) {
-			foreach($locations[$name] as $location) {
+		if (isset($locations[$name])) {
+			foreach ($locations[$name] as $location) {
 				$this->parseLocationTree($array, $level + 1, $location, $counters, $locations, $notes, $colors);
 			}
 		}
@@ -206,10 +215,11 @@ EOQ
 	 * @todo try to parametrize the "type=case" filter
 	 *
 	 */
-	public function getModifiedItems(?ItemWithCode $location, bool $recent = true, int $limit = 100): array {
+	public function getModifiedItems(?ItemWithCode $location, bool $recent = true, int $limit = 100): array
+	{
 		$array = [];
 
-		if($location !== null) {
+		if ($location !== null) {
 			$locationPart = 'AND `Ancestor` IN (
 	SELECT Descendant
 	FROM Tree
@@ -242,7 +252,7 @@ LIMIT ' . (int) $limit;
 			$success = $statement->execute();
 			assert($success);
 
-			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+			while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 				$array[$row['Item']] = $row['Last'];
 			}
 		} finally {
@@ -290,7 +300,7 @@ LIMIT ' . (int) $limit;
 		$locationFilter = $this->filterLocation($location);
 		$deletedFilter = $deleted ? '' : $this->filterDeletedLost();
 		$createdFilter = $this->filterCreated($creation);
-		if($filter === null) {
+		if ($filter === null) {
 			$featureFilter = '';
 		} else {
 			$featureFilter = 'AND `Code` IN (
@@ -316,7 +326,7 @@ ORDER BY Quantity DESC, Val";
 		try {
 			$success = $statement->execute();
 			assert($success, 'count by feature');
-			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+			while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 				$array[$row['Val']] = $row['Quantity'];
 			}
 		} finally {
@@ -358,7 +368,7 @@ ORDER BY Quantity DESC, Val";
 		$locationFilter = $this->filterLocation($location);
 		$deletedFilter = $deleted ? '' : $this->filterDeletedLost();
 		$createdFilter = $this->filterCreated($creation);
-		if($filter === null) {
+		if ($filter === null) {
 			$featureFilter = '';
 		} else {
 			$featureFilter = /** @lang MySQL */ 'AND `Code` IN (
@@ -384,8 +394,8 @@ $createdFilter
 		try {
 			$success = $statement->execute();
 			assert($success, 'count by feature');
-			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-				if(!isset($array[$row['Val']])) {
+			while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+				if (!isset($array[$row['Val']])) {
 					$array[$row['Val']] = [];
 				}
 				$array[$row['Val']][] = new ItemCode($row['Code']);
@@ -420,7 +430,7 @@ $createdFilter
 		$locationFilter = self::filterLocation($location);
 		$deletedFilter = $deleted ? '' : self::filterDeletedLost();
 		$createdFilter = self::filterCreated($creation);
-        $limitFilter = $limit === null ? '' : 'LIMIT ' . (int) $limit;
+		$limitFilter = $limit === null ? '' : 'LIMIT ' . (int) $limit;
 
 		/** @noinspection SqlResolve */
 		$query = "SELECT `Code`
@@ -438,7 +448,7 @@ $limitFilter";
 		try {
 			$success = $statement->execute();
 			assert($success, 'get items by features');
-			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+			while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 				$result[] = new ItemCode($row['Code']);
 			}
 		} finally {
@@ -457,7 +467,8 @@ $limitFilter";
 	 *
 	 * @return array
 	 */
-	public function getLostItems(array $features = [], ?int $limit = null, bool $deleted = false): array {
+	public function getLostItems(array $features = [], ?int $limit = null, bool $deleted = false): array
+	{
 		$pdo = $this->getPDO();
 		$deletedFilter = $deleted ? '' : 'AND DeletedAt IS NULL';
 
@@ -479,7 +490,7 @@ $limitFilter";
 		try {
 			$success = $statement->execute();
 			assert($success, 'get lost items');
-			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+			while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 				$result[] = new ItemCode($row['Code']);
 			}
 		} finally {
@@ -536,7 +547,7 @@ LIMIT " . (int) $limit;
 		try {
 			$success = $statement->execute();
 			assert($success, 'get items by NOT features');
-			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+			while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 				$result[] = new ItemCode($row['Code']);
 			}
 		} finally {
@@ -564,7 +575,7 @@ LIMIT " . (int) $limit;
 		?\DateTime $creation = null,
 		bool $deleted = false
 	): array {
-		if(empty($features)) {
+		if (empty($features)) {
 			throw new \LogicException('Nothing roll up in');
 		}
 		$pdo = $this->getPDO();
@@ -585,16 +596,16 @@ LIMIT " . (int) $limit;
 ) ';
 
 		$group = '';
-		foreach($features as $i => $feature) {
+		foreach ($features as $i => $feature) {
 			// Can't do it with coalesce, numeric features end up in wrong order...
 			$column = FeatureDAO::getColumn(BaseFeature::getType($feature));
 
-			if(!isset(BaseFeature::features[$feature])) {
+			if (!isset(BaseFeature::features[$feature])) {
 				throw new \InvalidArgumentException("$feature is not a feature");
 			}
 			$fcolname = $feature;
 			$select .= "f$i.$column AS `$fcolname`, ";
-			if($i > 0) {
+			if ($i > 0) {
 				$from .= " JOIN ProductItemFeatureUnified AS f$i ON f0.Code=f$i.Code";
 			}
 			$where .= " AND f$i.`Feature` = " . $pdo->quote($feature);
@@ -620,20 +631,22 @@ GROUP BY $group WITH ROLLUP";
 			// Cast integers to integers, doubles to doubles... basically ignore this part and imagine that MySQL
 			// returns the correct type even with COALESCE
 			$cast = [];
-			foreach($features as $feature) {
-				if(BaseFeature::getType($feature) === BaseFeature::INTEGER || BaseFeature::getType(
+			foreach ($features as $feature) {
+				if (
+					BaseFeature::getType($feature) === BaseFeature::INTEGER || BaseFeature::getType(
 						$feature
-					) === BaseFeature::DOUBLE) {
+					) === BaseFeature::DOUBLE
+				) {
 					$cast[] = $feature;
 				}
 			}
-			if(!empty($cast)) {
-				foreach($result as &$row) {
-					foreach($cast as $feature) {
-						if($row[$feature] !== null) {
-							if(BaseFeature::getType($feature) === BaseFeature::INTEGER) {
+			if (!empty($cast)) {
+				foreach ($result as &$row) {
+					foreach ($cast as $feature) {
+						if ($row[$feature] !== null) {
+							if (BaseFeature::getType($feature) === BaseFeature::INTEGER) {
 								$row[$feature] = (int) $row[$feature];
-							} else if(BaseFeature::getType($feature) === BaseFeature::DOUBLE) {
+							} elseif (BaseFeature::getType($feature) === BaseFeature::DOUBLE) {
 								$row[$feature] = (double) $row[$feature];
 							}
 						}
@@ -654,15 +667,16 @@ GROUP BY $group WITH ROLLUP";
 	 *
 	 * @return array Associative array with rows of [product, manufacturer|null, family|null, internal|null, items count]
 	 */
-	public function getAllProducts(?string $brand, ?string $model): array {
+	public function getAllProducts(?string $brand, ?string $model): array
+	{
 		$where = [];
-		if($brand !== null) {
+		if ($brand !== null) {
 			$where[] = 'Product.Brand = :b';
 		}
-		if($model !== null) {
+		if ($model !== null) {
 			$where[] = 'Product.Model = :m';
 		}
-		if(count($where) > 0) {
+		if (count($where) > 0) {
 			$where = 'WHERE ' . implode(' AND ', $where);
 		} else {
 			$where = '';
@@ -681,24 +695,24 @@ GROUP BY $group WITH ROLLUP";
 EOQ
 		);
 		try {
-			if($brand !== null) {
+			if ($brand !== null) {
 				/** @noinspection PhpRedundantOptionalArgumentInspection */
 				$statement->bindValue(':b', $brand, \PDO::PARAM_STR);
 			}
-			if($model !== null) {
+			if ($model !== null) {
 				/** @noinspection PhpRedundantOptionalArgumentInspection */
 				$statement->bindValue(':m', $model, \PDO::PARAM_STR);
 			}
 			$result = $statement->execute();
 			assert($result === true, 'get products and count');
 			$result = [];
-			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+			while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 				$product = new ProductCode($row['Brand'], $row['Model'], $row['Variant']);
 				$result[] = [$product, $row['Manufacturer'], $row['Family'], $row['Internal'], $row['Items']];
 			}
 
 			return $result;
-		} finally{
+		} finally {
 			$statement->closeCursor();
 		}
 	}
@@ -708,7 +722,8 @@ EOQ
 	 *
 	 * @return array Associative array with rows of [brand, products count]
 	 */
-	public function getAllBrands(): array {
+	public function getAllBrands(): array
+	{
 		$statement = $this->getPDO()->prepare(<<<EOQ
 			SELECT Brand, COUNT(*) AS Products
 			FROM Product
@@ -720,12 +735,13 @@ EOQ
 			$result = $statement->execute();
 			assert($result === true, 'get brands and count');
 			return $statement->fetchAll(\PDO::FETCH_NUM);
-		} finally{
+		} finally {
 			$statement->closeCursor();
 		}
 	}
 
-	public function getAllItemsOfProduct(ProductCode $product): array {
+	public function getAllItemsOfProduct(ProductCode $product): array
+	{
 		$statement = $this->getPDO()->prepare(<<<EOQ
 		SELECT Code
 		FROM Item
@@ -736,17 +752,18 @@ EOQ
 			$result = $statement->execute([$product->getBrand(), $product->getModel(), $product->getVariant()]);
 			assert($result === true, 'get items from products and count');
 			$result = [];
-			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+			while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 				$result[] = $this->database->itemDAO()->getItem(new ItemCode($row['Code']));
 			}
 
 			return $result;
-		} finally{
+		} finally {
 			$statement->closeCursor();
 		}
 	}
 
-	public function getProductsCountByBrand(): array {
+	public function getProductsCountByBrand(): array
+	{
 		$statement = $this->getPDO()->prepare(
 			<<<EOQ
 				SELECT Brand, COUNT(DISTINCT Model) AS Models, COUNT(*) AS Variants, COUNT(*)/COUNT(DISTINCT Model) AS VPP
@@ -760,12 +777,13 @@ EOQ
 			assert($result === true, 'get products count by brand');
 
 			return $statement->fetchAll(\PDO::FETCH_ASSOC);
-		} finally{
+		} finally {
 			$statement->closeCursor();
 		}
 	}
 
-	public function getItemsWithIncompleteProducts(): array {
+	public function getItemsWithIncompleteProducts(): array
+	{
 		$statement = $this->getPDO()->prepare(
 			<<<EOQ
 				SELECT Item.Code, Item.Brand, Item.Model, Item.Variant, COUNT(DISTINCT Product.Variant) AS NumVariants
@@ -782,12 +800,13 @@ EOQ
 			assert($result === true, 'get incomplete products');
 
 			return $statement->fetchAll(\PDO::FETCH_ASSOC);
-		} finally{
+		} finally {
 			$statement->closeCursor();
 		}
 	}
 
-	public function getSplittableItems(): array {
+	public function getSplittableItems(): array
+	{
 		$statement = $this->getPDO()->prepare(
 			<<<EOQ
 				SELECT DISTINCT Item.Code, Item.Brand, Item.Model, Item.Variant, COUNT(Feature) AS Features
@@ -805,7 +824,7 @@ EOQ
 			assert($result === true, 'get splittable items');
 
 			return $statement->fetchAll(\PDO::FETCH_ASSOC);
-		} finally{
+		} finally {
 			$statement->closeCursor();
 		}
 	}
@@ -818,16 +837,16 @@ EOQ
 		?string $filterValue = '',
 		?ItemCode $location = null,
 		?array $additionalFilter = [],
-		bool $deleted = false): array {
+		bool $deleted = false
+	): array {
 		//Array with featureName=>featureValue if filtered
 		//featureName=>null if not filtered
 		$pdo = $this->getPDO();
 
 
-		if($returnCount) {
+		if ($returnCount) {
 			$select = "COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) as Val, COUNT(*) AS Quantity";
-		}
-		else{
+		} else {
 			$select = "`Code`";
 		}
 
@@ -836,18 +855,17 @@ EOQ
 
 		BaseFeature::validateFeatureName($filterName);
 		$filterCondition .= "Feature = " . $pdo->quote($filterName);
-		if($filterValue !== '') {
+		if ($filterValue !== '') {
 			$filterCondition .= " AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = " . $pdo->quote($filterValue);
 		}
 
-		foreach($additionalFilter as $name => $value){
-			if($value === null){
+		foreach ($additionalFilter as $name => $value) {
+			if ($value === null) {
 				$filterCondition .= "AND `Code` IN (
 				  SELECT `Code`
 				  FROM ProductItemFeatureUnified
 				  WHERE Feature = " . $pdo->quote($name) . ")";
-			}
-			else{
+			} else {
 				$filterCondition .= "AND `Code` IN (
 				  SELECT `Code`
 				  FROM ProductItemFeatureUnified
@@ -859,19 +877,18 @@ EOQ
 		$notInCondition = '';
 		$inCondition = '';
 
-		foreach($dict as $featureName => $value){
+		foreach ($dict as $featureName => $value) {
 			BaseFeature::validateFeatureName($featureName);
-			if($value === null){
+			if ($value === null) {
 				$notInCondition .=  "OR Feature = " . $pdo->quote($featureName);
-			}
-			else{
+			} else {
 				$inCondition .= "OR (Feature = " . $pdo->quote($featureName) .
 					" AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = " . $pdo->quote($value) . ")";
 			}
 		}
 
 		$condition = '';
-		if(!empty($notInCondition)) {
+		if (!empty($notInCondition)) {
 			//Remove the first OR
 			$notInCondition = substr($notInCondition, 3);
 			$condition .= " AND Code NOT IN (
@@ -880,7 +897,7 @@ EOQ
 			WHERE " . $notInCondition .
 				")";
 		}
-		if(!empty($inCondition)) {
+		if (!empty($inCondition)) {
 			//Remove the first OR
 			$inCondition = substr($inCondition, 3);
 			$condition .= ' AND `Code` IN (
@@ -896,7 +913,7 @@ EOQ
 		FROM ProductItemFeatureUnified
 		WHERE " . $filterCondition . $condition . $deletedFilter;
 
-		if($returnCount) {
+		if ($returnCount) {
 			$query .= " GROUP BY Val
 			ORDER BY Quantity DESC, Val ASC";
 		}
@@ -907,13 +924,12 @@ EOQ
 		try {
 			$success = $statement->execute();
 			assert($success, 'stats by feature');
-			if($returnCount) {
-				while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+			if ($returnCount) {
+				while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 					$array[$row['Val']] = $row['Quantity'];
 				}
-			}
-			else{
-				while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+			} else {
+				while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 					$array[] = $row['Code'];
 				}
 			}
@@ -924,8 +940,9 @@ EOQ
 		return $array;
 	}
 
-	public function getUsersStats(string $change = '', ?int $limit = 5): array {
-		if(!ctype_alpha($change) && $change !== ''){
+	public function getUsersStats(string $change = '', ?int $limit = 5): array
+	{
+		if (!ctype_alpha($change) && $change !== '') {
 			throw new \DomainException("Wrong input string: $change is not alphabetic");
 		}
 		$change = strtoupper($change);
@@ -945,7 +962,7 @@ EOQ
 		try {
 			$success = $statement->execute();
 			assert($success, 'Users stats');
-			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+			while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 				$array[$row['User']] = $row['Count'];
 			}
 		} finally {
@@ -955,7 +972,8 @@ EOQ
 		return $array;
 	}
 
-	public function getLastAudit(?bool $productAudit = false ,?int $limit = 10): array {
+	public function getLastAudit(?bool $productAudit = false, ?int $limit = 10): array
+	{
 
 		$select = $productAudit ? "Brand, Model, Variant, `Change`, User, Time " : "Code, `Change`, Other, User, Time";
 
@@ -978,7 +996,8 @@ LIMIT " . $limit;
 		return $array;
 	}
 
-	public function getDefaultLocations(): array {
+	public function getDefaultLocations(): array
+	{
 		//this will cause a massive bug later lmao
 		$query = "SELECT `Key`, Value
 FROM Configuration C
@@ -991,7 +1010,7 @@ WHERE `Key` != 'DataVersion' AND
 		try {
 			$success = $statement->execute();
 			assert($success, 'Default location');
-			while($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+			while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
 				$array[$row['Key']] = $row['Value'];
 			}
 		} finally {
@@ -1000,42 +1019,44 @@ WHERE `Key` != 'DataVersion' AND
 		return $array;
 	}
 
-    /**
-     * get the total and average capacity of hdds or rams
-     * @param array $hddsOrRams must have property 'quantity' for each item
-     * @param string $propertyToSum must be 'capacity-decibyte' or 'capacity-byte'
-     * @return array
-     */
-	public function getTotalAndAverageCapacity(array $hddsOrRams,string $propertyToSum):
-    array {
-        $sumOfCapacity = 0;
-        $numberOfItems = 0;
-        foreach($hddsOrRams as $item)
-        {
-            // se non possiede , l'oggetto, la proprietà quantity oppure la proprietà 'capacity-decibyte' o 'capacity-byte' cade in errore
-            if(!array_key_exists('Quantity', $item) or !array_key_exists($propertyToSum, $item))
-            {
-                throw new \InvalidArgumentException("In Array passed, a item doesn't have the property 'Capacity' or the property inserted is not equal to 'capacity-byte' or to 'capacity-decibyte'" );
-            }
-            if(!$item[$propertyToSum]) continue;
-            $sumOfCapacity += ( $item[$propertyToSum] * $item['Quantity'] );
-            $numberOfItems += $item['Quantity'];
-        }
-        return [
-            'totalCapacity' => $sumOfCapacity,
-            'averageCapacity' => ( $sumOfCapacity / $numberOfItems )
-        ];
-    }
+	/**
+	 * get the total and average capacity of hdds or rams
+	 * @param array $hddsOrRams must have property 'quantity' for each item
+	 * @param string $propertyToSum must be 'capacity-decibyte' or 'capacity-byte'
+	 * @return array
+	 */
+	public function getTotalAndAverageCapacity(array $hddsOrRams, string $propertyToSum):
+	array
+	{
+		$sumOfCapacity = 0;
+		$numberOfItems = 0;
+		foreach ($hddsOrRams as $item) {
+			// se non possiede , l'oggetto, la proprietà quantity oppure la proprietà 'capacity-decibyte' o 'capacity-byte' cade in errore
+			if (!array_key_exists('Quantity', $item) or !array_key_exists($propertyToSum, $item)) {
+				throw new \InvalidArgumentException("In Array passed, a item doesn't have the property 'Capacity' or the property inserted is not equal to 'capacity-byte' or to 'capacity-decibyte'");
+			}
+			if (!$item[$propertyToSum]) {
+				continue;
+			}
+			$sumOfCapacity += ( $item[$propertyToSum] * $item['Quantity'] );
+			$numberOfItems += $item['Quantity'];
+		}
+		return [
+			'totalCapacity' => $sumOfCapacity,
+			'averageCapacity' => ( $sumOfCapacity / $numberOfItems )
+		];
+	}
 
-    /**
-     * counts items grouped by type that have serial number
-     * @return array
-     */
-    public function countItemsByTypeThatHaveSerialNumber():
-    array {
-        $pdo = $this->getPDO();
-        $array = [];
-        $queryToSelectItemWithSn = " SELECT ValueEnum as Type, Count(*) as Quantità FROM ProductItemFeatureUnified 
+	/**
+	 * counts items grouped by type that have serial number
+	 * @return array
+	 */
+	public function countItemsByTypeThatHaveSerialNumber():
+	array
+	{
+		$pdo = $this->getPDO();
+		$array = [];
+		$queryToSelectItemWithSn = " SELECT ValueEnum as Type, Count(*) as Quantità FROM ProductItemFeatureUnified 
         RIGHT JOIN Item ON Item.Code = ProductItemFeatureUnified.Code
         WHERE ProductItemFeatureUnified.Feature = 'type' AND Item.Code IN (
             SELECT ProductItemFeatureUnified.Code
@@ -1044,7 +1065,7 @@ WHERE `Key` != 'DataVersion' AND
         )
         GROUP BY Type
         ";
-        $queryToSelectItemWithoutSn = "SELECT ValueEnum as Type, Count(*) as Quantità FROM ProductItemFeatureUnified 
+		$queryToSelectItemWithoutSn = "SELECT ValueEnum as Type, Count(*) as Quantità FROM ProductItemFeatureUnified 
         RIGHT JOIN Item ON Item.Code = ProductItemFeatureUnified.Code
         WHERE ProductItemFeatureUnified.Feature = 'type' AND Item.Code NOT IN (
             SELECT ProductItemFeatureUnified.Code
@@ -1055,38 +1076,37 @@ WHERE `Key` != 'DataVersion' AND
         ";
 
 
-        $statementToGetItemWithSn = $this->getPDO()->prepare($queryToSelectItemWithSn);
-        $statementToGetItemWithoutSn = $this->getPDO()->prepare($queryToSelectItemWithoutSn);
-        try {
-            $successItemsWithSn = $statementToGetItemWithSn->execute();
-            $successItemsWithoutSn = $statementToGetItemWithoutSn->execute();
-            assert($successItemsWithSn, 'items with sn');
-            assert($successItemsWithoutSn,'items without sn');
+		$statementToGetItemWithSn = $this->getPDO()->prepare($queryToSelectItemWithSn);
+		$statementToGetItemWithoutSn = $this->getPDO()->prepare($queryToSelectItemWithoutSn);
+		try {
+			$successItemsWithSn = $statementToGetItemWithSn->execute();
+			$successItemsWithoutSn = $statementToGetItemWithoutSn->execute();
+			assert($successItemsWithSn, 'items with sn');
+			assert($successItemsWithoutSn, 'items without sn');
 
-            while($row = $statementToGetItemWithSn->fetch(\PDO::FETCH_ASSOC))
-            {
-                $array[$row['Type']]['withSn'] = $row['Quantità'];
-            }
-            while($row = $statementToGetItemWithoutSn->fetch(\PDO::FETCH_ASSOC))
-            {
-                $array[$row['Type']]['withoutSn'] = $row['Quantità'];
-            }
-        } finally {
-            $statementToGetItemWithSn->closeCursor();
-            $statementToGetItemWithoutSn->closeCursor();
-        }
+			while ($row = $statementToGetItemWithSn->fetch(\PDO::FETCH_ASSOC)) {
+				$array[$row['Type']]['withSn'] = $row['Quantità'];
+			}
+			while ($row = $statementToGetItemWithoutSn->fetch(\PDO::FETCH_ASSOC)) {
+				$array[$row['Type']]['withoutSn'] = $row['Quantità'];
+			}
+		} finally {
+			$statementToGetItemWithSn->closeCursor();
+			$statementToGetItemWithoutSn->closeCursor();
+		}
 
-        return $array;
-    }
+		return $array;
+	}
 
-	public function setDefaultLocation(string $key, string $value) {
+	public function setDefaultLocation(string $key, string $value)
+	{
 		$pdo = $this->getPDO();
-		if(isset($this->getDefaultLocations()[$key])) {
+		if (isset($this->getDefaultLocations()[$key])) {
 			$query = "UPDATE Configuration
 SET Value = :v
 WHERE `Key` = :k";
 
-			$statement =$pdo->prepare($query);
+			$statement = $pdo->prepare($query);
 			$statement->bindValue(':v', $value);
 			$statement->bindValue(':k', $key);
 			try {

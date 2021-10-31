@@ -2,12 +2,12 @@
 
 namespace WEEEOpen\Tarallo\SSRv1;
 
-
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\ProductCode;
 
-class FeaturePrinter {
+class FeaturePrinter
+{
 	// BEGIN GENERATED CODE
 	const features = [
 		'brand' => 'Brand',
@@ -181,7 +181,7 @@ class FeaturePrinter {
 		'cib-old' => 'CIB with a department name, usually with blue border',
 		'cib' => 'Border is often faded and appears orange',
 		'owner' => 'Department or area, not a person',
-		'variant' => 'Board revisions or similar if relevant, write "'.ProductCode::DEFAULT_VARIANT.'" if not or unknown'
+		'variant' => 'Board revisions or similar if relevant, write "' . ProductCode::DEFAULT_VARIANT . '" if not or unknown'
 	];
 
 	/**
@@ -190,17 +190,19 @@ class FeaturePrinter {
 	 * @param string $name Feature name
 	 * @return string Printable value, or the given name if not printable
 	 */
-	public static function printableName(string $name): string {
-		if(isset(self::features[$name])) {
+	public static function printableName(string $name): string
+	{
+		if (isset(self::features[$name])) {
 			return self::features[$name];
 		} else {
 			return $name;
 		}
 	}
 
-	public static function printableEnumValue(string $name, string $value): string {
-		if(isset(self::featuresEnum[$name])) {
-			if(isset(self::featuresEnum[$name][$value])) {
+	public static function printableEnumValue(string $name, string $value): string
+	{
+		if (isset(self::featuresEnum[$name])) {
+			if (isset(self::featuresEnum[$name][$value])) {
 				return self::featuresEnum[$name][$value];
 			}
 		}
@@ -215,15 +217,16 @@ class FeaturePrinter {
 	 * @return string
 	 * @throws \InvalidArgumentException if it's not pretty-printable
 	 */
-	private static function prettyPrint(Feature $feature): string {
+	private static function prettyPrint(Feature $feature): string
+	{
 		$unit = self::getUnit($feature);
 		$usePrefix = self::usePrefix($unit);
 
-		if(!$usePrefix) {
+		if (!$usePrefix) {
 			return $feature->value . ' ' . $unit;
 		}
 
-		if($unit === 'byte') {
+		if ($unit === 'byte') {
 			return self::binaryConvert($feature, 'B');
 		}
 
@@ -238,26 +241,27 @@ class FeaturePrinter {
 	 *
 	 * @return string
 	 */
-	private static function getUnit(Feature $feature): string {
-		if(self::endsWith($feature->name, '-byte')) {
+	private static function getUnit(Feature $feature): string
+	{
+		if (self::endsWith($feature->name, '-byte')) {
 			return 'byte';
-		} else if(self::endsWith($feature->name, '-hertz')) {
+		} elseif (self::endsWith($feature->name, '-hertz')) {
 			return 'Hz';
-		} else if(self::endsWith($feature->name, '-decibyte')) {
+		} elseif (self::endsWith($feature->name, '-decibyte')) {
 			return 'B';
-		} else if(self::endsWith($feature->name, '-ampere')) {
+		} elseif (self::endsWith($feature->name, '-ampere')) {
 			return 'A';
-		} else if(self::endsWith($feature->name, '-volt')) {
+		} elseif (self::endsWith($feature->name, '-volt')) {
 			return 'V';
-		} else if(self::endsWith($feature->name, '-watt')) {
+		} elseif (self::endsWith($feature->name, '-watt')) {
 			return 'W';
-		} else if(self::endsWith($feature->name, '-inch')) {
+		} elseif (self::endsWith($feature->name, '-inch')) {
 			return 'in.';
-		} else if(self::endsWith($feature->name, '-rpm')) {
+		} elseif (self::endsWith($feature->name, '-rpm')) {
 			return 'rpm';
-		} else if(self::endsWith($feature->name, '-mm')) {
+		} elseif (self::endsWith($feature->name, '-mm')) {
 			return 'mm';
-		} else if(self::endsWith($feature->name, '-gram')) {
+		} elseif (self::endsWith($feature->name, '-gram')) {
 			return 'g';
 		} else {
 			throw new \InvalidArgumentException("Feature $feature is not pretty-printable");
@@ -273,8 +277,9 @@ class FeaturePrinter {
 	 *
 	 * @return bool
 	 */
-	private static function usePrefix(string $unit): bool {
-		switch($unit) {
+	private static function usePrefix(string $unit): bool
+	{
+		switch ($unit) {
 			case 'mm':
 			case 'rpm':
 			case 'in.':
@@ -284,10 +289,11 @@ class FeaturePrinter {
 		return true;
 	}
 
-	private static function endsWith(string $haystack, string $needle) {
+	private static function endsWith(string $haystack, string $needle)
+	{
 		$length = strlen($needle); // It's O(1) internally, it has been like that for decades, don't worry
 
-		if(strlen($haystack) < $length) {
+		if (strlen($haystack) < $length) {
 			return false;
 		} else {
 			return substr($haystack, -$length) === $needle;
@@ -302,11 +308,12 @@ class FeaturePrinter {
 	 *
 	 * @return string
 	 */
-	private static function binaryConvert(Feature $feature, string $unit): string {
+	private static function binaryConvert(Feature $feature, string $unit): string
+	{
 		$prefix = 0;
 		$value = $feature->value;
 
-		while($value >= 1024 && $prefix <= 6) {
+		while ($value >= 1024 && $prefix <= 6) {
 			$value = $value / 1024; // Does this do a bit shift internally, for ints at least?
 			$prefix++;
 		}
@@ -324,11 +331,12 @@ class FeaturePrinter {
 	 *
 	 * @return string
 	 */
-	private static function decimalConvert(Feature $feature, string $unit): string {
+	private static function decimalConvert(Feature $feature, string $unit): string
+	{
 		$prefix = 0;
 		$value = $feature->value;
 
-		while($value >= 1000 && $prefix <= 6) {
+		while ($value >= 1000 && $prefix <= 6) {
 			// This casts ints to doubles, but JS does that too on the client (since JS has no ints) and it has never been a problem
 			$value /= 1000;
 			$prefix++;
@@ -343,21 +351,22 @@ class FeaturePrinter {
 	 *
 	 * @return string Value to be show to the user
 	 */
-	public static function printableValue(Feature $feature) {
-		if($feature->type === BaseFeature::INTEGER || $feature->type === BaseFeature::DOUBLE) {
+	public static function printableValue(Feature $feature)
+	{
+		if ($feature->type === BaseFeature::INTEGER || $feature->type === BaseFeature::DOUBLE) {
 			try {
 				return FeaturePrinter::prettyPrint($feature);
-			} catch(\InvalidArgumentException $ignored) {
-
+			} catch (\InvalidArgumentException $ignored) {
 			}
-		} else if($feature->type === BaseFeature::ENUM) {
+		} elseif ($feature->type === BaseFeature::ENUM) {
 			return FeaturePrinter::printableEnumValue($feature->name, $feature->value);
 		}
 
 		return $feature->value;
 	}
 
-	public static function printableExplanation(BaseFeature $feature) {
+	public static function printableExplanation(BaseFeature $feature)
+	{
 		return self::featureExplanations[$feature->name] ?? null;
 	}
 
@@ -368,7 +377,8 @@ class FeaturePrinter {
 	 *
 	 * @return string Translated group name
 	 */
-	public static function printableGroup(string $group): string {
+	public static function printableGroup(string $group): string
+	{
 		return self::groupTranslations[$group];
 	}
 
@@ -380,12 +390,13 @@ class FeaturePrinter {
 	 *
 	 * @return string k, M, G, T, ...
 	 */
-	private static function unitPrefix(int $prefix, bool $bigK = false): string {
-		switch($prefix) {
+	private static function unitPrefix(int $prefix, bool $bigK = false): string
+	{
+		switch ($prefix) {
 			case 0:
 				return '';
 			case 1:
-				if($bigK) {
+				if ($bigK) {
 					return 'K';
 				} else {
 					return 'k';
@@ -410,12 +421,13 @@ class FeaturePrinter {
 		throw new \InvalidArgumentException("Invalid SI prefix (value $prefix)");
 	}
 
-	public static function getAllFeatures() {
+	public static function getAllFeatures()
+	{
 		$array = [];
 
-		foreach(BaseFeature::features as $name => $stuff) {
+		foreach (BaseFeature::features as $name => $stuff) {
 			$ntype = BaseFeature::getType($name);
-			switch($ntype) {
+			switch ($ntype) {
 				case BaseFeature::ENUM:
 					$type = 'e';
 					$values = $stuff;
@@ -435,9 +447,9 @@ class FeaturePrinter {
 			$group = BaseFeature::getGroup($name);
 			// 'group' => FeaturePrinter::printableGroup($group)
 			$line = ['name' => $name, 'type' => $type, 'printableName' => self::features[$name]];
-			if($type === 'e') {
+			if ($type === 'e') {
 				assert(isset($values));
-				foreach($values as $enumValue => $true) {
+				foreach ($values as $enumValue => $true) {
 					$line['values'][$enumValue] = self::printableEnumValue($name, $enumValue);
 				}
 			}
@@ -447,7 +459,8 @@ class FeaturePrinter {
 		return $array;
 	}
 
-	public static function getAllExplanations(): array {
+	public static function getAllExplanations(): array
+	{
 		return self::featureExplanations;
 	}
 }

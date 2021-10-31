@@ -9,11 +9,13 @@ use Psr\Http\Server\RequestHandlerInterface;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Database\DatabaseException;
 
-class DatabaseConnection implements MiddlewareInterface {
-	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+class DatabaseConnection implements MiddlewareInterface
+{
+	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		try {
 			$db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);
-		} catch(DatabaseException $e) {
+		} catch (DatabaseException $e) {
 			throw new DatabaseException('Cannot connect to database');
 		}
 

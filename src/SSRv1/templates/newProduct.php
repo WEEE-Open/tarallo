@@ -3,7 +3,7 @@
 /** @var int $importedFrom|null */
 
 $base = $base ?? null;
-if($base instanceof \WEEEOpen\Tarallo\Item) {
+if ($base instanceof \WEEEOpen\Tarallo\Item) {
 	$baseItem = $base;
 	$base = \WEEEOpen\Tarallo\Product::fromItem($base);
 }
@@ -17,18 +17,18 @@ $isClone = !isset($baseItem) && $base instanceof \WEEEOpen\Tarallo\Product && !i
 			<label for="new-product-model" class="col p-0 m-0">Model:</label><input class="col-12 form-control" value="<?= ($base instanceof \WEEEOpen\Tarallo\Product) ? $base->getModel() : '' ?>" maxlength="100" id="new-product-model">
 			<label for="new-product-variant" class="col p-0 m-0">Variant:</label><input class="col-12 form-control" value="<?= ($base instanceof \WEEEOpen\Tarallo\Product) ? $base->getVariant() : \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT ?>" maxlength="100" id="new-product-variant">
 		</div>
-		<?php if(isset($base)): ?>
-			<?php if(isset($baseItem)): ?>
+		<?php if (isset($base)) : ?>
+			<?php if (isset($baseItem)) : ?>
 				<div class="inline-alert alert-info" role="alert">
 					<i class="fa fa-info-circle"></i>&nbsp;This product is split from <span class="text-monospace"><?= $this->e($baseItem->getCode()) ?></span>
 				</div>
-			<?php elseif($isClone): ?>
+			<?php elseif ($isClone) : ?>
 				<div class="inline-alert alert-info" role="alert">
 					<i class="fa fa-info-circle"></i>&nbsp;This is a copy of <?= $this->e($base->getFullName()) ?>
 				</div>
-			<?php ?>
+				<?php ?>
 
-			<?php elseif(isset($importedFrom)): ?>
+			<?php elseif (isset($importedFrom)) : ?>
 				<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This product is generated from a bulk import</span></div>
 			<?php endif; ?>
 

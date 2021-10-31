@@ -1,4 +1,4 @@
-(async function() {
+(async function () {
 	"use strict";
 
 	let rowCounter = 0;
@@ -23,8 +23,9 @@
 	 *
 	 * @param ev Event
 	 */
-	function buttonsClick(ev) {
-		if(ev.target.tagName !== 'BUTTON') {
+	function buttonsClick(ev)
+	{
+		if (ev.target.tagName !== 'BUTTON') {
 			return;
 		}
 
@@ -40,21 +41,21 @@
 		inserted.id = "search-row-container-" + rowCounter;
 		let replace = inserted.querySelectorAll('[for="search-row-new"], [id="search-row-new"]');
 		let rowElCounter = 1;
-		for(let el of replace) {
-			if(typeof el.attributes["for"] !== "undefined" && el.attributes["for"].nodeValue === "search-row-new") {
+		for (let el of replace) {
+			if (typeof el.attributes["for"] !== "undefined" && el.attributes["for"].nodeValue === "search-row-new") {
 				el.attributes["for"].nodeValue = "search-row-" + rowCounter + "-" + rowElCounter;
 			}
-			if(typeof el.attributes["id"] !== "undefined" && el.attributes["id"].nodeValue === "search-row-new") {
+			if (typeof el.attributes["id"] !== "undefined" && el.attributes["id"].nodeValue === "search-row-new") {
 				el.attributes["id"].nodeValue = "search-row-" + rowCounter + "-" + rowElCounter++;
 			}
 		}
 
 		// Add features list to dropdown, if present
 		let features = inserted.querySelector('.allfeatures');
-		if(features) {
+		if (features) {
 			features.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
 			let comparison = inserted.querySelector('.comparison');
-			if(comparison) {
+			if (comparison) {
 				features.addEventListener('change', (ev) => {updateSearchRowFromFeature(ev.target.closest('.searchrow'), ev.target)})
 				comparison.addEventListener('change', (ev) => {
 					updateSearchRowFromComparison(ev.target.closest('.searchrow'), ev.target, features)
@@ -72,14 +73,15 @@
 		toggleSearchButton();
 	}
 
-	function toggleSearchButton() {
+	function toggleSearchButton()
+	{
 		searchButton.disabled = searchRows.childElementCount <= 0;
 		let codes = 0, locations = 0;
-		for(let el of searchRows.children) {
-			if(el.classList.contains("search-code")) {
+		for (let el of searchRows.children) {
+			if (el.classList.contains("search-code")) {
 				codes++;
 			}
-			if(el.classList.contains("search-location")) {
+			if (el.classList.contains("search-location")) {
 				locations++;
 			}
 		}
@@ -94,16 +96,17 @@
 	 * @param {HTMLElement} rowContainer The row
 	 * @param {HTMLSelectElement|null} features Optional, there's only one in each rowContainer anyway
 	 */
-	function updateSearchRowFromFeature(rowContainer, features = null) {
-		if(!features) {
+	function updateSearchRowFromFeature(rowContainer, features = null)
+	{
+		if (!features) {
 			features = rowContainer.querySelector('.allfeatures');
 		}
 
 		let comparisonElement = rowContainer.querySelector('.comparison');
 		let type = window.featureTypes.get(features.value);
 
-		if(comparisonElement.dataset.type !== type) {
-			while(comparisonElement.lastChild) {
+		if (comparisonElement.dataset.type !== type) {
+			while (comparisonElement.lastChild) {
 				comparisonElement.removeChild(comparisonElement.lastChild);
 			}
 
@@ -119,7 +122,8 @@
 		updateSearchRowFromComparison(rowContainer, comparisonElement, features)
 	}
 
-	function defaultOption() {
+	function defaultOption()
+	{
 		let defaultOption = document.createElement('option');
 		defaultOption.value = "";
 		defaultOption.disabled = true;
@@ -135,23 +139,24 @@
 	 * @param {HTMLSelectElement|null} comparisonElement Optional, there's only one in each rowContainer anyway
 	 * @param {HTMLSelectElement|null} features Optional, there's only one in each rowContainer anyway
 	 */
-	function updateSearchRowFromComparison(rowContainer, comparisonElement = null, features = null) {
-		if(!features) {
+	function updateSearchRowFromComparison(rowContainer, comparisonElement = null, features = null)
+	{
+		if (!features) {
 			features = rowContainer.querySelector('.allfeatures');
 		}
 
-		if(!comparisonElement) {
+		if (!comparisonElement) {
 			comparisonElement = rowContainer.querySelector('.comparison');
 		}
 
 		let comparisonValue = rowContainer.querySelector('.comparisonvalue');
 
-		while(comparisonValue.lastChild) {
+		while (comparisonValue.lastChild) {
 			comparisonValue.removeChild(comparisonValue.lastChild);
 		}
 
 		let compare = comparisonElement.value;
-		if(compare === '*' || compare === '!') {
+		if (compare === '*' || compare === '!') {
 			let blank = document.createElement('input');
 			blank.classList.add('form-control');
 			blank.setAttribute('aria-label', "Value");
@@ -161,7 +166,7 @@
 		} else {
 			let type = window.featureTypes.get(features.value);
 			let name = features.value;
-			if(type === 'e') {
+			if (type === 'e') {
 				let select = createFeatureValueSelector(type, name);
 				comparisonValue.appendChild(select);
 			} else {
@@ -177,8 +182,9 @@
 	 * @param {Map<string,string>} operarators
 	 * @param {HTMLSelectElement|HTMLElement} select - It's a select but PHPStorm doesn't seem to understand that
 	 */
-	function optionsFromOperators(operarators, select) {
-		for(let [operator, printable] of operarators) {
+	function optionsFromOperators(operarators, select)
+	{
+		for (let [operator, printable] of operarators) {
 			let option = document.createElement('option');
 			option.value = operator;
 			option.textContent = printable;
@@ -186,10 +192,11 @@
 		}
 	}
 
-	async function searchButtonClick(ev) {
+	async function searchButtonClick(ev)
+	{
 		// The answers that did it: https://stackoverflow.com/a/39470019
 		// Thanks vzr, you're the only one that has figured this out in the entire universe
-		if(ev.target.checkValidity()) {
+		if (ev.target.checkValidity()) {
 			ev.preventDefault();
 		} else {
 			return;
@@ -198,10 +205,12 @@
 		let error = document.getElementById('search-error');
 		let tip = document.getElementById('search-tip');
 		error.classList.add('d-none');
-		if(tip) tip.classList.add('d-none');
+		if (tip) {
+			tip.classList.add('d-none');
+		}
 
 		let id = null;
-		if(ev.target.dataset.searchId) {
+		if (ev.target.dataset.searchId) {
 			id = ev.target.dataset.searchId;
 		}
 
@@ -213,16 +222,16 @@
 		query.sort = {};
 
 		let rows = searchRows.querySelectorAll('.searchrow');
-		for(let row of rows) {
-			if(row.classList.contains('search-code')) {
+		for (let row of rows) {
+			if (row.classList.contains('search-code')) {
 				query.code = row.querySelector('.comparisonvalue').value;
-			} else if(row.classList.contains('search-location')) {
+			} else if (row.classList.contains('search-location')) {
 				query.locations.push(row.querySelector('.comparisonvalue').value);
-			} else if(row.classList.contains('search-features')) {
+			} else if (row.classList.contains('search-features')) {
 				query.features.push(getSelectedFeatures(row));
-			} else if(row.classList.contains('search-ancestor')) {
+			} else if (row.classList.contains('search-ancestor')) {
 				query.ancestor.push(getSelectedFeatures(row));
-			} else if(row.classList.contains('search-sort')) {
+			} else if (row.classList.contains('search-sort')) {
 				query.sort[row.querySelector('.allfeatures').value] = row.querySelector('.sorting').value
 			}
 		}
@@ -230,22 +239,22 @@
 		// if(query.code.length <= 0) {
 		// 	delete query.code;
 		// }
-		if(query.locations.length <= 0) {
+		if (query.locations.length <= 0) {
 			delete query.locations;
 		}
-		if(query.features.length <= 0) {
+		if (query.features.length <= 0) {
 			delete query.features;
 		}
-		if(query.ancestor.length <= 0) {
+		if (query.ancestor.length <= 0) {
 			delete query.ancestor;
 		}
-		if(query.sort.length <= 0) {
+		if (query.sort.length <= 0) {
 			delete query.sort;
 		}
 
 		let uri, method;
 
-		if(id === null) {
+		if (id === null) {
 			uri = '/v2/search';
 			method = 'POST';
 		} else {
@@ -271,13 +280,13 @@
 			});
 
 			let result = await response.json();
-			if(response.ok) {
+			if (response.ok) {
 				goTo(result);
-			} else if(response.status === 401) {
+			} else if (response.status === 401) {
 				error.textContent = 'Session expired or logged out. Open another tab, log in and try again.';
 				error.classList.remove('d-none');
 			} else {
-				if('message' in result) {
+				if ('message' in result) {
 					error.textContent = result['message'];
 				} else {
 					error.textContent = 'Error';
@@ -291,7 +300,8 @@
 		}
 	}
 
-	function goTo(code = null, page = null) {
+	function goTo(code = null, page = null)
+	{
 		let query = window.location.search;
 		let hash = window.location.hash;
 
@@ -301,14 +311,15 @@
 		window.location.href = '/search/advanced' + idFragment + pageFragment + query + hash;
 	}
 
-	function createFeatureValueSelector(type, name) {
+	function createFeatureValueSelector(type, name)
+	{
 		let valueElement;
-		switch(type) {
+		switch (type) {
 			case 'e':
 				let options = window.featureValues.get(name);
 				let optionsTranslated = window.featureValuesTranslated.get(name);
 				let optionsArray = [];
-				for(let i = 0; i < options.length; i++) {
+				for (let i = 0; i < options.length; i++) {
 					let option = document.createElement('option');
 					option.value = options[i];
 					option.textContent = optionsTranslated[i];
@@ -322,7 +333,7 @@
 				valueElement.appendChild(defaultOption());
 				valueElement.required = true;
 
-				for(let option of optionsArray) {
+				for (let option of optionsArray) {
 					valueElement.appendChild(option);
 				}
 				break;
@@ -360,9 +371,10 @@
 	 *
 	 * @param ev Event
 	 */
-	function numberChanged(ev) {
+	function numberChanged(ev)
+	{
 		let unit;
-		if(ev.target.dataset.unit) {
+		if (ev.target.dataset.unit) {
 			unit = ev.target.dataset.unit;
 		} else {
 			// Extreme caching techniques
@@ -371,7 +383,7 @@
 		}
 		try {
 			let newValue = window.unitPrintableToValue(unit, ev.target.value);
-			if(ev.target.dataset.internalType === 'i' && (newValue % 1 !== 0)) {
+			if (ev.target.dataset.internalType === 'i' && (newValue % 1 !== 0)) {
 				// noinspection ExceptionCaughtLocallyJS
 				throw new Error("Value must represent an integer");
 			}
@@ -379,9 +391,9 @@
 			ev.target.dataset.internalValue = newValue.toString();
 			// Print it
 			ev.target.value = window.unitValueToPrintable(unit, newValue);
-		} catch(e) {
+		} catch (e) {
 			// Rollback
-			if(ev.target.dataset.internalValue === '') {
+			if (ev.target.dataset.internalValue === '') {
 				ev.target.value = '';
 			} else {
 				ev.target.value = window.unitValueToPrintable(unit, parseInt(ev.target.dataset.internalValue));
@@ -395,13 +407,14 @@
 		}
 	}
 
-	function getSelectedFeatures(row) {
+	function getSelectedFeatures(row)
+	{
 		let name = row.querySelector('.allfeatures').value;
 		let comparison = row.querySelector('.comparison').value;
 
 		let value;
 		let element = row.querySelector('.comparisonvalue').firstElementChild;
-		if(element.disabled) {
+		if (element.disabled) {
 			value = null;
 		} else {
 			switch (element.dataset.internalType) {

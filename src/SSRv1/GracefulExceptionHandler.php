@@ -1,8 +1,6 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo\SSRv1;
-
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -11,17 +9,19 @@ use Psr\Http\Server\RequestHandlerInterface;
 use WEEEOpen\Tarallo\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\NotFoundException;
 
-class GracefulExceptionHandler implements MiddlewareInterface {
+class GracefulExceptionHandler implements MiddlewareInterface
+{
 
-	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 
 		try {
 			return $handler->handle($request);
-		} catch(AuthorizationException $e) {
+		} catch (AuthorizationException $e) {
 			$request = $request
 				->withAttribute('Template', 'error')
 				->withAttribute('ResponseCode', 403);
-		} catch(NotFoundException $e) {
+		} catch (NotFoundException $e) {
 			$request = $request
 				->withAttribute('Template', 'error')
 				->withAttribute('TemplateParameters', ['reason' => 'Whatever you\'re looking for, it doesn\'t exist.'])

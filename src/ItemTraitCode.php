@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-trait ItemTraitCode {
+trait ItemTraitCode
+{
 	protected $code;
 
 	/**
@@ -14,50 +13,58 @@ trait ItemTraitCode {
 	 *
 	 * @see ItemTraitOptionalCode if the code should be optional
 	 */
-	public function __construct($code) {
-		if(is_string($code) && trim($code) !== '') {
+	public function __construct($code)
+	{
+		if (is_string($code) && trim($code) !== '') {
 			self::validateCode($code);
 			$this->code = $code;
 		} else {
-			if(!is_string($code)) {
+			if (!is_string($code)) {
 				$code = null;
 			}
 			throw new ValidationException($code, null, 'Item code must be a non-empty alphanumeric string or null');
 		}
 	}
 
-	public static function validateCode($code) {
-		if(function_exists('ctype_alnum')) {
+	public static function validateCode($code)
+	{
+		if (function_exists('ctype_alnum')) {
 			$valid = ctype_alnum($code);
 		} else {
 			$valid = preg_match('/^[a-zA-Z0-9]+$/', $code);
 		}
-		if(!$valid) {
+		if (!$valid) {
 			throw new ValidationException($code, null, "Code must be alphanumeric, '$code' isn't");
 		}
 	}
 
-	public function getCode(): string {
+	public function getCode(): string
+	{
 		return $this->code;
 	}
 
-	public function peekCode(): ?string {
+	public function peekCode(): ?string
+	{
 		return $this->code;
 	}
 
-	public function hasCode(): bool {
+	public function hasCode(): bool
+	{
 		return true;
 	}
 
-	public function compareCode(ItemWithCode $other): int {
+	public function compareCode(ItemWithCode $other): int
+	{
 		return strcasecmp($this->getCode(), $other->getCode());
 	}
 
-	public function jsonSerialize() {
+	public function jsonSerialize()
+	{
 		return $this->getCode();
 	}
 
-	public function __toString() {
+	public function __toString()
+	{
 		return $this->getCode();
 	}
 }

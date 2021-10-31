@@ -16,9 +16,9 @@ if(!is_file($data_filename)) {
 
 $data = file_get_contents($data_filename);
 $lines = preg_split('/[\n\r]/', $data, -1, PREG_SPLIT_NO_EMPTY);
-$resultphp = "\t// BEGIN GENERATED CODE" . PHP_EOL . "\tconst features = [" . PHP_EOL;
-$resultphp2 = "\tconst groups = [" . PHP_EOL;
-$resultlocalized = "\t// BEGIN GENERATED CODE" . PHP_EOL . "\tconst features = [" . PHP_EOL;
+$resultphp = "\t// BEGIN GENERATED CODE" . PHP_EOL . "\tpublic const features = [" . PHP_EOL;
+$resultphp2 = "\tpublic const groups = [" . PHP_EOL;
+$resultlocalized = "\t// BEGIN GENERATED CODE" . PHP_EOL . "\tpublic const features = [" . PHP_EOL;
 $resultlocalized2 = '';
 
 $block = 0;
@@ -153,7 +153,7 @@ $resultphp .= "\t];" . PHP_EOL . "\t// END GENERATED CODE";
 
 $resultlocalized .= "\t];" . PHP_EOL;
 $resultlocalized2 .= "\t];" . PHP_EOL . "\t// END GENERATED CODE";
-$resultlocalized = implode("\tconst featuresEnum = [\n", [$resultlocalized, $resultlocalized2]);
+$resultlocalized = implode("\tpublic const featuresEnum = [\n", [$resultlocalized, $resultlocalized2]);
 unset($resultlocalized2);
 
 $php_filename = $basedir . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'BaseFeature.php';

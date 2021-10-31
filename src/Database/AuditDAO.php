@@ -2,11 +2,11 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
-
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\ProductCode;
 
-class AuditDAO extends DAO {
+class AuditDAO extends DAO
+{
 	/**
 	 * Get audit table entries, most recent first
 	 *
@@ -15,7 +15,8 @@ class AuditDAO extends DAO {
 	 *
 	 * @return array
 	 */
-	public function getRecentAudit(int $perPage, int $page) {
+	public function getRecentAudit(int $perPage, int $page)
+	{
 		$statement = $this->getPDO()->prepare(
 			'SELECT `Code` AS `code`, `Change` AS `change`, Other AS `other`, UNIX_TIMESTAMP(`Time`) AS `time`, `User` AS `user`
 FROM Audit
@@ -44,7 +45,8 @@ LIMIT :offs, :cnt'
 	 *
 	 * @return array
 	 */
-	public function getRecentAuditByType(string $type, int $howMany) {
+	public function getRecentAuditByType(string $type, int $howMany)
+	{
 		$array = [];
 
 		$statement = $this->getPDO()->prepare(
@@ -60,7 +62,7 @@ LIMIT ?'
 		assert($result !== false, 'get audit by type');
 
 		try {
-			foreach($statement as $row) {
+			foreach ($statement as $row) {
 				$array[$row['Code']] = $row['Time'];
 			}
 		} finally {
@@ -78,7 +80,8 @@ LIMIT ?'
 	 *
 	 * @return array
 	 */
-	public function getItemHistory(ItemWithCode $item, int $howMany) {
+	public function getItemHistory(ItemWithCode $item, int $howMany)
+	{
 		$statement = $this->getPDO()->prepare(
 			'SELECT `Change` as `change`, Other as other, UNIX_TIMESTAMP(`Time`) AS `time`, `User` as `user`
 FROM Audit
@@ -106,7 +109,8 @@ LIMIT ?'
 	 *
 	 * @return array
 	 */
-	public function getProductHistory(ProductCode $product, int $howMany) {
+	public function getProductHistory(ProductCode $product, int $howMany)
+	{
 		$statement = $this->getPDO()->prepare(
 			'SELECT `Change` as `change`, UNIX_TIMESTAMP(`Time`) AS `time`, `User` as `user`
 FROM AuditProduct

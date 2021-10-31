@@ -2,13 +2,14 @@
 
 namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
-
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
-class CaseSummarizer implements Summarizer {
+class CaseSummarizer implements Summarizer
+{
 
-	public static function summarize(ItemWithFeatures $item): string {
+	public static function summarize(ItemWithFeatures $item): string
+	{
 		$type = $item->getFeature('type');
 		$form = $item->getFeature('motherboard-form-factor');
 		$color = $item->getFeature('color');

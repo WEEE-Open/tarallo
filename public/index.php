@@ -19,9 +19,9 @@ require '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.ph
 $request = ServerRequestFactory::fromGlobals();
 $area = substr($request->getUri()->getPath(), 0, 4);
 
-if($area === '/v2/') {
+if ($area === '/v2/') {
 	$response = (new APIv2\Controller())->handle($request);
-} elseif($area === '/v1/') {
+} elseif ($area === '/v1/') {
 	$response = new JsonResponse(ErrorResponse::fromMessage('The v1 API is gone. Use v2.'), 410);
 } else {
 	$response = (new SSRv1\Controller())->handle($request);

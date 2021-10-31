@@ -1,13 +1,14 @@
 <?php
+
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var string $moveDefaultFrom */
 /** @var string $currentPage */
 $moveDefaultFrom = $moveDefaultFrom ?? null;
 $currentPageShort = explode(' ', $currentPage)[0];
-$hereClass = function($page, $current){
+$hereClass = function ($page, $current) {
 	return $page === $current ? 'active' : '';
 };
-$hereSr = function($page, $current) {
+$hereSr = function ($page, $current) {
 	return $page === $current ? ' <span class="sr-only">(current)</span>' : '';
 };
 ?>

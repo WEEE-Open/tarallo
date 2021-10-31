@@ -2,18 +2,19 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
-
-class Updater extends DAO {
+class Updater extends DAO
+{
 	private $schemaVersion;
 	private $dataVersion;
 
-	public function __construct(Database $db, $callback) {
+	public function __construct(Database $db, $callback)
+	{
 		parent::__construct($db, $callback);
 		try {
 			$result = $this->getPDO()->query("SELECT `Value` FROM Configuration WHERE `Key` = 'SchemaVersion'");
 			$this->schemaVersion = (int) $result->fetchColumn();
-		} catch(\PDOException $e) {
-			if($e->getCode() === '42S02') {
+		} catch (\PDOException $e) {
+			if ($e->getCode() === '42S02') {
 				$this->schemaVersion = 0;
 				$this->dataVersion = 0;
 				return;
@@ -27,20 +28,22 @@ class Updater extends DAO {
 		echo 'Start from schema version ' . $this->schemaVersion . ' and data version ' . $this->dataVersion . PHP_EOL;
 	}
 
-	public function updateTo(int $schema, int $data) {
+	public function updateTo(int $schema, int $data)
+	{
 		$this->updateSchema($schema);
 		$this->updateData($data);
 	}
 
-	private function updateSchema(int $schema) {
-		if($this->schemaVersion === $schema) {
+	private function updateSchema(int $schema)
+	{
+		if ($this->schemaVersion === $schema) {
 			return;
-		} else if($this->schemaVersion > $schema) {
+		} elseif ($this->schemaVersion > $schema) {
 			throw new \InvalidArgumentException("Trying to downgrade schema from $this->schemaVersion to $schema");
 		}
 		// $schema is now > $this->schemaVersion
-		while($this->schemaVersion < $schema) {
-			switch($this->schemaVersion) {
+		while ($this->schemaVersion < $schema) {
+			switch ($this->schemaVersion) {
 				case 0:
 					$this->exec(
 						<<<EOQ
@@ -199,7 +202,7 @@ EOQ
 					// databases, so...
 					// Mark as lost all the items in the "Lost" location, if it exists.
 					$intermediate = $this->getPDO()->query("SELECT Code FROM Item WHERE Code = 'Lost'");
-					if($intermediate->rowCount() > 0) {
+					if ($intermediate->rowCount() > 0) {
 						// Close that cursor so we can do other stuff
 						$intermediate->closeCursor();
 						// Trigger will create and Audit entry, this requires an username... will fix them manually
@@ -208,7 +211,7 @@ EOQ
 						// Also, there still trigger preventing this from being a single query...
 						$intermediate2 = $this->getPDO()->query("SELECT DISTINCT Descendant FROM Tree WHERE Ancestor = 'Lost' AND Depth > 0");
 						$fetched = $intermediate2->fetchAll(\PDO::FETCH_COLUMN);
-						foreach($fetched as $item) {
+						foreach ($fetched as $item) {
 							// Again, there are a billion triggers preventing the simplest of queries, so we have to
 							// make some inane byzantine workarounds, I don't even know anymore, it's 1.30 AM I just
 							// want to insert these damn 4 rows into the damn table and be done with it, please,
@@ -301,8 +304,8 @@ EOQ
     FROM `Session`
     WHERE LastAccess < TIMESTAMPADD(DAY, -2, NOW());
 ');
-$this->exec('DROP EVENT IF EXISTS `TokensCleanup`;');
-$this->exec('CREATE EVENT `TokensCleanup`
+					$this->exec('DROP EVENT IF EXISTS `TokensCleanup`;');
+					$this->exec('CREATE EVENT `TokensCleanup`
     ON SCHEDULE EVERY \'1\' DAY
     ON COMPLETION PRESERVE
     ENABLE DO
@@ -509,12 +512,10 @@ SQL SECURITY INVOKER
 					try {
 						$this->exec("ALTER TABLE AuditProduct DROP CONSTRAINT check_change;");
 					} catch (\PDOException $ignored) {
-
 					}
 					try {
 						$this->exec("ALTER TABLE AuditProduct DROP CONSTRAINT check_change_2;");
 					} catch (\PDOException $ignored) {
-
 					}
 					$this->exec("ALTER TABLE AuditProduct ADD CONSTRAINT check_change CHECK (`Change` IN ('C', 'R', 'U', 'D'));");
 					$this->exec("DROP TRIGGER IF EXISTS AuditRenameProduct;");
@@ -553,8 +554,7 @@ END;");
           AND Item.Variant = AuditProduct.Variant
           AND AuditProduct.Change IN ('C', 'U')
           AND DATEDIFF(NOW(), AuditProduct.Time) >= 1
-    )"
-					);
+    )");
 				case 16:
 					$this->exec(
 						"CREATE TABLE `BulkTable`
@@ -632,10 +632,10 @@ BEGIN
 END;"
 					);
 					break;
-					case 18:
-						$this->exec("DROP EVENT IF EXISTS `DuplicateItemProductFeaturesCleanup`;");
-						$this->exec(
-					"CREATE EVENT `DuplicateItemProductFeaturesCleanup`
+				case 18:
+					$this->exec("DROP EVENT IF EXISTS `DuplicateItemProductFeaturesCleanup`;");
+					$this->exec(
+						"CREATE EVENT `DuplicateItemProductFeaturesCleanup`
     ON SCHEDULE EVERY '2' HOUR STARTS '2020-01-01 00:30:00'
     ON COMPLETION PRESERVE
     ENABLE DO
@@ -662,7 +662,7 @@ END;"
           AND TIMESTAMPDIFF(HOUR, AuditProduct.Time, NOW()) >= 2
     )
 ;"
-				);
+					);
 					break;
 
 				default:
@@ -674,14 +674,15 @@ END;"
 		$this->exec("UPDATE Configuration SET `Value` = \"$this->schemaVersion\" WHERE `Key` = \"SchemaVersion\"");
 	}
 
-	private function updateData(int $data) {
-		if($this->dataVersion === $data) {
+	private function updateData(int $data)
+	{
+		if ($this->dataVersion === $data) {
 			return;
-		} else if($this->dataVersion > $data) {
+		} elseif ($this->dataVersion > $data) {
 			throw new \InvalidArgumentException("Trying to downgrade schema from $this->dataVersion to $data");
 		}
-		while($this->dataVersion < $data) {
-			switch($this->dataVersion) {
+		while ($this->dataVersion < $data) {
+			switch ($this->dataVersion) {
 				case 0:
 					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('type', 'ssd')");
 					break;
@@ -811,10 +812,11 @@ END;"
 		$this->exec("UPDATE Configuration SET `Value` = '$this->dataVersion' WHERE `Key` = 'DataVersion'");
 	}
 
-	private function exec(string $query) {
+	private function exec(string $query)
+	{
 		$result = $this->getPDO()->exec($query);
 
-		if($result === false) {
+		if ($result === false) {
 			throw new \RuntimeException('Exec failed, see stack trace');
 		}
 	}

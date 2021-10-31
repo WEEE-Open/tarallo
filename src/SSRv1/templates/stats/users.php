@@ -9,7 +9,7 @@ $this->insert('stats::menu', ['currentPage' => 'users']);
 ?>
 
 <div class="row">
-<?php if(!empty($createdItems)): ?>
+<?php if (!empty($createdItems)) : ?>
 	<div class="col-12 col-md-8 col-lg-6">
 		<table class="table table-borderless stats">
 			<caption>Top users that have created items</caption>
@@ -20,7 +20,7 @@ $this->insert('stats::menu', ['currentPage' => 'users']);
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($createdItems as $user => $count): ?>
+			<?php foreach ($createdItems as $user => $count) : ?>
 				<tr>
 					<td><?=$user?></td>
 					<td><?=$count?></td>
@@ -30,7 +30,7 @@ $this->insert('stats::menu', ['currentPage' => 'users']);
 		</table>
 	</div>
 <?php endif; ?>
-<?php if(!empty($movedItems)): ?>
+<?php if (!empty($movedItems)) : ?>
 	<div class="col-12 col-md-8 col-lg-6">
 		<table class="table table-borderless stats">
 			<caption>Top users that have moved items</caption>
@@ -41,7 +41,7 @@ $this->insert('stats::menu', ['currentPage' => 'users']);
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($movedItems as $user => $count): ?>
+			<?php foreach ($movedItems as $user => $count) : ?>
 				<tr>
 					<td><?=$user?></td>
 					<td><?=$count?></td>
@@ -51,7 +51,7 @@ $this->insert('stats::menu', ['currentPage' => 'users']);
 		</table>
 	</div>
 <?php endif; ?>
-<?php if(!empty($updatedItems)): ?>
+<?php if (!empty($updatedItems)) : ?>
 	<div class="col-12 col-md-8 col-lg-6">
 		<table class="table table-borderless stats">
 			<caption>Top users that have updated items</caption>
@@ -62,7 +62,7 @@ $this->insert('stats::menu', ['currentPage' => 'users']);
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($updatedItems as $user => $count): ?>
+			<?php foreach ($updatedItems as $user => $count) : ?>
 				<tr>
 					<td><?=$user?></td>
 					<td><?=$count?></td>
@@ -72,7 +72,7 @@ $this->insert('stats::menu', ['currentPage' => 'users']);
 		</table>
 	</div>
 <?php endif; ?>
-<?php if(!empty($overall)): ?>
+<?php if (!empty($overall)) : ?>
 	<div class="col-12 col-md-8 col-lg-6">
 		<table class="table table-borderless stats">
 			<caption>Top users overall</caption>
@@ -83,7 +83,7 @@ $this->insert('stats::menu', ['currentPage' => 'users']);
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($overall as $user => $count): ?>
+			<?php foreach ($overall as $user => $count) : ?>
 				<tr>
 					<td><?=$user?></td>
 					<td><?=$count?></td>

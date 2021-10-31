@@ -5,7 +5,8 @@ namespace WEEEOpen\Tarallo\APIv2;
 use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ValidationException;
 
-class ProductBuilder {
+class ProductBuilder
+{
 	/**
 	 * Build an product, return it.
 	 *
@@ -16,15 +17,17 @@ class ProductBuilder {
 	 *
 	 * @return Product
 	 */
-	public static function ofArray(array $input, string $brand, string $model, string $variant): Product {
+	public static function ofArray(array $input, string $brand, string $model, string $variant): Product
+	{
 		return self::ofArrayInternal($input, $brand, $model, $variant);
 	}
 
-	private static function ofArrayInternal(array $input, string $brand, string $model, string $variant): Product {
+	private static function ofArrayInternal(array $input, string $brand, string $model, string $variant): Product
+	{
 		$product = new Product($brand, $model, $variant);
 
-		if(isset($input['features'])) {
-			if(!is_array($input['features'])) {
+		if (isset($input['features'])) {
+			if (!is_array($input['features'])) {
 				throw new ValidationException();
 			}
 			ItemBuilder::addFeatures($input['features'], $product);

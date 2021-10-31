@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-interface ItemWithContent {
+interface ItemWithContent
+{
 	public function addContent(ItemWithCode $item);
 	public function removeContent(ItemWithCode $item);
 	public function getContent(): array;

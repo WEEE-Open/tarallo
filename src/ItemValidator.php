@@ -2,8 +2,8 @@
 
 namespace WEEEOpen\Tarallo;
 
-
-class ItemValidator {
+class ItemValidator
+{
 	/**
 	 * Move item (or sub-items) to the correct place in their subtree, then in the items tree.
 	 * Items are only pushed toward leafs in their subtree and the container changed, they cannot be pushed towards
@@ -14,7 +14,8 @@ class ItemValidator {
 	 *
 	 * @return ItemWithFeatures|null Correct location (or the given one if unchanged, or null if null was given)
 	 */
-	public static function fixupLocation(ItemWithFeatures $item, ?ItemWithFeatures $parent): ?ItemWithFeatures {
+	public static function fixupLocation(ItemWithFeatures $item, ?ItemWithFeatures $parent): ?ItemWithFeatures
+	{
 		return self::reparentAll($item, $parent);
 	}
 
@@ -32,13 +33,14 @@ class ItemValidator {
 	 * @param bool $pushdown Push features down to sub-items or not
 	 * @param bool $pushup Push features up to ancestor items or not
 	 */
-	public static function fixupFeatures(ItemWithFeatures $item, bool $pushdown = true, bool $pushup = false) {
-		if($pushdown) {
+	public static function fixupFeatures(ItemWithFeatures $item, bool $pushdown = true, bool $pushup = false)
+	{
+		if ($pushdown) {
 			$lowerLimit = null;
 		} else {
 			$lowerLimit = $item;
 		}
-		if($pushup) {
+		if ($pushup) {
 			$upperLimit = null;
 		} else {
 			$upperLimit = $item;
@@ -54,20 +56,21 @@ class ItemValidator {
 	 *
 	 * @return ItemWithFeatures Correct parent (given one or a motherboard)
 	 */
-	private static function reparent(ItemWithFeatures $item, ItemWithFeatures $container): ItemWithFeatures {
+	private static function reparent(ItemWithFeatures $item, ItemWithFeatures $container): ItemWithFeatures
+	{
 		assert($container instanceof ItemWithContent);
 		$type = $item->getFeatureValue('type');
 		$parentType = $container->getFeatureValue('type');
 
-		if($type === null || $parentType == null) {
+		if ($type === null || $parentType == null) {
 			return $container;
 		}
 
 		$shouldBeInMobo = self::shouldBeInMotherboard($type);
-		if($parentType === 'case' && $shouldBeInMobo) {
+		if ($parentType === 'case' && $shouldBeInMobo) {
 			$content = $container->getContent();
 			$mobo = self::findByType($content, 'motherboard');
-			if($mobo !== null) {
+			if ($mobo !== null) {
 				return $mobo;
 			}
 		}
@@ -84,23 +87,24 @@ class ItemValidator {
 	 * @return ItemWithFeatures|null Correct parent for root item or null if was null
 	 * @see reparent
 	 */
-	private static function reparentAll(ItemWithFeatures $item, ?ItemWithFeatures $container): ?ItemWithFeatures {
+	private static function reparentAll(ItemWithFeatures $item, ?ItemWithFeatures $container): ?ItemWithFeatures
+	{
 		assert($item instanceof ItemWithContent);
-		if($container !== null) {
+		if ($container !== null) {
 			$container = self::reparent($item, $container);
 		}
 
 		$fixups = [];
-		foreach($item->getContent() as $subitem) {
+		foreach ($item->getContent() as $subitem) {
 			$newParent = self::reparentAll($subitem, $item);
-			if($newParent !== $item) {
+			if ($newParent !== $item) {
 				// Avoid changing arrays while foreachs are iterating over them
 				$fixups[] = [$subitem, $item, $newParent];
 			}
 		}
 
-		if(!empty($fixups)) {
-			foreach($fixups as $row) {
+		if (!empty($fixups)) {
+			foreach ($fixups as $row) {
 				/** @var Item[] $row */
 				$row[1]->removeContent($row[0]);
 				$row[2]->addContent($row[0]);
@@ -123,7 +127,7 @@ class ItemValidator {
 		?ItemWithFeatures $upperLimit
 	) {
 		assert($item instanceof ItemWithContent);
-		if($lowerLimit !== $item) {
+		if ($lowerLimit !== $item) {
 			self::pushdownFeatures($item);
 		}
 
@@ -131,7 +135,7 @@ class ItemValidator {
 //			self::pushupFeatures($item);
 //		}
 
-		foreach($item->getContent() as $subitem) {
+		foreach ($item->getContent() as $subitem) {
 			self::fixFeaturesRecursively($subitem, $lowerLimit, $upperLimit);
 		}
 
@@ -145,10 +149,11 @@ class ItemValidator {
 	 *
 	 * @throws ValidationException if item contains invalid features
 	 */
-	public static function validateFeatures(ItemWithFeatures $item) {
+	public static function validateFeatures(ItemWithFeatures $item)
+	{
 		$type = $item->getFeatureValue('type');
 
-		switch($type) {
+		switch ($type) {
 			case 'case':
 				self::validateFeaturesCase($item);
 				break;
@@ -157,8 +162,8 @@ class ItemValidator {
 				break;
 		}
 
-		if($item instanceof ItemWithContent) {
-			foreach($item->getContent() as $subitem) {
+		if ($item instanceof ItemWithContent) {
+			foreach ($item->getContent() as $subitem) {
 				self::validateFeatures($subitem);
 			}
 		}
@@ -173,8 +178,9 @@ class ItemValidator {
 	 * @throws ItemNestingException if items are invalidly nested
 	 * @throws ValidationException if item cannot be a root item and has a null parent
 	 */
-	public static function validateLocation(ItemWithFeatures $item, ?ItemWithFeatures $parent) {
-		if($parent === null) {
+	public static function validateLocation(ItemWithFeatures $item, ?ItemWithFeatures $parent)
+	{
+		if ($parent === null) {
 			self::checkRoot($item);
 		} else {
 			self::checkNesting($item, $parent);
@@ -188,38 +194,39 @@ class ItemValidator {
 	 * @param ItemWithFeatures|ItemWithCode|null $container Its container
 	 *
 	 */
-	private static function checkNesting(ItemWithFeatures $item, ?ItemWithFeatures $container): void {
+	private static function checkNesting(ItemWithFeatures $item, ?ItemWithFeatures $container): void
+	{
 		$type = $item->getFeatureValue('type');
 		$containerType = $container->getFeatureValue('type');
 
-		if($type === null || $containerType == null) {
+		if ($type === null || $containerType == null) {
 			return;
 		}
 
-		if($type === 'case' && $containerType !== 'location') {
+		if ($type === 'case' && $containerType !== 'location') {
 			throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Cases should be inside a location');
 		} else {
-			if(self::shouldBeInMotherboard($type)) {
-				if($containerType !== 'case' && $containerType !== 'location' && $containerType !== 'motherboard') {
+			if (self::shouldBeInMotherboard($type)) {
+				if ($containerType !== 'case' && $containerType !== 'location' && $containerType !== 'motherboard') {
 					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'RAMs, CPUs and expansion cards cards should be inside a case, location or motherboard');
 				}
 			} else {
-				if($type === 'location' && $containerType !== 'location') {
+				if ($type === 'location' && $containerType !== 'location') {
 					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Locations should be inside other locations or nothing');
 				} else {
-					if($containerType !== 'case' && $containerType !== 'location') {
+					if ($containerType !== 'case' && $containerType !== 'location') {
 						throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Normal items can be placed only inside cases and locations');
 					}
 				}
 			}
 		}
 
-		if($type === 'cpu' && $containerType === 'motherboard') {
-			if(!self::compareFeature($item, $container, 'cpu-socket')) {
+		if ($type === 'cpu' && $containerType === 'motherboard') {
+			if (!self::compareFeature($item, $container, 'cpu-socket')) {
 				$itemValue = $item->getFeatureValue('cpu-socket');
 				$parentValue = $container->getFeatureValue('cpu-socket');
-				if($itemValue !== null && $parentValue !== null) {
-					if(
+				if ($itemValue !== null && $parentValue !== null) {
+					if (
 						!($itemValue === 'am2' && $parentValue === 'am2plus')
 						&& !($itemValue === 'am3' && $parentValue === 'am3plus')
 						//&& !($itemValue === 'am4' && $parentValue === 'am4plus')
@@ -231,42 +238,42 @@ class ItemValidator {
 			}
 		}
 
-		if($type === 'ram' && $containerType === 'motherboard') {
-			if(!self::compareFeature($item, $container, 'ram-form-factor')) {
+		if ($type === 'ram' && $containerType === 'motherboard') {
+			if (!self::compareFeature($item, $container, 'ram-form-factor')) {
 				$itemValue = $item->getFeatureValue('ram-form-factor');
 				$parentValue = $container->getFeatureValue('ram-form-factor');
 				throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, "Incompatible form factor: RAM is $itemValue, motherboard is $parentValue");
 			}
-			if(!self::compareFeature($item, $container, 'ram-type')) {
+			if (!self::compareFeature($item, $container, 'ram-type')) {
 				$itemValue = $item->getFeatureValue('ram-type');
 				$parentValue = $container->getFeatureValue('ram-type');
 				throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, "Incompatible standard: RAM is $itemValue, motherboard is $parentValue");
 			}
 		}
 
-		if($containerType === 'case' && $container->getFeatureValue('motherboard-form-factor') === 'proprietary-laptop') {
-			if($type === 'psu') {
+		if ($containerType === 'case' && $container->getFeatureValue('motherboard-form-factor') === 'proprietary-laptop') {
+			if ($type === 'psu') {
 				$ff = $item->getFeatureValue('psu-form-factor');
-				if($ff !== null && $ff !== 'proprietary') {
+				if ($ff !== null && $ff !== 'proprietary') {
 					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, "Incompatible items: cannot place an internal PSU inside a laptop case");
 				}
-			} else if($type === 'hdd') {
-				if($item->getFeatureValue('hdd-form-factor') === '3.5') {
+			} elseif ($type === 'hdd') {
+				if ($item->getFeatureValue('hdd-form-factor') === '3.5') {
 					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'A 3.5" HDD is too large for a laptop');
 				}
-			} else if($type === 'odd') {
-				if($item->getFeatureValue('odd-form-factor') === '5.25') {
+			} elseif ($type === 'odd') {
+				if ($item->getFeatureValue('odd-form-factor') === '5.25') {
 					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'A 5.25" ODD is too large for a laptop');
 				}
-			} else if(self::isExpansionCard($type)) {
-				if($item->getFeatureValue('pcie-sockets-n') !== null || $item->getFeatureValue('pci-sockets-n') !== null || $item->getFeatureValue('isa-sockets-n') !== null) {
+			} elseif (self::isExpansionCard($type)) {
+				if ($item->getFeatureValue('pcie-sockets-n') !== null || $item->getFeatureValue('pci-sockets-n') !== null || $item->getFeatureValue('isa-sockets-n') !== null) {
 					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'A full size PCI(e) card cannot fit into a laptop');
 				}
 			}
 		}
 
 		assert($item instanceof ItemWithContent);
-		foreach($item->getContent() as $subitem) {
+		foreach ($item->getContent() as $subitem) {
 			self::checkNesting($subitem, $item);
 		}
 	}
@@ -278,19 +285,22 @@ class ItemValidator {
 	 *
 	 * @throws ValidationException
 	 */
-	public static function checkRoot(ItemWithFeatures $item) {
+	public static function checkRoot(ItemWithFeatures $item)
+	{
 		$type = $item->getFeatureValue('type');
-		if($type !== null && $type !== 'location') {
+		if ($type !== null && $type !== 'location') {
 			$code = $item instanceof ItemWithCode ? $item->peekCode() : null;
 			throw new ValidationException($code, null, 'Set a location for this item or mark it as a location itself, this type cannot be a root item');
 		}
 	}
 
-	private static function shouldBeInMotherboard(string $type): bool {
+	private static function shouldBeInMotherboard(string $type): bool
+	{
 		return $type === 'cpu' || $type === 'ram' || self::isExpansionCard($type);
 	}
 
-	private static function isExpansionCard(string $type): bool {
+	private static function isExpansionCard(string $type): bool
+	{
 		return strlen($type) > 5 && substr($type, -5) === '-card';
 	}
 
@@ -304,11 +314,12 @@ class ItemValidator {
 	 *
 	 * @return bool If the feature is the same or one of them is null
 	 */
-	private static function compareFeature(ItemWithFeatures $item, ItemWithFeatures $container, string $feature): bool {
+	private static function compareFeature(ItemWithFeatures $item, ItemWithFeatures $container, string $feature): bool
+	{
 		$itemFeature = $item->getFeatureValue($feature);
 		$parentFeature = $container->getFeatureValue($feature);
 
-		if($itemFeature !== null && $parentFeature !== null) {
+		if ($itemFeature !== null && $parentFeature !== null) {
 			return $itemFeature === $parentFeature;
 		}
 
@@ -325,10 +336,11 @@ class ItemValidator {
 	 *
 	 * @return ItemWithFeatures|null Item, or null if not found
 	 */
-	private static function findByType(array &$items, string $type, bool $remove = false): ?ItemWithFeatures {
-		foreach($items as $k => $maybe) {
-			if($maybe->getFeatureValue('type') === $type) {
-				if($remove) {
+	private static function findByType(array &$items, string $type, bool $remove = false): ?ItemWithFeatures
+	{
+		foreach ($items as $k => $maybe) {
+			if ($maybe->getFeatureValue('type') === $type) {
+				if ($remove) {
 					unset($items[$k]);
 				}
 				return $maybe;
@@ -344,8 +356,9 @@ class ItemValidator {
 	 *
 	 * @return string[]
 	 */
-	public static function getProductDefaultFeatures(string $type): array {
-		switch($type) {
+	public static function getProductDefaultFeatures(string $type): array
+	{
+		switch ($type) {
 			case 'case':
 				return [
 					'usb-ports-n', 'firewire-ports-n', 'mini-jack-ports-n', 'motherboard-form-factor',
@@ -462,8 +475,9 @@ class ItemValidator {
 	 *
 	 * @return string[]
 	 */
-	public static function getItemDefaultFeatures(string $type): array {
-		switch($type) {
+	public static function getItemDefaultFeatures(string $type): array
+	{
+		switch ($type) {
 			case 'case':
 			case 'monitor':
 				return [
@@ -496,7 +510,7 @@ class ItemValidator {
 //			case 'external-psu':
 //			case 'network-switch':
 //			case 'network-hub':
-			return [
+				return [
 					'brand', 'model', 'working', 'sn', 'owner'
 				];
 			case 'motherboard':
@@ -521,22 +535,24 @@ class ItemValidator {
 		}
 	}
 
-	public static function defaultFeaturesLastModified(): int {
+	public static function defaultFeaturesLastModified(): int
+	{
 		return filemtime(__FILE__);
 	}
 
-	private static function pushdownFeatures(ItemWithFeatures $item) {
+	private static function pushdownFeatures(ItemWithFeatures $item)
+	{
 		assert($item instanceof ItemWithContent);
 		$type = $item->getFeatureValue('type');
 
 		// Move laptop usb ports from the case to the motherboard
-		if($type === 'case') {
+		if ($type === 'case') {
 			$ff = $item->getFeatureValue('motherboard-form-factor');
-			if($ff === 'proprietary-laptop') {
-				if($item->getFeatureValue('usb-ports-n') !== null) {
+			if ($ff === 'proprietary-laptop') {
+				if ($item->getFeatureValue('usb-ports-n') !== null) {
 					$content = $item->getContent();
 					$mobo = self::findByType($content, 'motherboard');
-					if($mobo !== null && !$mobo->getFeatureValue('usb-ports-n') !== null) {
+					if ($mobo !== null && !$mobo->getFeatureValue('usb-ports-n') !== null) {
 						// TODO: this will end badly when products are implemented...
 						$mobo->addFeature(new Feature('usb-ports-n', $item->getFeatureValue('usb-ports-n')));
 						$item->removeFeatureByName('usb-ports-n');
@@ -552,20 +568,21 @@ class ItemValidator {
 //	private static function fixFeatures(ItemWithFeatures $item) {
 //	}
 
-	private static function validateFeaturesCase(ItemWithFeatures $case) {
+	private static function validateFeaturesCase(ItemWithFeatures $case)
+	{
 		$motherboardFF = $case->getFeatureValue('motherboard-form-factor');
 		$code = null;
-		if($case instanceof ItemWithCode) {
+		if ($case instanceof ItemWithCode) {
 			$code = $case->peekCode();
 		}
-		switch($motherboardFF) {
+		switch ($motherboardFF) {
 			case 'proprietary-laptop':
 				// It's a laptop, reject features that make sense only in desktops.
-				if($case->getFeatureValue('usb-ports-n') !== null) {
+				if ($case->getFeatureValue('usb-ports-n') !== null) {
 					throw new FeatureValidationException('usb-ports-n', $case->getFeatureValue('usb-ports-n'), null, $code, 'A laptop does not have USB ports on the case, but on the motherboard only. Remove the "USB ports" feature from the case or change the motherboard form factor.');
 				}
-				if($case->getFeatureValue('psu-form-factor') !== null) {
-					if($case->getFeatureValue('psu-form-factor') !== 'proprietary') {
+				if ($case->getFeatureValue('psu-form-factor') !== null) {
+					if ($case->getFeatureValue('psu-form-factor') !== 'proprietary') {
 						// Well, it may contain a power supply, if it's something really old... but it won't be standard anyway.
 						throw new FeatureValidationException('psu-form-factor', $case->getFeatureValue('psu-form-factor'), null, $code, 'A laptop does not have a standard internal PSU. Remove the "PSU form factor" feature from the case or change the motherboard form factor.');
 					}
@@ -573,13 +590,13 @@ class ItemValidator {
 				break;
 			default:
 				// It's a desktop, reject features that make sense only in laptops
-				if($case->getFeatureValue('power-connector') !== null) {
+				if ($case->getFeatureValue('power-connector') !== null) {
 					throw new FeatureValidationException('power-connector', $case->getFeatureValue('power-connector'), null, $code, 'A desktop computer case does not have any power connector. Remove that feature or change the motherboard form factor.');
 				}
-				if($case->getFeatureValue('psu-volt') !== null) {
+				if ($case->getFeatureValue('psu-volt') !== null) {
 					throw new FeatureValidationException('psu-volt', $case->getFeatureValue('psu-volt'), null, $code, 'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply voltage" feature or change the motherboard form factor.');
 				}
-				if($case->getFeatureValue('psu-ampere') !== null) {
+				if ($case->getFeatureValue('psu-ampere') !== null) {
 					throw new FeatureValidationException('psu-ampere', $case->getFeatureValue('psu-ampere'), null, $code, 'A desktop computer case does not require a laptop PSU with a single voltage. Remove the "Power supply current" feature or change the motherboard form factor.');
 				}
 				break;
@@ -592,13 +609,14 @@ class ItemValidator {
 		}
 	}
 
-	private static function validateFeaturesMonitor(ItemWithFeatures $monitor) {
+	private static function validateFeaturesMonitor(ItemWithFeatures $monitor)
+	{
 		$power = $monitor->getFeatureValue('power-connector');
-		if($power === 'c13' || $power === 'c19') {
-			if($monitor->getFeatureValue('psu-volt') !== null) {
+		if ($power === 'c13' || $power === 'c19') {
+			if ($monitor->getFeatureValue('psu-volt') !== null) {
 				$code = $monitor instanceof ItemWithCode ? $monitor->peekCode() : null;
 				throw new FeatureValidationException('psu-volt', $monitor->getFeatureValue('psu-volt'), null, $code, 'A monitor with a 220 V power connector should not require specific voltages and currents. Remove "Power supply voltage" or select another power connector type.');
-			} else if($monitor->getFeatureValue('psu-ampere') !== null) {
+			} elseif ($monitor->getFeatureValue('psu-ampere') !== null) {
 				$code = $monitor instanceof ItemWithCode ? $monitor->peekCode() : null;
 				throw new FeatureValidationException('psu-ampere', $monitor->getFeatureValue('psu-ampere'), null, $code, 'A monitor with a 220 V power connector should not require specific voltages and currents. Remove "Power supply current" or select another power connector type.');
 			}
@@ -612,9 +630,10 @@ class ItemValidator {
 	 *
 	 * @see Item::getFlatContent()
 	 */
-	public static function addAllVariants(array $items): void {
-		foreach($items as $item) {
-			if($item->getFeature('variant') === null) {
+	public static function addAllVariants(array $items): void
+	{
+		foreach ($items as $item) {
+			if ($item->getFeature('variant') === null) {
 				$item->addFeature(new Feature('variant', ProductCode::DEFAULT_VARIANT));
 			}
 		}

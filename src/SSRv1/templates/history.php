@@ -21,7 +21,7 @@ $code_escaped = $this->e($item->getCode());
 			</a>
 		</nav>
 	</header>
-	<?php if($deletedAt !== null): ?>
+	<?php if ($deletedAt !== null) : ?>
 		<div class="inline-alert w-auto alert-danger" role="alert"><i class="fa fa-trash"></i>&nbsp;This item has been deleted on <?= $deletedAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 	<?php endif; ?>
 

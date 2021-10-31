@@ -10,7 +10,7 @@ date_default_timezone_set('Europe/Rome');
 
 
 <div class="row">
-<?php if(!empty($recentlyAdded)): ?>
+<?php if (!empty($recentlyAdded)) : ?>
 	<div class="col-md-6 col-xl-4">
 		<table class="table table-borderless stats">
 			<caption>Recently added items</caption>
@@ -21,7 +21,7 @@ date_default_timezone_set('Europe/Rome');
 				</tr>
 			</thead>
 			<tbody>
-			<?php foreach($recentlyAdded as $code => $time): ?>
+			<?php foreach ($recentlyAdded as $code => $time) : ?>
 				<tr>
 					<td><a href="/item/<?=$code?>"><?=$code?></a></td>
 					<td class="small"><?=date('Y-m-d, H:i', $time)?></td>
@@ -31,7 +31,7 @@ date_default_timezone_set('Europe/Rome');
 		</table>
 	</div>
 <?php endif ?>
-<?php if(!empty($recentlyModified)): ?>
+<?php if (!empty($recentlyModified)) : ?>
 	<div class="col-md-6 col-xl-4">
 		<table class="table table-borderless stats">
 			<caption>Recently modified items</caption>
@@ -42,7 +42,7 @@ date_default_timezone_set('Europe/Rome');
 				</tr>
 			</thead>
 			<tbody>
-			<?php foreach($recentlyModified as $code => $time): ?>
+			<?php foreach ($recentlyModified as $code => $time) : ?>
 				<tr>
 					<td><a href="/item/<?=$code?>"><?=$code?></a></td>
 					<td class="small"><?=date('Y-m-d, H:i', $time)?></td>
@@ -52,7 +52,7 @@ date_default_timezone_set('Europe/Rome');
 		</table>
 	</div>
 <?php endif ?>
-	<?php if(!empty($recentlyMoved)): ?>
+	<?php if (!empty($recentlyMoved)) : ?>
 		<div class="col-md-6 col-xl-4">
 			<table class="table table-borderless stats">
 				<caption>Recently moved items</caption>
@@ -63,7 +63,7 @@ date_default_timezone_set('Europe/Rome');
 				</tr>
 				</thead>
 				<tbody>
-				<?php foreach($recentlyMoved as $code => $time): ?>
+				<?php foreach ($recentlyMoved as $code => $time) : ?>
 					<tr>
 						<td><a href="/item/<?=$code?>"><?=$code?></a></td>
 						<td class="small"><?=date('Y-m-d, H:i', $time)?></td>

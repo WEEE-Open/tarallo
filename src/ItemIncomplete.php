@@ -1,6 +1,5 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
 /**
@@ -8,12 +7,13 @@ namespace WEEEOpen\Tarallo;
  *
  * @package WEEEOpen\Tarallo
  */
-class ItemIncomplete
-	implements \JsonSerializable,
+class ItemIncomplete implements
+	\JsonSerializable,
 	ItemWithCode,
 	ItemWithFeatures,
 	ItemWithContent,
-	ItemWithLocation {
+	ItemWithLocation
+{
 	use ItemTraitOptionalCode;
 	use ItemTraitContent;
 	use ItemTraitLocation;

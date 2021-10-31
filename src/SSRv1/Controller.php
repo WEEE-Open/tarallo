@@ -40,13 +40,15 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Laminas\Diactoros\UploadedFile;
 
-class Controller implements RequestHandlerInterface {
+class Controller implements RequestHandlerInterface
+{
 	const cachefile = __DIR__ . '/../../resources/cache/SSRv1.cache';
 
-    use Routes;
+	use Routes;
 
 
-    public static function getItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function getItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -60,8 +62,8 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$ii = new ItemCode($id);
-		} catch(ValidationException $e) {
-			if($e->getCode() === 3) {
+		} catch (ValidationException $e) {
+			if ($e->getCode() === 3) {
 				$request = $request->withAttribute('Template', 'error')->withAttribute('ResponseCode', 404)->withAttribute('TemplateParameters', ['reason' => "Code '$id' contains invalid characters"]);
 				return $handler->handle($request);
 			}
@@ -81,13 +83,15 @@ class Controller implements RequestHandlerInterface {
 		$renderParameters['url'] = $request->getUri()->getPath();
 
 		$request = $request->withAttribute('Template', 'viewItem')->withAttribute(
-			'TemplateParameters', $renderParameters
+			'TemplateParameters',
+			$renderParameters
 		);
 
 		return $handler->handle($request);
 	}
 
-	public static function getProduct(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function getProduct(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -108,7 +112,8 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function getProductItems(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function getProductItems(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -123,9 +128,9 @@ class Controller implements RequestHandlerInterface {
 		$items = $db->statsDAO()->getAllItemsOfProduct($product);
 
 		$parameters = ['product' => $product, 'items' => $items];
-		if($edit !== null) {
+		if ($edit !== null) {
 			$parameters['edit'] = $edit;
-		} elseif($add !== null) {
+		} elseif ($add !== null) {
 			$parameters['add'] = $add;
 		}
 
@@ -134,7 +139,8 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function getAllProducts(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function getAllProducts(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -149,7 +155,8 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function getProductsPage(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function getProductsPage(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -162,17 +169,18 @@ class Controller implements RequestHandlerInterface {
 	}
 
 
-	public static function getItemHistory(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function getItemHistory(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
 		$parameters = $request->getAttribute('parameters', []);
 		$id = Validation::validateOptionalString($parameters, 'id', null);
 		$limit = Validation::validateOptionalInt($query, 'limit', 20);
-		if($limit > 100) {
+		if ($limit > 100) {
 			$limit = 100;
 		} else {
-			if($limit <= 0) {
+			if ($limit <= 0) {
 				$limit = 20;
 			}
 		}
@@ -183,7 +191,7 @@ class Controller implements RequestHandlerInterface {
 		$item = $db->itemDAO()->getItem($item, null, 0);
 
 		$history = $db->auditDAO()->getItemHistory($item, $limit);
-		if(count($history) === $limit) {
+		if (count($history) === $limit) {
 			array_pop($history);
 			$tooLong = true;
 		} else {
@@ -191,7 +199,8 @@ class Controller implements RequestHandlerInterface {
 		}
 
 		$request = $request->withAttribute('Template', 'history')->withAttribute(
-			'TemplateParameters', [
+			'TemplateParameters',
+			[
 				'item' => $item,
 				'history' => $history,
 				'tooLong' => $tooLong,
@@ -201,7 +210,8 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function getProductHistory(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function getProductHistory(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -212,7 +222,7 @@ class Controller implements RequestHandlerInterface {
 		$variant = Validation::validateOptionalString($parameters, 'variant');
 		$limit = Validation::validateOptionalInt($query, 'limit', 20);
 		$limit = min($limit, 100);
-		if($limit <= 0) {
+		if ($limit <= 0) {
 			$limit = 20;
 		}
 		$limit++;
@@ -220,7 +230,7 @@ class Controller implements RequestHandlerInterface {
 		$product = new ProductCode($brand, $model, $variant);
 
 		$history = $db->auditDAO()->getProductHistory($product, $limit);
-		if(count($history) === $limit) {
+		if (count($history) === $limit) {
 			array_pop($history);
 			$tooLong = true;
 		} else {
@@ -228,7 +238,8 @@ class Controller implements RequestHandlerInterface {
 		}
 
 		$request = $request->withAttribute('Template', 'historyProduct')->withAttribute(
-			'TemplateParameters', [
+			'TemplateParameters',
+			[
 				'product' => $product,
 				'history' => $history,
 				'tooLong' => $tooLong,
@@ -238,14 +249,15 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function addItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function addItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		$query = $request->getQueryParams();
 		$from = Validation::validateOptionalString($query, 'copy', null);
 		$copyBrand = Validation::validateOptionalString($query, 'copy-brand', null, null);
 		$copyModel = Validation::validateOptionalString($query, 'copy-model', null, null);
 		$copyVariant = Validation::validateOptionalString($query, 'copy-variant', null, null);
 
-		if($copyBrand !== null && $copyModel !== null && $copyVariant !== null) {
+		if ($copyBrand !== null && $copyModel !== null && $copyVariant !== null) {
 			/** @var Database $db */
 			$db = $request->getAttribute('Database');
 			$product = $db->productDAO()->getProduct(new ProductCode($copyBrand, $copyModel, $copyVariant));
@@ -255,10 +267,10 @@ class Controller implements RequestHandlerInterface {
 			$from->addFeature(new Feature('brand', $copyBrand));
 			$from->addFeature(new Feature('model', $copyModel));
 			$from->addFeature(new Feature('variant', $copyVariant));
-			if($type !== null) {
+			if ($type !== null) {
 				$from->addFeature($type);
 			}
-		} elseif($from === null) {
+		} elseif ($from === null) {
 			$from = new ItemIncomplete(null);
 			$from->addFeature(new BaseFeature('type'));
 			$from->addFeature(new BaseFeature('brand'));
@@ -271,7 +283,8 @@ class Controller implements RequestHandlerInterface {
 		}
 
 		$request = $request->withAttribute('Template', 'newItemPage')->withAttribute(
-			'TemplateParameters', [
+			'TemplateParameters',
+			[
 				'add' => true,
 				'base' => $from,
 			]
@@ -280,7 +293,8 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function addProduct(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function addProduct(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		$query = $request->getQueryParams();
 
 		$split = Validation::validateOptionalString($query, 'split', null, null);
@@ -288,8 +302,8 @@ class Controller implements RequestHandlerInterface {
 		$copyModel = Validation::validateOptionalString($query, 'copy-model', null, null);
 		$copyVariant = Validation::validateOptionalString($query, 'copy-variant', null, null);
 
-		if($split === null) {
-			if($copyBrand === null || $copyModel === null || $copyVariant === null) {
+		if ($split === null) {
+			if ($copyBrand === null || $copyModel === null || $copyVariant === null) {
 				$from = null;
 			} else {
 				$from = new ProductCode($copyBrand, $copyModel, $copyVariant);
@@ -298,13 +312,13 @@ class Controller implements RequestHandlerInterface {
 			$from = new ItemCode($split);
 		}
 
-		if($from === null) {
+		if ($from === null) {
 			$from = new ProductIncomplete();
 			$from->addFeature(new BaseFeature('type'));
 		} else {
 			/** @var Database $db */
 			$db = $request->getAttribute('Database');
-			if($from instanceof ProductCode) {
+			if ($from instanceof ProductCode) {
 				$from = $db->productDAO()->getProduct($from);
 			} else {
 				$from = $db->itemDAO()->getItem($from);
@@ -312,7 +326,8 @@ class Controller implements RequestHandlerInterface {
 		}
 
 		$request = $request->withAttribute('Template', 'newProductPage')->withAttribute(
-			'TemplateParameters', [
+			'TemplateParameters',
+			[
 				'add' => true,
 				'base' => $from,
 			]
@@ -321,7 +336,8 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function authError(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function authError(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		$request = $request
 			->withAttribute('Template', 'error')
 			->withAttribute('ResponseCode', 400)
@@ -330,13 +346,15 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function logout(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function logout(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		$request = $request->withAttribute('Template', 'logout');
 
 		return $handler->handle($request);
 	}
 
-	public static function options(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function options(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		$body = $request->getParsedBody();
 		/** @var UserSSO $user */
 		$user = $request->getAttribute('User');
@@ -345,46 +363,45 @@ class Controller implements RequestHandlerInterface {
 
 		$error = null;
 		$token = null;
-		if($body !== null && count($body) > 0) {
+		if ($body !== null && count($body) > 0) {
 			try {
-				if(isset($body['delete']) && isset($body['token'])) {
+				if (isset($body['delete']) && isset($body['token'])) {
 					$db->sessionDAO()->deleteToken($body['token']);
 					return new RedirectResponse('/options', 303);
-				}
-				elseif(isset($body['description']) && isset($body['new'])) {
+				} elseif (isset($body['description']) && isset($body['new'])) {
 					$data = new SessionLocal();
 					$data->level = $user->getLevel();
 					$data->description = $body['description'];
 					$data->owner = $user->uid;
 					$token = SessionLocal::generateToken();
 					$db->sessionDAO()->setDataForToken($token, $data);
-				}
-				elseif(isset($body['location']) && isset($body['default'])) {
-					if($user->getLevel() === $user::AUTH_LEVEL_ADMIN) {
+				} elseif (isset($body['location']) && isset($body['default'])) {
+					if ($user->getLevel() === $user::AUTH_LEVEL_ADMIN) {
 						$db->statsDAO()->setDefaultLocation($body['default'], $body['location']);
 					} else {
 						throw new AuthorizationException('Only admins can do that');
 					}
 				}
-			} catch(\Exception $e) {
+			} catch (\Exception $e) {
 				$error = $e->getMessage();
 			}
-
 		}
 
 		$request = $request->withAttribute('Template', 'options');
 		$request = $request->withAttribute(
-			'TemplateParameters', [
+			'TemplateParameters',
+			[
 			'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
 			'newToken' => $token,
 			'defaultLocations' => $db->statsDAO()->getDefaultLocations(),
 			'error' => $error
-		]
+			]
 		);
 		return $handler->handle($request);
 	}
 
-	public static function getHome(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function getHome(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
@@ -396,19 +413,26 @@ class Controller implements RequestHandlerInterface {
 			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
 			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
 			'toTest' => self::getToTest($db),
-			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(false,
+			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
+				false,
 				['smart-data' => null, 'surface-scan' => null],
-				'type', 'hdd', $location, ['working' => 'yes']),
+				'type',
+				'hdd',
+				$location,
+				['working' => 'yes']
+			),
 		];
 
 		$request = $request->withAttribute('Template', 'home')->withAttribute(
-			'TemplateParameters', $templateParameters
+			'TemplateParameters',
+			$templateParameters
 		);
 
 		return $handler->handle($request);
 	}
 
-	public static function getStats(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function getStats(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -420,10 +444,11 @@ class Controller implements RequestHandlerInterface {
 		$startDate = new \DateTime($startDate, new \DateTimeZone('Europe/Rome'));
 
 		$which = $parameters['which'] ?? '';
-		switch($which) {
+		switch ($which) {
 			case '':
 				$request = $request->withAttribute('Template', 'stats::main')->withAttribute(
-					'TemplateParameters', [
+					'TemplateParameters',
+					[
 						'recentlyAdded' => $db->auditDAO()->getRecentAuditByType('C', 50),
 						'recentlyModified' => $db->auditDAO()->getRecentAuditByType('M', 50),
 						'recentlyMoved' => $db->auditDAO()->getRecentAuditByType('M', 50),
@@ -433,16 +458,20 @@ class Controller implements RequestHandlerInterface {
 
 			case 'attention':
 				$request = $request->withAttribute('Template', 'stats::needAttention')->withAttribute(
-					'TemplateParameters', [
+					'TemplateParameters',
+					[
 						'serials' => $db->statsDAO()->getCountByFeature('sn', null, null, null, false, 2),
 						'missingData' => $db->statsDAO()->getItemsByFeatures(new Feature('check', 'missing-data'), null, 500),
 						'splittable' => $db->statsDAO()->getSplittableItems(),
 						'lost' => $db->statsDAO()->getLostItems([], 100),
-						'failedSmartOrSurfaceScan' =>$db->statsDAO()->getStatsByType(false,
+						'failedSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
+							false,
 							['smart-data' => 'fail', 'surface-scan' => 'fail'],
-							'type', 'hdd',
+							'type',
+							'hdd',
 							null,
-							['working' => 'yes']),
+							['working' => 'yes']
+						),
 					]
 				);
 				break;
@@ -454,7 +483,8 @@ class Controller implements RequestHandlerInterface {
 				$location = $location === null ? null : new ItemCode($location);
 
 				$request = $request->withAttribute('Template', 'stats::cases')->withAttribute(
-					'TemplateParameters', [
+					'TemplateParameters',
+					[
 						'location' => $location === null ? null : $location->getCode(),
 						'locationSet' => $locationSet,
 						'startDate' => $startDate,
@@ -462,13 +492,21 @@ class Controller implements RequestHandlerInterface {
 						'leastRecent' => $db->statsDAO()->getModifiedItems($location, false, 30),
 						'mostRecent' => $db->statsDAO()->getModifiedItems($location, true, 30),
 						'byOwner' => $db->statsDAO()->getCountByFeature(
-							'owner', new Feature('type', 'case'), $location, $startDate
+							'owner',
+							new Feature('type', 'case'),
+							$location,
+							$startDate
 						),
 						'byMobo' => $db->statsDAO()->getCountByFeature(
-							'motherboard-form-factor', new Feature('type', 'case'), $location, $startDate
+							'motherboard-form-factor',
+							new Feature('type', 'case'),
+							$location,
+							$startDate
 						),
 						'ready' => $db->statsDAO()->getItemsByFeatures(
-							new Feature('restrictions', 'ready'), $location, 100
+							new Feature('restrictions', 'ready'),
+							$location,
+							100
 						),
 					]
 				);
@@ -481,39 +519,54 @@ class Controller implements RequestHandlerInterface {
 				$location = $location === null ? null : new ItemCode($location);
 
 				$request = $request->withAttribute('Template', 'stats::rams')->withAttribute(
-					'TemplateParameters', [
+					'TemplateParameters',
+					[
 						'location' => $location === null ? null : $location->getCode(),
 						'locationSet' => $locationSet,
 						'startDate' => $startDate,
 						'startDateSet' => $startDateSet,
 						'byType' => $db->statsDAO()->getCountByFeature(
-							'ram-type', new Feature('type', 'ram'), $location
+							'ram-type',
+							new Feature('type', 'ram'),
+							$location
 						),
 						'byFormFactor' => $db->statsDAO()->getCountByFeature(
-							'ram-form-factor', new Feature('type', 'ram'), $location
+							'ram-form-factor',
+							new Feature('type', 'ram'),
+							$location
 						),
-//						'bySize' => $db->statsDAO()->getCountByFeature(
-//							'capacity-byte', new Feature('type', 'ram'), $location
-//						),
+					//						'bySize' => $db->statsDAO()->getCountByFeature(
+					//							'capacity-byte', new Feature('type', 'ram'), $location
+					//						),
 						'byTypeFrequency' => $db->statsDAO()->getRollupCountByFeature(
-							new Feature('type', 'ram'), [
+							new Feature('type', 'ram'),
+							[
 							'ram-type',
 							'ram-form-factor',
 							'frequency-hertz',
-						], $location
+							],
+							$location
 						),
 						'byTypeSize' => $db->statsDAO()->getRollupCountByFeature(
-							new Feature('type', 'ram'), [
+							new Feature('type', 'ram'),
+							[
 							'ram-type',
 							'ram-form-factor',
 							'capacity-byte',
-						], $location
+							],
+							$location
 						),
 						'noFrequency' => $db->statsDAO()->getItemByNotFeature(
-							new Feature('type', 'ram'), 'frequency-hertz', $location, 200
+							new Feature('type', 'ram'),
+							'frequency-hertz',
+							$location,
+							200
 						),
 						'noSize' => $db->statsDAO()->getItemByNotFeature(
-							new Feature('type', 'ram'), 'capacity-byte', $location, 200
+							new Feature('type', 'ram'),
+							'capacity-byte',
+							$location,
+							200
 						),
 					]
 				);
@@ -524,16 +577,21 @@ class Controller implements RequestHandlerInterface {
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
 				$request = $request->withAttribute('Template', 'stats::cpus')->withAttribute(
-					'TemplateParameters', [
+					'TemplateParameters',
+					[
 						'location' => $location === null ? null : $location->getCode(),
 						'locationSet' => $locationSet,
 						'startDate' => $startDate,
 						'startDateSet' => $startDateSet,
 						'byNcore' => $db->statsDAO()->getCountByFeature(
-							'core-n', new Feature('type', 'cpu'), $location
+							'core-n',
+							new Feature('type', 'cpu'),
+							$location
 						),
 						'byIsa' => $db->statsDAO()->getCountByFeature(
-							'isa', new Feature('type', 'cpu'), $location
+							'isa',
+							new Feature('type', 'cpu'),
+							$location
 						),
 						'commonModels' => $db->statsDAO()->getCountByFeature('model', new Feature('type', 'cpu'), $location, null, false, 5),
 					]
@@ -554,22 +612,38 @@ class Controller implements RequestHandlerInterface {
 				$byErased = $byErased === false ? 0 : $byErased;
 
 				$request = $request->withAttribute('Template', 'stats::hdds')->withAttribute(
-					'TemplateParameters', [
+					'TemplateParameters',
+					[
 						'location' => $location === null ? null : $location->getCode(),
 						'locationSet' => $locationSet,
 						'byErased' => $byErased,
 						'withoutErased' => $withoutErased,
 						'withoutErasedList' => $db->statsDAO()->getItemByNotFeature(
-							new Feature('type', 'hdd'), 'data-erased', $location, 200
+							new Feature('type', 'hdd'),
+							'data-erased',
+							$location,
+							200
 						),
 						'bySmartData' => $db->statsDAO()->getStatsByType(
-							true, ['type' => 'hdd'], 'smart-data', "", $location
+							true,
+							['type' => 'hdd'],
+							'smart-data',
+							"",
+							$location
 						),
 						'byCapacity' => $db->statsDAO()->getStatsByType(
-							true, ['type' => 'hdd'], 'capacity-decibyte', "", $location
+							true,
+							['type' => 'hdd'],
+							'capacity-decibyte',
+							"",
+							$location
 						),
 						'surfaceScan' => $db->statsDAO()->getStatsByType(
-							true, ['type' => 'hdd'], 'surface-scan', "", $location
+							true,
+							['type' => 'hdd'],
+							'surface-scan',
+							"",
+							$location
 						),
 						'formAndRotation' => $db->statsDAO()->getRollupCountByFeature(new Feature('type', 'hdd'), [
 							'hdd-form-factor',
@@ -581,7 +655,8 @@ class Controller implements RequestHandlerInterface {
 			case 'users':
 				$numUsers = Validation::validateOptionalString($query, 'top', 5);
 				$request = $request->withAttribute('Template', 'stats::users')->withAttribute(
-					'TemplateParameters', [
+					'TemplateParameters',
+					[
 						'createdItems' => $db->statsDAO()->getUsersStats('C', $numUsers),
 						'movedItems' => $db->statsDAO()->getUsersStats('M', $numUsers),
 						'updatedItems' => $db->statsDAO()->getUsersStats('U', $numUsers),
@@ -593,38 +668,40 @@ class Controller implements RequestHandlerInterface {
 				$request = $request->withAttribute('Template', 'stats::products')->withAttribute('TemplateParameters', [
 						'brandsProducts' => $db->statsDAO()->getProductsCountByBrand(),
 						'incomplete' => $db->statsDAO()->getItemsWithIncompleteProducts(),
-					]
-				);
+					]);
 				break;
 			case 'history':
 				$numEntries = Validation::validateOptionalString($query, 'limit', 10);
 				$request = $request->withAttribute('Template', 'stats::history')->withAttribute(
-					'TemplateParameters', [
+					'TemplateParameters',
+					[
 						'lastItemEntries' => $db->statsDAO()->getLastAudit(false, $numEntries),
 						'lastProductEntries' => $db->statsDAO()->getLastAudit(true, $numEntries)
 					]
 				);
 				break;
-            case 'cool':
-                $locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultCpuLocation'] ?? null;
-                $location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
-                $location = $location === null ? null : new ItemCode($location);
-                $request = $request->withAttribute('Template', 'stats::cool')->withAttribute('TemplateParameters',
-                [
-                    'cpusByBrand'=> $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'cpu')),
-                    'hddsByBrand' => $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'hdd')),
-                    'itemsByColor' => $db->statsDAO()->getCountByFeature('color',null),
-                    'hddsCapacity' => $db->statsDAO()->getTotalAndAverageCapacity($db->statsDAO()->getRollupCountByFeature(new Feature('type', 'hdd'), [
-                        'capacity-decibyte',
-                    ], $location),'capacity-decibyte'),
-                    'ramsCapacity' => $db->statsDAO()->getTotalAndAverageCapacity($db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), [
-                        'capacity-byte',
-                    ], $location),'capacity-byte'),
-                    'itemWithAndWithoutSerialNumber' => $db->statsDAO()->countItemsByTypeThatHaveSerialNumber(),
+			case 'cool':
+				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultCpuLocation'] ?? null;
+				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
+				$location = $location === null ? null : new ItemCode($location);
+				$request = $request->withAttribute('Template', 'stats::cool')->withAttribute(
+					'TemplateParameters',
+					[
+					'cpusByBrand' => $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'cpu')),
+					'hddsByBrand' => $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'hdd')),
+					'itemsByColor' => $db->statsDAO()->getCountByFeature('color', null),
+					'hddsCapacity' => $db->statsDAO()->getTotalAndAverageCapacity($db->statsDAO()->getRollupCountByFeature(new Feature('type', 'hdd'), [
+						'capacity-decibyte',
+					], $location), 'capacity-decibyte'),
+					'ramsCapacity' => $db->statsDAO()->getTotalAndAverageCapacity($db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), [
+						'capacity-byte',
+					], $location), 'capacity-byte'),
+					'itemWithAndWithoutSerialNumber' => $db->statsDAO()->countItemsByTypeThatHaveSerialNumber(),
 
-                ]);
+					]
+				);
 
-                break;
+				break;
 			default:
 				throw new NotFoundException();
 		}
@@ -632,7 +709,8 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function quickSearch(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function quickSearch(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$body = $request->getParsedBody();
@@ -642,7 +720,8 @@ class Controller implements RequestHandlerInterface {
 		return new RedirectResponse('/search/name/' . rawurlencode($search), 303);
 	}
 
-	public static function quickSearchName(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function quickSearchName(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -652,7 +731,7 @@ class Controller implements RequestHandlerInterface {
 
 		$item = $db->itemDAO()->getActualItemCode($name);
 
-		if(isset($item)) {
+		if (isset($item)) {
 			return new RedirectResponse('/item/' . rawurlencode($item->getCode()), 303);
 		}
 
@@ -660,7 +739,8 @@ class Controller implements RequestHandlerInterface {
 
 		$request = $request->withAttribute('Template', 'searchName');
 		$request = $request->withAttribute(
-			'TemplateParameters', [
+			'TemplateParameters',
+			[
 				'searchTerm' => $name,
 				'limit' => $limit,
 				'item' => $db->itemDAO()->getActualItemCode($name),
@@ -672,7 +752,8 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function quickSearchFeatureValue(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function quickSearchFeatureValue(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -683,7 +764,7 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$feature = new Feature($name, $value);
-		} catch(\InvalidArgumentException $e) {
+		} catch (\InvalidArgumentException $e) {
 			$request = $request
 				->withAttribute('Template', 'error')
 				->withAttribute('ResponseCode', 400)
@@ -695,7 +776,8 @@ class Controller implements RequestHandlerInterface {
 
 		$request = $request->withAttribute('Template', 'searchFeature');
 		$request = $request->withAttribute(
-			'TemplateParameters', [
+			'TemplateParameters',
+			[
 				'feature' => $feature,
 				'items' => $data,
 				'limit' => $limit,
@@ -715,7 +797,8 @@ class Controller implements RequestHandlerInterface {
 //		return $handler->handle($request);
 //	}
 
-	public static function search(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function search(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -726,7 +809,7 @@ class Controller implements RequestHandlerInterface {
 		$add = Validation::validateOptionalString($parameters, 'add', null);
 		$depth = Validation::validateOptionalInt($query, 'depth', null);
 
-		if($id === null) {
+		if ($id === null) {
 			$templateParameters = ['searchId' => null];
 		} else {
 			$perPage = 10;
@@ -757,7 +840,8 @@ class Controller implements RequestHandlerInterface {
 	}
 
 	public static function bulk(
-		/** @noinspection PhpUnusedParameterInspection */ ServerRequestInterface $request, RequestHandlerInterface $handler
+		/** @noinspection PhpUnusedParameterInspection */ ServerRequestInterface $request,
+		RequestHandlerInterface $handler
 	): ResponseInterface {
 		$response = new RedirectResponse('/bulk/move', 303);
 		$response->withoutHeader('Content-type');
@@ -765,22 +849,23 @@ class Controller implements RequestHandlerInterface {
 		return $response;
 	}
 
-	public static function bulkMove(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function bulkMove(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		$db = $request->getAttribute('Database');
 		$body = $request->getParsedBody();
 
-		if($body === null || count($body) === 0) {
+		if ($body === null || count($body) === 0) {
 			// Opened page, didn't submit anything yet
 			$items = null;
 		} else {
 			/** @var UploadedFile[] $uploaded */
 			$uploaded = $request->getUploadedFiles();
-			if(count($uploaded) === 0 || !isset($uploaded['Fitems']) || $uploaded['Fitems']->getError() === UPLOAD_ERR_NO_FILE) {
+			if (count($uploaded) === 0 || !isset($uploaded['Fitems']) || $uploaded['Fitems']->getError() === UPLOAD_ERR_NO_FILE) {
 				$items = (string) $body['items'];
 			} else {
-				if($uploaded['Fitems']->getError() !== UPLOAD_ERR_OK) {
+				if ($uploaded['Fitems']->getError() !== UPLOAD_ERR_OK) {
 					$items = $uploaded['Fitems']->getStream()->getContents();
-					if($items === false) {
+					if ($items === false) {
 						// TODO: throw some other exception
 						throw new \LogicException('Cannot open temporary file');
 					}
@@ -794,17 +879,17 @@ class Controller implements RequestHandlerInterface {
 		$error = null;
 		$moved = null;
 		$code = 200;
-		if($items != null) {
+		if ($items != null) {
 			// Null if there's no value or an empty string
 			$where = Validation::validateOptionalString($body, 'where', null, null);
-			if($where !== null) {
+			if ($where !== null) {
 				$where = new ItemCode($where);
 			}
 			try {
 				$moved = self::doBulkMove($items, $where, $db);
-			} catch(\Exception $e) { // TODO: catch specific exceptions (when an item is not found, it's too generic)
+			} catch (\Exception $e) { // TODO: catch specific exceptions (when an item is not found, it's too generic)
 				$error = $e->getMessage();
-				if($e instanceof \InvalidArgumentException || $e instanceof ValidationException) {
+				if ($e instanceof \InvalidArgumentException || $e instanceof ValidationException) {
 					$code = 400;
 				} else {
 					$code = 500;
@@ -815,33 +900,35 @@ class Controller implements RequestHandlerInterface {
 			->withAttribute('Template', 'bulk::move')
 			->withAttribute('StatusCode', $code)
 			->withAttribute(
-				'TemplateParameters', [
+				'TemplateParameters',
+				[
 				'error' => $error,
 				'moved' => $moved,
-			]
+				]
 			);
 
 		return $handler->handle($request);
 	}
 
-	public static function bulkAdd(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function bulkAdd(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		///* @var Database $db */
 		//$db = $request->getAttribute('Database');
 		$body = $request->getParsedBody();
 
-		if($body === null || count($body) === 0) {
+		if ($body === null || count($body) === 0) {
 			// Opened page, didn't submit anything yet
 			$request = $request->withAttribute('Template', 'bulk::add');
 		} else {
 			$add = json_decode((string) $body['add'], true);
-			if(!isset($body['id']) || $body['id'] === '') {
+			if (!isset($body['id']) || $body['id'] === '') {
 				$id = 'Import ' . strtoupper(substr(md5(time()), 0, 8));
 			} else {
 				$id = $body['id'];
 			}
 			$overwrite = boolval($body['overwrite'] ?? false);
 
-			if($add === null || json_last_error() !== JSON_ERROR_NONE) {
+			if ($add === null || json_last_error() !== JSON_ERROR_NONE) {
 				$request = $request->withAttribute('Template', 'bulk::add')->withAttribute('StatusCode', 400)->withAttribute('TemplateParameters', ['error' => 'Peracotta output contains errors: ' . json_last_error_msg()]);
 			} else {
 				/* @var Database $db */
@@ -849,15 +936,15 @@ class Controller implements RequestHandlerInterface {
 				$isDuplicate = $db->bulkDAO()->bulkIdentifierExistsAndLocked($id);
 				$ok = true;
 
-				if($overwrite) {
+				if ($overwrite) {
 					$db->bulkDAO()->deleteBulkImport($id);
-				} else if($isDuplicate) {
+				} elseif ($isDuplicate) {
 					$request = $request->withAttribute('Template', 'bulk::add')->withAttribute('StatusCode', 400)->withAttribute('TemplateParameters', ['error' => "Identifier $id already exists"]);
 					$ok = false;
 				}
 
-				if($ok) {
-					foreach($add as $item) {
+				if ($ok) {
+					foreach ($add as $item) {
 						// TODO: make an addAll function
 						$type = $item['type'];
 						$json = json_encode($item);
@@ -871,24 +958,25 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function bulkImport(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function bulkImport(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		// Handling bulk import from peracotta
 		$body = $request->getParsedBody();
 		$delete = null;
 		$import = null;
 
 		// Handle buttons
-		if($body !== null && count($body) > 0) {
+		if ($body !== null && count($body) > 0) {
 			// Delete
-			if(isset($body['delete'])) {
+			if (isset($body['delete'])) {
 				/* @var Database $db */
 				$db = $request->getAttribute('Database');
 				$db->bulkDAO()->deleteImport(intval($body['delete']));
-				return new RedirectResponse('/bulk/import',303);
+				return new RedirectResponse('/bulk/import', 303);
 			}
 
 			// Import handler
-			if(isset($body['import'])) {
+			if (isset($body['import'])) {
 				return new RedirectResponse('/bulk/import/review/' . intval($body['import']), 303);
 			}
 		}
@@ -897,17 +985,17 @@ class Controller implements RequestHandlerInterface {
 		// Get all Bulk Imports from BulkTable
 		$imports = $db->bulkDAO()->getBulkImports();
 		$importsAggregated = [];
-		foreach($imports as $importElement) {
-			if(isset($importElement['JSON'])) {
+		foreach ($imports as $importElement) {
+			if (isset($importElement['JSON'])) {
 				$json = json_decode($importElement['JSON'], true);
 			} else {
 				$json = [];
 			}
-			if($importElement['Type'] === 'I') {
+			if ($importElement['Type'] === 'I') {
 				$parsed = ItemBuilder::ofArrayFeatures($json);
 				$importElement['Exists'] = false;
-			} else if($importElement['Type'] === 'P') {
-				if(isset($json['brand']) && is_string($json['brand']) && strlen($json['brand']) > 0 && isset($json['model']) && is_string($json['model']) && strlen($json['model']) > 0) {
+			} elseif ($importElement['Type'] === 'P') {
+				if (isset($json['brand']) && is_string($json['brand']) && strlen($json['brand']) > 0 && isset($json['model']) && is_string($json['model']) && strlen($json['model']) > 0) {
 					$parsed = ProductBuilder::ofArray($json, $json['brand'], $json['model'], $json['variant'] ?? ProductCode::DEFAULT_VARIANT);
 					$importElement['Exists'] = $db->productDAO()->productExists($parsed);
 					$importElement['EncodedUrl'] = '/product/' . rawurlencode($parsed->getBrand()) . '/' . rawurlencode($parsed->getModel()) . '/' . rawurlencode($parsed->getVariant());
@@ -928,7 +1016,8 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function bulkImportReview(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function bulkImportReview(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/* @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -938,17 +1027,17 @@ class Controller implements RequestHandlerInterface {
 		// Decoding JSON and redirecting to Item or Product add page
 		$importElement = $db->bulkDAO()->getDecodedJSON($id);
 
-		if($importElement === null) {
+		if ($importElement === null) {
 			throw new NotFoundException(null, 'Bulk import item/product not found');
 		}
 
-		if($importElement['type'] === 'I') {
+		if ($importElement['type'] === 'I') {
 			return new RedirectResponse('/bulk/import/new/' . $id, 303);
-		} else if($importElement['type'] === 'P') {
+		} elseif ($importElement['type'] === 'P') {
 			$importElement = ProductBuilder::ofArray($importElement, $importElement['brand'], $importElement['model'], $importElement['variant'] ?? ProductCode::DEFAULT_VARIANT);
 			try {
 				$product = $db->productDAO()->getProduct($importElement);
-			} catch(NotFoundException $e) {
+			} catch (NotFoundException $e) {
 				return new RedirectResponse('/bulk/import/new/' . $id, 303);
 			}
 			$request = $request
@@ -965,7 +1054,8 @@ class Controller implements RequestHandlerInterface {
 		}
 	}
 
-	public static function bulkImportAdd(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function bulkImportAdd(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/* @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -975,22 +1065,22 @@ class Controller implements RequestHandlerInterface {
 		// Decoding JSON and redirecting to Item or Product add page
 		$importElement = $db->bulkDAO()->getDecodedJSON($id);
 
-		if($importElement === null) {
+		if ($importElement === null) {
 			throw new NotFoundException(null, 'Bulk import item/product not found');
 		}
 
-		if($importElement['type'] === 'I') {
+		if ($importElement['type'] === 'I') {
 			$parent = null;
-			$newItem = ItemBuilder::ofArray($importElement,null,$parent);
-			$request = $request->withAttribute('Template', 'newItemPage')->withAttribute('TemplateParameters',[
+			$newItem = ItemBuilder::ofArray($importElement, null, $parent);
+			$request = $request->withAttribute('Template', 'newItemPage')->withAttribute('TemplateParameters', [
 				'add' => true,
 				'base' => $newItem,
 				'importedFrom' => $id
 			]);
 			return $handler->handle($request);
-		} else if($importElement['type'] === 'P') {
+		} elseif ($importElement['type'] === 'P') {
 			$importElement = ProductBuilder::ofArray($importElement, $importElement['brand'], $importElement['model'], $importElement['variant'] ?? ProductCode::DEFAULT_VARIANT);
-			$request = $request->withAttribute('Template', 'newProductPage')->withAttribute('TemplateParameters',[
+			$request = $request->withAttribute('Template', 'newProductPage')->withAttribute('TemplateParameters', [
 				'add' => true,
 				'base' => $importElement,
 				'importedFrom' => $id
@@ -1020,31 +1110,35 @@ class Controller implements RequestHandlerInterface {
 	 * @throws \Exception whatever may surface from TreeDAO::moveWithValidation
 	 */
 	public static function doBulkMove(
-		string $itemsList, ?ItemCode $defaultLocation, Database $db, bool $fix = true, bool $validate = true
+		string $itemsList,
+		?ItemCode $defaultLocation,
+		Database $db,
+		bool $fix = true,
+		bool $validate = true
 	): array {
 		$moved = [];
-		if(strpos($itemsList, ',') === false) {
+		if (strpos($itemsList, ',') === false) {
 			$array = explode("\n", $itemsList);
 		} else {
 			$array = explode(',', $itemsList);
 		}
 
-		foreach($array as $line) {
+		foreach ($array as $line) {
 			$line = trim($line);
-			if($line === '') {
+			if ($line === '') {
 				// Skip empty lines (trailing commas, two consecutive commas, etc...)
 				continue;
 			}
 			$lineExploded = explode(':', $line);
-			if(count($lineExploded) == 1) {
+			if (count($lineExploded) == 1) {
 				$item = new ItemCode(trim($lineExploded[0]));
-				if($defaultLocation === null) {
+				if ($defaultLocation === null) {
 					throw new \InvalidArgumentException("No location provided for $line and no default location", 1);
 				} else {
 					$location = $defaultLocation;
 				}
 			} else {
-				if(count($lineExploded) == 2) {
+				if (count($lineExploded) == 2) {
 					$item = new ItemCode(trim($lineExploded[0]));
 					$location = new ItemCode(trim($lineExploded[1]));
 				} else {
@@ -1059,7 +1153,8 @@ class Controller implements RequestHandlerInterface {
 	}
 
 	public static function getFeaturesJson(
-		/** @noinspection PhpUnusedParameterInspection */ ServerRequestInterface $request, RequestHandlerInterface $handler
+		/** @noinspection PhpUnusedParameterInspection */ ServerRequestInterface $request,
+		RequestHandlerInterface $handler
 	): ResponseInterface {
 		// They aren't changing >1 time per second, so this should be stable enough for the ETag header...
 		$lastmod1 = ItemValidator::defaultFeaturesLastModified();
@@ -1073,19 +1168,19 @@ class Controller implements RequestHandlerInterface {
 		];
 
 		$cachedEtags = $request->getHeader('If-None-Match');
-		foreach($cachedEtags as $cachedEtag) {
-			if($cachedEtag === $etag) {
+		foreach ($cachedEtags as $cachedEtag) {
+			if ($cachedEtag === $etag) {
 				return new EmptyResponse(304, $responseHeaders);
 			}
 		}
 
 		$defaults = [];
-		foreach(Feature::features['type'] as $type => $useless) {
+		foreach (Feature::features['type'] as $type => $useless) {
 			$defaults[$type] = ItemValidator::getItemDefaultFeatures($type);
 		}
 
 		$defaults2 = [];
-		foreach(Feature::features['type'] as $type => $useless) {
+		foreach (Feature::features['type'] as $type => $useless) {
 			$defaults2[$type] = ItemValidator::getProductDefaultFeatures($type);
 		}
 
@@ -1099,7 +1194,8 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($json, 200, $responseHeaders);
 	}
 
-	private static function getToTest(Database $db): array {
+	private static function getToTest(Database $db): array
+	{
 		return [
 			'RAMs' => $db->statsDAO()->getItemByNotFeature(
 				new Feature('type', 'ram'),
@@ -1124,10 +1220,11 @@ class Controller implements RequestHandlerInterface {
 		];
 	}
 
-	public function handle(ServerRequestInterface $request): ResponseInterface {
+	public function handle(ServerRequestInterface $request): ResponseInterface
+	{
 		$route = $this->route($request);
 
-		switch($route[0]) {
+		switch ($route[0]) {
 			case FastRoute\Dispatcher::FOUND:
 				$level = $route[1][0];
 				$function = $route[1][1];
@@ -1169,10 +1266,10 @@ class Controller implements RequestHandlerInterface {
 			new TemplateEngine(),
 			new GracefulExceptionHandler(),
 		];
-		if($level !== null) {
+		if ($level !== null) {
 			$queue[] = new AuthValidator($level);
 		}
-		if($function !== null) {
+		if ($function !== null) {
 			$queue[] = new TransactionWrapper();
 			$queue[] = 'WEEEOpen\\Tarallo\\SSRv1\\' . $function;
 		}
@@ -1184,14 +1281,16 @@ class Controller implements RequestHandlerInterface {
 		return $relay->handle($request);
 	}
 
-	public static function infoLocations(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function infoLocations(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
 		$request = $request
 			->withAttribute('Template', 'info::locations')
 			->withAttribute(
-				'TemplateParameters', [
+				'TemplateParameters',
+				[
 					'locations' => $db->statsDAO()->getLocationsTree(),
 				]
 			);
@@ -1199,7 +1298,8 @@ class Controller implements RequestHandlerInterface {
 		return $handler->handle($request);
 	}
 
-	public static function infoTodo(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	public static function infoTodo(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
@@ -1211,11 +1311,15 @@ class Controller implements RequestHandlerInterface {
 			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
 			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
 			'toTest' => self::getToTest($db),
-			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(false,
+			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
+				false,
 				['smart-data' => null,
 					'surface-scan' => null],
-				'type', 'hdd',
-				$location, ['working' => 'yes']),
+				'type',
+				'hdd',
+				$location,
+				['working' => 'yes']
+			),
 		];
 
 		$request = $request->withAttribute('Template', 'info::todo')
@@ -1223,7 +1327,4 @@ class Controller implements RequestHandlerInterface {
 
 		return $handler->handle($request);
 	}
-
-
-
 }

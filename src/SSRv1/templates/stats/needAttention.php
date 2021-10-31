@@ -10,11 +10,11 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 ?>
 
 <div class="row">
-	<?php if(!empty($missingData)): ?>
+	<?php if (!empty($missingData)) : ?>
 		<div class="stats list col-12">
 			<p>Items with missing data <small>(<?=count($missingData)?>, max 500 shown)</small></p>
 			<div>
-				<?php foreach($missingData as $item): ?>
+				<?php foreach ($missingData as $item) : ?>
 					<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
 				<?php endforeach ?>
 			</div>
@@ -22,11 +22,11 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 	<?php endif ?>
 </div>
 <div class="row">
-	<?php if(!empty($failedSmartOrSurfaceScan)): ?>
+	<?php if (!empty($failedSmartOrSurfaceScan)) : ?>
 		<div class="stats list col-12">
 			<p>Working HDDs with failed SMART or Surface Scan: do they really work? <small>(<?=count($failedSmartOrSurfaceScan)?>, max 200 shown)</small></p>
 			<div>
-				<?php foreach($failedSmartOrSurfaceScan as $item): ?>
+				<?php foreach ($failedSmartOrSurfaceScan as $item) : ?>
 					<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
 				<?php endforeach ?>
 			</div>
@@ -34,11 +34,11 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 	<?php endif ?>
 </div>
 <div class="row">
-	<?php if(!empty($lost)): ?>
+	<?php if (!empty($lost)) : ?>
 		<div class="stats list col-12">
 			<p>Most wanted, aka lost items <small>(<?=count($lost)?>, max 100 shown)</small></p>
 			<div>
-				<?php foreach($lost as $item): ?>
+				<?php foreach ($lost as $item) : ?>
 					<a href="/item/<?=$this->e(rawurlencode($item))?>"><?=$this->e($item)?></a>
 				<?php endforeach ?>
 			</div>
@@ -46,7 +46,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 	<?php endif ?>
 </div>
 <div class="row">
-<?php if(!empty($splittable)): ?>
+<?php if (!empty($splittable)) : ?>
 	<div class="col-12 col-lg-6">
 		<table class="table table-borderless stats">
 			<caption>Items that can be split with a product</caption>
@@ -60,7 +60,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($splittable as $row): ?>
+			<?php foreach ($splittable as $row) : ?>
 				<tr>
 					<td><a href="/item/<?= $this->e($row['Code']) ?>"><?=$this->e($row['Code'])?></a></td>
 					<td><?=$this->e($row['Brand'])?></td>
@@ -73,7 +73,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 		</table>
 	</div>
 <?php endif ?>
-<?php if(!empty($serials)): ?>
+<?php if (!empty($serials)) : ?>
 	<div class="col-12 col-lg-6">
 		<table class="table table-borderless stats">
 			<caption>Duplicate serial numbers</caption>
@@ -84,7 +84,7 @@ $this->insert('stats::menu', ['currentPage' => 'attention']);
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($serials as $serial => $count): ?>
+			<?php foreach ($serials as $serial => $count) : ?>
 				<tr>
 					<td><a href="/search/feature/sn/<?=$this->e($serial)?>"><?=$this->e($serial)?></a></td>
 					<td><?=$this->e($count)?></td>

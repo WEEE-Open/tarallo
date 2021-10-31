@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-trait ExceptionWithItem {
+trait ExceptionWithItem
+{
 	/**
 	 * @var string|null
 	 */
@@ -15,7 +14,8 @@ trait ExceptionWithItem {
 	 *
 	 * @return $this
 	 */
-	public function setItem(?string $item) {
+	public function setItem(?string $item)
+	{
 		$this->item = $item;
 		return $this;
 	}
@@ -23,7 +23,8 @@ trait ExceptionWithItem {
 	/**
 	 * @return string|null
 	 */
-	public function getItem() {
+	public function getItem()
+	{
 		return $this->item;
 	}
 }

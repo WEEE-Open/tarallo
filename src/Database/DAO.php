@@ -2,11 +2,13 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
-abstract class DAO {
+abstract class DAO
+{
 	protected $database;
 	private $callback;
 
-	public function __construct(Database $db, $callback) {
+	public function __construct(Database $db, $callback)
+	{
 		$this->database = $db;
 		$this->callback = $callback;
 	}
@@ -14,7 +16,8 @@ abstract class DAO {
 	/**
 	 * @return \PDO the PDO instance from Database
 	 */
-	protected function getPDO() {
+	protected function getPDO()
+	{
 		return call_user_func($this->callback);
 	}
 }

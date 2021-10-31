@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-trait ItemTraitLocation {
+trait ItemTraitLocation
+{
 	protected $location = [];
 
 	/**
@@ -14,8 +13,9 @@ trait ItemTraitLocation {
 	 *
 	 * @see TreeDAO::getPathTo() function to obtain the needed array
 	 */
-	public function addAncestors(array $ancestors) {
-		foreach($ancestors as $ancestor) {
+	public function addAncestors(array $ancestors)
+	{
+		foreach ($ancestors as $ancestor) {
 			$this->location[] = $ancestor;
 		}
 	}
@@ -26,16 +26,17 @@ trait ItemTraitLocation {
 	 *
 	 * @return ItemWithCode[] first item is the tree root, last item is direct parent
 	 */
-	public function getPath(): array {
+	public function getPath(): array
+	{
 		$result = [];
 		$last = $this;
 		do {
-			foreach($last->location as $ancestor) {
+			foreach ($last->location as $ancestor) {
 				// array_merge returns a new array, not very efficient if called multiple times...
 				$result[] = $ancestor;
 			}
 			$last = end($result);
-		} while($last !== false && $last instanceof Item && count($last->location) > 0);
+		} while ($last !== false && $last instanceof Item && count($last->location) > 0);
 
 		// TODO: apply memoization ($this->location = $result)?
 
@@ -47,9 +48,10 @@ trait ItemTraitLocation {
 	 *
 	 * @return null|ItemWithCode
 	 */
-	public function getParent(): ?ItemWithCode {
+	public function getParent(): ?ItemWithCode
+	{
 		$path = $this->getPath();
-		if(count($path) === 0) {
+		if (count($path) === 0) {
 			return null;
 		}
 		return $path[count($path) - 1];

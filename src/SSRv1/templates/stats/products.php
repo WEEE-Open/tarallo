@@ -7,7 +7,7 @@ $this->insert('stats::menu', ['currentPage' => 'products']);
 ?>
 
 <div class="row">
-<?php if(!empty($incomplete)): ?>
+<?php if (!empty($incomplete)) : ?>
 	<div class="col-12 col-xl-6">
 		<table class="table table-borderless stats">
 			<caption>Items without a product, that could however have one</caption>
@@ -21,15 +21,15 @@ $this->insert('stats::menu', ['currentPage' => 'products']);
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($incomplete as $row): ?>
+			<?php foreach ($incomplete as $row) : ?>
 				<tr>
 					<td><a href="/item/<?= $this->e($row['Code']) ?>"><?=$this->e($row['Code'])?></a></td>
 					<td><?=$this->e($row['Brand'])?></td>
 					<td><?=$this->e($row['Model'])?></td>
 					<td <?= ($row['Variant'] ?? '') === \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT ? 'class="text-muted"' : '' ?>><?=$this->e($row['Variant'] ?? '')?></td>
-					<?php if($row['NumVariants'] > 0): ?>
+					<?php if ($row['NumVariants'] > 0) : ?>
 						<td><a href="/product/<?= $this->e($row['Brand']) ?>/<?= $this->e($row['Model']) ?>"><?=$this->e($row['NumVariants'])?></a></td>
-					<?php else: ?>
+					<?php else : ?>
 						<td>0</td>
 					<?php endif ?>
 				</tr>
@@ -38,7 +38,7 @@ $this->insert('stats::menu', ['currentPage' => 'products']);
 		</table>
 	</div>
 <?php endif ?>
-<?php if(!empty($brandsProducts)): ?>
+<?php if (!empty($brandsProducts)) : ?>
 	<div class="col-12 col-xl-6">
 		<table class="table table-borderless stats">
 			<caption>Products count per brand</caption>
@@ -51,7 +51,7 @@ $this->insert('stats::menu', ['currentPage' => 'products']);
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach($brandsProducts as $row): ?>
+			<?php foreach ($brandsProducts as $row) : ?>
 				<tr>
 					<td><a href="/product/<?= $this->e($row['Brand']) ?>"><?=$this->e($row['Brand'])?></a></td>
 					<td><?=$this->e($row['Models'])?></td>

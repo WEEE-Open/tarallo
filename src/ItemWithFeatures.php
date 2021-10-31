@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-interface ItemWithFeatures {
+interface ItemWithFeatures
+{
 	public function getFeature(string $name);
 	public function getFeatureValue(string $name);
 	public function removeFeatureByName(string $featureName);

@@ -1,10 +1,11 @@
 <?php
+
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var WEEEOpen\Tarallo\Product|WEEEOpen\Tarallo\Item $original */
 /** @var string[] $superSummary */
 /** @var int $bulkId */
 
-if($original instanceof \WEEEOpen\Tarallo\Product) {
+if ($original instanceof \WEEEOpen\Tarallo\Product) {
 	$viewUrl = '/product/' . rawurlencode($original->getBrand()) . '/' . rawurlencode($original->getModel()) . '/' . rawurlencode($original->getVariant());
 	$whatever = $superSummary[0] === '' ? 'product' : $superSummary[0];
 } else {

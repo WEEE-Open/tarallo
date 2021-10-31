@@ -10,7 +10,8 @@ use WEEEOpen\Tarallo\ItemIncomplete;
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\ValidationException;
 
-class ItemBuilder {
+class ItemBuilder
+{
 	/**
 	 * Build an Item, return it.
 	 *
@@ -20,13 +21,14 @@ class ItemBuilder {
 	 *
 	 * @return Item
 	 */
-	public static function ofArray(array $input, ?string $code, &$parent) {
+	public static function ofArray(array $input, ?string $code, &$parent)
+	{
 		$item = self::ofArrayInternal($input, $code, [0]);
 
-		if(isset($input['parent'])) {
+		if (isset($input['parent'])) {
 			try {
 				$parent = new ItemCode($input['parent']);
-			} catch(ValidationException $e) {
+			} catch (ValidationException $e) {
 				$e->setItemPath([]);
 				throw $e;
 			}
@@ -46,19 +48,20 @@ class ItemBuilder {
 	 * @return Item
 	 * @see ofArray
 	 */
-	private static function ofArrayInternal(array $input, ?string $code, array $path, $inner = false) {
+	private static function ofArrayInternal(array $input, ?string $code, array $path, $inner = false)
+	{
 		try {
 			$item = new Item($code);
-		} catch(ValidationException $e) {
+		} catch (ValidationException $e) {
 			$e->setItemPath($path);
 			throw $e;
 		}
 
-		if(isset($input['code'])) {
-			if($inner) {
+		if (isset($input['code'])) {
+			if ($inner) {
 				try {
 					$item->setCode($input['code']);
-				} catch(ValidationException $e) {
+				} catch (ValidationException $e) {
 					$e->setItemPath($path);
 					throw $e;
 				}
@@ -68,29 +71,29 @@ class ItemBuilder {
 			}
 		}
 
-		if($inner && isset($input['parent'])) {
+		if ($inner && isset($input['parent'])) {
 			throw new ValidationException($code, $path, 'Cannot set parent for internal items');
 		}
 
-		if(isset($input['features'])) {
-			if(!is_array($input['features'])) {
+		if (isset($input['features'])) {
+			if (!is_array($input['features'])) {
 				throw new ValidationException($code, $path, 'Features must be an array, ' . gettype($input['features']) . ' given');
 			}
 			try {
 				self::addFeatures($input['features'], $item);
-			} catch(FeatureValidationException $e) {
+			} catch (FeatureValidationException $e) {
 				$e->setItem($code);
 				$e->setItemPath($path);
 				throw $e;
 			}
 		}
 
-		if(isset($input['contents'])) {
-			if(!is_array($input['features'])) {
+		if (isset($input['contents'])) {
+			if (!is_array($input['features'])) {
 				throw new ValidationException($code, $path, 'Contents must be an array, ' . gettype($input['features']) .	' given');
 			}
 			$id = 0;
-			foreach($input['contents'] as $other) {
+			foreach ($input['contents'] as $other) {
 				$item->addContent(self::ofArrayInternal($other, null, array_merge($path, [$id]), true));
 				$id++;
 			}
@@ -107,15 +110,16 @@ class ItemBuilder {
 	 * @return ItemWithFeatures
 	 * @see ofArray
 	 */
-	public static function ofArrayFeatures(array $input): ?ItemWithFeatures {
+	public static function ofArrayFeatures(array $input): ?ItemWithFeatures
+	{
 		$item = new ItemIncomplete(null);
-		if(isset($input['features'])) {
-			if(!is_array($input['features'])) {
+		if (isset($input['features'])) {
+			if (!is_array($input['features'])) {
 				return $item;
 			}
 			try {
 				self::addFeatures($input['features'], $item);
-			} catch(FeatureValidationException $e) {
+			} catch (FeatureValidationException $e) {
 				return $item;
 			}
 		}
@@ -131,11 +135,12 @@ class ItemBuilder {
 	 *
 	 * @see addFeaturesDelta
 	 */
-	public static function addFeatures(array $features, ItemWithFeatures $item) {
-		foreach($features as $name => $value) {
+	public static function addFeatures(array $features, ItemWithFeatures $item)
+	{
+		foreach ($features as $name => $value) {
 			try {
 				$item->addFeature(Feature::ofString($name, trim($value)));
-			} catch(\Throwable $e) {
+			} catch (\Throwable $e) {
 				throw new FeatureValidationException($name, $value, null, null, $e->getMessage());
 			}
 		}
@@ -151,12 +156,13 @@ class ItemBuilder {
 	 *
 	 * @see addFeatures
 	 */
-	public static function addFeaturesDelta(array $features, ItemWithFeatures $item) {
+	public static function addFeaturesDelta(array $features, ItemWithFeatures $item)
+	{
 		$delete = [];
 		$add = [];
 
-		foreach($features as $name => $value) {
-			if($value === null) {
+		foreach ($features as $name => $value) {
+			if ($value === null) {
 				$delete[] = $name;
 			} else {
 				$add[$name] = $value;

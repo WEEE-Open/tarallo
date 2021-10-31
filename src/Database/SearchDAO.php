@@ -12,14 +12,16 @@ use WEEEOpen\Tarallo\Search;
 use WEEEOpen\Tarallo\SearchTriplet;
 use WEEEOpen\Tarallo\User;
 
-final class SearchDAO extends DAO {
-	private function getCompareArray(SearchTriplet $triplet): array {
+final class SearchDAO extends DAO
+{
+	private function getCompareArray(SearchTriplet $triplet): array
+	{
 		$feature = $triplet->getAsFeature();
 		$operator = $triplet->getCompare();
 		$value = $this->getPDO()->quote($feature->value);
-		switch($feature->type) {
+		switch ($feature->type) {
 			case BaseFeature::STRING:
-				switch($operator) {
+				switch ($operator) {
 					case '=':
 					case '<>':
 						return ['ValueText', $operator, $value];
@@ -32,7 +34,7 @@ final class SearchDAO extends DAO {
 			case BaseFeature::INTEGER:
 			case BaseFeature::DOUBLE:
 				$column = FeatureDAO::getColumn($feature->type);
-				switch($operator) {
+				switch ($operator) {
 					case '>':
 					case '<':
 					case '>=':
@@ -43,7 +45,7 @@ final class SearchDAO extends DAO {
 				}
 				break;
 			case BaseFeature::ENUM:
-				switch($operator) {
+				switch ($operator) {
 					case '=':
 					case '<>':
 						return ['ValueEnum', $operator, $value];
@@ -53,21 +55,24 @@ final class SearchDAO extends DAO {
 		throw new \InvalidArgumentException("Cannot apply filter $triplet");
 	}
 
-	private function getCompare(SearchTriplet $triplet): string {
+	private function getCompare(SearchTriplet $triplet): string
+	{
 		return implode(' ', $this->getCompareArray($triplet));
 	}
 
-	private function getCompareReversed(SearchTriplet $triplet): string {
+	private function getCompareReversed(SearchTriplet $triplet): string
+	{
 		$pieces = $this->getCompareArray($triplet);
-		if($pieces[1] === 'NOT LIKE') {
+		if ($pieces[1] === 'NOT LIKE') {
 			$pieces[1] = 'LIKE';
-		} else if($pieces[1] === '<>') {
+		} elseif ($pieces[1] === '<>') {
 			$pieces[1] = '=';
 		}
 		return implode(' ', $pieces);
 	}
 
-	private function ancestorIsReversed(SearchTriplet $triplet): string {
+	private function ancestorIsReversed(SearchTriplet $triplet): string
+	{
 		$operator = $triplet->getCompare();
 		// ! is handled elsewhere
 		return $operator === '<>' || $operator === '!~';
@@ -78,13 +83,14 @@ final class SearchDAO extends DAO {
 	 *
 	 * @return int
 	 */
-	public function getResultsCount(int $previousSearchId): int {
+	public function getResultsCount(int $previousSearchId): int
+	{
 		$s = $this->getPDO()->prepare('SELECT ResultsCount FROM Search WHERE Code = ?;');
 		$result = $s->execute([$previousSearchId]);
 		assert($result !== false, 'get results count');
 
 		try {
-			if($s->rowCount() === 0) {
+			if ($s->rowCount() === 0) {
 				throw new \LogicException("Search id $previousSearchId doesn't exist");
 			}
 			$row = $s->fetch(\PDO::FETCH_NUM);
@@ -100,12 +106,13 @@ final class SearchDAO extends DAO {
 	 *
 	 * @return string
 	 */
-	public function getOwnerUsername(int $searchId): string {
+	public function getOwnerUsername(int $searchId): string
+	{
 		$s = $this->getPDO()->prepare('SELECT Owner FROM Search WHERE Code = ?;');
 		$result = $s->execute([$searchId]);
 		assert($result !== false, 'get search owner username');
 		try {
-			if($s->rowCount() === 0) {
+			if ($s->rowCount() === 0) {
 				throw new \LogicException("Search id $searchId doesn't exist");
 			}
 			$row = $s->fetch(\PDO::FETCH_NUM);
@@ -123,7 +130,8 @@ final class SearchDAO extends DAO {
 	 *
 	 * @return int
 	 */
-	private function newSearch(User $user): int {
+	private function newSearch(User $user): int
+	{
 		$s = $this->getPDO()->prepare('INSERT INTO Search(`Owner`) VALUES (?)');
 		$result = $s->execute([$user->uid]);
 		assert($result !== false, 'start search');
@@ -140,13 +148,14 @@ final class SearchDAO extends DAO {
 	 * @TODO break up this function in smaller parts, it's huuuuuge
 	 * @noinspection PhpCastIsUnnecessaryInspection
 	 */
-	public function search(Search $search, User $user, ?int $previousSearchId = null): int {
+	public function search(Search $search, User $user, ?int $previousSearchId = null): int
+	{
 		$subqueries = [];
 		$subqueriesNotIn = [];
 		$pdo = $this->getPDO();
 
-		if($search->isSortOnly()) {
-			if($previousSearchId === null) {
+		if ($search->isSortOnly()) {
+			if ($previousSearchId === null) {
 				throw new \InvalidArgumentException("Sorting only is not allowed for a new search");
 			} else {
 				$this->sort($search, $previousSearchId);
@@ -154,21 +163,21 @@ final class SearchDAO extends DAO {
 			}
 		}
 
-		if($previousSearchId === null) {
+		if ($previousSearchId === null) {
 			$id = self::newSearch($user);
 		} else {
 			$id = $previousSearchId;
 		}
 
-		if($search->searchFeatures !== null) {
-			foreach($search->searchFeatures as $triplet) {
+		if ($search->searchFeatures !== null) {
+			foreach ($search->searchFeatures as $triplet) {
 				/** @var $triplet SearchTriplet */
 				$subqueries[] = $this->getFeatureSubquery($triplet, $pdo);
 			}
 		}
 
-		if($search->searchLocations !== null) {
-			foreach($search->searchLocations as $location) {
+		if ($search->searchLocations !== null) {
+			foreach ($search->searchLocations as $location) {
 				$escaped = $pdo->quote($location);
 
 				$subqueries[] = /** @lang MySQL */
@@ -180,12 +189,12 @@ EOQ;
 			}
 		}
 
-		if($search->searchAncestors !== null) {
-			foreach($search->searchAncestors as $triplet) {
+		if ($search->searchAncestors !== null) {
+			foreach ($search->searchAncestors as $triplet) {
 				/** @var $triplet SearchTriplet */
 				$reversed = $this->ancestorIsReversed($triplet);
 				$ancestorSubquery = $this->getAncestorSubquery($triplet, $reversed, $pdo);
-				if($reversed) {
+				if ($reversed) {
 					$subqueriesNotIn[] = $ancestorSubquery;
 				} else {
 					$subqueries[] = $ancestorSubquery;
@@ -193,25 +202,25 @@ EOQ;
 			}
 		}
 
-		if($search->searchCode === null) {
+		if ($search->searchCode === null) {
 			$codeSubquery = '';
 		} else {
 			$codeSubquery = 'Item.`Code` LIKE ' . $pdo->quote($search->searchCode);
 		}
 
 		$everything = '';
-		foreach($subqueries as $subquery) {
+		foreach ($subqueries as $subquery) {
 			$everything .= "AND Item.`Code` IN (\n";
 			$everything .= $subquery;
 			$everything .= "\n)";
 		}
-		foreach($subqueriesNotIn as $subquery) {
+		foreach ($subqueriesNotIn as $subquery) {
 			$everything .= "AND Item.`Code` NOT IN (\n";
 			$everything .= $subquery;
 			$everything .= "\n)";
 		}
 
-		if($codeSubquery !== '') {
+		if ($codeSubquery !== '') {
 			$everything .= "AND $codeSubquery";
 		}
 
@@ -221,7 +230,7 @@ EOQ;
 		// Or rather:
 		$everything = 'WHERE DeletedAt IS NULL ' . $everything;
 
-		if($previousSearchId) {
+		if ($previousSearchId) {
 			$megaquery = "
 DELETE FROM SearchResult
 WHERE Search = " . ((int) $id) . " AND Item NOT IN (SELECT `Code` FROM Item $everything);";
@@ -244,7 +253,8 @@ $everything;
 		return $id;
 	}
 
-	public function sortByCode(int $searchId) {
+	public function sortByCode(int $searchId)
+	{
 		$query = /** @lang MySQL */
 			"SELECT `Item` FROM SearchResult WHERE Search = ? ORDER BY CHAR_LENGTH(`Item`) DESC, `Item` DESC;";
 		$sortedStatement = $this->getPDO()->prepare($query);
@@ -258,32 +268,33 @@ $everything;
 			$sortedStatement->closeCursor();
 		}
 
-		if(!isset($sorted)) {
+		if (!isset($sorted)) {
 			throw new \LogicException('Lost sorted items (by code) along the way somehow');
 		}
-		if(count($sorted) === 0) {
+		if (count($sorted) === 0) {
 			return;
 		}
 
 		$i = 0;
-		foreach($sorted as $result) {
+		foreach ($sorted as $result) {
 			$this->setItemOrder($searchId, $result['Item'], $i);
 			$i++;
 		}
 	}
 
-	public function sort(Search $search, int $searchId) {
-		if($search->sort === null) {
+	public function sort(Search $search, int $searchId)
+	{
+		if ($search->sort === null) {
 			$this->sortByCode($searchId);
 
 			return;
 		}
 
-		if(!is_array($search->sort)) {
+		if (!is_array($search->sort)) {
 			throw new \InvalidArgumentException('"Sorts" must be an array');
 		}
 
-		if(empty($search->sort)) {
+		if (empty($search->sort)) {
 			$this->sortByCode($searchId);
 
 			return;
@@ -318,15 +329,15 @@ EOQ;
 			$sortedStatement->closeCursor();
 		}
 
-		if(!isset($sorted)) {
+		if (!isset($sorted)) {
 			throw new \LogicException('Lost sorted items along the way somehow');
 		}
-		if(count($sorted) === 0) {
+		if (count($sorted) === 0) {
 			return;
 		}
 
 		$i = 0;
-		foreach($sorted as $result) {
+		foreach ($sorted as $result) {
 			$this->setItemOrder($searchId, $result['Code'], $i);
 			$i++;
 		}
@@ -341,8 +352,9 @@ EOQ;
 	 * @param string $code Item code
 	 * @param int $position Position in the results
 	 */
-	private function setItemOrder(int $searchId, string $code, int $position) {
-		if($this->setItemOrderStatement === null) {
+	private function setItemOrder(int $searchId, string $code, int $position)
+	{
+		if ($this->setItemOrderStatement === null) {
 			$this->setItemOrderStatement = $this->getPDO()
 				->prepare('UPDATE SearchResult SET `Order` = :pos WHERE Search = :sea AND Item = :cod');
 		}
@@ -363,7 +375,8 @@ EOQ;
 	 *
 	 * @param int $searchId
 	 */
-	private function unsort(int $searchId) {
+	private function unsort(int $searchId)
+	{
 		$statement = $this->getPDO()->prepare('UPDATE SearchResult SET `Order` = NULL WHERE Search = ?');
 
 		try {
@@ -384,7 +397,8 @@ EOQ;
 	 *
 	 * @return Item[]
 	 */
-	public function getResults(int $id, int $page, int $perPage, ?int $depth = null): array {
+	public function getResults(int $id, int $page, int $perPage, ?int $depth = null): array
+	{
 		$this->refresh($id);
 
 		$statement = /** @lang MySQL */
@@ -399,7 +413,7 @@ EOQ;
 			$statement->bindValue(':offs', ($page - 1) * $perPage, \PDO::PARAM_INT);
 			$statement->bindValue(':cnt', $perPage, \PDO::PARAM_INT);
 			$statement->execute();
-			foreach($statement as $result) {
+			foreach ($statement as $result) {
 				$items[] = $itemDAO->getItem(new ItemCode($result['Item']), null, $depth);
 			}
 		} finally {
@@ -415,16 +429,18 @@ EOQ;
 	 *
 	 * @param int $id
 	 */
-	private function refresh(int $id) {
+	private function refresh(int $id)
+	{
 		// ID is an int, no riks of SQL injection...
 		$result = $this->getPDO()->exec("CALL RefreshSearch($id)");
 		// may be 0 for number of affected rows, or false on failure
 		assert($result !== false, 'update expiration date for search');
 	}
 
-	protected function getFeatureSubquery(SearchTriplet $triplet, \PDO $pdo): string {
+	protected function getFeatureSubquery(SearchTriplet $triplet, \PDO $pdo): string
+	{
 		$escaped = $pdo->quote($triplet->getAsFeature()->name);
-		switch($triplet->getCompare()) {
+		switch ($triplet->getCompare()) {
 			case '*':
 				return /** @lang MySQL */
 					<<<EOQ
@@ -456,10 +472,11 @@ EOQ;
 		}
 	}
 
-	protected function getAncestorSubquery(SearchTriplet $triplet, bool $reversed, \PDO $pdo): string {
+	protected function getAncestorSubquery(SearchTriplet $triplet, bool $reversed, \PDO $pdo): string
+	{
 		$escaped = $pdo->quote($triplet->getAsFeature()->name);
 
-		switch($triplet->getCompare()) {
+		switch ($triplet->getCompare()) {
 			case '*':
 				return /** @lang MySQL */
 					<<<EOQ
@@ -483,7 +500,7 @@ EOQ;
 				)
 EOQ;
 			default:
-				if($reversed) {
+				if ($reversed) {
 					$compareString = $this->getCompareReversed($triplet);
 				} else {
 					$compareString = $this->getCompare($triplet);
@@ -500,7 +517,8 @@ EOQ;
 		}
 	}
 
-	public function getBrandsLike(string $brand, int $limit = 10): array {
+	public function getBrandsLike(string $brand, int $limit = 10): array
+	{
 		$brand = str_replace(' ', '', $brand);
 		$statement = $this->getPDO()
 			->prepare("SELECT DISTINCT Brand, LENGTH(REPLACE(Brand, ' ', '')) - ? AS Distance FROM Product WHERE REPLACE(Brand, ' ', '') LIKE ? ORDER BY Distance LIMIT ?");
@@ -515,7 +533,8 @@ EOQ;
 		}
 	}
 
-	public function getProductsLike(string $search, int $limit = 10): array {
+	public function getProductsLike(string $search, int $limit = 10): array
+	{
 		$search = str_replace(' ', '', $search);
 		$statement = $this->getPDO()
 			// - LENGTH(REPLACE(LOWER(Brand),:brandfilter,'')) + LENGTH(Brand)
@@ -532,7 +551,7 @@ EOQ;
 
 			$result = [];
 			$statement->setFetchMode(\PDO::FETCH_NUM);
-			foreach($statement as $row) {
+			foreach ($statement as $row) {
 				$result[] = [new ProductCode($row[0], $row[1], $row[2]), $row[3]];
 			}
 			return $result;
@@ -541,7 +560,8 @@ EOQ;
 		}
 	}
 
-	public function getFeaturesLike(string $search, int $limit = 10): array {
+	public function getFeaturesLike(string $search, int $limit = 10): array
+	{
 //		$search = str_replace(' ', '', $search);
 		$statement = $this->getPDO()
 			->prepare("SELECT Code, Feature, ValueText, LENGTH(ValueText) - :strlen AS Distance FROM ItemFeature WHERE ValueText LIKE :search AND Feature NOT IN ('brand', 'model', 'variant') ORDER BY Distance, Code DESC LIMIT :limit");
@@ -553,7 +573,7 @@ EOQ;
 
 			$result = [];
 			$statement->setFetchMode(\PDO::FETCH_NUM);
-			foreach($statement as $row) {
+			foreach ($statement as $row) {
 				$result[] = [new ItemCode($row[0]), new Feature($row[1], $row[2]), $row[3]];
 			}
 			return $result;

@@ -1,4 +1,5 @@
 <?php
+
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var string $title */
 // Everything here is a citazione colta (for delucidazioni chiedere a JustMe11)

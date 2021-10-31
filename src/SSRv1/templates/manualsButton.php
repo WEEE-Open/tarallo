@@ -1,4 +1,5 @@
 <?php
+
 /** @var \WEEEOpen\Tarallo\Product $product */
 /** @var string $class */
 // The site expects urlencode, not rawurlencode

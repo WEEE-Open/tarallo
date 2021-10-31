@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-trait ExceptionWithPath {
+trait ExceptionWithPath
+{
 	/**
 	 * @var int[]|null
 	 */
@@ -15,7 +14,8 @@ trait ExceptionWithPath {
 	 *
 	 * @return $this
 	 */
-	public function setItemPath(?array $itemPath) {
+	public function setItemPath(?array $itemPath)
+	{
 		$this->itemPath = $itemPath;
 		return $this;
 	}
@@ -23,7 +23,8 @@ trait ExceptionWithPath {
 	/**
 	 * @return int[]|null
 	 */
-	public function getItemPath(): ?array {
+	public function getItemPath(): ?array
+	{
 		return $this->itemPath;
 	}
 }

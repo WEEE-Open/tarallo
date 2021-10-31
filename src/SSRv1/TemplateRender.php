@@ -1,8 +1,6 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo\SSRv1;
-
 
 use League\Plates\Engine;
 use Psr\Http\Message\ResponseInterface;
@@ -12,13 +10,15 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\HtmlResponse;
 
-class TemplateRender implements MiddlewareInterface {
-	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+class TemplateRender implements MiddlewareInterface
+{
+	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
 		$template = $request->getAttribute('Template', null);
 		$status = $request->getAttribute('ResponseCode', 200);
 		$headers = $request->getAttribute('ResponseHeaders', []);
 
-		if($request->getMethod() === 'HEAD' || $template === null) {
+		if ($request->getMethod() === 'HEAD' || $template === null) {
 			return new EmptyResponse($status, $headers);
 		} else {
 			/** @var Engine $engine */

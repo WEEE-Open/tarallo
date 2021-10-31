@@ -1,11 +1,11 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo\HTTP;
 
 use Throwable;
 
-class InvalidRequestBodyException extends \RuntimeException {
+class InvalidRequestBodyException extends \RuntimeException
+{
 	public $status = 400;
 
 	public function __construct(

@@ -4,16 +4,16 @@
 /** @var DateTime $startDate */
 /** @var bool $startDateSet */
 /** @var bool $allowDateSelection */
-if(!isset($allowDateSelection)) {
+if (!isset($allowDateSelection)) {
 	$allowDateSelection = true;
 }
-if($location === null): ?>
+if ($location === null) : ?>
 	<p class="stats text">All stats refer to <em>every possible location</em></p>
-<?php else: ?>
+<?php else : ?>
 	<p class="stats text">All stats refer to <em><?=$location?></em> only</p>
 <?php endif; ?>
 
-<?php if($allowDateSelection): ?>
+<?php if ($allowDateSelection) : ?>
 <form action="" method="GET">
 	<div class="form-group row">
 		<label for="statsDate" class="col-sm-2 col-lg-1 col-form-label">Start&nbsp;date</label>
@@ -24,7 +24,9 @@ if($location === null): ?>
 			<input class="btn btn-secondary" type="submit" value="Filter">
 		</div>
 	</div>
-	<?php if($location !== null && $locationSet): ?><input type="hidden" name="where" value="<?= $this->e($location) ?>"><?php endif; ?>
+	<?php if ($location !== null && $locationSet) :
+		?><input type="hidden" name="where" value="<?= $this->e($location) ?>"><?php
+	endif; ?>
 </form>
 <?php endif; ?>
 <form action="" method="GET">
@@ -37,5 +39,9 @@ if($location === null): ?>
 			<input class="btn btn-secondary" type="submit" value="Filter">
 		</div>
 	</div>
-	<?php if($allowDateSelection): if($startDate !== null && $startDateSet): ?><input type="hidden" name="from" value="<?= $startDate->format('Y-m-s') ?>"><?php endif; endif; ?>
+	<?php if ($allowDateSelection) :
+		if ($startDate !== null && $startDateSet) :
+			?><input type="hidden" name="from" value="<?= $startDate->format('Y-m-s') ?>"><?php
+		endif;
+	endif; ?>
 </form>

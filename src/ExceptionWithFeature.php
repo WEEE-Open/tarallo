@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-trait ExceptionWithFeature {
+trait ExceptionWithFeature
+{
 	/**
 	 * @var string|null
 	 */
@@ -19,7 +18,8 @@ trait ExceptionWithFeature {
 	 *
 	 * @return $this
 	 */
-	public function setFeature(?string $feature): ExceptionWithFeature {
+	public function setFeature(?string $feature): ExceptionWithFeature
+	{
 		$this->feature = $feature;
 		return $this;
 	}
@@ -27,7 +27,8 @@ trait ExceptionWithFeature {
 	/**
 	 * @return string|null
 	 */
-	public function getFeature(): ?string {
+	public function getFeature(): ?string
+	{
 		return $this->feature;
 	}
 
@@ -36,7 +37,8 @@ trait ExceptionWithFeature {
 	 *
 	 * @return $this
 	 */
-	public function setFeatureValue($featureValue): ExceptionWithFeature {
+	public function setFeatureValue($featureValue): ExceptionWithFeature
+	{
 		$this->featureValue = $featureValue;
 		return $this;
 	}
@@ -44,7 +46,8 @@ trait ExceptionWithFeature {
 	/**
 	 * @return mixed
 	 */
-	public function getFeatureValue() {
+	public function getFeatureValue()
+	{
 		return $this->featureValue;
 	}
 }

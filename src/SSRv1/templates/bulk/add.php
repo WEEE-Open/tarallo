@@ -9,7 +9,7 @@ $this->layout('main', ['title' => 'Bulk add', 'user' => $user, 'currentPage' => 
 
 <div class="row">
 	<div class="col-12">
-		<?php if(isset($error)): ?>
+		<?php if (isset($error)) : ?>
 			<p class="alert alert-danger mt-2" role="alert"><?= $this->e($error) ?></p>
 		<?php endif; ?>
 		<form action="/bulk/add" method="POST" enctype="multipart/form-data" id="bulk-add" class="mt-3">

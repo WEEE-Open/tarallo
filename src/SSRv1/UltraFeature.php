@@ -2,11 +2,11 @@
 
 namespace WEEEOpen\Tarallo\SSRv1;
 
-
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
 
-class UltraFeature {
+class UltraFeature
+{
 	protected $feature;
 	public $name;
 	public $pname;
@@ -15,8 +15,8 @@ class UltraFeature {
 	public $group;
 	public $type;
 
-	private function __construct() {
-
+	private function __construct()
+	{
 	}
 
 	/**
@@ -28,14 +28,15 @@ class UltraFeature {
 	 * @param string $language
 	 * @return UltraFeature
 	 */
-	public static function fromFeature(BaseFeature $feature, string $language): UltraFeature {
+	public static function fromFeature(BaseFeature $feature, string $language): UltraFeature
+	{
 		$that = new UltraFeature();
 		$that->feature = $feature;
 		$that->type = $feature->type;
 		$that->group = FeaturePrinter::printableGroup(BaseFeature::getGroup($feature->name));
 		$that->name = $feature->name;
 		$that->pname = FeaturePrinter::printableName($feature->name);
-		if($feature instanceof Feature) {
+		if ($feature instanceof Feature) {
 			$that->value = $feature->value;
 			$that->pvalue = FeaturePrinter::printableValue($feature);
 		} else {
@@ -45,11 +46,13 @@ class UltraFeature {
 		return $that;
 	}
 
-	public static function printableValue(Feature $feature, string $language): string {
+	public static function printableValue(Feature $feature, string $language): string
+	{
 		return FeaturePrinter::printableValue($feature);
 	}
 
-	public function printableExplanation(string $language): ?string {
+	public function printableExplanation(string $language): ?string
+	{
 		return FeaturePrinter::printableExplanation($this->feature);
 	}
 }

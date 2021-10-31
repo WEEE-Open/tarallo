@@ -23,15 +23,15 @@
 	<div class="error description">Error</div>
 </template>
 <template id="feature-edit-template-linked-error">
-    <div class="error description">Wrong value for a feature <a href="#first-error">here</a></div>
+	<div class="error description">Wrong value for a feature <a href="#first-error">here</a></div>
 </template>
 <template id="new-item-template">
 	<?php
-    $empty = new \WEEEOpen\Tarallo\ItemIncomplete(null);
-    $empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('type'));
-    $empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('working'));
-    $this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'base' => $empty])
-    ?>
+	$empty = new \WEEEOpen\Tarallo\ItemIncomplete(null);
+	$empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('type'));
+	$empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('working'));
+	$this->insert('newItem', ['recursion' => true, 'innerrecursion' => true, 'base' => $empty])
+	?>
 </template>
 <template id="features-select-template">
 	<?php $this->insert('featuresList'); ?>

@@ -5,7 +5,8 @@ namespace WEEEOpen\Tarallo\Database;
 use WEEEOpen\Tarallo\SessionLocal;
 use WEEEOpen\Tarallo\SessionSSO;
 
-final class SessionDAO extends DAO {
+final class SessionDAO extends DAO
+{
 	/**
 	 * Get user data from a session, or null
 	 *
@@ -13,17 +14,18 @@ final class SessionDAO extends DAO {
 	 *
 	 * @return SessionSSO
 	 */
-	public function getSession(string $sessionId): ?SessionSSO {
+	public function getSession(string $sessionId): ?SessionSSO
+	{
 		try {
 			$s = $this->getPDO()->prepare('SELECT `Data` FROM Session WHERE `Session` = ?');
 			$result = $s->execute([$sessionId]);
 			assert($result !== false, 'get session');
 			$rows = $s->rowCount();
-			if($rows === 0) {
+			if ($rows === 0) {
 				return null;
 			}
 			$data = $s->fetch(\PDO::FETCH_NUM)[0];
-			if($data === null) {
+			if ($data === null) {
 				return null;
 			}
 			return unserialize($data);
@@ -32,18 +34,19 @@ final class SessionDAO extends DAO {
 		}
 	}
 
-	public function getRedirect(string $sessionId): ?string {
+	public function getRedirect(string $sessionId): ?string
+	{
 		try {
 			$s = $this->getPDO()->prepare('SELECT `Redirect` FROM Session WHERE `Session` = ?');
 			$result = $s->execute([$sessionId]);
 			assert($result !== false, 'get session redirect');
 			$rows = $s->rowCount();
-			if($rows === 0) {
+			if ($rows === 0) {
 				return null;
 			}
 
 			$redirect = $s->fetch(\PDO::FETCH_NUM)[0];
-			if($redirect === null) {
+			if ($redirect === null) {
 				return '/';
 			}
 			// PHPStorm thinks that an if-else here provides a path where nothing is returned... Yeah right...
@@ -53,7 +56,8 @@ final class SessionDAO extends DAO {
 		}
 	}
 
-	public function deleteSession(string $sessionId) {
+	public function deleteSession(string $sessionId)
+	{
 		try {
 			$s = $this->getPDO()->prepare('DELETE FROM Session WHERE `Session` = ?');
 			$result = $s->execute([$sessionId]);
@@ -71,7 +75,8 @@ final class SessionDAO extends DAO {
 	 *
 	 * @return bool Does it exist or not?
 	 */
-	public function sessionExists(string $sessionID): bool {
+	public function sessionExists(string $sessionID): bool
+	{
 		try {
 			$s = $this->getPDO()->prepare('SELECT `Data`, `Redirect` FROM Session WHERE `Session` = :s FOR UPDATE');
 			$s->bindValue(':s', $sessionID, \PDO::PARAM_STR);
@@ -80,7 +85,7 @@ final class SessionDAO extends DAO {
 			$rows = $s->rowCount();
 			return $rows > 0;
 		} finally {
-			if(isset($s)) {
+			if (isset($s)) {
 				$s->closeCursor();
 			}
 		}
@@ -94,7 +99,8 @@ final class SessionDAO extends DAO {
 	 *
 	 * @return SessionLocal Session for the token, or null if it doesn't exist
 	 */
-	public function getToken(string $token, &$lastAccess): ?SessionLocal {
+	public function getToken(string $token, &$lastAccess): ?SessionLocal
+	{
 		try {
 			$s = $this->getPDO()->prepare('SELECT `Hash`, `Data`, `LastAccess` FROM SessionToken WHERE `Token` = :t FOR UPDATE');
 			list($token, $pass) = self::splitToken($token);
@@ -102,16 +108,16 @@ final class SessionDAO extends DAO {
 			$result = $s->execute();
 			assert($result !== false, 'token exists');
 			$rows = $s->rowCount();
-			if($rows > 0) {
+			if ($rows > 0) {
 				$row = $s->fetchAll(\PDO::FETCH_ASSOC)[0];
 				$lastAccess = $row['LastAccess'];
 				$hash = $row['Hash'];
-				if(!password_verify($pass, $hash)) {
+				if (!password_verify($pass, $hash)) {
 					return null;
 				}
 				try {
 					$lastAccess = new \DateTimeImmutable($lastAccess, new \DateTimeZone('Europe/Rome'));
-				} catch(\Exception $e) {
+				} catch (\Exception $e) {
 					return null;
 				}
 				return unserialize($row['Data']);
@@ -125,7 +131,8 @@ final class SessionDAO extends DAO {
 		}
 	}
 
-	public function deleteToken( string $token) {
+	public function deleteToken(string $token)
+	{
 		try {
 			$s = $this->getPDO()->prepare('DELETE FROM SessionToken WHERE Token = :t');
 			$s->bindValue(':t', $token, \PDO::PARAM_STR);
@@ -136,17 +143,18 @@ final class SessionDAO extends DAO {
 		}
 	}
 
-	public function getUserTokens(string $user): array {
+	public function getUserTokens(string $user): array
+	{
 		try {
 			$s = $this->getPDO()->prepare('SELECT `Token`, `Data`, LastAccess FROM SessionToken WHERE `Owner` = :o');
 			$s->bindValue(':o', $user, \PDO::PARAM_STR);
 			$result = $s->execute();
 			assert($result !== false, 'get user tokens');
 			$tokens = [];
-			foreach($s as $row) {
+			foreach ($s as $row) {
 				try {
 					$dt = new \DateTimeImmutable($row['LastAccess'], new \DateTimeZone('Europe/Rome'));
-				} catch(\Exception $e) {
+				} catch (\Exception $e) {
 					$dt = null;
 				}
 
@@ -170,10 +178,11 @@ final class SessionDAO extends DAO {
 	 *
 	 * @throws DatabaseException if session does not exist
 	 */
-	public function setRedirectForSession(string $sessionID, ?string $redirect = null) {
-		if(!$this->sessionExists($sessionID)) {
+	public function setRedirectForSession(string $sessionID, ?string $redirect = null)
+	{
+		if (!$this->sessionExists($sessionID)) {
 			$this->createSession($sessionID);
-			if($redirect === null) {
+			if ($redirect === null) {
 				// It's already null by default
 				return;
 			}
@@ -196,10 +205,11 @@ final class SessionDAO extends DAO {
 	 * @param string $sessionID
 	 * @param SessionSSO $data
 	 */
-	public function setDataForSession(string $sessionID, ?SessionSSO $data) {
-		if(!$this->sessionExists($sessionID)) {
+	public function setDataForSession(string $sessionID, ?SessionSSO $data)
+	{
+		if (!$this->sessionExists($sessionID)) {
 			$this->createSession($sessionID);
-			if($data === null) {
+			if ($data === null) {
 				// It's already null by default
 				return;
 			}
@@ -208,7 +218,7 @@ final class SessionDAO extends DAO {
 		try {
 			$s = $this->getPDO()->prepare('UPDATE Session SET Data = :d, LastAccess = CURRENT_TIMESTAMP() WHERE `Session` = :s');
 			$s->bindValue(':s', $sessionID, \PDO::PARAM_STR);
-			if($data === null) {
+			if ($data === null) {
 				$s->bindValue(':d', null, \PDO::PARAM_NULL);
 			} else {
 				$s->bindValue(':d', serialize($data), \PDO::PARAM_STR);
@@ -226,7 +236,8 @@ final class SessionDAO extends DAO {
 	 * @param string $token
 	 * @param SessionLocal $data
 	 */
-	public function setDataForToken(string $token, SessionLocal $data) {
+	public function setDataForToken(string $token, SessionLocal $data)
+	{
 		try {
 			$s = $this->getPDO()->prepare('REPLACE INTO SessionToken(Token, Hash, Data, Owner, LastAccess) VALUES (:t, :h, :d, :o, CURRENT_TIMESTAMP)');
 			list($token, $pass) = self::splitToken($token);
@@ -244,7 +255,8 @@ final class SessionDAO extends DAO {
 	/**
 	 * @param string $token
 	 */
-	public function bumpToken(string $token) {
+	public function bumpToken(string $token)
+	{
 		try {
 			$s = $this->getPDO()->prepare('UPDATE SessionToken SET LastAccess = CURRENT_TIMESTAMP WHERE Token = :t');
 			$token = self::splitToken($token)[0];
@@ -256,7 +268,8 @@ final class SessionDAO extends DAO {
 		}
 	}
 
-	private function createSession(string $sessionID) {
+	private function createSession(string $sessionID)
+	{
 		try {
 			$s = $this->getPDO()->prepare('INSERT INTO Session(Session, Data, Redirect) VALUES (:s, NULL, NULL)');
 			$s->bindValue(':s', $sessionID, \PDO::PARAM_STR);
@@ -272,7 +285,8 @@ final class SessionDAO extends DAO {
 	 *
 	 * @param $username
 	 */
-	public function setAuditUsername($username) {
+	public function setAuditUsername($username)
+	{
 		try {
 			$s = $this->getPDO()->prepare(
 			/** @lang MySQL */
@@ -285,9 +299,10 @@ final class SessionDAO extends DAO {
 		}
 	}
 
-	private static function splitToken(string $token): array {
+	private static function splitToken(string $token): array
+	{
 		$pieces = explode(':', $token, 2);
-		if(count($pieces) == 2) {
+		if (count($pieces) == 2) {
 			return $pieces;
 		} else {
 			return [$token, ''];

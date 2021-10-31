@@ -1,4 +1,4 @@
-(function() {
+(function () {
 	"use strict";
 
 	let quickMoveButton = document.getElementById('quickmovebutton');
@@ -9,20 +9,21 @@
 	let quickMoveDo = quickMove.getElementsByClassName('do')[0];
 	let quickMoveSwap = quickMove.getElementsByClassName('swap')[0];
 
-	for(let message of quickMove.getElementsByClassName('message')) {
+	for (let message of quickMove.getElementsByClassName('message')) {
 		message.classList.add('d-none');
 	}
 
-	for(let el of document.querySelectorAll('.itembuttons .move')) {
+	for (let el of document.querySelectorAll('.itembuttons .move')) {
 		el.addEventListener('click', moveButtonInItemListener);
 	}
 
-	for(let el of document.querySelectorAll('.features.collapse')) {
+	for (let el of document.querySelectorAll('.features.collapse')) {
 		$(el).on('show.bs.collapse', toggleSummary);
 		$(el).on('hidden.bs.collapse', toggleSummary);
 	}
 
-	function focusQuickMove() {
+	function focusQuickMove()
+	{
 		let len = quickMoveCode.value.length;
 		if (len <= 0) {
 			quickMoveCode.focus();
@@ -36,7 +37,7 @@
 	}
 
 	quickMoveButton.addEventListener('click', ev => {
-		if(quickMoveButton.classList.contains("active")) {
+		if (quickMoveButton.classList.contains("active")) {
 			quickMoveButton.classList.remove("active");
 			$(quickMove).collapse('hide');
 			nav.classList.remove("mb-0");
@@ -49,7 +50,7 @@
 		}
 	});
 
-	quickMoveSwap.addEventListener('click', function(e) {
+	quickMoveSwap.addEventListener('click', function (e) {
 		e.preventDefault();
 		e.stopPropagation();
 		let temp = quickMoveCode.value;
@@ -57,7 +58,8 @@
 		quickMoveLocation.value = temp;
 	});
 
-	async function moveInternal(code, parent) {
+	async function moveInternal(code, parent)
+	{
 		for (let message of quickMove.getElementsByClassName('alert')) {
 			message.classList.add('d-none');
 		}
@@ -133,7 +135,7 @@
 				undo.classList.add('btn', 'btn-primary')
 				undo.style.padding = "0.2em 0.4em";
 				undo.style.margin = "-0.4em";
-				undo.addEventListener('click', async (e) => {
+				undo.addEventListener('click', async(e) => {
 					e.preventDefault();
 					e.stopPropagation();
 
@@ -178,7 +180,7 @@
 		return false;
 	}
 
-	quickMoveDo.addEventListener('click', async (e) => {
+	quickMoveDo.addEventListener('click', async(e) => {
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -188,7 +190,7 @@
 		quickMoveLocation.setCustomValidity('');
 
 		// Checks that inputs are not empty
-		if(!form.checkValidity()) {
+		if (!form.checkValidity()) {
 			//form.classList.add('was-validated');
 			return false;
 		}
@@ -199,17 +201,18 @@
 		return await moveInternal(code, parent);
 	});
 
-	quickMove.addEventListener('keydown', function(e) {
-		if(e.key === "Enter") {
+	quickMove.addEventListener('keydown', function (e) {
+		if (e.key === "Enter") {
 			e.preventDefault();
 			quickMoveDo.click();
-		} else if(e.altKey && e.ctrlKey && (e.key === 's' || e.key === 'S')) {
+		} else if (e.altKey && e.ctrlKey && (e.key === 's' || e.key === 'S')) {
 			e.preventDefault();
 			quickMoveSwap.click();
 		}
 	});
 
-	function moveButtonInItemListener(e) {
+	function moveButtonInItemListener(e)
+	{
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -225,7 +228,8 @@
 		focusQuickMove();
 	}
 
-	function toggleSummary(e) {
+	function toggleSummary(e)
+	{
 		let summary = e.target.parentElement.querySelector('.summary');
 		summary.classList.toggle('open');
 	}

@@ -1,4 +1,5 @@
 <?php
+
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var \WEEEOpen\Tarallo\Item|null $base */
 /** @var int $importedFrom|null */

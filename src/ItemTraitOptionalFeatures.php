@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-trait ItemTraitOptionalFeatures {
+trait ItemTraitOptionalFeatures
+{
 	use ItemTraitFeatures;
 
 	/**
@@ -12,9 +11,10 @@ trait ItemTraitOptionalFeatures {
 	 *
 	 * @return $this
 	 */
-	public function addFeature($feature) {
-		if(isset($this->features[$feature->name])) {
-			if($feature instanceof BaseFeature) {
+	public function addFeature($feature)
+	{
+		if (isset($this->features[$feature->name])) {
+			if ($feature instanceof BaseFeature) {
 				// It's a BaseFeature (with no value) => ignore it, whatever
 				return $this;
 			}

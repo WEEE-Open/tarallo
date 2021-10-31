@@ -1,12 +1,12 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo\HTTP;
 
 use Throwable;
 
 // TODO: refactor it
-class InvalidParameterException extends \RuntimeException {
+class InvalidParameterException extends \RuntimeException
+{
 	public $status = 400;
 	protected $parameter;
 
@@ -18,13 +18,14 @@ class InvalidParameterException extends \RuntimeException {
 		Throwable $previous = null
 	) {
 		$this->parameter = $parameter;
-		if($message === '') {
+		if ($message === '') {
 			$message = "$parameter=$value is invalid";
 		}
 		parent::__construct($message, $code, $previous);
 	}
 
-	public function getParameter(): string {
+	public function getParameter(): string
+	{
 		return $this->parameter;
 	}
 }

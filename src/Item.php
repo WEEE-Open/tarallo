@@ -7,13 +7,14 @@ namespace WEEEOpen\Tarallo;
  *
  * @package WEEEOpen\Tarallo
  */
-class Item
-	implements \JsonSerializable,
+class Item implements
+	\JsonSerializable,
 	ItemWithCode,
 	ItemWithFeatures,
 	ItemWithProduct,
 	ItemWithContent,
-	ItemWithLocation {
+	ItemWithLocation
+{
 	use ItemTraitOptionalCode;
 	use ItemTraitContent;
 	use ItemTraitLocation;
@@ -26,75 +27,80 @@ class Item
 	protected $separate = false;
 
 
-	public function getToken(): ?string {
+	public function getToken(): ?string
+	{
 		return $this->token;
 	}
 
-	public function setToken($token) {
+	public function setToken($token)
+	{
 		$this->token = $token;
 		return $this;
 	}
 
-	public function setSeparate() {
+	public function setSeparate()
+	{
 		$this->separate = true;
-		foreach($this->contents as $item) {
+		foreach ($this->contents as $item) {
 			/** @var Item $item */
 			$item->setSeparate();
 		}
 	}
 
-	public function jsonSerialize() {
+	public function jsonSerialize()
+	{
 		$array = [];
 		$array['code'] = $this->getCode();
 
 		$array['features'] = [];
 
-		if($this->separate) {
+		if ($this->separate) {
 			// Add item features
-			if(!empty($this->features)){
-				foreach($this->features as $features) {
+			if (!empty($this->features)) {
+				foreach ($this->features as $features) {
 					$array['features'][$features->name] = $features->value;
 				}
 			}
 
 			// Then add a product
-			if(!empty($this->product)) {
+			if (!empty($this->product)) {
 				$array['product'] = $this->product;
 			}
 		} else {
 			// Add product features first
-			if(!empty($this->product)) {
-				foreach($this->product->getFeatures() as $features) {
+			if (!empty($this->product)) {
+				foreach ($this->product->getFeatures() as $features) {
 					$array['features'][$features->name] = $features->value;
 				}
 			}
 
 			// Then item features, so they can override others
-			if(!empty($this->features)){
-				foreach($this->features as $features) {
+			if (!empty($this->features)) {
+				foreach ($this->features as $features) {
 					$array['features'][$features->name] = $features->value;
 				}
 			}
 		}
-		if(!empty($this->contents)) {
+		if (!empty($this->contents)) {
 			$array['contents'] = $this->contents;
 		}
-		if(!empty($this->location)) {
+		if (!empty($this->location)) {
 			$array['location'] = $this->getPath();
 		}
-		if($this->deletedAt instanceof \DateTime) {
+		if ($this->deletedAt instanceof \DateTime) {
 			$array['deleted_at'] = $this->deletedAt->format(DATE_ISO8601);
 		}
-		if($this->lostAt instanceof \DateTime) {
+		if ($this->lostAt instanceof \DateTime) {
 			$array['lost_at'] = $this->lostAt->format(DATE_ISO8601);
 		}
 
 		return $array;
 	}
 
-	public function __toString() {
+	public function __toString()
+	{
 		$type = $this->getFeatureValue('type');
-		if($type === null) {
+		if ($type === null) {
 			return $this->getCode();
 		} else {
 			return $this->getCode() . " ($type)";
@@ -102,19 +108,23 @@ class Item
 	}
 
 	// TODO: consider the builder pattern as an alternative
-	public function setDeletedAt(\DateTime $when) {
+	public function setDeletedAt(\DateTime $when)
+	{
 		$this->deletedAt = $when;
 	}
 
-	public function setLostAt(\DateTime $when) {
+	public function setLostAt(\DateTime $when)
+	{
 		$this->lostAt = $when;
 	}
 
-	public function getDeletedAt(): ?\DateTime {
+	public function getDeletedAt(): ?\DateTime
+	{
 		return $this->deletedAt;
 	}
 
-	public function getLostAt(): ?\DateTime {
+	public function getLostAt(): ?\DateTime
+	{
 		return $this->lostAt;
 	}
 }

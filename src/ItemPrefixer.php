@@ -2,7 +2,8 @@
 
 namespace WEEEOpen\Tarallo;
 
-class ItemPrefixer {
+class ItemPrefixer
+{
 	/**
 	 * Generate a prefix for an item.
 	 *
@@ -13,12 +14,13 @@ class ItemPrefixer {
 	 *
 	 * @return string
 	 */
-	public static function get(ItemWithFeatures $item) {
+	public static function get(ItemWithFeatures $item)
+	{
 		$features = $item->getFeatures();
-		if(!isset($features['type'])) {
+		if (!isset($features['type'])) {
 			throw new ItemPrefixerException(null, 'Item has no type, cannot generate code');
 		}
-		switch($features['type']->value) {
+		switch ($features['type']->value) {
 			case 'mouse':
 				return 'M';
 			case 'keyboard':
@@ -33,11 +35,11 @@ class ItemPrefixer {
 				return 'R';
 			case 'hdd':
 			case 'ssd':
-				if(self::has('sata-ports-n', $features)) {
+				if (self::has('sata-ports-n', $features)) {
 					return 'S';
-				} else if(self::has('ide-ports-n', $features) || self::has('mini-ide-ports-n', $features)) {
+				} elseif (self::has('ide-ports-n', $features) || self::has('mini-ide-ports-n', $features)) {
 					return 'H';
-				} else if(self::has('scsi-sca2-ports-n', $features) || self::has('scsi-db68-ports-n', $features)) {
+				} elseif (self::has('scsi-sca2-ports-n', $features) || self::has('scsi-db68-ports-n', $features)) {
 					return 'SC';
 				} else {
 					throw new ItemPrefixerException(null, 'No or unknown hard drive connector, cannot generate a code');
@@ -46,7 +48,7 @@ class ItemPrefixer {
 				return 'D';
 			case 'psu':
 			case 'external-psu':
-				if(self::is('power-connector', 'da-2', $features)) {
+				if (self::is('power-connector', 'da-2', $features)) {
 					return 'AD';
 				}
 				return 'A';
@@ -79,16 +81,18 @@ class ItemPrefixer {
 		}
 	}
 
-	private static function has(string $name, array $features): bool {
+	private static function has(string $name, array $features): bool
+	{
 		$type = BaseFeature::getType($name);
-		if($type === BaseFeature::INTEGER || $type === BaseFeature::DOUBLE) {
+		if ($type === BaseFeature::INTEGER || $type === BaseFeature::DOUBLE) {
 			return isset($features[$name]) && $features[$name]->value > 0;
 		} else {
 			return isset($features[$name]);
 		}
 	}
 
-	private static function is($name, $value, $features) {
+	private static function is($name, $value, $features)
+	{
 		return isset($features[$name]) && $features[$name]->value === $value;
 	}
 }

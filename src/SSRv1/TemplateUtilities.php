@@ -7,14 +7,16 @@ use League\Plates\Extension\ExtensionInterface;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
 
-class TemplateUtilities implements ExtensionInterface {
+class TemplateUtilities implements ExtensionInterface
+{
 	public $template;
 
-	public function __construct() {
-
+	public function __construct()
+	{
 	}
 
-	public function register(Engine $engine) {
+	public function register(Engine $engine)
+	{
 		$engine->registerFunction('u', 'rawurlencode');
 		$engine->registerFunction('getUltraFeatures', [$this, 'getUltraFeatures']);
 		$engine->registerFunction('getGroupedFeatures', [$this, 'getGroupedFeatures']);
@@ -32,27 +34,28 @@ class TemplateUtilities implements ExtensionInterface {
 	 *
 	 * @return UltraFeature[]
 	 */
-	public function getUltraFeatures(array $features) {
+	public function getUltraFeatures(array $features)
+	{
 		$result = [];
 
-		foreach($features as $feature) {
+		foreach ($features as $feature) {
 			$ultra = UltraFeature::fromFeature($feature, $this->template->data()['lang'] ?? 'en');
 			$result[] = $ultra;
 		}
 		return $result;
-
 	}
 
 	/**
 	 * @param UltraFeature[] $ultraFeatures
 	 * @return UltraFeature[][] Translated group name => [UltraFeature, UltraFeature, ...]
 	 */
-	public function getGroupedFeatures(array $ultraFeatures) {
+	public function getGroupedFeatures(array $ultraFeatures)
+	{
 		$groups = [];
 		$groupsPrintable = [];
 
 		// $group has the group ID as key, the human-radable name comes later
-		foreach($ultraFeatures as $ultra) {
+		foreach ($ultraFeatures as $ultra) {
 			$groups[BaseFeature::getGroup($ultra->name)][] = $ultra;
 		}
 
@@ -61,7 +64,7 @@ class TemplateUtilities implements ExtensionInterface {
 		// IDs to human-readable names
 		ksort($groups);
 
-		foreach($groups as $groupId => &$ultraFeatures) {
+		foreach ($groups as $groupId => &$ultraFeatures) {
 			usort($ultraFeatures, [TemplateUtilities::class, 'featureNameSort']);
 			$groupsPrintable[FeaturePrinter::printableGroup($groupId)] = $ultraFeatures;
 		}
@@ -69,7 +72,8 @@ class TemplateUtilities implements ExtensionInterface {
 		return $groupsPrintable;
 	}
 
-	private static function featureNameSort(UltraFeature $a, UltraFeature $b) {
+	private static function featureNameSort(UltraFeature $a, UltraFeature $b)
+	{
 		return $a->pname <=> $b->pname;
 	}
 
@@ -85,15 +89,18 @@ class TemplateUtilities implements ExtensionInterface {
 	 *
 	 * @return string nice printable value
 	 */
-	public function printFeature(string $feature, $value, ?string $lang = null): string {
+	public function printFeature(string $feature, $value, ?string $lang = null): string
+	{
 		return UltraFeature::printableValue(new Feature($feature, $value), $lang ?? 'en');
 	}
 
-	public function printExplanation(UltraFeature $ultra, ?string $lang = null): string {
+	public function printExplanation(UltraFeature $ultra, ?string $lang = null): string
+	{
 		return $ultra->printableExplanation($lang ?? 'en') ?? '';
 	}
 
-	public function colorToHtml(string $color): string {
+	public function colorToHtml(string $color): string
+	{
 		$from = ['sip-brown', 'brown', 'darkgrey', 'orange', 'copper', 'golden', 'yellowed', 'weeerde', '-'];
 		$to   = ['#CB8', 'saddlebrown', 'dimgrey', 'darkorange', 'sandybrown', 'gold', 'lightyellow', '#00983a', ''];
 		return str_replace($from, $to, $color);
@@ -106,7 +113,8 @@ class TemplateUtilities implements ExtensionInterface {
 	 *
 	 * @return string
 	 */
-	public function contentEditableWrap(string $html): string {
+	public function contentEditableWrap(string $html): string
+	{
 		$paragraphed = '<div>' . str_replace(["\r\n", "\r", "\n"], '</div><div>', $html) . '</div>';
 		// According to the HTML spec, <div></div> should be ignored by browser.
 		// Firefox used to insert <p><br></p> for empty lines, for <div>s it does absolutely nothing but still displays them, soooo...
@@ -122,9 +130,10 @@ class TemplateUtilities implements ExtensionInterface {
 	 *
 	 * @return string[] Internal feature name => translated feature name
 	 */
-	public function getOptions(string $name) {
+	public function getOptions(string $name)
+	{
 		$options = BaseFeature::getOptions($name);
-		foreach($options as $value => &$translated) {
+		foreach ($options as $value => &$translated) {
 			$translated = FeaturePrinter::printableEnumValue($name, $value);
 		}
 		asort($options);
@@ -139,8 +148,9 @@ class TemplateUtilities implements ExtensionInterface {
 	 *
 	 * @return string
 	 */
-	public function asTextContent(?string $something): string {
-		if($something === null) {
+	public function asTextContent(?string $something): string
+	{
+		if ($something === null) {
 			return '';
 		} else {
 			return str_replace(["\r\n", "\r", "\n"], '', $something);
@@ -154,7 +164,8 @@ class TemplateUtilities implements ExtensionInterface {
 	 *
 	 * @return string
 	 */
-	public function prettyPrintJson(string $json) {
+	public function prettyPrintJson(string $json)
+	{
 		$result = '';
 		$level = 0;
 		$in_quotes = false;
@@ -162,22 +173,22 @@ class TemplateUtilities implements ExtensionInterface {
 		$ends_line_level = null;
 		$json_length = strlen($json);
 
-		for($i = 0; $i < $json_length; $i++) {
+		for ($i = 0; $i < $json_length; $i++) {
 			$char = $json[$i];
 			$new_line_level = null;
 			$post = "";
-			if($ends_line_level !== null) {
+			if ($ends_line_level !== null) {
 				$new_line_level = $ends_line_level;
 				$ends_line_level = null;
 			}
-			if($in_escape) {
+			if ($in_escape) {
 				$in_escape = false;
 			} else {
-				if($char === '"') {
+				if ($char === '"') {
 					$in_quotes = !$in_quotes;
 				} else {
-					if(!$in_quotes) {
-						switch($char) {
+					if (!$in_quotes) {
+						switch ($char) {
 							case '}':
 							case ']':
 								$level--;
@@ -185,7 +196,6 @@ class TemplateUtilities implements ExtensionInterface {
 								$new_line_level = $level;
 								break;
 
-							/** @noinspection PhpMissingBreakStatementInspection */
 							case '{':
 							/** @noinspection PhpMissingBreakStatementInspection */
 							case '[':
@@ -208,13 +218,13 @@ class TemplateUtilities implements ExtensionInterface {
 								break;
 						}
 					} else {
-						if($char === '\\') {
+						if ($char === '\\') {
 							$in_escape = true;
 						}
 					}
 				}
 			}
-			if($new_line_level !== null) {
+			if ($new_line_level !== null) {
 				$result .= "\n" . str_repeat("  ", $new_line_level);
 			}
 			$result .= $char . $post;

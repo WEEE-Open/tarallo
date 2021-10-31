@@ -1,14 +1,14 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo\SSRv1\Summary;
-
 
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
-class MonitorSummarizer implements Summarizer {
-	public static function summarize(ItemWithFeatures $item): string {
+class MonitorSummarizer implements Summarizer
+{
+	public static function summarize(ItemWithFeatures $item): string
+	{
 		$type = $item->getFeature('type');
 		$psuAmpere = $item->getFeature('psu-ampere');
 		$psuVolt = $item->getFeature('psu-volt');

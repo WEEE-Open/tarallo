@@ -1,14 +1,14 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo\SSRv1\Summary;
-
 
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
-class MotherboardSummarizer {
-	public static function summarize(ItemWithFeatures $item): string {
+class MotherboardSummarizer
+{
+	public static function summarize(ItemWithFeatures $item): string
+	{
 		$type = $item->getFeature('type');
 		$socket = $item->getFeature('cpu-socket');
 		$formFactor = $item->getFeature('motherboard-form-factor');
@@ -17,15 +17,14 @@ class MotherboardSummarizer {
 		$type = FeaturePrinter::printableValue($type);
 		$type .= $formFactor ? ' ' . FeaturePrinter::printableValue($formFactor) : '';
 
-		if($socket) {
+		if ($socket) {
 			$value = FeaturePrinter::printableValue($socket);
-			if(substr($value, 0, 6) === 'Socket') {
+			if (substr($value, 0, 6) === 'Socket') {
 				$theWordSocketLiterally = '';
 			} else {
 				$theWordSocketLiterally = str_replace(' (CPU)', '', FeaturePrinter::printableName('cpu-socket')) . ' ';
 			}
 			$type .= ' ' . $theWordSocketLiterally . $value;
-
 		}
 
 		$ports = PartialSummaries::summarizePorts($item, false, ' ');

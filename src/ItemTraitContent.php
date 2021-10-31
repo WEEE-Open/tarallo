@@ -1,10 +1,9 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-trait ItemTraitContent {
+trait ItemTraitContent
+{
 	protected $contents = [];
 
 	/**
@@ -14,7 +13,8 @@ trait ItemTraitContent {
 	 *
 	 * @return $this aka the parent item to the one you just added
 	 */
-	public function addContent(ItemWithCode $item) {
+	public function addContent(ItemWithCode $item)
+	{
 		$this->contents[] = $item;
 		// This was cool, but caused problems during serialization. Serious problems.
 		// It made the serialization fail because of recursion.
@@ -30,9 +30,10 @@ trait ItemTraitContent {
 	/**
 	 * @param ItemWithCode $item
 	 */
-	public function removeContent(ItemWithCode $item) {
+	public function removeContent(ItemWithCode $item)
+	{
 		$key = array_search($item, $this->contents);
-		if($key === false) {
+		if ($key === false) {
 			throw new \InvalidArgumentException("Cannot remove item {$item} from {$this}: not here");
 		} else {
 			unset($this->contents[$key]);
@@ -44,7 +45,8 @@ trait ItemTraitContent {
 	 *
 	 * @return Item[]
 	 */
-	public function getContent(): array {
+	public function getContent(): array
+	{
 		return $this->contents;
 	}
 
@@ -54,9 +56,10 @@ trait ItemTraitContent {
 	 *
 	 * @return Item[]
 	 */
-	public function getFlatContent(): array {
+	public function getFlatContent(): array
+	{
 		$result = array_merge([$this], $this->contents);
-		foreach($this->contents as $item) {
+		foreach ($this->contents as $item) {
 			/** @var Item $item */
 			$result = array_merge($result, $item->getFlatContent());
 		}

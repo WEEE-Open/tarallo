@@ -23,12 +23,12 @@ $copyQuery = http_build_query([
 <?php $this->insert('manualsButton', ['class' => 'btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto', 'product' => $product]) ?>
 
 <div class="results">
-	<?php foreach($items as $item) {
+	<?php foreach ($items as $item) {
 		/* the editor is activated by item or newItem (called by item) */
 		$parameters = ['item' => $item, 'recursion' => false];
-		if(isset($add)) {
+		if (isset($add)) {
 			$parameters['add'] = $add;
-		} else if(isset($edit)) {
+		} elseif (isset($edit)) {
 			$parameters['edit'] = $edit;
 		}
 		$parameters['showProductButton'] = false;
@@ -37,6 +37,6 @@ $copyQuery = http_build_query([
 	?>
 
 </div>
-<?php if(!isset($edit)):
+<?php if (!isset($edit)) :
 	$this->insert('editor');
 endif; ?>

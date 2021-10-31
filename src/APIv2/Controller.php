@@ -36,18 +36,20 @@ use WEEEOpen\Tarallo\ValidationException;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 
-
-class Controller implements RequestHandlerInterface {
+class Controller implements RequestHandlerInterface
+{
 	const cachefile = __DIR__ . '/../../resources/cache/APIv2.cache';
 
-	public static function sessionWhoami(ServerRequestInterface $request): ResponseInterface {
+	public static function sessionWhoami(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var User $user */
 		$user = $request->getAttribute('User');
 
 		return new JsonResponse(['username' => $user->uid, 'cn' => $user->cn, 'level' => $user->getLevel()]);
 	}
 
-	public static function getItem(ServerRequestInterface $request): ResponseInterface {
+	public static function getItem(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -57,27 +59,28 @@ class Controller implements RequestHandlerInterface {
 		$token = Validation::validateOptionalString($parameters, 'token');
 		$depth = Validation::validateOptionalString($query, 'depth');
 
-		if($id === null) {
+		if ($id === null) {
 			throw new \LogicException('Not implemented');
 		} else {
 			try {
 				$item = new ItemCode($id);
-			} catch(ValidationException $e) {
+			} catch (ValidationException $e) {
 				throw new NotFoundException($id);
 			}
 
-			if(!$db->itemDAO()->itemVisible($item)) {
+			if (!$db->itemDAO()->itemVisible($item)) {
 				throw new NotFoundException();
 			}
 			$data = $db->itemDAO()->getItem($item, $token, $depth);
-			if(isset($query['separate'])) {
+			if (isset($query['separate'])) {
 				$data->setSeparate();
 			}
 			return new JsonResponse($data);
 		}
 	}
 
-	public static function getProduct(ServerRequestInterface $request): ResponseInterface {
+	public static function getProduct(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -88,7 +91,7 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$product = new ProductCode($brand, $model, $variant);
-		} catch(ValidationException $e) {
+		} catch (ValidationException $e) {
 			throw new NotFoundException();
 		}
 
@@ -97,7 +100,8 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($data);
 	}
 
-	public static function getProducts(ServerRequestInterface $request): ResponseInterface {
+	public static function getProducts(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -110,7 +114,8 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($data);
 	}
 
-	public static function getDeletedItem(ServerRequestInterface $request): ResponseInterface {
+	public static function getDeletedItem(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -119,13 +124,13 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$item = new ItemCode($id);
-		} catch(ValidationException $e) {
+		} catch (ValidationException $e) {
 			throw new NotFoundException($id);
 		}
 
 		$deleted = $db->itemDAO()->itemDeletedAt($item);
 
-		if($deleted === null) {
+		if ($deleted === null) {
 			throw new NotFoundException();
 		} else {
 			$data = (new \DateTime($deleted, new \DateTimeZone('UTC')))->format('c');
@@ -134,7 +139,8 @@ class Controller implements RequestHandlerInterface {
 		}
 	}
 
-	public static function restoreItemParent(ServerRequestInterface $request): ResponseInterface {
+	public static function restoreItemParent(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -149,12 +155,12 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$item = new ItemCode($id);
-		} catch(ValidationException $e) {
+		} catch (ValidationException $e) {
 			throw new NotFoundException($id);
 		}
 		try {
 			$newParent = new ItemCode($payload);
-		} catch(ValidationException $e) {
+		} catch (ValidationException $e) {
 			throw new NotFoundException($payload, 'Location doesn\'t exist', 0, $e);
 		}
 
@@ -163,14 +169,15 @@ class Controller implements RequestHandlerInterface {
 		$created = $oldParent === null && $moved;
 
 		$response = self::generateMoveResponse($item, $moved, $newParent, $newParentActual, $oldParent);
-		if($created) {
-			return new JsonResponse($response,201);
+		if ($created) {
+			return new JsonResponse($response, 201);
 		} else {
 			return new JsonResponse($response);
 		}
 	}
 
-	public static function getByFeature(ServerRequestInterface $request): ResponseInterface {
+	public static function getByFeature(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -182,11 +189,11 @@ class Controller implements RequestHandlerInterface {
 		self::range('limit', $limit, 1, 10);
 
 		try {
-			if(BaseFeature::getType($id) !== BaseFeature::STRING) {
+			if (BaseFeature::getType($id) !== BaseFeature::STRING) {
 				// TODO: throw notImplementedException or something
 				throw new InvalidParameterException('feature', $id, "Only text features are supported, $id isn't");
 			}
-		} catch(\InvalidArgumentException $e) {
+		} catch (\InvalidArgumentException $e) {
 			throw new InvalidParameterException('feature', $id, $e->getMessage(), 0, $e);
 		}
 
@@ -197,7 +204,8 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($data);
 	}
 
-	public static function createItem(ServerRequestInterface $request): ResponseInterface {
+	public static function createItem(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -212,19 +220,19 @@ class Controller implements RequestHandlerInterface {
 
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
 
-		if($importId) {
+		if ($importId) {
 			$exists = $db->bulkDAO()->identifierExistsAndLocked($importId);
-			if(!$exists) {
+			if (!$exists) {
 				throw new StateChangedException('The imported product does not exist anymore, are you trying to create it twice or using an old version of the data?');
 			}
 		}
 
 		// Validation and fixupLocation requires the full parent item, which may not exist.
 		// Since this part is optional, its existence will be checked again later
-		if($parent instanceof ItemCode && ($fix || $validate)) {
+		if ($parent instanceof ItemCode && ($fix || $validate)) {
 			try {
 				$parent = $db->itemDAO()->getItem($parent, null, 1);
-			} catch(NotFoundException $e) {
+			} catch (NotFoundException $e) {
 				throw new NotFoundException($parent->getCode(), 'Location doesn\'t exist', 0, $e);
 			}
 		}
@@ -233,33 +241,33 @@ class Controller implements RequestHandlerInterface {
 		ItemValidator::addAllVariants($flat);
 
 		// We need product features for fixup and validation
-		if($fix || $validate) {
+		if ($fix || $validate) {
 			$db->productDAO()->getProductsAll($flat);
 		}
 
-		if($fix) {
+		if ($fix) {
 			$parent = ItemValidator::fixupLocation($item, $parent);
 			ItemValidator::fixupFeatures($item);
 		}
 
-		if($validate) {
+		if ($validate) {
 			ItemValidator::validateLocation($item, $parent);
 			ItemValidator::validateFeatures($item);
 		}
 
 		try {
 			$db->itemDAO()->addItem($item, $parent);
-		} catch(ItemPrefixerException $e) {
+		} catch (ItemPrefixerException $e) {
 			// TODO: $e->setItemPath();
 			throw $e;
 		}
 
 		// Remove import once we are sure that product is added
-		if($importId) {
+		if ($importId) {
 			$db->bulkDAO()->deleteImport($importId);
 		}
 
-		if($loopback) {
+		if ($loopback) {
 			$response = new JsonResponse($db->itemDAO()->getItem($item), 201);
 			$response = $response->withHeader('Location', '/v2/items/' . rawurlencode($item->getCode()));
 		} else {
@@ -270,7 +278,8 @@ class Controller implements RequestHandlerInterface {
 		return $response;
 	}
 
-	public static function createProduct(ServerRequestInterface $request): ResponseInterface {
+	public static function createProduct(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -280,31 +289,32 @@ class Controller implements RequestHandlerInterface {
 		$brand = Validation::validateOptionalString($parameters, 'brand');
 		$model = Validation::validateOptionalString($parameters, 'model');
 		$variant = Validation::validateOptionalString($parameters, 'variant');
-		$importId = Validation::validateOptionalInt($query, 'import');;
+		$importId = Validation::validateOptionalInt($query, 'import');
+		;
 		$loopback = isset($query['loopback']);
 		$validate = !isset($query['novalidate']);
 
 		$product = ProductBuilder::ofArray($payload, $brand, $model, $variant);
 
-		if($importId) {
+		if ($importId) {
 			$exists = $db->bulkDAO()->identifierExistsAndLocked($importId);
-			if(!$exists) {
+			if (!$exists) {
 				throw new StateChangedException('The imported product does not exist anymore, are you trying to create it twice or using an old version of the data?');
 			}
 		}
 
-		if($validate) {
+		if ($validate) {
 			ItemValidator::validateFeatures($product);
 		}
 
 		$db->productDAO()->addProduct($product);
 
 		// Remove import once we are sure that product is added
-		if($importId) {
+		if ($importId) {
 			$db->bulkDAO()->deleteImport($importId);
 		}
 
-		if($loopback) {
+		if ($loopback) {
 			$response = new JsonResponse($db->productDAO()->getProduct($product), 201);
 			$response = $response->withHeader('Location', '/v2/products/' . rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
 		} else {
@@ -314,7 +324,8 @@ class Controller implements RequestHandlerInterface {
 		return $response;
 	}
 
-	public static function renameProduct(ServerRequestInterface $request): ResponseInterface {
+	public static function renameProduct(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -334,7 +345,7 @@ class Controller implements RequestHandlerInterface {
 		$product = $db->productDAO()->renameProduct($product, $brandNew, $modelNew, $variantNew);
 
 		// TODO: why do these headers break everything? Why do they break everything *ONLY* for this method?
-		if($loopback) {
+		if ($loopback) {
 			$response = new JsonResponse($db->productDAO()->getProduct($product), 200);
 			//$response = $response->withHeader('Location', '/v2/products/' . rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
 		} else {
@@ -344,7 +355,8 @@ class Controller implements RequestHandlerInterface {
 		return $response;
 	}
 
-	public static function removeItem(ServerRequestInterface $request): ResponseInterface {
+	public static function removeItem(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -353,7 +365,7 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$id = new ItemCode($id);
-		} catch(ValidationException $e) {
+		} catch (ValidationException $e) {
 			throw new NotFoundException($id);
 		}
 
@@ -362,7 +374,8 @@ class Controller implements RequestHandlerInterface {
 		return new EmptyResponse(204);
 	}
 
-	public static function deleteProduct(ServerRequestInterface $request): ResponseInterface {
+	public static function deleteProduct(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -376,10 +389,10 @@ class Controller implements RequestHandlerInterface {
 
 		$db->productDAO()->productMustExist($product);
 
-		if(!isset($query['force'])) {
+		if (!isset($query['force'])) {
 			$count = $db->productDAO()->countItemsAndLock($product);
-			if($count > 0) {
-				if($count === 1) {
+			if ($count > 0) {
+				if ($count === 1) {
 					$message = "There is 1 item of $product, you can only delete products that are not referenced by any item";
 				} else {
 					$message = "There are $count items of $product, you can only delete products that are not referenced by any item";
@@ -390,14 +403,15 @@ class Controller implements RequestHandlerInterface {
 
 		$found = $db->productDAO()->deleteProduct($product);
 
-		if($found) {
+		if ($found) {
 			return new EmptyResponse();
 		} else {
 			throw new NotFoundException();
 		}
 	}
 
-	public static function setItemParent(ServerRequestInterface $request): ResponseInterface {
+	public static function setItemParent(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -412,12 +426,12 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$item = new ItemCode($id);
-		} catch(ValidationException $e) {
+		} catch (ValidationException $e) {
 			throw new NotFoundException($id);
 		}
 		try {
 			$newParent = new ItemCode($payload);
-		} catch(ValidationException $e) {
+		} catch (ValidationException $e) {
 			throw new NotFoundException($payload);
 		}
 
@@ -425,14 +439,15 @@ class Controller implements RequestHandlerInterface {
 		$created = $oldParent === null && $moved;
 
 		$response = self::generateMoveResponse($item, $moved, $newParent, $newParentActual, $oldParent);
-		if($created) {
-			return new JsonResponse($response,201);
+		if ($created) {
+			return new JsonResponse($response, 201);
 		} else {
 			return new JsonResponse($response);
 		}
 	}
 
-	public static function deleteItemParent(ServerRequestInterface $request): ResponseInterface {
+	public static function deleteItemParent(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -441,7 +456,7 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$code = new ItemCode($id);
-		} catch(ValidationException $e) {
+		} catch (ValidationException $e) {
 			throw new NotFoundException($id);
 		}
 		$db->itemDAO()->loseItem($code);
@@ -449,7 +464,8 @@ class Controller implements RequestHandlerInterface {
 		return new EmptyResponse(204);
 	}
 
-	public static function setFeatures(ServerRequestInterface $request): ResponseInterface {
+	public static function setFeatures(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -466,20 +482,20 @@ class Controller implements RequestHandlerInterface {
 		// PUT => delete every feature, replace with new ones
 		ItemBuilder::addFeatures($payload, $thing);
 
-		if($validate) {
+		if ($validate) {
 			ItemValidator::validateFeatures($thing);
 		}
 
 		$deleted = $db->featureDAO()->deleteFeaturesAll($thing);
 		$added = $db->featureDAO()->setFeatures($thing);
 
-		if($deleted && !$added) {
+		if ($deleted && !$added) {
 			// Delete everything and replace with an empty array => we need to generate an audit entry
 			$db->featureDAO()->addAuditEntry($thing);
 		}
 
-		if($loopback) {
-			if($id === null) {
+		if ($loopback) {
+			if ($id === null) {
 				return new JsonResponse($db->itemDAO()->getItem($thing));
 			} else {
 				return new JsonResponse($db->productDAO()->getProduct($thing));
@@ -489,7 +505,8 @@ class Controller implements RequestHandlerInterface {
 		}
 	}
 
-	public static function updateFeatures(ServerRequestInterface $request): ResponseInterface {
+	public static function updateFeatures(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -506,17 +523,17 @@ class Controller implements RequestHandlerInterface {
 		// PATCH => specify features to update and to delete, other are left as they are
 		$delete = ItemBuilder::addFeaturesDelta($payload, $thing);
 
-		if($validate) {
-			if($id === null) {
+		if ($validate) {
+			if ($id === null) {
 				$thingWithFullFeatures = $db->productDAO()->getProduct($thing);
 			} else {
 				$thingWithFullFeatures = $db->itemDAO()->getItem($thing);
 			}
 
-			foreach($delete as $deleteThis) {
+			foreach ($delete as $deleteThis) {
 				$thingWithFullFeatures->removeFeatureByName($deleteThis);
 			}
-			foreach($thing->getFeatures() as $addThis) {
+			foreach ($thing->getFeatures() as $addThis) {
 				$thingWithFullFeatures->addFeature($addThis);
 			}
 			ItemValidator::validateFeatures($thingWithFullFeatures);
@@ -527,12 +544,12 @@ class Controller implements RequestHandlerInterface {
 
 		// setFeatures generates an audit entry if anything changed, deleteFeatures never does
 		// so we may need to generate it manually
-		if($deleted && !$changed) {
+		if ($deleted && !$changed) {
 			$db->featureDAO()->addAuditEntry($thing);
 		}
 
-		if($loopback) {
-			if($id === null) {
+		if ($loopback) {
+			if ($id === null) {
 				return new JsonResponse($db->productDAO()->getProduct($thing));
 			} else {
 				return new JsonResponse($db->itemDAO()->getItem($thing));
@@ -542,7 +559,8 @@ class Controller implements RequestHandlerInterface {
 		}
 	}
 
-	public static function doSearch(ServerRequestInterface $request): ResponseInterface {
+	public static function doSearch(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		/** @var User $user */
@@ -554,10 +572,10 @@ class Controller implements RequestHandlerInterface {
 
 		$id = Validation::validateOptionalString($parameters, 'id');
 
-		if($id) {
+		if ($id) {
 			// Refining a search: must be owner or admin
 			$username = $db->searchDAO()->getOwnerUsername($id);
-			if($username !== $user->uid) {
+			if ($username !== $user->uid) {
 				AuthValidator::ensureLevel($user, User::AUTH_LEVEL_ADMIN);
 			}
 		}
@@ -568,7 +586,8 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($resultId);
 	}
 
-	public static function getSearch(ServerRequestInterface $request): ResponseInterface {
+	public static function getSearch(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -579,10 +598,10 @@ class Controller implements RequestHandlerInterface {
 		$depth = Validation::validateOptionalInt($query, 'depth');
 		$perPage = Validation::validateOptionalInt($query, 'perPage', 10);
 
-		if($page <= 0) {
+		if ($page <= 0) {
 			$page = 1;
 		}
-		if($perPage <= 0) {
+		if ($perPage <= 0) {
 			$perPage = 10;
 		}
 
@@ -591,7 +610,8 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($results);
 	}
 
-	public static function getHistory(ServerRequestInterface $request): ResponseInterface {
+	public static function getHistory(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -608,7 +628,8 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($data);
 	}
 
-	public static function getItemHistory(ServerRequestInterface $request): ResponseInterface {
+	public static function getItemHistory(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -620,11 +641,11 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$item = new ItemCode($id);
-		} catch(ValidationException $e) {
+		} catch (ValidationException $e) {
 			throw new NotFoundException($id);
 		}
 
-		if(!$db->itemDAO()->itemExists($item)) {
+		if (!$db->itemDAO()->itemExists($item)) {
 			throw new NotFoundException();
 		}
 
@@ -635,7 +656,8 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($data);
 	}
 
-	public static function ItemsNotFeature(ServerRequestInterface $request): ResponseInterface {
+	public static function ItemsNotFeature(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -650,7 +672,7 @@ class Controller implements RequestHandlerInterface {
 
 		try {
 			$explosion = Validation::explodeFeatureValuePair($feature);
-		} catch(\InvalidArgumentException $e) {
+		} catch (\InvalidArgumentException $e) {
 			throw new SearchException($e->getMessage());
 		}
 		$data = $db->StatsDAO()->getItemByNotFeature(
@@ -659,13 +681,17 @@ class Controller implements RequestHandlerInterface {
 			$location === null ? null : new
 			ItemCode(
 				$location
-			), $limit, $creation === null ? null : new \DateTime($creation), $deleted
+			),
+			$limit,
+			$creation === null ? null : new \DateTime($creation),
+			$deleted
 		);
 
 		return new JsonResponse($data);
 	}
 
-	public static function RecentAuditByType(ServerRequestInterface $request): ResponseInterface {
+	public static function RecentAuditByType(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -678,7 +704,8 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($data);
 	}
 
-	public static function CountByFeature(ServerRequestInterface $request): ResponseInterface {
+	public static function CountByFeature(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -690,22 +717,22 @@ class Controller implements RequestHandlerInterface {
 		$deleted = isset($parameters['deleted']) ? $parameters['deleted'] : false;
 		$cutoff = Validation::validateOptionalInt($parameters, 'cutoff', 1);
 
-		if($filter !== null) {
+		if ($filter !== null) {
 			try {
 				$explosion = Validation::explodeFeatureValuePair($feature);
-			} catch(\InvalidArgumentException $e) {
+			} catch (\InvalidArgumentException $e) {
 				throw new SearchException(null, null, $e->getMessage(), 0, $e);
 			}
 			try {
 				$filter = new Feature($explosion[0], $explosion[1]);
-			} catch(\InvalidArgumentException $e) {
+			} catch (\InvalidArgumentException $e) {
 				throw new SearchException($explosion[0], $explosion[1], $e->getMessage(), 0, $e);
 			}
 		}
 
 		try {
 			$item = new ItemCode($location);
-		} catch(ValidationException $e) {
+		} catch (ValidationException $e) {
 			throw new NotFoundException($location);
 		}
 
@@ -721,7 +748,8 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($data);
 	}
 
-	public static function addBulk(ServerRequestInterface $request): ResponseInterface {
+	public static function addBulk(ServerRequestInterface $request): ResponseInterface
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters');
@@ -729,18 +757,18 @@ class Controller implements RequestHandlerInterface {
 		$identifier = Validation::validateOptionalString($parameters, 'identifier');
 		$body = $request->getAttribute('ParsedBody', []);
 
-		if($identifier === null) {
+		if ($identifier === null) {
 			$identifier = 'Automated upload ' . strtoupper(substr(md5(microtime()), 0, 10));
 		}
 		$overwrite = boolval($query['overwrite'] ?? false);
 
 		$isDuplicate = $db->bulkDAO()->bulkIdentifierExistsAndLocked($identifier);
-		if($overwrite) {
+		if ($overwrite) {
 			$db->bulkDAO()->deleteBulkImport($identifier);
-		} else if($isDuplicate) {
+		} elseif ($isDuplicate) {
 			throw new DuplicateBulkIdentifierException();
 		}
-		foreach($body as $item) {
+		foreach ($body as $item) {
 			$type = $item['type'];
 			$json = json_encode($item);
 			$db->bulkDAO()->addBulk($identifier, $type, $json);
@@ -749,14 +777,15 @@ class Controller implements RequestHandlerInterface {
 		return new EmptyResponse();
 	}
 
-	public static function getItemsAutosuggest(ServerRequestInterface $request) {
+	public static function getItemsAutosuggest(ServerRequestInterface $request)
+	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
 		$search = Validation::validateHasString($query, 'q');
 
 		$min = 3;
-		if(strlen($search) < $min) {
+		if (strlen($search) < $min) {
 			throw new RangeException($parameter, $min, null, "Minimum length for autocomplete is $min");
 		}
 
@@ -764,11 +793,12 @@ class Controller implements RequestHandlerInterface {
 		return new JsonResponse($json);
 	}
 
-	private static function range(string $parameter, $value, ?int $min, ?int $max) {
-		if($max !== null && $value > $max) {
+	private static function range(string $parameter, $value, ?int $min, ?int $max)
+	{
+		if ($max !== null && $value > $max) {
 			throw new RangeException($parameter, $min, $max, "Maximum value is $max");
 		}
-		if($min !== null && $value < $min) {
+		if ($min !== null && $value < $min) {
 			throw new RangeException($parameter, $min, $max, "Minimum value is $min");
 		}
 	}
@@ -780,8 +810,9 @@ class Controller implements RequestHandlerInterface {
 	 *
 	 * @return Item|Product
 	 */
-	private static function getProductOrItemForUpdate(Database $db, ?string $id, $parameters) {
-		if($id === null) {
+	private static function getProductOrItemForUpdate(Database $db, ?string $id, $parameters)
+	{
+		if ($id === null) {
 			$brand = Validation::validateOptionalString($parameters, 'brand');
 			$model = Validation::validateOptionalString($parameters, 'model');
 			$variant = Validation::validateOptionalString($parameters, 'variant');
@@ -794,23 +825,25 @@ class Controller implements RequestHandlerInterface {
 		return $thing;
 	}
 
-	protected static function generateMoveResponse(ItemWithCode $item, $moved, ItemCode $newParent, $newParentActual, $oldParent): array {
+	protected static function generateMoveResponse(ItemWithCode $item, $moved, ItemCode $newParent, $newParentActual, $oldParent): array
+	{
 		$response = [
 			'code' => $item->getCode(),
 			'from' => $oldParent,
 			'to' => $newParent->getCode(),
 			'moved' => $moved,
 		];
-		if($newParent->compareCode($newParentActual) !== 0) {
+		if ($newParent->compareCode($newParentActual) !== 0) {
 			$response['actual'] = $newParentActual->getCode();
 		}
 		return $response;
 	}
 
-	public function handle(ServerRequestInterface $request): ResponseInterface {
+	public function handle(ServerRequestInterface $request): ResponseInterface
+	{
 		$route = $this->route($request);
 
-		switch($route[0]) {
+		switch ($route[0]) {
 			case FastRoute\Dispatcher::FOUND:
 				$level = $route[1][0];
 				$function = $route[1][1];
@@ -833,10 +866,10 @@ class Controller implements RequestHandlerInterface {
 			new AuthTokenManager(),
 			new AuthManager(false),
 		];
-		if($level !== null) {
+		if ($level !== null) {
 			$queue[] = new AuthValidator($level);
 		}
-		if($function !== null) {
+		if ($function !== null) {
 			$queue[] = new TransactionWrapper();
 			$queue[] = 'WEEEOpen\\Tarallo\\APIv2\\' . $function;
 		}
@@ -847,22 +880,23 @@ class Controller implements RequestHandlerInterface {
 		return $relay->handle($request);
 	}
 
-	private function route(ServerRequestInterface $request): array {
+	private function route(ServerRequestInterface $request): array
+	{
 		$dispatcher = FastRoute\cachedDispatcher(
-			function(FastRoute\RouteCollector $r) {
+			function (FastRoute\RouteCollector $r) {
 
 				$r->addGroup(
 					'/v2',
-					function(FastRoute\RouteCollector $r) {
+					function (FastRoute\RouteCollector $r) {
 						$r->addGroup(
 							'/items',
-							function(FastRoute\RouteCollector $r) {
+							function (FastRoute\RouteCollector $r) {
 								$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
 								$r->post('', [User::AUTH_LEVEL_RW, 'Controller::createItem']);
 
 								$r->addGroup(
 									'/{id}',
-									function(FastRoute\RouteCollector $r) {
+									function (FastRoute\RouteCollector $r) {
 										// TODO: make token access public
 										$r->get('[/token/{token}]', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
 										$r->get('/history', [User::AUTH_LEVEL_RO, 'Controller::getItemHistory']);
@@ -891,10 +925,12 @@ class Controller implements RequestHandlerInterface {
 								);
 							}
 						);
-						$r->addGroup('/deleted',
-							function(FastRoute\RouteCollector $r) {
-								$r->addGroup('/{id}',
-									function(FastRoute\RouteCollector $r) {
+						$r->addGroup(
+							'/deleted',
+							function (FastRoute\RouteCollector $r) {
+								$r->addGroup(
+									'/{id}',
+									function (FastRoute\RouteCollector $r) {
 										$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getDeletedItem']);
 										$r->put('/parent', [User::AUTH_LEVEL_RW, 'Controller::restoreItemParent']);
 										// TODO: this $r->delete('', [User::AUTH_LEVEL_RW, 'Controller::removeItemPermanently']);
@@ -909,8 +945,9 @@ class Controller implements RequestHandlerInterface {
 
 						$r->get('/features/{feature}/{value}', [User::AUTH_LEVEL_RO, 'Controller::getByFeature']);
 
-						$r->addGroup('/products',
-							function(FastRoute\RouteCollector $r) {
+						$r->addGroup(
+							'/products',
+							function (FastRoute\RouteCollector $r) {
 								//$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getProducts']);
 								$r->get('/{brand}/{model}', [User::AUTH_LEVEL_RO, 'Controller::getProducts']);
 								$r->get('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct']);
@@ -918,8 +955,9 @@ class Controller implements RequestHandlerInterface {
 								$r->patch('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::renameProduct']);
 								$r->delete('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::deleteProduct']);
 
-								$r->addGroup('/{brand}/{model}/{variant}/features',
-									function(FastRoute\RouteCollector $r) {
+								$r->addGroup(
+									'/{brand}/{model}/{variant}/features',
+									function (FastRoute\RouteCollector $r) {
 										//$r->get('',  [User::AUTH_LEVEL_RW, 'Controller::getProductFeatures']);
 										$r->post('', [User::AUTH_LEVEL_RW, 'Controller::setFeatures']);
 										$r->patch('', [User::AUTH_LEVEL_RW, 'Controller::updateFeatures']);
@@ -935,7 +973,7 @@ class Controller implements RequestHandlerInterface {
 
 						$r->addGroup(
 							'/stats',
-							function(FastRoute\RouteCollector $r) {
+							function (FastRoute\RouteCollector $r) {
 								$r->get('/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]', [User::AUTH_LEVEL_RO, 'Controller::ItemsNotFeature']);
 								$r->get('/getRecentAuditByType/{type}[/{howMany}]', [User::AUTH_LEVEL_RO, 'Controller::RecentAuditByType']);
 								$r->get('/getCountByFeature/{feature}[/{filter}[/{location}[/{creation[/{deleted[/{cutoff}]]]]]', [User::AUTH_LEVEL_RO, 'Controller::CountByFeature']);
@@ -943,7 +981,7 @@ class Controller implements RequestHandlerInterface {
 						);
 						$r->addGroup(
 							'/bulk',
-							function(FastRoute\RouteCollector $r) {
+							function (FastRoute\RouteCollector $r) {
 								$r->post('/add[/{identifier}]', [User::AUTH_LEVEL_RO, 'Controller::addBulk']);
 							}
 						);

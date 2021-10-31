@@ -2,21 +2,22 @@
 
 namespace WEEEOpen\Tarallo\SSRv1\Summary;
 
-
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
-class Summary {
-	public static function peel(ItemWithFeatures $item): ?string {
+class Summary
+{
+	public static function peel(ItemWithFeatures $item): ?string
+	{
 		$type = $item->getFeature('type');
-		switch($type) {
+		switch ($type) {
 			case null:
 				// Otherwise it breaks the summarizers
 				return 'Unknown item (set the type)';
 			case 'case':
-				 return CaseSummarizer::summarize($item);
+				return CaseSummarizer::summarize($item);
 			case 'motherboard':
 				return MotherboardSummarizer::summarize($item);
 			case 'cpu':
@@ -48,7 +49,7 @@ class Summary {
 			case 'tv-card':
 				return SimplePortsSummarizer::summarize($item);
 			case 'monitor':
-			 	return MonitorSummarizer::summarize($item);
+				return MonitorSummarizer::summarize($item);
 			// These are default cases, we'd get here anyway
 //			case 'printer':
 //			case 'scanner':
@@ -65,21 +66,22 @@ class Summary {
 		}
 	}
 
-	public static function peelForList(ProductCode $product, ?string $manufacturer, ?string $family, ?string $internal): array {
+	public static function peelForList(ProductCode $product, ?string $manufacturer, ?string $family, ?string $internal): array
+	{
 		$brand = $product->getBrand();
 		$model = $product->getModel();
 		$variant = $product->getVariantOrEmpty();
 
 		$family = $family === null ? '' : $family;
-		if($family !== '' && $model !== '' && strpos($model, $family) !== false) {
+		if ($family !== '' && $model !== '' && strpos($model, $family) !== false) {
 			$family = '';
 		}
 
-		if($manufacturer !== null && $internal === null) {
+		if ($manufacturer !== null && $internal === null) {
 			$aka = "$manufacturer $model";
-		} else if($manufacturer === null && $internal !== null) {
+		} elseif ($manufacturer === null && $internal !== null) {
 			$aka = "$brand $internal";
-		} else if($manufacturer !== null && $internal !== null) {
+		} elseif ($manufacturer !== null && $internal !== null) {
 			$aka = "$manufacturer $internal";
 		} else {
 			$aka = '';
@@ -88,10 +90,11 @@ class Summary {
 		return [$brand, $family, $model, $variant, $aka];
 	}
 
-	public static function peelBulkItem(ItemWithFeatures $itemOrProduct): array {
+	public static function peelBulkItem(ItemWithFeatures $itemOrProduct): array
+	{
 		$name = PartialSummaries::summarizeCommercial($itemOrProduct);
 		$type = $itemOrProduct->getFeature('type');
-		if($type !== null) {
+		if ($type !== null) {
 			$type = FeaturePrinter::printableValue($type);
 		} else {
 			$type = '';

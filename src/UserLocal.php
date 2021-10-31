@@ -1,13 +1,13 @@
 <?php
 
-
 namespace WEEEOpen\Tarallo;
 
-
-class UserLocal extends User {
+class UserLocal extends User
+{
 	public $owner;
 
-	public static function fromSession(SessionLocal $session): User {
+	public static function fromSession(SessionLocal $session): User
+	{
 		$user = new UserLocal();
 		$user->cn = $session->description;
 		$user->uid = $session->owner;
