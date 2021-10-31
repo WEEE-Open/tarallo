@@ -5,6 +5,7 @@
 /** @var array $itemsByColor */
 /** @var array $hddsCapacity */
 /** @var array $ramsCapacity */
+/** @var array $itemWithAndWithoutSerialNumber */
 $this->layout('main', ['title' => 'Stats: cool', 'user' => $user, 'currentPage' => 'stats', 'tooltips' => true, 'container' => true, 'bootstrapTable' => true]);
 $this->insert('stats::menu', ['currentPage' => 'cool']);
 ?>
@@ -67,6 +68,29 @@ $this->insert('stats::menu', ['currentPage' => 'cool']);
                     <tr>
                         <td><?=$this->e(ucfirst($nameColor))?></td>
                         <td><?=$this->e(ucfirst($count))?></td>
+                    </tr>
+                <?php endforeach ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif ?>
+    <?php if(!empty($itemWithAndWithoutSerialNumber)): ?>
+        <div class="col-12 col-xl-6">
+            <table class="table table-borderless stats">
+                <caption>Items count by Serial Number</caption>
+                <thead class="thead-dark">
+                <tr>
+                    <th data-sortable="true" scope="col">Type</th>
+                    <th data-sortable="true" scope="col">With SN</th>
+                    <th data-sortable="true" scope="col">Without SN</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach($itemWithAndWithoutSerialNumber as $type => $value): ?>
+                    <tr>
+                        <td><?=$this->e(ucfirst($type))?></td>
+                        <td><?=array_key_exists('withSn',$value) ? $this->e(ucfirst($value['withSn'])) : 'None'?></td>
+                        <td><?=array_key_exists('withoutSn',$value) ? $this->e(ucfirst($value['withoutSn'])) : 'None'?></td>
                     </tr>
                 <?php endforeach ?>
                 </tbody>

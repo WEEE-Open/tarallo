@@ -620,8 +620,10 @@ class Controller implements RequestHandlerInterface {
                     'ramsCapacity' => $db->statsDAO()->getTotalAndAverageCapacity($db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), [
                         'capacity-byte',
                     ], $location),'capacity-byte'),
+                    'itemWithAndWithoutSerialNumber' => $db->statsDAO()->countItemsByTypeThatHaveSerialNumber(),
 
                 ]);
+
                 break;
 			default:
 				throw new NotFoundException();

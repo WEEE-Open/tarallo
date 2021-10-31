@@ -1027,6 +1027,58 @@ WHERE `Key` != 'DataVersion' AND
         ];
     }
 
+    /**
+     * counts items grouped by type that have serial number
+     * @return array
+     */
+    public function countItemsByTypeThatHaveSerialNumber():
+    array {
+        $pdo = $this->getPDO();
+        $array = [];
+        $queryToSelectItemWithSn = " SELECT ValueEnum as Type, Count(*) as Quantità FROM ProductItemFeatureUnified 
+        RIGHT JOIN Item ON Item.Code = ProductItemFeatureUnified.Code
+        WHERE ProductItemFeatureUnified.Feature = 'type' AND Item.Code IN (
+            SELECT ProductItemFeatureUnified.Code
+            FROM ProductItemFeatureUnified
+            WHERE ProductItemFeatureUnified.Feature = 'sn'
+        )
+        GROUP BY Type
+        ";
+        $queryToSelectItemWithoutSn = "SELECT ValueEnum as Type, Count(*) as Quantità FROM ProductItemFeatureUnified 
+        RIGHT JOIN Item ON Item.Code = ProductItemFeatureUnified.Code
+        WHERE ProductItemFeatureUnified.Feature = 'type' AND Item.Code NOT IN (
+            SELECT ProductItemFeatureUnified.Code
+            FROM ProductItemFeatureUnified
+            WHERE ProductItemFeatureUnified.Feature = 'sn'
+        )
+        GROUP BY Type
+        ";
+
+
+        $statementToGetItemWithSn = $this->getPDO()->prepare($queryToSelectItemWithSn);
+        $statementToGetItemWithoutSn = $this->getPDO()->prepare($queryToSelectItemWithoutSn);
+        try {
+            $successItemsWithSn = $statementToGetItemWithSn->execute();
+            $successItemsWithoutSn = $statementToGetItemWithoutSn->execute();
+            assert($successItemsWithSn, 'items with sn');
+            assert($successItemsWithoutSn,'items without sn');
+
+            while($row = $statementToGetItemWithSn->fetch(\PDO::FETCH_ASSOC))
+            {
+                $array[$row['Type']]['withSn'] = $row['Quantità'];
+            }
+            while($row = $statementToGetItemWithoutSn->fetch(\PDO::FETCH_ASSOC))
+            {
+                $array[$row['Type']]['withoutSn'] = $row['Quantità'];
+            }
+        } finally {
+            $statementToGetItemWithSn->closeCursor();
+            $statementToGetItemWithoutSn->closeCursor();
+        }
+
+        return $array;
+    }
+
 	public function setDefaultLocation(string $key, string $value) {
 		$pdo = $this->getPDO();
 		if(isset($this->getDefaultLocations()[$key])) {
