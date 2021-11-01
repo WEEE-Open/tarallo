@@ -27,7 +27,8 @@ RUN mkdir ./sql ./bin ./public ./src ./tests
 
 COPY config/config-docker.php ./config/config.php
 COPY ./composer.json ./composer.json 
-COPY ./composer.lock ./composer.lock 
+COPY ./composer.lock ./composer.lock
+COPY ./phpcs.xml ./phpcs.xml
 
 # install composer
 RUN php -r "readfile('http://getcomposer.org/installer');" | php -- --install-dir=/usr/bin/ --filename=composer

@@ -79,11 +79,31 @@ If you want to profile the application enable the profiler in the [configuration
 
 The directories of the git tree that contain the application's sources (`public`, `src` and `tests`) are directly mapped within the container, and changing any file in those directories will immediately reflect on the running instance inside the container.
 
-### Testing
+#### Tests
+
+To run tests from a terminal: `composer test`. Check `composer.json` for the actual command, if you have problems running composer.
 
 To run tests from PHPStorm, follow these [instructions](docs/tests/TESTS.md).
 
 Run with Coverage too, if you want.
+
+#### Linting
+
+To lint your code: `composer lint`. Check `composer.json` for the actual command, if you have problems running composer.
+
+Some errors can be fixed automatically: for that, use `composer lintfix`.
+
+The linter is PHP_CodeSniffer **with a custom configuration**: if you enable PHPStorm integration (which it will propose automatically), you need to specify `Custom` as the Coding Standard:
+
+![alt](docs/lint/images/1.png)
+
+then use the `...` icon and select the full path, on your machine, to the `phpcs.xml` file. If it complains about path mappings, map the root of this repository to `/var/www/html` - that's not true, but the file is copied there anyway.
+
+This is a lot easier if you have already configured tests (see above), otherwise you may run into problems with PHPStorm looking for the PHP interpreter elsewhere.
+
+It's also easier if you want to run PHP_CodeSniffer outside the container.  
+Make sure you have a php executable in your path: as long as it is compatible with PHP_CodeSniffer it should be good, linting does not depend on PHP version or other software installed inside the containers.  
+Then you just need to do `composer install` and `composer lint`, PHP_CodeSniffer detects the configuration file automatically. `composer lintfix` also works.
 
 ### Production
 

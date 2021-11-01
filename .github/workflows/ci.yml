@@ -56,8 +56,8 @@ jobs:
 #          msgfmt resources/locale/en-US/LC_MESSAGES/messages.po --output-file=resources/locale/en-US/LC_MESSAGES/messages.mo
 
       - name: PHPCS linting
-        run: vendor/bin/phpcs --report=summary src public
+        run: composer lint
 
       # --coverage-text
       - name: PHPUnit Tests
-        run: vendor/bin/phpunit --configuration tests/phpunit.xml
+        run: composer test
