@@ -12,10 +12,8 @@ use WEEEOpen\Tarallo\APIv2\ProductBuilder;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Database\TreeDAO;
-use WEEEOpen\Tarallo\DuplicateBulkIdentifierException;
 use WEEEOpen\Tarallo\ErrorHandler;
 use WEEEOpen\Tarallo\Feature;
-use WEEEOpen\Tarallo\HTTP\AuthenticationException;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
 use WEEEOpen\Tarallo\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\HTTP\AuthValidator;
@@ -24,15 +22,12 @@ use WEEEOpen\Tarallo\HTTP\TransactionWrapper;
 use WEEEOpen\Tarallo\HTTP\Validation;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemIncomplete;
-use WEEEOpen\Tarallo\ItemTraitCode;
 use WEEEOpen\Tarallo\ItemValidator;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\ProductIncomplete;
 use WEEEOpen\Tarallo\SessionLocal;
-use WEEEOpen\Tarallo\SSRv1\Summary\Summarizer;
 use WEEEOpen\Tarallo\SSRv1\Summary\Summary;
-use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\UserSSO;
 use WEEEOpen\Tarallo\ValidationException;
 use Laminas\Diactoros\Response\EmptyResponse;
@@ -42,10 +37,9 @@ use Laminas\Diactoros\UploadedFile;
 
 class Controller implements RequestHandlerInterface
 {
-	const cachefile = __DIR__ . '/../../resources/cache/SSRv1.cache';
-
 	use Routes;
 
+	public const CACHEFILE = __DIR__ . '/../../resources/cache/SSRv1.cache';
 
 	public static function getItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
@@ -159,7 +153,7 @@ class Controller implements RequestHandlerInterface
 	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
-		$parameters = $request->getAttribute('parameters', []);
+		//$parameters = $request->getAttribute('parameters', []);
 
 		$brands = $db->statsDAO()->getAllBrands();
 
@@ -709,10 +703,10 @@ class Controller implements RequestHandlerInterface
 		return $handler->handle($request);
 	}
 
+	/** @noinspection PhpUnusedParameterInspection */
 	public static function quickSearch(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
-		/** @var Database $db */
-		$db = $request->getAttribute('Database');
+		//$db = $request->getAttribute('Database');
 		$body = $request->getParsedBody();
 
 		$search = Validation::validateHasString($body, 'search');
@@ -962,8 +956,8 @@ class Controller implements RequestHandlerInterface
 	{
 		// Handling bulk import from peracotta
 		$body = $request->getParsedBody();
-		$delete = null;
-		$import = null;
+		//$delete = null;
+		//$import = null;
 
 		// Handle buttons
 		if ($body !== null && count($body) > 0) {
@@ -1175,12 +1169,12 @@ class Controller implements RequestHandlerInterface
 		}
 
 		$defaults = [];
-		foreach (Feature::features['type'] as $type => $useless) {
+		foreach (Feature::FEATURES['type'] as $type => $useless) {
 			$defaults[$type] = ItemValidator::getItemDefaultFeatures($type);
 		}
 
 		$defaults2 = [];
-		foreach (Feature::features['type'] as $type => $useless) {
+		foreach (Feature::FEATURES['type'] as $type => $useless) {
 			$defaults2[$type] = ItemValidator::getProductDefaultFeatures($type);
 		}
 

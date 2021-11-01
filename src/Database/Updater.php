@@ -555,6 +555,7 @@ END;");
           AND AuditProduct.Change IN ('C', 'U')
           AND DATEDIFF(NOW(), AuditProduct.Time) >= 1
     )");
+					break;
 				case 16:
 					$this->exec(
 						"CREATE TABLE `BulkTable`

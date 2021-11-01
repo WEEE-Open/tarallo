@@ -10,21 +10,21 @@ class BaseFeature
 	public const DOUBLE = 3;
 
 	// Change these numbers for a different sorting
-	public const GROUP_commercial = 1;
-	public const GROUP_general = 2;
-	public const GROUP_hddprocedures = 3;
-	public const GROUP_physical = 4;
-	public const GROUP_features = 5;
-	public const GROUP_ports = 6;
-	public const GROUP_sockets = 7;
-	public const GROUP_power = 8;
-	public const GROUP_powerconnectors = 9;
-	public const GROUP_codes = 10;
-	public const GROUP_administrative = 11;
-	public const GROUP_software = 12;
+	public const GROUP_COMMERCIAL = 1;
+	public const GROUP_GENERAL = 2;
+	public const GROUP_HDDPROCEDURES = 3;
+	public const GROUP_PHYSICAL = 4;
+	public const GROUP_FEATURES = 5;
+	public const GROUP_PORTS = 6;
+	public const GROUP_SOCKETS = 7;
+	public const GROUP_POWER = 8;
+	public const GROUP_POWERCONNECTORS = 9;
+	public const GROUP_CODES = 10;
+	public const GROUP_ADMINISTRATIVE = 11;
+	public const GROUP_SOFTWARE = 12;
 
 	// BEGIN GENERATED CODE
-	public const features = [
+	public const FEATURES = [
 		'brand' => self::STRING,
 		'model' => self::STRING,
 		'internal-name' => self::STRING,
@@ -142,127 +142,127 @@ class BaseFeature
 		'jae-ports-n' => self::INTEGER,
 		'game-ports-n' => self::INTEGER,
 	];
-	public const groups = [
-		'brand' => self::GROUP_commercial,
-		'model' => self::GROUP_commercial,
-		'internal-name' => self::GROUP_commercial,
-		'family' => self::GROUP_commercial,
-		'variant' => self::GROUP_commercial,
-		'key-bios-setup' => self::GROUP_software,
-		'key-boot-menu' => self::GROUP_software,
-		'owner' => self::GROUP_administrative,
-		'sn' => self::GROUP_codes,
-		'wwn' => self::GROUP_codes,
-		'mac' => self::GROUP_codes,
-		'type' => self::GROUP_general,
-		'working' => self::GROUP_general,
-		'capacity-byte' => self::GROUP_features,
-		'frequency-hertz' => self::GROUP_features,
-		'diameter-mm' => self::GROUP_physical,
-		'diagonal-inch' => self::GROUP_physical,
-		'isa' => self::GROUP_features,
-		'color' => self::GROUP_physical,
-		'motherboard-form-factor' => self::GROUP_physical,
-		'notes' => self::GROUP_general,
-		'gotcha' => self::GROUP_general,
-		'agp-sockets-n' => self::GROUP_sockets,
-		'arrival-batch' => self::GROUP_administrative,
-		'capacity-decibyte' => self::GROUP_features,
-		'cib' => self::GROUP_administrative,
-		'cib-qr' => self::GROUP_administrative,
-		'core-n' => self::GROUP_features,
-		'thread-n' => self::GROUP_features,
-		'cpu-socket' => self::GROUP_sockets,
-		'dvi-ports-n' => self::GROUP_ports,
-		'ethernet-ports-1000m-n' => self::GROUP_ports,
-		'ethernet-ports-100m-n' => self::GROUP_ports,
-		'ethernet-ports-10base2-bnc-n' => self::GROUP_ports,
-		'ethernet-ports-10m-n' => self::GROUP_ports,
-		'odd-form-factor' => self::GROUP_physical,
-		'hdd-form-factor' => self::GROUP_physical,
-		'ide-ports-n' => self::GROUP_ports,
-		'odd-type' => self::GROUP_features,
-		'pcie-power-pin-n' => self::GROUP_powerconnectors,
-		'pcie-sockets-n' => self::GROUP_sockets,
-		'pci-sockets-n' => self::GROUP_sockets,
-		'cnr-sockets-n' => self::GROUP_sockets,
-		'power-connector' => self::GROUP_powerconnectors,
-		'power-idle-watt' => self::GROUP_power,
-		'power-rated-watt' => self::GROUP_power,
-		'ps2-ports-n' => self::GROUP_ports,
-		'psu-ampere' => self::GROUP_power,
-		'psu-connector-motherboard' => self::GROUP_powerconnectors,
-		'psu-volt' => self::GROUP_power,
-		'ram-type' => self::GROUP_features,
-		'ram-timings' => self::GROUP_features,
-		'sata-ports-n' => self::GROUP_ports,
-		'esata-ports-n' => self::GROUP_ports,
-		'sas-sata-ports-n' => self::GROUP_ports,
-		'sas-sff-8087-ports-n' => self::GROUP_ports,
-		'sas-sff-8088-ports-n' => self::GROUP_ports,
-		'software' => self::GROUP_software,
-		'usb-ports-n' => self::GROUP_ports,
-		'usb-c-ports-n' => self::GROUP_ports,
-		'usb-header-n' => self::GROUP_ports,
-		'internal-header-n' => self::GROUP_ports,
-		'vga-ports-n' => self::GROUP_ports,
-		'os-license-code' => self::GROUP_codes,
-		'os-license-version' => self::GROUP_codes,
-		'power-idle-pfc' => self::GROUP_power,
-		'firewire-ports-n' => self::GROUP_ports,
-		'mini-firewire-ports-n' => self::GROUP_ports,
-		'serial-ports-n' => self::GROUP_ports,
-		'parallel-ports-n' => self::GROUP_ports,
-		'ram-form-factor' => self::GROUP_physical,
-		'weight-gram' => self::GROUP_physical,
-		'spin-rate-rpm' => self::GROUP_features,
-		'dms-59-ports-n' => self::GROUP_ports,
-		'check' => self::GROUP_general,
-		'todo' => self::GROUP_general,
-		'ram-ecc' => self::GROUP_features,
-		'other-code' => self::GROUP_codes,
-		'hdmi-ports-n' => self::GROUP_ports,
-		'scsi-sca2-ports-n' => self::GROUP_ports,
-		'scsi-db68-ports-n' => self::GROUP_ports,
-		'mini-ide-ports-n' => self::GROUP_ports,
-		'data-erased' => self::GROUP_hddprocedures,
-		'surface-scan' => self::GROUP_hddprocedures,
-		'smart-data' => self::GROUP_hddprocedures,
-		'wireless-receiver' => self::GROUP_features,
-		'rj11-ports-n' => self::GROUP_ports,
-		'ethernet-ports-10base5-aui-n' => self::GROUP_ports,
-		'midi-ports-n' => self::GROUP_ports,
-		'mini-jack-ports-n' => self::GROUP_ports,
-		'thunderbolt-ports-n' => self::GROUP_ports,
-		'rca-mono-ports-n' => self::GROUP_ports,
-		'tv-out-ports-n' => self::GROUP_ports,
-		's-video-ports-n' => self::GROUP_ports,
-		's-video-7pin-ports-n' => self::GROUP_ports,
-		'composite-video-ports-n' => self::GROUP_ports,
-		'serial-db25-ports-n' => self::GROUP_ports,
-		'isa-sockets-n' => self::GROUP_sockets,
-		'mini-pcie-sockets-n' => self::GROUP_sockets,
-		'mini-pci-sockets-n' => self::GROUP_sockets,
-		'brand-manufacturer' => self::GROUP_commercial,
-		'psu-form-factor' => self::GROUP_physical,
-		'psu-rails-most-power' => self::GROUP_power,
-		'psu-12v-rail-ampere' => self::GROUP_power,
-		'cib-old' => self::GROUP_administrative,
-		'integrated-graphics-brand' => self::GROUP_features,
-		'integrated-graphics-model' => self::GROUP_features,
-		'restrictions' => self::GROUP_general,
-		'displayport-ports-n' => self::GROUP_ports,
-		'mini-displayport-ports-n' => self::GROUP_ports,
-		'micro-hdmi-ports-n' => self::GROUP_ports,
-		'pci-low-profile' => self::GROUP_features,
-		'psu-connector-cpu' => self::GROUP_powerconnectors,
-		'sata-power-n' => self::GROUP_powerconnectors,
-		'jae-ports-n' => self::GROUP_ports,
-		'game-ports-n' => self::GROUP_ports,
+	public const GROUPS = [
+		'brand' => self::GROUP_COMMERCIAL,
+		'model' => self::GROUP_COMMERCIAL,
+		'internal-name' => self::GROUP_COMMERCIAL,
+		'family' => self::GROUP_COMMERCIAL,
+		'variant' => self::GROUP_COMMERCIAL,
+		'key-bios-setup' => self::GROUP_SOFTWARE,
+		'key-boot-menu' => self::GROUP_SOFTWARE,
+		'owner' => self::GROUP_ADMINISTRATIVE,
+		'sn' => self::GROUP_CODES,
+		'wwn' => self::GROUP_CODES,
+		'mac' => self::GROUP_CODES,
+		'type' => self::GROUP_GENERAL,
+		'working' => self::GROUP_GENERAL,
+		'capacity-byte' => self::GROUP_FEATURES,
+		'frequency-hertz' => self::GROUP_FEATURES,
+		'diameter-mm' => self::GROUP_PHYSICAL,
+		'diagonal-inch' => self::GROUP_PHYSICAL,
+		'isa' => self::GROUP_FEATURES,
+		'color' => self::GROUP_PHYSICAL,
+		'motherboard-form-factor' => self::GROUP_PHYSICAL,
+		'notes' => self::GROUP_GENERAL,
+		'gotcha' => self::GROUP_GENERAL,
+		'agp-sockets-n' => self::GROUP_SOCKETS,
+		'arrival-batch' => self::GROUP_ADMINISTRATIVE,
+		'capacity-decibyte' => self::GROUP_FEATURES,
+		'cib' => self::GROUP_ADMINISTRATIVE,
+		'cib-qr' => self::GROUP_ADMINISTRATIVE,
+		'core-n' => self::GROUP_FEATURES,
+		'thread-n' => self::GROUP_FEATURES,
+		'cpu-socket' => self::GROUP_SOCKETS,
+		'dvi-ports-n' => self::GROUP_PORTS,
+		'ethernet-ports-1000m-n' => self::GROUP_PORTS,
+		'ethernet-ports-100m-n' => self::GROUP_PORTS,
+		'ethernet-ports-10base2-bnc-n' => self::GROUP_PORTS,
+		'ethernet-ports-10m-n' => self::GROUP_PORTS,
+		'odd-form-factor' => self::GROUP_PHYSICAL,
+		'hdd-form-factor' => self::GROUP_PHYSICAL,
+		'ide-ports-n' => self::GROUP_PORTS,
+		'odd-type' => self::GROUP_FEATURES,
+		'pcie-power-pin-n' => self::GROUP_POWERCONNECTORS,
+		'pcie-sockets-n' => self::GROUP_SOCKETS,
+		'pci-sockets-n' => self::GROUP_SOCKETS,
+		'cnr-sockets-n' => self::GROUP_SOCKETS,
+		'power-connector' => self::GROUP_POWERCONNECTORS,
+		'power-idle-watt' => self::GROUP_POWER,
+		'power-rated-watt' => self::GROUP_POWER,
+		'ps2-ports-n' => self::GROUP_PORTS,
+		'psu-ampere' => self::GROUP_POWER,
+		'psu-connector-motherboard' => self::GROUP_POWERCONNECTORS,
+		'psu-volt' => self::GROUP_POWER,
+		'ram-type' => self::GROUP_FEATURES,
+		'ram-timings' => self::GROUP_FEATURES,
+		'sata-ports-n' => self::GROUP_PORTS,
+		'esata-ports-n' => self::GROUP_PORTS,
+		'sas-sata-ports-n' => self::GROUP_PORTS,
+		'sas-sff-8087-ports-n' => self::GROUP_PORTS,
+		'sas-sff-8088-ports-n' => self::GROUP_PORTS,
+		'software' => self::GROUP_SOFTWARE,
+		'usb-ports-n' => self::GROUP_PORTS,
+		'usb-c-ports-n' => self::GROUP_PORTS,
+		'usb-header-n' => self::GROUP_PORTS,
+		'internal-header-n' => self::GROUP_PORTS,
+		'vga-ports-n' => self::GROUP_PORTS,
+		'os-license-code' => self::GROUP_CODES,
+		'os-license-version' => self::GROUP_CODES,
+		'power-idle-pfc' => self::GROUP_POWER,
+		'firewire-ports-n' => self::GROUP_PORTS,
+		'mini-firewire-ports-n' => self::GROUP_PORTS,
+		'serial-ports-n' => self::GROUP_PORTS,
+		'parallel-ports-n' => self::GROUP_PORTS,
+		'ram-form-factor' => self::GROUP_PHYSICAL,
+		'weight-gram' => self::GROUP_PHYSICAL,
+		'spin-rate-rpm' => self::GROUP_FEATURES,
+		'dms-59-ports-n' => self::GROUP_PORTS,
+		'check' => self::GROUP_GENERAL,
+		'todo' => self::GROUP_GENERAL,
+		'ram-ecc' => self::GROUP_FEATURES,
+		'other-code' => self::GROUP_CODES,
+		'hdmi-ports-n' => self::GROUP_PORTS,
+		'scsi-sca2-ports-n' => self::GROUP_PORTS,
+		'scsi-db68-ports-n' => self::GROUP_PORTS,
+		'mini-ide-ports-n' => self::GROUP_PORTS,
+		'data-erased' => self::GROUP_HDDPROCEDURES,
+		'surface-scan' => self::GROUP_HDDPROCEDURES,
+		'smart-data' => self::GROUP_HDDPROCEDURES,
+		'wireless-receiver' => self::GROUP_FEATURES,
+		'rj11-ports-n' => self::GROUP_PORTS,
+		'ethernet-ports-10base5-aui-n' => self::GROUP_PORTS,
+		'midi-ports-n' => self::GROUP_PORTS,
+		'mini-jack-ports-n' => self::GROUP_PORTS,
+		'thunderbolt-ports-n' => self::GROUP_PORTS,
+		'rca-mono-ports-n' => self::GROUP_PORTS,
+		'tv-out-ports-n' => self::GROUP_PORTS,
+		's-video-ports-n' => self::GROUP_PORTS,
+		's-video-7pin-ports-n' => self::GROUP_PORTS,
+		'composite-video-ports-n' => self::GROUP_PORTS,
+		'serial-db25-ports-n' => self::GROUP_PORTS,
+		'isa-sockets-n' => self::GROUP_SOCKETS,
+		'mini-pcie-sockets-n' => self::GROUP_SOCKETS,
+		'mini-pci-sockets-n' => self::GROUP_SOCKETS,
+		'brand-manufacturer' => self::GROUP_COMMERCIAL,
+		'psu-form-factor' => self::GROUP_PHYSICAL,
+		'psu-rails-most-power' => self::GROUP_POWER,
+		'psu-12v-rail-ampere' => self::GROUP_POWER,
+		'cib-old' => self::GROUP_ADMINISTRATIVE,
+		'integrated-graphics-brand' => self::GROUP_FEATURES,
+		'integrated-graphics-model' => self::GROUP_FEATURES,
+		'restrictions' => self::GROUP_GENERAL,
+		'displayport-ports-n' => self::GROUP_PORTS,
+		'mini-displayport-ports-n' => self::GROUP_PORTS,
+		'micro-hdmi-ports-n' => self::GROUP_PORTS,
+		'pci-low-profile' => self::GROUP_FEATURES,
+		'psu-connector-cpu' => self::GROUP_POWERCONNECTORS,
+		'sata-power-n' => self::GROUP_POWERCONNECTORS,
+		'jae-ports-n' => self::GROUP_PORTS,
+		'game-ports-n' => self::GROUP_PORTS,
 	];
 	// END GENERATED CODE
 
-	public const itemOnlyFeatures = [
+	public const ITEM_ONLY_FEATURES = [
 		'brand' => true,
 		'model' => true,
 		'variant' => true,
@@ -323,10 +323,10 @@ class BaseFeature
 	 */
 	public static function getGroup($name)
 	{
-		if (!isset(self::groups[$name])) {
+		if (!isset(self::GROUPS[$name])) {
 			throw new \InvalidArgumentException("Cannot get group for feature $name: doesn't exist");
 		}
-		return self::groups[$name];
+		return self::GROUPS[$name];
 	}
 
 	/**
@@ -339,7 +339,7 @@ class BaseFeature
 		if (!is_string($name)) {
 			throw new \InvalidArgumentException('Feature name must be a string, ' . gettype($name) . ' given');
 		}
-		if (!isset(self::features[$name])) {
+		if (!isset(self::FEATURES[$name])) {
 			throw new \InvalidArgumentException('Unknown feature name: ' . $name);
 		}
 	}
@@ -353,10 +353,10 @@ class BaseFeature
 	 */
 	public static function getType(string $name): int
 	{
-		if (!isset(self::features[$name])) {
+		if (!isset(self::FEATURES[$name])) {
 			throw new \InvalidArgumentException("Cannot get type for feature $name: doesn't exist");
 		}
-		return is_int(self::features[$name]) ? self::features[$name] : self::ENUM;
+		return is_int(self::FEATURES[$name]) ? self::FEATURES[$name] : self::ENUM;
 	}
 
 	/**
@@ -371,7 +371,7 @@ class BaseFeature
 		if (self::getType($name) !== self::ENUM) {
 			throw new \InvalidArgumentException("Feature $name is not an enum");
 		}
-		return self::features[$name];
+		return self::FEATURES[$name];
 	}
 
 

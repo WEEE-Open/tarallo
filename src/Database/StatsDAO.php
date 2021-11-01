@@ -600,7 +600,7 @@ LIMIT " . (int) $limit;
 			// Can't do it with coalesce, numeric features end up in wrong order...
 			$column = FeatureDAO::getColumn(BaseFeature::getType($feature));
 
-			if (!isset(BaseFeature::features[$feature])) {
+			if (!isset(BaseFeature::FEATURES[$feature])) {
 				throw new \InvalidArgumentException("$feature is not a feature");
 			}
 			$fcolname = $feature;
@@ -1025,8 +1025,7 @@ WHERE `Key` != 'DataVersion' AND
 	 * @param string $propertyToSum must be 'capacity-decibyte' or 'capacity-byte'
 	 * @return array
 	 */
-	public function getTotalAndAverageCapacity(array $hddsOrRams, string $propertyToSum):
-	array
+	public function getTotalAndAverageCapacity(array $hddsOrRams, string $propertyToSum): array
 	{
 		$sumOfCapacity = 0;
 		$numberOfItems = 0;
@@ -1051,8 +1050,7 @@ WHERE `Key` != 'DataVersion' AND
 	 * counts items grouped by type that have serial number
 	 * @return array
 	 */
-	public function countItemsByTypeThatHaveSerialNumber():
-	array
+	public function countItemsByTypeThatHaveSerialNumber(): array
 	{
 		$pdo = $this->getPDO();
 		$array = [];
@@ -1076,8 +1074,8 @@ WHERE `Key` != 'DataVersion' AND
         ";
 
 
-		$statementToGetItemWithSn = $this->getPDO()->prepare($queryToSelectItemWithSn);
-		$statementToGetItemWithoutSn = $this->getPDO()->prepare($queryToSelectItemWithoutSn);
+		$statementToGetItemWithSn = $pdo->prepare($queryToSelectItemWithSn);
+		$statementToGetItemWithoutSn = $pdo->prepare($queryToSelectItemWithoutSn);
 		try {
 			$successItemsWithSn = $statementToGetItemWithSn->execute();
 			$successItemsWithoutSn = $statementToGetItemWithoutSn->execute();

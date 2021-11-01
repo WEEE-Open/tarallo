@@ -1,6 +1,6 @@
 <?php
 
-$features = \WEEEOpen\Tarallo\SSRv1\FeaturePrinter::features;
+$features = \WEEEOpen\Tarallo\SSRv1\FeaturePrinter::FEATURES;
 $groups = [];
 foreach ($features as $value => $name) {
 	$groups[WEEEOpen\Tarallo\BaseFeature::getGroup($value)][$value] = $name;

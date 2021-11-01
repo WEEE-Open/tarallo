@@ -5,7 +5,7 @@ default: up
 ######################################### Utility #############################################
 .PHONY:
 features:
-	utils/generate-features "$(CURDIR)"
+	bin/generate-features "$(CURDIR)"
 
 .PHONY:
 dbupdate:

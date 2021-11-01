@@ -9,13 +9,13 @@ class SessionLocal
 	public $level;
 	public $owner;
 
-	const lengthBefore = 16;
-	const lengthAfter = 32;
+	protected const LENGTH_BEFORE = 16;
+	protected const LENGTH_AFTER = 32;
 	public static function generateToken(): string
 	{
 		try {
-			$before = rtrim(strtr(base64_encode(random_bytes(self::lengthBefore)), '+/', '-_'), '=');
-			$after = rtrim(strtr(base64_encode(random_bytes(self::lengthAfter)), '+/', '-_'), '=');
+			$before = rtrim(strtr(base64_encode(random_bytes(self::LENGTH_BEFORE)), '+/', '-_'), '=');
+			$after = rtrim(strtr(base64_encode(random_bytes(self::LENGTH_AFTER)), '+/', '-_'), '=');
 		} catch (\Exception $e) {
 			throw new EntropyException($e->getMessage(), 0, $e);
 		}

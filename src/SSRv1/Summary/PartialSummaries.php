@@ -57,7 +57,7 @@ class PartialSummaries
 
 	public static function summarizePorts(ItemWithFeatures $item, bool $compact = false, string $glue = ', '): string
 	{
-		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_ports);
+		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_PORTS);
 		$sequence = self::summarizeSequence($compact, $filtered);
 
 		return implode($glue, $sequence);
@@ -65,7 +65,7 @@ class PartialSummaries
 
 	public static function summarizeSockets(ItemWithFeatures $item, bool $compact = false, string $glue = ', '): string
 	{
-		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_sockets);
+		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_SOCKETS);
 		unset($filtered['cpu-socket']);
 		$sequence = self::summarizeSequence($compact, $filtered);
 
@@ -74,7 +74,7 @@ class PartialSummaries
 
 	public static function summarizePowerconnectors(ItemWithFeatures $item, bool $compact = false, string $glue = ', '): string
 	{
-		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_powerconnectors);
+		$filtered = self::getFeaturesInGroup($item, BaseFeature::GROUP_POWERCONNECTORS);
 		$sequence = self::summarizeSequence($compact, $filtered);
 
 		return implode($glue, $sequence);
@@ -93,8 +93,8 @@ class PartialSummaries
 			// Skip BaseFeature(s) from ItemIncomplete, these cannot be summarized
 			if (
 				$feature instanceof Feature
-				&& isset(BaseFeature::groups[$feature->name])
-				&& BaseFeature::groups[$feature->name] === $group
+				&& isset(BaseFeature::GROUPS[$feature->name])
+				&& BaseFeature::GROUPS[$feature->name] === $group
 			) {
 				$filtered[$feature->name] = $feature;
 			}

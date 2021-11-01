@@ -11,21 +11,21 @@ class Product extends ProductCode implements \JsonSerializable, ItemWithFeatures
 {
 	use ItemTraitFeatures;
 
-	public static function fromItem(Item $item)
+	public static function fromItem(Item $item): Product
 	{
 		$brand = $item->getFeatureValue('brand');
 		$model = $item->getFeatureValue('model');
 		$variant = $item->getFeatureValue('variant');
 		$product = new Product($brand, $model, $variant);
 		foreach ($item->getOwnFeatures() as $feature) {
-			if (!isset(BaseFeature::itemOnlyFeatures[$feature->name])) {
+			if (!isset(BaseFeature::ITEM_ONLY_FEATURES[$feature->name])) {
 				$product->addFeature($feature);
 			}
 		}
 		return $product;
 	}
 
-	function jsonSerialize()
+	public function jsonSerialize()
 	{
 		$array = [];
 		$array['brand'] = $this->brand;
@@ -40,7 +40,7 @@ class Product extends ProductCode implements \JsonSerializable, ItemWithFeatures
 		return $array;
 	}
 
-	function __toString()
+	public function __toString()
 	{
 		if ($this->variant === self::DEFAULT_VARIANT) {
 			return $this->brand . ' ' . $this->model;

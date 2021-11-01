@@ -34,7 +34,7 @@ class TemplateUtilities implements ExtensionInterface
 	 *
 	 * @return UltraFeature[]
 	 */
-	public function getUltraFeatures(array $features)
+	public function getUltraFeatures(array $features): array
 	{
 		$result = [];
 
@@ -49,7 +49,7 @@ class TemplateUtilities implements ExtensionInterface
 	 * @param UltraFeature[] $ultraFeatures
 	 * @return UltraFeature[][] Translated group name => [UltraFeature, UltraFeature, ...]
 	 */
-	public function getGroupedFeatures(array $ultraFeatures)
+	public function getGroupedFeatures(array $ultraFeatures): array
 	{
 		$groups = [];
 		$groupsPrintable = [];
@@ -72,7 +72,7 @@ class TemplateUtilities implements ExtensionInterface
 		return $groupsPrintable;
 	}
 
-	private static function featureNameSort(UltraFeature $a, UltraFeature $b)
+	private static function featureNameSort(UltraFeature $a, UltraFeature $b): int
 	{
 		return $a->pname <=> $b->pname;
 	}
@@ -130,7 +130,7 @@ class TemplateUtilities implements ExtensionInterface
 	 *
 	 * @return string[] Internal feature name => translated feature name
 	 */
-	public function getOptions(string $name)
+	public function getOptions(string $name): array
 	{
 		$options = BaseFeature::getOptions($name);
 		foreach ($options as $value => &$translated) {
@@ -164,7 +164,7 @@ class TemplateUtilities implements ExtensionInterface
 	 *
 	 * @return string
 	 */
-	public function prettyPrintJson(string $json)
+	public function prettyPrintJson(string $json): string
 	{
 		$result = '';
 		$level = 0;
@@ -200,6 +200,7 @@ class TemplateUtilities implements ExtensionInterface
 							/** @noinspection PhpMissingBreakStatementInspection */
 							case '[':
 								$level++;
+								// no break
 							case ',':
 								$ends_line_level = $level;
 								break;

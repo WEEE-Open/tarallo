@@ -38,7 +38,9 @@ use Laminas\Diactoros\Response\JsonResponse;
 
 class Controller implements RequestHandlerInterface
 {
-	const cachefile = __DIR__ . '/../../resources/cache/APIv2.cache';
+	use Routes;
+
+	public const CACHEFILE = __DIR__ . '/../../resources/cache/APIv2.cache';
 
 	public static function sessionWhoami(ServerRequestInterface $request): ResponseInterface
 	{
@@ -290,7 +292,7 @@ class Controller implements RequestHandlerInterface
 		$model = Validation::validateOptionalString($parameters, 'model');
 		$variant = Validation::validateOptionalString($parameters, 'variant');
 		$importId = Validation::validateOptionalInt($query, 'import');
-		;
+
 		$loopback = isset($query['loopback']);
 		$validate = !isset($query['novalidate']);
 
@@ -316,12 +318,10 @@ class Controller implements RequestHandlerInterface
 
 		if ($loopback) {
 			$response = new JsonResponse($db->productDAO()->getProduct($product), 201);
-			$response = $response->withHeader('Location', '/v2/products/' . rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
 		} else {
 			$response = new JsonResponse(['brand' => $product->getBrand(), 'model' => $product->getModel(), 'variant' => $product->getVariant()], 201);
-			$response = $response->withHeader('Location', '/v2/products/' . rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
 		}
-		return $response;
+		return $response->withHeader('Location', '/v2/products/' . rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
 	}
 
 	public static function renameProduct(ServerRequestInterface $request): ResponseInterface
@@ -656,7 +656,7 @@ class Controller implements RequestHandlerInterface
 		return new JsonResponse($data);
 	}
 
-	public static function ItemsNotFeature(ServerRequestInterface $request): ResponseInterface
+	public static function itemsNotFeature(ServerRequestInterface $request): ResponseInterface
 	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
@@ -690,7 +690,7 @@ class Controller implements RequestHandlerInterface
 		return new JsonResponse($data);
 	}
 
-	public static function RecentAuditByType(ServerRequestInterface $request): ResponseInterface
+	public static function recentAuditByType(ServerRequestInterface $request): ResponseInterface
 	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
@@ -704,7 +704,7 @@ class Controller implements RequestHandlerInterface
 		return new JsonResponse($data);
 	}
 
-	public static function CountByFeature(ServerRequestInterface $request): ResponseInterface
+	public static function countByFeature(ServerRequestInterface $request): ResponseInterface
 	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
@@ -786,7 +786,7 @@ class Controller implements RequestHandlerInterface
 
 		$min = 3;
 		if (strlen($search) < $min) {
-			throw new RangeException($parameter, $min, null, "Minimum length for autocomplete is $min");
+			throw new RangeException('q', $min, null, "Minimum length for autocomplete is $min");
 		}
 
 		$json = $db->itemDAO()->getItemsForAutosuggest($search);
@@ -878,122 +878,5 @@ class Controller implements RequestHandlerInterface
 		$relay = $relayBuilder->newInstance($queue);
 
 		return $relay->handle($request);
-	}
-
-	private function route(ServerRequestInterface $request): array
-	{
-		$dispatcher = FastRoute\cachedDispatcher(
-			function (FastRoute\RouteCollector $r) {
-
-				$r->addGroup(
-					'/v2',
-					function (FastRoute\RouteCollector $r) {
-						$r->addGroup(
-							'/items',
-							function (FastRoute\RouteCollector $r) {
-								$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
-								$r->post('', [User::AUTH_LEVEL_RW, 'Controller::createItem']);
-
-								$r->addGroup(
-									'/{id}',
-									function (FastRoute\RouteCollector $r) {
-										// TODO: make token access public
-										$r->get('[/token/{token}]', [User::AUTH_LEVEL_RO, 'Controller::getItem']);
-										$r->get('/history', [User::AUTH_LEVEL_RO, 'Controller::getItemHistory']);
-										$r->put('', [User::AUTH_LEVEL_RW, 'Controller::createItem']);
-										$r->delete('', [User::AUTH_LEVEL_RW, 'Controller::removeItem']);
-
-										// Useless
-										//$r->get('/parent',  [User::AUTH_LEVEL_RW, 'Controller::getItemParent']);
-										$r->put('/parent', [User::AUTH_LEVEL_RW, 'Controller::setItemParent']);
-										$r->delete('/parent', [User::AUTH_LEVEL_RW, 'Controller::deleteItemParent']);
-
-										//$r->get('/product', [User::AUTH_LEVEL_RW, 'Controller::getItemProduct']);
-										//$r->put('/product',  [User::AUTH_LEVEL_RW, 'Controller::setItemProduct']);
-										//$r->delete('/product',  [User::AUTH_LEVEL_RW, 'Controller::deleteItemProduct']);
-
-										// Also useless, just get the item
-										// $r->get('/features',  [User::AUTH_LEVEL_RW, 'Controller::getItemFeatures']);
-										$r->put('/features', [User::AUTH_LEVEL_RW, 'Controller::setFeatures']);
-										$r->patch('/features', [User::AUTH_LEVEL_RW, 'Controller::updateFeatures']);
-
-										// TODO: implement this one
-										//$r->get('/path',  [User::AUTH_LEVEL_RW, 'Controller::getItemPath']);
-
-										// $r->get('/contents',  [User::AUTH_LEVEL_RW, 'Controller::getItemContents']);
-									}
-								);
-							}
-						);
-						$r->addGroup(
-							'/deleted',
-							function (FastRoute\RouteCollector $r) {
-								$r->addGroup(
-									'/{id}',
-									function (FastRoute\RouteCollector $r) {
-										$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getDeletedItem']);
-										$r->put('/parent', [User::AUTH_LEVEL_RW, 'Controller::restoreItemParent']);
-										// TODO: this $r->delete('', [User::AUTH_LEVEL_RW, 'Controller::removeItemPermanently']);
-									}
-								);
-							}
-						);
-
-						$r->post('/search', [User::AUTH_LEVEL_RO, 'Controller::doSearch']);
-						$r->patch('/search/{id}', [User::AUTH_LEVEL_RO, 'Controller::doSearch']);
-						$r->get('/search/{id}[/page/{page}]', [User::AUTH_LEVEL_RO, 'Controller::getSearch']);
-
-						$r->get('/features/{feature}/{value}', [User::AUTH_LEVEL_RO, 'Controller::getByFeature']);
-
-						$r->addGroup(
-							'/products',
-							function (FastRoute\RouteCollector $r) {
-								//$r->get('', [User::AUTH_LEVEL_RO, 'Controller::getProducts']);
-								$r->get('/{brand}/{model}', [User::AUTH_LEVEL_RO, 'Controller::getProducts']);
-								$r->get('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RO, 'Controller::getProduct']);
-								$r->put('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::createProduct']);
-								$r->patch('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::renameProduct']);
-								$r->delete('/{brand}/{model}/{variant}', [User::AUTH_LEVEL_RW, 'Controller::deleteProduct']);
-
-								$r->addGroup(
-									'/{brand}/{model}/{variant}/features',
-									function (FastRoute\RouteCollector $r) {
-										//$r->get('',  [User::AUTH_LEVEL_RW, 'Controller::getProductFeatures']);
-										$r->post('', [User::AUTH_LEVEL_RW, 'Controller::setFeatures']);
-										$r->patch('', [User::AUTH_LEVEL_RW, 'Controller::updateFeatures']);
-									}
-								);
-							}
-						);
-
-						$r->get('/history[/page/{page}]', [User::AUTH_LEVEL_RO, 'Controller::getHistory']);
-
-						$r->get('/session', [User::AUTH_LEVEL_RW, 'Controller::sessionWhoami']);
-						$r->get('/autosuggest/code', [User::AUTH_LEVEL_RO, 'Controller::getItemsAutosuggest']);
-
-						$r->addGroup(
-							'/stats',
-							function (FastRoute\RouteCollector $r) {
-								$r->get('/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]', [User::AUTH_LEVEL_RO, 'Controller::ItemsNotFeature']);
-								$r->get('/getRecentAuditByType/{type}[/{howMany}]', [User::AUTH_LEVEL_RO, 'Controller::RecentAuditByType']);
-								$r->get('/getCountByFeature/{feature}[/{filter}[/{location}[/{creation[/{deleted[/{cutoff}]]]]]', [User::AUTH_LEVEL_RO, 'Controller::CountByFeature']);
-							}
-						);
-						$r->addGroup(
-							'/bulk',
-							function (FastRoute\RouteCollector $r) {
-								$r->post('/add[/{identifier}]', [User::AUTH_LEVEL_RO, 'Controller::addBulk']);
-							}
-						);
-					}
-				);
-			},
-			[
-				'cacheFile' => self::cachefile,
-				'cacheDisabled' => !TARALLO_CACHE_ENABLED,
-			]
-		);
-
-		return $dispatcher->dispatch($request->getMethod(), $request->getUri()->getPath());
 	}
 }

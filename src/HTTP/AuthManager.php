@@ -12,21 +12,20 @@ use ReflectionMethod;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\OpenIDConnectRefreshClient;
 use WEEEOpen\Tarallo\SessionSSO;
-use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\UserSSO;
 use Laminas\Diactoros\Response\RedirectResponse;
 
 class AuthManager implements MiddlewareInterface
 {
-	const COOKIE_NAME = 'tsessionsso';
-	const KEYSPACE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
-	const KEYSPACE_STRLEN = 64;
+	private const COOKIE_NAME = 'tsessionsso';
+	private const KEYSPACE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-_';
+	private const KEYSPACE_STRLEN = 64;
 	private $browser = true;
 
 	/**
 	 * @param bool $browser The client is a browser that can be redirect to the SSO server
 	 */
-	public function __construct($browser = true)
+	public function __construct(bool $browser = true)
 	{
 		$this->browser = $browser;
 	}
@@ -34,15 +33,15 @@ class AuthManager implements MiddlewareInterface
 	/**
 	 * Set the cookie
 	 *
-	 * @param $newContent
-	 * @param $expire
+	 * @param string $newContent
+	 * @param int $expire
 	 */
 	protected static function setCookie(string $newContent, int $expire)
 	{
 		setcookie(self::COOKIE_NAME, $newContent, $expire, '', '', !TARALLO_DEVELOPMENT_ENVIRONMENT, true);
 	}
 
-	private static function oidc()
+	private static function oidc(): OpenIDConnectClient
 	{
 		$oidc = new OpenIDConnectClient(TARALLO_OIDC_ISSUER, TARALLO_OIDC_CLIENT_KEY, TARALLO_OIDC_CLIENT_SECRET);
 		$oidc->addScope(['openid', 'profile']);
@@ -57,7 +56,7 @@ class AuthManager implements MiddlewareInterface
 	 *
 	 * @return string
 	 */
-	private static function newUniqueIdentifier(Database $db)
+	private static function newUniqueIdentifier(Database $db): string
 	{
 		do {
 			$id = self::newIdentifier();
@@ -72,7 +71,7 @@ class AuthManager implements MiddlewareInterface
 	 * @return string
 	 * @see newUniqueIdentifier
 	 */
-	private static function newIdentifier()
+	private static function newIdentifier(): string
 	{
 		$str = '';
 		for ($i = 0; $i < 32; $i++) {

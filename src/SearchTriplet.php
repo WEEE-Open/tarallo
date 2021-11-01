@@ -7,15 +7,15 @@ class SearchTriplet
 	private $feature;
 	private $compare;
 	//private static $separators = ['>', '>=', '=', '<=', '<', '<>', '~', '≥', '≤', '!='];
-	const separatorsOrdering = ['>', '>=', '<=', '<'];
-	const separatorsPartial = ['~', '!~'];
-	const separatorsOther = ['=', '<>'];
-	const separatorsDefined = ['*', '!'];
+	public const SEPARATORS_ORDERING = ['>', '>=', '<=', '<'];
+	public const SEPARATORS_PARTIAL = ['~', '!~'];
+	public const SEPARATORS_OTHER = ['=', '<>'];
+	public const SEPARATORS_DEFINED = ['*', '!'];
 
 	public function __construct($key, $compare, $value)
 	{
 		if ($value === null) {
-			if (in_array($compare, self::separatorsDefined)) {
+			if (in_array($compare, self::SEPARATORS_DEFINED)) {
 				$this->feature = new BaseFeature($key);
 			} else {
 				throw new \InvalidArgumentException("Value must be provided for operator '$compare'");
@@ -24,11 +24,11 @@ class SearchTriplet
 			$this->feature = new Feature($key, $value);
 		}
 
-		if (in_array($compare, self::separatorsPartial)) {
+		if (in_array($compare, self::SEPARATORS_PARTIAL)) {
 			self::checkCanPartialMatch($this->feature);
-		} elseif (in_array($compare, self::separatorsOrdering)) {
+		} elseif (in_array($compare, self::SEPARATORS_ORDERING)) {
 			self::checkWellOrdered($this->feature, $compare);
-		} elseif (!in_array($compare, self::separatorsOther) && !in_array($compare, self::separatorsDefined)) {
+		} elseif (!in_array($compare, self::SEPARATORS_OTHER) && !in_array($compare, self::SEPARATORS_DEFINED)) {
 			throw new \InvalidArgumentException("'$compare' is not a valid comparison operator");
 		}
 

@@ -9,7 +9,7 @@ use WEEEOpen\Tarallo\ProductCode;
 class FeaturePrinter
 {
 	// BEGIN GENERATED CODE
-	const features = [
+	public const FEATURES = [
 		'brand' => 'Brand',
 		'model' => 'Model',
 		'internal-name' => 'Internal (code)name',
@@ -127,7 +127,7 @@ class FeaturePrinter
 		'jae-ports-n' => 'JAE (50 pin laptop ODD)',
 		'game-ports-n' => 'Game port',
 	];
-	const featuresEnum = [
+	public const FEATURES_ENUM = [
 		'type' => ['location' => 'Location', 'case' => 'Case', 'motherboard' => 'Motherboard', 'cpu' => 'CPU', 'graphics-card' => 'Graphics card', 'ram' => 'RAM', 'hdd' => 'HDD', 'ssd' => 'SSD', 'odd' => 'ODD', 'psu' => 'PSU', 'audio-card' => 'Audio card', 'ethernet-card' => 'Ethernet card', 'monitor' => 'Monitor', 'mouse' => 'Mouse', 'keyboard' => 'Keyboard', 'network-switch' => 'Network switch', 'network-hub' => 'Network hub', 'modem-router' => 'Modem/router', 'fdd' => 'FDD', 'ports-bracket' => 'Bracket with ports', 'card-reader' => 'Card reader', 'other-card' => 'Other internal card', 'fan-controller' => 'Fan controller (rheobus)', 'modem-card' => 'Modem card', 'storage-card' => 'Storage card', 'wifi-card' => 'WiFi card', 'bluetooth-card' => 'Bluetooth card', 'external-psu' => 'External PSU', 'zip-drive' => 'ZIP drive', 'printer' => 'Printer', 'scanner' => 'Scanner', 'inventoried-object' => 'Other (with invetory sticker)', 'adapter' => 'Adapter', 'usbhub' => 'USB hub', 'tv-card' => 'TV tuner card'],
 		'working' => ['no' => 'No', 'yes' => 'Yes', 'maybe' => 'Sometimes'],
 		'isa' => ['x86-32' => 'x86 32 bit', 'x86-64' => 'x86 64 bit', 'ia-64' => 'IA-64', 'arm' => 'ARM'],
@@ -156,22 +156,22 @@ class FeaturePrinter
 	];
 	// END GENERATED CODE
 
-	const groupTranslations = [
-		BaseFeature::GROUP_administrative => 'Administrative',
-		BaseFeature::GROUP_commercial => 'Commercial',
-		BaseFeature::GROUP_general => 'General',
-		BaseFeature::GROUP_hddprocedures => 'HDD procedures',
-		BaseFeature::GROUP_physical => 'Phyisical',
-		BaseFeature::GROUP_features => 'Features',
-		BaseFeature::GROUP_ports => 'Ports',
-		BaseFeature::GROUP_sockets => 'Sockets',
-		BaseFeature::GROUP_power => 'Power',
-		BaseFeature::GROUP_powerconnectors => 'Power connectors',
-		BaseFeature::GROUP_codes => 'Codes',
-		BaseFeature::GROUP_software => 'Software',
+	public const GROUP_TRANSLATIONS = [
+		BaseFeature::GROUP_ADMINISTRATIVE => 'Administrative',
+		BaseFeature::GROUP_COMMERCIAL => 'Commercial',
+		BaseFeature::GROUP_GENERAL => 'General',
+		BaseFeature::GROUP_HDDPROCEDURES => 'HDD procedures',
+		BaseFeature::GROUP_PHYSICAL => 'Phyisical',
+		BaseFeature::GROUP_FEATURES => 'Features',
+		BaseFeature::GROUP_PORTS => 'Ports',
+		BaseFeature::GROUP_SOCKETS => 'Sockets',
+		BaseFeature::GROUP_POWER => 'Power',
+		BaseFeature::GROUP_POWERCONNECTORS => 'Power connectors',
+		BaseFeature::GROUP_CODES => 'Codes',
+		BaseFeature::GROUP_SOFTWARE => 'Software',
 	];
 
-	const featureExplanations = [
+	public const FEATURE_EXPLANATIONS = [
 		'brand-manufacturer' => 'Only if different from brand',
 		'working' => 'Not tested yet? Do not set this feature at all!',
 		'data-erased' => 'Not erased yet? Do not set this feature at all!',
@@ -192,8 +192,8 @@ class FeaturePrinter
 	 */
 	public static function printableName(string $name): string
 	{
-		if (isset(self::features[$name])) {
-			return self::features[$name];
+		if (isset(self::FEATURES[$name])) {
+			return self::FEATURES[$name];
 		} else {
 			return $name;
 		}
@@ -201,9 +201,9 @@ class FeaturePrinter
 
 	public static function printableEnumValue(string $name, string $value): string
 	{
-		if (isset(self::featuresEnum[$name])) {
-			if (isset(self::featuresEnum[$name][$value])) {
-				return self::featuresEnum[$name][$value];
+		if (isset(self::FEATURES_ENUM[$name])) {
+			if (isset(self::FEATURES_ENUM[$name][$value])) {
+				return self::FEATURES_ENUM[$name][$value];
 			}
 		}
 		return $value;
@@ -367,7 +367,7 @@ class FeaturePrinter
 
 	public static function printableExplanation(BaseFeature $feature)
 	{
-		return self::featureExplanations[$feature->name] ?? null;
+		return self::FEATURE_EXPLANATIONS[$feature->name] ?? null;
 	}
 
 	/**
@@ -379,7 +379,7 @@ class FeaturePrinter
 	 */
 	public static function printableGroup(string $group): string
 	{
-		return self::groupTranslations[$group];
+		return self::GROUP_TRANSLATIONS[$group];
 	}
 
 	/**
@@ -425,7 +425,7 @@ class FeaturePrinter
 	{
 		$array = [];
 
-		foreach (BaseFeature::features as $name => $stuff) {
+		foreach (BaseFeature::FEATURES as $name => $stuff) {
 			$ntype = BaseFeature::getType($name);
 			switch ($ntype) {
 				case BaseFeature::ENUM:
@@ -446,7 +446,7 @@ class FeaturePrinter
 
 			$group = BaseFeature::getGroup($name);
 			// 'group' => FeaturePrinter::printableGroup($group)
-			$line = ['name' => $name, 'type' => $type, 'printableName' => self::features[$name]];
+			$line = ['name' => $name, 'type' => $type, 'printableName' => self::FEATURES[$name]];
 			if ($type === 'e') {
 				assert(isset($values));
 				foreach ($values as $enumValue => $true) {
@@ -461,6 +461,6 @@ class FeaturePrinter
 
 	public static function getAllExplanations(): array
 	{
-		return self::featureExplanations;
+		return self::FEATURE_EXPLANATIONS;
 	}
 }

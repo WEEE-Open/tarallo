@@ -7,7 +7,7 @@ class ProductCode
 	protected $brand;
 	protected $model;
 	protected $variant;
-	const DEFAULT_VARIANT = 'default';
+	public const DEFAULT_VARIANT = 'default';
 
 	/**
 	 * Product constructor.

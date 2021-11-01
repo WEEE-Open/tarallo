@@ -104,7 +104,7 @@ class Feature extends BaseFeature
 				}
 				break;
 			case BaseFeature::ENUM:
-				if (!isset(BaseFeature::features[$name][$value])) {
+				if (!isset(BaseFeature::FEATURES[$name][$value])) {
 					throw new \InvalidArgumentException(
 						'Feature value for ' . $name . ' is not among acceptable ones: ' . $value . ' given'
 					);
