@@ -692,7 +692,7 @@
 		} else {
 			base = 1000;
 		}
-		return number * (base *  * exp);
+		return number * (Math.pow(base, exp));
 	}
 
 	/**
