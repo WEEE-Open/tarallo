@@ -719,7 +719,7 @@ class Controller implements RequestHandlerInterface
 
 		if ($filter !== null) {
 			try {
-				$explosion = Validation::explodeFeatureValuePair($feature);
+				$explosion = Validation::explodeFeatureValuePair($filter);
 			} catch (\InvalidArgumentException $e) {
 				throw new SearchException(null, null, $e->getMessage(), 0, $e);
 			}
@@ -731,14 +731,14 @@ class Controller implements RequestHandlerInterface
 		}
 
 		try {
-			$item = new ItemCode($location);
+			$location = $location === null ? null : new ItemCode($location);
 		} catch (ValidationException $e) {
 			throw new NotFoundException($location);
 		}
 		$data = $db->statsDAO()->getCountByFeature(
 			$feature,
 			$filter,
-			$location === null ? null : $item,
+			$location,
 			$creation === null ? null : new \DateTime($creation),
 			$deleted,
 			$cutoff
