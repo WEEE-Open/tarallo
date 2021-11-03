@@ -735,7 +735,6 @@ class Controller implements RequestHandlerInterface
 		} catch (ValidationException $e) {
 			throw new NotFoundException($location);
 		}
-
 		$data = $db->statsDAO()->getCountByFeature(
 			$feature,
 			$filter,
@@ -871,7 +870,7 @@ class Controller implements RequestHandlerInterface
 		}
 		if ($function !== null) {
 			$queue[] = new TransactionWrapper();
-			$queue[] = 'WEEEOpen\\Tarallo\\APIv2\\' . $function;
+			$queue[] = $function;
 		}
 
 		$relayBuilder = new RelayBuilder();

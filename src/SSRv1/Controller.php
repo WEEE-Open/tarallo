@@ -1265,7 +1265,7 @@ class Controller implements RequestHandlerInterface
 		}
 		if ($function !== null) {
 			$queue[] = new TransactionWrapper();
-			$queue[] = 'WEEEOpen\\Tarallo\\SSRv1\\' . $function;
+			$queue[] = $function;
 		}
 		$queue[] = new TemplateRender();
 
