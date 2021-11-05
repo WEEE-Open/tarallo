@@ -1433,10 +1433,10 @@
 		let go;
 
 		if (isItem) {
-			go = confirm(`Delete item ${code}: are you sure ? Really ? REALLY ? `);
+			go = confirm("Delete item " + code + ": are you sure? Really? REALLY?");
 		} else {
 			let variantDisplayed = variantIsDefault ? '' : (' ' + variant);
-			go = confirm(`Delete product ${brand} ${model}${variantDisplayed}: are you sure ? Really ? REALLY ? `);
+			go = confirm("Delete product " +  brand + " " + model + variantDisplayed + ": are you sure? Really? REALLY?");
 		}
 
 		if (go) {
@@ -1492,7 +1492,7 @@
 
 		let method, uri;
 		method = 'DELETE';
-		uri = ` / v2 / items / ${encodeURIComponent(code)} / parent`;
+		uri = "/v2/items/" + encodeURIComponent(code) + "/parent";
 
 		try {
 			let response = await fetchWithTimeout(uri, {
