@@ -284,53 +284,57 @@ CREATE TABLE `BulkTable`
 
 CREATE TABLE `Donations`
 (
-    `Id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
-    `Location` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Donation` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `DonationName` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Location` VARCHAR(255) COLLATE utf8mb4_unicode_ci NULL,
     `Date` TIMESTAMP(6) NULL DEFAULT NULL,
-    `ReferenceUser` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `Note` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `Is_completed` BOOLEAN DEFAULT FALSE,
-    PRIMARY KEY (`Id`)
+    `ReferenceUser` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Note` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+    `IsCompleted` BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (`Donation`),
+    FOREIGN KEY (Location) REFERENCES `Item` (`Code`)
+        ON UPDATE CASCADE
+        ON DELETE NO ACTION,
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `PcDonations`
+CREATE TABLE `ItemDonation`
 (
-    `Id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
-    `Id_donation` BIGINT UNSIGNED NOT NULL,
-    `Code_pc` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    PRIMARY KEY (`Id`),
-    CONSTRAINT FOREIGN KEY (`Id_donation`) REFERENCES `Donations` (`Id`)
+    `Donation` BIGINT UNSIGNED NOT NULL,
+    `Code` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    PRIMARY KEY (`Donation`, `Code`),
+    CONSTRAINT FOREIGN KEY (`Donation`) REFERENCES `Donations` (`Donation`)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    CONSTRAINT FOREIGN KEY (`Code_pc`) REFERENCES `Item` (`Code`)
+    CONSTRAINT FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `CheckList`
+CREATE TABLE `CheckListElements`
 (
-    `Id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `CheckListElement` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `CheckListGroup` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     `Description` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
-    PRIMARY KEY (`Id`)
+    PRIMARY KEY (`CheckListElement`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
-CREATE TABLE `CheckListPcs`
+CREATE TABLE `CheckListDonation`
 (
-    `Id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
-    `Id_checklist` BIGINT UNSIGNED NOT NULL,
-    `Code_pc` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `Is_completed` BOOLEAN DEFAULT FALSE,
-    PRIMARY KEY (`Id`),
-    CONSTRAINT FOREIGN KEY (`Id_checklist`) REFERENCES `Checklist` (`Id`)
+    `CheckListElement` BIGINT UNSIGNED NOT NULL,
+    `Donation` BIGINT UNSIGNED NOT NULL,
+    `Code` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Completed` BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (`CheckListElement`, `Donation`, `Code`),
+    CONSTRAINT FOREIGN KEY (`CheckListElement`) REFERENCES `CheckListElements` (`CheckListElement`)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-        CONSTRAINT FOREIGN KEY (`Code_pc`) REFERENCES `Item` (`Code`)
+    CONSTRAINT FOREIGN KEY (`Donation`, `Code`) REFERENCES `ItemDonation` (`Donation`, `Code`)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 ) ENGINE = InnoDB
