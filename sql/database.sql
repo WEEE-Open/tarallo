@@ -282,6 +282,61 @@ CREATE TABLE `BulkTable`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
+CREATE TABLE `Donations`
+(
+    `Id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `Location` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Date` TIMESTAMP(6) NULL DEFAULT NULL,
+    `ReferenceUser` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Note` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Is_completed` BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (`Id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `PcDonations`
+(
+    `Id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `Id_donation` BIGINT UNSIGNED NOT NULL,
+    `Code_pc` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    PRIMARY KEY (`Id`),
+    CONSTRAINT FOREIGN KEY (`Id_donation`) REFERENCES `Donations` (`Id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT FOREIGN KEY (`Code_pc`) REFERENCES `Item` (`Code`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `CheckList`
+(
+    `Id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `Description` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+    PRIMARY KEY (`Id`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE `CheckListPcs`
+(
+    `Id` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `Id_checklist` BIGINT UNSIGNED NOT NULL,
+    `Code_pc` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Is_completed` BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (`Id`),
+    CONSTRAINT FOREIGN KEY (`Id_checklist`) REFERENCES `Checklist` (`Id`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+        CONSTRAINT FOREIGN KEY (`Code_pc`) REFERENCES `Item` (`Code`)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
 -- ProductFeature - ItemFeature View
 
 CREATE VIEW ProductItemFeature AS
