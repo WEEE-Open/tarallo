@@ -56,7 +56,7 @@ trait Routes
 				$r->get('/bulk/import/review/{id}', [User::AUTH_LEVEL_RO, [Controller::class, 'bulkImportReview']]);
 				$r->get('/bulk/import/new/{id}', [User::AUTH_LEVEL_RW, [Controller::class, 'bulkImportAdd']]);
 				$r->addGroup(
-					'/stats',
+					'/info/stats',
 					function (FastRoute\RouteCollector $r) {
 						$r->get('', [User::AUTH_LEVEL_RO, [Controller::class, 'getStats']]);
 						$r->get('/{which}', [User::AUTH_LEVEL_RO, [Controller::class, 'getStats']]);
@@ -64,7 +64,9 @@ trait Routes
 				);
 				$r->get('/info/locations', [User::AUTH_LEVEL_RO, [Controller::class, 'infoLocations']]);
 				$r->get('/info/todo', [User::AUTH_LEVEL_RO, [Controller::class, 'infoTodo']]);
-			},
+                $r->get('/donations', [User::AUTH_LEVEL_RW, [Controller::class, 'getDonations']]);
+            },
+
 			[
 				'cacheFile' => self::CACHEFILE,
 				'cacheDisabled' => !TARALLO_CACHE_ENABLED,

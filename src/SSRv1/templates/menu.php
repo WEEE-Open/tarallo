@@ -45,7 +45,8 @@ $hereSr = function ($page, $current) {
 				<div class="dropdown-menu" aria-labelledby="infoDropdown">
 					<a class="dropdown-item <?= $hereClass('info locations', $currentPage) ?>" href="/info/locations">Locations<?= $hereSr('info locations', $currentPage) ?></a>
 					<a class="dropdown-item <?= $hereClass('info todo', $currentPage) ?>" href="/info/todo">TODO<?= $hereSr('info todo', $currentPage) ?></a>
-				</div>
+                    <a class="dropdown-item <?= $hereClass('info stats', $currentPage) ?>" href="/info/stats">Stats<?= $hereSr('info stats', $currentPage) ?></a>
+                </div>
 			</li>
 			<li class="nav-item">
 				<a class="nav-link" data-toggle="collapse" href="#quickmove" role="button" aria-expanded="false" aria-controls="quickmove" id="quickmovebutton">Move</a>
@@ -61,7 +62,7 @@ $hereSr = function ($page, $current) {
 				</div>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link <?= $hereClass('stats', $currentPage) ?>" href="/stats">Stats<?= $hereSr('stats', $currentPage) ?></a>
+				<a class="nav-link <?= $hereClass('donations', $currentPage) ?>" href="/donations">Donations<?= $hereSr('donations', $currentPage) ?></a>
 			</li>
 			<li class="nav-item">
 				<a class="nav-link <?= $hereClass('options', $currentPage) ?>" href="/options">Options<?= $hereSr('options', $currentPage) ?></a>

@@ -1321,4 +1321,22 @@ class Controller implements RequestHandlerInterface
 
 		return $handler->handle($request);
 	}
+
+    public static function getDonations(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        /** @var Database $db */
+        $db = $request->getAttribute('Database');
+
+
+
+        $templateParameters = [
+
+        ];
+        $request = $request->withAttribute('Template', 'donations')->withAttribute(
+            'TemplateParameters',
+            $templateParameters
+        );
+
+        return $handler->handle($request);
+    }
 }
