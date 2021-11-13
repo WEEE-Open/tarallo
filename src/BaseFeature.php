@@ -288,7 +288,7 @@ class BaseFeature
 		'check' => true,
 	];
 
-	public static function featuresLastModified(): int
+	public static function fileLastModified(): int
 	{
 		return filemtime(__FILE__);
 	}

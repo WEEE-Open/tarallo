@@ -184,6 +184,11 @@ class FeaturePrinter
 		'variant' => 'Board revisions or similar if relevant, write "' . ProductCode::DEFAULT_VARIANT . '" if not or unknown'
 	];
 
+	public static function fileLastModified(): int
+	{
+		return filemtime(__FILE__);
+	}
+
 	/**
 	 * Get translated/printable name of a feature
 	 *

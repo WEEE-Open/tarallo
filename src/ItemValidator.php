@@ -488,26 +488,27 @@ class ItemValidator
 	 */
 	public static function getItemDefaultFeatures(string $type): array
 	{
+		// Brand, Model, Variant, Type are already there by default for every item
 		switch ($type) {
 			case 'case':
 			case 'smartphone-tablet':
 				return [
 					'cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code',
-					'brand', 'model', 'working', 'sn', 'arrival-batch', 'owner', 'notes',
+					'working', 'sn', 'arrival-batch', 'owner', 'notes',
 				];
 			case 'monitor':
 				return [
 					'cib-qr', 'cib', 'cib-old', 'other-code',
-					'brand', 'model', 'working', 'sn', 'arrival-batch', 'owner', 'notes',
+					'working', 'sn', 'arrival-batch', 'owner', 'notes',
 				];
 			case 'cpu':
 				return [
-					'brand', 'model', 'working', 'owner'
+					'working', 'owner'
 				];
 			case 'keyboard':
 			case 'mouse':
 				return [
-					'brand', 'model', 'wireless-receiver', 'working', 'sn', 'owner'
+					'wireless-receiver', 'working', 'sn', 'owner'
 				];
 			case 'graphics-card':
 			case 'audio-card':
@@ -516,7 +517,7 @@ class ItemValidator
 			case 'tv-card':
 			case 'storage-card':
 				return [
-					'brand', 'model', 'pci-low-profile', 'working', 'sn', 'owner',
+					'pci-low-profile', 'working', 'sn', 'owner',
 				];
 			default: // Includes all these cases
 //			case 'ram':
@@ -527,7 +528,7 @@ class ItemValidator
 //			case 'network-switch':
 //			case 'network-hub':
 				return [
-					'brand', 'model', 'working', 'sn', 'owner'
+					'working', 'sn', 'owner'
 				];
 			case 'motherboard':
 			case 'ethernet-card':
@@ -535,12 +536,12 @@ class ItemValidator
 			case 'wifi-card':
 			case 'modem-router':
 				return [
-					'brand', 'model', 'working', 'mac', 'sn', 'owner', 'notes'
+					'working', 'mac', 'sn', 'owner', 'notes'
 				];
 			case 'hdd':
 			case 'ssd':
 				return [
-					'brand', 'model', 'working', 'sn', 'wwn',
+					'working', 'sn', 'wwn',
 					'data-erased', 'surface-scan', 'smart-data', 'software', 'owner',
 				];
 			case 'ports-bracket':
@@ -551,7 +552,7 @@ class ItemValidator
 		}
 	}
 
-	public static function defaultFeaturesLastModified(): int
+	public static function fileLastModified(): int
 	{
 		return filemtime(__FILE__);
 	}
