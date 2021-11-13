@@ -335,4 +335,4 @@ FROM ProductItemFeature;
 
 -- Do not combine these lines, they're parsed by update.php... WITH A REGEX!
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 19);
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 27);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 28);
