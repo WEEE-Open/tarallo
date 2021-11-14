@@ -1028,7 +1028,7 @@ WHERE `Key` != 'DataVersion' AND
 	public function getTotalAndAverageCapacity(array $hddsOrRams, string $propertyToSum): array
 	{
 		$sumOfCapacity = 0;
-		$numberOfItems = 0;
+		$numberOfItems = 1;
 		foreach ($hddsOrRams as $item) {
 			// se non possiede , l'oggetto, la proprietà quantity oppure la proprietà 'capacity-decibyte' o 'capacity-byte' cade in errore
 			if (!array_key_exists('Quantity', $item) or !array_key_exists($propertyToSum, $item)) {
