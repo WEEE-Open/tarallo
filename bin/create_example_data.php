@@ -501,6 +501,13 @@ $multijson = [
 	'That big and heavy case' => json_decode('[{"type":"I","features":{"brand":"LeaderTech","model":"LT-9001","variant":"default","type":"case","working":"yes"},"contents":[{"features":{"brand":"Foo Bar Industrial Motherboards","model":"K987AB","variant":"v1.1","mac":"00:f0:00:b4:12:12","sn":"FBN347325VH29030","type":"motherboard","working":"yes"},"contents":[{"code":"C251","features":{"brand":"Intel","model":"Core 2 Quad Q4000","variant":"default","type":"cpu","working":"yes"}},{"features":{"brand":"Samsung","model":"S667ABC1024","sn":"247823652378","variant":"v1","type":"ram","working":"yes"}}]}]},{"type":"P","brand":"Samsung","model":"S667ABC1024","variant":"v1","features":{"capacity-byte":1073741824,"color":"green","frequency-hertz":667000000,"ram-ecc":"no","ram-form-factor":"dimm","ram-timings":"8-8-8-24 as DDR2-667","ram-type":"ddr2","type":"ram"}},{"type":"P","brand":"Intel","model":"Core 2 Quad Q4000","variant":"default","features":{"core-n":4,"cpu-socket":"lga775","frequency-hertz":3200000000,"isa":"x86-64","thread-n":4,"type":"cpu"}},{"type":"P","brand":"Foo Bar Industrial Motherboards","model":"K987AB","variant":"v1.1","features":{"ethernet-ports-1000m-n":1,"ide-ports-n":1,"mini-jack-ports-n":3,"motherboard-form-factor":"atx","parallel-ports-n":1,"pci-sockets-n":4,"pcie-sockets-n":1,"ps2-ports-n":2,"ram-form-factor":"dimm","ram-type":"ddr2","sata-ports-n":4,"serial-ports-n":1,"type":"motherboard","usb-ports-n":5}}]', true),
 	'Intentionally malformed data' => json_decode('[{"type":"I","features":{"model":"PessimPlex 360","type":"case","working":"yes"},"contents":[{"features":{"brand":"Foo Bar Industrial Motherboards","variant":"v1.1","mac":"00:f0:00:b4:99:99","type":"motherboard","working":"yes"},"contents":[{"features":{"working":"yes","note":"Surprise item with no data, but we know it works, because magic!"}}]}]},{"type":"P","brand":"Foo","variant":"default","features":{"color":"green","type":"ram"}},{"type":"P","brand":"Foo","features":{"color":"green","type":"ram"}},{"type":"P","features":{"color":"green","type":"ram"}},{"type":"P","features":{"color":"green"}}]', true),
 ];
+
+
+for($i = 0; $i < 50; $i++)
+{
+    $db->donationsDAO()->newDonation('donazione ' . $i,null,'Polito','donazione test' . $i , ($i%2 == 0),'Bryan');
+}
+
 foreach($multijson as $name => $json) {
 	foreach($json as $item){
 		$type = $item['type'];
