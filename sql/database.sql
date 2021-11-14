@@ -294,7 +294,7 @@ CREATE TABLE `Donations`
     PRIMARY KEY (`Donation`),
     FOREIGN KEY (Location) REFERENCES `Item` (`Code`)
         ON UPDATE CASCADE
-        ON DELETE NO ACTION,
+        ON DELETE NO ACTION
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
