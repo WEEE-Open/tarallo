@@ -1327,11 +1327,10 @@ class Controller implements RequestHandlerInterface
         /** @var Database $db */
         $db = $request->getAttribute('Database');
 
-
-
         $templateParameters = [
-
+            'donations' => $db->donationsDAO()->getAllDonations()
         ];
+
         $request = $request->withAttribute('Template', 'donations')->withAttribute(
             'TemplateParameters',
             $templateParameters
