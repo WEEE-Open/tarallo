@@ -11,7 +11,7 @@ class DonationsDAO extends DAO
      */
     public function getAllDonations(): array
     {
-        $query = "SELECT * FROM Donations";
+        $query = "SELECT * FROM Donations ORDER BY IsCompleted , Date";
         $statement = $this->getPDO()->prepare($query);
         $donations = [];
         try
