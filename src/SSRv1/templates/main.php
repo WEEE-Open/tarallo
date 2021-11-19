@@ -59,7 +59,7 @@ $tooltips = $tooltips ?? false;
 	<?=$this->section('content')?>
 </section>
 <?php if (isset($bootstrapTable) && $bootstrapTable) : ?>
-	<script>$(document.getElementsByTagName("table")).bootstrapTable();</script>
+<script>$(document.getElementsByTagName("table")).bootstrapTable({classes: 'table'});</script>
 <?php endif; ?>
 <?php if ($tooltips) :
 	?><script>tippy('[data-tippy-content]')</script><?php

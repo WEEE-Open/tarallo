@@ -67,7 +67,7 @@ class ItemValidator
 		}
 
 		$shouldBeInMobo = self::shouldBeInMotherboard($type);
-		if ($parentType === 'case' && $shouldBeInMobo) {
+		if (self::isCase($parentType) && $shouldBeInMobo) {
 			$content = $container->getContent();
 			$mobo = self::findByType($content, 'motherboard');
 			if ($mobo !== null) {
@@ -155,6 +155,7 @@ class ItemValidator
 
 		switch ($type) {
 			case 'case':
+			case 'smartphone-tablet':
 				self::validateFeaturesCase($item);
 				break;
 			case 'monitor':
@@ -203,18 +204,18 @@ class ItemValidator
 			return;
 		}
 
-		if ($type === 'case' && $containerType !== 'location') {
+		if (self::isCase($type) && $containerType !== 'location') {
 			throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Cases should be inside a location');
 		} else {
 			if (self::shouldBeInMotherboard($type)) {
-				if ($containerType !== 'case' && $containerType !== 'location' && $containerType !== 'motherboard') {
+				if (!self::isCase($containerType) && $containerType !== 'location' && $containerType !== 'motherboard') {
 					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'RAMs, CPUs and expansion cards cards should be inside a case, location or motherboard');
 				}
 			} else {
 				if ($type === 'location' && $containerType !== 'location') {
 					throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Locations should be inside other locations or nothing');
 				} else {
-					if ($containerType !== 'case' && $containerType !== 'location') {
+					if (!self::isCase($containerType) && $containerType !== 'location') {
 						throw new ItemNestingException($item->peekCode(), $container->peekCode(), null, 'Normal items can be placed only inside cases and locations');
 					}
 				}
@@ -251,7 +252,7 @@ class ItemValidator
 			}
 		}
 
-		if ($containerType === 'case' && $container->getFeatureValue('motherboard-form-factor') === 'proprietary-laptop') {
+		if (self::isCase($containerType) && $container->getFeatureValue('motherboard-form-factor') === 'proprietary-laptop') {
 			if ($type === 'psu') {
 				$ff = $item->getFeatureValue('psu-form-factor');
 				if ($ff !== null && $ff !== 'proprietary') {
@@ -297,6 +298,11 @@ class ItemValidator
 	private static function shouldBeInMotherboard(string $type): bool
 	{
 		return $type === 'cpu' || $type === 'ram' || self::isExpansionCard($type);
+	}
+
+	private static function isCase(string $type): bool
+	{
+		return $type === 'case' || $type === 'smartphone-tablet';
 	}
 
 	private static function isExpansionCard(string $type): bool
@@ -363,6 +369,11 @@ class ItemValidator
 				return [
 					'usb-ports-n', 'firewire-ports-n', 'mini-jack-ports-n', 'motherboard-form-factor',
 					'psu-form-factor', 'power-connector', 'psu-volt', 'psu-ampere', 'color'
+				];
+			case 'smartphone-tablet':
+				return [
+					'usb-ports-n', 'usb-c-ports-n', 'mini-jack-ports-n', 'power-connector', 'psu-volt', 'psu-ampere',
+					'diagonal-inch', 'color'
 				];
 			case 'motherboard':
 				return [
@@ -477,21 +488,27 @@ class ItemValidator
 	 */
 	public static function getItemDefaultFeatures(string $type): array
 	{
+		// Brand, Model, Variant, Type are already there by default for every item
 		switch ($type) {
 			case 'case':
-			case 'monitor':
+			case 'smartphone-tablet':
 				return [
 					'cib-qr', 'cib', 'cib-old', 'other-code', 'os-license-version', 'os-license-code',
-					'brand', 'model', 'working', 'sn', 'arrival-batch', 'owner', 'notes',
+					'working', 'sn', 'arrival-batch', 'owner', 'notes',
+				];
+			case 'monitor':
+				return [
+					'cib-qr', 'cib', 'cib-old', 'other-code',
+					'working', 'sn', 'arrival-batch', 'owner', 'notes',
 				];
 			case 'cpu':
 				return [
-					'brand', 'model', 'working', 'owner'
+					'working', 'owner'
 				];
 			case 'keyboard':
 			case 'mouse':
 				return [
-					'brand', 'model', 'wireless-receiver', 'working', 'sn', 'owner'
+					'wireless-receiver', 'working', 'sn', 'owner'
 				];
 			case 'graphics-card':
 			case 'audio-card':
@@ -500,7 +517,7 @@ class ItemValidator
 			case 'tv-card':
 			case 'storage-card':
 				return [
-					'brand', 'model', 'pci-low-profile', 'working', 'sn', 'owner',
+					'pci-low-profile', 'working', 'sn', 'owner',
 				];
 			default: // Includes all these cases
 //			case 'ram':
@@ -511,7 +528,7 @@ class ItemValidator
 //			case 'network-switch':
 //			case 'network-hub':
 				return [
-					'brand', 'model', 'working', 'sn', 'owner'
+					'working', 'sn', 'owner'
 				];
 			case 'motherboard':
 			case 'ethernet-card':
@@ -519,12 +536,12 @@ class ItemValidator
 			case 'wifi-card':
 			case 'modem-router':
 				return [
-					'brand', 'model', 'working', 'mac', 'sn', 'owner', 'notes'
+					'working', 'mac', 'sn', 'owner', 'notes'
 				];
 			case 'hdd':
 			case 'ssd':
 				return [
-					'brand', 'model', 'working', 'sn', 'wwn',
+					'working', 'sn', 'wwn',
 					'data-erased', 'surface-scan', 'smart-data', 'software', 'owner',
 				];
 			case 'ports-bracket':
@@ -535,7 +552,7 @@ class ItemValidator
 		}
 	}
 
-	public static function defaultFeaturesLastModified(): int
+	public static function fileLastModified(): int
 	{
 		return filemtime(__FILE__);
 	}
@@ -546,7 +563,7 @@ class ItemValidator
 		$type = $item->getFeatureValue('type');
 
 		// Move laptop usb ports from the case to the motherboard
-		if ($type === 'case') {
+		if (self::isCase($type)) {
 			$ff = $item->getFeatureValue('motherboard-form-factor');
 			if ($ff === 'proprietary-laptop') {
 				if ($item->getFeatureValue('usb-ports-n') !== null) {

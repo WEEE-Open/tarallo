@@ -13,17 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php: ['7.3', '8.0', 'latest']
+        php: ['latest']
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: Cache Composer dependencies
-        uses: actions/cache@v2
-        with:
-          path: /tmp/composer-cache
-          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+# Doesn't work in PRs
+#      - name: Cache Composer dependencies
+#        uses: actions/cache@v2
+#        with:
+#          path: /tmp/composer-cache
+#          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
 
       - name: Install dependencies
         uses: php-actions/composer@v6
