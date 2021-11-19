@@ -44,9 +44,9 @@ $this->layout('main', ['title' => 'Donations', 'user' => $user]);
 						<td class="col text-center">
 							<?php 
 								if($donation["IsCompleted"])
-									echo "&#x2713";
+									echo '<i class="fas fa-check"></i>';
 								else
-									echo "&#x2717";
+									echo '<i class="fas fa-times"></i>';
 							?>
 						</td>
 						<td class="col">
