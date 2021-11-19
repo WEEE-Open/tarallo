@@ -804,6 +804,10 @@ END;"
 				case 26:
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('smart-data', 'sus')");
 					break;
+				case 27:
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('type', 'smartphone-tablet')");
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('power-connector', 'usb-c')");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

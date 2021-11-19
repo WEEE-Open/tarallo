@@ -1151,10 +1151,11 @@ class Controller implements RequestHandlerInterface
 		RequestHandlerInterface $handler
 	): ResponseInterface {
 		// They aren't changing >1 time per second, so this should be stable enough for the ETag header...
-		$lastmod1 = ItemValidator::defaultFeaturesLastModified();
-		$lastmod2 = BaseFeature::featuresLastModified();
+		$lastmod1 = ItemValidator::fileLastModified();
+		$lastmod2 = BaseFeature::fileLastModified();
+		$lastmod3 = FeaturePrinter::fileLastModified();
 		$language = 'en';
-		$etag = "$lastmod1$lastmod2$language";
+		$etag = "$lastmod1$lastmod2$lastmod3$language";
 
 		$responseHeaders = [
 			'Etag' => $etag,

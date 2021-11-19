@@ -249,7 +249,7 @@ class AuthManager implements MiddlewareInterface
 
 					$session = new SessionSSO();
 					$session->uid = 'dev.user';
-					$session->cn = 'Developement User';
+					$session->cn = 'Development User';
 					$session->idToken = 'F00B4R';
 					$session->idTokenValidityTime = 60 * 60 * 24;
 					$session->idTokenExpiry = time() + $session->idTokenValidityTime;

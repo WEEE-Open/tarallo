@@ -75,6 +75,7 @@ class ItemPrefixer
 			case 'modem-router':
 				return 'NET';
 			case 'case':
+			case 'smartphone-tablet':
 				return '';
 			default:
 				throw new ItemPrefixerException(null, 'No prefix found for type ' . $features['type']);

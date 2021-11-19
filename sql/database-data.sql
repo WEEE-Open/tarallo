@@ -164,6 +164,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('type', 'adapter'), -- Adapter --
 	('type', 'usbhub'), -- USB hub --
 	('type', 'tv-card'), -- TV tuner card --
+	('type', 'smartphone-tablet'), -- Smartphone/tablet --
 	('working', 'no'), -- No --
 	('working', 'yes'), -- Yes --
 	('working', 'maybe'), -- Sometimes --
@@ -291,6 +292,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('power-connector', 'barrel'), -- Barrel --
 	('power-connector', 'miniusb'), -- Mini USB --
 	('power-connector', 'microusb'), -- Micro USB --
+	('power-connector', 'usb-c'), -- Type C USB --
 	('power-connector', 'proprietary'), -- Proprietary --
 	('power-connector', 'da-2'), -- Dell DA-2 --
 	('psu-connector-motherboard', 'proprietary'), -- Proprietary --
