@@ -6,7 +6,7 @@ $this->layout('main', ['title' => 'Donations', 'user' => $user]);
     <div class="container">
 		<div class="row">
         	<h2 class="col-8">Donations</h2>
-				<input class="col btn btn-secondary" type="button" value="New">
+				<input class="col btn btn-outline-primary" type="button" value="New">
 		</div>
 		<br>
 		<table class="table table-striped table-borderless">
