@@ -1339,4 +1339,34 @@ class Controller implements RequestHandlerInterface
 
         return $handler->handle($request);
     }
+
+    public static function getDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        /** @var Database $db */
+        $db = $request->getAttribute('Database');
+        $parameters = $request->getAttribute('parameters', []);
+
+        $id = Validation::validateOptionalInt($parameters, 'id', null);
+
+        $templateParameters = [
+            //'donation' => $db->donationsDAO()->getDonation()
+        ];
+
+        $request = $request->withAttribute('Template', 'donation')->withAttribute(
+            'TemplateParameters',
+            $templateParameters
+        );
+
+        return $handler->handle($request);
+    }
+
+    public static function newDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        /** @var Database $db */
+        $db = $request->getAttribute('Database');
+
+        $request = $request->withAttribute('Template', 'donation');
+
+        return $handler->handle($request);
+    }
 }
