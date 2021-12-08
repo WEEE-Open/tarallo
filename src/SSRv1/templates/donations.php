@@ -11,19 +11,19 @@ $this->layout('main', ['title' => 'Donations', 'user' => $user]);
 		<br>
 		<table class="table table-striped table-borderless">
 			<thead class="thead-dark">
-				<tr>
-					<th class="col-4">Donation Name</th>
-					<th class="col">Donation Date</th>
-					<th class="col">Completed</th>
-					<th class="col"></th>
+				<tr class="text-center">
+					<th>Donation Name</th>
+					<th>Donation Date</th>
+					<th>Completed</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>
 				<?php foreach($donations as $donation) : ?>
 					<tr> 
-						<td class="col-4"><a href="/donation/<?=$donation["Donation"]?>"><?=ucfirst($donation["DonationName"])?></a></td>
-						<td class="col"><?=$donation["Date"]?></td>
-						<td class="col text-center">
+						<td><a href="/donation/<?=$donation["Donation"]?>"><?=ucfirst($donation["DonationName"])?></a></td>
+						<td><?=$donation["Date"]?></td>
+						<td class=" text-center">
 							<?php 
 								if($donation["IsCompleted"])
 									echo '<i class="fas fa-check"></i>';
@@ -31,7 +31,7 @@ $this->layout('main', ['title' => 'Donations', 'user' => $user]);
 									echo '<i class="fas fa-times"></i>';
 							?>
 						</td>
-						<td class="col">
+						<td>
 							<button class="btn btn-danger ml-2 delete" data-name="brand" tabindex="-1">
 								<i class="fa fa-trash" role="img" aria-label="Delete"></i>
 							</button>
