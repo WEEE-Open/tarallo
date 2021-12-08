@@ -65,6 +65,8 @@ trait Routes
 				$r->get('/info/locations', [User::AUTH_LEVEL_RO, [Controller::class, 'infoLocations']]);
 				$r->get('/info/todo', [User::AUTH_LEVEL_RO, [Controller::class, 'infoTodo']]);
                 $r->get('/donations', [User::AUTH_LEVEL_RW, [Controller::class, 'getDonations']]);
+                $r->get('/donation/new', [User::AUTH_LEVEL_RW, [Controller::class, 'newDonation']]);
+                $r->get('/donation/{id}', [User::AUTH_LEVEL_RW, [Controller::class, 'getDonation']]);
             },
 
 			[
