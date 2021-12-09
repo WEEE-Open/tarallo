@@ -68,10 +68,10 @@ while($retry) {
 $end = time() - $start;
 
 if($successCounter >= 2) {
-	echo "Database up in $end seconds, at last";
+	echo "Database up in $end seconds, at last" . PHP_EOL;
 	exit(0);
 } else {
-	echo "Database did not start";
+	echo "Database did not start" . PHP_EOL;
 	exit(1);
 }
 
