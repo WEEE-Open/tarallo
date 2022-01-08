@@ -808,6 +808,18 @@ END;"
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('type', 'smartphone-tablet')");
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('power-connector', 'usb-c')");
 					break;
+				case 28:
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('type', 'projector')");
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('todo', 'repair')");
+					$this->exec("INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES ('video-api', 'software', 0)");
+					$this->exec("SET FOREIGN_KEY_CHECKS = 0;"); // See case 5 for an explanation
+					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = 'add-parts' WHERE `ValueEnum` = 'container' AND `Feature` = 'todo'");
+					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = 'add-parts' WHERE `ValueEnum` = 'replace-temp-parts' AND `Feature` = 'todo'");
+					$this->exec("UPDATE `FeatureEnum` SET `ValueEnum` = 'test-and-inventory' WHERE `ValueEnum` = 'finish-testing' AND `Feature` = 'todo'");
+					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = 'test-and-inventory' WHERE `ValueEnum` = 'finish-testing' AND `Feature` = 'todo'");
+					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = 'test-and-inventory' WHERE `ValueEnum` = 'finish-inventory' AND `Feature` = 'todo'");
+					$this->exec("SET FOREIGN_KEY_CHECKS = 1;");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

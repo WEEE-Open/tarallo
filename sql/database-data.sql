@@ -68,6 +68,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('sas-sff-8087-ports-n', 'ports', 1), -- SAS (SFF-8087) --
 	('sas-sff-8088-ports-n', 'ports', 1), -- SAS (SFF-8088) --
 	('software', 'software', 0), -- Software (installed) --
+	('video-api', 'software', 0), -- Video APIs --
 	('usb-ports-n', 'ports', 1), -- USB --
 	('usb-c-ports-n', 'ports', 1), -- USB-C --
 	('usb-header-n', 'ports', 1), -- USB (internal header) --
@@ -160,10 +161,11 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('type', 'zip-drive'), -- ZIP drive --
 	('type', 'printer'), -- Printer --
 	('type', 'scanner'), -- Scanner --
-	('type', 'inventoried-object'), -- Other (with invetory sticker) --
+	('type', 'inventoried-object'), -- Other (with inventory sticker) --
 	('type', 'adapter'), -- Adapter --
 	('type', 'usbhub'), -- USB hub --
 	('type', 'tv-card'), -- TV tuner card --
+	('type', 'projector'), -- Projector --
 	('type', 'smartphone-tablet'), -- Smartphone/tablet --
 	('working', 'no'), -- No --
 	('working', 'yes'), -- Yes --
@@ -319,19 +321,17 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('check', 'wrong-data'), -- Wrong/conflicting data --
 	('check', 'wrong-content'), -- Wrong items inside --
 	('todo', 'transplant'), -- Transplant into another case --
-	('todo', 'container'), -- Container for transplant --
 	('todo', 'install-os'), -- Install OS --
+	('todo', 'repair'), -- Repair --
 	('todo', 'replace-capacitors'), -- Replace blown capacitors --
-	('todo', 'replace-temp-parts'), -- Replace temporary parts --
-	('todo', 'remove-from-computer'), -- Remove from computer --
+	('todo', 'remove-from-computer'), -- Remove from machine --
 	('todo', 'replace-broken-parts'), -- Replace parts marked as not working --
-	('todo', 'replace-elec-components'), -- Replace faulty electronic components --
+	('todo', 'replace-elec-components'), -- Replace faulty electronics on PCB --
 	('todo', 'add-parts'), -- Add missing parts --
 	('todo', 'salvage-parts'), -- Salvage parts (dismantle) --
 	('todo', 'thermal-paste'), -- Replace thermal paste --
 	('todo', 'replace-cmos-battery'), -- Replace CMOS battery --
-	('todo', 'finish-testing'), -- Finish testing --
-	('todo', 'finish-inventory'), -- Finish inventory of parts --
+	('todo', 'test-and-inventory'), -- Test and update inventory --
 	('todo', 'see-notes'), -- See notes --
 	('ram-ecc', 'no'), -- No --
 	('ram-ecc', 'yes'), -- Yes --
