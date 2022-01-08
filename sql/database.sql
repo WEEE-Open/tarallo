@@ -333,6 +333,6 @@ SELECT Code,
     COALESCE(ValueDouble_Item, ValueDouble_Product) AS ValueDouble
 FROM ProductItemFeature;
 
--- Do not combine these lines, they're parsed by update.php... WITH A REGEX!
+-- Do not combine these lines, they're parsed by update-db... WITH A REGEX!
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 19);
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 29);
