@@ -188,4 +188,14 @@ class Database
 		$pdo->rollBack();
 		// Can return false, but what can we do? Try to rollback again, and again, over and over again, forever until the end of times?
 	}
+
+	/**
+	 * Check if APCu is enabled.
+	 *
+	 * @return bool Enabled or disabled
+	 */
+	public static function hasApcu(): bool
+	{
+		return function_exists('apcu_enabled') && apcu_enabled();
+	}
 }

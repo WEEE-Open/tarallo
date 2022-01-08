@@ -388,6 +388,7 @@ class Controller implements RequestHandlerInterface
 			'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
 			'newToken' => $token,
 			'defaultLocations' => $db->statsDAO()->getDefaultLocations(),
+			'apcuEnabled' => $db->hasApcu(),
 			'error' => $error
 			]
 		);
