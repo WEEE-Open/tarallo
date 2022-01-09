@@ -357,6 +357,12 @@ class Controller implements RequestHandlerInterface
 
 		$error = null;
 		$token = null;
+		$editable = [
+			'DefaultHddLocation',
+			'DefaultCpuLocation',
+			'DefaultTodosLocation',
+		];
+
 		if ($body !== null && count($body) > 0) {
 			try {
 				if (isset($body['delete']) && isset($body['token'])) {
@@ -371,7 +377,10 @@ class Controller implements RequestHandlerInterface
 					$db->sessionDAO()->setDataForToken($token, $data);
 				} elseif (isset($body['location']) && isset($body['default'])) {
 					if ($user->getLevel() === $user::AUTH_LEVEL_ADMIN) {
-						$db->statsDAO()->setDefaultLocation($body['default'], $body['location']);
+						if (!in_array($body['default'], $editable, true)) {
+							throw new AuthorizationException('Not even admins can edit that');
+						}
+						$db->statsDAO()->setOptionValue($body['default'], $body['location']);
 					} else {
 						throw new AuthorizationException('Only admins can do that');
 					}
@@ -381,13 +390,18 @@ class Controller implements RequestHandlerInterface
 			}
 		}
 
+		$optionsForTemplate = [];
+		foreach ($editable as $optionKey) {
+			$optionsForTemplate[$optionKey] = $db->statsDAO()->getOptionValue($optionKey);
+		}
+
 		$request = $request->withAttribute('Template', 'options');
 		$request = $request->withAttribute(
 			'TemplateParameters',
 			[
 			'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
 			'newToken' => $token,
-			'defaultLocations' => $db->statsDAO()->getDefaultLocations(),
+			'defaultLocations' => $optionsForTemplate,
 			'apcuEnabled' => $db->hasApcu(),
 			'error' => $error
 			]
@@ -400,13 +414,13 @@ class Controller implements RequestHandlerInterface
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
-		$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultHddLocation'] ?? null;
+		$locationDefault = $db->optionDAO()->getOptionValue('DefaultHddLocation');
 		$location = Validation::validateOptionalString($request->getQueryParams(), 'where', $locationDefault, null);
 		$location = $location === null ? null : new ItemCode($location);
 
 		$templateParameters = [
-			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
-			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
+			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation'),
+			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation'),
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
 				false,
@@ -472,7 +486,7 @@ class Controller implements RequestHandlerInterface
 				break;
 
 			case 'cases':
-				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultCaseLocation'] ?? null;
+				$locationDefault = $db->optionDAO()->getOptionValue('DefaultCaseLocation');
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
@@ -508,7 +522,7 @@ class Controller implements RequestHandlerInterface
 				break;
 
 			case 'rams':
-				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultRamLocation'] ?? null;
+				$locationDefault = $db->optionDAO()->getOptionValue('DefaultRamLocation');
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
@@ -567,7 +581,7 @@ class Controller implements RequestHandlerInterface
 				);
 				break;
 			case 'cpus':
-				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultCpuLocation'] ?? null;
+				$locationDefault = $db->optionDAO()->getOptionValue('DefaultCpuLocation');
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
@@ -593,7 +607,7 @@ class Controller implements RequestHandlerInterface
 				);
 				break;
 			case 'hdds':
-				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultHddLocation'] ?? null;
+				$locationDefault = $db->optionDAO()->getOptionValue('DefaultHddLocation');
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
@@ -676,7 +690,7 @@ class Controller implements RequestHandlerInterface
 				);
 				break;
 			case 'cool':
-				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultCpuLocation'] ?? null;
+				$locationDefault = $db->optionDAO()->getOptionValue('DefaultCpuLocation');
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$location = $location === null ? null : new ItemCode($location);
 				$request = $request->withAttribute('Template', 'stats::cool')->withAttribute(
@@ -1299,13 +1313,13 @@ class Controller implements RequestHandlerInterface
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
-		$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultHddLocation'] ?? null;
+		$locationDefault = $db->statsDAO()->getOptionValue('DefaultHddLocation');
 		$location = Validation::validateOptionalString($request->getQueryParams(), 'where', $locationDefault, null);
 		$location = $location === null ? null : new ItemCode($location);
 
 		$templateParameters = [
-			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
-			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
+			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->statsDAO()->getOptionValue('DefaultTodosLocation'),
+			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->statsDAO()->getOptionValue('DefaultTodosLocation'),
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
 				false,

@@ -15,6 +15,7 @@ class Database
 	private $treeDAO = null;
 	private $productDAO = null;
 	private $bulkDAO = null;
+	private $optionDAO = null;
 	private $username;
 	private $password;
 	private $dsn;
@@ -139,6 +140,15 @@ class Database
 		}
 
 		return $this->bulkDAO;
+	}
+
+	public function optionDAO(): OptionDAO
+	{
+		if ($this->optionDAO === null) {
+			$this->optionDAO = new OptionDAO($this, $this->callback);
+		}
+
+		return $this->optionDAO;
 	}
 
 	public function updater()

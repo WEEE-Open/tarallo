@@ -78,6 +78,7 @@ abstract class DatabaseTest extends TestCase {
 		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Product; SET FOREIGN_KEY_CHECKS = 1;");
 		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE SearchResult; SET FOREIGN_KEY_CHECKS = 1;");
 		$pdo->exec(/** @lang MariaDB */ "SET FOREIGN_KEY_CHECKS = 0; TRUNCATE TABLE Search; SET FOREIGN_KEY_CHECKS = 1;");
+		$pdo->exec(/** @lang MariaDB */ "DELETE FROM Configuration WHERE `Key` NOT IN ('SchemaVersion', 'DataVersion');");
 		$pdo->exec(/** @lang MariaDB */ "INSERT INTO Prefixes(Prefix, `Integer`) VALUES ('M', 10), ('T', 75), ('', 60);");
 	}
 
