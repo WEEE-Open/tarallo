@@ -22,7 +22,7 @@ use WEEEOpen\Tarallo\HTTP\TransactionWrapper;
 use WEEEOpen\Tarallo\HTTP\Validation;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemIncomplete;
-use WEEEOpen\Tarallo\ItemValidator;
+use WEEEOpen\Tarallo\Normalization;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\ProductIncomplete;
@@ -1152,7 +1152,7 @@ class Controller implements RequestHandlerInterface
 		RequestHandlerInterface $handler
 	): ResponseInterface {
 		// They aren't changing >1 time per second, so this should be stable enough for the ETag header...
-		$lastmod1 = ItemValidator::fileLastModified();
+		$lastmod1 = Normalization::fileLastModified();
 		$lastmod2 = BaseFeature::fileLastModified();
 		$lastmod3 = FeaturePrinter::fileLastModified();
 		$language = 'en';
@@ -1172,12 +1172,12 @@ class Controller implements RequestHandlerInterface
 
 		$defaults = [];
 		foreach (Feature::FEATURES['type'] as $type => $useless) {
-			$defaults[$type] = ItemValidator::getItemDefaultFeatures($type);
+			$defaults[$type] = Normalization::getItemDefaultFeatures($type);
 		}
 
 		$defaults2 = [];
 		foreach (Feature::FEATURES['type'] as $type => $useless) {
-			$defaults2[$type] = ItemValidator::getProductDefaultFeatures($type);
+			$defaults2[$type] = Normalization::getProductDefaultFeatures($type);
 		}
 
 		$json = [
