@@ -17,7 +17,7 @@ trait Routes
 				$r->get('/logout', [null, [Controller::class, 'logout']]);
 				$r->get('/', [User::AUTH_LEVEL_RO, [Controller::class, 'getHome']]);
 				$r->get('', [User::AUTH_LEVEL_RO, [Controller::class, 'getHome']]);
-				$r->get('/features.json', [User::AUTH_LEVEL_RO, [Controller::class, 'getFeaturesJson']]);
+				$r->get('/features.json', [null, [Controller::class, 'getFeaturesJson']]);
 				// TODO: make token access public
 				$r->get('/item/{id}', [User::AUTH_LEVEL_RO, [Controller::class, 'getItem']]);
 				$r->get('/item/{id}/add/{add}', [User::AUTH_LEVEL_RW, [Controller::class, 'getItem']]);
