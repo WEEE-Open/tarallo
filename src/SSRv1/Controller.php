@@ -420,8 +420,8 @@ class Controller implements RequestHandlerInterface
 		$location = $location === null ? null : new ItemCode($location);
 
 		$templateParameters = [
-			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation'),
-			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation'),
+			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation')),
+			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation')),
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
 				false,
@@ -1324,8 +1324,8 @@ class Controller implements RequestHandlerInterface
 		$location = $location === null ? null : new ItemCode($location);
 
 		$templateParameters = [
-			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->statsDAO()->getOptionValue('DefaultTodosLocation'),
-			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->statsDAO()->getOptionValue('DefaultTodosLocation'),
+			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->statsDAO()->getOptionValue('DefaultTodosLocation')),
+			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->statsDAO()->getOptionValue('DefaultTodosLocation')),
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
 				false,
