@@ -1019,9 +1019,11 @@ class Controller implements RequestHandlerInterface
 					$importElement['Exists'] = false;
 				}
 				$importElement['SuperSummary'] = Summary::peelBulkItem($parsed);
+				$importElement['Error'] = false;
 			} catch (FeatureValidationException $e) {
 				$importElement['Exists'] = $importElement['Exists'] ?? false;
-				$importElement['SuperSummary'] = "Parse error: " . $e->getMessage();
+				$importElement['SuperSummary'] = ['', "Parse error: " . $e->getMessage()];
+				$importElement['Error'] = true;
 			}
 			$importsAggregated[$importElement['BulkIdentifier']][] = $importElement;
 		}

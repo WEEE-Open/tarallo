@@ -35,7 +35,7 @@ $jsonid = 0;
 				<?php foreach ($import as $line) : ?>
 					<tr>
 						<td class="align-middle"><?= $typize($line['Type']) ?></td>
-						<td class="align-middle"><?= $this->e($line['SuperSummary'][0]) ?><?= $line['SuperSummary'][0] !== '' && $line['SuperSummary'][1] !== '' ? ' ' : '' ?><small class="text-muted"><?php if ($line['Exists']) {
+						<td class="align-middle"><?= $line["Error"] ? '<i class="fa fa-exclamation-triangle text-danger"></i>&nbsp;' : '' ?><?= $this->e($line['SuperSummary'][0]) ?><?= $line['SuperSummary'][0] !== '' && $line['SuperSummary'][1] !== '' ? ' ' : '' ?><small class="text-muted"><?php if ($line['Exists']) {
 							echo "<a class=\"text-muted\" href=\"${line['EncodedUrl']}\">";
 												 } ?><?= $this->e($line['SuperSummary'][1]) ?><?php if ($line['Exists']) {
 												 echo '</a>';
@@ -53,7 +53,7 @@ $jsonid = 0;
 									JSON
 								</button>
 								<button class="btn <?= $line["Exists"] ? 'btn-outline-success' : 'btn-success' ?>" type="submit"
-										name="import" value="<?= (int) $line["Identifier"]?>">
+										name="import" value="<?= (int) $line["Identifier"]?>" <?= $line["Error"] ? 'disabled' : '' ?>>
 									Import
 								</button>
 								<button class="btn <?= $line["Exists"] ? 'btn-danger' : 'btn-outline-danger' ?>" type="submit"
