@@ -381,7 +381,7 @@ class Controller implements RequestHandlerInterface
 						if (!in_array($body['default'], $editable, true)) {
 							throw new AuthorizationException('Not even admins can edit that');
 						}
-						$db->statsDAO()->setOptionValue($body['default'], $body['location']);
+						$db->optionDAO()->setOptionValue($body['default'], $body['location']);
 					} else {
 						throw new AuthorizationException('Only admins can do that');
 					}
@@ -393,7 +393,7 @@ class Controller implements RequestHandlerInterface
 
 		$optionsForTemplate = [];
 		foreach ($editable as $optionKey) {
-			$optionsForTemplate[$optionKey] = $db->statsDAO()->getOptionValue($optionKey);
+			$optionsForTemplate[$optionKey] = $db->optionDAO()->getOptionValue($optionKey);
 		}
 
 		$request = $request->withAttribute('Template', 'options');
@@ -1319,13 +1319,13 @@ class Controller implements RequestHandlerInterface
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
-		$locationDefault = $db->statsDAO()->getOptionValue('DefaultHddLocation');
+		$locationDefault = $db->optionDAO()->getOptionValue('DefaultHddLocation');
 		$location = Validation::validateOptionalString($request->getQueryParams(), 'where', $locationDefault, null);
 		$location = $location === null ? null : new ItemCode($location);
 
 		$templateParameters = [
-			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->statsDAO()->getOptionValue('DefaultTodosLocation')),
-			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->statsDAO()->getOptionValue('DefaultTodosLocation')),
+			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation')),
+			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation')),
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
 				false,
