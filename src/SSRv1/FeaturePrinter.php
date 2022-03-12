@@ -114,6 +114,7 @@ class FeaturePrinter
 		'mini-pcie-sockets-n' => 'Mini PCI Express',
 		'mini-pci-sockets-n' => 'Mini PCI',
 		'm2-connectors-n' => 'M.2',
+		'm2-slot-length-mm' => 'M.2',
 		'brand-manufacturer' => 'Brand (manufacturer)',
 		'psu-form-factor' => 'Form factor (PSU)',
 		'psu-rails-most-power' => 'Rails with most power',

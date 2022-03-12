@@ -844,6 +844,9 @@ END;"
 					$this->exec("DELETE FROM `FeatureEnum` WHERE ValueEnum LIKE '2.5-%' OR ValueEnum LIKE '1.8-%' OR ValueEnum = 'm2.2'");
 					$this->exec("DELETE FROM `ProductFeature` WHERE ValueEnum LIKE '2.5-%' OR ValueEnum LIKE '1.8-%' OR ValueEnum = 'm2.2'");
 					break;
+				case 30:
+					$this->exec("INSERT INTO `Feature` (Feature, `Group`, Type) VALUES ('m2-slot-length-mm', 'physical', 3)");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

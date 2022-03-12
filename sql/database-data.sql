@@ -114,6 +114,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('mini-pcie-sockets-n', 'sockets', 1), -- Mini PCI Express --
 	('mini-pci-sockets-n', 'sockets', 1), -- Mini PCI --
 	('m2-connectors-n', 'ports', 1), -- M.2 --
+	('m2-slot-length-mm', 'physical', 3), -- M.2 --
 	('brand-manufacturer', 'commercial', 0), -- Brand (manufacturer) --
 	('psu-form-factor', 'physical', 2), -- Form factor (PSU) --
 	('psu-rails-most-power', 'power', 2), -- Rails with most power --
