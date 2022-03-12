@@ -23,7 +23,7 @@ $this->layout('main', ['title' => 'Donations', 'user' => $user]);
 					<tr> 
 						<td><a href="/donation/<?=$donation["Donation"]?>"><?=ucfirst($donation["DonationName"])?></a></td>
 						<td><?=$donation["Date"]?></td>
-						<td class=" text-center">
+						<td class="text-center align-middle">
 							<?php 
 								if($donation["IsCompleted"])
 									echo '<i class="fas fa-check"></i>';
