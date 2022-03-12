@@ -54,7 +54,8 @@ foreach($lines as $line) {
 			continue;
 		}
 		if($block === 1) {
-			$feature = $id = substr($boom[0], 3, strlen($boom[0]) - 4);
+			$boom[0] = ltrim($boom[0]);
+			$feature = $id = substr($boom[0], 2, strlen($boom[0]) - 3);
 			$group = strtoupper(substr($boom[1], 2, strlen($boom[1]) - 3));
 			$type = substr($boom[2], 1, 1);
 
