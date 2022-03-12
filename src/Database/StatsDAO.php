@@ -371,7 +371,8 @@ ORDER BY Quantity DESC, Val";
 		if ($filter === null) {
 			$featureFilter = '';
 		} else {
-			$featureFilter = /** @lang MySQL */ 'AND `Code` IN (
+			$featureFilter = /** @lang MySQL */
+				'AND `Code` IN (
   SELECT `Code`
   FROM ProductItemFeatureUnified
   WHERE Feature = ' . $pdo->quote($filter->name) . ' AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = ' . $pdo->quote($filter->value) . '
@@ -682,7 +683,8 @@ GROUP BY $group WITH ROLLUP";
 			$where = '';
 		}
 
-		$statement = $this->getPDO()->prepare(<<<EOQ
+		$statement = $this->getPDO()->prepare(
+			<<<EOQ
 			SELECT Product.Brand, Product.Model, Product.Variant, pfManufacturer.ValueText AS Manufacturer, pfFamily.ValueText AS Family, pfInternal.ValueText AS Internal, COUNT(Code) AS Items
 			FROM Item
 			NATURAL RIGHT JOIN Product
@@ -724,7 +726,8 @@ EOQ
 	 */
 	public function getAllBrands(): array
 	{
-		$statement = $this->getPDO()->prepare(<<<EOQ
+		$statement = $this->getPDO()->prepare(
+			<<<EOQ
 			SELECT Brand, COUNT(*) AS Products
 			FROM Product
 			GROUP BY Brand
@@ -742,7 +745,8 @@ EOQ
 
 	public function getAllItemsOfProduct(ProductCode $product): array
 	{
-		$statement = $this->getPDO()->prepare(<<<EOQ
+		$statement = $this->getPDO()->prepare(
+			<<<EOQ
 		SELECT Code
 		FROM Item
 		WHERE Brand = ? AND Model = ? AND Variant = ?
@@ -880,7 +884,7 @@ EOQ
 		foreach ($dict as $featureName => $value) {
 			BaseFeature::validateFeatureName($featureName);
 			if ($value === null) {
-				$notInCondition .=  "OR Feature = " . $pdo->quote($featureName);
+				$notInCondition .= "OR Feature = " . $pdo->quote($featureName);
 			} else {
 				$inCondition .= "OR (Feature = " . $pdo->quote($featureName) .
 					" AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = " . $pdo->quote($value) . ")";
@@ -906,7 +910,7 @@ EOQ
 				  WHERE ' . $inCondition . ')';
 		}
 
-		$condition .=  ' ' . $this->filterLocation($location);
+		$condition .= ' ' . $this->filterLocation($location);
 		$deletedFilter = $deleted ? '' : $this->filterDeletedLost();
 
 		$query = "SELECT " . $select . "
@@ -947,12 +951,12 @@ EOQ
 		}
 		$change = strtoupper($change);
 		$pdo = $this->getPDO();
-		$where = $change ?  " WHERE `Change` = " . $pdo->quote($change) : '';
+		$where = $change ? " WHERE `Change` = " . $pdo->quote($change) : '';
 		/** @noinspection SqlResolve */
 		$query = "SELECT User, COUNT(*) as Count
 		FROM Audit" .
 			$where
-		. " GROUP BY User 
+			. " GROUP BY User 
 		ORDER BY Count DESC
 		LIMIT " . $limit;
 
@@ -996,33 +1000,12 @@ LIMIT " . $limit;
 		return $array;
 	}
 
-	public function getDefaultLocations(): array
-	{
-		//this will cause a massive bug later lmao
-		$query = "SELECT `Key`, Value
-FROM Configuration C
-WHERE `Key` != 'DataVersion' AND
-        `Key` != 'SchemaVersion'";
-
-		$array = [];
-		$statement = $this->getPDO()->prepare($query);
-
-		try {
-			$success = $statement->execute();
-			assert($success, 'Default location');
-			while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-				$array[$row['Key']] = $row['Value'];
-			}
-		} finally {
-			$statement->closeCursor();
-		}
-		return $array;
-	}
-
 	/**
 	 * get the total and average capacity of hdds or rams
+	 *
 	 * @param array $hddsOrRams must have property 'quantity' for each item
 	 * @param string $propertyToSum must be 'capacity-decibyte' or 'capacity-byte'
+	 *
 	 * @return array
 	 */
 	public function getTotalAndAverageCapacity(array $hddsOrRams, string $propertyToSum): array
@@ -1037,12 +1020,12 @@ WHERE `Key` != 'DataVersion' AND
 			if (!$item[$propertyToSum]) {
 				continue;
 			}
-			$sumOfCapacity += ( $item[$propertyToSum] * $item['Quantity'] );
+			$sumOfCapacity += ($item[$propertyToSum] * $item['Quantity']);
 			$numberOfItems += $item['Quantity'];
 		}
 		return [
 			'totalCapacity' => $sumOfCapacity,
-			'averageCapacity' => ( $sumOfCapacity / $numberOfItems )
+			'averageCapacity' => ($sumOfCapacity / $numberOfItems)
 		];
 	}
 
@@ -1094,40 +1077,5 @@ WHERE `Key` != 'DataVersion' AND
 		}
 
 		return $array;
-	}
-
-	public function setDefaultLocation(string $key, string $value)
-	{
-		$pdo = $this->getPDO();
-		if (isset($this->getDefaultLocations()[$key])) {
-			$query = "UPDATE Configuration
-SET Value = :v
-WHERE `Key` = :k";
-
-			$statement = $pdo->prepare($query);
-			$statement->bindValue(':v', $value);
-			$statement->bindValue(':k', $key);
-			try {
-				$success = $statement->execute();
-				assert($success, 'Set location');
-			} finally {
-				$statement->closeCursor();
-			}
-		} else {
-			//$pdo = $this->getPDO();
-			$query = "
-INSERT INTO Configuration (`Key`, Value) VALUES (:k, :v)";
-
-			$statement = $pdo->prepare($query);
-			$statement->bindValue(':v', $value);
-			$statement->bindValue(':k', $key);
-
-			try {
-				$success = $statement->execute();
-				assert($success, 'New location');
-			} finally {
-				$statement->closeCursor();
-			}
-		}
 	}
 }

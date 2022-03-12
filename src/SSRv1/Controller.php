@@ -14,6 +14,7 @@ use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Database\TreeDAO;
 use WEEEOpen\Tarallo\ErrorHandler;
 use WEEEOpen\Tarallo\Feature;
+use WEEEOpen\Tarallo\FeatureValidationException;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
 use WEEEOpen\Tarallo\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\HTTP\AuthValidator;
@@ -22,7 +23,7 @@ use WEEEOpen\Tarallo\HTTP\TransactionWrapper;
 use WEEEOpen\Tarallo\HTTP\Validation;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemIncomplete;
-use WEEEOpen\Tarallo\ItemValidator;
+use WEEEOpen\Tarallo\Normalization;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\ProductIncomplete;
@@ -357,6 +358,12 @@ class Controller implements RequestHandlerInterface
 
 		$error = null;
 		$token = null;
+		$editable = [
+			'DefaultHddLocation',
+			'DefaultCpuLocation',
+			'DefaultTodosLocation',
+		];
+
 		if ($body !== null && count($body) > 0) {
 			try {
 				if (isset($body['delete']) && isset($body['token'])) {
@@ -371,7 +378,10 @@ class Controller implements RequestHandlerInterface
 					$db->sessionDAO()->setDataForToken($token, $data);
 				} elseif (isset($body['location']) && isset($body['default'])) {
 					if ($user->getLevel() === $user::AUTH_LEVEL_ADMIN) {
-						$db->statsDAO()->setDefaultLocation($body['default'], $body['location']);
+						if (!in_array($body['default'], $editable, true)) {
+							throw new AuthorizationException('Not even admins can edit that');
+						}
+						$db->optionDAO()->setOptionValue($body['default'], $body['location']);
 					} else {
 						throw new AuthorizationException('Only admins can do that');
 					}
@@ -381,13 +391,19 @@ class Controller implements RequestHandlerInterface
 			}
 		}
 
+		$optionsForTemplate = [];
+		foreach ($editable as $optionKey) {
+			$optionsForTemplate[$optionKey] = $db->optionDAO()->getOptionValue($optionKey);
+		}
+
 		$request = $request->withAttribute('Template', 'options');
 		$request = $request->withAttribute(
 			'TemplateParameters',
 			[
 			'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
 			'newToken' => $token,
-			'defaultLocations' => $db->statsDAO()->getDefaultLocations(),
+			'defaultLocations' => $optionsForTemplate,
+			'apcuEnabled' => $db->hasApcu(),
 			'error' => $error
 			]
 		);
@@ -399,13 +415,13 @@ class Controller implements RequestHandlerInterface
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
-		$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultHddLocation'] ?? null;
+		$locationDefault = $db->optionDAO()->getOptionValue('DefaultHddLocation');
 		$location = Validation::validateOptionalString($request->getQueryParams(), 'where', $locationDefault, null);
 		$location = $location === null ? null : new ItemCode($location);
 
 		$templateParameters = [
-			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
-			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
+			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation')),
+			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation')),
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
 				false,
@@ -471,7 +487,7 @@ class Controller implements RequestHandlerInterface
 				break;
 
 			case 'cases':
-				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultCaseLocation'] ?? null;
+				$locationDefault = $db->optionDAO()->getOptionValue('DefaultCaseLocation');
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
@@ -507,7 +523,7 @@ class Controller implements RequestHandlerInterface
 				break;
 
 			case 'rams':
-				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultRamLocation'] ?? null;
+				$locationDefault = $db->optionDAO()->getOptionValue('DefaultRamLocation');
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
@@ -566,7 +582,7 @@ class Controller implements RequestHandlerInterface
 				);
 				break;
 			case 'cpus':
-				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultCpuLocation'] ?? null;
+				$locationDefault = $db->optionDAO()->getOptionValue('DefaultCpuLocation');
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
@@ -592,7 +608,7 @@ class Controller implements RequestHandlerInterface
 				);
 				break;
 			case 'hdds':
-				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultHddLocation'] ?? null;
+				$locationDefault = $db->optionDAO()->getOptionValue('DefaultHddLocation');
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$locationSet = $location !== $locationDefault;
 				$location = $location === null ? null : new ItemCode($location);
@@ -675,7 +691,7 @@ class Controller implements RequestHandlerInterface
 				);
 				break;
 			case 'cool':
-				$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultCpuLocation'] ?? null;
+				$locationDefault = $db->optionDAO()->getOptionValue('DefaultCpuLocation');
 				$location = Validation::validateOptionalString($query, 'where', $locationDefault, null);
 				$location = $location === null ? null : new ItemCode($location);
 				$request = $request->withAttribute('Template', 'stats::cool')->withAttribute(
@@ -980,28 +996,35 @@ class Controller implements RequestHandlerInterface
 		$imports = $db->bulkDAO()->getBulkImports();
 		$importsAggregated = [];
 		foreach ($imports as $importElement) {
-			if (isset($importElement['JSON'])) {
-				$json = json_decode($importElement['JSON'], true);
-			} else {
-				$json = [];
-			}
-			if ($importElement['Type'] === 'I') {
-				$parsed = ItemBuilder::ofArrayFeatures($json);
-				$importElement['Exists'] = false;
-			} elseif ($importElement['Type'] === 'P') {
-				if (isset($json['brand']) && is_string($json['brand']) && strlen($json['brand']) > 0 && isset($json['model']) && is_string($json['model']) && strlen($json['model']) > 0) {
-					$parsed = ProductBuilder::ofArray($json, $json['brand'], $json['model'], $json['variant'] ?? ProductCode::DEFAULT_VARIANT);
-					$importElement['Exists'] = $db->productDAO()->productExists($parsed);
-					$importElement['EncodedUrl'] = '/product/' . rawurlencode($parsed->getBrand()) . '/' . rawurlencode($parsed->getModel()) . '/' . rawurlencode($parsed->getVariant());
+			try {
+				if (isset($importElement['JSON'])) {
+					$json = json_decode($importElement['JSON'], true);
+				} else {
+					$json = [];
+				}
+				if ($importElement['Type'] === 'I') {
+					$parsed = ItemBuilder::ofArrayFeatures($json);
+					$importElement['Exists'] = false;
+				} elseif ($importElement['Type'] === 'P') {
+					if (isset($json['brand']) && is_string($json['brand']) && strlen($json['brand']) > 0 && isset($json['model']) && is_string($json['model']) && strlen($json['model']) > 0) {
+						$parsed = ProductBuilder::ofArray($json, $json['brand'], $json['model'], $json['variant'] ?? ProductCode::DEFAULT_VARIANT);
+						$importElement['Exists'] = $db->productDAO()->productExists($parsed);
+						$importElement['EncodedUrl'] = '/product/' . rawurlencode($parsed->getBrand()) . '/' . rawurlencode($parsed->getModel()) . '/' . rawurlencode($parsed->getVariant());
+					} else {
+						$parsed = new ItemIncomplete(null);
+						$importElement['Exists'] = false;
+					}
 				} else {
 					$parsed = new ItemIncomplete(null);
 					$importElement['Exists'] = false;
 				}
-			} else {
-				$parsed = new ItemIncomplete(null);
-				$importElement['Exists'] = false;
+				$importElement['SuperSummary'] = Summary::peelBulkItem($parsed);
+				$importElement['Error'] = false;
+			} catch (FeatureValidationException $e) {
+				$importElement['Exists'] = $importElement['Exists'] ?? false;
+				$importElement['SuperSummary'] = ['', "Parse error: " . $e->getMessage()];
+				$importElement['Error'] = true;
 			}
-			$importElement['SuperSummary'] = Summary::peelBulkItem($parsed);
 			$importsAggregated[$importElement['BulkIdentifier']][] = $importElement;
 		}
 
@@ -1151,7 +1174,7 @@ class Controller implements RequestHandlerInterface
 		RequestHandlerInterface $handler
 	): ResponseInterface {
 		// They aren't changing >1 time per second, so this should be stable enough for the ETag header...
-		$lastmod1 = ItemValidator::fileLastModified();
+		$lastmod1 = Normalization::fileLastModified();
 		$lastmod2 = BaseFeature::fileLastModified();
 		$lastmod3 = FeaturePrinter::fileLastModified();
 		$language = 'en';
@@ -1171,12 +1194,12 @@ class Controller implements RequestHandlerInterface
 
 		$defaults = [];
 		foreach (Feature::FEATURES['type'] as $type => $useless) {
-			$defaults[$type] = ItemValidator::getItemDefaultFeatures($type);
+			$defaults[$type] = Normalization::getItemDefaultFeatures($type);
 		}
 
 		$defaults2 = [];
 		foreach (Feature::FEATURES['type'] as $type => $useless) {
-			$defaults2[$type] = ItemValidator::getProductDefaultFeatures($type);
+			$defaults2[$type] = Normalization::getProductDefaultFeatures($type);
 		}
 
 		$json = [
@@ -1298,13 +1321,13 @@ class Controller implements RequestHandlerInterface
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 
-		$locationDefault = $db->statsDAO()->getDefaultLocations()['DefaultHddLocation'] ?? null;
+		$locationDefault = $db->optionDAO()->getOptionValue('DefaultHddLocation');
 		$location = Validation::validateOptionalString($request->getQueryParams(), 'where', $locationDefault, null);
 		$location = $location === null ? null : new ItemCode($location);
 
 		$templateParameters = [
-			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
-			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->statsDAO()->getDefaultLocations()['DefaultTodosLocation'] ?? null),
+			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation')),
+			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation')),
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
 				false,

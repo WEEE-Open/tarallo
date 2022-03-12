@@ -71,7 +71,7 @@ final class ProductDAO extends DAO
 	 */
 	public function getProducts(string $brand, string $model): array
 	{
-		$statement = $this->getPDO()->prepare('SELECT  Brand, Model, Variant FROM Product WHERE Brand = :prod AND Model = :model');
+		$statement = $this->getPDO()->prepare('SELECT Brand, Model, Variant FROM Product WHERE Brand = :prod AND Model = :model');
 		try {
 			$statement->bindValue(':prod', $brand, \PDO::PARAM_STR);
 			$statement->bindValue(':model', $model, \PDO::PARAM_STR);

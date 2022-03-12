@@ -4,7 +4,7 @@ namespace WEEEOpen\Tarallo\Database;
 
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemCode;
-use WEEEOpen\Tarallo\ItemValidator;
+use WEEEOpen\Tarallo\Normalization;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\NotFoundException;
 
@@ -35,11 +35,11 @@ final class TreeDAO extends DAO
 		}
 
 		if ($fix) {
-			$newParent = ItemValidator::fixupLocation($item, $newParent);
+			$newParent = Normalization::fixupLocation($item, $newParent);
 		}
 
 		if ($validate) {
-			ItemValidator::validateLocation($item, $newParent);
+			Normalization::validateLocation($item, $newParent);
 		}
 
 		if ($newParent === null) {

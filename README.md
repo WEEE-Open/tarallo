@@ -120,7 +120,7 @@ bin/build-cache
 composer install --no-dev --classmap-authoritative --optimize-autoloader
 ```
 
-If this is the first deployment you'll need to import `sql/database.sql`, `sql/database-data.sql` and `sql/database-procedures.sql` manually in the production database, if it is an update you may need to run the update script: use `php bin/update.php` on the server.
+If this is the first deployment you'll need to import `sql/database.sql`, `sql/database-data.sql` and `sql/database-procedures.sql` manually in the production database, if it is an update you may need to run the update script: use `php bin/update-db` on the server.
 
 ## More details
 

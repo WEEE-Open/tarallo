@@ -7,14 +7,14 @@ use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\FeatureValidationException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemNestingException;
-use WEEEOpen\Tarallo\ItemValidator;
+use WEEEOpen\Tarallo\Normalization;
 use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ValidationException;
 
 /**
- * @covers \WEEEOpen\Tarallo\ItemValidator
+ * @covers \WEEEOpen\Tarallo\Normalization
  */
-class ItemValidatorTest extends TestCase {
+class NormalizationTest extends TestCase {
 	private static function item(string $code, string $type): Item {
 		$item = new Item($code);
 		$item->addFeature(new Feature('type', $type));
@@ -32,34 +32,34 @@ class ItemValidatorTest extends TestCase {
 		$cpu = self::item('C123', 'cpu');
 
 		$this->expectException(ItemNestingException::class);
-		ItemValidator::validateLocation($ram, $cpu);
+		Normalization::validateLocation($ram, $cpu);
 	}
 
 	public function testInvalidRoot() {
 		$ram = self::item('R2', 'ram');
 
 		$this->expectException(ValidationException::class);
-		ItemValidator::validateLocation($ram, null);
+		Normalization::validateLocation($ram, null);
 	}
 
 	public function testAnotherInvalidRoot() {
 		$case = self::item('CASE', 'case');
 
 		$this->expectException(ValidationException::class);
-		ItemValidator::validateLocation($case, null);
+		Normalization::validateLocation($case, null);
 	}
 
 	public function testValidRoot() {
 		$meh = self::item('MEH', 'location');
 
-		ItemValidator::validateLocation($meh, null);
+		Normalization::validateLocation($meh, null);
 		$this->assertTrue(true, 'Location is accepted, no random exceptions are thrown');
 	}
 
 	public function testValidRootNoType() {
 		$meh = new Item('meh');
 
-		ItemValidator::validateLocation($meh, null);
+		Normalization::validateLocation($meh, null);
 		$this->assertTrue(true, 'Location is accepted, no random exceptions are thrown');
 	}
 
@@ -73,10 +73,10 @@ class ItemValidatorTest extends TestCase {
 		$pc->addContent($mobo);
 		$mobo->addContent($ram1)->addContent($cpu);
 
-		$correct = ItemValidator::fixupLocation($ram2, $pc);
+		$correct = Normalization::fixupLocation($ram2, $pc);
 		$this->assertInstanceOf(Item::class, $correct, 'Fixup returns an Item');
 		$this->assertEquals('MOBO', $correct->getCode(), 'RAM gets moved to motherboard');
-		ItemValidator::validateLocation($ram2, $pc); // doesn't throw an exception = we're good to go.
+		Normalization::validateLocation($ram2, $pc); // doesn't throw an exception = we're good to go.
 	}
 
 	public function testImpossibleFixup() {
@@ -89,11 +89,11 @@ class ItemValidatorTest extends TestCase {
 		$pc->addContent($mobo);
 		$mobo->addContent($ram1)->addContent($ram2);
 
-		$unchanged = ItemValidator::fixupLocation($cpu, $ram1);
+		$unchanged = Normalization::fixupLocation($cpu, $ram1);
 		$this->assertInstanceOf(Item::class, $unchanged, 'Fixup returns an Item');
 		$this->assertEquals($ram1, $unchanged, 'Fixup shouldn\'t have changed parent since it only moves item down');
 		$this->expectException(ItemNestingException::class);
-		ItemValidator::validateLocation($unchanged, $ram1);
+		Normalization::validateLocation($unchanged, $ram1);
 	}
 
 	public function testNoTypeDescendant() {
@@ -103,27 +103,27 @@ class ItemValidatorTest extends TestCase {
 
 		$item = new Item('Whatever');
 
-		$unchanged = ItemValidator::fixupLocation($item, $pc);
+		$unchanged = Normalization::fixupLocation($item, $pc);
 		$this->assertEquals($pc, $unchanged, 'Fixup shouldn\'t have changed parent');
-		ItemValidator::validateLocation($item, $pc);
+		Normalization::validateLocation($item, $pc);
 	}
 
 	public function testNoTypeParent() {
 		$mobo = self::item('MOBO', 'motherboard');
 		$item = new Item('Whatever');
 
-		$unchanged = ItemValidator::fixupLocation($mobo, $item);
+		$unchanged = Normalization::fixupLocation($mobo, $item);
 		$this->assertEquals($item, $unchanged, 'Fixup shouldn\'t have changed parent');
-		ItemValidator::validateLocation($mobo, $item);
+		Normalization::validateLocation($mobo, $item);
 	}
 
 	public function testNoTypeBoth() {
 		$meh = new Item('meh');
 		$item = new Item('Whatever');
 
-		$unchanged = ItemValidator::fixupLocation($meh, $item);
+		$unchanged = Normalization::fixupLocation($meh, $item);
 		$this->assertEquals($item, $unchanged, 'Fixup shouldn\'t have changed parent');
-		ItemValidator::validateLocation($meh, $item);
+		Normalization::validateLocation($meh, $item);
 	}
 
 	public function testReparentInside() {
@@ -137,7 +137,7 @@ class ItemValidatorTest extends TestCase {
 		$pc->addContent($mobo)->addContent($cpu);
 		$mobo->addContent($ram1)->addContent($ram2);
 
-		$unchanged = ItemValidator::fixupLocation($pc, $lab);
+		$unchanged = Normalization::fixupLocation($pc, $lab);
 		$this->assertEquals($lab, $unchanged, 'Fixup shouldn\'t have changed parent');
 		$inmobo = $mobo->getContent();
 		$this->assertContains($cpu, $inmobo, 'CPU has been moved to motherboard');
@@ -150,7 +150,7 @@ class ItemValidatorTest extends TestCase {
 		$cpu = self::item('C123', 'cpu');
 
 		$pc->addContent($ram1)->addContent($ram2);
-		$unchanged = ItemValidator::fixupLocation($cpu, $pc);
+		$unchanged = Normalization::fixupLocation($cpu, $pc);
 		$this->assertEquals($pc, $unchanged, 'Fixup shouldn\'t have changed parent, there\'s no motherboard');
 	}
 
@@ -161,12 +161,12 @@ class ItemValidatorTest extends TestCase {
 		$cpu = self::item('C666', 'cpu');
 
 		$box->addContent($ram)->addContent($mobo);
-		$unchanged = ItemValidator::fixupLocation($cpu, $box);
+		$unchanged = Normalization::fixupLocation($cpu, $box);
 		$this->assertEquals(
 			$box, $unchanged,
 			'Fixup shouldn\'t have changed parent, items don\'t move to random motherboards in random boxes'
 		);
-		ItemValidator::validateLocation($cpu, $box);
+		Normalization::validateLocation($cpu, $box);
 	}
 
 	public function testValidFeatureV() {
@@ -174,7 +174,7 @@ class ItemValidatorTest extends TestCase {
 		$pc->addFeature(new Feature('motherboard-form-factor', 'proprietary-laptop'));
 		$pc->addFeature(new Feature('psu-volt', 19.0));
 
-		ItemValidator::validateFeatures($pc);
+		Normalization::validateFeatures($pc);
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
@@ -183,7 +183,7 @@ class ItemValidatorTest extends TestCase {
 		$pc->addFeature(new Feature('color', 'green')); // no information on form factor
 		$pc->addFeature(new Feature('psu-volt', 19.0));
 
-		ItemValidator::validateFeatures($pc);
+		Normalization::validateFeatures($pc);
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
@@ -194,7 +194,7 @@ class ItemValidatorTest extends TestCase {
 
 		$this->expectException(FeatureValidationException::class);
 		try {
-			ItemValidator::validateFeatures($pc);
+			Normalization::validateFeatures($pc);
 		} catch(FeatureValidationException $e) {
 			$this->assertEquals('PC42', $e->getItem());
 			$this->assertEquals('psu-volt', $e->getFeature());
@@ -210,7 +210,7 @@ class ItemValidatorTest extends TestCase {
 
 		$this->expectException(FeatureValidationException::class);
 		try {
-			ItemValidator::validateFeatures($pc);
+			Normalization::validateFeatures($pc);
 		} catch(FeatureValidationException $e) {
 			$this->assertEquals(null, $e->getItem());
 			$this->assertEquals('psu-volt', $e->getFeature());
@@ -226,7 +226,7 @@ class ItemValidatorTest extends TestCase {
 
 		$this->expectException(FeatureValidationException::class);
 		try {
-			ItemValidator::validateFeatures($pc);
+			Normalization::validateFeatures($pc);
 		} catch(FeatureValidationException $e) {
 			$this->assertEquals('PC42', $e->getItem());
 			$this->assertEquals('psu-ampere', $e->getFeature());
@@ -242,7 +242,7 @@ class ItemValidatorTest extends TestCase {
 
 		$this->expectException(FeatureValidationException::class);
 		try {
-			ItemValidator::validateFeatures($pc);
+			Normalization::validateFeatures($pc);
 		} catch(FeatureValidationException $e) {
 			$this->assertEquals('PC42', $e->getItem());
 			$this->assertEquals('power-connector', $e->getFeature());
@@ -258,7 +258,7 @@ class ItemValidatorTest extends TestCase {
 
 		$this->expectException(FeatureValidationException::class);
 		try {
-			ItemValidator::validateFeatures($pc);
+			Normalization::validateFeatures($pc);
 		} catch(FeatureValidationException $e) {
 			$this->assertEquals('PC42', $e->getItem());
 			$this->assertEquals('psu-form-factor', $e->getFeature());
@@ -272,7 +272,7 @@ class ItemValidatorTest extends TestCase {
 		$pc->addFeature(new Feature('motherboard-form-factor', 'proprietary'));
 		$pc->addFeature(new Feature('power-connector', 'barrel'));
 
-		ItemValidator::validateFeatures($pc);
+		Normalization::validateFeatures($pc);
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
@@ -281,7 +281,7 @@ class ItemValidatorTest extends TestCase {
 		$pc->addFeature(new Feature('motherboard-form-factor', 'proprietary-laptop'));
 		$pc->addFeature(new Feature('power-connector', 'barrel'));
 
-		ItemValidator::validateFeatures($pc);
+		Normalization::validateFeatures($pc);
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
@@ -295,7 +295,7 @@ class ItemValidatorTest extends TestCase {
 		$pc->addFeature(new Feature('psu-ampere', 5.2));
 		$pc->addFeature(new Feature('psu-volt', 19.0));
 
-		ItemValidator::validateFeatures($pc);
+		Normalization::validateFeatures($pc);
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
@@ -305,7 +305,7 @@ class ItemValidatorTest extends TestCase {
 		$pc->addFeature(new Feature('psu-form-factor', 'atx'));
 		$pc->addFeature(new Feature('color', 'red'));
 
-		ItemValidator::validateFeatures($pc);
+		Normalization::validateFeatures($pc);
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
@@ -314,7 +314,7 @@ class ItemValidatorTest extends TestCase {
 		$pc->addFeature(new Feature('motherboard-form-factor', 'btx'));
 		$pc->addFeature(new Feature('usb-ports-n', 2));
 
-		ItemValidator::validateFeatures($pc);
+		Normalization::validateFeatures($pc);
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
@@ -323,7 +323,7 @@ class ItemValidatorTest extends TestCase {
 		$pc->addFeature(new Feature('motherboard-form-factor', 'proprietary'));
 		$pc->addFeature(new Feature('usb-ports-n', 2));
 
-		ItemValidator::validateFeatures($pc);
+		Normalization::validateFeatures($pc);
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
@@ -334,7 +334,7 @@ class ItemValidatorTest extends TestCase {
 		$mobo->addFeature(new Feature('usb-ports-n', 4));
 		$pc->addContent($mobo);
 
-		ItemValidator::validateFeatures($pc);
+		Normalization::validateFeatures($pc);
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
@@ -347,25 +347,13 @@ class ItemValidatorTest extends TestCase {
 
 		$this->expectException(FeatureValidationException::class);
 		try {
-			ItemValidator::validateFeatures($pc);
+			Normalization::validateFeatures($pc);
 		} catch(FeatureValidationException $e) {
 			$this->assertEquals('PC42', $e->getItem());
 			$this->assertEquals('usb-ports-n', $e->getFeature());
 			$this->assertEquals(4, $e->getFeatureValue());
 			throw $e;
 		}
-	}
-
-	public function testInvalidUSBLaptopFixup() {
-		$pc = self::item('PC42', 'case');
-		$pc->addFeature(new Feature('motherboard-form-factor', 'proprietary-laptop'));
-		$pc->addFeature(new Feature('usb-ports-n', 4));
-		$mobo = self::item('MOBO55', 'motherboard');
-		$pc->addContent($mobo);
-
-		ItemValidator::fixupFeatures($pc);
-		ItemValidator::validateFeatures($pc);
-		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
 	public function testInvalidUSBLaptopFixupNoMobo() {
@@ -375,11 +363,9 @@ class ItemValidatorTest extends TestCase {
 		$hdd = self::item('S123', 'hdd');
 		$pc->addContent($hdd);
 
-		ItemValidator::fixupFeatures($pc);
-
 		$this->expectException(FeatureValidationException::class);
 		try {
-			ItemValidator::validateFeatures($pc);
+			Normalization::validateFeatures($pc);
 		} catch(FeatureValidationException $e) {
 			$this->assertEquals('PC42', $e->getItem());
 			$this->assertEquals('usb-ports-n', $e->getFeature());
@@ -393,7 +379,7 @@ class ItemValidatorTest extends TestCase {
 		$pc2 = self::item('PC24', 'case');
 
 		$this->expectException(ItemNestingException::class);
-		ItemValidator::validateLocation($pc, $pc2);
+		Normalization::validateLocation($pc, $pc2);
 	}
 
 	public function testInvalidODD() {
@@ -401,7 +387,7 @@ class ItemValidatorTest extends TestCase {
 		$item = self::item('Boh', 'odd');
 
 		$this->expectException(ItemNestingException::class);
-		ItemValidator::validateLocation($item, $mobo);
+		Normalization::validateLocation($item, $mobo);
 	}
 
 	public function testInvalidHDD() {
@@ -409,7 +395,7 @@ class ItemValidatorTest extends TestCase {
 		$item = self::item('Boh', 'hdd');
 
 		$this->expectException(ItemNestingException::class);
-		ItemValidator::validateLocation($item, $mobo);
+		Normalization::validateLocation($item, $mobo);
 	}
 
 	public function testRAMFFMismatch() {
@@ -421,7 +407,7 @@ class ItemValidatorTest extends TestCase {
 		$item->addFeature(new Feature('ram-type', 'ddr2'));
 
 		$this->expectException(ItemNestingException::class);
-		ItemValidator::validateLocation($item, $mobo);
+		Normalization::validateLocation($item, $mobo);
 	}
 
 	public function testRAMFFMismatchDeep() {
@@ -435,7 +421,7 @@ class ItemValidatorTest extends TestCase {
 		$mobo->addContent($item);
 
 		$this->expectException(ItemNestingException::class);
-		ItemValidator::validateLocation($mobo, $pc);
+		Normalization::validateLocation($mobo, $pc);
 	}
 
 	public function testRAMTypeMismatch() {
@@ -447,7 +433,7 @@ class ItemValidatorTest extends TestCase {
 		$item->addFeature(new Feature('ram-type', 'ddr'));
 
 		$this->expectException(ItemNestingException::class);
-		ItemValidator::validateLocation($item, $mobo);
+		Normalization::validateLocation($item, $mobo);
 	}
 
 	public function testCPUSocketMismatch() {
@@ -457,7 +443,7 @@ class ItemValidatorTest extends TestCase {
 		$item->addFeature(new Feature('cpu-socket', 'lga1155'));
 
 		$this->expectException(ItemNestingException::class);
-		ItemValidator::validateLocation($item, $mobo);
+		Normalization::validateLocation($item, $mobo);
 	}
 
 	public function testCPUSocketUnknown() {
@@ -465,7 +451,7 @@ class ItemValidatorTest extends TestCase {
 		$item = self::item('C555', 'cpu');
 		$item->addFeature(new Feature('cpu-socket', 'lga1155'));
 
-		ItemValidator::validateLocation($item, $mobo);
+		Normalization::validateLocation($item, $mobo);
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
@@ -474,7 +460,7 @@ class ItemValidatorTest extends TestCase {
 		$mobo->addFeature(new Feature('cpu-socket', 'socket478'));
 		$item = self::item('C555', 'cpu');
 
-		ItemValidator::validateLocation($item, $mobo);
+		Normalization::validateLocation($item, $mobo);
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
@@ -482,7 +468,7 @@ class ItemValidatorTest extends TestCase {
 		$mobo = self::item('B42', 'motherboard');
 		$item = self::item('C555', 'cpu');
 
-		ItemValidator::validateLocation($item, $mobo);
+		Normalization::validateLocation($item, $mobo);
 		$this->assertTrue(true, 'No exceptions are thrown');
 	}
 
@@ -497,7 +483,7 @@ class ItemValidatorTest extends TestCase {
 			$item = self::item('C555', 'cpu');
 			$item->addFeature(new Feature('cpu-socket', $a[$i]));
 
-			ItemValidator::validateLocation($item, $mobo);
+			Normalization::validateLocation($item, $mobo);
 			$count++;
 		}
 
@@ -512,7 +498,7 @@ class ItemValidatorTest extends TestCase {
 		$item->addFeature(new Feature('cpu-socket', 'am2plus'));
 
 		$this->expectException(ItemNestingException::class);
-		ItemValidator::validateLocation($item, $mobo);
+		Normalization::validateLocation($item, $mobo);
 	}
 
 	public function testCPUSocketCrossInompatAm3() {
@@ -522,7 +508,7 @@ class ItemValidatorTest extends TestCase {
 		$item->addFeature(new Feature('cpu-socket', 'am3plus'));
 
 		$this->expectException(ItemNestingException::class);
-		ItemValidator::validateLocation($item, $mobo);
+		Normalization::validateLocation($item, $mobo);
 	}
 
 	public function testCPUSocketCrossInompatFm2() {
@@ -532,6 +518,6 @@ class ItemValidatorTest extends TestCase {
 		$item->addFeature(new Feature('cpu-socket', 'fm2plus'));
 
 		$this->expectException(ItemNestingException::class);
-		ItemValidator::validateLocation($item, $mobo);
+		Normalization::validateLocation($item, $mobo);
 	}
 }

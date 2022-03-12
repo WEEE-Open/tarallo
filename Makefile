@@ -9,11 +9,11 @@ features:
 
 .PHONY:
 dbupdate:
-	docker-compose exec -T app php /var/www/html/bin/update.php
+	docker-compose exec -T app php /var/www/html/bin/update-db
 
 .PHONY:
 examples:
-	docker-compose exec -T app php /var/www/html/bin/create_example_data.php
+	docker-compose exec -T app php /var/www/html/bin/create-example-data
 
 ######################################## Production ###########################################
 resources/cache/SSRv1.cache: src/SSRv1/Controller.php
@@ -29,7 +29,7 @@ cache: resources/cache/SSRv1.cache resources/cache/APIv2.cache
 ###################################### (Re)Build targets ######################################
 .PHONY:
 build: $(wildcard docker/**/*)
-	docker-compose down --volume || true
+	docker-compose down -v || true
 	docker-compose build
 
 .PHONY:
@@ -37,7 +37,7 @@ rebuild: destroy build up
 
 .PHONY:
 refresh: $(wildcard docker/**/*)
-	docker-compose down --volume || true
+	docker-compose down -v || true
 	docker-compose build --no-cache
 
 #################################### Continous Integration ####################################
@@ -61,7 +61,7 @@ destroy: down
 
 .PHONY:
 down:
-	docker-compose down --volume
+	docker-compose down -v
 
 
 

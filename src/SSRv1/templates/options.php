@@ -4,6 +4,7 @@
 /** @var string|null $newToken */
 /** @var string|null $error */
 /** @var string[] $defaultLocations */
+/** @var bool $apcuEnabled */
 $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options', 'container' => true]);
 ?>
 <?php $locationNames = [
@@ -88,5 +89,6 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 	</div>
 </form>
 	<?php endforeach; ?>
+<p>APCu status: <?= $apcuEnabled ? 'enabled' : '<strong>disabled!</strong>' ?></p>
 <?php endif; ?>
 

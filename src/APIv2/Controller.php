@@ -23,7 +23,7 @@ use WEEEOpen\Tarallo\HTTP\Validation;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemPrefixerException;
-use WEEEOpen\Tarallo\ItemValidator;
+use WEEEOpen\Tarallo\Normalization;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\Product;
@@ -240,7 +240,7 @@ class Controller implements RequestHandlerInterface
 		}
 
 		$flat = $item->getFlatContent();
-		ItemValidator::addAllVariants($flat);
+		Normalization::addAllVariants($flat);
 
 		// We need product features for fixup and validation
 		if ($fix || $validate) {
@@ -248,13 +248,13 @@ class Controller implements RequestHandlerInterface
 		}
 
 		if ($fix) {
-			$parent = ItemValidator::fixupLocation($item, $parent);
-			ItemValidator::fixupFeatures($item);
+			$parent = Normalization::fixupLocation($item, $parent);
+			//Normalization::fixupFeatures($item);
 		}
 
 		if ($validate) {
-			ItemValidator::validateLocation($item, $parent);
-			ItemValidator::validateFeatures($item);
+			Normalization::validateLocation($item, $parent);
+			Normalization::validateFeatures($item);
 		}
 
 		try {
@@ -306,7 +306,7 @@ class Controller implements RequestHandlerInterface
 		}
 
 		if ($validate) {
-			ItemValidator::validateFeatures($product);
+			Normalization::validateFeatures($product);
 		}
 
 		$db->productDAO()->addProduct($product);
@@ -483,7 +483,7 @@ class Controller implements RequestHandlerInterface
 		ItemBuilder::addFeatures($payload, $thing);
 
 		if ($validate) {
-			ItemValidator::validateFeatures($thing);
+			Normalization::validateFeatures($thing);
 		}
 
 		$deleted = $db->featureDAO()->deleteFeaturesAll($thing);
@@ -536,7 +536,7 @@ class Controller implements RequestHandlerInterface
 			foreach ($thing->getFeatures() as $addThis) {
 				$thingWithFullFeatures->addFeature($addThis);
 			}
-			ItemValidator::validateFeatures($thingWithFullFeatures);
+			Normalization::validateFeatures($thingWithFullFeatures);
 		}
 
 		$deleted = $db->featureDAO()->deleteFeatures($thing, $delete);

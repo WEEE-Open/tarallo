@@ -2,7 +2,7 @@
 
 namespace WEEEOpen\Tarallo;
 
-class ItemValidator
+class Normalization
 {
 	/**
 	 * Move item (or sub-items) to the correct place in their subtree, then in the items tree.
@@ -17,35 +17,6 @@ class ItemValidator
 	public static function fixupLocation(ItemWithFeatures $item, ?ItemWithFeatures $parent): ?ItemWithFeatures
 	{
 		return self::reparentAll($item, $parent);
-	}
-
-	/**
-	 * Execute the fixup procedure on an item.
-	 * Features will be changed inside this item and pushed down to sub-items if $subtree is true, which is the right
-	 * thing to do when adding new items. If $subtree is false, features won't be pushed around: this is useful when
-	 * editing features for a single item that may contain more items.
-	 * Features are never pushed up.
-	 *
-	 * This is needed to avoid modifications to items that weren't open in the editor. Otherwise it may confuse the
-	 * user, isn't visible to audit and seems a bad idea in general.
-	 *
-	 * @param ItemWithFeatures $item The item
-	 * @param bool $pushdown Push features down to sub-items or not
-	 * @param bool $pushup Push features up to ancestor items or not
-	 */
-	public static function fixupFeatures(ItemWithFeatures $item, bool $pushdown = true, bool $pushup = false)
-	{
-		if ($pushdown) {
-			$lowerLimit = null;
-		} else {
-			$lowerLimit = $item;
-		}
-		if ($pushup) {
-			$upperLimit = null;
-		} else {
-			$upperLimit = $item;
-		}
-		self::fixFeaturesRecursively($item, $lowerLimit, $upperLimit);
 	}
 
 	/**
@@ -112,34 +83,6 @@ class ItemValidator
 		}
 
 		return $container;
-	}
-
-	/**
-	 * Move all features that should be moved to the right item.
-	 *
-	 * @param ItemWithFeatures $item
-	 * @param ItemWithFeatures|null $lowerLimit
-	 * @param ItemWithFeatures|null $upperLimit
-	 */
-	private static function fixFeaturesRecursively(
-		ItemWithFeatures $item,
-		?ItemWithFeatures $lowerLimit,
-		?ItemWithFeatures $upperLimit
-	) {
-		assert($item instanceof ItemWithContent);
-		if ($lowerLimit !== $item) {
-			self::pushdownFeatures($item);
-		}
-
-//		if($upperLimit !== $item) {
-//			self::pushupFeatures($item);
-//		}
-
-		foreach ($item->getContent() as $subitem) {
-			self::fixFeaturesRecursively($subitem, $lowerLimit, $upperLimit);
-		}
-
-//		self::fixFeatures($item);
 	}
 
 	/**
@@ -478,7 +421,6 @@ class ItemValidator
 		}
 	}
 
-
 	/**
 	 * Get default feature names (i.e. most common ones) for an item type
 	 *
@@ -556,34 +498,6 @@ class ItemValidator
 	{
 		return filemtime(__FILE__);
 	}
-
-	private static function pushdownFeatures(ItemWithFeatures $item)
-	{
-		assert($item instanceof ItemWithContent);
-		$type = $item->getFeatureValue('type');
-
-		// Move laptop usb ports from the case to the motherboard
-		if (self::isCase($type)) {
-			$ff = $item->getFeatureValue('motherboard-form-factor');
-			if ($ff === 'proprietary-laptop') {
-				if ($item->getFeatureValue('usb-ports-n') !== null) {
-					$content = $item->getContent();
-					$mobo = self::findByType($content, 'motherboard');
-					if ($mobo !== null && !$mobo->getFeatureValue('usb-ports-n') !== null) {
-						// TODO: this will end badly when products are implemented...
-						$mobo->addFeature(new Feature('usb-ports-n', $item->getFeatureValue('usb-ports-n')));
-						$item->removeFeatureByName('usb-ports-n');
-					}
-				}
-			}
-		}
-	}
-
-//	private static function pushupFeatures(ItemWithFeatures $item) {
-//	}
-//
-//	private static function fixFeatures(ItemWithFeatures $item) {
-//	}
 
 	private static function validateFeaturesCase(ItemWithFeatures $case)
 	{
