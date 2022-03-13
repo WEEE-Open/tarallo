@@ -47,6 +47,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('ethernet-ports-10m-n', 'ports', 1), -- Ethernet (10M) --
 	('odd-form-factor', 'physical', 2), -- Form factor (ODD) --
 	('hdd-form-factor', 'physical', 2), -- Form factor (HDD) --
+	('height-mm', 'physical', 3), -- Height --
 	('ide-ports-n', 'ports', 1), -- IDE/ATA --
 	('odd-type', 'features', 2), -- ODD capabilities --
 	('pcie-power-pin-n', 'powerconnectors', 1), -- PCI Express power pins --
@@ -64,6 +65,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('ram-timings', 'features', 0), -- RAM timings -- https://en.wikipedia.org/wiki/Memory_timings
 	('sata-ports-n', 'ports', 1), -- SATA --
 	('esata-ports-n', 'ports', 1), -- eSATA --
+	('msata-ports-n', 'ports', 1), -- mSATA --
 	('sas-sata-ports-n', 'ports', 1), -- SAS (SATA connector) --
 	('sas-sff-8087-ports-n', 'ports', 1), -- SAS (SFF-8087) --
 	('sas-sff-8088-ports-n', 'ports', 1), -- SAS (SFF-8088) --
@@ -111,6 +113,8 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('isa-sockets-n', 'sockets', 1), -- ISA --
 	('mini-pcie-sockets-n', 'sockets', 1), -- Mini PCI Express --
 	('mini-pci-sockets-n', 'sockets', 1), -- Mini PCI --
+	('m2-connectors-n', 'ports', 1), -- M.2 --
+	('m2-slot-length-mm', 'physical', 3), -- M.2 --
 	('brand-manufacturer', 'commercial', 0), -- Brand (manufacturer) --
 	('psu-form-factor', 'physical', 2), -- Form factor (PSU) --
 	('psu-rails-most-power', 'power', 2), -- Rails with most power --
@@ -272,14 +276,10 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('odd-form-factor', 'laptop-odd-9.5mm'), -- SFF-8552 (9.5 mm standard cut corner) -- Physical dimensions specified in SFF-8552
 	('odd-form-factor', 'laptop-odd-12.7mm'), -- SFF-8552 (12.7 mm cut corner) -- Physical dimensions specified in SFF-8552 (or less formally: https://superuser.com/a/276241)
 	('hdd-form-factor', '3.5'), -- 3.5 in. -- max height 26.10 mm, SFF-8301 also specifies 17.80 and 42.00. These are probably 1/3H, 1/4H and 1/2H, respectively. Fractions of full height, which is around 80 mm.
-	('hdd-form-factor', '2.5-15mm'), -- 2.5 in. (15 mm uncommon) -- second number is the height in millimeters (these are specified as 15 but most common sizes, for both bays and drives, are 7 mm and 9.5 mm: the more you know...)
-	('hdd-form-factor', '2.5-9.5mm'), -- 2.5 in. (9.5 mm) --
-	('hdd-form-factor', '2.5-7mm'), -- 2.5 in. (7 mm) --
-	('hdd-form-factor', '1.8-9.5mm'), -- 1.8 in. (9.5 mm) --
-	('hdd-form-factor', '1.8-8mm'), -- 1.8 in. (8 mm) --
-	('hdd-form-factor', '1.8-5mm'), -- 1.8 in. (5 mm) --
+	('hdd-form-factor', '2.5'), -- 2.5 in. --
+	('hdd-form-factor', '1.8'), -- 1.8 in. --
+	('hdd-form-factor', '1'), -- 1 in. --
 	('hdd-form-factor', 'm2'), -- M2 --
-	('hdd-form-factor', 'm2.2'), -- M2.2 --
 	('odd-type', 'cd-r'), -- CD-R --
 	('odd-type', 'cd-rw'), -- CD-RW --
 	('odd-type', 'dvd-r'), -- DVD-R --

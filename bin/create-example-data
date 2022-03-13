@@ -443,7 +443,7 @@ for($i = 100; $i < 250; $i++) {
 	$ff = rand(0, 2);
 	$model = ['FY', 'AS', '5D'][$ff] . $capacity . ['S', 'M'][$port] . substr((string) $ff, 0, 1) . substr((string) $rpm, 0, 2);
 	$port = $port ? 'ide-ports-n' : 'sata-ports-n';
-	$ff = ['3.5','1.8-5mm', '2.5-9.5mm'][$ff];
+	$ff = ['3.5','1.8', '2.5'][$ff];
 	$hdd = (new Item('HDD' . $i))
 		->addFeature(new Feature('brand', 'Minstor'))
 		->addFeature(new Feature('model', $model))

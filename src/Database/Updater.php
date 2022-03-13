@@ -820,6 +820,33 @@ END;"
 					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = 'test-and-inventory' WHERE `ValueEnum` = 'finish-inventory' AND `Feature` = 'todo'");
 					$this->exec("SET FOREIGN_KEY_CHECKS = 1;");
 					break;
+				case 29:
+					$this->exec("INSERT INTO `Feature` (Feature, `Group`, Type) VALUES ('height-mm', 'physical', 3), ('msata-ports-n', 'ports', 1), ('m2-connectors-n', 'ports', 1)");
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('hdd-form-factor', '2.5'), ('hdd-form-factor', '1.8'), ('hdd-form-factor', '1')");
+					$this->exec("INSERT INTO `ItemFeature` (Code, `Feature`, `ValueDouble`) SELECT Code, 'height-mm', 15.0 FROM ItemFeature WHERE Feature = 'hdd-form-factor' AND ValueEnum LIKE '%-15mm'");
+					$this->exec("INSERT INTO `ItemFeature` (Code, `Feature`, `ValueDouble`) SELECT Code, 'height-mm', 9.5 FROM ItemFeature WHERE Feature = 'hdd-form-factor' AND ValueEnum LIKE '%-9.5mm'");
+					$this->exec("INSERT INTO `ItemFeature` (Code, `Feature`, `ValueDouble`) SELECT Code, 'height-mm', 8.0 FROM ItemFeature WHERE Feature = 'hdd-form-factor' AND ValueEnum LIKE '%-8mm'");
+					$this->exec("INSERT INTO `ItemFeature` (Code, `Feature`, `ValueDouble`) SELECT Code, 'height-mm', 7.0 FROM ItemFeature WHERE Feature = 'hdd-form-factor' AND ValueEnum LIKE '%-7mm'");
+					$this->exec("INSERT INTO `ItemFeature` (Code, `Feature`, `ValueDouble`) SELECT Code, 'height-mm', 5.0 FROM ItemFeature WHERE Feature = 'hdd-form-factor' AND ValueEnum LIKE '%-5mm'");
+					$this->exec("INSERT INTO `ProductFeature` (Brand, Model, Variant, `Feature`, `ValueDouble`) SELECT Brand, Model, Variant, 'height-mm', 15.0 FROM ProductFeature WHERE Feature = 'hdd-form-factor' AND ValueEnum LIKE '%-15mm'");
+					$this->exec("INSERT INTO `ProductFeature` (Brand, Model, Variant, `Feature`, `ValueDouble`) SELECT Brand, Model, Variant, 'height-mm', 9.5 FROM ProductFeature WHERE Feature = 'hdd-form-factor' AND ValueEnum LIKE '%-9.5mm'");
+					$this->exec("INSERT INTO `ProductFeature` (Brand, Model, Variant, `Feature`, `ValueDouble`) SELECT Brand, Model, Variant, 'height-mm', 8.0 FROM ProductFeature WHERE Feature = 'hdd-form-factor' AND ValueEnum LIKE '%-8mm'");
+					$this->exec("INSERT INTO `ProductFeature` (Brand, Model, Variant, `Feature`, `ValueDouble`) SELECT Brand, Model, Variant, 'height-mm', 7.0 FROM ProductFeature WHERE Feature = 'hdd-form-factor' AND ValueEnum LIKE '%-7mm'");
+					$this->exec("INSERT INTO `ProductFeature` (Brand, Model, Variant, `Feature`, `ValueDouble`) SELECT Brand, Model, Variant, 'height-mm', 5.0 FROM ProductFeature WHERE Feature = 'hdd-form-factor' AND ValueEnum LIKE '%-5mm'");
+					$this->exec("SET FOREIGN_KEY_CHECKS = 0;"); // See case 5 for an explanation
+					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = '2.5' WHERE `ValueEnum` LIKE '2.5-%' AND `Feature` = 'hdd-form-factor'");
+					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = '1.8' WHERE `ValueEnum` LIKE '1.8-%' AND `Feature` = 'hdd-form-factor'");
+					$this->exec("UPDATE `ItemFeature` SET `ValueEnum` = 'm2' WHERE `ValueEnum` = 'm2.2' AND `Feature` = 'hdd-form-factor'");
+					$this->exec("UPDATE `ProductFeature` SET `ValueEnum` = '2.5' WHERE `ValueEnum` LIKE '2.5-%' AND `Feature` = 'hdd-form-factor'");
+					$this->exec("UPDATE `ProductFeature` SET `ValueEnum` = '1.8' WHERE `ValueEnum` LIKE '1.8-%' AND `Feature` = 'hdd-form-factor'");
+					$this->exec("UPDATE `ProductFeature` SET `ValueEnum` = 'm2' WHERE `ValueEnum` = 'm2.2' AND `Feature` = 'hdd-form-factor'");
+					$this->exec("SET FOREIGN_KEY_CHECKS = 1;");
+					$this->exec("DELETE FROM `FeatureEnum` WHERE ValueEnum LIKE '2.5-%' OR ValueEnum LIKE '1.8-%' OR ValueEnum = 'm2.2'");
+					$this->exec("DELETE FROM `ProductFeature` WHERE ValueEnum LIKE '2.5-%' OR ValueEnum LIKE '1.8-%' OR ValueEnum = 'm2.2'");
+					break;
+				case 30:
+					$this->exec("INSERT INTO `Feature` (Feature, `Group`, Type) VALUES ('m2-slot-length-mm', 'physical', 3)");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}

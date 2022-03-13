@@ -45,7 +45,7 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('owner', 'Area IT'))
 			->addFeature(new Feature('sn', 'ABCD123123123'))
 			->addFeature(new Feature('sata-ports-n', 1))
-			->addFeature(new Feature('hdd-form-factor', "2.5-9.5mm"))
+			->addFeature(new Feature('hdd-form-factor', "2.5"))
 			->addFeature(new Feature('data-erased', 'yes'))
 			->addFeature(new Feature('smart-data', 'ok'))
 			->addFeature(new Feature('surface-scan', 'pass'))
@@ -54,8 +54,7 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		// "2.5 in. (9.5 mm)" is "hdd-form-factor"
-		$this->assertEquals('HDD 40 GB SATA 2.5 in. (9.5 mm) 5400 rpm, ESP, Western Digital Caviar WD40ASD, Windows XP',
+		$this->assertEquals('HDD 40 GB SATA 2.5 in. 5400 rpm, ESP, Western Digital Caviar WD40ASD, Windows XP',
 			$summary);
 
 		return $summary;
