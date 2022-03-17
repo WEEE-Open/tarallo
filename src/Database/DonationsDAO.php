@@ -29,6 +29,31 @@ class DonationsDAO extends DAO
     }
 
     /**
+     * get a specific donation
+     * @param Int $id_donation id of the donation
+     */
+    public function getDonation(Int $id_donation): array
+    {
+        $query = "SELECT * FROM Donations WHERE Donation = :id ";
+
+        $statement = $this->getPDO()->prepare($query);
+        $donation = [];
+        try {
+            //bind parametres
+            $statement->bindParam(':id',$id_donation);
+            $success = $statement->execute();
+            assert($success, 'Donation');
+            while( $row = $statement->fetch(\PDO::FETCH_ASSOC) )
+            {
+                $donation = $row;
+            }
+        } finally{
+            $statement->closeCursor();
+        }
+        return $donation;
+    }
+
+    /**
      * Create a new Record in Donation Table
      *
      * @param String $donation_name
