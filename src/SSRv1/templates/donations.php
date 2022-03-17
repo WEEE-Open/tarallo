@@ -7,7 +7,7 @@ $this->layout('main', ['title' => 'Donations', 'user' => $user]);
 		<div class="row d-flex m-0 justify-content-between">
         	<h2 class="col-6 p-0">Donations</h2>
             <input class="col-2 btn btn-outline-primary" type="button" value="New">
-			<a class="col-2 nav-link" href="/donation">Donation</a>
+			
 		</div>
 		<br>
 		<table class="table table-striped table-borderless">
