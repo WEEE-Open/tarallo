@@ -1363,6 +1363,17 @@ class Controller implements RequestHandlerInterface
         return $handler->handle($request);
     }
 
+    public static function updateDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        /** @var Database $db */
+        $db = $request->getAttribute('Database');
+        $body = $request->getParsedBody(); // parametres
+
+        $db->donationsDAO()->updateDonation();
+        //return to the donations page
+        return new RedirectResponse('/donations', 303);
+    }
+
     public static function deleteDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         /** @var Database $db */

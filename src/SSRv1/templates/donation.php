@@ -8,7 +8,7 @@ $this->layout('main', ['title' => 'Donation', 'user' => $user]);
         <h2 class="col-8 p-0">Donazione</h2>
     </div>
     <br>
-    <form class="row g-2" action="" method="POST">
+    <form class="row g-2" action="/donation/update" enctype="multipart/form-data" method="POST">
         <div class="col-12 mb-3">
             <label for="DonationName">Donation Name: </label>
             <input class="form-control" placeholder="Donation Name"  value="<?php echo $donation['DonationName'] ?>" type="text" name="DonationName" id="DonationName">

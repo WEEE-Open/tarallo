@@ -113,5 +113,24 @@ class DonationsDAO extends DAO
         }
     }
 
+    /**
+     * Updating an exiting donation
+     * @param array $donation
+     */
+    function updateDonation(Array $donation)
+    {
+        $query = "";
+
+        $statement = $this->getPDO()->prepare($query);
+        try {
+            //bind parametres
+            $statement->bindParam();
+            $success = $statement->execute();
+
+        } finally{
+            $statement->closeCursor();
+        }
+    }
+
 
 }
