@@ -1363,6 +1363,26 @@ class Controller implements RequestHandlerInterface
         return $handler->handle($request);
     }
 
+    public static function deleteDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+    {
+        /** @var Database $db */
+        $db = $request->getAttribute('Database');
+        $parameters = $request->getAttribute('parameters', []);
+
+        $id = Validation::validateOptionalInt($parameters, 'id', null);
+
+        $id_donation = $db->donationsDAO()->getDonation($id);
+
+        if(!$id_donation)
+        {
+            throw new NotFoundException(null, 'Donaazione non trovata!');
+        }
+        $db->donationsDAO()->deleteDonation($id);
+
+        return new RedirectResponse('/donations', 303);
+
+    }
+
     public static function getDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
         /** @var Database $db */

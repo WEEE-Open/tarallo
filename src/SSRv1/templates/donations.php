@@ -33,11 +33,21 @@ $this->layout('main', ['title' => 'Donations', 'user' => $user]);
 							?>
 						</td>
 						<td>
-							<button class="btn btn-danger ml-2 delete" data-name="brand" tabindex="-1">
-								<i class="fa fa-trash" role="img" aria-label="Delete"></i>
+							<button class="btn btn-danger ml-2 delete" data-name="brand" tabindex="-1" onclick='deleteDonation(<?php echo $donation["Donation"] ?>,<?php echo json_encode($donation["DonationName"]) ?>)'>
+                                <i class="fa fa-trash" role="img" aria-label="Delete"></i>
 							</button>
 						</td>
 				</tr>
 				<?php endforeach ?>
 			</tbody>
     </div>
+<script>
+    function deleteDonation(id,nome)
+    {
+        if( confirm('Vuoi eliminare la donazione : ' + nome) )
+        {
+            window.location.href = 'donation/' + id + '/delete'
+        }
+    }
+
+</script>

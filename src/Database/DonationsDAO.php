@@ -93,5 +93,25 @@ class DonationsDAO extends DAO
         }
     }
 
+    /**
+     * Delete a donation through id
+     * @param Int $id Id of donation
+     */
+    function deleteDonation(Int $id)
+    {
+        $query = "DELETE FROM Donations WHERE Donation = :id";
+
+        $statement = $this->getPDO()->prepare($query);
+        try {
+            //bind parametres
+            $statement->bindParam(':id',$id);
+            $success = $statement->execute();
+            assert($success, 'Donation Deleted');
+
+        } finally{
+            $statement->closeCursor();
+        }
+    }
+
 
 }
