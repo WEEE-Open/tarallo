@@ -2,6 +2,9 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
+use WEEEOpen\Tarallo\ItemCode;
+use WEEEOpen\Tarallo\ItemWithCode;
+
 class DonationsDAO extends DAO
 {
 
@@ -131,6 +134,33 @@ class DonationsDAO extends DAO
             $statement->closeCursor();
         }
     }
+
+    /**
+     * returns the code of items related to the donation
+     * @param Int $id_donation
+     * @return array
+     */
+    function itemsOfDonation(Int $id_donation) : array
+    {
+        $query = "SELECT Code FROM ItemDonation WHERE Donation = :id ";
+
+        $statement = $this->getPDO()->prepare($query);
+        $itemsCode = [];
+        try {
+            //bind parametres
+            $statement->bindParam(':id',$id_donation);
+            $success = $statement->execute();
+            assert($success, 'Items found');
+            while( $row = $statement->fetch(\PDO::FETCH_ASSOC) )
+            {
+                $itemsCode[] = new ItemCode($row['Code']);
+            }
+        } finally{
+            $statement->closeCursor();
+        }
+        return $itemsCode;
+    }
+
 
 
 }

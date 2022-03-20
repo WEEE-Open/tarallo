@@ -1402,15 +1402,22 @@ class Controller implements RequestHandlerInterface
 
         $id = Validation::validateOptionalInt($parameters, 'id', null);
 
-        $id_donation = $db->donationsDAO()->getDonation($id);
+        $donation = $db->donationsDAO()->getDonation($id);
 
-        if(!$id_donation)
+        if(!$donation)
         {
             throw new NotFoundException(null, 'Donaazione non trovata!');
         }
+        $itemsCode = $db->donationsDAO()->itemsOfDonation($id);
+
+        //adding to the donation the related items
+        foreach($itemsCode as $code)
+        {
+            $donation['items'][] = $db->itemDAO()->getItem($code);
+        }
 
         $templateParameters = [
-            'donation' => $id_donation
+            'donation' => $donation
         ];
 
         $request = $request->withAttribute('Template', 'donation')->withAttribute(

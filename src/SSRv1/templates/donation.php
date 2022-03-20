@@ -49,5 +49,32 @@ $this->layout('main', ['title' => 'Donation', 'user' => $user]);
                 </form>
             </div>
         </div>
+        <?php if(array_key_exists('items',$donation)){ ?>
+        <div id="items">
+            <ul  class="list-group">
+                <h2>Items</h2>
+            <?php foreach($donation['items'] as $item) : ?>
+            <li class="list-group-item">
+            <div class="card d-flex flex-row">
+                <ul class="list-group w-75">
+                <h5 class="card-header">Nome Computer</h5>
+                    <li class="list-group-item card-body">
+                        <h5 class="card-title">Componente</h5>
+                        <p class="card-text">Descrizione Minima</p>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center justify-content-center w-25 border-left px-1">
+                    <h2 class="text-truncate"><?=$this->e($item->getCode()); ?></h2>
+                </div>
+            </div>
+                <div class="d-flex justify-content-between mt-1">
+                    <button type="button" class="btn btn-dark">Avanzate</button>
+                    <button type="button" class="btn btn-danger">Rimuovi</button>
+                </div>
+            </li>
+            <?php endforeach ?>
+            </ul>
+        </div>
+        <?php } ?>
     </form>
 </div>
