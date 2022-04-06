@@ -739,7 +739,7 @@ class Controller implements RequestHandlerInterface
 		$name = rawurldecode(Validation::validateHasString($parameters, 'name'));
 		$limit = Validation::validateOptionalInt($query, 'limit', 10);
 
-		$item = $db->itemDAO()->getActualItemCode($name);
+		$item = $db->itemDAO()->getActualItemCode($name, true);
 
 		if (isset($item)) {
 			return new RedirectResponse('/item/' . rawurlencode($item->getCode()), 303);
@@ -753,7 +753,7 @@ class Controller implements RequestHandlerInterface
 			[
 				'searchTerm' => $name,
 				'limit' => $limit,
-				'item' => $db->itemDAO()->getActualItemCode($name),
+				'item' => $db->itemDAO()->getActualItemCode($name, true),
 				'brands' => $db->searchDAO()->getBrandsLike($name, $limit),
 				'products' => $db->searchDAO()->getProductsLike($name, $limit),
 				'features' => $db->searchDAO()->getFeaturesLike($name, $limit),
