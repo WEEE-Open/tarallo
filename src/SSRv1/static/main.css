@@ -173,7 +173,7 @@ tr.rootitem {
 	background: #eee;
 }
 
-.item + .item {
+.item:not(:first-child) {
 	margin-top: 2em;
 }
 
