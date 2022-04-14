@@ -202,7 +202,7 @@ endif; ?>
 			$empty = new \WEEEOpen\Tarallo\ItemIncomplete(null);
 			$empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('brand'));
 			$empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('model'));
-			$empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('variant'));
+			$empty->addFeature(new \WEEEOpen\Tarallo\Feature('variant', \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT));
 			$empty->addFeature(new \WEEEOpen\Tarallo\BaseFeature('type'));
 			$this->insert('newItem', ['recursion' => true, 'innerrecursion' => false, 'base' => $empty]);
 		}
