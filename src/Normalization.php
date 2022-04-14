@@ -324,8 +324,8 @@ class Normalization
 					'cpu-socket', 'ram-form-factor', 'ram-type', 'agp-sockets-n', 'pci-sockets-n', 'pcie-sockets-n',
 					'sata-ports-n', 'ide-ports-n', 'jae-ports-n', 'game-ports-n', 'serial-ports-n', 'parallel-ports-n',
 					'usb-ports-n', 'ethernet-ports-1000m-n', 'ethernet-ports-100m-n', 'ps2-ports-n', 'integrated-graphics-brand',
-					'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 's-video-ports-n', 'hdmi-ports-n',
-					's-video-7pin-ports-n', 'mini-jack-ports-n', 'psu-connector-cpu', 'psu-connector-motherboard',
+					'integrated-graphics-model', 'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n',
+					'mini-jack-ports-n', 'psu-connector-cpu', 'psu-connector-motherboard',
 				];
 			case 'cpu':
 				return [
@@ -356,7 +356,7 @@ class Normalization
 				return [
 					'integrated-graphics-brand', 'integrated-graphics-model',
 					'capacity-byte', 'vga-ports-n', 'dvi-ports-n',
-					'hdmi-ports-n', 's-video-ports-n', 's-video-7pin-ports-n', 'composite-video-ports-n',
+					'hdmi-ports-n', 'composite-video-ports-n',
 					'agp-sockets-n', 'pcie-sockets-n', 'pcie-power-pin-n', 'pci-low-profile', 'color'
 				];
 			case 'psu':
