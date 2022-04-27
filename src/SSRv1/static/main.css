@@ -177,6 +177,14 @@ tr.rootitem {
 	margin-top: 2em;
 }
 
+.breadbox + .item {
+        margin-top: 0;
+}
+
+.breadbox {
+        margin-top: 2em;
+}
+
 .item:not(.root) {
 	border: .1em solid #ccc;
 }
