@@ -361,13 +361,13 @@ class Normalization
 				];
 			case 'psu':
 				return [
-					'brand-manufacturer', 'power-connector',
+					'power-connector',
 					'power-rated-watt', 'psu-connector-cpu', 'psu-connector-motherboard', 'psu-form-factor',
 					'psu-12v-rail-ampere', 'pcie-power-pin-n', 'sata-power-n', 'color'
 				];
 			case 'external-psu':
 				return [
-					'brand-manufacturer', 'power-connector', 'psu-volt', 'psu-ampere'
+					'power-connector', 'psu-volt', 'psu-ampere'
 				];
 			case 'ethernet-card':
 				return [
@@ -407,7 +407,7 @@ class Normalization
 				];
 			case 'keyboard':
 			case 'mouse':
-				return ['brand-manufacturer', 'ps2-ports-n', 'usb-ports-n', 'wireless-receiver', 'color'];
+				return ['ps2-ports-n', 'usb-ports-n', 'wireless-receiver', 'color'];
 			case 'monitor':
 				return [
 					'diagonal-inch', 'vga-ports-n', 'dvi-ports-n', 'hdmi-ports-n', 's-video-ports-n',
