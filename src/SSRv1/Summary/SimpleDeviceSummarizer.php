@@ -11,7 +11,7 @@ class SimpleDeviceSummarizer implements Summarizer
 	public static function summarize(ItemWithFeatures $item): string
 	{
 		$type = FeaturePrinter::printableValue($item->getFeature('type'));
-		$ports = PartialSummaries::summarizePorts($item, true, ' ');
+		$ports = PartialSummaries::summarizePorts($item, false, ' ');
 //		$sockets = PartialSummaries::summarizeSockets($item, true, ' ');
 		$commercial = PartialSummaries::summarizeCommercial($item);
 		$color = $item->getFeature('color');
