@@ -1,0 +1,91 @@
+#!/usr/bin/php
+<?php
+
+namespace WEEEOpen\Tarallo;
+
+use WEEEOpen\Tarallo\Database\Database;
+use WEEEOpen\Tarallo\Normalization;
+
+if (php_sapi_name() !== 'cli') {
+	http_response_code(403);
+	header('Content-Type', 'text/plain');
+	echo 'Available only in PHP CLI';
+	exit(1);
+}
+
+require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
+
+if(count($argv) != 3) {
+	echo 'Missing parameter(s)';
+	echo PHP_EOL;
+	exit(1);
+}
+
+if($argv[1] == 'add') {
+	$add = true;
+	$print = false;
+} else if($argv[1] == 'print') {
+	$add = false;
+	$print = true;
+} else {
+	echo 'Nothing to do';
+	echo PHP_EOL;
+	exit(2);
+}
+
+$filename = __DIR__ . DIRECTORY_SEPARATOR . $argv[2];
+if(!is_file($filename)) {
+	echo 'Does not exist: ' . $filename;
+	echo PHP_EOL;
+	exit(1);
+}
+
+$fp = fopen($filename, 'r');
+if($fp === false) {
+	echo 'Cannot open file: ' . $filename;
+	echo PHP_EOL;
+	exit(1);
+}
+
+$rows = [];
+$first = true;
+while (($row = fgetcsv($fp)) !== false) {
+	if($first) {
+		$first = false;
+	} else {
+		$rows[] = $row;
+	}
+}
+
+fclose($fp);
+
+if($print) {
+	foreach($rows as $row) {
+		echo Normalization::minimizeText($row[0]) . ",$row[1],brand" . PHP_EOL;
+	}
+}
+
+if($add) {
+	try {
+		$db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);
+
+		foreach($rows as $row) {
+			try {
+				$db->featureDAO()->addNormalizedValue($row[0], $row[1], $row[2]);
+				echo "$row[2] | $row[0] => $row[1]: OK" . PHP_EOL;
+			} catch(\PDOException $e) {
+				echo "$row[2] | $row[0] => $row[1]: " . $e->getMessage() . PHP_EOL;
+			}
+		}
+	} catch(\Exception $e) {
+		echo get_class($e);
+		echo PHP_EOL;
+		echo $e->getMessage();
+		echo PHP_EOL;
+		echo $e->getTraceAsString();
+		exit(1);
+	}
+}
+
+exit(0);

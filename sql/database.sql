@@ -282,6 +282,17 @@ CREATE TABLE `BulkTable`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
+CREATE TABLE `Normalization`
+(
+    `MinimizedKey` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `NormalizedValue` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Category` VARCHAR(40) COLLATE utf8mb4_unicode_ci NOT NULL,
+    PRIMARY KEY (`MinimizedKey`),
+    INDEX (`Category`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
 -- ProductFeature - ItemFeature View
 
 CREATE VIEW ProductItemFeature AS
@@ -334,5 +345,5 @@ SELECT Code,
 FROM ProductItemFeature;
 
 -- Do not combine these lines, they're parsed by update-db... WITH A REGEX!
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 19);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 20);
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 31);

@@ -63,6 +63,31 @@ class Validation
 	}
 
 	/**
+	 * Return string value from a key if it exists (being casted if not a string),
+	 * or throw an exception.
+	 * Empty string is considered invalid.
+	 *
+	 * @param array $payload THE array
+	 * @param string $key Some key
+	 *
+	 * @return string|null Whatever the value is, or $default
+	 */
+	public static function validateMandatoryString(
+		array $payload,
+		string $key,
+	) {
+		if (!isset($payload[$key])) {
+			throw new InvalidRequestBodyException("Missing $key");
+		}
+		$value = $payload[$key];
+		if ($value === '') {
+			throw new InvalidRequestBodyException("Empty $key");
+		}
+		// TODO: is the decode required?
+		return rawurldecode($value);
+	}
+
+	/**
 	 * Return int value form a key if it exists (being casted if not an int),
 	 * or supplied default value if it doesn't
 	 *

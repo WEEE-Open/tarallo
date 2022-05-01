@@ -348,7 +348,7 @@ class Controller implements RequestHandlerInterface
 		return $handler->handle($request);
 	}
 
-	public static function options(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	public static function optionsMain(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
 		$body = $request->getParsedBody();
 		/** @var UserSSO $user */
@@ -358,17 +358,12 @@ class Controller implements RequestHandlerInterface
 
 		$error = null;
 		$token = null;
-		$editable = [
-			'DefaultHddLocation',
-			'DefaultCpuLocation',
-			'DefaultTodosLocation',
-		];
 
 		if ($body !== null && count($body) > 0) {
 			try {
 				if (isset($body['delete']) && isset($body['token'])) {
 					$db->sessionDAO()->deleteToken($body['token']);
-					return new RedirectResponse('/options', 303);
+					return new RedirectResponse('/options/main', 303);
 				} elseif (isset($body['description']) && isset($body['new'])) {
 					$data = new SessionLocal();
 					$data->level = $user->getLevel();
@@ -376,15 +371,45 @@ class Controller implements RequestHandlerInterface
 					$data->owner = $user->uid;
 					$token = SessionLocal::generateToken();
 					$db->sessionDAO()->setDataForToken($token, $data);
-				} elseif (isset($body['location']) && isset($body['default'])) {
-					if ($user->getLevel() === $user::AUTH_LEVEL_ADMIN) {
-						if (!in_array($body['default'], $editable, true)) {
-							throw new AuthorizationException('Not even admins can edit that');
-						}
-						$db->optionDAO()->setOptionValue($body['default'], $body['location']);
-					} else {
-						throw new AuthorizationException('Only admins can do that');
+				}
+			} catch (\Exception $e) {
+				$error = $e->getMessage();
+			}
+		}
+
+		$request = $request->withAttribute('Template', 'optionsMain');
+		$request = $request->withAttribute(
+			'TemplateParameters',
+			[
+			'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
+			'newToken' => $token,
+			'error' => $error
+			]
+		);
+		return $handler->handle($request);
+	}
+
+	public static function optionsStats(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$body = $request->getParsedBody();
+
+		$error = null;
+		$editable = [
+			'DefaultHddLocation',
+			'DefaultRamLocation',
+			'DefaultCpuLocation',
+			'DefaultTodosLocation',
+		];
+
+		if ($body !== null && count($body) > 0) {
+			try {
+				if (isset($body['location']) && isset($body['default'])) {
+					if (!in_array($body['default'], $editable, true)) {
+						throw new AuthorizationException('Not even admins can edit that');
 					}
+					$db->optionDAO()->setOptionValue($body['default'], $body['location']);
 				}
 			} catch (\Exception $e) {
 				$error = $e->getMessage();
@@ -396,15 +421,53 @@ class Controller implements RequestHandlerInterface
 			$optionsForTemplate[$optionKey] = $db->optionDAO()->getOptionValue($optionKey);
 		}
 
-		$request = $request->withAttribute('Template', 'options');
+		$request = $request->withAttribute('Template', 'optionsStats');
 		$request = $request->withAttribute(
 			'TemplateParameters',
 			[
-			'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
-			'newToken' => $token,
-			'defaultLocations' => $optionsForTemplate,
-			'apcuEnabled' => $db->hasApcu(),
-			'error' => $error
+				'defaultLocations' => $optionsForTemplate,
+				'error' => $error
+			]
+		);
+		return $handler->handle($request);
+	}
+
+	public static function optionsNormalization(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$body = $request->getParsedBody();
+
+		$error = null;
+
+		if ($body !== null && count($body) > 0) {
+			try {
+				if (isset($body['delete'])) {
+					// delete
+					$minimized = Validation::validateMandatoryString($body, 'minimized');
+					$db->featureDAO()->deleteNormalizedValue($minimized);
+					return new RedirectResponse('/options/normalization', 303);
+				} elseif (isset($body['new'])) {
+					// create
+					$value = Validation::validateMandatoryString($body, 'value');
+					$wrong = Validation::validateOptionalString($body, 'wrong', $value, $value);
+					$category = Validation::validateMandatoryString($body, 'category');
+					$db->featureDAO()->addNormalizedValue($wrong, $value, $category);
+					return new RedirectResponse('/options/normalization', 303);
+				}
+			} catch (\Exception $e) {
+				$error = $e->getMessage();
+			}
+		}
+
+		$request = $request->withAttribute('Template', 'optionsNormalization');
+		$request = $request->withAttribute(
+			'TemplateParameters',
+			[
+				'normalizationValues' => $db->featureDAO()->getAllNormalizationValues(),
+				'normalizationCategories' => $db->featureDAO()->getAllNormalizationCategories(),
+				'apcuEnabled' => $db->hasApcu(),
+				'error' => $error
 			]
 		);
 		return $handler->handle($request);
@@ -922,8 +985,6 @@ class Controller implements RequestHandlerInterface
 
 	public static function bulkAdd(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
-		///* @var Database $db */
-		//$db = $request->getAttribute('Database');
 		$body = $request->getParsedBody();
 
 		if ($body === null || count($body) === 0) {
@@ -955,8 +1016,8 @@ class Controller implements RequestHandlerInterface
 
 				if ($ok) {
 					foreach ($add as $item) {
-						// TODO: make an addAll function
 						$type = $item['type'];
+						$db->featureDAO()->tryNormalizeBulkImport($item);
 						$json = json_encode($item);
 						$db->bulkDAO()->addBulk($id, $type, $json);
 					}

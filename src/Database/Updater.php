@@ -665,7 +665,19 @@ END;"
 ;"
 					);
 					break;
-
+				case 19:
+					$this->exec(
+					'CREATE TABLE `Normalization`
+(
+    `MinimizedKey` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `NormalizedValue` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Category` VARCHAR(40) COLLATE utf8mb4_unicode_ci NOT NULL,
+    PRIMARY KEY (`MinimizedKey`),
+    INDEX (`Category`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;');
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}

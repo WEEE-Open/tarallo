@@ -64,7 +64,7 @@ $hereSr = function ($page, $current) {
 				<a class="nav-link <?= $hereClass('stats', $currentPage) ?>" href="/stats">Stats<?= $hereSr('stats', $currentPage) ?></a>
 			</li>
 			<li class="nav-item">
-				<a class="nav-link <?= $hereClass('options', $currentPage) ?>" href="/options">Options<?= $hereSr('options', $currentPage) ?></a>
+				<a class="nav-link <?= $hereClass('options', $currentPage) ?>" href="/options/main">Options<?= $hereSr('options', $currentPage) ?></a>
 			</li>
 		</ul>
 

@@ -14,3 +14,4 @@ config/config.php
 config/config-production.php
 public/adminer*
 .env
+*.csv

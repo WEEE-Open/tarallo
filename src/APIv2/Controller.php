@@ -769,6 +769,7 @@ class Controller implements RequestHandlerInterface
 		}
 		foreach ($body as $item) {
 			$type = $item['type'];
+			$db->featureDAO()->tryNormalizeBulkImport($item);
 			$json = json_encode($item);
 			$db->bulkDAO()->addBulk($identifier, $type, $json);
 		}

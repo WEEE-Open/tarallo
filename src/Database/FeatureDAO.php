@@ -12,9 +12,14 @@ use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ProductCode;
+use WEEEOpen\Tarallo\Normalization;
 
 final class FeatureDAO extends DAO
 {
+	private const NORMALIZATION_CATEGORY_BRAND = 'brand';
+	private const NORMALIZATION_CACHE_PREFIX = 'normalization_';
+	private const NORMALIZATION_CACHE_TTL = 60 * 60 * 24;
+
 	/**
 	 * Obtain \PDO::PARAM_... constant from feature name
 	 *
@@ -373,5 +378,172 @@ final class FeatureDAO extends DAO
 		$statement->bindValue(':m', $product->getModel(), \PDO::PARAM_STR);
 		$statement->bindValue(':v', $product->getVariant(), \PDO::PARAM_STR);
 		return $statement;
+	}
+
+	/**
+	 * Get all normalization values, for the settings page, not to be used to actually normalized.
+	 *
+	 * @return array
+	 */
+	public function getAllNormalizationValues()
+	{
+		$statement = $this->getPDO()->prepare('SELECT MinimizedKey, NormalizedValue, Category FROM Normalization');
+
+		try {
+			$success = $statement->execute();
+			assert($success, 'get all normalized values');
+
+			return $statement->fetchAll(\PDO::FETCH_NUM);
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * Get all normalization values, for the settings page, not to be used to actually normalized.
+	 *
+	 * @return array
+	 */
+	public function getAllNormalizationCategories()
+	{
+		$statement = $this->getPDO()->prepare('SELECT DISTINCT Category FROM Normalization');
+
+		try {
+			$success = $statement->execute();
+			assert($success, 'get normalized categories');
+
+			$result = [];
+			while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
+				$result[] = $row[0];
+			}
+			return $result;
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	public function addNormalizedValue(string $wrong, string $value, string $category)
+	{
+		$statement = $this->getPDO()->prepare('INSERT INTO Normalization(MinimizedKey, NormalizedValue, Category) VALUES (?, ?, ?)');
+
+		try {
+			$success = $statement->execute([Normalization::minimizeText($wrong), $value, $category]);
+			assert($success, 'add normalized value');
+
+			$this->deleteCache($category);
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	public function deleteNormalizedValue(string $minimized)
+	{
+		$statement = $this->getPDO()->prepare('DELETE FROM Normalization WHERE MinimizedKey = ?');
+
+		try {
+			$success = $statement->execute([$minimized]);
+			assert($success, 'add normalized value');
+
+			// TODO: delete only one category
+			foreach($this->getAllNormalizationCategories() as $category) {
+				$this->deleteCache($category);
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * Get normalization values from database
+	 *
+	 * @param string $category Normalization category
+	 *
+	 * @return array
+	 */
+	private function getNormalizationValues(string $category)
+	{
+		$statement = $this->getPDO()->prepare('SELECT MinimizedKey, NormalizedValue FROM Normalization WHERE Category = ?');
+		$statement->bindValue(1, $category);
+
+		try {
+			$success = $statement->execute();
+			assert($success, 'get normalized values');
+		} finally {
+			$statement->closeCursor();
+		}
+
+		$result = [];
+		while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
+			$result[$row[0]] = $row[1];
+		}
+
+		return $result;
+	}
+
+	private function apcuGenerator($key)
+	{
+		return $this->getNormalizationValues(substr($key, strlen(self::NORMALIZATION_CACHE_PREFIX)));
+	}
+
+	private function normalizeText(string $text, string $category, bool &$found): string
+	{
+		switch($category) {
+			case self::NORMALIZATION_CATEGORY_BRAND:
+				if (Database::hasApcu()) {
+					$success = null;
+					$values = apcu_fetch(self::NORMALIZATION_CACHE_PREFIX . $category, $success);
+					if (!$success) {
+						$values = apcu_entry(self::NORMALIZATION_CACHE_PREFIX . $category, [$this, 'apcuGenerator'], self::NORMALIZATION_CACHE_TTL);
+					}
+				} else {
+					$values = $this->getNormalizationValues($category);
+				}
+
+				$textMinimized = Normalization::minimizeText($text);
+				if (isset($values[$textMinimized])) {
+					$found = true;
+					return $values[$textMinimized];
+				} else {
+					$found = false;
+					return $text;
+				}
+				break;
+			default:
+				throw new \InvalidArgumentException('Unknown normalization category: ' . self::NORMALIZATION_CATEGORY_BRAND);
+		}
+	}
+
+	private function deleteCache(string $category)
+	{
+		if (Database::hasApcu()) {
+			apcu_delete(self::NORMALIZATION_CACHE_PREFIX . $category);
+		}
+	}
+
+	public function tryNormalizeBulkImport(array &$stuff)
+	{
+		if (isset($stuff['features'])) {
+			if (isset($stuff['features']['brand'])) {
+				$found = false;
+				$normalized = $this->normalizeText($stuff['features']['brand'], self::NORMALIZATION_CATEGORY_BRAND, $found);
+				// Is it worth comparing $stuff['features']['brand'] === $normalized?
+				// It may have been normalized into the same value...
+				if($found) {
+					$stuff['features']['brand'] = $normalized;
+				}
+			}
+			if (isset($stuff['features']['brand-manufacturer'])) {
+				$found = false;
+				$normalized = $this->normalizeText($stuff['features']['brand-manufacturer'], self::NORMALIZATION_CATEGORY_BRAND, $found);
+				if($found) {
+					$stuff['features']['brand-manufacturer'] = $normalized;
+				}
+			}
+		}
+		if (isset($stuff['contents'])) {
+			foreach ($stuff['contents'] as &$otherStuff) {
+				$this->tryNormalizeBulkImport($otherStuff);
+			}
+		}
 	}
 }

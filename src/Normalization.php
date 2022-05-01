@@ -568,4 +568,9 @@ class Normalization
 			}
 		}
 	}
+
+	public static function minimizeText(string $text): string
+	{
+		return preg_replace("/[^a-z0-9&]/", '', strtolower($text));
+	}
 }
