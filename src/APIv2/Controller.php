@@ -297,7 +297,7 @@ class Controller implements RequestHandlerInterface
 		$loopback = isset($query['loopback']);
 		$validate = !isset($query['novalidate']);
 
-		$normalizedBrand = $db->featureDAO()->tryNormalizeValue($brand, 'brand');
+		$normalizedBrand = $db->featureDAO()->tryNormalizeValue('brand', $brand);
 		if ($normalizedBrand !== null) {
 			// $previousBrand = $brand;
 			$brand = $normalizedBrand;
@@ -350,7 +350,7 @@ class Controller implements RequestHandlerInterface
 		$modelNew = Validation::validateOptionalString($payload, 'model', null, null);
 		$variantNew = Validation::validateOptionalString($payload, 'variant', null, null);
 
-		$normalizedBrand = $db->featureDAO()->tryNormalizeValue($brand, 'brand');
+		$normalizedBrand = $db->featureDAO()->tryNormalizeValue('brand', $brand);
 		if ($normalizedBrand !== null) {
 			$brandNew = $normalizedBrand;
 		}

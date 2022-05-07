@@ -510,16 +510,16 @@ final class FeatureDAO extends DAO
 		$statement = $this->getPDO()->prepare('SELECT MinimizedKey, NormalizedValue FROM Normalization WHERE Category = ?');
 		$statement->bindValue(1, $category);
 
+		$result = [];
 		try {
 			$success = $statement->execute();
 			assert($success, 'get normalized values');
+
+			while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
+				$result[$row[0]] = $row[1];
+			}
 		} finally {
 			$statement->closeCursor();
-		}
-
-		$result = [];
-		while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
-			$result[$row[0]] = $row[1];
 		}
 
 		return $result;
@@ -544,13 +544,10 @@ final class FeatureDAO extends DAO
 
 		$textMinimized = Normalization::minimizeText($text);
 		if (isset($values[$textMinimized])) {
-			$found = true;
 			return $values[$textMinimized];
 		} else {
-			$found = false;
-			return $text;
+			return null;
 		}
-		return null;
 	}
 
 	private function deleteCache(string $category)
@@ -615,10 +612,10 @@ final class FeatureDAO extends DAO
 	public function tryNormalizeAll(array &$features)
 	{
 		$normalizeWith = self::getNormalizationMapping();
-		foreach (&$features as $key => $feature) {
+		foreach ($features as $key => $feature) {
 			/** @var Feature $feature */
 			if (isset($normalizeWith[$feature->name])) {
-				$normalized = $this->tryNormalizeFeature($feature->value, $normalizeWith[$feature->name]);
+				$normalized = $this->tryNormalizeFeature($feature, $normalizeWith[$feature->name]);
 				if ($normalized !== null) {
 					$features[$key] = $normalized;
 				}
