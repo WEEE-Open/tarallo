@@ -227,6 +227,8 @@ final class FeatureDAO extends DAO
 			return false;
 		}
 
+		$this->tryNormalizeAll($features);
+
 		$changes = false;
 		foreach ($features as $feature) {
 			$changed = $this->setFeature($item, $feature);
@@ -528,32 +530,27 @@ final class FeatureDAO extends DAO
 		return $this->getNormalizationValues(substr($key, strlen(self::NORMALIZATION_CACHE_PREFIX)));
 	}
 
-	private function normalizeText(string $text, string $category): string
+	private function normalizeText(string $text, string $category): ?string
 	{
-		switch ($category) {
-			case self::NORMALIZATION_CATEGORY_BRAND:
-				if (Database::hasApcu()) {
-					$success = null;
-					$values = apcu_fetch(self::NORMALIZATION_CACHE_PREFIX . $category, $success);
-					if (!$success) {
-						$values = apcu_entry(self::NORMALIZATION_CACHE_PREFIX . $category, [$this, 'apcuGenerator'], self::NORMALIZATION_CACHE_TTL);
-					}
-				} else {
-					$values = $this->getNormalizationValues($category);
-				}
-
-				$textMinimized = Normalization::minimizeText($text);
-				if (isset($values[$textMinimized])) {
-					//$found = true;
-					return $values[$textMinimized];
-				} else {
-					//$found = false;
-					return $text;
-				}
-				break;
-			default:
-				throw new \InvalidArgumentException('Unknown normalization category: ' . self::NORMALIZATION_CATEGORY_BRAND);
+		if (Database::hasApcu()) {
+			$success = null;
+			$values = apcu_fetch(self::NORMALIZATION_CACHE_PREFIX . $category, $success);
+			if (!$success) {
+				$values = apcu_entry(self::NORMALIZATION_CACHE_PREFIX . $category, [$this, 'apcuGenerator'], self::NORMALIZATION_CACHE_TTL);
+			}
+		} else {
+			$values = $this->getNormalizationValues($category);
 		}
+
+		$textMinimized = Normalization::minimizeText($text);
+		if (isset($values[$textMinimized])) {
+			$found = true;
+			return $values[$textMinimized];
+		} else {
+			$found = false;
+			return $text;
+		}
+		return null;
 	}
 
 	private function deleteCache(string $category)
@@ -563,6 +560,11 @@ final class FeatureDAO extends DAO
 		}
 	}
 
+	/**
+	 * Normalize items/products from a bulk import
+	 *
+	 * @param array $stuff One item or product
+	 */
 	public function tryNormalizeBulkImport(array &$stuff)
 	{
 		if (isset($stuff['features'])) {
@@ -570,7 +572,9 @@ final class FeatureDAO extends DAO
 			foreach ($normalizeWith as $feature => $group) {
 				if (isset($stuff['features'][$feature])) {
 					$normalized = $this->normalizeText($stuff['features'][$feature], $group);
-					$stuff['features'][$feature] = $normalized;
+					if ($normalized !== null) {
+						$stuff['features'][$feature] = $normalized;
+					}
 				}
 			}
 		}
@@ -579,5 +583,35 @@ final class FeatureDAO extends DAO
 				$this->tryNormalizeBulkImport($otherStuff);
 			}
 		}
+	}
+
+	/**
+	 * Normalize all features
+	 *
+	 * @param Feature[] $features List of features
+	 */
+	public function tryNormalizeAll(array &$features)
+	{
+		$normalizeWith = self::getNormalizationMapping();
+		foreach (&$features as $key => $feature) {
+			/** @var Feature $feature */
+			if (isset($normalizeWith[$feature->name])) {
+				$normalized = $this->tryNormalizeFeature($feature->value, $normalizeWith[$feature->name]);
+				if ($normalized !== null) {
+					$features[$key] = $normalized;
+				}
+			}
+		}
+	}
+
+	private function tryNormalizeFeature(Feature $feature, string $category): ?Feature
+	{
+		$normalized = $this->normalizeText($feature->value, $category);
+		if ($normalized !== null) {
+			if ($normalized !== $feature->value) {
+				return new Feature($feature->name, $normalized);
+			}
+		}
+		return null;
 	}
 }
