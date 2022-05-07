@@ -5,6 +5,7 @@ namespace WEEEOpen\Tarallo\Database;
 use PDOStatement;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
+use WEEEOpen\Tarallo\ForbiddenNormalizationException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemTraitFeatures;
 use WEEEOpen\Tarallo\ItemWithCode;
@@ -17,8 +18,24 @@ use WEEEOpen\Tarallo\Normalization;
 final class FeatureDAO extends DAO
 {
 	private const NORMALIZATION_CATEGORY_BRAND = 'brand';
+	private const NORMALIZATION_CATEGORY_OWNER = 'owner';
+	private const NORMALIZATION_CATEGORY_OS_VERSION = 'os-version';
+	private const NORMALIZATION_CATEGORY_KEY = 'key';
 	private const NORMALIZATION_CACHE_PREFIX = 'normalization_';
 	private const NORMALIZATION_CACHE_TTL = 60 * 60 * 24;
+
+	public static function getNormalizationMapping(): array
+	{
+		return [
+			'brand' => self::NORMALIZATION_CATEGORY_BRAND,
+			'brand-manufacturer' => self::NORMALIZATION_CATEGORY_BRAND,
+			'integrated-graphics-brand' => self::NORMALIZATION_CATEGORY_BRAND,
+			'os-license-version' => self::NORMALIZATION_CATEGORY_OS_VERSION,
+			'owner' => self::NORMALIZATION_CATEGORY_OWNER,
+			'key-bios-setup' => self::NORMALIZATION_CATEGORY_KEY,
+			'key-boot-menu' => self::NORMALIZATION_CATEGORY_KEY,
+		];
+	}
 
 	/**
 	 * Obtain \PDO::PARAM_... constant from feature name
@@ -387,7 +404,7 @@ final class FeatureDAO extends DAO
 	 */
 	public function getAllNormalizationValues()
 	{
-		$statement = $this->getPDO()->prepare('SELECT MinimizedKey, NormalizedValue, Category FROM Normalization');
+		$statement = $this->getPDO()->prepare('SELECT MinimizedKey, NormalizedValue, Category FROM Normalization ORDER BY Category, NormalizedValue');
 
 		try {
 			$success = $statement->execute();
@@ -422,12 +439,38 @@ final class FeatureDAO extends DAO
 		}
 	}
 
+	public function isNormalizationForbidden(string $minimized, string $category)
+	{
+		$statement = $this->getPDO()->prepare('SELECT COUNT(*) FROM NormalizationForbidden WHERE MinimizedKey = ? AND Category = ?');
+
+		try {
+			$success = $statement->execute([$minimized, $category]);
+			assert($success, 'check forbidden normalization');
+
+			$result = [];
+			$count = (int) $statement->fetchAll(\PDO::FETCH_NUM)[0][0];
+
+			return $count > 0;
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * @throws ForbiddenNormalizationException
+	 */
 	public function addNormalizedValue(string $wrong, string $value, string $category)
 	{
+		$minimized = Normalization::minimizeText($wrong);
+		$isForbidden = $this->isNormalizationForbidden($minimized, $category);
+		if ($isForbidden) {
+			throw new ForbiddenNormalizationException();
+		}
+
 		$statement = $this->getPDO()->prepare('INSERT INTO Normalization(MinimizedKey, NormalizedValue, Category) VALUES (?, ?, ?)');
 
 		try {
-			$success = $statement->execute([Normalization::minimizeText($wrong), $value, $category]);
+			$success = $statement->execute([$minimized, $value, $category]);
 			assert($success, 'add normalized value');
 
 			$this->deleteCache($category);
@@ -445,7 +488,7 @@ final class FeatureDAO extends DAO
 			assert($success, 'add normalized value');
 
 			// TODO: delete only one category
-			foreach($this->getAllNormalizationCategories() as $category) {
+			foreach ($this->getAllNormalizationCategories() as $category) {
 				$this->deleteCache($category);
 			}
 		} finally {
@@ -485,9 +528,9 @@ final class FeatureDAO extends DAO
 		return $this->getNormalizationValues(substr($key, strlen(self::NORMALIZATION_CACHE_PREFIX)));
 	}
 
-	private function normalizeText(string $text, string $category, bool &$found): string
+	private function normalizeText(string $text, string $category): string
 	{
-		switch($category) {
+		switch ($category) {
 			case self::NORMALIZATION_CATEGORY_BRAND:
 				if (Database::hasApcu()) {
 					$success = null;
@@ -501,10 +544,10 @@ final class FeatureDAO extends DAO
 
 				$textMinimized = Normalization::minimizeText($text);
 				if (isset($values[$textMinimized])) {
-					$found = true;
+					//$found = true;
 					return $values[$textMinimized];
 				} else {
-					$found = false;
+					//$found = false;
 					return $text;
 				}
 				break;
@@ -523,20 +566,11 @@ final class FeatureDAO extends DAO
 	public function tryNormalizeBulkImport(array &$stuff)
 	{
 		if (isset($stuff['features'])) {
-			if (isset($stuff['features']['brand'])) {
-				$found = false;
-				$normalized = $this->normalizeText($stuff['features']['brand'], self::NORMALIZATION_CATEGORY_BRAND, $found);
-				// Is it worth comparing $stuff['features']['brand'] === $normalized?
-				// It may have been normalized into the same value...
-				if($found) {
-					$stuff['features']['brand'] = $normalized;
-				}
-			}
-			if (isset($stuff['features']['brand-manufacturer'])) {
-				$found = false;
-				$normalized = $this->normalizeText($stuff['features']['brand-manufacturer'], self::NORMALIZATION_CATEGORY_BRAND, $found);
-				if($found) {
-					$stuff['features']['brand-manufacturer'] = $normalized;
+			$normalizeWith = self::getNormalizationMapping();
+			foreach ($normalizeWith as $feature => $group) {
+				if (isset($stuff['features'][$feature])) {
+					$normalized = $this->normalizeText($stuff['features'][$feature], $group);
+					$stuff['features'][$feature] = $normalized;
 				}
 			}
 		}

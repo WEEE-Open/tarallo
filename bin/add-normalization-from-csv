@@ -76,6 +76,8 @@ if($add) {
 				echo "$row[2] | $row[0] => $row[1]: OK" . PHP_EOL;
 			} catch(\PDOException $e) {
 				echo "$row[2] | $row[0] => $row[1]: " . $e->getMessage() . PHP_EOL;
+			} catch(ForbiddenNormalizationException $e) {
+				echo "$row[2] | $row[0] => $row[1]: forbidden" . PHP_EOL;
 			}
 		}
 	} catch(\Exception $e) {

@@ -15,6 +15,7 @@ use WEEEOpen\Tarallo\Database\TreeDAO;
 use WEEEOpen\Tarallo\ErrorHandler;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\FeatureValidationException;
+use WEEEOpen\Tarallo\ForbiddenNormalizationException;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
 use WEEEOpen\Tarallo\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\HTTP\AuthValidator;
@@ -455,6 +456,8 @@ class Controller implements RequestHandlerInterface
 					$db->featureDAO()->addNormalizedValue($wrong, $value, $category);
 					return new RedirectResponse('/options/normalization', 303);
 				}
+			} catch (ForbiddenNormalizationException $e) {
+				$error = "This value is ambiguous or handled in code, it cannot be normalized here";
 			} catch (\Exception $e) {
 				$error = $e->getMessage();
 			}

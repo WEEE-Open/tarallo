@@ -58,21 +58,21 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 	<p><small>There are <?= count($normalizationValues); ?> rows.</small></p>
 	<script>
 		let search = document.getElementById("search");
-        let normalizationtable = document.getElementById("normalizationtable");
-        let debounceTimer;
+		let normalizationtable = document.getElementById("normalizationtable");
+		let debounceTimer;
 
-        search.addEventListener('keyup', () => {
-            clearTimeout(debounceTimer);
+		search.addEventListener('keyup', () => {
+			clearTimeout(debounceTimer);
 
-            debounceTimer = setTimeout(() => {
-                let minimized = search.value.toLowerCase().replace(/[^a-z0-9&]/, '');
-                for(let td of normalizationtable.querySelectorAll('td.minimized')) {
-                    if(minimized === '' || td.textContent === minimized) {
-                        td.parentElement.classList.remove("d-none");
-                    } else {
-                        td.parentElement.classList.add("d-none");
-                    }
-                }
+			debounceTimer = setTimeout(() => {
+				let minimized = search.value.toLowerCase().replace(/[^a-z0-9&]/, '');
+				for(let td of normalizationtable.querySelectorAll('td.minimized')) {
+					if(minimized === '' || td.textContent === minimized) {
+						td.parentElement.classList.remove("d-none");
+					} else {
+						td.parentElement.classList.add("d-none");
+					}
+				}
 			}, 300);
 		});
 	</script>
@@ -95,8 +95,8 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 		</div>
 		<script>
 			let wrong = document.getElementById('wrong');
-            let value = document.getElementById('value');
-            value.addEventListener('change', () => {
+			let value = document.getElementById('value');
+			value.addEventListener('change', () => {
 				wrong.placeholder = value.value;
 			});
 		</script>
@@ -104,7 +104,7 @@ $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => '
 			<label class="col col-form-label" for="category">Category</label>
 			<div class="col">
 				<select class="form-control" id="category" name="category" required>
-					<?php foreach($normalizationCategories as $category): ?>
+					<?php foreach ($normalizationCategories as $category) : ?>
 					<option value="<?= $this->e($category) ?>"><?= $this->e($category) ?></option>
 					<?php endforeach; ?>
 				</select>
