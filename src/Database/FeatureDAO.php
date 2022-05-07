@@ -586,6 +586,28 @@ final class FeatureDAO extends DAO
 	}
 
 	/**
+	 * Normalize a single string value
+	 *
+	 * @param string $category Feature name
+	 * @param string $value The value
+	 *
+	 * @return string|null The normalized value if different
+	 */
+	public function tryNormalizeValue(string $name, string $value): ?string
+	{
+		$normalizeWith = self::getNormalizationMapping();
+		if (isset($normalizeWith[$name])) {
+			$normalized = $this->normalizeText($value, $normalizeWith[$name]);
+			if ($normalized !== null) {
+				if ($normalized !== $value) {
+					return $normalized;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Normalize all features
 	 *
 	 * @param Feature[] $features List of features

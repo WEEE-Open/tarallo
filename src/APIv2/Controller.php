@@ -9,6 +9,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 use Relay\RelayBuilder;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Database\Database;
+use WEEEOpen\Tarallo\Database\FeatureDAO;
 use WEEEOpen\Tarallo\Database\TreeDAO;
 use WEEEOpen\Tarallo\DuplicateBulkIdentifierException;
 use WEEEOpen\Tarallo\ErrorHandler;
@@ -296,6 +297,12 @@ class Controller implements RequestHandlerInterface
 		$loopback = isset($query['loopback']);
 		$validate = !isset($query['novalidate']);
 
+		$normalizedBrand = $db->featureDAO()->tryNormalizeValue($brand, 'brand');
+		if ($normalizedBrand !== null) {
+			// $previousBrand = $brand;
+			$brand = $normalizedBrand;
+		}
+
 		$product = ProductBuilder::ofArray($payload, $brand, $model, $variant);
 
 		if ($importId) {
@@ -315,6 +322,8 @@ class Controller implements RequestHandlerInterface
 		if ($importId) {
 			$db->bulkDAO()->deleteImport($importId);
 		}
+
+		// TODO: if($normalizedBrand !== null), rename items that had $previousBrand?
 
 		if ($loopback) {
 			$response = new JsonResponse($db->productDAO()->getProduct($product), 201);
@@ -340,6 +349,11 @@ class Controller implements RequestHandlerInterface
 		$brandNew = Validation::validateOptionalString($payload, 'brand', null, null);
 		$modelNew = Validation::validateOptionalString($payload, 'model', null, null);
 		$variantNew = Validation::validateOptionalString($payload, 'variant', null, null);
+
+		$normalizedBrand = $db->featureDAO()->tryNormalizeValue($brand, 'brand');
+		if ($normalizedBrand !== null) {
+			$brandNew = $normalizedBrand;
+		}
 
 		$product = new ProductCode($brand, $model, $variant);
 		$product = $db->productDAO()->renameProduct($product, $brandNew, $modelNew, $variantNew);
