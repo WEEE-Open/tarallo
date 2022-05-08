@@ -18,7 +18,7 @@ WORKDIR /var/www/html
 # Download and install Adminer. Also substitute default server host from "localhost" to "db" for convenience
 RUN if [ "$DEVELOPMENT" = "true" ]; then\
         mkdir -p /var/www/html/admin \
-        && curl -o /var/www/html/admin/index.php -L https://github.com/vrana/adminer/releases/download/v4.8.0/adminer-4.8.0-mysql-en.php \
+        && curl -o /var/www/html/admin/index.php -L https://github.com/vrana/adminer/releases/download/v4.8.1/adminer-4.8.1-mysql-en.php \
         && sed -i "s#'\.h(SERVER)\.'\" title#db\" title#g" /var/www/html/admin/index.php; \
     fi
 
