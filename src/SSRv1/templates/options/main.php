@@ -4,6 +4,7 @@
 /** @var string|null $newToken */
 /** @var string|null $error */
 $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options', 'container' => true]);
+$this->insert('options::menu', ['currentPage' => '']);
 ?>
 
 <?php if ($error !== null) : ?>

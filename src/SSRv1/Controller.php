@@ -364,7 +364,7 @@ class Controller implements RequestHandlerInterface
 			try {
 				if (isset($body['delete']) && isset($body['token'])) {
 					$db->sessionDAO()->deleteToken($body['token']);
-					return new RedirectResponse('/options/main', 303);
+					return new RedirectResponse('/options', 303);
 				} elseif (isset($body['description']) && isset($body['new'])) {
 					$data = new SessionLocal();
 					$data->level = $user->getLevel();
@@ -378,7 +378,7 @@ class Controller implements RequestHandlerInterface
 			}
 		}
 
-		$request = $request->withAttribute('Template', 'optionsMain');
+		$request = $request->withAttribute('Template', 'options::main');
 		$request = $request->withAttribute(
 			'TemplateParameters',
 			[
@@ -411,6 +411,7 @@ class Controller implements RequestHandlerInterface
 						throw new AuthorizationException('Not even admins can edit that');
 					}
 					$db->optionDAO()->setOptionValue($body['default'], $body['location']);
+					return new RedirectResponse($request->getRequestTarget(), 303);
 				}
 			} catch (\Exception $e) {
 				$error = $e->getMessage();
@@ -422,7 +423,7 @@ class Controller implements RequestHandlerInterface
 			$optionsForTemplate[$optionKey] = $db->optionDAO()->getOptionValue($optionKey);
 		}
 
-		$request = $request->withAttribute('Template', 'optionsStats');
+		$request = $request->withAttribute('Template', 'options::stats');
 		$request = $request->withAttribute(
 			'TemplateParameters',
 			[
@@ -447,14 +448,14 @@ class Controller implements RequestHandlerInterface
 					// delete
 					$minimized = Validation::validateMandatoryString($body, 'minimized');
 					$db->featureDAO()->deleteNormalizedValue($minimized);
-					return new RedirectResponse('/options/normalization', 303);
+					return new RedirectResponse($request->getRequestTarget(), 303);
 				} elseif (isset($body['new'])) {
 					// create
 					$value = Validation::validateMandatoryString($body, 'value');
 					$wrong = Validation::validateOptionalString($body, 'wrong', $value, $value);
 					$category = Validation::validateMandatoryString($body, 'category');
 					$db->featureDAO()->addNormalizedValue($wrong, $value, $category);
-					return new RedirectResponse('/options/normalization', 303);
+					return new RedirectResponse($request->getRequestTarget(), 303);
 				}
 			} catch (ForbiddenNormalizationException $e) {
 				$error = "This value is ambiguous or handled in code, it cannot be normalized here";
@@ -463,7 +464,7 @@ class Controller implements RequestHandlerInterface
 			}
 		}
 
-		$request = $request->withAttribute('Template', 'optionsNormalization');
+		$request = $request->withAttribute('Template', 'options::normalization');
 		$request = $request->withAttribute(
 			'TemplateParameters',
 			[

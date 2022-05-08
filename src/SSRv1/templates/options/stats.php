@@ -4,6 +4,7 @@
 /** @var string[] $defaultLocations */
 /** @var bool $apcuEnabled */
 $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options', 'container' => true]);
+$this->insert('options::menu', ['currentPage' => 'stats']);
 ?>
 <?php $locationNames = [
 	'DefaultCpuLocation' => 'Default location for CPU stats',

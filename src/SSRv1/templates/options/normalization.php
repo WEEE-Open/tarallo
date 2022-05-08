@@ -5,6 +5,7 @@
 /** @var string[] $normalizationCategories */
 /** @var bool $apcuEnabled */
 $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options', 'container' => true]);
+$this->insert('options::menu', ['currentPage' => 'normalization']);
 ?>
 <?php $locationNames = [
 	'DefaultRamLocation' => 'Default location for RAM stats',

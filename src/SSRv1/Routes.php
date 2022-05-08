@@ -44,12 +44,17 @@ trait Routes
 				$r->get('/search/advanced/{id:[0-9]+}/page/{page:[0-9]+}/add/{add}', [User::AUTH_LEVEL_RO, [Controller::class, 'search']]);
 				$r->get('/search/advanced/{id:[0-9]+}/edit/{edit}', [User::AUTH_LEVEL_RO, [Controller::class, 'search']]);
 				$r->get('/search/advanced/{id:[0-9]+}/page/{page:[0-9]+}/edit/{edit}', [User::AUTH_LEVEL_RO, [Controller::class, 'search']]);
-				$r->get('/options/main', [User::AUTH_LEVEL_RO, [Controller::class, 'optionsMain']]);
-				$r->post('/options/main', [User::AUTH_LEVEL_RO, [Controller::class, 'optionsMain']]);
-				$r->get('/options/stats', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'optionsStats']]);
-				$r->post('/options/stats', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'optionsStats']]);
-				$r->get('/options/normalization', [User::AUTH_LEVEL_RW, [Controller::class, 'optionsNormalization']]);
-				$r->post('/options/normalization', [User::AUTH_LEVEL_RW, [Controller::class, 'optionsNormalization']]);
+				$r->addGroup(
+					'/options',
+					function (FastRoute\RouteCollector $r) {
+						$r->get('', [User::AUTH_LEVEL_RO, [Controller::class, 'optionsMain']]);
+						$r->post('', [User::AUTH_LEVEL_RO, [Controller::class, 'optionsMain']]);
+						$r->get('/stats', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'optionsStats']]);
+						$r->post('/stats', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'optionsStats']]);
+						$r->get('/normalization', [User::AUTH_LEVEL_RW, [Controller::class, 'optionsNormalization']]);
+						$r->post('/normalization', [User::AUTH_LEVEL_RW, [Controller::class, 'optionsNormalization']]);
+					}
+				);
 				$r->get('/bulk', [User::AUTH_LEVEL_RO, [Controller::class, 'bulk']]);
 				$r->get('/bulk/move', [User::AUTH_LEVEL_RO, [Controller::class, 'bulkMove']]);
 				$r->post('/bulk/move', [User::AUTH_LEVEL_RW, [Controller::class, 'bulkMove']]);
