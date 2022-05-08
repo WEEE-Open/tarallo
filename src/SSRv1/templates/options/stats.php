@@ -10,7 +10,7 @@ $this->insert('options::menu', ['currentPage' => 'stats']);
 	'DefaultCpuLocation' => 'Default location for CPU stats',
 	'DefaultRamLocation' => 'Default location for RAM stats',
 	'DefaultHddLocation' => 'Default location for HDD stats',
-	'DefaultLabLocation' => 'Lab name, for stats',
+	'DefaultTodosLocation' => 'Lab name, for TODOs',
 ];
 ?>
 

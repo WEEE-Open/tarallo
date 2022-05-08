@@ -62,7 +62,7 @@ $this->insert('options::menu', ['currentPage' => 'normalization']);
 		let normalizationtable = document.getElementById("normalizationtable");
 		let debounceTimer;
 		let filter = () => {
-			let minimized = search.value.toLowerCase().replace(/[^a-z0-9&]/, '');
+			let minimized = search.value.toLowerCase().replace(/[^a-z0-9&]/g, '');
 			for(let td of normalizationtable.querySelectorAll('td.minimized')) {
 				if(minimized === '' || td.textContent === minimized) {
 					td.parentElement.classList.remove("d-none");
