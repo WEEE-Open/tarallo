@@ -72,10 +72,8 @@ class Validation
 	 *
 	 * @return string|null Whatever the value is, or $default
 	 */
-	public static function validateMandatoryString(
-		array $payload,
-		string $key,
-	) {
+	public static function validateMandatoryString(array $payload, string $key)
+	{
 		if (!isset($payload[$key])) {
 			throw new InvalidRequestBodyException("Missing $key");
 		}
