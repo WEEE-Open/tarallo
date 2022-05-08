@@ -6,7 +6,6 @@ use WEEEOpen\Tarallo\DuplicateBulkIdentifierException;
 
 final class BulkDAO extends DAO
 {
-
 	/**
 	 * Add an entry to the bulk table
 	 *

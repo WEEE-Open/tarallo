@@ -7,7 +7,6 @@ use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class SimplePortsSummarizer implements Summarizer
 {
-
 	public static function summarize(ItemWithFeatures $item): string
 	{
 		$type = FeaturePrinter::printableValue($item->getFeature('type'));

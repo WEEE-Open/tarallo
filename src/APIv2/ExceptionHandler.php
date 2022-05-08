@@ -10,7 +10,6 @@ use Laminas\Diactoros\Response\JsonResponse;
 
 class ExceptionHandler implements MiddlewareInterface
 {
-
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
 		try {

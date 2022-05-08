@@ -7,7 +7,6 @@ use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class RamSummarizer implements Summarizer
 {
-
 	public static function summarize(ItemWithFeatures $item): string
 	{
 		$ecc = $item->getFeature('ram-ecc');

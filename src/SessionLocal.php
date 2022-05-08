@@ -4,7 +4,6 @@ namespace WEEEOpen\Tarallo;
 
 class SessionLocal
 {
-
 	public $description;
 	public $level;
 	public $owner;

@@ -11,7 +11,6 @@ use WEEEOpen\Tarallo\NotFoundException;
 
 class GracefulExceptionHandler implements MiddlewareInterface
 {
-
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
 

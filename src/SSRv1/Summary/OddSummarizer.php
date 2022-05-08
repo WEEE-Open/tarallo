@@ -7,7 +7,6 @@ use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class OddSummarizer implements Summarizer
 {
-
 	public static function summarize(ItemWithFeatures $item): string
 	{
 		$type = $item->getFeature('type');

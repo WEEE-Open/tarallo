@@ -11,7 +11,6 @@ use WEEEOpen\Tarallo\User;
 
 class TransactionWrapper implements MiddlewareInterface
 {
-
 	public function process(Request $request, RequestHandlerInterface $handler): Response
 	{
 		/** @var Database $db */
