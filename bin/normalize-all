@@ -1,0 +1,130 @@
+#!/usr/bin/php
+<?php
+
+namespace WEEEOpen\Tarallo;
+
+use WEEEOpen\Tarallo\Database\Database;
+use WEEEOpen\Tarallo\Normalization;
+
+if (php_sapi_name() !== 'cli') {
+	http_response_code(403);
+	header('Content-Type', 'text/plain');
+	echo 'Available only in PHP CLI';
+	exit(1);
+}
+
+require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'autoload.php';
+require __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'config.php';
+
+$pdo = new \PDO(TARALLO_DB_DSN, TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, [
+	\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+	\PDO::ATTR_CASE => \PDO::CASE_NATURAL,
+	\PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+	\PDO::ATTR_AUTOCOMMIT => false,
+	\PDO::ATTR_EMULATE_PREPARES => false,
+]);
+
+$res1 = $pdo->query(/** @lang MariaDB */ "SELECT Code FROM Item;");
+if($res1 === false) {
+	echo 'Failed to get items' . PHP_EOL;
+	exit(1);
+}
+$items = $res1->fetchAll(\PDO::FETCH_COLUMN);
+$res1->closeCursor();
+
+$res2 = $pdo->query(/** @lang MariaDB */ "SELECT Brand, Model, Variant FROM Product;");
+if($res2 === false) {
+	echo 'Failed to get items' . PHP_EOL;
+	exit(1);
+}
+$products = $res2->fetchAll(\PDO::FETCH_NUM);
+$res2->closeCursor();
+
+$db = new Database(TARALLO_DB_USERNAME, TARALLO_DB_PASSWORD, TARALLO_DB_DSN);
+$db->sessionDAO()->setAuditUsername('Normalization script');
+
+$i = $db->itemDAO();
+$f = $db->featureDAO();
+$p = $db->productDAO();
+
+$stats = [
+	'items' => [
+		'normalized' => 0,
+		'nochange' => 0,
+		'error' => 0,
+	],
+	'products' => [
+		'normalized' => 0,
+		'nochange' => 0,
+		'error' => 0,
+	],
+];
+
+const DRY_RUN = false;
+
+foreach($products as $row) {
+	$printable = "{$row[0]} {$row[1]} {$row[2]}";
+	try {
+		$changed = false;
+		$normalizedBrand = $db->featureDAO()->tryNormalizeValue('brand', $row[0]);
+		if ($normalizedBrand !== null && $normalizedBrand !== $row[0]) {
+			if(!DRY_RUN) {
+				$p->renameProduct(new ProductCode($row[0], $row[1], $row[2]), $normalizedBrand, null, null);
+				$row[0] = $normalizedBrand;
+			}
+			$changed = true;
+		}
+
+		$product = $p->getProduct(new ProductCode($row[0], $row[1], $row[2]));
+
+		$features = $product->getOwnFeatures();
+		$changed2 = false;
+		$f->tryNormalizeAll($features, $changed2);
+		if($changed2) {
+			if(!DRY_RUN) {
+				$f->setFeatures($product);
+			}
+		}
+		if($changed || $changed2) {
+			$stats['products']['normalized']++;
+			echo str_pad($printable, 60, ' ') . ' | OK' . PHP_EOL;
+		} else {
+			$stats['products']['nochange']++;
+			echo str_pad($printable, 60, ' ') . ' | no change' . PHP_EOL;
+		}
+	} catch(\Exception $e) {
+		$stats['products']['error']++;
+		echo str_pad($printable, 60, ' ') . ' | EXCEPTION: ' . get_class($e) . ': ' . $e->getMessage() . PHP_EOL;
+	}
+}
+unset($row);
+
+foreach($items as $code) {
+	try {
+		$item = $i->getItem(new ItemCode($code), null, 0);
+
+		$features = $item->getOwnFeatures();
+		$changed = false;
+		$f->tryNormalizeAll($features, $changed);
+		if($changed) {
+			// It would be enough to call this, without tryNormalizeAll, but there would be no stats
+			if(!DRY_RUN) {
+				$f->setFeatures($item);
+			}
+			$stats['items']['normalized']++;
+			echo str_pad($code, 10, ' ') . ' | OK' . PHP_EOL;
+		} else {
+			$stats['items']['nochange']++;
+			echo str_pad($code, 10, ' ') . ' | no change' . PHP_EOL;
+		}
+	} catch(\Exception $e) {
+		$stats['items']['error']++;
+		echo str_pad($code, 10, ' ') . ' | EXCEPTION: ' . get_class($e) . ': ' . $e->getCode() . PHP_EOL;
+	}
+}
+unset($code);
+
+//print_r($stats);
+var_export($stats);
+
+exit(0);

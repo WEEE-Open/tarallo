@@ -609,7 +609,7 @@ final class FeatureDAO extends DAO
 	 *
 	 * @param Feature[] $features List of features
 	 */
-	public function tryNormalizeAll(array &$features)
+	public function tryNormalizeAll(array &$features, ?bool &$changed = null)
 	{
 		$normalizeWith = self::getNormalizationMapping();
 		foreach ($features as $key => $feature) {
@@ -618,6 +618,9 @@ final class FeatureDAO extends DAO
 				$normalized = $this->tryNormalizeFeature($feature, $normalizeWith[$feature->name]);
 				if ($normalized !== null) {
 					$features[$key] = $normalized;
+					if ($changed !== null) {
+						$changed = true;
+					}
 				}
 			}
 		}
