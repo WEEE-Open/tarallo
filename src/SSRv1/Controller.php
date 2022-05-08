@@ -24,6 +24,7 @@ use WEEEOpen\Tarallo\HTTP\TransactionWrapper;
 use WEEEOpen\Tarallo\HTTP\Validation;
 use WEEEOpen\Tarallo\ItemCode;
 use WEEEOpen\Tarallo\ItemIncomplete;
+use WEEEOpen\Tarallo\ItemTraitCode;
 use WEEEOpen\Tarallo\Normalization;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ProductCode;
@@ -486,9 +487,13 @@ class Controller implements RequestHandlerInterface
 		$location = Validation::validateOptionalString($request->getQueryParams(), 'where', $locationDefault, null);
 		$location = $location === null ? null : new ItemCode($location);
 
+		$defaultLocation = $db->optionDAO()->getOptionValue('DefaultTodosLocation');
+		if ($defaultLocation !== null) {
+			$defaultLocation = new ItemCode($defaultLocation);
+		}
 		$templateParameters = [
-			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation')),
-			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation')),
+			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $defaultLocation),
+			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $defaultLocation),
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
 				false,
@@ -1390,9 +1395,13 @@ class Controller implements RequestHandlerInterface
 		$location = Validation::validateOptionalString($request->getQueryParams(), 'where', $locationDefault, null);
 		$location = $location === null ? null : new ItemCode($location);
 
+		$defaultLocation = $db->optionDAO()->getOptionValue('DefaultTodosLocation');
+		if ($defaultLocation !== null) {
+			$defaultLocation = new ItemCode($defaultLocation);
+		}
 		$templateParameters = [
-			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation')),
-			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $db->optionDAO()->getOptionValue('DefaultTodosLocation')),
+			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $defaultLocation),
+			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $defaultLocation),
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
 				false,
