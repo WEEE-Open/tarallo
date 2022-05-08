@@ -293,6 +293,16 @@ CREATE TABLE `Normalization`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
+CREATE TABLE `NormalizationForbidden`
+(
+    `MinimizedKey` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Category` VARCHAR(40) COLLATE utf8mb4_unicode_ci NOT NULL,
+    PRIMARY KEY (`MinimizedKey`),
+    INDEX (`Category`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
+
 -- ProductFeature - ItemFeature View
 
 CREATE VIEW ProductItemFeature AS
