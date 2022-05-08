@@ -61,21 +61,22 @@ $this->insert('options::menu', ['currentPage' => 'normalization']);
 		let search = document.getElementById("search");
 		let normalizationtable = document.getElementById("normalizationtable");
 		let debounceTimer;
+		let filter = () => {
+			let minimized = search.value.toLowerCase().replace(/[^a-z0-9&]/, '');
+			for(let td of normalizationtable.querySelectorAll('td.minimized')) {
+				if(minimized === '' || td.textContent === minimized) {
+					td.parentElement.classList.remove("d-none");
+				} else {
+					td.parentElement.classList.add("d-none");
+				}
+			}
+		};
 
 		search.addEventListener('keyup', () => {
 			clearTimeout(debounceTimer);
-
-			debounceTimer = setTimeout(() => {
-				let minimized = search.value.toLowerCase().replace(/[^a-z0-9&]/, '');
-				for(let td of normalizationtable.querySelectorAll('td.minimized')) {
-					if(minimized === '' || td.textContent === minimized) {
-						td.parentElement.classList.remove("d-none");
-					} else {
-						td.parentElement.classList.add("d-none");
-					}
-				}
-			}, 300);
+			debounceTimer = setTimeout(filter, 300);
 		});
+		filter();
 	</script>
 </div>
 
