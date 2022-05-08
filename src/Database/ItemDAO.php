@@ -9,6 +9,7 @@ use WEEEOpen\Tarallo\ItemPrefixer;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\NotFoundException;
+use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\ValidationException;
 
 final class ItemDAO extends DAO
@@ -284,6 +285,62 @@ final class ItemDAO extends DAO
 		$statement = $this->getPDO()->prepare('UPDATE Item SET LostAt = NULL WHERE `Code` = ?');
 		try {
 			$statement->execute([$item->getCode()]);
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * Rename items without a product, when the product is created but it has a different name.
+	 *
+	 * @param ProductCode $old Old product that didn't exist
+	 * @param ProductCode $new New product that exists
+	 */
+	public function renameItemsWithoutProduct(ProductCode $old, ProductCode $new)
+	{
+		// Cannot SELECT Code from Item:
+		// Error in query (1442): Can't update table 'Item' in stored function/trigger because it is already used by statement which invoked this stored function/trigger
+		$statement = $this->getPDO()->prepare('
+UPDATE ItemFeature SET ValueText = :newValue
+WHERE Feature = :feature
+AND Code IN (
+	SELECT f1.`Code`
+    FROM ItemFeature AS f1, ItemFeature AS f2, ItemFeature AS f3
+    WHERE f1.Code = f2.Code AND f2.Code = f3.Code
+	AND f1.Feature = \'brand\' AND f2.Feature = \'model\' AND f3.Feature = \'variant\'
+	AND f1.ValueText = :b
+	AND f2.ValueText = :m
+	AND f3.ValueText = :v
+)');
+		try {
+			$statement->bindValue(':b', $old->getBrand());
+			$statement->bindValue(':m', $old->getModel());
+			$statement->bindValue(':v', $old->getVariant());
+
+			if ($old->getBrand() !== $new->getBrand()) {
+				$statement->bindValue(':feature', 'brand');
+				$statement->bindValue(':newValue', $new->getBrand());
+
+				$result = $statement->execute();
+				assert($result !== false, 'rename items without a product 1');
+				$statement->bindValue(':b', $new->getBrand());
+			}
+			if ($old->getModel() !== $new->getModel()) {
+				$statement->bindValue(':feature', 'model');
+				$statement->bindValue(':newValue', $new->getModel());
+
+				$result = $statement->execute();
+				assert($result !== false, 'rename items without a product 2');
+				$statement->bindValue(':m', $new->getModel());
+			}
+			if ($old->getVariant() !== $new->getVariant()) {
+				$statement->bindValue(':feature', 'variant');
+				$statement->bindValue(':newValue', $new->getVariant());
+
+				$result = $statement->execute();
+				assert($result !== false, 'rename items without a product 3');
+				//$statement->bindValue(':m', $new->getVariant());
+			}
 		} finally {
 			$statement->closeCursor();
 		}

@@ -299,7 +299,7 @@ class Controller implements RequestHandlerInterface
 
 		$normalizedBrand = $db->featureDAO()->tryNormalizeValue('brand', $brand);
 		if ($normalizedBrand !== null) {
-			// $previousBrand = $brand;
+			$previousBrand = $brand;
 			$brand = $normalizedBrand;
 		}
 
@@ -323,7 +323,12 @@ class Controller implements RequestHandlerInterface
 			$db->bulkDAO()->deleteImport($importId);
 		}
 
-		// TODO: if($normalizedBrand !== null), rename items that had $previousBrand?
+		if ($normalizedBrand !== null) {
+			$db->itemDAO()->renameItemsWithoutProduct(
+				new ProductCode($previousBrand, $model, $variant),
+				new ProductCode($brand, $model, $variant),
+			);
+		}
 
 		if ($loopback) {
 			$response = new JsonResponse($db->productDAO()->getProduct($product), 201);
