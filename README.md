@@ -1,6 +1,6 @@
 # T.A.R.A.L.L.O.
 
-[![Continous Integration](https://github.com/WEEE-Open/tarallo/actions/workflows/continous-integration.yml/badge.svg)](https://github.com/WEEE-Open/tarallo/actions/workflows/continous-integration.yml)
+[![Continous Integration](https://github.com/WEEE-Open/tarallo/actions/workflows/ci.yml/badge.svg)](https://github.com/WEEE-Open/tarallo/actions/workflows/continous-integration.yml)
 
 Tuttofare Assistente il Riuso di Aggeggi Logori e Localmente Opprimenti  
 (aka L'inventario Opportuno)
