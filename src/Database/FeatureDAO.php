@@ -575,6 +575,12 @@ final class FeatureDAO extends DAO
 				}
 			}
 		}
+		if (isset($stuff['brand'])) {
+			$normalized = $this->normalizeText($stuff['brand'], self::NORMALIZATION_CATEGORY_BRAND);
+			if ($normalized !== null) {
+				$stuff['brand'] = $normalized;
+			}
+		}
 		if (isset($stuff['contents'])) {
 			foreach ($stuff['contents'] as &$otherStuff) {
 				$this->tryNormalizeBulkImport($otherStuff);
