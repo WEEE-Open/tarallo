@@ -560,11 +560,15 @@ EOQ;
 		}
 	}
 
-	public function getFeaturesLike(string $search, int $limit = 10): array
+	public function getFeaturesLike(string $search, bool $product = false, int $limit = 10): array
 	{
-//		$search = str_replace(' ', '', $search);
-		$statement = $this->getPDO()
-			->prepare("SELECT Code, Feature, ValueText, LENGTH(ValueText) - :strlen AS Distance FROM ItemFeature WHERE ValueText LIKE :search AND Feature NOT IN ('brand', 'model', 'variant') ORDER BY Distance, Code DESC LIMIT :limit");
+		if ($product) {
+			$statement = $this->getPDO()
+				->prepare("SELECT Brand, Model, Variant, Feature, ValueText, LENGTH(ValueText) - :strlen AS Distance FROM ProductFeature WHERE ValueText LIKE :search AND Feature NOT IN ('brand', 'model', 'variant') ORDER BY Distance, Brand, Model, Variant DESC LIMIT :limit");
+		} else {
+			$statement = $this->getPDO()
+				->prepare("SELECT Code, Feature, ValueText, LENGTH(ValueText) - :strlen AS Distance FROM ItemFeature WHERE ValueText LIKE :search AND Feature NOT IN ('brand', 'model', 'variant') ORDER BY Distance, Code DESC LIMIT :limit");
+		}
 		try {
 			$statement->bindValue(':strlen', strlen($search), \PDO::PARAM_INT);
 			$statement->bindValue(':search', "%$search%", \PDO::PARAM_STR);
@@ -573,8 +577,14 @@ EOQ;
 
 			$result = [];
 			$statement->setFetchMode(\PDO::FETCH_NUM);
-			foreach ($statement as $row) {
-				$result[] = [new ItemCode($row[0]), new Feature($row[1], $row[2]), $row[3]];
+			if ($product) {
+				foreach ($statement as $row) {
+					$result[] = [new ProductCode($row[0], $row[1], $row[2]), new Feature($row[3], $row[4]), $row[5]];
+				}
+			} else {
+				foreach ($statement as $row) {
+					$result[] = [new ItemCode($row[0]), new Feature($row[1], $row[2]), $row[3]];
+				}
 			}
 			return $result;
 		} finally {

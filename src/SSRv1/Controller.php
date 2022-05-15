@@ -818,6 +818,7 @@ class Controller implements RequestHandlerInterface
 		}
 
 		$name = trim($name);
+		$normalizedBrand = $db->featureDAO()->tryNormalizeValue('brand', $name);
 
 		$request = $request->withAttribute('Template', 'searchName');
 		$request = $request->withAttribute(
@@ -826,9 +827,11 @@ class Controller implements RequestHandlerInterface
 				'searchTerm' => $name,
 				'limit' => $limit,
 				'item' => $db->itemDAO()->getActualItemCode($name, true),
-				'brands' => $db->searchDAO()->getBrandsLike($name, $limit),
+				'normalizedAsBrand' => $normalizedBrand,
+				'brands' => $normalizedBrand === null ? $db->searchDAO()->getBrandsLike($name, $limit) : [],
 				'products' => $db->searchDAO()->getProductsLike($name, $limit),
-				'features' => $db->searchDAO()->getFeaturesLike($name, $limit),
+				'itemFeatures' => $db->searchDAO()->getFeaturesLike($name, false, $limit),
+				'productFeatures' => $db->searchDAO()->getFeaturesLike($name, true, $limit),
 			]
 		);
 		return $handler->handle($request);
