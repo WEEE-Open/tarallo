@@ -29,10 +29,10 @@ $copyQuery = http_build_query([
 ], null, '&', PHP_QUERY_RFC3986);
 ?>
 
-<article class="container item root <?=$editing ? ' head editing' : ''?>" data-brand="<?=$this->e($product->getBrand())?>" data-model="<?=$this->e($product->getModel())?>" data-variant="<?=$this->e($product->getVariant())?>" data-variant-is-default="<?= (string) (bool) ($product->getVariant() === \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT) ?>">
+<article class="container item product root <?=$editing ? ' head editing' : ''?>" data-brand="<?=$this->e($product->getBrand())?>" data-model="<?=$this->e($product->getModel())?>" data-variant="<?=$this->e($product->getVariant())?>" data-variant-is-default="<?= (string) (bool) ($product->getVariant() === \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT) ?>">
 	<header class="row">
 		<h4 class="p-2 col m-0" id="code-<?=$this->e($product->getBrand())?>-<?=$this->e($product->getModel())?>-<?=$this->e($product->getVariant())?>"><?= str_replace(' ', '&nbsp;', $brandModel) ?><small><?= $maybeVariant ?></small></h4>
-		<nav class="p-2 m-0 ml-auto itembuttons">
+		<nav class="p-2 m-0 ml-auto itembuttons inheader">
 		<?php if ($editing) : ?>
 			<a class="btn btn-outline-secondary btn-sm btn-item disabled" role="button" href="#">
 				<i class="fa fa-pencil-alt"></i>&nbsp;Rename
@@ -46,7 +46,7 @@ $copyQuery = http_build_query([
 		</nav>
 	</header>
 
-	<nav class="itembuttons row mx-0 mt-2">
+	<nav class="itembuttons primary row mx-0 mt-2">
 		<?php if ($editing) : ?>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel

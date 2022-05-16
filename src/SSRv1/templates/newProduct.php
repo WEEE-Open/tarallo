@@ -35,7 +35,7 @@ $isClone = !isset($baseItem) && $base instanceof \WEEEOpen\Tarallo\Product && !i
 		<?php endif; ?>
 	</header>
 
-	<nav class="itembuttons row mx-0 mt-2 justify-content-end">
+	<nav class="itembuttons primary row mx-0 mt-2 justify-content-end">
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 			<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 		</button>

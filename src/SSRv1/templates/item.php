@@ -74,7 +74,7 @@ endif; ?>
 		data-code="<?=$code_escaped?>">
 	<header class="row">
 		<h4 class="p-2 col m-0" id="code-<?=$code_escaped?>"><?=$code_escaped?></h4>
-		<nav class="p-2 m-0 ml-auto itembuttons">
+		<nav class="p-2 m-0 ml-auto itembuttons inheader">
 			<?php if ($editing) : ?>
 				<a class="btn btn-outline-secondary btn-sm btn-item disabled" role="button" href="#">
 					<i class="fa fa-pencil-alt"></i>&nbsp;Rename
@@ -121,7 +121,7 @@ endif; ?>
 		<div class="inline-alert w-auto alert-serious" role="alert"><i class="fa fa-archive"></i>&nbsp;This item has been lost on <?= $lostAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 	<?php endif; ?>
 
-	<nav class="itembuttons row mx-0 mt-2">
+	<nav class="itembuttons primary row mx-0 mt-2">
 		<?php if ($editing && $target) : ?>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel

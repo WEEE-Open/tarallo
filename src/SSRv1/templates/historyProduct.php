@@ -13,7 +13,7 @@ $bmv_rawurlencoded = $this->e(rawurlencode($product->getBrand()) . '/' . rawurle
 <article class="container item root">
 	<header class="row">
 		<h4 class="p-2 col-12 col-md m-0" id="code-<?=$this->e($product->getBrand())?>-<?=$this->e($product->getModel())?>-<?=$this->e($product->getVariant())?>"><?= $title ?></h4>
-		<nav class="p-2 m-0 itembuttons">
+		<nav class="p-2 m-0 itembuttons inheader">
 			<a class="btn btn-outline-secondary btn-sm btn-item" role="button" href="/product/<?= $bmv_rawurlencoded ?>">
 				<i class="fa fa-search"></i>&nbsp;View
 			</a>

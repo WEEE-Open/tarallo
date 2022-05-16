@@ -392,7 +392,7 @@
 
 		if (root !== null) {
 			let linkedError = document.importNode(document.getElementById('feature-edit-template-linked-error').content, true).firstElementChild;
-			root.querySelector('.itembuttons').insertAdjacentElement('afterend', linkedError);
+			root.querySelector('.itembuttons.primary').insertAdjacentElement('afterend', linkedError);
 			linkedErrors.set(template, linkedError);
 			feature.id = 'first-error';
 		}
