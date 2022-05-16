@@ -372,8 +372,7 @@ class Normalization
 			case 'ethernet-card':
 				return [
 					'pcie-sockets-n', 'pci-sockets-n', 'ethernet-ports-1000m-n',
-					'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'ethernet-ports-10base2-bnc-n',
-					'ethernet-ports-10base5-aui-n', 'pci-low-profile'
+					'ethernet-ports-100m-n', 'ethernet-ports-10m-n', 'pci-low-profile', 'color'
 				];
 			case 'audio-card':
 				return [
