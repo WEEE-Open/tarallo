@@ -8,7 +8,7 @@ $this->layout('main', ['title' => 'Home', 'user' => $user, 'container' => true])
 //date_default_timezone_set('Europe/Rome');
 ?>
 <?php $this->insert('info::todo', ['todos' => $todos, 'checks' => $checks, 'missingSmartOrSurfaceScan' => $missingSmartOrSurfaceScan, 'toTest' => $toTest, 'included' => true]) ?>
-<h2>Useful key combinations</h2>
+<h2 class="mt-3">Useful key combinations</h2>
 <p>In editor mode, select a feature and...</p>
 <ul class="list-unstyled">
 	<li><kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Z</kbd> delete feature</li>
