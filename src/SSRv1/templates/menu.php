@@ -68,7 +68,7 @@ $hereSr = function ($page, $current) {
 			</li>
 		</ul>
 
-		<form class="form-inline my-2 my-md-0" action="/search" method="post">
+		<form class="form-inline my-2 my-md-0 justify-content-end" action="/search" method="post">
 			<input required class="form-control mx-0 mr-sm-2" type="search" aria-label="Search" name="search">
 			<button class="btn btn-outline-primary my-2 my-sm-0 mr-sm-2" type="submit">Search</button>
 			<a class="btn btn-secondary my-2 my-sm-0" href="/search/advanced">Advanced</a>
