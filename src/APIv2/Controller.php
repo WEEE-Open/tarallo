@@ -675,6 +675,33 @@ class Controller implements RequestHandlerInterface
 		return new JsonResponse($data);
 	}
 
+	public static function itemsByValue(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$feature = Validation::validateHasString($parameters, 'feature');
+		$filter = Validation::validateOptionalString($parameters, 'filter', null, null);
+		$location = Validation::validateOptionalString($parameters, 'location', null, null);
+		$creation = Validation::validateOptionalString($parameters, 'creation', null);
+		$deleted = boolval(Validation::validateOptionalString($parameters, 'creation', false));
+		//$deleted = isset($parameters['deleted']) ? $parameters['deleted'] : false;
+
+		$data = $db->StatsDAO()->getItemsForEachValue(
+			$feature,
+			$filter !== null ? new Feature($feature, $filter) : null,
+			$location === null ? null : new
+			ItemCode(
+				$location
+			),
+			$creation === null ? null : new \DateTime($creation),
+			$deleted
+		);
+
+		return new JsonResponse($data);
+	}
+
 	public static function itemsNotFeature(ServerRequestInterface $request): ResponseInterface
 	{
 		/** @var Database $db */
