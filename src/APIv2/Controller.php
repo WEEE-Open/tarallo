@@ -812,6 +812,29 @@ class Controller implements RequestHandlerInterface
 		return new JsonResponse($json);
 	}
 
+	public static function getLocationAutosuggest(ServerRequestInterface $request)
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+		$search = Validation::validateHasString($query, 'q');
+
+		$min = 3;
+		if (strlen($search) < $min) {
+			throw new RangeException('q', $min, null, "Minimum length for autocomplete is $min");
+		}
+
+		$locations = $db->statsDAO()->getLocationsTree();
+
+		$json = [];
+
+		foreach ($locations as $place) {
+			array_push($json, ["name"=> $place[1], "color"=> $place[4]]);
+		}
+
+		return new JsonResponse($json);
+	}
+
 	private static function range(string $parameter, $value, ?int $min, ?int $max)
 	{
 		if ($max !== null && $value > $max) {

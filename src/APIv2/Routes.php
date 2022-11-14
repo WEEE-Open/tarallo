@@ -99,7 +99,13 @@ trait Routes
 						$r->get('/history[/page/{page}]', [User::AUTH_LEVEL_RO, [Controller::class, 'getHistory']]);
 
 						$r->get('/session', [User::AUTH_LEVEL_RW, [Controller::class, 'sessionWhoami']]);
-						$r->get('/autosuggest/code', [User::AUTH_LEVEL_RO, [Controller::class, 'getItemsAutosuggest']]);
+						$r->addGroup(
+							'/autosuggest',
+							function (FastRoute\RouteCollector $r) {
+								$r->get('/code', [User::AUTH_LEVEL_RO, [Controller::class, 'getItemsAutosuggest']]);
+								$r->get('/location', [User::AUTH_LEVEL_RO, [Controller::class, 'getLocationAutosuggest']]);
+							}
+						);
 
 						$r->addGroup(
 							'/stats',

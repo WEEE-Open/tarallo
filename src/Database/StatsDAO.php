@@ -198,6 +198,32 @@ EOQ
 		}
 	}
 
+	public function getItemsForAutosuggest(string $code, bool $secondTry = false): array
+	{
+		$limit = 10;
+
+		$statement = $this->getPDO()
+			->prepare(
+				"SELECT Code, t.ValueEnum
+FROM Item
+WHERE DeletedAt IS NULL AND Code LIKE :f
+LIMIT $limit"
+			);
+		try {
+			$statement->bindValue(':f', $value);
+			$success = $statement->execute();
+			assert($success, 'get items for autosuggest');
+			$array = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
+		} finally {
+			$statement->closeCursor();
+		}
+		if (count($array) < $limit && !$secondTry) {
+			$more = $this->getItemsForAutosuggest($code, true);
+			$array = array_merge($array, array_diff($more, $array));
+		}
+		return $array;
+	}
+
 	/**
 	 * Get most/least recently changed cases in a particular location, excluding in-use ones. This takes into account
 	 * all audit entries for all contained items.
