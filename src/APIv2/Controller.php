@@ -819,18 +819,15 @@ class Controller implements RequestHandlerInterface
 		$query = $request->getQueryParams();
 		$search = Validation::validateHasString($query, 'q');
 
-		$min = 3;
+
+		// this is disabled because it can actually be useful to have the list as soon as you start typing,
+		// still gonna leave this here in case anyone wants to change it
+		/*$min = 3; 
 		if (strlen($search) < $min) {
 			throw new RangeException('q', $min, null, "Minimum length for autocomplete is $min");
-		}
+		}*/
 
-		$locations = $db->statsDAO()->getLocationsTree();
-
-		$json = [];
-
-		foreach ($locations as $place) {
-			array_push($json, ["name"=> $place[1], "color"=> $place[4]]);
-		}
+		$json = $db->statsDAO()->getLocationsForAutosuggest($search);
 
 		return new JsonResponse($json);
 	}
