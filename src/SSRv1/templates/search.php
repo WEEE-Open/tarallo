@@ -26,7 +26,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 	<div class="row d-flex flex-row mr-0 mb-1 searchrow search-code" id="search-row-container-new">
 		<label class="col-sm-2 col-form-label" for="search-row-new">Code is <span data-tippy-content="Wildcards: % for any number of characters, _ for a single character">like</span></label>
 		<div class="flex-fill">
-			<input type="text" class="form-control comparisonvalue" id="search-row-new" required>
+			<input type="text" class="form-control comparisonvalue basicAutoComplete" id="search-row-new" required autocomplete="off" data-url="/v2/autosuggest/code">
 		</div>
 		<button class="btn btn-danger ml-2 delete" aria-roledescription="delete" tabindex="-1"><i class="fa fa-trash" role="img" aria-label="Delete"></i></button>
 	</div>
@@ -36,7 +36,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 	<div class="row d-flex flex-row mr-0 mb-1 searchrow search-location" id="search-row-container-new">
 		<label class="col-sm-2 col-form-label" for="search-row-new">Location is</label>
 		<div class="flex-fill">
-			<input type="text" class="form-control comparisonvalue" id="search-row-new" required>
+			<input type="text" class="form-control comparisonvalue basicAutoComplete" id="search-row-new" required autocomplete="off" data-url="/v2/autosuggest/location">
 		</div>
 		<button class="btn btn-danger ml-2 delete" aria-roledescription="delete" tabindex="-1"><i class="fa fa-trash" role="img" aria-label="Delete"></i></button>
 	</div>

@@ -66,7 +66,7 @@ $isClone = isset($base) && $base->hasCode();
 	<?php if (!$innerrecursion && !$recursion) : ?>
 		<section class="setlocation form-inline">
 			<label for="newparent" class="my-1 mr-2">Location</label>
-			<input id="newparent" class="form-control mb-2 mr-sm-2">
+			<input id="newparent" class="form-control mb-2 mr-sm-2 locationAutoComplete" autocomplete="off" data-url="/v2/autosuggest/location">
 		</section>
 	<?php endif ?>
 
@@ -109,6 +109,13 @@ $isClone = isset($base) && $base->hasCode();
 		?>
 	</section>
 </article>
+<script>$('.locationAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300},formatResult:(l) => {
+	return {
+		id: l.name,
+		text: l.name,
+		html: `<div>${l.name} ${l.color ? `<i class="fa fa-square ml-1" title="${l.color}" style="color:${l.color}"></i>` : ""}</div>`
+	}
+}});</script>
 <?php if (!$innerrecursion) {
 	?><script>const activate = true;</script><?php
 	$this->insert('editor');
