@@ -412,6 +412,10 @@ form.nice textarea {
 	display: block;
 }
 
+.dropdown-item.active {
+	color: white !important;
+}
+
 @media only screen and (min-width: 34rem) {
 	.features ul > li {
 		grid-template-rows: auto auto auto;
