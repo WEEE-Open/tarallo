@@ -685,8 +685,7 @@ class Controller implements RequestHandlerInterface
 		$filter = Validation::validateOptionalString($parameters, 'filter', null, null);
 		$location = Validation::validateOptionalString($parameters, 'location', null, null);
 		$creation = Validation::validateOptionalString($parameters, 'creation', null);
-		$deleted = boolval(Validation::validateOptionalString($parameters, 'creation', false));
-		//$deleted = isset($parameters['deleted']) ? $parameters['deleted'] : false;
+		$deleted = Validation::validateOptionalBool($parameters, 'deleted', false);
 
 		$data = $db->StatsDAO()->getItemsForEachValue(
 			$feature,

@@ -106,6 +106,27 @@ class Validation
 	}
 
 	/**
+	 * Return bolean value form a key if it exists,
+	 * or supplied default value if it doesn't.
+	 * Accepts as true: true, t, yes, 1; anything else is considered false
+	 *
+	 * @param array $payload THE array
+	 * @param string $key Some key
+	 *
+	 * @param bool|null $default Default value if there's no such key
+	 *
+	 * @return bool|null Whatever the value is, or $default
+	 */
+	public static function validateOptionalBool(array $payload, string $key, ?bool $default = null)
+	{
+		if (isset($payload[$key])) {
+			return in_array(strtolower($payload[$key]), ['true','t','yes','1',1,true]);
+		} else {
+			return $default;
+		}
+	}
+
+	/**
 	 * Check that the JSON request body contains something: that is, it is an array and is not empty
 	 *
 	 * @param mixed $possiblyArray
