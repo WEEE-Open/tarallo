@@ -827,7 +827,7 @@ class Controller implements RequestHandlerInterface
 			throw new RangeException('q', $min, null, "Minimum length for autocomplete is $min");
 		}*/
 
-		$json = $db->statsDAO()->getLocationsForAutosuggest($search);
+		$json = $db->itemDAO()->getLocationsForAutosuggest($search);
 
 		return new JsonResponse($json);
 	}

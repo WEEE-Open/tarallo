@@ -541,4 +541,45 @@ LIMIT $limit"
 		}
 		return $array;
 	}
+
+	public function getLocationsForAutosuggest(string $code, bool $secondTry = false): array
+	{
+		$limit = 10;
+		if ($secondTry) {
+			$limit *= 2;
+			$value = "%$code%";
+		} else {
+			$value = "$code%";
+		}
+
+		$statement = $this->getPDO()
+			->prepare(
+				"SELECT t1.Code AS name, t2.ValueEnum AS color
+FROM `ProductItemFeatureUnified` AS t1
+LEFT JOIN `ItemFeature` AS t2
+ON t2.Feature = 'color' AND t1.Code = t2.Code
+WHERE t1.ValueEnum = 'location' AND t1.Code LIKE :f
+LIMIT $limit"
+			);
+		try {
+			$statement->bindValue(':f', $value);
+			$success = $statement->execute();
+			assert($success, 'get locations for autosuggest');
+			$array = $statement->fetchAll(\PDO::FETCH_ASSOC);
+			//$colors = $statement->fetchAll(\PDO::FETCH_COLUMN, 1);
+		} finally {
+			$statement->closeCursor();
+		}
+		if (count($array) < $limit && !$secondTry) {
+			$more = $this->getLocationsForAutosuggest($code, true);
+			$loc = array_map(function ($l) {
+				return $l["name"];
+			}, $array);
+			foreach ($more as $value) {
+				if (!in_array($value["name"], $loc))
+					array_push($array, $value);
+			}
+		}
+		return $array;
+	}
 }
