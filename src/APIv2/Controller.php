@@ -32,6 +32,7 @@ use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\ProductException;
 use WEEEOpen\Tarallo\SearchException;
 use WEEEOpen\Tarallo\StateChangedException;
+use WEEEOpen\Tarallo\SSRv1\Summary\Summary;
 use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\ValidationException;
 use Laminas\Diactoros\Response\EmptyResponse;
@@ -696,7 +697,7 @@ class Controller implements RequestHandlerInterface
 
 		$itemWithFeatures = $db->itemDAO()->getItem($item);
 
-		$summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($itemWithFeatures);
+		$summary = Summary::peel($itemWithFeatures);
 
 		return new JsonResponse(["summary"=>$summary]);
 	}
