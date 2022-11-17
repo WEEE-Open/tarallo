@@ -36,7 +36,6 @@ use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\ValidationException;
 use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
-use Laminas\Diactoros\Response\TextResponse;
 
 class Controller implements RequestHandlerInterface
 {
@@ -693,15 +692,13 @@ class Controller implements RequestHandlerInterface
 			throw new NotFoundException($id);
 		}
 
-		if (!$db->itemDAO()->itemExists($item)) {
-			throw new NotFoundException();
-		}
+		$db->itemDAO()->itemMustExist($item, true);
 
 		$itemWithFeatures = $db->itemDAO()->getItem($item);
 
 		$summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($itemWithFeatures);
 
-		return new TextResponse($summary);
+		return new JsonResponse(["summary"=>$summary]);
 	}
 
 	public static function itemsNotFeature(ServerRequestInterface $request): ResponseInterface
