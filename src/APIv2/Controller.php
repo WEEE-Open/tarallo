@@ -32,6 +32,7 @@ use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\ProductException;
 use WEEEOpen\Tarallo\SearchException;
 use WEEEOpen\Tarallo\StateChangedException;
+use WEEEOpen\Tarallo\SSRv1\Summary\Summary;
 use WEEEOpen\Tarallo\User;
 use WEEEOpen\Tarallo\ValidationException;
 use Laminas\Diactoros\Response\EmptyResponse;
@@ -674,6 +675,32 @@ class Controller implements RequestHandlerInterface
 
 		return new JsonResponse($data);
 	}
+
+	public static function getItemSummary(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalString($parameters, 'id');
+		// TODO: rename to limit?
+		$length = Validation::validateOptionalInt($query, 'length', 20);
+
+		try {
+			$item = new ItemCode($id);
+		} catch (ValidationException $e) {
+			throw new NotFoundException($id);
+		}
+
+		$db->itemDAO()->itemMustExist($item, true);
+
+		$itemWithFeatures = $db->itemDAO()->getItem($item);
+
+		$summary = Summary::peel($itemWithFeatures);
+
+		return new JsonResponse(["summary"=>$summary]);
+  }
 
 	public static function itemsByValue(ServerRequestInterface $request): ResponseInterface
 	{
