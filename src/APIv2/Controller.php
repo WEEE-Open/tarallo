@@ -865,6 +865,26 @@ class Controller implements RequestHandlerInterface
 		return new JsonResponse($json);
 	}
 
+	public static function getLocationAutosuggest(ServerRequestInterface $request)
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+		$search = Validation::validateHasString($query, 'q');
+
+
+		// this is disabled because it can actually be useful to have the list as soon as you start typing,
+		// still gonna leave this here in case anyone wants to change it
+		/*$min = 3; 
+		if (strlen($search) < $min) {
+			throw new RangeException('q', $min, null, "Minimum length for autocomplete is $min");
+		}*/
+
+		$json = $db->itemDAO()->getLocationsForAutosuggest($search);
+
+		return new JsonResponse($json);
+	}
+
 	private static function range(string $parameter, $value, ?int $min, ?int $max)
 	{
 		if ($max !== null && $value > $max) {

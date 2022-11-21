@@ -33,6 +33,21 @@
 		let templateName = ev.target.dataset.template;
 		let template = document.importNode(document.getElementById(templateName).content, true);
 
+		if (templateName === "search-template-code")
+			template.children.forEach((ch) => {
+				$(ch).find('.basicAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300}});
+			});
+		else if (templateName === "search-template-location")
+			template.children.forEach((ch) => {
+				$(ch).find('.basicAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300},formatResult:(l) => {
+					return {
+						id: l.name,
+						text: l.name,
+						html: `<div>${l.name} ${l.color ? `<i class="fa fa-square ml-1" title="${l.color}" style="color:${l.color}"></i>` : ""}</div>`
+					}
+				}});
+			});
+
 		searchRows.appendChild(template);
 		rowCounter++;
 
@@ -48,6 +63,12 @@
 			if (typeof el.attributes["id"] !== "undefined" && el.attributes["id"].nodeValue === "search-row-new") {
 				el.attributes["id"].nodeValue = "search-row-" + rowCounter + "-" + rowElCounter++;
 			}
+			// This is to prevent from hitting enter and deleting the field instead of actually running the search
+			el.addEventListener('keydown', function(ev) {
+				if (ev.which === 13) {
+					ev.preventDefault();
+				}
+			});
 		}
 
 		// Add features list to dropdown, if present
