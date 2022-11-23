@@ -8,6 +8,7 @@ $this->layout('main', ['title' => $statusCode . ' ' . $reasonPhrase, 'container'
 
 <section id="content">
 	<p class="httperror">
+		<img src="/static/tarallo.png" alt="Divino Grante Tarallo Volante" title="Il Grande Tarallo Volante ti guiderà alla Luce" class="grande-tarallo-volante">
 		<strong class="status"><?= $statusCode ?></strong><span class="status">
 			<?= $reasonPhrase ?></span>
 	</p>

@@ -21,6 +21,11 @@
 	font-size: 6vw;
 }
 
+.httperror .grande-tarallo-volante {
+	float: right;
+	width: 35%;
+}
+
 .inline-alert {
 	padding: 0.6rem;
 	width: 100%;
