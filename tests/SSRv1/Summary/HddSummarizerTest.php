@@ -1,15 +1,17 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\SSRv1\Summary\HddSummarizer;
+use WEEEOpen\TaralloTest\SSRv1\Summary\SummarizerTestCase;
 
 /**
  * @covers \WEEEOpen\Tarallo\SSRv1\Summary\HddSummarizer
  */
-class HddSummarizerTest extends TestCase {
-	public function testHdd() {
+class HddSummarizerTest extends SummarizerTestCase
+{
+	public function testHdd()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -29,12 +31,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 3.5 in. 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHdd2() {
+	public function testHdd2()
+	{
 		$item = new Item('H456');
 		$item
 			->addFeature(new Feature('brand', 'Western Digital'))
@@ -54,13 +57,16 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 40 GB SATA 2.5 in. 5400 rpm, ESP, Western Digital Caviar WD40ASD, Windows XP',
-			$summary);
+		$this->assertArrayEquals(
+			["HDD 40 GB SATA 2.5 in. 5400 rpm", "ESP", "Western Digital Caviar WD40ASD", "Windows XP"],
+			$summary
+		);
 
 		return $summary;
 	}
-	
-	public function testHddNoFamily() {
+
+	public function testHddNoFamily()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -79,12 +85,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, ESP, Seagate STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 3.5 in. 7200 rpm", "ESP", "Seagate STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddNoCommercial() {
+	public function testHddNoCommercial()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('capacity-decibyte', 80000000000))
@@ -101,12 +108,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, ESP, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 3.5 in. 7200 rpm", "ESP", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddNoOs() {
+	public function testHddNoOs()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -125,12 +133,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, ESP, Seagate Barracuda STM123456XYZ', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 3.5 in. 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddNoOsNoCommercial() {
+	public function testHddNoOsNoCommercial()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('capacity-decibyte', 80000000000))
@@ -146,12 +155,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, ESP', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 3.5 in. 7200 rpm", "ESP"], $summary);
 
 		return $summary;
 	}
 
-	public function testHdd2Sata() {
+	public function testHdd2Sata()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -171,12 +181,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB 2×SATA 3.5 in. 7200 rpm, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB 2×SATA 3.5 in. 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddIde() {
+	public function testHddIde()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -196,12 +207,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB IDE/ATA 3.5 in. 7200 rpm, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB IDE/ATA 3.5 in. 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddMiniIde() {
+	public function testHddMiniIde()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -221,15 +233,16 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals(
-			'HDD 80 GB Mini IDE 3.5 in. 7200 rpm, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS',
+		$this->assertArrayEquals(
+			["HDD 80 GB Mini IDE 3.5 in. 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testHddScsi() {
+	public function testHddScsi()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -249,12 +262,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SCSI SCA2 (80 pin) 3.5 in. 7200 rpm, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SCSI SCA2 (80 pin) 3.5 in. 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddScsi2() {
+	public function testHddScsi2()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -274,12 +288,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SCSI DB68 (68 pin) 3.5 in. 7200 rpm, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SCSI DB68 (68 pin) 3.5 in. 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddWTF() {
+	public function testHddWTF()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -300,12 +315,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA + IDE/ATA 3.5 in. 7200 rpm, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA + IDE/ATA 3.5 in. 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddWTF2() {
+	public function testHddWTF2()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -327,13 +343,14 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA + IDE/ATA + Mini IDE 3.5 in. 7200 rpm, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA + IDE/ATA + Mini IDE 3.5 in. 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
 
-	public function testHddWTFThisIsAJoke() {
+	public function testHddWTFThisIsAJoke()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -355,12 +372,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB 2×SATA + 2×IDE/ATA + 2×Mini IDE 3.5 in. 7200 rpm, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB 2×SATA + 2×IDE/ATA + 2×Mini IDE 3.5 in. 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddNotErased() {
+	public function testHddNotErased()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -379,12 +397,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, _SP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 3.5 in. 7200 rpm", "_SP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddNoSmart() {
+	public function testHddNoSmart()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -403,12 +422,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, E_P, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 3.5 in. 7200 rpm", "E_P", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddNoSurface() {
+	public function testHddNoSurface()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -427,12 +447,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, ES_, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 3.5 in. 7200 rpm", "ES_", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddNoSmartScan() {
+	public function testHddNoSmartScan()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -450,13 +471,16 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, E__, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS',
-			$summary);
+		$this->assertArrayEquals(
+			["HDD 80 GB SATA 3.5 in. 7200 rpm", "E__", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"],
+			$summary
+		);
 
 		return $summary;
 	}
 
-	public function testHddNoProcedures() {
+	public function testHddNoProcedures()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -473,26 +497,30 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, ___, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS',
-			$summary);
+		$this->assertArrayEquals(
+			["HDD 80 GB SATA 3.5 in. 7200 rpm", "___", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"],
+			$summary
+		);
 
 		return $summary;
 	}
 
 
-	public function testHddNothing() {
+	public function testHddNothing()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('type', 'hdd'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD, ___', $summary);
+		$this->assertArrayEquals(["HDD", "___"], $summary);
 
 		return $summary;
 	}
 
 
-	public function testHddSmartOld() {
+	public function testHddSmartOld()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -512,13 +540,14 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, EOP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 3.5 in. 7200 rpm", "EOP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
 
-	public function testHddScanFail() {
+	public function testHddScanFail()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -538,13 +567,14 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, ESX, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 3.5 in. 7200 rpm", "ESX", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
 
-	public function testHddSmartFailed() {
+	public function testHddSmartFailed()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -564,13 +594,14 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in. 7200 rpm, EXP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 3.5 in. 7200 rpm", "EXP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
 
-	public function testHddNoFF() {
+	public function testHddNoFF()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -589,12 +620,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 7200 rpm, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddNoRpm() {
+	public function testHddNoRpm()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -613,12 +645,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB SATA 3.5 in., ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB SATA 3.5 in.", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddNoCapacity() {
+	public function testHddNoCapacity()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -637,11 +670,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD SATA 3.5 in. 7200 rpm, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD SATA 3.5 in. 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
-	public function testHddNoPortos() {
+
+	public function testHddNoPortos()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -660,12 +695,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB 3.5 in. 7200 rpm, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB 3.5 in. 7200 rpm", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddMissingData() {
+	public function testHddMissingData()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -683,12 +719,13 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD 80 GB 3.5 in., ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD 80 GB 3.5 in.", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}
 
-	public function testHddMissingData2() {
+	public function testHddMissingData2()
+	{
 		$item = new Item('H123');
 		$item
 			->addFeature(new Feature('brand', 'Seagate'))
@@ -704,7 +741,7 @@ class HddSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = HddSummarizer::summarize($item);
-		$this->assertEquals('HDD, ESP, Seagate Barracuda STM123456XYZ, Xubuntu 18.04 LTS', $summary);
+		$this->assertArrayEquals(["HDD", "ESP", "Seagate Barracuda STM123456XYZ", "Xubuntu 18.04 LTS"], $summary);
 
 		return $summary;
 	}

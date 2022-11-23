@@ -9,13 +9,13 @@ use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class Summary
 {
-	public static function peel(ItemWithFeatures $item): ?string
+	public static function peel(ItemWithFeatures $item): array
 	{
 		$type = $item->getFeature('type');
 		switch ($type) {
 			case null:
 				// Otherwise it breaks the summarizers
-				return 'Unknown item (set the type)';
+				return ['Unknown item (set the type)'];
 			case 'case':
 				return CaseSummarizer::summarize($item);
 			case 'motherboard':

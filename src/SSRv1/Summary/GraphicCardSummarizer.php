@@ -7,7 +7,7 @@ use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class GraphicCardSummarizer implements Summarizer
 {
-	public static function summarize(ItemWithFeatures $item): string
+	public static function summarize(ItemWithFeatures $item): array
 	{
 		$type = $item->getFeature('type');
 		$capacity = $item->getFeature('capacity-byte');
@@ -18,14 +18,12 @@ class GraphicCardSummarizer implements Summarizer
 		$type .= $socket ? " $socket" : '';
 		$type .= $capacity ? ' ' . FeaturePrinter::printableValue($capacity) : '';
 
-		$ports = PartialSummaries::summarizePorts($item, false, ' ');
-		$ports = $ports ? ", $ports" : '';
+		$ports = PartialSummaries::summarizePorts($item, false, ', ');
 
-		$color = $color ? ', ' . FeaturePrinter::printableValue($color) : '';
+		$color = $color ? FeaturePrinter::printableValue($color) : '';
 
 		$commercial = PartialSummaries::summarizeCommercial($item);
-		$commercial = $commercial ? ", $commercial" : '';
 
-		return $type . $ports . $color . $commercial;
+		return array_filter([$type, $ports, $color, $commercial]);
 	}
 }

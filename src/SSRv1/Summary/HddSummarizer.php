@@ -7,7 +7,7 @@ use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class HddSummarizer implements Summarizer
 {
-	public static function summarize(ItemWithFeatures $item): string
+	public static function summarize(ItemWithFeatures $item): array
 	{
 		$type = $item->getFeature('type');
 		$capacity = $item->getFeature('capacity-decibyte');
@@ -101,10 +101,6 @@ class HddSummarizer implements Summarizer
 
 		$commercial = PartialSummaries::summarizeCommercial($item);
 
-		$pretty = $hardware . ', ' . $procedures;
-		$pretty .= $commercial ? ', ' . $commercial : '';
-		$pretty .= $os ? ', ' . $os : '';
-
-		return $pretty;
+		return array_filter([$hardware, $procedures, $commercial, "$os"]);
 	}
 }

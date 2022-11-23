@@ -1,15 +1,17 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\SSRv1\Summary\MotherboardSummarizer;
+use WEEEOpen\TaralloTest\SSRv1\Summary\SummarizerTestCase;
 
 /**
  * @covers \WEEEOpen\Tarallo\SSRv1\Summary\MotherboardSummarizer
  */
-class MotherboardSummarizerTest extends TestCase {
-	public function testMotherboard() {
+class MotherboardSummarizerTest extends SummarizerTestCase
+{
+	public function testMotherboard()
+	{
 		$item = new Item('B55');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -26,15 +28,16 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('pcie-sockets-n', 3));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, Compaq D845GVFT',
+		$this->assertArrayEquals(
+			["Motherboard Micro ATX Socket 478 (desktop mPGA478B)", "1× PCI, 3× PCI Express", "1× IDE/ATA, 4× USB, 1× VGA", "Red", "Compaq D845GVFT"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardNoSockets() {
+	public function testMotherboardNoSockets()
+	{
 		$item = new Item('B55');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -48,15 +51,16 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('ide-ports-n', 1));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Micro ATX, 1× IDE/ATA 4× USB 1× VGA, Red, Compaq D845GVFT',
+		$this->assertArrayEquals(
+			["Motherboard Micro ATX", "1× IDE/ATA, 4× USB, 1× VGA", "Red", "Compaq D845GVFT"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardNoPorts() {
+	public function testMotherboardNoPorts()
+	{
 		$item = new Item('B55');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -70,15 +74,16 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('pcie-sockets-n', 3));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, Red, Compaq D845GVFT',
+		$this->assertArrayEquals(
+			["Motherboard Micro ATX Socket 478 (desktop mPGA478B)", "1× PCI, 3× PCI Express", "Red", "Compaq D845GVFT"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardNoColor() {
+	public function testMotherboardNoColor()
+	{
 		$item = new Item('B55');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -94,15 +99,16 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('pcie-sockets-n', 3));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Compaq D845GVFT',
+		$this->assertArrayEquals(
+			["Motherboard Micro ATX Socket 478 (desktop mPGA478B)", "1× PCI, 3× PCI Express", "1× IDE/ATA, 4× USB, 1× VGA", "Compaq D845GVFT"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardNoColorNoCommercial() {
+	public function testMotherboardNoColorNoCommercial()
+	{
 		$item = new Item('B55');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -116,15 +122,16 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('pcie-sockets-n', 3));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA',
+		$this->assertArrayEquals(
+			["Motherboard Micro ATX Socket 478 (desktop mPGA478B)", "1× PCI, 3× PCI Express", "1× IDE/ATA, 4× USB, 1× VGA"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardNoFormFactor() {
+	public function testMotherboardNoFormFactor()
+	{
 		$item = new Item('B55');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -140,15 +147,16 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('pcie-sockets-n', 3));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, Compaq D845GVFT',
+		$this->assertArrayEquals(
+			["Motherboard Socket 478 (desktop mPGA478B)", "1× PCI, 3× PCI Express", "1× IDE/ATA, 4× USB, 1× VGA", "Red", "Compaq D845GVFT"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardNoBrand() {
+	public function testMotherboardNoBrand()
+	{
 		$item = new Item('B55');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -164,15 +172,16 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('pcie-sockets-n', 3));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, D845GVFT',
+		$this->assertArrayEquals(
+			["Motherboard Micro ATX Socket 478 (desktop mPGA478B)", "1× PCI, 3× PCI Express", "1× IDE/ATA, 4× USB, 1× VGA", "Red", "D845GVFT"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardNoModel() {
+	public function testMotherboardNoModel()
+	{
 		$item = new Item('B55');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -188,15 +197,16 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('pcie-sockets-n', 3));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, Compaq',
+		$this->assertArrayEquals(
+			["Motherboard Micro ATX Socket 478 (desktop mPGA478B)", "1× PCI, 3× PCI Express", "1× IDE/ATA, 4× USB, 1× VGA", "Red", "Compaq"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardNoCommercial() {
+	public function testMotherboardNoCommercial()
+	{
 		$item = new Item('B55');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -211,15 +221,16 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('pcie-sockets-n', 3));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red',
+		$this->assertArrayEquals(
+			["Motherboard Micro ATX Socket 478 (desktop mPGA478B)", "1× PCI, 3× PCI Express", "1× IDE/ATA, 4× USB, 1× VGA", "Red"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardNoCommercialNoPortsNoColor() {
+	public function testMotherboardNoCommercialNoPortsNoColor()
+	{
 		$item = new Item('B55');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -230,15 +241,16 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('pcie-sockets-n', 3));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Micro ATX Socket 478 (desktop mPGA478B), 1× PCI 3× PCI Express',
+		$this->assertArrayEquals(
+			["Motherboard Micro ATX Socket 478 (desktop mPGA478B)", "1× PCI, 3× PCI Express"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardNoCommercialNoPortsNoColorNoPorts() {
+	public function testMotherboardNoCommercialNoPortsNoColorNoPorts()
+	{
 		$item = new Item('B55');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -246,30 +258,32 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Micro ATX',
+		$this->assertArrayEquals(
+			["Motherboard Micro ATX"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardNothing() {
+	public function testMotherboardNothing()
+	{
 		$item = new Item('B55');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard',
+		$this->assertArrayEquals(
+			["Motherboard"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardIssue219() {
+	public function testMotherboardIssue219()
+	{
 		$item = new Item('B123');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -286,15 +300,16 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('pcie-sockets-n', 3));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Micro ATX Socket 370, 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, Compaq F00B4R',
+		$this->assertArrayEquals(
+			["Motherboard Micro ATX Socket 370", "1× PCI, 3× PCI Express", "1× IDE/ATA, 4× USB, 1× VGA", "Red", "Compaq F00B4R"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testMotherboardIssue219SocketSocket() {
+	public function testMotherboardIssue219SocketSocket()
+	{
 		$item = new Item('B123');
 		$item
 			->addFeature(new Feature('type', 'motherboard'))
@@ -311,12 +326,11 @@ class MotherboardSummarizerTest extends TestCase {
 			->addFeature(new Feature('pcie-sockets-n', 3));
 
 		$summary = MotherboardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Motherboard Micro ATX Socket 7, 1× PCI 3× PCI Express, 1× IDE/ATA 4× USB 1× VGA, Red, Compaq F00B4R',
+		$this->assertArrayEquals(
+			["Motherboard Micro ATX Socket 7", "1× PCI, 3× PCI Express", "1× IDE/ATA, 4× USB, 1× VGA", "Red", "Compaq F00B4R"],
 			$summary
 		);
 
 		return $summary;
 	}
-
 }

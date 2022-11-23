@@ -7,7 +7,7 @@ use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class RamSummarizer implements Summarizer
 {
-	public static function summarize(ItemWithFeatures $item): string
+	public static function summarize(ItemWithFeatures $item): array
 	{
 		$ecc = $item->getFeature('ram-ecc');
 		if ($ecc === null) {
@@ -43,14 +43,7 @@ class RamSummarizer implements Summarizer
 			// Looks nicer
 			$technical = 'RAM';
 		}
-		if ($technical !== '' && $commercial !== '') {
-			$pretty = "$technical, $commercial";
-		} elseif ($technical !== '') {
-			$pretty = $technical;
-		} else {
-			$pretty = $commercial;
-		}
 
-		return $pretty;
+		return array_filter([$technical, $commercial]);
 	}
 }

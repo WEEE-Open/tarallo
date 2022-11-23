@@ -1,15 +1,17 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\SSRv1\Summary\GraphicCardSummarizer;
+use WEEEOpen\TaralloTest\SSRv1\Summary\SummarizerTestCase;
 
 /**
  * @covers \WEEEOpen\Tarallo\SSRv1\Summary\GraphicCardSummarizer
  */
-class GraphicCardSummarizerTest extends TestCase {
-	public function testGraphicCard(){
+class GraphicCardSummarizerTest extends SummarizerTestCase
+{
+	public function testGraphicCard()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('brand', 'Nvidia'))
@@ -27,13 +29,14 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('capacity-byte', 134217728));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, 2× DVI 1× HDMI 1× S-Video, Green, Nvidia GeForce4 MX 440',
+		$this->assertArrayEquals(
+			["Graphics card PCI Express 128 MiB", "2× DVI, 1× HDMI, 1× S-Video", "Green", "Nvidia GeForce4 MX 440"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNoColor(){
+	public function testGraphicCardNoColor()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('brand', 'Nvidia'))
@@ -50,13 +53,14 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('capacity-byte', 134217728));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, 2× DVI 1× HDMI 1× S-Video, Nvidia GeForce4 MX 440',
+		$this->assertArrayEquals(
+			["Graphics card PCI Express 128 MiB", "2× DVI, 1× HDMI, 1× S-Video", "Nvidia GeForce4 MX 440"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNoBrand(){
+	public function testGraphicCardNoBrand()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('model', 'GeForce4 MX 440'))
@@ -73,13 +77,14 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('capacity-byte', 134217728));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, 2× DVI 1× HDMI 1× S-Video, Green, GeForce4 MX 440',
+		$this->assertArrayEquals(
+			["Graphics card PCI Express 128 MiB", "2× DVI, 1× HDMI, 1× S-Video", "Green", "GeForce4 MX 440"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNoModel(){
+	public function testGraphicCardNoModel()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('brand', 'Nvidia'))
@@ -96,13 +101,14 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('capacity-byte', 134217728));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, 2× DVI 1× HDMI 1× S-Video, Green, Nvidia',
+		$this->assertArrayEquals(
+			["Graphics card PCI Express 128 MiB", "2× DVI, 1× HDMI, 1× S-Video", "Green", "Nvidia"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNoCommercial(){
+	public function testGraphicCardNoCommercial()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('color', 'green'))
@@ -118,13 +124,14 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('capacity-byte', 134217728));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, 2× DVI 1× HDMI 1× S-Video, Green',
+		$this->assertArrayEquals(
+			["Graphics card PCI Express 128 MiB", "2× DVI, 1× HDMI, 1× S-Video", "Green"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNoCommercialNoColor(){
+	public function testGraphicCardNoCommercialNoColor()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('owner', 'DISAT'))
@@ -139,38 +146,19 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('capacity-byte', 134217728));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, 2× DVI 1× HDMI 1× S-Video',
+		$this->assertArrayEquals(
+			["Graphics card PCI Express 128 MiB", "2× DVI, 1× HDMI, 1× S-Video"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNoPorts(){
-		$item = new Item('SG69');
-		$item
-			->addFeature(new Feature('brand', 'Nvidia'))
-			->addFeature(new Feature('model', 'GeForce4 MX 440'))
-			->addFeature(new Feature('color', 'green'))
-			->addFeature(new Feature('owner', 'DISAT'))
-			->addFeature(new Feature('working', 'yes'))
-			->addFeature(new Feature('pci-low-profile', 'no'))
-			->addFeature(new Feature('sn', '314159265358'))
-			->addFeature(new Feature('type', 'graphics-card'))
-			->addFeature(new Feature('pcie-sockets-n', 1))
-			->addFeature(new Feature('capacity-byte', 134217728));
-
-		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, Green, Nvidia GeForce4 MX 440',
-			$summary
-		);
-	}
-
-	public function testGraphicCardNoPortsNoColor(){
+	public function testGraphicCardNoPorts()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('brand', 'Nvidia'))
 			->addFeature(new Feature('model', 'GeForce4 MX 440'))
+			->addFeature(new Feature('color', 'green'))
 			->addFeature(new Feature('owner', 'DISAT'))
 			->addFeature(new Feature('working', 'yes'))
 			->addFeature(new Feature('pci-low-profile', 'no'))
@@ -180,13 +168,35 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('capacity-byte', 134217728));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, Nvidia GeForce4 MX 440',
+		$this->assertArrayEquals(
+			["Graphics card PCI Express 128 MiB", "Green", "Nvidia GeForce4 MX 440"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNoCapacity(){
+	public function testGraphicCardNoPortsNoColor()
+	{
+		$item = new Item('SG69');
+		$item
+			->addFeature(new Feature('brand', 'Nvidia'))
+			->addFeature(new Feature('model', 'GeForce4 MX 440'))
+			->addFeature(new Feature('owner', 'DISAT'))
+			->addFeature(new Feature('working', 'yes'))
+			->addFeature(new Feature('pci-low-profile', 'no'))
+			->addFeature(new Feature('sn', '314159265358'))
+			->addFeature(new Feature('type', 'graphics-card'))
+			->addFeature(new Feature('pcie-sockets-n', 1))
+			->addFeature(new Feature('capacity-byte', 134217728));
+
+		$summary = GraphicCardSummarizer::summarize($item);
+		$this->assertArrayEquals(
+			["Graphics card PCI Express 128 MiB", "Nvidia GeForce4 MX 440"],
+			$summary
+		);
+	}
+
+	public function testGraphicCardNoCapacity()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('brand', 'Nvidia'))
@@ -203,13 +213,14 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('pcie-sockets-n', 1));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card PCI Express, 2× DVI 1× HDMI 1× S-Video, Green, Nvidia GeForce4 MX 440',
+		$this->assertArrayEquals(
+			["Graphics card PCI Express", "2× DVI, 1× HDMI, 1× S-Video", "Green", "Nvidia GeForce4 MX 440"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNoSocket(){
+	public function testGraphicCardNoSocket()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('brand', 'Nvidia'))
@@ -226,13 +237,14 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('capacity-byte', 134217728));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card 128 MiB, 2× DVI 1× HDMI 1× S-Video, Green, Nvidia GeForce4 MX 440',
+		$this->assertArrayEquals(
+			["Graphics card 128 MiB", "2× DVI, 1× HDMI, 1× S-Video", "Green", "Nvidia GeForce4 MX 440"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNoSocketNoCapacity(){
+	public function testGraphicCardNoSocketNoCapacity()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('brand', 'Nvidia'))
@@ -248,13 +260,14 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('type', 'graphics-card'));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card, 2× DVI 1× HDMI 1× S-Video, Green, Nvidia GeForce4 MX 440',
+		$this->assertArrayEquals(
+			["Graphics card", "2× DVI, 1× HDMI, 1× S-Video", "Green", "Nvidia GeForce4 MX 440"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNoCommercialNoPorts(){
+	public function testGraphicCardNoCommercialNoPorts()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('color', 'green'))
@@ -267,13 +280,14 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('capacity-byte', 134217728));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card PCI Express 128 MiB, Green',
+		$this->assertArrayEquals(
+			["Graphics card PCI Express 128 MiB", "Green"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNoCommercialNoCapacityNoSocket(){
+	public function testGraphicCardNoCommercialNoCapacityNoSocket()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('color', 'green'))
@@ -287,13 +301,14 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('type', 'graphics-card'));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card, 2× DVI 1× HDMI 1× S-Video, Green',
+		$this->assertArrayEquals(
+			["Graphics card", "2× DVI, 1× HDMI, 1× S-Video", "Green"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNoCommercialNoCapacityNoSocketNoPorts(){
+	public function testGraphicCardNoCommercialNoCapacityNoSocketNoPorts()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('color', 'green'))
@@ -304,21 +319,22 @@ class GraphicCardSummarizerTest extends TestCase {
 			->addFeature(new Feature('type', 'graphics-card'));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card, Green',
+		$this->assertArrayEquals(
+			["Graphics card", "Green"],
 			$summary
 		);
 	}
 
-	public function testGraphicCardNothing(){
+	public function testGraphicCardNothing()
+	{
 		$item = new Item('SG69');
 		$item
 			->addFeature(new Feature('working', 'yes'))
 			->addFeature(new Feature('type', 'graphics-card'));
 
 		$summary = GraphicCardSummarizer::summarize($item);
-		$this->assertEquals(
-			'Graphics card',
+		$this->assertArrayEquals(
+			["Graphics card"],
 			$summary
 		);
 	}

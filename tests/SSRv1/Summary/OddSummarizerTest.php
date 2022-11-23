@@ -1,15 +1,17 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\SSRv1\Summary\OddSummarizer;
+use WEEEOpen\TaralloTest\SSRv1\Summary\SummarizerTestCase;
 
 /**
  * @covers \WEEEOpen\Tarallo\SSRv1\Summary\OddSummarizer
  */
-class OddSummarizerTest extends TestCase {
-	public function testOdd(){
+class OddSummarizerTest extends SummarizerTestCase
+{
+	public function testOdd()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
@@ -22,15 +24,16 @@ class OddSummarizerTest extends TestCase {
 			->addFeature(new Feature('odd-form-factor', '5.25'));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD 5.25 in. DVD-RW, SATA, Light grey, Toshiba MK1234GSX',
+		$this->assertArrayEquals(
+			["ODD 5.25 in. DVD-RW", "SATA", "Light grey", "Toshiba MK1234GSX"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testOddNoOddType(){
+	public function testOddNoOddType()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
@@ -42,15 +45,16 @@ class OddSummarizerTest extends TestCase {
 			->addFeature(new Feature('odd-form-factor', '5.25'));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD 5.25 in., SATA, Light grey, Toshiba MK1234GSX',
+		$this->assertArrayEquals(
+			["ODD 5.25 in.", "SATA", "Light grey", "Toshiba MK1234GSX"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testOddNoFormFactor(){
+	public function testOddNoFormFactor()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
@@ -62,15 +66,16 @@ class OddSummarizerTest extends TestCase {
 			->addFeature(new Feature('sata-ports-n', 1));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD DVD-RW, SATA, Light grey, Toshiba MK1234GSX',
+		$this->assertArrayEquals(
+			["ODD DVD-RW", "SATA", "Light grey", "Toshiba MK1234GSX"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testOddNoFormFactorNoOddType(){
+	public function testOddNoFormFactorNoOddType()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
@@ -81,15 +86,16 @@ class OddSummarizerTest extends TestCase {
 			->addFeature(new Feature('sata-ports-n', 1));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD, SATA, Light grey, Toshiba MK1234GSX',
+		$this->assertArrayEquals(
+			["ODD", "SATA", "Light grey", "Toshiba MK1234GSX"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testOddNoPorts(){
+	public function testOddNoPorts()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
@@ -101,14 +107,14 @@ class OddSummarizerTest extends TestCase {
 			->addFeature(new Feature('odd-form-factor', '5.25'));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD 5.25 in. DVD-RW, Light grey, Toshiba MK1234GSX',
+		$this->assertArrayEquals(
+			["ODD 5.25 in. DVD-RW", "Light grey", "Toshiba MK1234GSX"],
 			$summary
 		);
-
 	}
 
-	public function testOddNoPortsNoCommercial() {
+	public function testOddNoPortsNoCommercial()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
@@ -118,15 +124,16 @@ class OddSummarizerTest extends TestCase {
 			->addFeature(new Feature('odd-form-factor', '5.25'));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD 5.25 in. DVD-RW, Light grey',
+		$this->assertArrayEquals(
+			["ODD 5.25 in. DVD-RW", "Light grey"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testOddNoPortsNoCommercialNoColor() {
+	public function testOddNoPortsNoCommercialNoColor()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
@@ -135,30 +142,32 @@ class OddSummarizerTest extends TestCase {
 			->addFeature(new Feature('odd-form-factor', '5.25'));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD 5.25 in. DVD-RW',
+		$this->assertArrayEquals(
+			["ODD 5.25 in. DVD-RW"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testOddNothing() {
+	public function testOddNothing()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD',
+		$this->assertArrayEquals(
+			["ODD"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testOddNoColor(){
+	public function testOddNoColor()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
@@ -170,15 +179,16 @@ class OddSummarizerTest extends TestCase {
 			->addFeature(new Feature('odd-form-factor', '5.25'));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD 5.25 in. DVD-RW, SATA, Toshiba MK1234GSX',
+		$this->assertArrayEquals(
+			["ODD 5.25 in. DVD-RW", "SATA", "Toshiba MK1234GSX"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testOddNoColorNoCommercial(){
+	public function testOddNoColorNoCommercial()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
@@ -188,15 +198,16 @@ class OddSummarizerTest extends TestCase {
 			->addFeature(new Feature('odd-form-factor', '5.25'));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD 5.25 in. DVD-RW, SATA',
+		$this->assertArrayEquals(
+			["ODD 5.25 in. DVD-RW", "SATA"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testOddNoBrand(){
+	public function testOddNoBrand()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
@@ -208,15 +219,16 @@ class OddSummarizerTest extends TestCase {
 			->addFeature(new Feature('odd-form-factor', '5.25'));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD 5.25 in. DVD-RW, SATA, Light grey, MK1234GSX',
+		$this->assertArrayEquals(
+			["ODD 5.25 in. DVD-RW", "SATA", "Light grey", "MK1234GSX"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testOddNoCommercial(){
+	public function testOddNoCommercial()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
@@ -227,15 +239,16 @@ class OddSummarizerTest extends TestCase {
 			->addFeature(new Feature('odd-form-factor', '5.25'));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD 5.25 in. DVD-RW, SATA, Light grey',
+		$this->assertArrayEquals(
+			["ODD 5.25 in. DVD-RW", "SATA", "Light grey"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testOddNoModel(){
+	public function testOddNoModel()
+	{
 		$item = new Item('ODD200');
 		$item
 			->addFeature(new Feature('type', 'odd'))
@@ -247,8 +260,8 @@ class OddSummarizerTest extends TestCase {
 			->addFeature(new Feature('odd-form-factor', '5.25'));
 
 		$summary = OddSummarizer::summarize($item);
-		$this->assertEquals(
-			'ODD 5.25 in. DVD-RW, SATA, Light grey, Toshiba',
+		$this->assertArrayEquals(
+			["ODD 5.25 in. DVD-RW", "SATA", "Light grey", "Toshiba"],
 			$summary
 		);
 

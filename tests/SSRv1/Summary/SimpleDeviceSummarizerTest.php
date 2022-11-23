@@ -1,15 +1,17 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\SSRv1\Summary\SimpleDeviceSummarizer;
+use WEEEOpen\TaralloTest\SSRv1\Summary\SummarizerTestCase;
 
 /**
  * @covers \WEEEOpen\Tarallo\SSRv1\Summary\SimpleDeviceSummarizer
  */
-class SimpleDeviceSummarizerTest extends TestCase {
-	public function testStorageCard() {
+class SimpleDeviceSummarizerTest extends SummarizerTestCase
+{
+	public function testStorageCard()
+	{
 		$item = new Item('Q1');
 		$item
 			->addFeature(new Feature('color', 'green'))
@@ -25,8 +27,8 @@ class SimpleDeviceSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = SimpleDeviceSummarizer::summarize($item);
-		$this->assertEquals(
-			'Storage card, 1× SAS (SATA connector), Green, Outtel SRC123567',
+		$this->assertArrayEquals(
+			["Storage card", "1× SAS (SATA connector)", "Green", "Outtel SRC123567"],
 			$summary
 		);
 

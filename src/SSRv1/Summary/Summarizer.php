@@ -6,5 +6,5 @@ use WEEEOpen\Tarallo\ItemWithFeatures;
 
 interface Summarizer
 {
-	public static function summarize(ItemWithFeatures $item): string;
+	public static function summarize(ItemWithFeatures $item): array;
 }

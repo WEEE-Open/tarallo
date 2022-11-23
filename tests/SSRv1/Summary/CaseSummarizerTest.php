@@ -1,15 +1,17 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\SSRv1\Summary\CaseSummarizer;
+use WEEEOpen\TaralloTest\SSRv1\Summary\SummarizerTestCase;
 
 /**
  * @covers \WEEEOpen\Tarallo\SSRv1\Summary\CaseSummarizer
  */
-class CaseSummarizerTest extends TestCase {
-	public function testCase() {
+class CaseSummarizerTest extends SummarizerTestCase
+{
+	public function testCase()
+	{
 		$item = new Item('420');
 		$item
 			->addFeature(new Feature('color', 'white'))
@@ -21,15 +23,16 @@ class CaseSummarizerTest extends TestCase {
 			->addFeature(new Feature('motherboard-form-factor', 'atx'));
 
 		$summary = CaseSummarizer::summarize($item);
-		$this->assertEquals(
-			'Case ATX (4× USB), White, Asus Optiplex 755 SFF',
+		$this->assertArrayEquals(
+			["Case ATX", "4× USB", "White", "Asus Optiplex 755 SFF"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testCaseSinglePort() {
+	public function testCaseSinglePort()
+	{
 		$item = new Item('420');
 		$item
 			->addFeature(new Feature('color', 'grey'))
@@ -42,15 +45,16 @@ class CaseSummarizerTest extends TestCase {
 			->addFeature(new Feature('motherboard-form-factor', 'microatx'));
 
 		$summary = CaseSummarizer::summarize($item);
-		$this->assertEquals(
-			'Case Micro ATX (1× Firewire, 4× USB), Grey, HP AsdPC',
+		$this->assertArrayEquals(
+			["Case Micro ATX", "1× Firewire, 4× USB", "Grey", "HP AsdPC"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testCaseNoModel() {
+	public function testCaseNoModel()
+	{
 		$item = new Item('420');
 		$item
 			->addFeature(new Feature('color', 'white'))
@@ -61,15 +65,16 @@ class CaseSummarizerTest extends TestCase {
 			->addFeature(new Feature('motherboard-form-factor', 'atx'));
 
 		$summary = CaseSummarizer::summarize($item);
-		$this->assertEquals(
-			'Case ATX (4× USB), White, Asus',
+		$this->assertArrayEquals(
+			["Case ATX", "4× USB", "White", "Asus"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testCaseNoCommercial() {
+	public function testCaseNoCommercial()
+	{
 		$item = new Item('420');
 		$item
 			->addFeature(new Feature('color', 'white'))
@@ -79,15 +84,16 @@ class CaseSummarizerTest extends TestCase {
 			->addFeature(new Feature('motherboard-form-factor', 'atx'));
 
 		$summary = CaseSummarizer::summarize($item);
-		$this->assertEquals(
-			'Case ATX (4× USB), White',
+		$this->assertArrayEquals(
+			["Case ATX", "4× USB", "White"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testCaseNoColor() {
+	public function testCaseNoColor()
+	{
 		$item = new Item('420');
 		$item
 			->addFeature(new Feature('usb-ports-n', 4))
@@ -98,15 +104,16 @@ class CaseSummarizerTest extends TestCase {
 			->addFeature(new Feature('motherboard-form-factor', 'atx'));
 
 		$summary = CaseSummarizer::summarize($item);
-		$this->assertEquals(
-			'Case ATX (4× USB), Asus Optiplex 755 SFF',
+		$this->assertArrayEquals(
+			["Case ATX", "4× USB", "Asus Optiplex 755 SFF"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testCaseNoPorts() {
+	public function testCaseNoPorts()
+	{
 		$item = new Item('420');
 		$item
 			->addFeature(new Feature('color', 'white'))
@@ -117,15 +124,16 @@ class CaseSummarizerTest extends TestCase {
 			->addFeature(new Feature('motherboard-form-factor', 'atx'));
 
 		$summary = CaseSummarizer::summarize($item);
-		$this->assertEquals(
-			'Case ATX, White, Asus Optiplex 755 SFF',
+		$this->assertArrayEquals(
+			["Case ATX", "White", "Asus Optiplex 755 SFF"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testCaseNoPortsNoFormFactor() {
+	public function testCaseNoPortsNoFormFactor()
+	{
 		$item = new Item('420');
 		$item
 			->addFeature(new Feature('color', 'white'))
@@ -135,15 +143,16 @@ class CaseSummarizerTest extends TestCase {
 			->addFeature(new Feature('model', 'Optiplex 755 SFF'));
 
 		$summary = CaseSummarizer::summarize($item);
-		$this->assertEquals(
-			'Case, White, Asus Optiplex 755 SFF',
+		$this->assertArrayEquals(
+			["Case", "White", "Asus Optiplex 755 SFF"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testCaseNoFormFactor() {
+	public function testCaseNoFormFactor()
+	{
 		$item = new Item('420');
 		$item
 			->addFeature(new Feature('color', 'white'))
@@ -154,15 +163,16 @@ class CaseSummarizerTest extends TestCase {
 			->addFeature(new Feature('model', 'Optiplex 755 SFF'));
 
 		$summary = CaseSummarizer::summarize($item);
-		$this->assertEquals(
-			'Case (4× USB), White, Asus Optiplex 755 SFF',
+		$this->assertArrayEquals(
+			["Case", "4× USB", "White", "Asus Optiplex 755 SFF"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testCaseNoCommercialNoColor() {
+	public function testCaseNoCommercialNoColor()
+	{
 		$item = new Item('420');
 		$item
 			->addFeature(new Feature('usb-ports-n', 4))
@@ -171,15 +181,16 @@ class CaseSummarizerTest extends TestCase {
 			->addFeature(new Feature('motherboard-form-factor', 'atx'));
 
 		$summary = CaseSummarizer::summarize($item);
-		$this->assertEquals(
-			'Case ATX (4× USB)',
+		$this->assertArrayEquals(
+			["Case ATX", "4× USB"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testCaseNoCommercialNoColorNoPorts() {
+	public function testCaseNoCommercialNoColorNoPorts()
+	{
 		$item = new Item('420');
 		$item
 			->addFeature(new Feature('type', 'case'))
@@ -187,30 +198,32 @@ class CaseSummarizerTest extends TestCase {
 			->addFeature(new Feature('motherboard-form-factor', 'atx'));
 
 		$summary = CaseSummarizer::summarize($item);
-		$this->assertEquals(
-			'Case ATX',
+		$this->assertArrayEquals(
+			["Case ATX"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testCaseNothing() {
+	public function testCaseNothing()
+	{
 		$item = new Item('420');
 		$item
 			->addFeature(new Feature('type', 'case'))
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = CaseSummarizer::summarize($item);
-		$this->assertEquals(
-			'Case',
+		$this->assertArrayEquals(
+			["Case"],
 			$summary
 		);
 
 		return $summary;
 	}
 
-	public function testCaseNoColorNoPortsNoFormFactor() {
+	public function testCaseNoColorNoPortsNoFormFactor()
+	{
 		$item = new Item('420');
 		$item
 			->addFeature(new Feature('type', 'case'))
@@ -219,16 +232,11 @@ class CaseSummarizerTest extends TestCase {
 			->addFeature(new Feature('model', 'Optiplex 755 SFF'));
 
 		$summary = CaseSummarizer::summarize($item);
-		$this->assertEquals(
-			'Case, Asus Optiplex 755 SFF',
+		$this->assertArrayEquals(
+			["Case", "Asus Optiplex 755 SFF"],
 			$summary
 		);
 
 		return $summary;
-
 	}
-
-
-
-
 }

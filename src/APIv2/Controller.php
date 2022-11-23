@@ -696,10 +696,7 @@ class Controller implements RequestHandlerInterface
 		$db->itemDAO()->itemMustExist($item, true);
 
 		$itemWithFeatures = $db->itemDAO()->getItem($item);
-
-		$summary = Summary::peel($itemWithFeatures);
-
-		return new JsonResponse(["summary"=>$summary]);
+		return new JsonResponse(Summary::peel($itemWithFeatures));
   }
 
 	public static function itemsByValue(ServerRequestInterface $request): ResponseInterface
