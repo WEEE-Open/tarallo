@@ -48,8 +48,12 @@ if (isset($edit)) {
 	}
 }
 
+// A little more logic in a template won't kill, right?
 $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
-$summary_escaped = array_map([$this, 'e'], explode(', ', $summary));
+$summary_split = preg_split("/(\(.*\))/", $summary, -1, PREG_SPLIT_DELIM_CAPTURE);
+$summary_split = array_map(fn($v): array => str_starts_with($v, '(') ? [$v] : explode(', ', $v), $summary_split);
+$flat = call_user_func_array('array_merge', $summary_split);
+$summary_escaped = array_map([$this, 'e'], $flat);
 unset($summary);
 
 $product = $item->getProduct();
