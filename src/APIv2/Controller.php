@@ -770,8 +770,13 @@ class Controller implements RequestHandlerInterface
 
 		$type = Validation::validateHasString($parameters, 'type');
 		$limit = Validation::validateOptionalInt($parameters, 'howMany', 100);
+		$featureFilter = Validation::validateOptionalString($parameters, 'featureFilter', null, null);
+		if ($featureFilter !== null) {
+			$exp = Validation::explodeFeatureValuePair($featureFilter);
+			$featureFilter = new Feature($exp[0], $exp[1]);
+		}
 
-		$data = $db->AuditDAO()->getRecentAuditByType($type, $limit);
+		$data = $db->AuditDAO()->getRecentAuditByType($type, $limit, $featureFilter);
 
 		return new JsonResponse($data);
 	}
@@ -875,7 +880,7 @@ class Controller implements RequestHandlerInterface
 
 		// this is disabled because it can actually be useful to have the list as soon as you start typing,
 		// still gonna leave this here in case anyone wants to change it
-		/*$min = 3; 
+		/*$min = 3;
 		if (strlen($search) < $min) {
 			throw new RangeException('q', $min, null, "Minimum length for autocomplete is $min");
 		}*/

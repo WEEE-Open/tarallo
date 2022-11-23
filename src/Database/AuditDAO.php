@@ -2,6 +2,7 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
+use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\ProductCode;
 
@@ -42,23 +43,35 @@ LIMIT :offs, :cnt'
 	 *
 	 * @param string $type C, M, etc...
 	 * @param int $howMany How many rows to return (LIMIT)
+	 * @param Feature|null $filter Feature that items must match
 	 *
 	 * @return array
 	 */
-	public function getRecentAuditByType(string $type, int $howMany)
+	public function getRecentAuditByType(string $type, int $howMany, ?Feature $filter = null)
 	{
 		$array = [];
 
 		$statement = $this->getPDO()->prepare(
-			'SELECT `Code`, MAX(UNIX_TIMESTAMP(`Time`)) AS `Time`
-FROM Audit
-WHERE `Change` = ?
-GROUP BY `Code`
-ORDER BY `Time` DESC, `Code` DESC
-LIMIT ?'
+			'SELECT Audit.`Code` AS `Code`, MAX(UNIX_TIMESTAMP(`Time`)) AS `Time`
+FROM Audit ' .
+			($filter ? 'INNER JOIN (SELECT `Code`, `Feature`, COALESCE(`ValueText`, `ValueEnum`, `ValueDouble`) AS `Value` FROM ProductItemFeatureUnified) AS PIFU
+ON Audit.`Code` = PIFU.`Code`' : '') .
+			'WHERE Audit.`Change` = :changeType ' .
+			($filter ? 'AND PIFU.`Feature` = :feature AND PIFU.`Value` = :value ' : '') .
+			'GROUP BY Audit.`Code`
+ORDER BY Audit.`Time` DESC, Audit.`Code` DESC
+LIMIT :howMany'
 		);
 
-		$result = $statement->execute([$type, $howMany]);
+		$statement->bindParam(':changeType', $type);
+		$statement->bindParam(':howMany', $howMany);
+		if ($filter !== null) {
+			$statement->bindParam(':feature', $filter->name);
+			$statement->bindParam(':value', $filter->value);
+		}
+
+		$result = $statement->execute();
+
 		assert($result !== false, 'get audit by type');
 
 		try {
