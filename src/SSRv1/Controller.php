@@ -758,7 +758,8 @@ class Controller implements RequestHandlerInterface
 					'TemplateParameters',
 					[
 						'lastItemEntries' => $db->statsDAO()->getLastAudit(false, $numEntries),
-						'lastProductEntries' => $db->statsDAO()->getLastAudit(true, $numEntries)
+						'lastProductEntries' => $db->statsDAO()->getLastAudit(true, $numEntries),
+						'topAuditCountPerItemPerType' => $db->statsDAO()->getItemsMostAuditedPerType($numEntries)
 					]
 				);
 				break;
