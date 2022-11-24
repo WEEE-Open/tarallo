@@ -375,6 +375,36 @@ class Controller implements RequestHandlerInterface
 		return $response;
 	}
 
+	public static function renameItem(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+		$payload = $request->getAttribute('ParsedBody', []);
+
+		$id = Validation::validateHasString($parameters, 'id');
+		$newName = Validation::validateHasString($payload, 'name');
+
+		try {
+			$id = new ItemCode($id);
+		} catch (ValidationException $e) {
+			throw new NotFoundException($id);
+		}
+
+		$db->itemDAO()->itemMustExist($id, true);
+		
+		$newItem = new ItemCode($newName);
+		$db->itemDAO()->itemMustNotExist($newItem, true);
+
+		try {
+			$db->itemDAO()->renameItem($id, $newName);
+		} catch (ValidationException $e) {
+			throw new InvalidParameterException('name', $newName, "New name $newName, not a valid name");
+		}
+
+		return new EmptyResponse(204);
+	}
+
 	public static function removeItem(ServerRequestInterface $request): ResponseInterface
 	{
 		/** @var Database $db */

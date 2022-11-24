@@ -9,6 +9,7 @@ use WEEEOpen\Tarallo\ItemPrefixer;
 use WEEEOpen\Tarallo\ItemWithCode;
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\NotFoundException;
+use WEEEOpen\Tarallo\FoundException;
 use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\ValidationException;
 
@@ -72,8 +73,8 @@ final class ItemDAO extends DAO
 		$statement = $this->getPDO()->prepare('UPDATE Item SET Code=:cod WHERE `Code` = :old');
 
 		try {
-			$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
-			$statement->bindValue(':old', $newCode, \PDO::PARAM_STR);
+			$statement->bindValue(':cod', $newCode, \PDO::PARAM_STR);
+			$statement->bindValue(':old', $item->getCode(), \PDO::PARAM_STR);
 			$result = $statement->execute();
 			assert($result !== false, 'update item');
 		} catch (\PDOException $e) {
@@ -218,6 +219,33 @@ final class ItemDAO extends DAO
 			$statement->execute([$item->getCode()]);
 			if ($statement->rowCount() === 0) {
 				throw new NotFoundException();
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * Ensure that an Item exists in the Item table and lock its row
+	 *
+	 * @param ItemWithCode $item
+	 * @param bool $allowDeleted True if a deleted item is acceptable as "existing", false if deleted items should be
+	 * ignored
+	 */
+	public function itemMustNotExist(ItemWithCode $item, bool $allowDeleted = false)
+	{
+		// Use Item instead of ProductItemFeatures because we need to check DeletedAt, and we will modify Item anyway
+		if ($allowDeleted) {
+			$statement = $this->getPDO()
+				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod FOR UPDATE');
+		} else {
+			$statement = $this->getPDO()
+				->prepare('SELECT `Code` FROM Item WHERE `Code` = :cod and `DeletedAt` IS NULL FOR UPDATE');
+		}
+		try {
+			$statement->execute([$item->getCode()]);
+			if ($statement->rowCount() > 0) {
+				throw new FoundException();
 			}
 		} finally {
 			$statement->closeCursor();
