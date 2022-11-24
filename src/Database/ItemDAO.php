@@ -62,6 +62,31 @@ final class ItemDAO extends DAO
 	 * Soft-delete an item (mark as deleted to make invisible, detach from tree)
 	 *
 	 * @param ItemWithCode $item
+	 * @param string $newCode
+	 *
+	 * @throws ValidationException if item contains other items (cannot be deleted)
+	 */
+	public function renameItem(ItemWithCode $item, string $newCode)
+	{
+		$this->itemMustExist($item);
+		$statement = $this->getPDO()->prepare('UPDATE Item SET Code=:cod WHERE `Code` = :old');
+
+		try {
+			$statement->bindValue(':cod', $item->getCode(), \PDO::PARAM_STR);
+			$statement->bindValue(':old', $newCode, \PDO::PARAM_STR);
+			$result = $statement->execute();
+			assert($result !== false, 'update item');
+		} catch (\PDOException $e) {
+			throw $e;
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * Soft-delete an item (mark as deleted to make invisible, detach from tree)
+	 *
+	 * @param ItemWithCode $item
 	 *
 	 * @throws ValidationException if item contains other items (cannot be deleted)
 	 */

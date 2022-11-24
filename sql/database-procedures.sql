@@ -79,12 +79,14 @@ CREATE TRIGGER ItemBMVUpdate
 	ON ItemFeature
 	FOR EACH ROW
 	BEGIN
-		IF(NEW.Feature = 'brand') THEN
-			UPDATE Item SET Brand = NEW.ValueText WHERE Code = NEW.Code;
-		ELSEIF(NEW.Feature = 'model') THEN
-			UPDATE Item SET Model = NEW.ValueText WHERE Code = NEW.Code;
-		ELSEIF(NEW.Feature = 'variant') THEN
-			UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
+		IF(NEW.Code = OLD.Code) THEN -- This prevents infinite loop on item rename
+			IF(NEW.Feature = 'brand') THEN
+				UPDATE Item SET Brand = NEW.ValueText WHERE Code = NEW.Code;
+			ELSEIF(NEW.Feature = 'model') THEN
+				UPDATE Item SET Model = NEW.ValueText WHERE Code = NEW.Code;
+			ELSEIF(NEW.Feature = 'variant') THEN
+				UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
+			END IF;
 		END IF;
 	END $$
 DELIMITER ;
@@ -212,21 +214,24 @@ DELIMITER ;
 DROP TRIGGER IF EXISTS CascadeItemCodeUpdateForReal;
 DELIMITER $$
 CREATE TRIGGER CascadeItemCodeUpdateForReal
-	BEFORE UPDATE
-	ON Item
-	FOR EACH ROW
-	BEGIN
-		IF(NEW.Code <> OLD.Code) THEN
-			SET FOREIGN_KEY_CHECKS = 0;
-			UPDATE Tree
-			SET Ancestor=NEW.Code
-			WHERE Ancestor=OLD.Code;
-			UPDATE Tree
-			SET Descendant=NEW.Code
-			WHERE Descendant=OLD.Code;
-			SET FOREIGN_KEY_CHECKS = 1;
-		END IF;
-	END $$
+    BEFORE UPDATE
+    ON Item
+    FOR EACH ROW
+    BEGIN
+        IF(NEW.Code <> OLD.Code) THEN
+            SET FOREIGN_KEY_CHECKS = 0;
+            UPDATE ItemFeature
+            SET Code=NEW.Code
+            WHERE Code=OLD.Code;
+            UPDATE Tree
+            SET Ancestor=NEW.Code
+            WHERE Ancestor=OLD.Code;
+            UPDATE Tree
+            SET Descendant=NEW.Code
+            WHERE Descendant=OLD.Code;
+            SET FOREIGN_KEY_CHECKS = 1;
+        END IF;
+    END $$
 DELIMITER ;
 
 -- Search ----------------------------------------------------------------------
