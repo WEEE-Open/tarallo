@@ -34,7 +34,7 @@ trait Routes
 										$r->put('', [User::AUTH_LEVEL_RW, [Controller::class, 'createItem']]);
 										$r->delete('', [User::AUTH_LEVEL_RW, [Controller::class, 'removeItem']]);
 
-										$r->put('/rename', [User::AUTH_LEVEL_RW, [Controller::class, 'renameItem']]);
+										$r->put('/code', [User::AUTH_LEVEL_RW, [Controller::class, 'renameItem']]);
 
 										// Useless
 										//$r->get('/parent',  [User::AUTH_LEVEL_RW, [Controller::class, 'getItemParent']]);
