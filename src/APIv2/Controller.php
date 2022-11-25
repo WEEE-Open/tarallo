@@ -383,7 +383,7 @@ class Controller implements RequestHandlerInterface
 		$payload = $request->getAttribute('ParsedBody', []);
 
 		$id = Validation::validateHasString($parameters, 'id');
-		$newName = Validation::validateHasString($payload, 'name');
+		$newName = Validation::validateHasString($payload, 'code');
 
 		try {
 			$id = new ItemCode($id);
@@ -399,7 +399,7 @@ class Controller implements RequestHandlerInterface
 		try {
 			$db->itemDAO()->renameItem($id, $newName);
 		} catch (ValidationException $e) {
-			throw new InvalidParameterException('name', $newName, "New name $newName, not a valid name");
+			throw new InvalidParameterException('code', $newName, "New code $newName, not a valid code");
 		}
 
 		return new EmptyResponse(204);
