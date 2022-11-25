@@ -108,11 +108,11 @@ $now = new DateTime();
 			<thead class="thead-dark">
 			<tr>
 				<th scope="col">Code</th>
-				<th data-sortable="true" scope="col">Update Count</th>
+				<th scope="col">Update Count</th>
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach ($topAuditCountPerItemPerType['U'] as $i) : ?>
+			<?php foreach ($topAuditCountPerItemPerType['U'] ?? [] as $i) : ?>
 				<tr>
 					<td><a href="/item/<?=$i['Code']?>"><?= $this->e($i['Code'])?></a></td>
 					<td><?=$i['Count']?></td>
@@ -127,11 +127,11 @@ $now = new DateTime();
 			<thead class="thead-dark">
 			<tr>
 				<th scope="col">Code</th>
-				<th data-sortable="true" scope="col">Move Count</th>
+				<th scope="col">Move Count</th>
 			</tr>
 			</thead>
 			<tbody>
-			<?php foreach ($topAuditCountPerItemPerType['M'] as $i) : ?>
+			<?php foreach ($topAuditCountPerItemPerType['M'] ?? [] as $i) : ?>
 				<tr>
 					<td><a href="/item/<?=$i['Code']?>"><?= $this->e($i['Code'])?></a></td>
 					<td><?=$i['Count']?></td>

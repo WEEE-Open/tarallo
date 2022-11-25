@@ -1087,6 +1087,7 @@ LIMIT " . $limit;
 	 */
 	public function getItemsMostAuditedPerType(int $limit)
 	{
+		$result = [];
 		$pdo = $this->getPDO();
 
 		$stmt = $pdo->prepare("SELECT `Code`, `Change`, `Count`
@@ -1097,14 +1098,16 @@ LIMIT " . $limit;
 		) AS t
 		WHERE n <= ? ORDER BY n");
 
-		$stmt->execute([$limit]);
+		try {
+			$stmt->execute([$limit]);
 
-		$result = [ 'C' => [], 'M' => [], 'U' => []];
-		while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-			$result[$row['Change']][] = $row;
+			while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+				$result[$row['Change']][] = $row;
+			}
+		} finally {
+			$stmt->closeCursor();
 		}
 
-		$stmt->closeCursor();
 		return $result;
 	}
 }
