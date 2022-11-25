@@ -51,26 +51,28 @@ LIMIT :offs, :cnt'
 	{
 		$array = [];
 
-		$statement = $this->getPDO()->prepare(
-			'SELECT Audit.`Code` AS `Code`, MAX(UNIX_TIMESTAMP(`Time`)) AS `Time`
-FROM Audit ' .
-			($filter ? 'INNER JOIN (SELECT `Code`, `Feature`, COALESCE(`ValueText`, `ValueEnum`, `ValueDouble`) AS `Value` FROM ProductItemFeatureUnified) AS PIFU
-ON Audit.`Code` = PIFU.`Code`' : '') .
-			'WHERE Audit.`Change` = :changeType ' .
-			($filter ? 'AND PIFU.`Feature` = :feature AND PIFU.`Value` = :value ' : '') .
-			'GROUP BY Audit.`Code`
-ORDER BY Audit.`Time` DESC, Audit.`Code` DESC
-LIMIT :howMany'
-		);
-
-		$statement->bindParam(':changeType', $type);
-		$statement->bindParam(':howMany', $howMany);
-		if ($filter !== null) {
-			$statement->bindParam(':feature', $filter->name);
-			$statement->bindParam(':value', $filter->value);
+		if ($filter) {
+			$filter = /** @lang MySQL */
+				'AND `Code` IN (
+    SELECT `Code`
+    FROM ProductItemFeatureUnified
+    WHERE Feature = ' . $this->getPDO()->quote($filter->name) . ' AND COALESCE(`Value`, ValueText, ValueEnum, ValueDouble) = ' . $this->getPDO()->quote($filter->value) . '
+)';
+		} else {
+			$filter = '';
 		}
 
-		$result = $statement->execute();
+		$query = /** @lang MySQL */
+			'SELECT `Code` AS `Code`, MAX(UNIX_TIMESTAMP(`Time`)) AS `Time`
+FROM Audit
+WHERE `Change` = ? ' . "
+$filter
+GROUP BY `Code`
+ORDER BY MAX(`Time`) DESC, `Code` DESC
+LIMIT ?";
+
+		$statement = $this->getPDO()->prepare($query);
+		$result = $statement->execute([$type, $howMany]);
 
 		assert($result !== false, 'get audit by type');
 
