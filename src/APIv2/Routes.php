@@ -104,6 +104,8 @@ trait Routes
 							'/autosuggest',
 							function (FastRoute\RouteCollector $r) {
 								$r->get('/code', [User::AUTH_LEVEL_RO, [Controller::class, 'getItemsAutosuggest']]);
+								$r->get('/brand', [User::AUTH_LEVEL_RO, [Controller::class, 'getBrandsAutosuggest']]);
+								$r->get('/model', [User::AUTH_LEVEL_RO, [Controller::class, 'getModelsAutosuggest']]);
 								$r->get('/location', [User::AUTH_LEVEL_RO, [Controller::class, 'getLocationAutosuggest']]);
 							}
 						);

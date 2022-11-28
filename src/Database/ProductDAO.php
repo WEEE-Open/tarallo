@@ -248,4 +248,68 @@ final class ProductDAO extends DAO
 			$statement->closeCursor();
 		}
 	}
+
+	public function getBrandsForAutosuggest(string $code, bool $secondTry = false): array
+	{
+		$limit = 10;
+		if ($secondTry) {
+			$limit *= 2;
+			$value = "%$code%";
+		} else {
+			$value = "$code%";
+		}
+
+		$statement = $this->getPDO()
+			->prepare(
+				"SELECT DISTINCT Brand
+FROM ProductFeature
+WHERE Brand LIKE :f
+LIMIT $limit"
+			);
+		try {
+			$statement->bindValue(':f', $value);
+			$success = $statement->execute();
+			assert($success, 'get brands for autosuggest');
+			$array = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
+		} finally {
+			$statement->closeCursor();
+		}
+		if (count($array) < $limit && !$secondTry) {
+			$more = $this->getBrandsForAutosuggest($code, true);
+			$array = array_merge($array, array_diff($more, $array));
+		}
+		return $array;
+	}
+
+	public function getModelsForAutosuggest(string $code, bool $secondTry = false): array
+	{
+		$limit = 10;
+		if ($secondTry) {
+			$limit *= 2;
+			$value = "%$code%";
+		} else {
+			$value = "$code%";
+		}
+
+		$statement = $this->getPDO()
+			->prepare(
+				"SELECT DISTINCT Model
+FROM ProductFeature
+WHERE Model LIKE :f
+LIMIT $limit"
+			);
+		try {
+			$statement->bindValue(':f', $value);
+			$success = $statement->execute();
+			assert($success, 'get models for autosuggest');
+			$array = $statement->fetchAll(\PDO::FETCH_COLUMN, 0);
+		} finally {
+			$statement->closeCursor();
+		}
+		if (count($array) < $limit && !$secondTry) {
+			$more = $this->getModelsForAutosuggest($code, true);
+			$array = array_merge($array, array_diff($more, $array));
+		}
+		return $array;
+	}
 }

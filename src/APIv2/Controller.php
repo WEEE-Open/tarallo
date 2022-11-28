@@ -865,6 +865,38 @@ class Controller implements RequestHandlerInterface
 		return new JsonResponse($json);
 	}
 
+	public static function getBrandsAutosuggest(ServerRequestInterface $request)
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+		$search = Validation::validateHasString($query, 'q');
+
+		$min = 3;
+		if (strlen($search) < $min) {
+			throw new RangeException('q', $min, null, "Minimum length for autocomplete is $min");
+		}
+
+		$json = $db->productDAO()->getBrandsForAutosuggest($search);
+		return new JsonResponse($json);
+	}
+
+	public static function getmodelsAutosuggest(ServerRequestInterface $request)
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$query = $request->getQueryParams();
+		$search = Validation::validateHasString($query, 'q');
+
+		$min = 3;
+		if (strlen($search) < $min) {
+			throw new RangeException('q', $min, null, "Minimum length for autocomplete is $min");
+		}
+
+		$json = $db->productDAO()->getmodelsForAutosuggest($search);
+		return new JsonResponse($json);
+	}
+
 	public static function getLocationAutosuggest(ServerRequestInterface $request)
 	{
 		/** @var Database $db */
