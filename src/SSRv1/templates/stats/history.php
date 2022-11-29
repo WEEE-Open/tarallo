@@ -2,6 +2,7 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var array[] $lastItemEntries */
 /** @var array[] $lastProductEntries */
+/** @var array[][] $topAuditCountPerItemPerType */
 
 $this->layout('main', ['title' => 'Stats: history', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'bootstrapTable' => true]);
 $this->insert('stats::menu', ['currentPage' => 'history']);
@@ -52,7 +53,8 @@ $now = new DateTime();
 			<?php endforeach ?>
 			</tbody>
 		</table>
-	</div>	<div class="col">
+	</div>
+	<div class="col">
 		<table class="table table-borderless stats">
 			<caption>Last changes on products</caption>
 			<thead class="thead-dark">
@@ -93,6 +95,46 @@ $now = new DateTime();
 						</a><?=$sentence?>
 						<small class="text-muted">by <?= $this->e($line['User']) ?> <?= $this->e($time)?></small>
 					</td>
+				</tr>
+			<?php endforeach ?>
+			</tbody>
+		</table>
+	</div>
+</div>
+<div class="row">
+	<div class="col">
+		<table class="table table-borderless stats">
+			<caption>Most updated items</caption>
+			<thead class="thead-dark">
+			<tr>
+				<th scope="col">Code</th>
+				<th scope="col">Update Count</th>
+			</tr>
+			</thead>
+			<tbody>
+			<?php foreach ($topAuditCountPerItemPerType['U'] ?? [] as $i) : ?>
+				<tr>
+					<td><a href="/item/<?=$i['Code']?>"><?= $this->e($i['Code'])?></a></td>
+					<td><?=$i['Count']?></td>
+				</tr>
+			<?php endforeach ?>
+			</tbody>
+		</table>
+	</div>
+	<div class="col">
+		<table class="table table-borderless stats">
+			<caption>Most moved items</caption>
+			<thead class="thead-dark">
+			<tr>
+				<th scope="col">Code</th>
+				<th scope="col">Move Count</th>
+			</tr>
+			</thead>
+			<tbody>
+			<?php foreach ($topAuditCountPerItemPerType['M'] ?? [] as $i) : ?>
+				<tr>
+					<td><a href="/item/<?=$i['Code']?>"><?= $this->e($i['Code'])?></a></td>
+					<td><?=$i['Count']?></td>
 				</tr>
 			<?php endforeach ?>
 			</tbody>
