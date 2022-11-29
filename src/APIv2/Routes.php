@@ -115,7 +115,7 @@ trait Routes
 							function (FastRoute\RouteCollector $r) {
 								$r->get('/getItemsForEachValue/{feature}[/{filter}[/{location}[/{creation}[/{deleted}]]]]', [User::AUTH_LEVEL_RO, [Controller::class, 'itemsByValue']]);
 								$r->get('/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]', [User::AUTH_LEVEL_RO, [Controller::class, 'itemsNotFeature']]);
-								$r->get('/getRecentAuditByType/{type}[/{howMany}]', [User::AUTH_LEVEL_RO, [Controller::class, 'recentAuditByType']]);
+								$r->get('/getRecentAuditByType/{type}[/{howMany}[/{featureFilter}]]', [User::AUTH_LEVEL_RO, [Controller::class, 'recentAuditByType']]);
 								$r->get('/getCountByFeature/{feature}[/{filter}[/{location}[/{creation[/{deleted[/{cutoff}]]]]]', [User::AUTH_LEVEL_RO, [Controller::class, 'countByFeature']]);
 							}
 						);
