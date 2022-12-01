@@ -39,15 +39,15 @@ if (count($features) > 0) :
 							break; default:
 						case WEEEOpen\Tarallo\BaseFeature::STRING:
 							?>
-						<input class="value" type="text" data-internal-name="<?= $ultra->name ?>" value="<?= $this->e($ultra->value) ?>" data-initial-value="<?= $ultra->value ?>" id="feature-el-<?= $ultra->name ?>"></input>
+						<input class="value" type="text" data-internal-type="s" data-internal-name="<?= $ultra->name ?>" value="<?= $this->e($ultra->value) ?>" data-initial-value="<?= $ultra->value ?>" id="feature-el-<?= $ultra->name ?>"></input>
 							<?php
 									   break; case WEEEOpen\Tarallo\BaseFeature::INTEGER:
 								?>
-						<input class="value" type="number" step="1" data-internal-name="<?= $ultra->name ?>" value="<?= $ultra->value ?>" data-initial-value="<?= $ultra->value ?>" id="feature-el-<?= $ultra->name ?>"></input>
+						<input class="value" type="number" data-internal-type="i" step="1" data-internal-name="<?= $ultra->name ?>" value="<?= $ultra->value ?>" data-initial-value="<?= $ultra->value ?>" id="feature-el-<?= $ultra->name ?>"></input>
 								<?php
 												  break; case WEEEOpen\Tarallo\BaseFeature::DOUBLE:
 											?>
-						<input class="value" type="number" step="0.01" data-internal-name="<?= $ultra->name ?>" value="<?= $ultra->value ?>" data-initial-value="<?= $ultra->value ?>" id="feature-el-<?= $ultra->name ?>"></input>
+						<input class="value" type="number" data-internal-type="d" step="0.01" data-internal-name="<?= $ultra->name ?>" value="<?= $ultra->value ?>" data-initial-value="<?= $ultra->value ?>" id="feature-el-<?= $ultra->name ?>"></input>
 					<?php endswitch; ?>
 					<div class="controls"><button data-name="<?= $ultra->name ?>" class="btn btn-danger ml-2 delete" aria-roledescription="delete" tabindex="-1"><i class="fa fa-trash" role="img" aria-label="Delete"></i></button></div>
 				</li>

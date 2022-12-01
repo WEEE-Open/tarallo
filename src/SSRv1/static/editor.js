@@ -187,11 +187,16 @@
 			value.addEventListener('keydown', otherHandler);
 		}
 
-		// Event listeners for string and numeric features
-		for (let div of featuresElement.querySelectorAll('[contenteditable]')) {
+		// Event listeners for string and numeric features + autocomplete
+		for (let div of featuresElement.querySelectorAll('input')) {
 			if (div.dataset.internalType === 's') {
 				div.addEventListener('paste', sanitizePaste);
 				div.addEventListener('input', textChangedEvent);
+				if (div.dataset.internalName == "model") {
+					$(div).autoComplete({minLength:3,resolverSettings:{requestThrottling:300, url: '/v2/autosuggest/model'}});
+				} else if (div.dataset.internalName == "brand") {
+					$(div).autoComplete({minLength:3,resolverSettings:{requestThrottling:300, url: '/v2/autosuggest/brand'}});
+				}
 			} else {
 				div.addEventListener('blur', numberChanged);
 			}
@@ -986,33 +991,24 @@
 				break;
 			case 'i':
 			case 'd':
-				valueElement = document.createElement('div');
+				valueElement = document.createElement('input');
+				valueElement.type = "number";
+				valueElement.step = type = 'd' ? 0.01 : 1;
 				valueElement.dataset.internalValue = '';
 				valueElement.dataset.previousValue = '';
-				valueElement.contentEditable = 'true';
 				valueElement.addEventListener('blur', numberChanged);
 				valueElement.addEventListener("paste", sanitizePaste);
-
-				div = document.createElement('div');
-				div.textContent = '';
-				valueElement.appendChild(div);
 				break;
 			case 's':
 			default:
-				valueElement = document.createElement('div');
+				valueElement = document.createElement('input');
+				valueElement.type = "text"
 				valueElement.dataset.internalValue = ''; // Actually unused
 				valueElement.dataset.previousValue = '';
-				valueElement.contentEditable = 'true';
 				valueElement.addEventListener('paste', sanitizePaste);
 				valueElement.addEventListener('input', textChangedEvent);
-
-				div = document.createElement('div');
-				//div.textContent = '?'; // empty <div>s break everything // not anymore apparently? 2018-12-05
-				valueElement.appendChild(div);
 				break;
 		}
-
-		valueElement.dataset.internalType = type;
 		valueElement.dataset.internalName = name;
 		valueElement.classList.add("value");
 		valueElement.classList.add("changed");
