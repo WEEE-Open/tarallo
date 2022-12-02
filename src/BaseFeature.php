@@ -8,6 +8,7 @@ class BaseFeature
 	public const INTEGER = 1;
 	public const ENUM = 2;
 	public const DOUBLE = 3;
+	public const MULTILINE = 4;
 
 	// Change these numbers for a different sorting
 	public const GROUP_COMMERCIAL = 1;
@@ -45,7 +46,7 @@ class BaseFeature
 		'isa' => ['x86-32' => true, 'x86-64' => true, 'ia-64' => true, 'arm' => true],
 		'color' => ['black' => true, 'white' => true, 'green' => true, 'darkgreen' => true, 'olivedrab' => true, 'yellow' => true, 'red' => true, 'blue' => true, 'teal' => true, 'grey' => true, 'silver' => true, 'darkgrey' => true, 'lightgrey' => true, 'pink' => true, 'transparent' => true, 'brown' => true, 'orange' => true, 'violet' => true, 'sip-brown' => true, 'lightblue' => true, 'yellowed' => true, 'transparent-dark' => true, 'golden' => true, 'copper' => true, 'weeerde' => true],
 		'motherboard-form-factor' => ['atx' => true, 'miniatx' => true, 'microatx' => true, 'miniitx' => true, 'proprietary' => true, 'btx' => true, 'microbtx' => true, 'nanobtx' => true, 'picobtx' => true, 'wtx' => true, 'flexatx' => true, 'proprietary-laptop' => true, 'eatx' => true],
-		'notes' => self::STRING,
+		'notes' => self::MULTILINE,
 		'gotcha' => self::STRING,
 		'agp-sockets-n' => self::INTEGER,
 		'arrival-batch' => self::STRING,

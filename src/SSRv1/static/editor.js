@@ -262,7 +262,7 @@
 				} else if (div.dataset.internalName == "brand") {
 					$(div).autoComplete({minLength:3,resolverSettings:{requestThrottling:300, url: '/v2/autosuggest/brand'}});
 				}
-			} else {
+			} else if (div.dataset.internalType !== 'm') {
 				div.addEventListener('blur', numberChanged);
 			}
 		}
@@ -1031,6 +1031,13 @@
 				valueElement.addEventListener('blur', numberChanged);
 				//valueElement.addEventListener("paste", sanitizePaste);
 				break;
+			case 'm':
+				valueElement = document.createElement('textarea');
+				valueElement.dataset.internalValue = ''; // Actually unused
+				valueElement.dataset.previousValue = '';
+				//valueElement.addEventListener('paste', sanitizePaste);
+				valueElement.addEventListener('input', textChangedEvent);
+				break;
 			case 's':
 			default:
 				valueElement = document.createElement('input');
@@ -1175,6 +1182,7 @@
 				value = valueElement.dataset.internalValue;
 				break;
 			case 's':
+			case 'm':
 			default:
 				value = valueElement.value;
 		}

@@ -51,6 +51,7 @@ final class FeatureDAO extends DAO
 		switch ($type) {
 			case BaseFeature::ENUM:
 			case BaseFeature::DOUBLE:
+			case BaseFeature::MULTILINE:
 			case BaseFeature::STRING:
 				return \PDO::PARAM_STR;
 			case BaseFeature::INTEGER:
@@ -72,6 +73,7 @@ final class FeatureDAO extends DAO
 	public static function getColumn(int $type): string
 	{
 		switch ($type) {
+			case BaseFeature::MULTILINE:
 			case BaseFeature::STRING:
 				return 'ValueText';
 			case BaseFeature::INTEGER:
