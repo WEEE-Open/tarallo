@@ -61,14 +61,12 @@ CREATE TRIGGER ItemBMVInsert
 	ON ItemFeature
 	FOR EACH ROW
 	BEGIN
-		IF(NEW.Code = OLD.Code) THEN -- This prevents infinite loop on item rename
-			IF(NEW.Feature = 'brand') THEN
-				UPDATE Item SET Brand = NEW.ValueText WHERE Code = NEW.Code;
-			ELSEIF(NEW.Feature = 'model') THEN
-				UPDATE Item SET Model = NEW.ValueText WHERE Code = NEW.Code;
-			ELSEIF(NEW.Feature = 'variant') THEN
-				UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
-			END IF;
+		IF(NEW.Feature = 'brand') THEN
+			UPDATE Item SET Brand = NEW.ValueText WHERE Code = NEW.Code;
+		ELSEIF(NEW.Feature = 'model') THEN
+			UPDATE Item SET Model = NEW.ValueText WHERE Code = NEW.Code;
+		ELSEIF(NEW.Feature = 'variant') THEN
+			UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
 		END IF;
 	END $$
 DELIMITER ;
@@ -81,12 +79,14 @@ CREATE TRIGGER ItemBMVUpdate
 	ON ItemFeature
 	FOR EACH ROW
 	BEGIN
-		IF(NEW.Feature = 'brand') THEN
-			UPDATE Item SET Brand = NEW.ValueText WHERE Code = NEW.Code;
-		ELSEIF(NEW.Feature = 'model') THEN
-			UPDATE Item SET Model = NEW.ValueText WHERE Code = NEW.Code;
-		ELSEIF(NEW.Feature = 'variant') THEN
-			UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
+		IF(NEW.Code = OLD.Code) THEN -- This prevents infinite loop on item rename
+			IF(NEW.Feature = 'brand') THEN
+				UPDATE Item SET Brand = NEW.ValueText WHERE Code = NEW.Code;
+			ELSEIF(NEW.Feature = 'model') THEN
+				UPDATE Item SET Model = NEW.ValueText WHERE Code = NEW.Code;
+			ELSEIF(NEW.Feature = 'variant') THEN
+				UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
+			END IF;
 		END IF;
 	END $$
 DELIMITER ;

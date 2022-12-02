@@ -715,24 +715,24 @@ BEGIN
 	END IF;
 END;"
 						);
-						$this->exec("DROP TRIGGER IF EXISTS ItemBMVInsert");
+						$this->exec("DROP TRIGGER IF EXISTS ItemBMVUpdate");
 						$this->exec("
-CREATE TRIGGER ItemBMVInsert
-AFTER INSERT
-ON ItemFeature
-FOR EACH ROW
-BEGIN
-	IF(NEW.Code = OLD.Code) THEN -- This prevents infinite loop on item rename
-		IF(NEW.Feature = 'brand') THEN
-			UPDATE Item SET Brand = NEW.ValueText WHERE Code = NEW.Code;
-		ELSEIF(NEW.Feature = 'model') THEN
-			UPDATE Item SET Model = NEW.ValueText WHERE Code = NEW.Code;
-		ELSEIF(NEW.Feature = 'variant') THEN
-			UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
+CREATE TRIGGER ItemBMVUpdate
+	AFTER UPDATE
+	ON ItemFeature
+	FOR EACH ROW
+	BEGIN
+		IF(NEW.Code = OLD.Code) THEN -- This prevents infinite loop on item rename
+			IF(NEW.Feature = 'brand') THEN
+				UPDATE Item SET Brand = NEW.ValueText WHERE Code = NEW.Code;
+			ELSEIF(NEW.Feature = 'model') THEN
+				UPDATE Item SET Model = NEW.ValueText WHERE Code = NEW.Code;
+			ELSEIF(NEW.Feature = 'variant') THEN
+				UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
+			END IF;
 		END IF;
-	END IF;
-END
-						");
+	END;"
+						);
 						break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
