@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: /tmp/composer-cache
           key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
@@ -38,6 +38,14 @@ jobs:
           # args: --ignore-platform-reqs
           php_extensions: json mysqlnd pdo
           php_version: "${{ matrix.php }}"
+
+      - name: PHPCS linting
+        uses: thenabeel/action-phpcs@v8
+        with:
+          standard: phpcs.xml
+          files: "src/**,public/**,templates/**"
+          phpcs_path: vendor/bin/phpcs
+          fail_on_warnings: true
 
       # sudo apt-get install mariadb-client
       # mysqladmin ping --user=root --password=root --host=127.0.0.1 --protocol=tcp --port=3306
@@ -54,9 +62,6 @@ jobs:
 #        run: |
 #          sudo apt-get install gettext
 #          msgfmt resources/locale/en-US/LC_MESSAGES/messages.po --output-file=resources/locale/en-US/LC_MESSAGES/messages.mo
-
-      - name: PHPCS linting
-        run: composer lint
 
       # --coverage-text
       - name: PHPUnit Tests
