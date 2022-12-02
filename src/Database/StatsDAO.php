@@ -1078,4 +1078,36 @@ LIMIT " . $limit;
 
 		return $array;
 	}
+
+	/**
+	 * returns top $limit most audited items per audit type
+	 * @param int $limit Number of items to return
+	 *
+	 * @return array
+	 */
+	public function getItemsMostAuditedPerType(int $limit)
+	{
+		$result = [];
+		$pdo = $this->getPDO();
+
+		$stmt = $pdo->prepare("SELECT `Code`, `Change`, `Count`
+		FROM (
+			SELECT `Code`, `Change`, COUNT(*) AS `Count`, ROW_NUMBER() OVER (PARTITION BY `Change` ORDER BY `Count` DESC) AS n
+			FROM Audit
+			GROUP BY `Code`, `Change`
+		) AS t
+		WHERE n <= ? ORDER BY n");
+
+		try {
+			$stmt->execute([$limit]);
+
+			while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+				$result[$row['Change']][] = $row;
+			}
+		} finally {
+			$stmt->closeCursor();
+		}
+
+		return $result;
+	}
 }

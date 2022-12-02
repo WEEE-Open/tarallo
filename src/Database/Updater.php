@@ -692,6 +692,48 @@ END;"
   COLLATE = utf8mb4_unicode_ci;'
 					);
 					break;
+					case 21:
+						$this->exec("DROP TRIGGER IF EXISTS CascadeItemCodeUpdateForReal");
+						$this->exec("
+CREATE TRIGGER CascadeItemCodeUpdateForReal
+BEFORE UPDATE
+ON Item
+FOR EACH ROW
+BEGIN
+	IF(NEW.Code <> OLD.Code) THEN
+		SET FOREIGN_KEY_CHECKS = 0;
+		UPDATE ItemFeature
+		SET Code=NEW.Code
+		WHERE Code=OLD.Code;
+		UPDATE Tree
+		SET Ancestor=NEW.Code
+		WHERE Ancestor=OLD.Code;
+		UPDATE Tree
+		SET Descendant=NEW.Code
+		WHERE Descendant=OLD.Code;
+		SET FOREIGN_KEY_CHECKS = 1;
+	END IF;
+END;"
+						);
+						$this->exec("DROP TRIGGER IF EXISTS ItemBMVInsert");
+						$this->exec("
+CREATE TRIGGER ItemBMVInsert
+AFTER INSERT
+ON ItemFeature
+FOR EACH ROW
+BEGIN
+	IF(NEW.Code = OLD.Code) THEN -- This prevents infinite loop on item rename
+		IF(NEW.Feature = 'brand') THEN
+			UPDATE Item SET Brand = NEW.ValueText WHERE Code = NEW.Code;
+		ELSEIF(NEW.Feature = 'model') THEN
+			UPDATE Item SET Model = NEW.ValueText WHERE Code = NEW.Code;
+		ELSEIF(NEW.Feature = 'variant') THEN
+			UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
+		END IF;
+	END IF;
+END
+						");
+						break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}

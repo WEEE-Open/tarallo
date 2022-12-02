@@ -375,6 +375,36 @@ class Controller implements RequestHandlerInterface
 		return $response;
 	}
 
+	public static function renameItem(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+		$payload = $request->getAttribute('ParsedBody', []);
+
+		$id = Validation::validateHasString($parameters, 'id');
+		$newName = Validation::validateHasString($payload, 'code');
+
+		try {
+			$id = new ItemCode($id);
+		} catch (ValidationException $e) {
+			throw new NotFoundException($id);
+		}
+
+		$db->itemDAO()->itemMustExist($id, true);
+		
+		$newItem = new ItemCode($newName);
+		$db->itemDAO()->itemMustNotExist($newItem, true);
+
+		try {
+			$db->itemDAO()->renameItem($id, $newName);
+		} catch (ValidationException $e) {
+			throw new InvalidParameterException('code', $newName, "New code $newName, not a valid code");
+		}
+
+		return new EmptyResponse(204);
+	}
+
 	public static function removeItem(ServerRequestInterface $request): ResponseInterface
 	{
 		/** @var Database $db */
@@ -770,8 +800,13 @@ class Controller implements RequestHandlerInterface
 
 		$type = Validation::validateHasString($parameters, 'type');
 		$limit = Validation::validateOptionalInt($parameters, 'howMany', 100);
+		$featureFilter = Validation::validateOptionalString($parameters, 'featureFilter', null, null);
+		if ($featureFilter !== null) {
+			$exp = Validation::explodeFeatureValuePair($featureFilter);
+			$featureFilter = new Feature($exp[0], $exp[1]);
+		}
 
-		$data = $db->AuditDAO()->getRecentAuditByType($type, $limit);
+		$data = $db->AuditDAO()->getRecentAuditByType($type, $limit, $featureFilter);
 
 		return new JsonResponse($data);
 	}
@@ -907,7 +942,7 @@ class Controller implements RequestHandlerInterface
 
 		// this is disabled because it can actually be useful to have the list as soon as you start typing,
 		// still gonna leave this here in case anyone wants to change it
-		/*$min = 3; 
+		/*$min = 3;
 		if (strlen($search) < $min) {
 			throw new RangeException('q', $min, null, "Minimum length for autocomplete is $min");
 		}*/

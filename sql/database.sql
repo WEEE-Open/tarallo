@@ -355,5 +355,5 @@ SELECT Code,
 FROM ProductItemFeature;
 
 -- Do not combine these lines, they're parsed by update-db... WITH A REGEX!
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 21);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 22);
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 31);

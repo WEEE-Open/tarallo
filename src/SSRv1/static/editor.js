@@ -155,6 +155,71 @@
 
 			enableFeatureHandlers(featuresElement, deletedFeatures);
 		}
+
+		// Item code edit button
+		$('.rename').on("click", function (ev) {
+			let dataset = ev.currentTarget.parentElement.parentElement.parentElement.dataset;
+			let currentCode = dataset.code;
+			swal({
+				title: "Input new item code:",
+				icon: "info",
+				buttons: {
+					cancel: {
+						text: "Cancel",
+						visible: true,
+
+					},
+					confirm: {
+						text: "Rename",
+						closeModal: false,
+					}
+				},
+				content: {
+					element: "input",
+					attributes: {
+						placeholder: "New Code", 
+						value: currentCode
+					}
+				}
+			}).then(async (value) => {
+				if (value == null || value == "") {
+					swal.close();
+				} else {
+					let response = await fetchWithTimeout('/v2/items/' + encodeURIComponent(currentCode) + '/code', {
+						headers: {
+							'Accept': 'application/json',
+							'Content-Type': 'application/json'
+						},
+						method: 'PUT',
+						credentials: 'include',
+						body: JSON.stringify({
+							"code":value
+						})
+					});
+					if (response.ok) {
+						swal({
+							icon: "success",
+							title: "Success",
+							text: "You will be redirected shortly"
+						});
+						setTimeout(()=>{
+							let pageCode = window.location.pathname.split('/')[2];
+							console.log(pageCode, currentCode);
+							if (pageCode == currentCode)
+								window.location.href = '/item/' + encodeURIComponent(value);
+							else 
+								window.location.href = '/item/' + encodeURIComponent(pageCode);
+						}, 2000);
+					} else {
+						swal({
+							icon: "error",
+							title: "Error",
+							text: await response.json().then(j => j.message)
+						});
+					}
+				}
+			});
+		});
 	}
 
 	/**

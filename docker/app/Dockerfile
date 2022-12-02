@@ -1,4 +1,4 @@
-FROM php:8.0-fpm
+FROM php:8.0-fpm-alpine
 
 ARG XDEBUG
 ARG PROFILER
@@ -9,7 +9,7 @@ ENV XDEBUG=${XDEBUG}
 ENV PROFILER=${PROFILER}
 ENV DEVELOPMENT=${DEVELOPMENT}
 
-RUN apt-get update && apt-get install -y git unzip iproute2 && docker-php-ext-install pdo_mysql
+RUN docker-php-ext-install pdo_mysql
 
 # Create server root directory and enter it
 RUN mkdir -p /var/www/html
@@ -42,13 +42,15 @@ RUN if [ "$DEVELOPMENT" = "true" ]; \
 # install xdebug
 # https://stackoverflow.com/questions/49907308/installing-xdebug-in-docker
 RUN if [ "$DEVELOPMENT" = "true" -a "$XDEBUG" = "true" ]; \
-        then yes | pecl install xdebug \
-        && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
+        then apk add --no-cache --virtual .phpize_deps $PHPIZE_DEPS \
+        && yes | pecl install xdebug \
+        && docker-php-ext-enable xdebug \
         && echo "xdebug.client_host=$(/sbin/ip route|awk '/default/ { print $3 }')" >> /usr/local/etc/php/conf.d/xdebug.ini \
         && echo 'xdebug.discover_client_host=true' >> /usr/local/etc/php/conf.d/xdebug.ini \
         && echo 'xdebug.start_with_request=trigger' >> /usr/local/etc/php/conf.d/xdebug.ini \
         && echo 'xdebug.output_dir="/xdebug"' >> /usr/local/etc/php/conf.d/xdebug.ini \
-        && echo 'xdebug.profiler_output_name = "cachegrind_%H_%t.out"' >> /usr/local/etc/php/conf.d/xdebug.ini; \
+        && echo 'xdebug.profiler_output_name = "cachegrind_%H_%t.out"' >> /usr/local/etc/php/conf.d/xdebug.ini \
+        && apk del -f .phpize_deps; \
     fi
 
 # Conditionally enable the profiler

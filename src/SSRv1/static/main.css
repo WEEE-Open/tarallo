@@ -396,11 +396,15 @@ form.nice textarea {
 .pagination {
 	margin: 1.5em auto;
 	text-align: center;
+	display: flex;
+	align-content: space-between;
 }
 
 .pagination a {
 	padding: 0.5em;
 	color: #333;
+	flex-grow: 1;
+	border-radius: .25rem;
 }
 
 .pagination a:visited {
@@ -411,6 +415,16 @@ form.nice textarea {
 .pagination a:not(.disabled):hover {
 	background-color: #333;
 	color: #eee;
+	text-decoration: none;
+}
+
+.pagination .disabled {
+	color: gray !important;
+}
+
+.pagination .current {
+	font-weight: 600;
+	background-color: #eee;
 }
 
 #options form label {
