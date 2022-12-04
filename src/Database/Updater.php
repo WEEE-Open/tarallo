@@ -732,9 +732,9 @@ CREATE TRIGGER ItemBMVUpdate
 		END IF;
 	END;");
 					break;
-					case 22:
-						$this->exec(
-							'CREATE TABLE `Donations` (
+				case 22:
+					$this->exec(
+						'CREATE TABLE `Donations` (
                              `Id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
                              `Name` text NOT NULL,
                              `Location` text DEFAULT NULL,
@@ -745,9 +745,9 @@ CREATE TRIGGER ItemBMVUpdate
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;'
-						);
-						$this->exec(
-							'CREATE TABLE `DonationItem` (
+					);
+					$this->exec(
+						'CREATE TABLE `DonationItem` (
     `Donation` bigint(20) unsigned NOT NULL,
     `Code` varchar(255) NOT NULL,
     PRIMARY KEY (`Donation`,`Code`),
@@ -757,9 +757,9 @@ CREATE TRIGGER ItemBMVUpdate
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;'
-						);
-						$this->exec(
-							'CREATE TABLE `DonationTasks` (
+					);
+					$this->exec(
+						'CREATE TABLE `DonationTasks` (
     `DonationId` bigint(20) unsigned NOT NULL,
     `Id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
     `Index` int(11) NOT NULL,
@@ -771,9 +771,9 @@ CREATE TRIGGER ItemBMVUpdate
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;'
-						);
-						$this->exec(
-							'CREATE TABLE `DonationTasksProgress` (
+					);
+					$this->exec(
+						'CREATE TABLE `DonationTasksProgress` (
     `DonationId` bigint(20) unsigned NOT NULL,
     `TaskId` bigint(20) unsigned NOT NULL,
     `ItemCode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -786,9 +786,9 @@ CREATE TRIGGER ItemBMVUpdate
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;'
-						);
-						$this->exec("DROP EVENT IF EXISTS `DonationItem_ai`");
-						$this->exec("
+					);
+					$this->exec("DROP EVENT IF EXISTS `DonationItem_ai`");
+					$this->exec("
 CREATE TRIGGER `DonationItem_ai` AFTER INSERT ON `DonationItem` FOR EACH ROW
 BEGIN
 	DECLARE TaskId BIGINT(20) UNSIGNED;
@@ -813,8 +813,8 @@ BEGIN
 	
 	CLOSE cur;
 END;");
-						$this->exec("DROP EVENT IF EXISTS `DonationTasks_ai`");
-						$this->exec("
+					$this->exec("DROP EVENT IF EXISTS `DonationTasks_ai`");
+					$this->exec("
 CREATE TRIGGER `DonationTasks_ai` AFTER INSERT ON `DonationTasks` FOR EACH ROW
 BEGIN
 	DECLARE ItemId varchar(255);
@@ -867,7 +867,10 @@ BEGIN
 		SET FOREIGN_KEY_CHECKS = 1;
 	END IF;
 END;");
-						break;
+					break;
+				case 23:
+					$this->exec("ALTER TABLE `Search` ADD COLUMN `Query` TEXT AFTER `Code`");
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}

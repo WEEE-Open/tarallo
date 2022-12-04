@@ -204,6 +204,7 @@ CREATE TABLE `Prefixes`
 CREATE TABLE `Search`
 (
     `Code` BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
+    `Query` TEXT NOT NULL,
     `Expires` TIMESTAMP NOT NULL DEFAULT 0,
     `ResultsCount` BIGINT UNSIGNED NOT NULL DEFAULT 0,
     `Owner` VARCHAR(100) COLLATE utf8mb4_unicode_ci,
@@ -405,5 +406,5 @@ SELECT Code,
 FROM ProductItemFeature;
 
 -- Do not combine these lines, they're parsed by update-db... WITH A REGEX!
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 23);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 24);
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 31);

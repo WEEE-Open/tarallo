@@ -2,7 +2,7 @@
 
 namespace WEEEOpen\Tarallo;
 
-class SearchTriplet
+class SearchTriplet implements \JsonSerializable
 {
 	private $feature;
 	private $compare;
@@ -92,5 +92,10 @@ class SearchTriplet
 				"Cannot apply operator '$operator' to " . $feature->name . ': cannot be ordered'
 			);
 		}
+	}
+
+	public function jsonSerialize()
+	{
+		return [$this->feature->name, $this->compare, $this->getValue()];
 	}
 }

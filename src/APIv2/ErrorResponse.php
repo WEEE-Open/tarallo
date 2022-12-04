@@ -15,8 +15,6 @@ class ErrorResponse implements \JsonSerializable
 	public $parameter;
 	public $min;
 	public $max;
-	public $lh;
-	public $rh;
 	public $status = 500;
 	public $trace;
 
@@ -55,12 +53,6 @@ class ErrorResponse implements \JsonSerializable
 		}
 		if (method_exists($e, 'getMax')) {
 			$error->max = $e->getMax();
-		}
-		if (method_exists($e, 'getLh')) {
-			$error->lh = $e->getLh();
-		}
-		if (method_exists($e, 'getRh')) {
-			$error->rh = $e->getRh();
 		}
 		if (TARALLO_DEVELOPMENT_ENVIRONMENT) {
 			$error->trace .= $e->getFile();
@@ -115,12 +107,6 @@ class ErrorResponse implements \JsonSerializable
 		}
 		if (isset($this->max)) {
 			$result['max'] = $this->max;
-		}
-		if (isset($this->lh)) {
-			$result['lh'] = $this->lh;
-		}
-		if (isset($this->rh)) {
-			$result['rh'] = $this->rh;
 		}
 //		if(isset($this->status)) {
 //			$result['status'] = $this->status;
