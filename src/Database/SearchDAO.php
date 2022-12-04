@@ -444,7 +444,7 @@ EOQ;
 			}
 		}
 
-		$inQ = $in ? $template . implode(" OR ", $in) . " GROUP BY `Code` HAVING COUNT(*)=". count($in) : null;
+		$inQ = $in ? $template . implode(" OR ", $in) . " GROUP BY `Code` HAVING COUNT(*)=" . count($in) : null;
 
 		return [$inQ, $notIn ? $template . implode(" OR ", $notIn) : null];
 	}
@@ -498,7 +498,9 @@ EOQ;
 			}
 		}
 
-		return [$in ? $template . implode(" OR ", $in) : null, $notIn ? $template . implode(" OR ", $notIn) : null];
+		$inQ = $in ? $template . implode(" OR ", $in) . " GROUP BY `Descendant` HAVING COUNT(*)=" . count($in) : null;
+
+		return [$inQ, $notIn ? $template . implode(" OR ", $notIn) : null];
 	}
 
 	public function getBrandsLike(string $brand, int $limit = 10): array
