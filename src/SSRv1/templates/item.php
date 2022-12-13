@@ -157,17 +157,17 @@ endif; ?>
 			<a class="btn btn-outline-primary btn-item col-6 col-sm-4 col-md-auto" data-toggle="collapse" href="#collapsible-features-<?=$code_escaped?>" role="button" aria-expanded="false" aria-controls="#collapsible-features-<?=$code_escaped?>">
 				<i class="fa fa-globe"></i>&nbsp;Details
 			</a>
-			<?php if ($showProductButton && $product !== null) : ?>
-				<a class="btn btn-outline-primary btn-item col-12 col-sm-8 col-md-10 col-lg-auto" role="button" href="/product/<?=$this->e(rawurlencode($product->getBrand()))?>/<?=$this->e(rawurlencode($product->getModel()))?>/<?=$this->e(rawurlencode($product->getVariant()))?>">
-					<i class="fa fa-briefcase"></i>&nbsp;View <?= $productName /* Already escaped */ ?>
-				</a>
-			<?php endif ?>
 		<?php endif ?>
 	</nav>
 
 	<?php if (!$editing || !$target) : ?>
 		<section class="summary <?=$working?> open">
 			<span><?= implode('<span class="sep">, </span></span><span>', $summary_escaped) ?></span>
+			<?php if ($showProductButton && $product !== null) : ?>
+				<span class="underlinelinks"><a href="/product/<?=$this->e(rawurlencode($product->getBrand()))?>/<?=$this->e(rawurlencode($product->getModel()))?>/<?=$this->e(rawurlencode($product->getVariant()))?>">
+					Go to product &#187;
+				</a></span>
+			<?php endif ?>
 		</section>
 
 		<section class="features collapse" id="collapsible-features-<?=$this->e($item->getCode())?>">
