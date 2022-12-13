@@ -30,7 +30,7 @@ INSERT INTO `Feature` (`Feature`, `Group`, `Type`) VALUES
 	('isa', 'features', 2), -- Architecture --
 	('color', 'physical', 2), -- Color --
 	('motherboard-form-factor', 'physical', 2), -- Form factor (motherboard) --
-	('notes', 'general', 0), -- Notes --
+	('notes', 'general', 4), -- Notes --
 	('gotcha', 'general', 0), -- Gotcha --
 	('agp-sockets-n', 'sockets', 1), -- AGP --
 	('arrival-batch', 'administrative', 0), -- Arrival batch --

@@ -74,6 +74,9 @@ foreach($lines as $line) {
 				case '3':
 					$resultphp .= "\t\t'$feature' => self::DOUBLE," . PHP_EOL;
 					break;
+				case '4':
+					$resultphp .= "\t\t'$feature' => self::MULTILINE," . PHP_EOL;
+					break;
 			}
 			$resultphp2 .= "\t\t'$feature' => self::GROUP_$group," . PHP_EOL;
 

@@ -252,12 +252,17 @@
 			value.addEventListener('keydown', otherHandler);
 		}
 
-		// Event listeners for string and numeric features
-		for (let div of featuresElement.querySelectorAll('[contenteditable]')) {
+		// Event listeners for string and numeric features + autocomplete
+		for (let div of featuresElement.querySelectorAll('input')) {
 			if (div.dataset.internalType === 's') {
-				div.addEventListener('paste', sanitizePaste);
+				//div.addEventListener('paste', sanitizePaste);
 				div.addEventListener('input', textChangedEvent);
-			} else {
+				if (div.dataset.internalName == "model") {
+					$(div).autoComplete({minLength:3,resolverSettings:{requestThrottling:300, url: '/v2/autosuggest/model'}});
+				} else if (div.dataset.internalName == "brand") {
+					$(div).autoComplete({minLength:3,resolverSettings:{requestThrottling:300, url: '/v2/autosuggest/brand'}});
+				}
+			} else if (div.dataset.internalType !== 'm') {
 				div.addEventListener('blur', numberChanged);
 			}
 		}
@@ -294,16 +299,14 @@
 	 */
 	function textChanged(input)
 	{
-		let feature = input.parentElement;
-		fixDiv(input);
-		fadeOutInlineErrors(feature);
+		fadeOutInlineErrors(input);
 		// Newly added element
-		if (!input.dataset.initialValue) {
+		if (input.dataset.initialValue === null) {
 			return;
 		}
 
-		if (input.textContent.length === input.dataset.initialValue.length) {
-			if (input.textContent === input.dataset.initialValue) {
+		if (input.value.length === (input.dataset.initialValue || 0).length) {
+			if (input.value === input.dataset.initialValue) {
 				input.classList.remove('changed');
 				return;
 			}
@@ -350,10 +353,9 @@
 	 */
 	function numberChanged(ev)
 	{
-		let feature = ev.currentTarget.parentElement;
-		fixDiv(ev.target);
+		let feature = ev.currentTarget;
 		fadeOutInlineErrors(feature);
-		let value = ev.target.textContent;
+		let value = ev.target.value;
 		let unit;
 		if (ev.target.dataset.unit) {
 			unit = ev.target.dataset.unit;
@@ -371,28 +373,17 @@
 			// Store new value
 			ev.target.dataset.internalValue = newValue.toString();
 			// Print it
-			let lines = ev.target.getElementsByTagName('DIV');
-			lines[0].textContent = valueToPrintable(unit, newValue);
-			while (lines.length > 1) {
-				let last = lines[lines.length - 1];
-				last.remove();
-			}
+			feature.value = valueToPrintable(unit, newValue);
 			// Save if for later
 			ev.target.dataset.previousValue = newValue.toString();
 		} catch (e) {
 			// rollback
 			ev.target.dataset.internalValue = ev.target.dataset.previousValue;
-			// Remove content
-			while (ev.target.firstChild) {
-				ev.target.removeChild(ev.target.firstChild);
-			}
 			// Add previous content
-			let div = document.createElement("div");
-			ev.target.appendChild(div);
 			if (ev.target.dataset.previousValue === '') {
-				div.textContent = '';
+				div.value = '';
 			} else {
-				div.textContent = valueToPrintable(unit, parseInt(ev.target.dataset.previousValue));
+				div.value = valueToPrintable(unit, parseInt(ev.target.dataset.previousValue));
 			}
 			// Display error message
 			if (!(ev.target.dataset.previousValue === '' && e.message === 'empty-input')) {
@@ -403,31 +394,13 @@
 			}
 		}
 		// New elements don't have an initial value
-		if (!ev.target.dataset.initialValue) {
+		if (ev.target.dataset.initialValue === null) {
 			return;
 		}
 		if (ev.target.dataset.internalValue === ev.target.dataset.initialValue) {
 			ev.target.classList.remove('changed');
 		} else {
 			ev.target.classList.add('changed');
-		}
-	}
-
-	/**
-	 * Remove formatting when pasting into contentEditable
-	 *
-	 * @param ev Event
-	 */
-	function sanitizePaste(ev)
-	{
-		ev.preventDefault();
-		// noinspection JSUnresolvedVariable
-		let text = ev.clipboardData.getData("text/plain");
-		document.execCommand("insertHTML", false, text);
-		if (ev.target.classList.contains("value")) {
-			fixDiv(ev.currentTarget);
-		} else {
-			fixDiv(ev.currentTarget.parentElement);
 		}
 	}
 
@@ -816,18 +789,18 @@
 			switch (ev.key) {
 				case 'U':
 				case 'u':
-					ev.target.childNodes[0].childNodes[0].textContent = ev.target.childNodes[0].childNodes[0].textContent.toLocaleUpperCase();
+					ev.target.value = ev.target.value.toLocaleUpperCase();
 					textChanged(ev.target);
 					break;
 				case 'L':
 				case 'l':
-					ev.target.childNodes[0].childNodes[0].textContent = ev.target.childNodes[0].childNodes[0].textContent.toLocaleLowerCase();
+					ev.target.value = ev.target.value.toLocaleLowerCase();
 					textChanged(ev.target);
 					break;
 				case 'y':
 				case 'Y':
 					// https://stackoverflow.com/a/22193094
-					ev.target.childNodes[0].childNodes[0].textContent = ev.target.childNodes[0].childNodes[0].textContent
+					ev.target.value = ev.target.value
 						.split(' ')
 						.map(a => a[0].toUpperCase() + a.substr(1).toLowerCase())
 						.join(' ');
@@ -1051,34 +1024,32 @@
 				break;
 			case 'i':
 			case 'd':
-				valueElement = document.createElement('div');
+				valueElement = document.createElement('input');
+				valueElement.type = "text";
 				valueElement.dataset.internalValue = '';
 				valueElement.dataset.previousValue = '';
-				valueElement.contentEditable = 'true';
 				valueElement.addEventListener('blur', numberChanged);
-				valueElement.addEventListener("paste", sanitizePaste);
-
-				div = document.createElement('div');
-				div.textContent = '';
-				valueElement.appendChild(div);
+				//valueElement.addEventListener("paste", sanitizePaste);
+				break;
+			case 'm':
+				valueElement = document.createElement('textarea');
+				valueElement.dataset.internalValue = ''; // Actually unused
+				valueElement.dataset.previousValue = '';
+				//valueElement.addEventListener('paste', sanitizePaste);
+				valueElement.addEventListener('input', textChangedEvent);
 				break;
 			case 's':
 			default:
-				valueElement = document.createElement('div');
+				valueElement = document.createElement('input');
+				valueElement.type = "text"
 				valueElement.dataset.internalValue = ''; // Actually unused
 				valueElement.dataset.previousValue = '';
-				valueElement.contentEditable = 'true';
-				valueElement.addEventListener('paste', sanitizePaste);
+				//valueElement.addEventListener('paste', sanitizePaste);
 				valueElement.addEventListener('input', textChangedEvent);
-
-				div = document.createElement('div');
-				//div.textContent = '?'; // empty <div>s break everything // not anymore apparently? 2018-12-05
-				valueElement.appendChild(div);
 				break;
 		}
-
-		valueElement.dataset.internalType = type;
 		valueElement.dataset.internalName = name;
+		valueElement.dataset.internalType = type;
 		valueElement.classList.add("value");
 		valueElement.classList.add("changed");
 		valueElement.id = id;
@@ -1200,6 +1171,7 @@
 	 */
 	function getValueFrom(valueElement)
 	{
+		console.log(valueElement);
 		let value;
 		switch (valueElement.dataset.internalType) {
 			case 'e':
@@ -1210,13 +1182,9 @@
 				value = valueElement.dataset.internalValue;
 				break;
 			case 's':
+			case 'm':
 			default:
-				let paragraphs = valueElement.getElementsByTagName('DIV');
-				let lines = [];
-				for (let paragraph of paragraphs) {
-					lines.push(paragraph.textContent);
-				}
-				value = lines.join('\n');
+				value = valueElement.value;
 		}
 		return value;
 	}
@@ -1724,44 +1692,6 @@
 			return undefined;
 		}
 	};
-
-	/**
-	 * Add divs that disappear randomly from contentEditable elements
-	 * and fixes other stochastic events since browser apparently
-	 * and hopelessly bork contentEditable in some subtle and innovative
-	 * way with each minor release.
-	 *
-	 * @param {HTMLElement} element
-	 */
-	function fixDiv(element)
-	{
-		for (let node of element.childNodes) {
-			if (node.nodeType === 3) {
-				let div = document.createElement('div');
-				div.textContent = node.textContent;
-				element.insertBefore(div, node);
-				element.removeChild(node);
-
-				// Dima Viditch is the only person in the universe that has figured this out: https://stackoverflow.com/a/16863913
-				// Nothing else worked. NOTHING.
-				// ...on Firefox, at least. The code below, obtained via trial and error, seems to work on both Firefox and Chrome.
-				//let wrongSelection = window.getSelection();
-				//let pointlessRange = document.createRange();
-				//div.textContent = '?';
-				//pointlessRange.selectNodeContents(div);
-				//wrongSelection.removeAllRanges();
-				//wrongSelection.addRange(pointlessRange);
-				//document.execCommand('delete', false, null);
-
-				let sel = window.getSelection();
-				// First (and only) child is a text node...
-				sel.collapse(div.childNodes[0], div.childNodes[0].textContent.length);
-			} else if (!node.hasChildNodes()) {
-				// Solitary <br> that escaped a <div> (happens somewhat randomly when deleting text): nuke it
-				element.removeChild(node);
-			}
-		}
-	}
 
 	// For search
 	window.featureTypes = featureTypes;

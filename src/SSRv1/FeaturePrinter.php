@@ -448,6 +448,9 @@ class FeaturePrinter
 				case BaseFeature::DOUBLE:
 					$type = 'd';
 					break;
+				case BaseFeature::MULTILINE:
+					$type = 'm';
+					break;
 				case BaseFeature::STRING:
 				default:
 					$type = 's';

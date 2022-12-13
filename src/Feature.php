@@ -73,6 +73,7 @@ class Feature extends BaseFeature
 		$type = BaseFeature::getType($name);
 		switch ($type) {
 			case BaseFeature::STRING:
+			case BaseFeature::MULTILINE:
 				if (!is_string($value)) {
 					throw new \InvalidArgumentException(
 						'Feature value for ' . $name . ' must be string, ' . gettype($value) . ' given'

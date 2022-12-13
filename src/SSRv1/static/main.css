@@ -483,7 +483,7 @@ form.nice textarea {
 		grid-column: -3;
 	}
 
-	.features ul > li > .name > *, .features ul > li > .value > div {
+	.features ul > li > .name > *, .features ul > li > input, .features ul > li > .value > div {
 		padding: .5rem;
 	}
 }
