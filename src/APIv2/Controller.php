@@ -473,6 +473,7 @@ class Controller implements RequestHandlerInterface
 		$id = Validation::validateHasString($parameters, 'id');
 		$fix = !isset($query['nofix']);
 		$validate = !isset($query['novalidate']);
+		$moveAcrossTrees = Validation::validateOptionalBool($query, 'moveAcrossTrees', false);
 
 		try {
 			$item = new ItemCode($id);
@@ -483,6 +484,13 @@ class Controller implements RequestHandlerInterface
 			$newParent = new ItemCode($payload);
 		} catch (ValidationException $e) {
 			throw new NotFoundException($payload);
+		}
+
+		[$itemRoot] = $db->treeDAO()->getRootParent($item);
+		[$newParentRoot] = $db->treeDAO()->getRootParent($newParent);
+
+		if ($itemRoot != $newParentRoot && !$moveAcrossTrees) {
+			return new JsonResponse(ErrorResponse::fromMessage('Moving across trees not allowed'), 403);
 		}
 
 		[$oldParent, $newParentActual, $moved] = TreeDAO::moveWithValidation($db, $item, $newParent, $fix, $validate);
