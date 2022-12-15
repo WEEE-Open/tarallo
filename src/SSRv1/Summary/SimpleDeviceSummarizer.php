@@ -7,7 +7,7 @@ use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class SimpleDeviceSummarizer implements Summarizer
 {
-	public static function summarize(ItemWithFeatures $item): string
+	public static function summarize(ItemWithFeatures $item): array
 	{
 		$type = FeaturePrinter::printableValue($item->getFeature('type'));
 		$ports = PartialSummaries::summarizePorts($item, false, ' ');
@@ -15,19 +15,6 @@ class SimpleDeviceSummarizer implements Summarizer
 		$commercial = PartialSummaries::summarizeCommercial($item);
 		$color = $item->getFeature('color');
 
-		$pieces = [$type];
-		if ($ports !== '') {
-			$pieces[] = $ports;
-		}
-//		if($sockets !== '') {
-//			$pieces[] = $sockets;
-//		}
-		if ($color !== null) {
-			$pieces[] = FeaturePrinter::printableValue($color);
-		}
-		if ($commercial !== '') {
-			$pieces[] = $commercial;
-		}
-		return implode(', ', $pieces);
+		return array_filter([$type, $ports, $color ? FeaturePrinter::printableValue($color) : '', $commercial ]);
 	}
 }

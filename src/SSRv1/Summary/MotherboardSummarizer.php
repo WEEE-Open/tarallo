@@ -5,9 +5,9 @@ namespace WEEEOpen\Tarallo\SSRv1\Summary;
 use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
-class MotherboardSummarizer
+class MotherboardSummarizer implements Summarizer
 {
-	public static function summarize(ItemWithFeatures $item): string
+	public static function summarize(ItemWithFeatures $item): array
 	{
 		$type = $item->getFeature('type');
 		$socket = $item->getFeature('cpu-socket');
@@ -19,26 +19,21 @@ class MotherboardSummarizer
 
 		if ($socket) {
 			$value = FeaturePrinter::printableValue($socket);
-			if (substr($value, 0, 6) === 'Socket') {
-				$theWordSocketLiterally = '';
-			} else {
-				$theWordSocketLiterally = str_replace(' (CPU)', '', FeaturePrinter::printableName('cpu-socket')) . ' ';
+			if (!str_starts_with($value, "Socket")) {
+				$value = "Socket $value";
 			}
-			$type .= ' ' . $theWordSocketLiterally . $value;
+
+			$type .= " $value";
 		}
 
-		$ports = PartialSummaries::summarizePorts($item, false, ' ');
-		$ports = $ports ? ", $ports" : '';
+		$ports = PartialSummaries::summarizePorts($item, false, ', ');
 
-		$sockets = PartialSummaries::summarizeSockets($item, false, ' ');
-		$sockets = $sockets ? ", $sockets" : '';
+		$sockets = PartialSummaries::summarizeSockets($item, false, ', ');
 
-		$color = $color = $color ? ', ' . FeaturePrinter::printableValue($color) : '';
+		$color = $color ? FeaturePrinter::printableValue($color) : '';
 
 		$commercial = PartialSummaries::summarizeCommercial($item);
-		$commercial = $commercial ? ", $commercial" : '';
 
-		$pretty =  $type . $sockets . $ports . $color . $commercial;
-		return $pretty;
+		return array_filter([$type, $sockets, $ports, $color, $commercial]);
 	}
 }

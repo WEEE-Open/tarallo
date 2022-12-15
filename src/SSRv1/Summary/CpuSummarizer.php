@@ -7,7 +7,7 @@ use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class CpuSummarizer implements Summarizer
 {
-	public static function summarize(ItemWithFeatures $item): string
+	public static function summarize(ItemWithFeatures $item): array
 	{
 
 		$type = $item->getFeature('type');
@@ -24,42 +24,27 @@ class CpuSummarizer implements Summarizer
 			$architecture .= ' (' . FeaturePrinter::printableName('isa') . '?)';
 		}
 
-		$coreStats = '';
-		$coreStats .= $numCores ? ' ' . $numCores . ' ' . FeaturePrinter::printableName('core-n') : '';
-		$coreStats .= $numThreads ? ' ' . $numThreads . ' ' . FeaturePrinter::printableName('thread-n') : '';
+		$coreStats = [$numCores ? "$numCores " . FeaturePrinter::printableName('core-n') : ''];
+		$coreStats[] = $numThreads ? "$numThreads " . FeaturePrinter::printableName('thread-n') : '';
+		$coreStats = implode(' ', array_filter($coreStats));
 		if ($coreStats === '') {
 			$at = '';
 		} else {
-			$at = ' @';
+			$at = ' @ ';
 		}
-		$coreStats .= $frequency ? $at . ' ' . FeaturePrinter::printableValue($frequency) : '';
+		$coreStats .= $frequency ? $at . FeaturePrinter::printableValue($frequency) : '';
 
 		$commercial = PartialSummaries::summarizeCommercial($item);
 
 		if ($socket) {
 			$socket = FeaturePrinter::printableValue($socket);
 			$socket = explode(' (', $socket)[0];
-		} else {
-			$socket = '';
 		}
 
 		if (empty($coreStats) && empty($commercial) && empty($socket)) {
-			$pretty = FeaturePrinter::printableValue($type);
-		} else {
-			$pretty = $architecture;
-			if ($coreStats !== '') {
-				$pretty .= ",$coreStats";
-			}
-			if ($socket !== '') {
-				$theWordSocketLiterally = str_replace(' (CPU)', '', FeaturePrinter::printableName('cpu-socket'));
-				$pretty .= ', ' . $theWordSocketLiterally . ' ' . $socket;
-			}
-			if ($commercial !== '') {
-				$pretty .= ", $commercial";
-			}
+			return [FeaturePrinter::printableValue($type)];
 		}
 
-
-		return $pretty;
+		return array_filter([$architecture, $coreStats, $socket ? "Socket $socket" : '', $commercial ]);
 	}
 }

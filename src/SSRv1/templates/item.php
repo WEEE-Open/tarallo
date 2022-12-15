@@ -49,7 +49,7 @@ if (isset($edit)) {
 }
 
 $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
-$summary_escaped = array_map([$this, 'e'], explode(', ', $summary));
+$summary_escaped = array_map([$this, 'e'], $summary);
 unset($summary);
 
 $product = $item->getProduct();

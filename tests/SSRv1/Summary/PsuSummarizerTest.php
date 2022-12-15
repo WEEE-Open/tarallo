@@ -1,15 +1,17 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\SSRv1\Summary\PsuSummarizer;
+use WEEEOpen\TaralloTest\SSRv1\Summary\SummarizerTestCase;
 
 /**
  * @covers \WEEEOpen\Tarallo\SSRv1\Summary\PsuSummarizer
  */
-class PsuSummarizerTest extends TestCase {
-	public function testPsu() {
+class PsuSummarizerTest extends SummarizerTestCase
+{
+	public function testPsu()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('brand', 'Corsair'))
@@ -26,13 +28,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU ATX 500 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power), Black, Corsair CX500W',
+		$this->assertArrayEquals(
+			["PSU ATX 500 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power", "Black", "Corsair CX500W"],
 			$summary
 		);
 	}
-	
-	public function testPsuNoColor() {
+
+	public function testPsuNoColor()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('brand', 'Corsair'))
@@ -48,12 +51,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU ATX 500 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power), Corsair CX500W',
+		$this->assertArrayEquals(
+			["PSU ATX 500 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power", "Corsair CX500W"],
 			$summary
 		);
 	}
-	public function testPsuNoBrand() {
+
+	public function testPsuNoBrand()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('model', 'CX500W'))
@@ -69,12 +74,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU ATX 500 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power), Black, CX500W',
+		$this->assertArrayEquals(
+			["PSU ATX 500 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power", "Black", "CX500W"],
 			$summary
 		);
 	}
-	public function testPsuNoModel() {
+
+	public function testPsuNoModel()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('brand', 'Corsair'))
@@ -90,12 +97,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU ATX 500 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power), Black, Corsair',
+		$this->assertArrayEquals(
+			["PSU ATX 500 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power", "Black", "Corsair"],
 			$summary
 		);
 	}
-	public function testPsuNoCommercial() {
+
+	public function testPsuNoCommercial()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('color', 'black'))
@@ -110,12 +119,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU ATX 500 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power), Black',
+		$this->assertArrayEquals(
+			["PSU ATX 500 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power", "Black"],
 			$summary
 		);
 	}
-	public function testPsuNoCommercialNoColor() {
+
+	public function testPsuNoCommercialNoColor()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('pcie-power-pin-n', 14))
@@ -129,13 +140,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU ATX 500 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power)',
+		$this->assertArrayEquals(
+			["PSU ATX 500 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power"],
 			$summary
 		);
 	}
-	
-	public function testPsuNoConnectors() {
+
+	public function testPsuNoConnectors()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('brand', 'Corsair'))
@@ -147,13 +159,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU ATX 500 W, Black, Corsair CX500W',
+		$this->assertArrayEquals(
+			["PSU ATX 500 W", "Black", "Corsair CX500W"],
 			$summary
 		);
 	}
-	
-	public function testPsuNoExternal() {
+
+	public function testPsuNoExternal()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('brand', 'Corsair'))
@@ -169,13 +182,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU ATX 500 W (ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power), Black, Corsair CX500W',
+		$this->assertArrayEquals(
+			["PSU ATX 500 W", "ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power", "Black", "Corsair CX500W"],
 			$summary
 		);
 	}
-	
-	public function testPsuNoInternal() {
+
+	public function testPsuNoInternal()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('brand', 'Corsair'))
@@ -188,13 +202,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU ATX 500 W (C13/C14), Black, Corsair CX500W',
+		$this->assertArrayEquals(
+			["PSU ATX 500 W", "C13/C14", "Black", "Corsair CX500W"],
 			$summary
 		);
 	}
-	
-	public function testPsuMoboOnly() {
+
+	public function testPsuMoboOnly()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('brand', 'Corsair'))
@@ -207,13 +222,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU ATX 500 W (ATX 24 pin Mobo), Black, Corsair CX500W',
+		$this->assertArrayEquals(
+			["PSU ATX 500 W", "ATX 24 pin Mobo", "Black", "Corsair CX500W"],
 			$summary
 		);
 	}
-	
-	public function testPsuNoWatt() {
+
+	public function testPsuNoWatt()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('brand', 'Corsair'))
@@ -229,13 +245,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU ATX (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power), Black, Corsair CX500W',
+		$this->assertArrayEquals(
+			["PSU ATX", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power", "Black", "Corsair CX500W"],
 			$summary
 		);
 	}
-	
-	public function testPsuNoFF() {
+
+	public function testPsuNoFF()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('brand', 'Corsair'))
@@ -251,13 +268,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU 500 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power), Black, Corsair CX500W',
+		$this->assertArrayEquals(
+			["PSU 500 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power", "Black", "Corsair CX500W"],
 			$summary
 		);
 	}
 
-	public function testPsuNoFFNoWattNoCommercial() {
+	public function testPsuNoFFNoWattNoCommercial()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('pcie-power-pin-n', 14))
@@ -269,13 +287,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power)',
+		$this->assertArrayEquals(
+			["PSU", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 14× PCI Express power pins, 4× SATA power"],
 			$summary
 		);
 	}
 
-	public function testPsuNoWattNoFFNoPorts() {
+	public function testPsuNoWattNoFFNoPorts()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('brand', 'Corsair'))
@@ -285,12 +304,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU, Black, Corsair CX500W',
+		$this->assertArrayEquals(
+			["PSU", "Black", "Corsair CX500W"],
 			$summary
 		);
 	}
-	public function testPsuNoWattNoFFNoPortsNoColor() {
+
+	public function testPsuNoWattNoFFNoPortsNoColor()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('brand', 'Corsair'))
@@ -299,12 +320,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU, Corsair CX500W',
+		$this->assertArrayEquals(
+			["PSU", "Corsair CX500W"],
 			$summary
 		);
 	}
-	public function testPsuNoWattNoFFNoPortsNoCommercial() {
+
+	public function testPsuNoWattNoFFNoPortsNoCommercial()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('color', 'black'))
@@ -312,25 +335,28 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU, Black',
+		$this->assertArrayEquals(
+			["PSU", "Black"],
 			$summary
 		);
 	}
-	public function testPsuNothing() {
+
+	public function testPsuNothing()
+	{
 		$item = new Item('A99');
 		$item
 			->addFeature(new Feature('type', 'psu'))
 			->addFeature(new Feature('working', 'no'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU',
+		$this->assertArrayEquals(
+			["PSU"],
 			$summary
 		);
 	}
 
-	public function testPsuManufacturer() {
+	public function testPsuManufacturer()
+	{
 		$item = new Item('A420');
 		$item
 			->addFeature(new Feature('brand', 'HP'))
@@ -347,13 +373,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU Proprietary 100 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power), Green, HP (Delta Eletronics) DPS-100DB A',
+		$this->assertArrayEquals(
+			["PSU Proprietary 100 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power", "Green", "HP (Delta Eletronics) DPS-100DB A"],
 			$summary
 		);
 	}
 
-	public function testPsuManufacturerAndInternalName() {
+	public function testPsuManufacturerAndInternalName()
+	{
 		$item = new Item('A420');
 		$item
 			->addFeature(new Feature('brand', 'HP'))
@@ -371,13 +398,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU Proprietary 100 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power), Green, HP DPS-100DB A (Delta Eletronics F00B4R)',
+		$this->assertArrayEquals(
+			["PSU Proprietary 100 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power", "Green", "HP DPS-100DB A (Delta Eletronics F00B4R)"],
 			$summary
 		);
 	}
 
-	public function testPsuInternalName() {
+	public function testPsuInternalName()
+	{
 		$item = new Item('A420');
 		$item
 			->addFeature(new Feature('brand', 'HP'))
@@ -394,13 +422,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU Proprietary 100 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power), Green, HP DPS-100DB A (F00B4R)',
+		$this->assertArrayEquals(
+			["PSU Proprietary 100 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power", "Green", "HP DPS-100DB A (F00B4R)"],
 			$summary
 		);
 	}
 
-	public function testPsuManufacturerAndInternalNameNoModel() {
+	public function testPsuManufacturerAndInternalNameNoModel()
+	{
 		$item = new Item('A420');
 		$item
 			->addFeature(new Feature('brand', 'HP'))
@@ -417,13 +446,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU Proprietary 100 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power), Green, HP (Delta Eletronics F00B4R)',
+		$this->assertArrayEquals(
+			["PSU Proprietary 100 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power", "Green", "HP (Delta Eletronics F00B4R)"],
 			$summary
 		);
 	}
 
-	public function testPsuManufacturerAndInternalNameNoBrand() {
+	public function testPsuManufacturerAndInternalNameNoBrand()
+	{
 		$item = new Item('A420');
 		$item
 			->addFeature(new Feature('brand-manufacturer', 'Delta Eletronics'))
@@ -440,13 +470,14 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU Proprietary 100 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power), Green, DPS-100DB A (Delta Eletronics F00B4R)',
+		$this->assertArrayEquals(
+			["PSU Proprietary 100 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power", "Green", "DPS-100DB A (Delta Eletronics F00B4R)"],
 			$summary
 		);
 	}
 
-	public function testPsuManufacturerAndInternalNameNoBrandNoModel() {
+	public function testPsuManufacturerAndInternalNameNoBrandNoModel()
+	{
 		$item = new Item('A420');
 		$item
 			->addFeature(new Feature('brand-manufacturer', 'Delta Eletronics'))
@@ -462,8 +493,8 @@ class PsuSummarizerTest extends TestCase {
 			->addFeature(new Feature('working', 'yes'));
 
 		$summary = PsuSummarizer::summarize($item);
-		$this->assertEquals(
-			'PSU Proprietary 100 W (C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power), Green, (Delta Eletronics F00B4R)',
+		$this->assertArrayEquals(
+			["PSU Proprietary 100 W", "C13/C14, ATX 24 pin Mobo, 8 pin CPU, 99× SATA power", "Green", "(Delta Eletronics F00B4R)"],
 			$summary
 		);
 	}

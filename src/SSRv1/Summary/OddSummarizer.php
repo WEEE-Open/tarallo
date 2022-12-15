@@ -7,7 +7,7 @@ use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 class OddSummarizer implements Summarizer
 {
-	public static function summarize(ItemWithFeatures $item): string
+	public static function summarize(ItemWithFeatures $item): array
 	{
 		$type = $item->getFeature('type');
 		$oddType = $item->getFeature('odd-type');
@@ -18,14 +18,12 @@ class OddSummarizer implements Summarizer
 		$type .= $formFactor ? ' ' . FeaturePrinter::printableValue($formFactor) : '';
 		$type .= $oddType ? ' ' . FeaturePrinter::printableValue($oddType) : '';
 
-		$color = $color ? ', ' . FeaturePrinter::printableValue($color) : '';
+		$color = $color ? FeaturePrinter::printableValue($color) : '';
 
 		$commercial = PartialSummaries::summarizeCommercial($item);
-		$commercial = $commercial ? ", $commercial" : '';
 
-		$ports = PartialSummaries::summarizePorts($item, true, ' ');
-		$ports = $ports ? ", $ports" : '';
+		$ports = PartialSummaries::summarizePorts($item, true, ', ');
 
-		return $type . $ports . $color . $commercial;
+		return array_filter([$type, $ports, $color, $commercial]);
 	}
 }

@@ -17,7 +17,7 @@ $this->layout(
 );
 
 $summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($product);
-$summary_escaped = array_map([$this, 'e'], explode(', ', $summary));
+$summary_escaped = array_map([$this, 'e'], $summary);
 unset($summary);
 
 $bmv_rawurlencoded = $this->e(rawurlencode($product->getBrand()) . '/' . rawurlencode($product->getModel()) . '/' . rawurlencode($product->getVariant()));
