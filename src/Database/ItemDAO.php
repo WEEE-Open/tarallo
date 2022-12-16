@@ -58,7 +58,7 @@ final class ItemDAO extends DAO
 			$this->addItem($childItem, $item);
 		}
 	}
-	
+
 	/**
 	 * Soft-delete an item (mark as deleted to make invisible, detach from tree)
 	 *
@@ -83,7 +83,7 @@ final class ItemDAO extends DAO
 			$statement->closeCursor();
 		}
 	}
-	
+
 	/**
 	 * Soft-delete an item (mark as deleted to make invisible, detach from tree)
 	 *
@@ -629,8 +629,9 @@ LIMIT $limit"
 				return $l["name"];
 			}, $array);
 			foreach ($more as $value) {
-				if (!in_array($value["name"], $loc))
+				if (!in_array($value["name"], $loc)) {
 					array_push($array, $value);
+				}
 			}
 		}
 		return $array;

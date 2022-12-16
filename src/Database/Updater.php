@@ -692,9 +692,9 @@ END;"
   COLLATE = utf8mb4_unicode_ci;'
 					);
 					break;
-					case 21:
-						$this->exec("DROP TRIGGER IF EXISTS CascadeItemCodeUpdateForReal");
-						$this->exec("
+				case 21:
+					$this->exec("DROP TRIGGER IF EXISTS CascadeItemCodeUpdateForReal");
+					$this->exec("
 CREATE TRIGGER CascadeItemCodeUpdateForReal
 BEFORE UPDATE
 ON Item
@@ -713,10 +713,9 @@ BEGIN
 		WHERE Descendant=OLD.Code;
 		SET FOREIGN_KEY_CHECKS = 1;
 	END IF;
-END;"
-						);
-						$this->exec("DROP TRIGGER IF EXISTS ItemBMVUpdate");
-						$this->exec("
+END;");
+					$this->exec("DROP TRIGGER IF EXISTS ItemBMVUpdate");
+					$this->exec("
 CREATE TRIGGER ItemBMVUpdate
 	AFTER UPDATE
 	ON ItemFeature
@@ -731,9 +730,8 @@ CREATE TRIGGER ItemBMVUpdate
 				UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
 			END IF;
 		END IF;
-	END;"
-						);
-						break;
+	END;");
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}

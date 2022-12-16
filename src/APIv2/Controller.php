@@ -392,7 +392,7 @@ class Controller implements RequestHandlerInterface
 		}
 
 		$db->itemDAO()->itemMustExist($id, true);
-		
+
 		$newItem = new ItemCode($newName);
 		$db->itemDAO()->itemMustNotExist($newItem, true);
 
@@ -727,7 +727,7 @@ class Controller implements RequestHandlerInterface
 
 		$itemWithFeatures = $db->itemDAO()->getItem($item);
 		return new JsonResponse(Summary::peel($itemWithFeatures));
-  }
+	}
 
 	public static function itemsByValue(ServerRequestInterface $request): ResponseInterface
 	{

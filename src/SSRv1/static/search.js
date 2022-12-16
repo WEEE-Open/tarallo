@@ -33,20 +33,22 @@
 		let templateName = ev.target.dataset.template;
 		let template = document.importNode(document.getElementById(templateName).content, true);
 
-		if (templateName === "search-template-code")
+		if (templateName === "search-template-code") {
 			template.children.forEach((ch) => {
 				$(ch).find('.basicAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300}});
 			});
-		else if (templateName === "search-template-location")
+		} else if (templateName === "search-template-location") {
 			template.children.forEach((ch) => {
 				$(ch).find('.basicAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300},formatResult:(l) => {
 					return {
 						id: l.name,
 						text: l.name,
+						// phpcs:ignore
 						html: `<div>${l.name} ${l.color ? `<i class="fa fa-square ml-1" title="${l.color}" style="color:${l.color}"></i>` : ""}</div>`
 					}
-				}});
+					}});
 			});
+		}
 
 		searchRows.appendChild(template);
 		rowCounter++;
@@ -64,7 +66,7 @@
 				el.attributes["id"].nodeValue = "search-row-" + rowCounter + "-" + rowElCounter++;
 			}
 			// This is to prevent from hitting enter and deleting the field instead of actually running the search
-			el.addEventListener('keydown', function(ev) {
+			el.addEventListener('keydown', function (ev) {
 				if (ev.which === 13) {
 					ev.preventDefault();
 				}
@@ -235,12 +237,12 @@
 			id = ev.target.dataset.searchId;
 		}
 
-		let query = {};
-		// query.code = [];
-		query.locations = [];
-		query.features = [];
-		query.ancestor = [];
-		query.sort = {};
+			let query = {};
+			// query.code = [];
+			query.locations = [];
+			query.features = [];
+			query.ancestor = [];
+			query.sort = {};
 
 		let rows = searchRows.querySelectorAll('.searchrow');
 		for (let row of rows) {
@@ -273,7 +275,7 @@
 			delete query.sort;
 		}
 
-		let uri, method;
+			let uri, method;
 
 		if (id === null) {
 			uri = '/v2/search';
@@ -298,7 +300,7 @@
 				method: method,
 				credentials: 'include',
 				body: JSON.stringify(query)
-			});
+				});
 
 			let result = await response.json();
 			if (response.ok) {
