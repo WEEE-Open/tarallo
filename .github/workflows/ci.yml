@@ -18,12 +18,8 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
-    strategy:
-      matrix:
-        php: ['7.3', '8.0', 'latest']
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Cache Composer dependencies
         uses: actions/cache@v3
@@ -37,15 +33,15 @@ jobs:
           # If you use the PHPUnit action, uncomment this and comment php_extensions
           # args: --ignore-platform-reqs
           php_extensions: json mysqlnd pdo
-          php_version: "${{ matrix.php }}"
+          php_version: "8.0"
+
+      - name: Add checkstyle matchers for phpcs
+        run: |
+          echo "::add-matcher::.github/phpcs-matcher.json"
 
       - name: PHPCS linting
-        uses: thenabeel/action-phpcs@v8
-        with:
-          standard: phpcs.xml
-          files: "src/**,public/**,templates/**"
-          phpcs_path: vendor/bin/phpcs
-          fail_on_warnings: true
+        run: |
+          composer exec -- phpcs --report=checkstyle --ignore=*.min.css src public
 
       # sudo apt-get install mariadb-client
       # mysqladmin ping --user=root --password=root --host=127.0.0.1 --protocol=tcp --port=3306
