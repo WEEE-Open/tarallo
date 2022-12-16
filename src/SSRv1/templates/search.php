@@ -3,6 +3,7 @@
 /** @var int|null $depth */
 /** @var string $noDepthUrl */
 /** @var int|null $searchId */
+/** @var \WEEEOpen\Tarallo\Search|null $search */
 /** @var int|null $page Current page (only if searchId is not null) */
 /** @var int|null $pages Total number of pages (only if searchId is not null) */
 /** @var int|null $total Total number of results (only if searchId is not null) */
@@ -34,9 +35,9 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 
 <template id="search-template-location">
 	<div class="row d-flex flex-row mr-0 mb-1 searchrow search-location" id="search-row-container-new">
-		<label class="col-sm-2 col-form-label" for="search-row-new">Location is</label>
+		<label class="col-sm-2 col-form-label" for="search-row-new">Location is one of</label>
 		<div class="flex-fill">
-			<input type="text" class="form-control comparisonvalue basicAutoComplete" id="search-row-new" required autocomplete="off" data-url="/v2/autosuggest/location">
+			<input type="text" class="form-control comparisonvalue" id="search-row-new" required autocomplete="off" data-url="/v2/autosuggest/location">
 		</div>
 		<button class="btn btn-danger ml-2 delete" aria-roledescription="delete" tabindex="-1"><i class="fa fa-trash" role="img" aria-label="Delete"></i></button>
 	</div>

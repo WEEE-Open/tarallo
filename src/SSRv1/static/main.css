@@ -415,6 +415,11 @@ form.nice textarea {
 	display: block;
 }
 
+.tagify {
+	flex-wrap: nowrap !important;
+	align-items: center !important;
+}
+
 .hidden {
 	display: none !important;
 }

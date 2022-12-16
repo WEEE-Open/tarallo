@@ -5,26 +5,32 @@ namespace WEEEOpen\Tarallo;
 use WEEEOpen\Tarallo\HTTP\InvalidParameterException;
 
 /**
- * Handle search diffs of form
- * [["type" => "code|locs|feats|c_feats|sorts", "key" => int|null, "value" => <>|null ],...]
+ * Handle search diffs
+ * Op: {"key": int|null, "value": <TypeValue>|null}
+ * Diff: {"code": [Op], "feature": [Op], "c_feature": [Op], "location": [Op], "sort": [Op]}
  */
 class SearchDiff
 {
 	public $added = [];
 	public $updated = [];
+	public $deleted = [];
 	private $sortOnly = true;
 
 	public function __construct(array $diff)
 	{
-		foreach ($diff as $e) {
-			if ($e["type"] !== "sorts") {
-				$this->sortOnly = false;
-			}
+		foreach ($diff as $type => $ops) {
+			foreach ($ops as $op) {
+				if ($type !== "sort") {
+					$this->sortOnly = false;
+				}
 
-			if ($e["key"] === null) {
-				$this->added[] = $e;
-			} else {
-				$this->updated[] = $e;
+				if ($op["key"] === null) {
+					$this->added[] = ["type" => $type, "value" => $op["value"]];
+				} elseif ($op["value"] === null) {
+					$this->deleted[] = ["type" => $type, "key" => $op["key"]];
+				} else {
+					$this->updated[] = ["type" => $type, "key" => $op["key"], "value" => $op["value"]];
+				}
 			}
 		}
 	}
@@ -36,6 +42,6 @@ class SearchDiff
 
 	public function isNewOnly(): bool
 	{
-		return !$this->updated;
+		return empty($this->updated) && empty($this->deleted);
 	}
 }

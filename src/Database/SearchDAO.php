@@ -92,24 +92,28 @@ final class SearchDAO extends DAO
 		$subqueries = [];
 		$subqueriesNotIn = [];
 
-		if ($search->searchFeatures !== null) {
-			[$subqueries[], $subqueriesNotIn[]] = $this->getFeatureSubqueries($search->searchFeatures, $pdo);
+		$features = $search->getFiltersByType("feature");
+		if (!empty($features)) {
+			[$subqueries[], $subqueriesNotIn[]] = $this->getFeatureSubqueries($features, $pdo);
 		}
 
-		if ($search->searchAncestors !== null) {
-			[$subqueries[], $subqueriesNotIn[]] = $this->getAncestorSubqueries($search->searchAncestors, $pdo);
+		$ancestors = $search->getFiltersByType("c_feature");
+		if (!empty($ancestors)) {
+			[$subqueries[], $subqueriesNotIn[]] = $this->getAncestorSubqueries($ancestors, $pdo);
 		}
 
-		if ($search->searchLocations !== null) {
-			[$subqueries[], $subqueriesNotIn[]] = $this->getLocationSubqueries($search->searchLocations, $pdo);
+		$locations = $search->getFiltersByType("location");
+		if (!empty($locations)) {
+			[$subqueries[], $subqueriesNotIn[]] = $this->getLocationSubqueries($locations, $pdo);
 		}
 
 		$subqueries = array_filter($subqueries);
 		$subqueriesNotIn = array_filter($subqueriesNotIn);
 
 		$codeQuery = "";
-		if ($search->getCode() !== null) {
-			$escaped = $pdo->quote($search->getCode());
+		$code = $search->getFiltersByType("code")[0] ?? null;
+		if ($code !== null) {
+			$escaped = $pdo->quote($code);
 			$codeQuery = " AND Item.`Code` LIKE $escaped";
 		}
 
@@ -124,7 +128,6 @@ final class SearchDAO extends DAO
 		}
 
 		$filter .= $codeQuery;
-
 		return $filter;
 	}
 
@@ -143,7 +146,7 @@ final class SearchDAO extends DAO
 		}
 
 		$stmt = $pdo->prepare('INSERT INTO `Search` (`Query`, `Owner`) VALUES (?, ?)');
-		//throw new \Exception(print_r($search, true));
+
 		$r = $stmt->execute([json_encode($search), $user]);
 		assert($r !== false, 'start search');
 		$id = $pdo->lastInsertId();
@@ -176,7 +179,7 @@ WHERE DeletedAt IS NULL AND $filter";
 	{
 		$pdo = $this->getPDO();
 
-		if (!$search->getCode()) {
+		if (!$search->getId()) {
 			throw new \InvalidArgumentException("Search must have a code set");
 		}
 
@@ -189,7 +192,7 @@ WHERE DeletedAt IS NULL AND $filter";
 		}
 
 		if ($diff->isSortOnly()) {
-			$this->sort($new_search, $search->getCode());
+			$this->sort($new_search, $search->getId());
 		} else {
 			$filter = (new Search())->applyDiff($diff);
 			$filter = $this->getSearchFilter($filter, $pdo);
@@ -200,36 +203,46 @@ WHERE DeletedAt IS NULL AND $filter";
 			AND `Item` NOT IN (SELECT `Code` FROM Item WHERE $filter)";
 
 			$stmt = $pdo->prepare($query);
-			$res = $stmt->execute([$search->getCode()]);
+			$res = $stmt->execute([$search->getId()]);
 			assert($res !== null, "filter old results");
 
 			// No need to re-sort
 		}
 
+		$stmt = $pdo->prepare("UPDATE Search SET `Query` = ? WHERE `Code` = ?");
+		$res = $stmt->execute([json_encode($new_search), $new_search->getId()]);
+		assert($res !== null, "update search query");
+
 		return null;
 	}
 
-	public function getSearchById(string $id): Search
+	public function getSearchById(string $id): ?Search
 	{
 		$pdo = $this->getPDO();
 
-		$stmt = $pdo->prepare("
+		$stmt = $pdo->prepare(
+			"
 		SELECT `Query`, `Owner`
 		FROM Search
-		WHERE `Code` = ?");
+		WHERE `Code` = ?"
+		);
 
 		try {
 			$result = $stmt->execute([$id]);
-			assert($result, "get search");
+			assert($result, "getSearchById");
 
-			$search = $stmt->fetch(PDO::FETCH_ASSOC);
+			$search = $stmt->fetch(\PDO::FETCH_ASSOC);
 		} finally {
 			$stmt->closeCursor();
 		}
 
-		$result = Search::fromJson(json_decode($search["Query"]));
+		if (!$search) {
+			return null;
+		}
+
+		$result = Search::fromJson(json_decode($search["Query"], true));
 		$result->setOwner($search["Owner"]);
-		$result->setCode($id);
+		$result->setId($id);
 
 		return $result;
 	}
@@ -265,26 +278,19 @@ WHERE DeletedAt IS NULL AND $filter";
 
 	public function sort(Search $search, int $searchId)
 	{
-		if ($search->sorts === null) {
+		$sorts = $search->getFiltersByType("sort");
+		if (empty($sorts)) {
 			$this->sortByCode($searchId);
 
 			return;
 		}
 
-		if (!is_array($search->sorts)) {
-			throw new \InvalidArgumentException('"Sorts" must be an array');
-		}
+		//TODO: Handle multisort
+		$firstSort = $sorts[0];
 
-		if (empty($search->sorts)) {
-			$this->sortByCode($searchId);
-
-			return;
-		}
-
-		reset($search->sorts);
 		//throw new \Exception(print_r($search->sorts, true));
-		$featureName = key($search->sorts);
-		$ascdesc = $search->sorts[$featureName] === '+' ? 'ASC' : 'DESC';
+		$featureName = $firstSort["feature"];
+		$direction = $firstSort["direction"] === '+' ? 'ASC' : 'DESC';
 		$column = FeatureDAO::getColumn(BaseFeature::getType($featureName));
 
 		self::unsort($searchId);
@@ -298,7 +304,7 @@ LEFT JOIN (
 	WHERE Feature = ?
 ) AS features ON `Item` = features.`Code`
 WHERE Search = ?
-ORDER BY ISNULL($column), $column $ascdesc, CHAR_LENGTH(`Code`) DESC, `Code` DESC;
+ORDER BY ISNULL($column), $column $direction, CHAR_LENGTH(`Code`) DESC, `Code` DESC;
 EOQ;
 
 		$sortedStatement = $this->getPDO()->prepare($miniquery);

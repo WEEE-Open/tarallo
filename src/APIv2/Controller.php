@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\APIv2;
 
 use FastRoute;
+use Laminas\Diactoros\Response\TextResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -649,8 +650,6 @@ class Controller implements RequestHandlerInterface
 		$search = $db->searchDAO()->getSearchById($id);
 		if ($user->uid !== $search->getOwner()) {
 			AuthValidator::ensureLevel($user, User::AUTH_LEVEL_ADMIN);
-		} else {
-			throw new AuthorizationException();
 		}
 
 		$diff = new SearchDiff($payload);
@@ -663,7 +662,18 @@ class Controller implements RequestHandlerInterface
 		}
 	}
 
-	public static function getSearch(ServerRequestInterface $request): ResponseInterface
+	public static function getSearchQuery(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+		$id = Validation::validateHasString($parameters, 'id');
+		$search = $db->searchDAO()->getSearchById($id);
+
+		return new JsonResponse($search);
+	}
+
+	public static function getSearchResults(ServerRequestInterface $request): ResponseInterface
 	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');

@@ -74,7 +74,8 @@ trait Routes
 
 						$r->post('/search', [User::AUTH_LEVEL_RO, [Controller::class, 'newSearch']]);
 						$r->patch('/search/{id}', [User::AUTH_LEVEL_RO, [Controller::class, 'updateSearch']]);
-						$r->get('/search/{id}[/page/{page}]', [User::AUTH_LEVEL_RO, [Controller::class, 'getSearch']]);
+						$r->get('/search/query/{id}', [User::AUTH_LEVEL_RO, [Controller::class, 'getSearchQuery']]);
+						$r->get('/search/{id}[/page/{page}]', [User::AUTH_LEVEL_RO, [Controller::class, 'getSearchResults']]);
 
 						$r->get('/features/{feature}/{value}', [User::AUTH_LEVEL_RO, [Controller::class, 'getByFeature']]);
 
