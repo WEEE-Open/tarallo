@@ -177,11 +177,11 @@
 				content: {
 					element: "input",
 					attributes: {
-						placeholder: "New Code", 
+						placeholder: "New Code",
 						value: currentCode
 					}
 				}
-			}).then(async (value) => {
+			}).then(async(value) => {
 				if (value == null || value == "") {
 					swal.close();
 				} else {
@@ -202,13 +202,14 @@
 							title: "Success",
 							text: "You will be redirected shortly"
 						});
-						setTimeout(()=>{
+						setTimeout(() => {
 							let pageCode = window.location.pathname.split('/')[2];
 							console.log(pageCode, currentCode);
-							if (pageCode == currentCode)
+							if (pageCode == currentCode) {
 								window.location.href = '/item/' + encodeURIComponent(value);
-							else 
+							} else {
 								window.location.href = '/item/' + encodeURIComponent(pageCode);
+							}
 						}, 2000);
 					} else {
 						swal({
