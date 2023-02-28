@@ -33,7 +33,7 @@ jobs:
           # If you use the PHPUnit action, uncomment this and comment php_extensions
           # args: --ignore-platform-reqs
           php_extensions: json mysqlnd pdo
-          php_version: "8.0"
+          php_version: "${{ matrix.php }}"
 
       - name: Add checkstyle matchers for phpcs
         run: |
