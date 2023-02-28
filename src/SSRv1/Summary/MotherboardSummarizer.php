@@ -19,7 +19,7 @@ class MotherboardSummarizer implements Summarizer
 
 		if ($socket) {
 			$value = FeaturePrinter::printableValue($socket);
-			if (!str_starts_with($value, "Socket")) {
+			if (strcmp($value, "Socket", strlen(6))) {
 				$value = "Socket $value";
 			}
 
