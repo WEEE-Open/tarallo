@@ -58,13 +58,13 @@
 		quickMoveLocation.value = temp;
 	});
 
-	async function moveInternal(code, parent)
+	async function moveInternal(code, parent, moveAcrossTrees = false)
 	{
 		for (let message of quickMove.getElementsByClassName('alert')) {
 			message.classList.add('d-none');
 		}
 
-		let response = await fetch('/v2/items/' + encodeURIComponent(code) + '/parent', {
+		let response = await fetch('/v2/items/' + encodeURIComponent(code) + '/parent' + (moveAcrossTrees ? '?moveAcrossTrees=true' : ''), {
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
@@ -142,7 +142,7 @@
 					let code = json['code'];
 					let parent = json['from'];
 
-					return await moveInternal(code, parent);
+					return await moveInternal(code, parent, true);
 				});
 				ok.append(undo);
 			}
@@ -174,6 +174,32 @@
 			}
 			warning.classList.remove('d-none');
 			warning.textContent = errorText;
+		} else if (response.status === 403) {
+			swal({
+				title: "You are trying to move an item from a tree to another, confirm?",
+				icon: "info",
+				buttons: {
+					cancel: {
+						text: "Cancel",
+						visible: true,
+
+					},
+					confirm: {
+						text: "Move anyway",
+						closeModal: false,
+					}
+				}
+			}).then(async (value) => {
+				if (value == null || value == "") {
+					swal.close();
+				} else {
+					await moveInternal(code, parent, true);
+					swal({
+						icon: "success",
+						title: "Success"
+					});
+				}
+			})
 		} else {
 			error.classList.remove('d-none');
 		}

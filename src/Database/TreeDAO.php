@@ -113,6 +113,33 @@ final class TreeDAO extends DAO
 	}
 
 	/**
+	 * Get root parent.
+	 * It will not error if the item is the root
+	 * 
+	 * @param ItemWithCode $item
+	 * 
+	 * @return array 0 is the root parent, 1 indicates whether the input item is already the parent, returns null if not found
+	 */
+	public function getRootParent(ItemWithCode $item)
+	{
+		$statement = $this->getPDO()->prepare('SELECT Ancestor, Depth FROM Tree WHERE Descendant = ? AND Depth=(SELECT max(Depth) FROM Tree WHERE Descendant = ?)');
+
+		try {
+			$statement->execute([$item->getCode(), $item->getCode()]);
+
+			$row = $statement->fetch(\PDO::FETCH_ASSOC);
+
+			if ($row == false) {
+				return;
+			}
+
+			return [new ItemCode($row['Ancestor']), $row['Depth'] == 0];
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	/**
 	 * Get path to an item and set it.
 	 * Item code must be not null, obviously.
 	 *
