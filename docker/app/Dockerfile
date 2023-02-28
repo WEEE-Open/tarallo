@@ -42,7 +42,7 @@ RUN if [ "$DEVELOPMENT" = "true" ]; \
 # install xdebug
 # https://stackoverflow.com/questions/49907308/installing-xdebug-in-docker
 RUN if [ "$DEVELOPMENT" = "true" -a "$XDEBUG" = "true" ]; \
-        then apk add --no-cache --virtual .phpize_deps $PHPIZE_DEPS \
+        then apk add --no-cache --virtual .phpize_deps $PHPIZE_DEPS linux-headers \
         && yes | pecl install xdebug \
         && docker-php-ext-enable xdebug \
         && echo "xdebug.client_host=$(/sbin/ip route|awk '/default/ { print $3 }')" >> /usr/local/etc/php/conf.d/xdebug.ini \
