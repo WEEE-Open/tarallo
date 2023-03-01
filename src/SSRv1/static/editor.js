@@ -268,6 +268,12 @@
 			}
 		}
 
+		for (let ta of featuresElement.querySelectorAll('textarea')) {
+			if (ta.dataset.internalType === 'm') {
+				ta.addEventListener('input', textChangedEvent);
+			}
+		}
+
 		// For enum features
 		for (let select of featuresElement.querySelectorAll('select')) {
 			select.addEventListener('change', selectChanged);
