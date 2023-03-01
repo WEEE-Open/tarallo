@@ -1212,7 +1212,6 @@
 		for (let element of changed) {
 			let feature = element.parentElement;
 			let value = getValueFrom(element);
-			console.log(value);
 			if (value === "") {
 				throw new EmptyFeatureValueError(feature);
 			}
