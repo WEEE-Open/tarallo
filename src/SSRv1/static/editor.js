@@ -258,9 +258,9 @@
 			if (div.dataset.internalType === 's') {
 				//div.addEventListener('paste', sanitizePaste);
 				div.addEventListener('input', textChangedEvent);
-				if (div.dataset.internalName == "model") {
+				if (div.dataset.internalName === "model") {
 					$(div).autoComplete({minLength:3,resolverSettings:{requestThrottling:300, url: '/v2/autosuggest/model'}});
-				} else if (div.dataset.internalName == "brand") {
+				} else if (div.dataset.internalName === "brand") {
 					$(div).autoComplete({minLength:3,resolverSettings:{requestThrottling:300, url: '/v2/autosuggest/brand'}});
 				}
 			} else if (div.dataset.internalType !== 'm') {
