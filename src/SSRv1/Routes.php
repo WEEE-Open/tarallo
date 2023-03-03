@@ -55,6 +55,7 @@ trait Routes
 						$r->post('/normalization', [User::AUTH_LEVEL_RW, [Controller::class, 'optionsNormalization']]);
 					}
 				);
+				$r->get('/donation/new', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'addDonation']]);
 				$r->get('/bulk', [User::AUTH_LEVEL_RO, [Controller::class, 'bulk']]);
 				$r->get('/bulk/move', [User::AUTH_LEVEL_RO, [Controller::class, 'bulkMove']]);
 				$r->post('/bulk/move', [User::AUTH_LEVEL_RW, [Controller::class, 'bulkMove']]);

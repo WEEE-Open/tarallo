@@ -333,6 +333,13 @@ class Controller implements RequestHandlerInterface
 		return $handler->handle($request);
 	}
 
+	public static function addDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		$request = $request->withAttribute('Template', 'newDonation');
+
+		return $handler->handle($request);
+	}
+
 	public static function authError(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
 		$request = $request

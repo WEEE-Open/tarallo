@@ -389,6 +389,20 @@ form.nice textarea {
 	resize: vertical;
 }
 
+.list-group-item.input-group {
+	display: flex;
+	padding: 0;
+}
+
+.list-group-item.input-group .form-control {
+	border: none;
+	padding-left: 1.125rem;
+}
+
+.list-group-item.input-group .btn {
+	border-radius: 0;
+}
+
 .hidden {
 	display: none !important;
 }

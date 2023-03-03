@@ -3,6 +3,7 @@
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var string $moveDefaultFrom */
 /** @var string $currentPage */
+/** @var array $activeDonations */
 $moveDefaultFrom = $moveDefaultFrom ?? null;
 $currentPageShort = explode(' ', $currentPage)[0];
 $hereClass = function ($page, $current) {
@@ -49,6 +50,17 @@ $hereSr = function ($page, $current) {
 			</li>
 			<li class="nav-item">
 				<a class="nav-link" data-toggle="collapse" href="#quickmove" role="button" aria-expanded="false" aria-controls="quickmove" id="quickmovebutton">Move</a>
+			</li>
+			<li class="nav-item dropdown">
+				<a class="nav-link dropdown-toggle <?= $hereClass('domations', $currentPageShort) ?>" href="#" id="bulkDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+					Donations<?= $hereSr('donations', $currentPageShort) ?>
+				</a>
+				<div class="dropdown-menu" aria-labelledby="donationsDropdown">
+					<a class="dropdown-item <?= $hereClass('donation new', $currentPage) ?>" href="/donation/new">New<?= $hereSr('donation new', $currentPage) ?></a>
+					<?php foreach ($activeDonations as $donation): ?>
+						<a class="dropdown-item <?= $hereClass('donation id', $currentPage) ?>" href="/donation/id">Donation name<?= $hereSr('donation id', $currentPage) ?></a>
+					<? endforeach ?>
+				</div>
 			</li>
 			<li class="nav-item dropdown">
 				<a class="nav-link dropdown-toggle <?= $hereClass('bulk', $currentPageShort) ?>" href="#" id="bulkDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

@@ -54,7 +54,7 @@ $tooltips = $tooltips ?? false;
 </nav>
 
 <?php if (isset($user)) {
-	echo $this->fetch('menu', ['moveDefaultFrom' => $moveDefaultFrom, 'currentPage' => $currentPage]);
+	echo $this->fetch('menu', ['moveDefaultFrom' => $moveDefaultFrom, 'currentPage' => $currentPage, 'activeDonations' => array()]);
 } ?>
 
 <section class="container <?= isset($container) && $container ? '' : 'p-0'?>">
