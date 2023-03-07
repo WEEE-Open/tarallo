@@ -32,10 +32,6 @@ $this->layout('main', ['title' => 'New donation', 'currentPage' => 'donation new
             <label>Items list:</label>
             <ul class="list-group item-list-input">
                 <input type="hidden" name="ItemsList">
-                <li class="list-group-item">Cras justo odio</li>
-                <li class="list-group-item">Dapibus ac facilisis in</li>
-                <li class="list-group-item">Morbi leo risus</li>
-                <li class="list-group-item">Porta ac consectetur ac</li>
                 <div class="list-group-item input-group mb-3">
                     <input type="text" class="form-control" placeholder="Add item" autocomplete="off">
                     <div class="input-group-append">

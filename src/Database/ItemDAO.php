@@ -636,4 +636,26 @@ LIMIT $limit"
 		}
 		return $array;
 	}
+
+	public function getTypesForItemCodes($list)
+	{
+		$pdo = $this->getPDO();
+		$prefix = $itemsList = '';
+		foreach ($itemsList as $item)
+		{
+			$itemsList .= $prefix . '"' . $pdo->quote($item) . '"';
+			$prefix = ', ';
+		}
+		$statement = $pdo->prepare(
+			"SELECT Code, ValueEnum FROM ItemFeature WHERE Feature=\"Type\" AND Code IN ($itemsList)"
+		);
+		try {
+			$success = $statement->execute();
+			$array = $statement->fetchAll(\PDO::FETCH_ASSOC);
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $array ?? array();
+	}
 }

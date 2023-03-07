@@ -896,7 +896,7 @@ class Controller implements RequestHandlerInterface
 		$query = $request->getQueryParams();
 		$search = Validation::validateHasString($query, 'q');
 
-		$min = 3;
+		$min = 1;
 		if (strlen($search) < $min) {
 			throw new RangeException('q', $min, null, "Minimum length for autocomplete is $min");
 		}
@@ -965,6 +965,23 @@ class Controller implements RequestHandlerInterface
 		if ($min !== null && $value < $min) {
 			throw new RangeException($parameter, $min, $max, "Minimum value is $min");
 		}
+	}
+
+	public function getTypesForItemCodes(ServerRequestInterface $request)
+	{
+		/** @var Database $db */
+		//$db = $request->getAttribute('Database');
+		/*$payload = json_decode($request->getBody()->getContents(), true);
+
+		if ($payload === null) {
+			return new EmptyResponse(400);
+		}
+
+		$json = $db->itemDAO()->getTypesForItemCodes($payload);
+
+		return new JsonResponse($json);*/
+
+		return new JsonResponse(array());
 	}
 
 	/**

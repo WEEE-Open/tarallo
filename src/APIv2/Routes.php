@@ -119,6 +119,7 @@ trait Routes
 								$r->get('/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]', [User::AUTH_LEVEL_RO, [Controller::class, 'itemsNotFeature']]);
 								$r->get('/getRecentAuditByType/{type}[/{howMany}[/{featureFilter}]]', [User::AUTH_LEVEL_RO, [Controller::class, 'recentAuditByType']]);
 								$r->get('/getCountByFeature/{feature}[/{filter}[/{location}[/{creation[/{deleted[/{cutoff}]]]]]', [User::AUTH_LEVEL_RO, [Controller::class, 'countByFeature']]);
+								$r->post('/getTypesForItemCodes', [User::AUTH_LEVEL_RO, [Controller::class, 'getTypesForItemCodes']]);
 							}
 						);
 						$r->addGroup(
