@@ -33,12 +33,17 @@ $this->layout('main', ['title' => 'New donation', 'currentPage' => 'donation new
             <ul class="list-group item-list-input">
                 <input type="hidden" name="ItemsList">
                 <div class="list-group-item input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Add item" autocomplete="off">
+                    <input type="text" class="form-control" placeholder="Add item" autocomplete="off" data-autocomplete-uri="/v2/autosuggest/code">
                     <div class="input-group-append">
                         <button class="btn btn-secondary" type="button">Add</button>
                     </div>
                 </div>
             </ul>
+        </div>
+        <div class="col-12 mb-3 no-tasks" id="tasksContainer">
+            <h5>Tasks:</h5>
+            <div class="no-tasks-text"><i>No tasks to show, please add an item before adding tasks</i></div>
+            <input type="hidden" name="tasks">
         </div>
     </form>
 </article>

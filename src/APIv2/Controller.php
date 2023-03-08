@@ -967,11 +967,11 @@ class Controller implements RequestHandlerInterface
 		}
 	}
 
-	public function getTypesForItemCodes(ServerRequestInterface $request)
+	public static function getTypesForItemCodes(ServerRequestInterface $request)
 	{
 		/** @var Database $db */
-		//$db = $request->getAttribute('Database');
-		/*$payload = json_decode($request->getBody()->getContents(), true);
+		$db = $request->getAttribute('Database');
+		$payload = json_decode($request->getBody()->getContents(), true);
 
 		if ($payload === null) {
 			return new EmptyResponse(400);
@@ -979,9 +979,7 @@ class Controller implements RequestHandlerInterface
 
 		$json = $db->itemDAO()->getTypesForItemCodes($payload);
 
-		return new JsonResponse($json);*/
-
-		return new JsonResponse(array());
+		return new JsonResponse($json);
 	}
 
 	/**

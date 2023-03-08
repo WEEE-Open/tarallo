@@ -403,6 +403,14 @@ form.nice textarea {
 	border-radius: 0;
 }
 
+.no-tasks-text {
+	display: none;
+}
+
+.no-tasks .no-tasks-text {
+	display: block;
+}
+
 .hidden {
 	display: none !important;
 }

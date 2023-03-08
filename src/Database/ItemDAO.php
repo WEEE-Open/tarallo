@@ -639,23 +639,41 @@ LIMIT $limit"
 
 	public function getTypesForItemCodes($list)
 	{
+		if (sizeof($list) == 0) return array();
 		$pdo = $this->getPDO();
 		$prefix = $itemsList = '';
-		foreach ($itemsList as $item)
+		foreach ($list as $item)
 		{
-			$itemsList .= $prefix . '"' . $pdo->quote($item) . '"';
+			$itemsList .= $prefix . $pdo->quote($item);
 			$prefix = ', ';
 		}
 		$statement = $pdo->prepare(
-			"SELECT Code, ValueEnum FROM ItemFeature WHERE Feature=\"Type\" AND Code IN ($itemsList)"
+			"SELECT Item.Code AS Code, ItemFeature.ValueEnum AS ItemValue, ProductFeature.ValueEnum AS ProductValue
+FROM Item
+LEFT JOIN ItemFeature ON Item.Code = ItemFeature.Code AND ItemFeature.Feature = 'type'
+LEFT JOIN ProductFeature ON Item.Brand = ProductFeature.Brand AND Item.Model = ProductFeature.Model AND Item.Variant = ProductFeature.Variant AND ProductFeature.Feature = 'type'
+WHERE Item.Code IN ($itemsList);"
 		);
+		$missingItems = array_merge(array(), $list);
+		$output = array();
 		try {
 			$success = $statement->execute();
 			$array = $statement->fetchAll(\PDO::FETCH_ASSOC);
+			foreach($array as $thing) {
+				if (isset($thing["ProductValue"]) || isset($thing["ItemValue"])) {
+					$output[$thing["Code"]] = $thing["ItemValue"] ?? $thing["ProductValue"];
+				} else {
+					$output[$thing["Code"]] = null;
+				}
+				unset($missingItems[array_search($thing["Code"], $missingItems)]);
+			}
+			foreach($missingItems as $missing) {
+				$output[$missing] = null;
+			}
 		} finally {
 			$statement->closeCursor();
 		}
 
-		return $array ?? array();
+		return $output;
 	}
 }
