@@ -16,6 +16,7 @@ class Database
 	private $productDAO = null;
 	private $bulkDAO = null;
 	private $optionDAO = null;
+	private $donationsDAO = null;
 	private $username;
 	private $password;
 	private $dsn;
@@ -150,6 +151,15 @@ class Database
 
 		return $this->optionDAO;
 	}
+
+	public function donationsDAO(): DonationsDAO
+    {
+        if( $this->donationsDAO === null)
+        {
+            $this->donationsDAO = new DonationsDAO($this,$this->callback);
+        }
+        return $this->donationsDAO;
+    }
 
 	public function updater()
 	{

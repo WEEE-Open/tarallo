@@ -1,11 +1,22 @@
 <?php
-
+/** @var string $error|null */
+/** @var string $name|null */
+/** @var string $location|null */
+/** @var string $date|null */
+/** @var string $notes|null */
+/** @var string $itemsList|null */
+/** @var string $tasks|null */
 
 
 $this->layout('main', ['title' => 'New donation', 'currentPage' => 'donation new', 'tooltips' => true]);
 ?>
 
 <article class="container">
+    <?php if (isset($error)): ?>
+    <div class="alert alert-warning" role="alert">
+        <?=$error?>
+    </div>
+    <? endif ?>
     <form class="row g-2" action="/donation/new" enctype="multipart/form-data" method="POST">
         <div class="itembuttons primary row mx-0 mt-2 justify-content-end w-100">
             <div class="row d-flex m-0 justify-content-between mr-auto">
@@ -17,21 +28,25 @@ $this->layout('main', ['title' => 'New donation', 'currentPage' => 'donation new
             </label>
         </div>
         <div class="col-12 mb-3">
-            <label for="DonationName">Donation Name: </label>
-            <input class="form-control" placeholder="Donation Name" type="text" name="DonationName" id="DonationName">
+            <label for="Name">Donation Name: </label>
+            <input class="form-control" placeholder="Donation Name" type="text" name="Name" id="Name" value="<?php echo $name ?? ''?>">
         </div>
         <div class="col-12 mb-3">
             <label for="Location">Location: </label>
-            <input class="form-control" placeholder="Location" type="text" name="Location" id="Location">
+            <input class="form-control" placeholder="Location" type="text" name="Location" id="Location" value="<?php echo $location ?? ''?>">
         </div>
         <div class="col-12 mb-3">
             <label for="Date">Date: </label>
-            <input type="date" name="Date" id="datetime-local">
+            <input type="date" name="Date" id="datetime-local" value="<?php echo $date ?? ''?>">
+        </div>
+        <div class="col-12 mb-3 d-grid">
+            <label for="Notes">Notes: </label>
+            <textarea name="Notes" id="Notes"><?php echo $notes ?? ''?></textarea>
         </div>
         <div class="col-12 mb-3">
             <label>Items list:</label>
             <ul class="list-group item-list-input">
-                <input type="hidden" name="ItemsList">
+                <input type="hidden" name="ItemsList" value="<?php echo $itemsList ?? ''?>">
                 <div class="list-group-item input-group mb-3">
                     <input type="text" class="form-control" placeholder="Add item" autocomplete="off" data-autocomplete-uri="/v2/autosuggest/code">
                     <div class="input-group-append">
@@ -43,7 +58,7 @@ $this->layout('main', ['title' => 'New donation', 'currentPage' => 'donation new
         <div class="col-12 mb-3 no-tasks" id="tasksContainer">
             <h5>Tasks:</h5>
             <div class="no-tasks-text"><i>No tasks to show, please add an item before adding tasks</i></div>
-            <input type="hidden" name="tasks">
+            <input type="hidden" name="Tasks" value="<?php echo $tasks ?? ''?>">
         </div>
     </form>
 </article>

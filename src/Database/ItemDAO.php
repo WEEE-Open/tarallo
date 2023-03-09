@@ -676,4 +676,29 @@ WHERE Item.Code IN ($itemsList);"
 
 		return $output;
 	}
+
+	public function checkItemListAllExist($list)
+	{
+		if (sizeof($list) == 0) return true;
+		$pdo = $this->getPDO();
+		$prefix = $itemsList = '';
+		foreach ($list as $item)
+		{
+			$itemsList .= $prefix . $pdo->quote($item);
+			$prefix = ', ';
+		}
+		$statement = $pdo->prepare(
+			"SELECT COUNT(`Code`) AS Total FROM Item WHERE Code IN ($itemsList) AND `DeletedAt` IS NULL"
+		);
+		try {
+			$success = $statement->execute();
+			$result = $statement->fetch(\PDO::FETCH_ASSOC);
+			if ($result["Total"] == sizeof($list)) return true;
+			return false;
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $output;
+	}
 }

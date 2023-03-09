@@ -165,6 +165,22 @@
         hydrateListInput(listInput);
     }
 
+    $("input[name=Location]").autoComplete({
+        minLength: 1,
+        resolverSettings: { 
+            url: "/v2/autosuggest/location",
+            requestThrottling: 100,
+            fail: () => {},
+        }, events: {
+            searchPost: (list, el) => {
+                if (list.length > 0) {
+                    newInput.dataset.lastValid = JSON.stringify(list);
+                }
+                return list;
+            }
+        }
+    });
+
     let typesNames = await fetch("/features.json").then(res => res.json()).then(res => Object.values(res.features).find(f => f.findIndex(ff => ff.name == "type") != -1).find(ff => ff.name == "type").values).catch(() => []);
 
     let typesCache = {};
@@ -196,7 +212,7 @@
 
         function refreshTypes() {
             let tasksContainer = $("#tasksContainer");
-            let allTasksInput = document.querySelector("input[name=tasks]");
+            let allTasksInput = document.querySelector("input[name=Tasks]");
 
             let modifiedTasksCount = {};
             deleted.forEach(item => {
@@ -218,7 +234,6 @@
                     inputGroup.attr("id", "tasks-group-" + type);
                     inputGroup.append(createListInput({
                         title: "Tasks for " + typesNames[type] + ":",
-                        hiddenName: "tasks-" + type,
                         initialData: oldTasks[type]
                     }));
                     inputGroup.find("input[type=hidden]").on('input', function () {

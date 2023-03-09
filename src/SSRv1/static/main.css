@@ -457,6 +457,10 @@ form.nice textarea {
 	color: white !important;
 }
 
+.d-grid {
+	display: grid;
+}
+
 @media only screen and (min-width: 34rem) {
 	.features ul > li {
 		grid-template-rows: auto auto auto;

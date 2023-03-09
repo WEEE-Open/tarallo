@@ -335,7 +335,37 @@ class Controller implements RequestHandlerInterface
 
 	public static function addDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
-		$request = $request->withAttribute('Template', 'newDonation');
+		$body = $request->getParsedBody();
+		if ($body === null || count($body) === 0 || $body["ItemsList"] === null) {
+			$request = $request->withAttribute('Template', 'newDonation'); 
+		} else {
+			if ($name = $body["Name"]) {
+				$date = strtotime($body["Date"] ?? "");
+				if ($date === false) {
+					$date = null;
+				}
+				/** @var Database $db */
+				$db = $request->getAttribute('Database');
+				$itemsList = json_decode($body["ItemsList"]);
+				if ($itemsList === null || count($itemsList) == 0) {
+					$error = "Please input at least one item in the items list";
+				} else if ($db->itemDAO()->checkItemListAllExist($itemsList)) {
+					if ($body["Tasks"] === null || ($tasks = json_decode($body["Tasks"], true)) === null) {
+						$tasks = [];
+					}
+					$donationId = $db->donationsDAO()->newDonation($name, $body["Location"], $body["Notes"], $date, $itemsList, $tasks);
+					return new RedirectResponse("/donation/$donationId", 303);
+				} else {
+					$error = "Some items in the list are not valid";
+				}
+			} else {
+				$error = "Please provide a name";
+			}
+			// if we are still here it means that there was an error
+			$request = $request
+				->withAttribute('Template', 'newDonation')
+				->withAttribute('TemplateParameters', ['error' => $error, 'name' => $body["Name"] ?? null, 'location' => $body["Location"] ?? null, 'date' => $body["Date"] ?? null, 'itemList' => $body["ItemsList"] ?? null, 'tasks' => $body["Tasks"] ?? null]); 
+		}
 
 		return $handler->handle($request);
 	}
