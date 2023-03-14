@@ -364,7 +364,7 @@ class Controller implements RequestHandlerInterface
 			// if we are still here it means that there was an error
 			$request = $request
 				->withAttribute('Template', 'newDonation')
-				->withAttribute('TemplateParameters', ['error' => $error, 'name' => $body["Name"] ?? null, 'location' => $body["Location"] ?? null, 'date' => $body["Date"] ?? null, 'itemList' => $body["ItemsList"] ?? null, 'tasks' => $body["Tasks"] ?? null]); 
+				->withAttribute('TemplateParameters', ['error' => $error, 'name' => $body["Name"] ?? null, 'location' => $body["Location"] ?? null, 'date' => $body["Date"] ?? null, 'itemsList' => $body["ItemsList"] ?? null, 'tasks' => $body["Tasks"] ?? null]); 
 		}
 
 		return $handler->handle($request);

@@ -41,12 +41,12 @@ $this->layout('main', ['title' => 'New donation', 'currentPage' => 'donation new
         </div>
         <div class="col-12 mb-3 d-grid">
             <label for="Notes">Notes: </label>
-            <textarea name="Notes" id="Notes"><?php echo $notes ?? ''?></textarea>
+            <textarea name="Notes" id="Notes"><?php echo htmlspecialchars($notes ?? '')?></textarea>
         </div>
         <div class="col-12 mb-3">
             <label>Items list:</label>
             <ul class="list-group item-list-input">
-                <input type="hidden" name="ItemsList" value="<?php echo $itemsList ?? ''?>">
+                <input type="hidden" name="ItemsList" value="<?php echo htmlspecialchars($itemsList ?? '')?>">
                 <div class="list-group-item input-group mb-3">
                     <input type="text" class="form-control" placeholder="Add item" autocomplete="off" data-autocomplete-uri="/v2/autosuggest/code">
                     <div class="input-group-append">
@@ -58,7 +58,7 @@ $this->layout('main', ['title' => 'New donation', 'currentPage' => 'donation new
         <div class="col-12 mb-3 no-tasks" id="tasksContainer">
             <h5>Tasks:</h5>
             <div class="no-tasks-text"><i>No tasks to show, please add an item before adding tasks</i></div>
-            <input type="hidden" name="Tasks" value="<?php echo $tasks ?? ''?>">
+            <input type="hidden" name="Tasks" value="<?php echo htmlspecialchars($tasks ?? '')?>">
         </div>
     </form>
 </article>
