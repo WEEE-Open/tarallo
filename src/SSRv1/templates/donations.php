@@ -1,0 +1,81 @@
+<?php
+/** @var string $donations|null */
+
+
+$this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'tooltips' => true]);
+
+$completed = [];
+
+?>
+
+<h2>Donations</h2>
+<div class="row">
+	<?php if (isset($donations) && !empty($donations)) : ?>
+		<div class="col-12">
+			<table class="table table-borderless stats">
+				<caption>Active donations</caption>
+				<thead class="thead-dark">
+				<tr>
+					<th scope="col">Name</th>
+					<th scope="col">Location</th>
+					<th scope="col">Date</th>
+					<th scope="col">Progress</th>
+					<th scope="col">Total Items</th>
+				</tr>
+				</thead>
+				<tbody>
+				<?php foreach ($donations as $donation) : ?>
+					<?php if($donation["isCompleted"]) {
+						array_push($completed, $donation);
+						continue;
+					}?>
+					<tr>
+						<td><a href="/donation/<?=$donation["id"]?>"><?=$donation["name"]?></a></td>
+						<td><?=$donation["location"] ?? "" ?></td>
+						<td><?=$donation["date"] ?? ""?></td>
+						<?php
+							if ($donation["totalTasks"] === 0) {
+								$progress = 0;
+							} else {
+								$progress = round($donation["completedTasks"]/$donation["totalTasks"]*100, 0, PHP_ROUND_HALF_DOWN);
+							}
+						?>
+						<td style="display: grid; grid-template-columns: 1fr auto; align-items: center;">
+							<div class="progress ml-2 mr-2" style="height: 5px;">
+								<div class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: <?=$progress?>%;" aria-valuenow="<?=$progress?>" aria-valuemin="0" aria-valuemax="100"></div>
+							</div>
+							<?=$progress?>%
+						</td>
+						<td><?=$donation["totalItems"] ?? ""?></td>
+					</tr>
+				<?php endforeach ?>
+				</tbody>
+			</table>
+			<?php if(!empty($completed)): ?>
+				<table class="table table-borderless stats">
+					<caption>Completed donations</caption>
+					<tbody>
+					<?php foreach ($completed as $donation) : ?>
+						<tr>
+							<td><a href="/donation/<?=$donation["id"]?>"><?=$donation["name"]?></a></td>
+							<td><?=$donation["location"] ?? "" ?></td>
+							<td><?=$donation["date"] ?? ""?></td>
+							<td style="display: grid; grid-template-columns: 1fr auto; align-items: center;">
+								<div class="progress ml-2 mr-2" style="height: 5px;">
+									<div class="progress-bar progress-bar-striped bg-success" role="progressbar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+								</div>
+								100%
+							</td>
+							<td><?=$donation["totalItems"] ?? ""?></td>
+						</tr>
+					<?php endforeach ?>
+					</tbody>
+				</table>
+			<? endif ?>
+		</div>
+	<?php else: ?>
+	<p>
+		<i>No donations on record</i>
+	</p>
+	<? endif ?>
+</div>

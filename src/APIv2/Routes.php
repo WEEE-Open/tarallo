@@ -99,6 +99,16 @@ trait Routes
 							}
 						);
 
+						$r->addGroup(
+							'/donation',
+							function (FastRoute\RouteCollector $r) {
+								$r->get('', [User::AUTH_LEVEL_RO, [Controller::class, 'getDonationsList']]);
+								//$r->get('/new', [User::AUTH_LEVEL_RO, [Controller::class, 'newDonation']]);
+								$r->get('/{id}', [User::AUTH_LEVEL_RO, [Controller::class, 'getDonation']]);
+								$r->post('/{id}/tasks', [User::AUTH_LEVEL_RW, [Controller::class, 'updateTasks']]);
+							}
+						);
+
 						$r->get('/history[/page/{page}]', [User::AUTH_LEVEL_RO, [Controller::class, 'getHistory']]);
 
 						$r->get('/session', [User::AUTH_LEVEL_RW, [Controller::class, 'sessionWhoami']]);

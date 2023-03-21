@@ -370,6 +370,55 @@ class Controller implements RequestHandlerInterface
 		return $handler->handle($request);
 	}
 
+	public static function listDonations(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+
+		$request = $request
+			->withAttribute('Template', 'donations')
+			->withAttribute('TemplateParameters', ['donations' => $db->donationsDAO()->listDonations()]);
+
+		return $handler->handle($request);
+	}
+
+	public static function viewDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		if ($id == -1) {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+
+		$donation = $db->donationsDAO()->getDonation($id);
+
+		if ($donation === false) {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+			
+		$request = $request
+			->withAttribute('Template', 'donation')
+			->withAttribute('TemplateParameters', ['donation' => $donation]);
+
+		return $handler->handle($request);
+	}
+
 	public static function authError(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
 		$request = $request

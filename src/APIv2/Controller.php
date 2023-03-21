@@ -982,6 +982,46 @@ class Controller implements RequestHandlerInterface
 		return new JsonResponse($json);
 	}
 
+	public static function getDonationsList(ServerRequestInterface $request)
+	{
+		$db = $request->getAttribute('Database');
+
+		$json = $db->donationsDAO()->listDonations();
+
+		return new JsonResponse($json);
+	}
+
+	public static function getDonation(ServerRequestInterface $request)
+	{
+		$parameters = $request->getAttribute('parameters');
+		$id = Validation::validateHasString($parameters, 'id');
+		$db = $request->getAttribute('Database');
+
+		$json = $db->donationsDAO()->getDonation($id);
+
+		if ($json === false) {
+			return new JsonResponse(ErrorResponse::fromMessage('Not found'), 404);
+		}
+
+		return new JsonResponse($json);
+	}
+
+	public static function updateTasks(ServerRequestInterface $request)
+	{
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters');
+		$id = Validation::validateHasString($parameters, 'id');
+		if (!$db->donationsDAO()->donationExists($id)) {
+			return new JsonResponse(ErrorResponse::fromMessage('Not found'), 404);
+		}
+
+		$payload = json_decode($request->getBody()->getContents(), true);
+
+		$db->donationsDAO()->updateTasksProgress($id, $payload);
+
+		return new EmptyResponse();
+	}
+
 	/**
 	 * @param Database $db
 	 * @param string|null $id
