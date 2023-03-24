@@ -189,7 +189,7 @@
 						closeModal: false,
 					}
 				}
-			}).then(async (value) => {
+			}).then(async(value) => {
 				if (value == null || value == "") {
 					swal.close();
 				} else {

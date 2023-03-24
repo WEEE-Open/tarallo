@@ -1,4 +1,5 @@
 <?php
+
 /** @var String $type */
 
 $url = [
