@@ -115,9 +115,9 @@ final class TreeDAO extends DAO
 	/**
 	 * Get root parent.
 	 * It will not error if the item is the root
-	 * 
+	 *
 	 * @param ItemWithCode $item
-	 * 
+	 *
 	 * @return array 0 is the root parent, 1 indicates whether the input item is already the parent, returns null if not found
 	 */
 	public function getRootParent(ItemWithCode $item)
