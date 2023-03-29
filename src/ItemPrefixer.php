@@ -41,6 +41,8 @@ class ItemPrefixer
 					return 'H';
 				} elseif (self::has('scsi-sca2-ports-n', $features) || self::has('scsi-db68-ports-n', $features)) {
 					return 'SC';
+				}  elseif (self::has('m2-connectors-n', $features)) {
+					return 'SM';
 				} else {
 					throw new ItemPrefixerException(null, 'No or unknown hard drive connector, cannot generate a code');
 				}
