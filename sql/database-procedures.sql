@@ -611,6 +611,63 @@ CREATE EVENT `DuplicateItemProductFeaturesCleanup`
 $$
 DELIMITER ;
 
+DROP EVENT IF EXISTS `DonationItem_ai`;
+DELIMITER $$
+CREATE TRIGGER `DonationItem_ai` AFTER INSERT ON `DonationItem` FOR EACH ROW
+BEGIN
+    DECLARE TaskId BIGINT(20) UNSIGNED;
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE cur CURSOR FOR SELECT Id FROM DonationTasks WHERE DonationId = NEW.Donation AND ItemType = (SELECT IFNULL(ItemFeature.ValueEnum, ProductFeature.ValueEnum)
+        FROM Item
+        LEFT JOIN ItemFeature ON Item.Code = ItemFeature.Code AND ItemFeature.Feature = 'type'
+        LEFT JOIN ProductFeature ON Item.Brand = ProductFeature.Brand AND Item.Model = ProductFeature.Model AND Item.Variant = ProductFeature.Variant AND ProductFeature.Feature = 'type'
+        WHERE Item.Code = NEW.Code);
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    OPEN cur;
+    
+    insert_loop: LOOP
+        FETCH cur INTO TaskId;
+        IF done THEN
+            LEAVE insert_loop;
+        END IF;
+        
+        INSERT INTO DonationTasksProgress (DonationId, `TaskId`, ItemCode, Completed) VALUES (NEW.Donation, TaskId, NEW.Code, 0);
+    END LOOP;
+    
+    CLOSE cur;
+END $$
+DELIMITER ;
+
+DROP EVENT IF EXISTS `DonationTasks_ai`;
+DELIMITER $$
+CREATE TRIGGER `DonationTasks_ai` AFTER INSERT ON `DonationTasks` FOR EACH ROW
+BEGIN
+    DECLARE ItemId varchar(255);
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE cur CURSOR FOR SELECT DonationItem.Code
+        FROM DonationItem
+        LEFT JOIN Item ON DonationItem.Code = Item.Code
+        LEFT JOIN ItemFeature ON DonationItem.Code = ItemFeature.Code AND ItemFeature.Feature = 'type'
+        LEFT JOIN ProductFeature ON Item.Brand = ProductFeature.Brand AND Item.Model = ProductFeature.Model AND Item.Variant = ProductFeature.Variant AND ProductFeature.Feature = 'type'
+        WHERE DonationItem.Donation = NEW.DonationId AND IFNULL(ItemFeature.ValueEnum, ProductFeature.ValueEnum) = NEW.ItemType;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    OPEN cur;
+    
+    insert_loop: LOOP
+        FETCH cur INTO ItemId;
+        IF done THEN
+            LEAVE insert_loop;
+        END IF;
+        
+        INSERT INTO DonationTasksProgress (DonationId, `TaskId`, ItemCode, Completed) VALUES (NEW.DonationId, NEW.Id, ItemId, 0);
+    END LOOP;
+    
+    CLOSE cur;
+END $$
+DELIMITER ;
+
 -- SET GLOBAL ------------------------------------------------------------------
 
 SET GLOBAL event_scheduler = ON;

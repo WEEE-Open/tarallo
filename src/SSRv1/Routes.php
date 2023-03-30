@@ -57,8 +57,10 @@ trait Routes
 				);
 				$r->get('/donation', [User::AUTH_LEVEL_RW, [Controller::class, 'listDonations']]);
 				$r->get('/donation/new', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'addDonation']]);
-				$r->get('/donation/{id}', [User::AUTH_LEVEL_RW, [Controller::class, 'viewDonation']]);
 				$r->post('/donation/new', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'addDonation']]);
+				$r->get('/donation/{id}', [User::AUTH_LEVEL_RW, [Controller::class, 'viewDonation']]);
+				$r->get('/donation/{id}/edit', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'editDonation']]);
+				$r->post('/donation/{id}/edit', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'editDonation']]);
 				$r->get('/bulk', [User::AUTH_LEVEL_RO, [Controller::class, 'bulk']]);
 				$r->get('/bulk/move', [User::AUTH_LEVEL_RO, [Controller::class, 'bulkMove']]);
 				$r->post('/bulk/move', [User::AUTH_LEVEL_RW, [Controller::class, 'bulkMove']]);

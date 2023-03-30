@@ -27,14 +27,23 @@ class DonationsDAO extends DAO
 
 			$itemsTypes = $this->database->itemDAO()->getTypesForItemCodes($itemsList);
 
-			//inverting the items array and grouping them by type
+			$types = array_unique(array_values($itemsTypes));
 
-			$grouped = array();
-			foreach($itemsTypes as $id => $type) {
-				if (isset($grouped[$type])) {
-					$grouped[$type][] = $id;
+			foreach($types as $type) {
+				$tasks_list = $tasks[$type] ?? null;
+				if (is_array($tasks_list) && count($tasks_list) > 0) {
+					$i = 0;
+					foreach($tasks_list as $task) {
+						$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($donationId, $i, :task, :itemType)");
+						$statement-> bindParam(':task', $task);
+						$statement-> bindParam(':itemType', $type);
+						$success = $statement->execute();
+						$i++;
+					}
 				} else {
-					$grouped[$type] = array($id);
+					$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($donationId, -1, 'Done', :itemType)");
+					$statement-> bindParam(':itemType', $type);
+					$success = $statement->execute();
 				}
 			}
 
@@ -44,37 +53,6 @@ class DonationsDAO extends DAO
 				$statement->bindParam(':code',$item);
 
 				$success = $statement->execute();
-			}
-
-			foreach($grouped as $type => $items) {
-				$taskIds = [];
-				if (isset($tasks[$type]) && count($tasks[$type]) > 0) {
-					$i = 0;
-					foreach($tasks[$type] as $task) {
-						$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($donationId, $i, :task, :itemType)");
-						$statement-> bindParam(':task', $task);
-						$statement-> bindParam(':itemType', $type);
-						$success = $statement->execute();
-						$i++;
-						
-						array_push($taskIds, $this->getPDO()->lastInsertId());
-					}
-				} else {
-					$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($donationId, -1, :task, :itemType)");
-					$statement-> bindParam(':task', $task);
-					$statement-> bindParam(':itemType', $type);
-					$success = $statement->execute();
-
-					array_push($taskIds, $this->getPDO()->lastInsertId());
-				}
-
-				foreach($taskIds as $taskId) {
-					foreach($items as $item) {
-						$statement = $this->getPDO()->prepare("INSERT INTO DonationTasksProgress(DonationId, TaskId, ItemCode, Completed) VALUES($donationId, $taskId, :item, 0)");
-						$statement-> bindParam(':item', $item);
-						$success = $statement->execute();
-					}
-				}
 			}
 
 			return $donationId;
@@ -120,6 +98,155 @@ GROUP BY d.Id");
 		}
 	}
 
+	public function updateDonation($id, $name, $location, $notes, $date, $itemsList, $tasks)
+	{
+		$oldDonation = $this->getDonation($id);
+
+		$statement = $this->getPDO()->prepare("UPDATE Donations SET Name=:name, Location=:location, Date=:date, Notes=:notes WHERE Id=:id");
+		try {
+			$statement->bindParam(':name',$name);
+			$statement->bindParam(':location',$location);
+			$statement->bindParam(':date', $parsedDate);
+			$statement->bindParam(':notes',$notes);
+			$statement->bindParam(':id',$id);
+
+			$success = $statement->execute();
+
+			$added_items = array_diff($itemsList, array_keys($oldDonation["itemsType"]));
+			$removed_items = array_diff(array_keys($oldDonation["itemsType"]), $itemsList);
+
+			foreach($removed_items as $item) {
+				$statement = $this->getPDO()->prepare("DELETE FROM DonationItem WHERE Donation=:id AND Code=:code");
+				$statement->bindParam(':id',$id);
+				$statement->bindParam(':code',$item);
+
+				$success = $statement->execute();
+				$tasksList = $statement->fetchAll(\PDO::FETCH_ASSOC);
+			}
+
+			foreach($added_items as $item) {
+				$statement = $this->getPDO()->prepare("INSERT INTO DonationItem(Donation,Code) VALUES(:donationId,:code)");
+				$statement->bindParam(':donationId',$id);
+				$statement->bindParam(':code',$item);
+
+				$success = $statement->execute();
+			}
+			
+			$added_items_types = $this->database->itemDAO()->getTypesForItemCodes($added_items);
+
+			// add tasks for types that were not in the donation before
+			foreach(array_unique(array_values($added_items_types)) as $type) {
+				if (!isset($donation["tasks"][$type])) {
+					$tasks_list = $tasks[$type] ?? null;
+					if (is_array($tasks_list) && count($tasks_list) > 0) {
+						$i = 0;
+						foreach($tasks_list as $task) {
+							$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, $i, :task, :itemType)");
+							$statement-> bindParam(':task', $task);
+							$statement-> bindParam(':itemType', $type);
+							$success = $statement->execute();
+							$i++;
+						}
+					} else {
+						$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, -1, 'Done', :itemType)");
+						$statement-> bindParam(':itemType', $type);
+						$success = $statement->execute();
+					}
+				}
+			}
+			
+			// modify or add tasks for the types that already existed
+			foreach($oldDonation["tasks"] as $type => $oldTasks) {
+				$newTasks = $tasks[$type] ?? null;
+				if (is_array($oldTasks)) {
+					if (is_array($newTasks) && count($newTasks) > 0) {
+						$i = 0;
+						$newTasksWithoutRename = array_map(function ($t) {
+							if (is_array($t)) return $t[0];
+							return $t;
+						}, $newTasks);
+						$deletedTasks = array_filter($oldTasks, function ($t) use ($newTasksWithoutRename) {
+							return array_search($t, $newTasksWithoutRename) === false;
+						});
+						foreach ($deletedTasks as $task) {
+							$oldTaskIndex = array_search($deletedTasks[0], $oldTasks);
+							$statement = $this->getPDO()->prepare("DELETE FROM DonationTasks WHERE DonationId=:donationId AND ItemType=:type AND `Index`=:oldIndex");
+							$statement->bindParam(':donationId',$id);
+							$statement->bindParam(':type',$type);
+							$statement->bindParam(':oldIndex',$oldTaskIndex);
+							$success = $statement->execute();
+						}
+						foreach ($newTasks as $task) {
+							if (is_array($task)) { // this means it was renamed, value 0 is the old name, value 1 is the new name
+								$oldTaskIndex = array_search($task[0], $oldTasks);
+								if ($oldTaskIndex === false) { // means that it's new
+									$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, $i, :task, :itemType)");
+									$statement-> bindParam(':task', $task[1]);
+									$statement-> bindParam(':itemType', $type);
+									$success = $statement->execute();
+								} else {
+									$statement = $this->getPDO()->prepare("UPDATE DonationTasks SET Title=:title, `Index`=:newIndex WHERE DonationId=:donationId AND ItemType=:type AND `Index`=:oldIndex");
+									$statement->bindParam(':title',$task[1]);
+									$statement->bindParam(':newIndex',$i);
+									$statement->bindParam(':donationId',$id);
+									$statement->bindParam(':type',$type);
+									$statement->bindParam(':oldIndex',$oldTaskIndex);
+									$success = $statement->execute();
+								}
+							} else {
+								$oldTaskIndex = array_search($task, $oldTasks);
+								if ($oldTaskIndex !== $i) {
+									if ($oldTaskIndex === false) {
+										$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, $i, :task, :itemType)");
+										$statement-> bindParam(':task', $task);
+										$statement-> bindParam(':itemType', $type);
+										$success = $statement->execute();
+									} else {
+										$statement = $this->getPDO()->prepare("UPDATE DonationTasks SET `Index`=:newIndex WHERE DonationId=:donationId AND ItemType=:type AND `Index`=:oldIndex");
+										$statement->bindParam(':newIndex',$i);
+										$statement->bindParam(':donationId',$id);
+										$statement->bindParam(':type',$type);
+										$statement->bindParam(':oldIndex',$oldTaskIndex);
+										$success = $statement->execute();
+									}
+								}
+							}
+							$i++;
+						}
+					} else {
+						$statement = $this->getPDO()->prepare("DELETE FROM DonationTasks WHERE DonationId=:donationId AND ItemType=:type");
+						$statement->bindParam(':donationId',$id);
+						$statement->bindParam(':type',$type);
+						$success = $statement->execute();
+
+						$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, -1, 'Done', :itemType)");
+						$statement-> bindParam(':itemType', $type);
+						$success = $statement->execute();
+					}
+				} else {
+					if (is_array($newTasks) && count($newTasks) > 0) {
+						$statement = $this->getPDO()->prepare("DELETE FROM DonationTasks WHERE DonationId=:donationId AND ItemType=:type");
+						$statement->bindParam(':donationId',$id);
+						$statement->bindParam(':type',$type);
+						$success = $statement->execute();
+
+						$i = 0;
+						foreach($newTasks as $task) {
+							$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, $i, :task, :itemType)");
+							$statement-> bindParam(':task', $task);
+							$statement-> bindParam(':itemType', $type);
+							$success = $statement->execute();
+							$i++;
+						}
+					}
+				}
+			}
+
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+	
 	public function getDonation($id)
 	{
 		$id = intval($id);
