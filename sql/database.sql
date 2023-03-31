@@ -303,6 +303,18 @@ CREATE TABLE `NormalizationForbidden`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
+CREATE TABLE `Donations` (
+                             `Id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                             `Name` text NOT NULL,
+                             `Location` text DEFAULT NULL,
+                             `Date` timestamp(6) NULL DEFAULT NULL,
+                             `Notes` text DEFAULT NULL,
+                             `IsCompleted` tinyint(1) DEFAULT 0,
+                             PRIMARY KEY (`Id`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE `DonationItem` (
     `Donation` bigint(20) unsigned NOT NULL,
     `Code` varchar(255) NOT NULL,
@@ -310,18 +322,6 @@ CREATE TABLE `DonationItem` (
     KEY `Code` (`Code`),
     CONSTRAINT `DonationItem_ibfk_1` FOREIGN KEY (`Donation`) REFERENCES `Donations` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `DonationItem_ibfk_2` FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci;
-
-CREATE TABLE `Donations` (
-    `Id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-    `Name` text NOT NULL,
-    `Location` text DEFAULT NULL,
-    `Date` timestamp(6) NULL DEFAULT NULL,
-    `Notes` text DEFAULT NULL,
-    `IsCompleted` tinyint(1) DEFAULT 0,
-    PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
