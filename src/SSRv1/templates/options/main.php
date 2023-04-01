@@ -5,11 +5,18 @@
 /** @var string|null $error */
 $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options', 'container' => true]);
 $this->insert('options::menu', ['currentPage' => '']);
+
 ?>
 
 <?php if ($error !== null) : ?>
 <div class="col-12">
 	<p class="alert alert-danger" role="alert"><?= $this->e($error) ?></p>
+</div>
+<?php endif; ?>
+
+<?php if ($newToken !== null) : ?>
+<div class="col-12">
+	<p class="alert alert-warning" role="alert">Your new token is: <?=$newToken?></p>
 </div>
 <?php endif; ?>
 
