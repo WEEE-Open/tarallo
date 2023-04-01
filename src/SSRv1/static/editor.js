@@ -1707,4 +1707,12 @@
 	window.unitValueToPrintable = valueToPrintable;
 	window.unitPrintableToValue = printableToValue;
 	window.unitNameToType = nameToType;
+
+	$('.locationAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300},formatResult:(l) => {
+		return {
+			id: l.name,
+			text: l.name,
+			html: `<div>${l.name} ${l.color ? `<i class="fa fa-square ml-1" title="${l.color}" style="color:${l.color}"></i>` : ""}</div>`
+		}
+	}});
 }());
