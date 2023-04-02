@@ -1712,7 +1712,7 @@
 		return {
 			id: l.name,
 			text: l.name,
-			html: `<div>${ l.name } ${ l.color ? `<i class="fa fa-square ml-1" title="${ l.color }" style="color:${ l.color }"></i>` : "" }</div>`
+			html: `<div>${l.name} ${l.color ? `<i class="fa fa-square ml-1" title="${l.color}" style="color:${l.color}"></i>` : ""}</div>`
 		}
-		}});
+	}});
 }());
