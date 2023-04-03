@@ -516,7 +516,7 @@ class Controller implements RequestHandlerInterface
 			return $handler->handle($request);
 		}
 
-		$filename = "donation summary" . $donation["name"] . ".xlsx";
+		$filename = "donation summary " . $donation["name"] . ".xlsx";
 		http_response_code(200);
 		header('Content-disposition: attachment; filename="'.XLSXWriter::sanitize_filename($filename).'"');
 		header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
