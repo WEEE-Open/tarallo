@@ -109,13 +109,6 @@ $isClone = isset($base) && $base->hasCode();
 		?>
 	</section>
 </article>
-<script>$('.locationAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300},formatResult:(l) => {
-	return {
-		id: l.name,
-		text: l.name,
-		html: `<div>${l.name} ${l.color ? `<i class="fa fa-square ml-1" title="${l.color}" style="color:${l.color}"></i>` : ""}</div>`
-	}
-}});</script>
 <?php if (!$innerrecursion) {
 	?><script>const activate = true;</script><?php
 	$this->insert('editor');
