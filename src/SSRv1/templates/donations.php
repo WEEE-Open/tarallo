@@ -1,6 +1,6 @@
 <?php
 /** @var string $donations|null */
-
+/** @var bool $canCreateNew|null */
 
 $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'tooltips' => true]);
 
@@ -8,8 +8,17 @@ $completed = [];
 
 ?>
 
-<h2>Donations</h2>
 <div class="row">
+	<div class="itembuttons primary row mx-0 mt-2 justify-content-end w-100">
+		<div class="row d-flex m-0 justify-content-between mr-auto">
+			<h2 class="col-8 p-0">Donations</h2>
+		</div>
+		<?php if ($canCreateNew ?? false): ?>
+		<a href="/donation/new" class="btn btn-outline-primary col-4 col-sm-auto edit mb-2 mr-2">
+			<i class="fa fa-plus"></i>&nbsp;New
+		</a>
+		<? endif ?>
+	</div>
 	<?php if (isset($donations) && !empty($donations)) : ?>
 		<div class="col-12">
 			<table class="table table-borderless stats">

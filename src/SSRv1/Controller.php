@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\SSRv1;
 
 use FastRoute;
+use XLSXWriter;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -375,11 +376,13 @@ class Controller implements RequestHandlerInterface
 	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
+		/** @var UserSSO $user */
+		$user = $request->getAttribute('User');
 
 
 		$request = $request
 			->withAttribute('Template', 'donations')
-			->withAttribute('TemplateParameters', ['donations' => $db->donationsDAO()->listDonations()]);
+			->withAttribute('TemplateParameters', ['donations' => $db->donationsDAO()->listDonations(), 'canCreateNew' => $user->getLevel() == UserSSO::AUTH_LEVEL_ADMIN]);
 
 		return $handler->handle($request);
 	}
@@ -491,6 +494,63 @@ class Controller implements RequestHandlerInterface
 		}
 
 		return $handler->handle($request);
+	}
+	
+	public static function downloadDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		$donation = $db->donationsDAO()->getDonation($id);
+
+		if ($donation === false) {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+
+		$filename = "donation summary" . $donation["name"] . ".xlsx";
+		http_response_code(200);
+		header('Content-disposition: attachment; filename="'.XLSXWriter::sanitize_filename($filename).'"');
+		header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		header('Content-Transfer-Encoding: binary');
+		header('Cache-Control: must-revalidate');
+		header('Pragma: public');
+
+
+		$rows = array(
+			array('2003','1','-50.5','2010-01-01 23:00:00','2012-12-31 23:00:00'),
+			array('2003','=B1', '23.5','2010-01-01 00:00:00','2012-12-31 00:00:00'),
+		);
+
+		$writer = new XLSXWriter();
+		$writer->setAuthor('Tarallo'); 
+		foreach($rows as $row)
+			$writer->writeSheetRow('Sheet1', $row);
+		$writer->writeToStdOut();
+
+		exit(0);
+	}
+	
+	public static function deleteDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		$db->donationsDAO()->deleteDonation($id);
+
+		return new RedirectResponse("/donation", 303);
 	}
 
 	public static function authError(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface

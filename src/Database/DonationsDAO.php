@@ -338,6 +338,17 @@ GROUP BY d.Id");
 		}
 	}
 
+	public function deleteDonation($id)
+	{
+		$statement = $this->getPDO()->prepare("DELETE FROM Donations WHERE Id=:id");
+		try {
+			$statement->bindParam(':id', $id);
+			$success = $statement->execute();
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
 	public function updateTasksProgress($id, $tasks)
 	{
 		foreach($tasks as $task => $progress) {

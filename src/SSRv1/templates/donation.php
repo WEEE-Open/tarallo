@@ -11,9 +11,12 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 		<div class="row d-flex m-0 justify-content-between mr-auto">
 			<h2 class="col-8 p-0"><?=htmlspecialchars($donation["name"])?></h2>
 		</div>
+		<a href="/donation/<?=$donation["id"]?>/download" class="btn btn-outline-primary col-4 col-sm-auto edit mb-2 mr-2" download>
+			<i class="fa fa-download"></i>&nbsp;Download as excel
+		</a>
 		<?php if ($showEditButton ?? false): ?>
 		<a href="/donation/<?=$donation["id"]?>/edit" class="btn btn-outline-primary col-4 col-sm-auto edit mb-2 mr-2">
-			<i class="fa fa-pencil-alt"></i>&nbsp;Edit
+			<i class="fa fa-edit"></i>&nbsp;Edit
 		</a>
 		<? endif ?>
 	</div>

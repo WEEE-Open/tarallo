@@ -256,4 +256,44 @@
 
     $("[name=ItemsList]").trigger("input");
 
+	$(".delete").on('click', () => {
+		swal({
+			icon: "warning",
+			dangerMode: true,
+			title: "Are you sure?",
+			content: {
+				element: 'div',
+				attributes: {
+					innerText: 'Deleting a donation will loose all progress and is NOT recoverable'
+				}
+			},
+			buttons: {
+				cancel: true,
+				confirm: "Yes",
+			},
+		}).then((r) => {
+			if (r !== true) return;
+			swal({
+				icon: "warning",
+				dangerMode: true,
+				title: "But like seriously?",
+				content: {
+					element: 'div',
+					attributes: {
+						innerText: 'I cannot stress enough how this is NOT RECOVERABLE'
+					}
+				},
+				buttons: {
+					cancel: true,
+					confirm: "Yes",
+				},
+			}).then((r) => {
+				if (r !== true) return;
+				let tempLink = document.createElement("a");
+				tempLink.href = "delete";
+				tempLink.click();
+			})
+		});
+	});
+
 })();
