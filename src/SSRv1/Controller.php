@@ -516,6 +516,101 @@ class Controller implements RequestHandlerInterface
 			return $handler->handle($request);
 		}
 
+		$itemsProperties = [];
+
+		foreach($donation["itemsType"] as $itemId => $_) {
+			try {
+				$item = new ItemCode($itemId);
+			} catch (ValidationException $e) {
+				$itemsProperties[$itemId] = null;
+			}
+			$itemsProperties[$itemId] = $db->itemDAO()->getItem($item);
+		}
+
+		$writer = new XLSXWriter();
+		$writer->setAuthor('Tarallo'); 
+		foreach($donation["tasks"] as $type => $_) {
+			$displayType = FeaturePrinter::FEATURES_ENUM['type'][$type];
+			$itemsOfType = array_filter($donation["itemsType"], function ($it) use ($type) {return $it === $type;});
+			$rootProperties = [];
+			$groupedPropertiesForSubItems = [];
+			$countOfType = [];
+			foreach($itemsOfType as $item => $_) {
+				$rootProperties = array_unique(array_merge($rootProperties, array_keys($itemsProperties[$item]->getFeatures())));
+				$itemsToCheck = $itemsProperties[$item]->getContent();
+				for($i = 0; $i < count($itemsToCheck); $i++) {
+					$content = $itemsToCheck[$i];
+					$type = $content->getFeatures()["type"]->value ?? "unknown";
+					$groupedPropertiesForSubItems[$type] = array_unique(array_merge($groupedPropertiesForSubItems[$type] ?? [], array_keys($content->getFeatures())));
+					$countOfType[$type] = ($countOfType[$type] ?? 0) + 1;
+					if (count($content->getContent()) > 0) {
+						array_push($itemsToCheck, ...$content->getContent());
+					}
+				}
+			}
+			$rootProperties = array_filter($rootProperties, function ($t) {
+				return !in_array($t, ["type", "owner", "note"]);
+			});
+			$groupedPropertiesForSubItems = array_map(function ($arr) {
+				return array_filter($arr, function ($t) {
+					return !in_array($t, ["type", "owner", "note"]);
+				});
+			}, $groupedPropertiesForSubItems);
+			//var_dump($itemsOfType);
+			 //var_dump($displayType, json_encode($rootProperties), json_encode($groupedPropertiesForSubItems), json_encode($countOfType)); 
+			if (count($countOfType)>0) {
+				$writer->writeSheetRow($displayType, array_merge(array_fill(0, count($rootProperties)+1, ''), 
+					...array_map(function ($type, $arr) use ($countOfType) {
+						if (($countOfType[$type]??0) > 1) {
+							$acc = [];
+							for ($i = 0; $i < $countOfType[$type]; $i++)
+								array_push($acc, FeaturePrinter::FEATURES_ENUM['type'][$type] . ' ' . $i, ...array_fill(0, count($arr)-1, ''));
+							return $acc;
+						} else
+							return [FeaturePrinter::FEATURES_ENUM['type'][$type], ...array_fill(0, count($arr)-1, '')];
+					},
+					array_keys($groupedPropertiesForSubItems),
+					array_values($groupedPropertiesForSubItems)
+				)));
+				$offset = count($rootProperties);
+				$writer->markMergedCell($displayType, $start_row = 0, $start_col = 0, $end_row = 0, $end_col = $offset);
+				$offset += 1;
+				foreach($groupedPropertiesForSubItems as $type => $n) {
+					for ($i = 0; $i < $countOfType[$type]; $i++) {
+						$l = count($n) - 1;
+						$writer->markMergedCell($displayType, $start_row = 0, $start_col = $offset, $end_row = 0, $end_col = $offset + $l);
+						$offset += $l + 1;
+					}
+				}
+				$writer->writeSheetRow($displayType, array_merge(["Id"], 
+					array_map(function ($f) {return FeaturePrinter::FEATURES[$f] ?? $f;}, $rootProperties), 
+					...array_map(function ($type, $arr) use ($countOfType) {
+						if (($countOfType[$type]??0) > 1) {
+							$acc = [];
+							for ($i = 0; $i < $countOfType[$type]; $i++)
+								array_push($acc, ...array_map(function ($f) {return FeaturePrinter::FEATURES[$f] ?? $f;}, $arr));
+							return $acc;
+						} else
+							return array_map(function ($f) {return FeaturePrinter::FEATURES[$f] ?? $f;}, $arr);
+					}, array_keys($groupedPropertiesForSubItems), array_values($groupedPropertiesForSubItems))
+				));
+				foreach($itemsOfType as $item => $_) {
+					$writer->writeSheetRow($displayType, [$item,
+						...array_map(function ($f) use ($item, $itemsProperties) {return $itemsProperties[$item]->getFeature($f)->value ?? '';}, $rootProperties)
+					]);
+				}
+			} else {
+				$writer->writeSheetRow($displayType, array_merge(["Id"], 
+					array_map(function ($f) {return FeaturePrinter::FEATURES[$f] ?? $f;}, $rootProperties)
+				));
+				foreach($itemsOfType as $item => $_) {
+					$writer->writeSheetRow($displayType, [$item, ...array_map(function ($f) use ($item, $itemsProperties) {return $itemsProperties[$item]->getFeature($f)->value ?? '';}, $rootProperties)]);
+				}
+			}
+			// $writer->markMergedCell($sheetName, $start_row = 0, $start_col = 0, $end_row = 1, $end_col = 0);
+			// $writer->writeSheetRow($displayType, $row);
+		}
+		
 		$filename = "donation summary " . $donation["name"] . ".xlsx";
 		http_response_code(200);
 		header('Content-disposition: attachment; filename="'.XLSXWriter::sanitize_filename($filename).'"');
@@ -524,16 +619,6 @@ class Controller implements RequestHandlerInterface
 		header('Cache-Control: must-revalidate');
 		header('Pragma: public');
 
-
-		$rows = array(
-			array('2003','1','-50.5','2010-01-01 23:00:00','2012-12-31 23:00:00'),
-			array('2003','=B1', '23.5','2010-01-01 00:00:00','2012-12-31 00:00:00'),
-		);
-
-		$writer = new XLSXWriter();
-		$writer->setAuthor('Tarallo'); 
-		foreach($rows as $row)
-			$writer->writeSheetRow('Sheet1', $row);
 		$writer->writeToStdOut();
 
 		exit(0);
