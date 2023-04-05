@@ -529,12 +529,13 @@ class Controller implements RequestHandlerInterface
 
 		$writer = new XLSXWriter();
 		$writer->setAuthor('Tarallo'); 
-		foreach($donation["tasks"] as $type => $_) {
+		foreach($donation["tasks"] as $type => $_) { // Good luck to anyone that will have to debug/modify this code
 			$displayType = FeaturePrinter::FEATURES_ENUM['type'][$type];
 			$itemsOfType = array_filter($donation["itemsType"], function ($it) use ($type) {return $it === $type;});
 			$rootProperties = [];
 			$groupedPropertiesForSubItems = [];
 			$countOfType = [];
+			$groupedPropertiesValuesForSubItems = [];
 			foreach($itemsOfType as $item => $_) {
 				$rootProperties = array_unique(array_merge($rootProperties, array_keys($itemsProperties[$item]->getFeatures())));
 				$itemsToCheck = $itemsProperties[$item]->getContent();
@@ -542,42 +543,45 @@ class Controller implements RequestHandlerInterface
 					$content = $itemsToCheck[$i];
 					$type = $content->getFeatures()["type"]->value ?? "unknown";
 					$groupedPropertiesForSubItems[$type] = array_unique(array_merge($groupedPropertiesForSubItems[$type] ?? [], array_keys($content->getFeatures())));
-					$countOfType[$type] = ($countOfType[$type] ?? 0) + 1;
+					$groupedPropertiesValuesForSubItems[$item] ??= [];
+					$groupedPropertiesValuesForSubItems[$item][$type] ??= [];
+					array_push($groupedPropertiesValuesForSubItems[$item][$type], $content);
+					$countOfType[$type] = max(($countOfType[$type] ?? 0), count($groupedPropertiesValuesForSubItems[$item][$type]));
 					if (count($content->getContent()) > 0) {
 						array_push($itemsToCheck, ...$content->getContent());
 					}
 				}
 			}
 			$rootProperties = array_filter($rootProperties, function ($t) {
-				return !in_array($t, ["type", "owner", "note"]);
+				return !in_array($t, ["type", "owner", "note", "working"]);
 			});
 			$groupedPropertiesForSubItems = array_map(function ($arr) {
 				return array_filter($arr, function ($t) {
-					return !in_array($t, ["type", "owner", "note"]);
+					return !in_array($t, ["type", "owner", "note", "working"]);
 				});
 			}, $groupedPropertiesForSubItems);
 			//var_dump($itemsOfType);
-			 //var_dump($displayType, json_encode($rootProperties), json_encode($groupedPropertiesForSubItems), json_encode($countOfType)); 
+			//var_dump($displayType, json_encode($rootProperties), json_encode($groupedPropertiesForSubItems), json_encode($groupedPropertiesValuesForSubItems), json_encode($countOfType)); 
 			if (count($countOfType)>0) {
 				$writer->writeSheetRow($displayType, array_merge(array_fill(0, count($rootProperties)+1, ''), 
 					...array_map(function ($type, $arr) use ($countOfType) {
 						if (($countOfType[$type]??0) > 1) {
 							$acc = [];
 							for ($i = 0; $i < $countOfType[$type]; $i++)
-								array_push($acc, FeaturePrinter::FEATURES_ENUM['type'][$type] . ' ' . $i, ...array_fill(0, count($arr)-1, ''));
+								array_push($acc, FeaturePrinter::FEATURES_ENUM['type'][$type] . ' ' . $i, ...array_fill(0, count($arr), ''));
 							return $acc;
 						} else
-							return [FeaturePrinter::FEATURES_ENUM['type'][$type], ...array_fill(0, count($arr)-1, '')];
+							return [FeaturePrinter::FEATURES_ENUM['type'][$type], ...array_fill(0, count($arr), '')];
 					},
 					array_keys($groupedPropertiesForSubItems),
 					array_values($groupedPropertiesForSubItems)
-				)));
+				)), ['valign' => 'center', 'halign' => 'center']);
 				$offset = count($rootProperties);
 				$writer->markMergedCell($displayType, $start_row = 0, $start_col = 0, $end_row = 0, $end_col = $offset);
 				$offset += 1;
 				foreach($groupedPropertiesForSubItems as $type => $n) {
 					for ($i = 0; $i < $countOfType[$type]; $i++) {
-						$l = count($n) - 1;
+						$l = count($n);
 						$writer->markMergedCell($displayType, $start_row = 0, $start_col = $offset, $end_row = 0, $end_col = $offset + $l);
 						$offset += $l + 1;
 					}
@@ -588,15 +592,26 @@ class Controller implements RequestHandlerInterface
 						if (($countOfType[$type]??0) > 1) {
 							$acc = [];
 							for ($i = 0; $i < $countOfType[$type]; $i++)
-								array_push($acc, ...array_map(function ($f) {return FeaturePrinter::FEATURES[$f] ?? $f;}, $arr));
+								array_push($acc, "Id", ...array_map(function ($f) {return FeaturePrinter::FEATURES[$f] ?? $f;}, $arr));
 							return $acc;
 						} else
-							return array_map(function ($f) {return FeaturePrinter::FEATURES[$f] ?? $f;}, $arr);
+							return ["Id", ...array_map(function ($f) {return FeaturePrinter::FEATURES[$f] ?? $f;}, $arr)];
 					}, array_keys($groupedPropertiesForSubItems), array_values($groupedPropertiesForSubItems))
 				));
 				foreach($itemsOfType as $item => $_) {
 					$writer->writeSheetRow($displayType, [$item,
-						...array_map(function ($f) use ($item, $itemsProperties) {return $itemsProperties[$item]->getFeature($f)->value ?? '';}, $rootProperties)
+						...array_map(function ($f) use ($item, $itemsProperties) {return $itemsProperties[$item]->getFeatureValue($f) ?? '';}, $rootProperties),
+						...array_merge(...array_map(function ($type, $arr) use ($item, $countOfType, $groupedPropertiesValuesForSubItems) {
+							$acc = [];
+							for ($i = 0; $i < $countOfType[$type]; $i++) {
+								if (!isset($groupedPropertiesValuesForSubItems[$item][$type]) || count($groupedPropertiesValuesForSubItems[$item][$type])<=$i) {
+									array_push($acc, ...array_fill(0, count($arr), ''));
+								} else {
+									array_push($acc, $groupedPropertiesValuesForSubItems[$item][$type][$i]->getCode(), ...array_map(function ($f) use ($item, $type, $i, $groupedPropertiesValuesForSubItems) {return $groupedPropertiesValuesForSubItems[$item][$type][$i]->getFeatureValue($f) ?? '';}, $arr));
+								}
+							}
+							return $acc;
+						}, array_keys($groupedPropertiesForSubItems), array_values($groupedPropertiesForSubItems)))
 					]);
 				}
 			} else {
@@ -604,11 +619,9 @@ class Controller implements RequestHandlerInterface
 					array_map(function ($f) {return FeaturePrinter::FEATURES[$f] ?? $f;}, $rootProperties)
 				));
 				foreach($itemsOfType as $item => $_) {
-					$writer->writeSheetRow($displayType, [$item, ...array_map(function ($f) use ($item, $itemsProperties) {return $itemsProperties[$item]->getFeature($f)->value ?? '';}, $rootProperties)]);
+					$writer->writeSheetRow($displayType, [$item, ...array_map(function ($f) use ($item, $itemsProperties) {return $itemsProperties[$item]->getFeatureValue($f) ?? '';}, $rootProperties)]);
 				}
 			}
-			// $writer->markMergedCell($sheetName, $start_row = 0, $start_col = 0, $end_row = 1, $end_col = 0);
-			// $writer->writeSheetRow($displayType, $row);
 		}
 		
 		$filename = "donation summary " . $donation["name"] . ".xlsx";
