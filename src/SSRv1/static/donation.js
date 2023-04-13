@@ -24,18 +24,87 @@
             });
         }
 
+		function escapeHTML(str) {
+			const p = document.createElement("p");
+			p.appendChild(document.createTextNode(str));
+			return p.innerHTML;
+		}
+
         function renderItem(text) {
-            let newItem = $('<li class="list-group-item p-0 d-flex align-items-center"><div class="p-2 pl-3 mr-auto name"></div><div class="btn btn-outline-danger" id="delete"><i class="fa fa-trash"></i></div></li>');
-            newItem.find('.name').text(text);
+			let oldText;
+			if (Array.isArray(text)) {
+				oldText = text[0];
+				text = text[1];
+			}
+            let newItem = $(`<li class="list-group-item p-0 d-flex align-items-center"><div class="p-2 pl-3 mr-auto name"></div>${(hiddenInput.dataset.edit ?? false) ? '<div class="btn btn-outline-primary" id="move-up"><i class="fas fa-chevron-up"></i></div><div class="btn btn-outline-primary" id="move-down"><i class="fas fa-chevron-down"></i></div>' : ''}${(hiddenInput.dataset.edit ?? false) ? '<div class="btn btn-outline-primary" id="edit"><i class="fas fa-pencil-alt"></i></div>' : ''}<div class="btn btn-outline-danger" id="delete"><i class="fa fa-trash"></i></div></li>`);
+            newItem.find('.name').html(`<del id="old">${escapeHTML(oldText || "")}</del> ${escapeHTML(text)}`);
             newItem.find("#delete").on('click', () => {
                 $(listInput).find(newItem).remove();
                 let currentList = JSON.parse(hiddenInput.value || "[]");
-                const index = currentList.indexOf(text);
+				const index = currentList.findIndex(t => (Array.isArray(t) ? t[0] : t) === (oldText || text));
                 if (index > -1) { 
                     currentList.splice(index, 1);
                 }
                 hiddenInput.value = JSON.stringify(currentList);
                 $(hiddenInput).trigger("input");
+            });
+			newItem.find("#move-up").on('click', () => {
+                let currentList = JSON.parse(hiddenInput.value || "[]");
+				const index = currentList.findIndex(t => (Array.isArray(t) ? t[0] : t) === (oldText || text));
+                if (index > 0) { 
+                	$(newItem).insertBefore($(newItem).prev());
+					[currentList[index], currentList[index-1]] = [currentList[index-1], currentList[index]];
+					hiddenInput.value = JSON.stringify(currentList);
+					$(hiddenInput).trigger("input");
+                }
+            });
+			newItem.find("#move-down").on('click', () => {
+                let currentList = JSON.parse(hiddenInput.value || "[]");
+				const index = currentList.findIndex(t => (Array.isArray(t) ? t[0] : t) === (oldText || text));
+                if (index > -1 && index < currentList.length - 1) { 
+                	$(newItem).insertAfter($(newItem).next());
+					[currentList[index], currentList[index+1]] = [currentList[index+1], currentList[index]];
+					hiddenInput.value = JSON.stringify(currentList);
+					$(hiddenInput).trigger("input");
+                }
+            });
+			newItem.find("#edit").on('click', () => {
+				swal({
+					icon: "info",
+					title: "Enter new name:",
+					content: "input",
+					buttons: {
+						cancel: {
+							text: "Cancel",
+							value: null,
+							visible: true,
+							closeModal: true,
+						},
+						confirm: {
+							text: "OK",
+							value: true,
+							visible: true,
+							closeModal: true
+						}
+					}
+				}).then((res) => {
+					if (!res || res.trim() === "") return;
+					res = res.trim();
+					let currentList = JSON.parse(hiddenInput.value || "[]");
+					const index = currentList.findIndex(t => (Array.isArray(t) ? t[0] : t) === (oldText || text));
+					if (index > -1) { 
+						if (res === (Array.isArray(currentList[index]) ? currentList[index][1] : currentList[index])) return;
+						if (res === text) {
+							currentList[index] = res;
+							newItem.find('.name').html(`<del id="old"></del> ${escapeHTML(text)}`);
+						} else {
+							currentList[index] = [text, res];
+							newItem.find('.name').html(`<del id="old">${escapeHTML(text || "")}</del> ${escapeHTML(res)}`);
+						}
+					}
+					hiddenInput.value = JSON.stringify(currentList);
+					$(hiddenInput).trigger("input");
+				});
             });
             $(listInput).find(".input-group").before(newItem);
         }
@@ -84,9 +153,7 @@
                 newInput.blur();
                 let currentList = JSON.parse(hiddenInput.value || "[]");
                 let newItems = pastedText.split('\n').map(item => item.trim()).filter(item => item != '');
-                Promise.all(newItems.map(item => {
-                    return fetch(newInput.dataset.autocompleteUri+'?q='+item).then(res => res.json()).then(res => res[0]).catch(() => null);
-                })).then(items => items.filter(item => item != null && currentList.indexOf(item) === -1)).then(items => {
+				let callback = (items => {
                     if (items.length === 0) {
                         swal({
                             icon: "error",
@@ -106,13 +173,13 @@
                     });
                     swal({
                         icon: "info",
-                        title: "Confirm adding the following items?",
+                        title: "Confirm adding the following?",
                         content: displayList,
                         buttons: {
                             cancel: {
                                 text: "Cancel",
                                 value: null,
-                                visible: false,
+                                visible: true,
                                 closeModal: true,
                             },
                             confirm: {
@@ -129,8 +196,15 @@
                     }).then(() => {
                         newInput.focus();
                     });
-                })
+                });
 
+				if (newInput.dataset.autocompleteUri) {
+					Promise.all(newItems.map(item => {
+						return fetch(newInput.dataset.autocompleteUri+'?q='+item).then(res => res.json()).then(res => res[0]).catch(() => null);
+					})).then(items => items.filter(item => item != null && currentList.indexOf(item) === -1)).then(callback);
+				} else {
+					callback(newItems);
+				}
             }
         })
 
@@ -150,6 +224,8 @@
      * @param {string} opt.autocompleteUri (optional) 
      * @param {string} opt.hiddenName (optional)
      * @param {object} opt.initialData (optional)
+     * @param {boolean} opt.edit (optional)
+     * @param {boolean} opt.arrange (optional)
      */
     function createListInput(opt) {
         let newListInput = $('<label>test</label><ul class="list-group item-list-input"><input type="hidden"><div class="list-group-item input-group mb-3"><input type="text" class="form-control" placeholder="Add item" autocomplete="off"><div class="input-group-append"><button class="btn btn-secondary" type="button">Add</button></div></div></ul>');
@@ -157,6 +233,8 @@
         if (opt.autocompleteUri) newListInput.find('input[type=text]').get(0).dataset.autocompleteUri = opt.autocompleteUri;
         if (opt.hiddenName) newListInput.find('input[type=hidden]').attr("name", opt.hiddenName);
         if (opt.initialData) newListInput.find('input[type=hidden]').attr("value", JSON.stringify(opt.initialData));
+		if (opt.edit === true) newListInput.find('input[type=hidden]').attr("data-edit", true);
+		if (opt.arrange === true) newListInput.find('input[type=hidden]').attr("data-arrange", true);
         hydrateListInput(newListInput.get(1));
         return newListInput;
     }
@@ -225,16 +303,18 @@
             Object.entries(modifiedTasksCount).forEach(([type, count]) => {
                 typesCount[type] = (typesCount[type] || 0) + count;
                 if (typesCount[type] < 0) typesCount[type] = 0; // this shouldn't happen but just to be safe
-                if (typesCount[type] == 0) {
+                if (typesCount[type] === 0) {
                     delete typesCount[type];
                     $("#tasks-group-" + type).remove();
-                } else if (count > 0 && typesCount[type] == count) {
+                } else if (count > 0 && typesCount[type] === count) {
                     let oldTasks = JSON.parse(allTasksInput.value || "{}")
                     let inputGroup = $('<div></div>');
                     inputGroup.attr("id", "tasks-group-" + type);
                     inputGroup.append(createListInput({
-                        title: "Tasks for " + typesNames[type] + ":",
-                        initialData: oldTasks[type]
+                        title: "Tasks for " + (typesNames[type] || "Other") + ":",
+                        initialData: oldTasks[type],
+						edit: true,
+						arrange: true,
                     }));
                     inputGroup.find("input[type=hidden]").on('input', function () {
                         let groupTasks = JSON.parse(this.value || "[]");
