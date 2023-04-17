@@ -15,9 +15,18 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 			<i class="fa fa-download"></i>&nbsp;Download as excel
 		</a>
 		<?php if ($showEditButton ?? false): ?>
+		<?php if ($donation["isCompleted"]): ?>
+		<a href="/donation/<?=$donation["id"]?>/uncomplete" class="btn btn-outline-warning col-4 col-sm-auto complete mb-2 mr-2">
+			<i class="fa fa-check"></i>&nbsp;Unmark as done
+		</a>
+		<?php else: ?>
+		<a href="/donation/<?=$donation["id"]?>/complete" class="btn btn-outline-warning col-4 col-sm-auto complete mb-2 mr-2">
+			<i class="fa fa-check"></i>&nbsp;Unmark as done
+		</a>
 		<a href="/donation/<?=$donation["id"]?>/edit" class="btn btn-outline-primary col-4 col-sm-auto edit mb-2 mr-2">
 			<i class="fa fa-edit"></i>&nbsp;Edit
 		</a>
+		<? endif ?>
 		<? endif ?>
 	</div>
 	<?php if (isset($donation["location"]) && $donation["location"] != ''): ?>
@@ -39,6 +48,38 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 	<div class="col-12">
 		<b>Total items:</b> <?=count($donation["itemsType"])?>
 	</div>
+	<?php if ($donation["isCompleted"]): ?>
+	<div class="col-12">
+		<b>Progress: </b>100%
+		<div class="progress m-2" style="height: 5px;">
+			<div class="progress-bar progress-bar-striped bg-success" role="progressbar" id="progressBar" style="width: 100%;" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
+		</div>
+	</div>
+	<div class="col-12">
+		<h4>Donated Items</h4>
+		<?php
+		$grouped = [];
+		foreach($donation["itemsType"] as $item => $type) {
+			if (is_array($grouped[$type] ?? null)) {
+				$grouped[$type][] = $item;
+			} else {
+				$grouped[$type] = [$item];
+			}
+		}
+		if (count($donation["itemsType"]) !== 0):
+		foreach($grouped as $type => $items): ?>
+		<h5><?php $this->insert('productIcon', ['type' => $type, 'color' => 'black']) ?><?=\WEEEOpen\Tarallo\SSRv1\FeaturePrinter::FEATURES_ENUM['type'][$type]?> - <?=count($items)?></h4>
+		<ul>
+			<?php foreach($items as $item): ?>
+				<li><a href="/item/<?=$item?>"><?=$item?></a></li>
+			<? endforeach ?>
+		</ul>
+		<? endforeach ?>
+		<?php else: ?>
+		<i>No items in donation</i>
+		<? endif ?>
+	</div>
+	<?php else: ?>
 	<div class="col-12">
 		<b>Progress: </b><span id="progressText"><?=$donation["progress"]?></span>%
 		<div class="progress m-2" style="height: 5px;">
@@ -93,5 +134,6 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 			</table>
 		</div>
 	<? endforeach ?>
+	<? endif ?>
 </div>
-<script src="/static/donationTasks.js"></script>
+<?php if ($donation["isCompleted"]) : ?> <script src="/static/donationTasks.js"></script> <? endif ?>

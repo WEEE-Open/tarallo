@@ -262,29 +262,6 @@ GROUP BY d.Id");
 
 				$donation["isCompleted"] = boolval($donation["isCompleted"]);
 
-				$statement = $this->getPDO()->prepare("SELECT Title, ItemType, `Index` FROM DonationTasks WHERE DonationId = :id ORDER BY `Index` ASC");
-				$statement->bindParam(':id',$id);
-
-				$success = $statement->execute();
-				$tasksList = $statement->fetchAll(\PDO::FETCH_ASSOC);
-
-				$tasks = array();
-				foreach($tasksList as $t) {
-					if ($t["Index"] === -1) {
-						$tasks[$t["ItemType"]] = $t["Title"];
-					} else {
-						if (!is_bool($tasks[$t["ItemType"]] ?? '')) {
-							if (isset($tasks[$t["ItemType"]])) {
-								$tasks[$t["ItemType"]][] = $t["Title"];
-							} else {
-								$tasks[$t["ItemType"]] = array($t["Title"]);
-							}
-						}
-					}
-				}
-
-				$donation["tasks"] = $tasks;
-
 				$statement = $this->getPDO()->prepare("SELECT Code FROM DonationItem WHERE Donation = :id");
 				$statement->bindParam(':id',$id);
 
@@ -298,36 +275,61 @@ GROUP BY d.Id");
 
 				$donation["itemsType"] = $this->database->itemDAO()->getTypesForItemCodes($itemsList);
 
-				$statement = $this->getPDO()->prepare("SELECT ItemCode, `Index`, Completed FROM DonationTasksProgress d LEFT JOIN DonationTasks dt ON dt.DonationId = d.DonationId AND d.TaskId = dt.Id WHERE d.DonationId = :id ORDER BY `Index` ASC");
-				$statement->bindParam(':id',$id);
-
-				$success = $statement->execute();
-				$tasksProgressList = $statement->fetchAll(\PDO::FETCH_ASSOC);
-
-				$tasksProgress = [];
-				$countCompletedTasks = 0;
-
-				foreach($tasksProgressList as $task) {
-					if (boolval($task["Completed"])) $countCompletedTasks++;
-					if ($task["Index"] === -1) {
-						$tasksProgress[$task["ItemCode"]] = boolval($task["Completed"]);
-					} else {
-						if (!is_bool($tasksProgress[$task["ItemCode"]] ?? '')) { // Prevents a possible bug
-							if (is_array($tasksProgress[$task["ItemCode"]] ?? '')) {
-								array_push($tasksProgress[$task["ItemCode"]], boolval($task["Completed"]));
-							} else {
-								$tasksProgress[$task["ItemCode"]] = [boolval($task["Completed"])];
+				if (!$donation["isCompleted"]) {
+					$statement = $this->getPDO()->prepare("SELECT Title, ItemType, `Index` FROM DonationTasks WHERE DonationId = :id ORDER BY `Index` ASC");
+					$statement->bindParam(':id',$id);
+	
+					$success = $statement->execute();
+					$tasksList = $statement->fetchAll(\PDO::FETCH_ASSOC);
+	
+					$tasks = array();
+					foreach($tasksList as $t) {
+						if ($t["Index"] === -1) {
+							$tasks[$t["ItemType"]] = $t["Title"];
+						} else {
+							if (!is_bool($tasks[$t["ItemType"]] ?? '')) {
+								if (isset($tasks[$t["ItemType"]])) {
+									$tasks[$t["ItemType"]][] = $t["Title"];
+								} else {
+									$tasks[$t["ItemType"]] = array($t["Title"]);
+								}
 							}
 						}
 					}
-				}
+	
+					$donation["tasks"] = $tasks;
 
-				$donation["tasksProgress"] = $tasksProgress;
-				$donation["totalTasks"] = count($tasksProgressList);
-				if ($donation["totalTasks"] === 0) {
-					$donation["progress"] = 0;
-				} else {
-					$donation["progress"] = round($countCompletedTasks/$donation["totalTasks"]*100, 0, PHP_ROUND_HALF_DOWN);
+					$statement = $this->getPDO()->prepare("SELECT ItemCode, `Index`, Completed FROM DonationTasksProgress d LEFT JOIN DonationTasks dt ON dt.DonationId = d.DonationId AND d.TaskId = dt.Id WHERE d.DonationId = :id ORDER BY `Index` ASC");
+					$statement->bindParam(':id',$id);
+
+					$success = $statement->execute();
+					$tasksProgressList = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+					$tasksProgress = [];
+					$countCompletedTasks = 0;
+
+					foreach($tasksProgressList as $task) {
+						if (boolval($task["Completed"])) $countCompletedTasks++;
+						if ($task["Index"] === -1) {
+							$tasksProgress[$task["ItemCode"]] = boolval($task["Completed"]);
+						} else {
+							if (!is_bool($tasksProgress[$task["ItemCode"]] ?? '')) { // Prevents a possible bug
+								if (is_array($tasksProgress[$task["ItemCode"]] ?? '')) {
+									array_push($tasksProgress[$task["ItemCode"]], boolval($task["Completed"]));
+								} else {
+									$tasksProgress[$task["ItemCode"]] = [boolval($task["Completed"])];
+								}
+							}
+						}
+					}
+
+					$donation["tasksProgress"] = $tasksProgress;
+					$donation["totalTasks"] = count($tasksProgressList);
+					if ($donation["totalTasks"] === 0) {
+						$donation["progress"] = 0;
+					} else {
+						$donation["progress"] = round($countCompletedTasks/$donation["totalTasks"]*100, 0, PHP_ROUND_HALF_DOWN);
+					}
 				}
 
 				return $donation;
@@ -349,8 +351,44 @@ GROUP BY d.Id");
 		}
 	}
 
+	public function completeDonation($id)
+	{
+		$statement = $this->getPDO()->prepare("UPDATE Donations SET IsCompleted=1 WHERE Id=:id");
+		try {
+			$statement->bindParam(':id', $id);
+			$success = $statement->execute();
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
+	public function uncompleteDonation($id)
+	{
+		$statement = $this->getPDO()->prepare("UPDATE Donations SET IsCompleted=0 WHERE Id=:id");
+		try {
+			$statement->bindParam(':id', $id);
+			$success = $statement->execute();
+		} finally {
+			$statement->closeCursor();
+		}
+	}
+
 	public function updateTasksProgress($id, $tasks)
 	{
+		$statement = $this->getPDO()->prepare("SELECT IsCompleted FROM Donations WHERE Id = :id");
+		try {
+			$parsedDId = intval($id);
+			$statement->bindParam(':id', $parsedDId);
+			$success = $statement->execute();
+			$donation = $statement->fetch(\PDO::FETCH_ASSOC);
+			if ($donation["IsCompleted"] === 1)
+			throw new \LogicException(
+				'Can\'t update a task in a completed donation'
+			);
+		} finally {
+			$statement->closeCursor();
+		}
+
 		foreach($tasks as $task => $progress) {
 			$statement = $this->getPDO()->prepare("UPDATE DonationTasksProgress dtp JOIN DonationTasks dt ON dtp.TaskId = dt.Id SET dtp.Completed = :completed WHERE dtp.DonationId = :dId AND dtp.ItemCode = :itemCode AND dt.`Index` = :index");
 			try {

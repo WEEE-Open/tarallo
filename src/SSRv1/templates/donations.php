@@ -60,9 +60,21 @@ $completed = [];
 				<?php endforeach ?>
 				</tbody>
 			</table>
+			<?php if(count($donations) === count($completed)): ?>
+				<i class="text-center d-block">No active donations</i>
+			<? endif ?>
 			<?php if(!empty($completed)): ?>
 				<table class="table table-borderless stats">
 					<caption>Completed donations</caption>
+					<thead class="thead-dark">
+					<tr>
+						<th scope="col">Name</th>
+						<th scope="col">Location</th>
+						<th scope="col">Date</th>
+						<th scope="col">Progress</th>
+						<th scope="col">Total Items</th>
+					</tr>
+					</thead>
 					<tbody>
 					<?php foreach ($completed as $donation) : ?>
 						<tr>

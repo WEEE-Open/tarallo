@@ -425,6 +425,54 @@ class Controller implements RequestHandlerInterface
 		return $handler->handle($request);
 	}
 
+	public static function completeDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		if ($id == -1) {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+
+		$db->donationsDAO()->completeDonation($id);
+		
+		return new RedirectResponse("/donation/$id", 303);
+		
+	}
+
+	public static function uncompleteDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		if ($id == -1) {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+
+		$db->donationsDAO()->uncompleteDonation($id);
+		
+		return new RedirectResponse("/donation/$id", 303);
+		
+	}
+
 	public static function editDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
 		/** @var Database $db */
@@ -452,6 +500,10 @@ class Controller implements RequestHandlerInterface
 				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
 
 			return $handler->handle($request);
+		}
+
+		if ($oldDonation["isCompleted"]) {
+			return new RedirectResponse("/donation/$id", 303);
 		}
 
 		$body = $request->getParsedBody();
