@@ -991,6 +991,41 @@ class Controller implements RequestHandlerInterface
 		return new JsonResponse($json);
 	}
 
+	public static function newDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		$body = $request->getParsedBody();
+		if ($body === null || count($body) === 0 || $body["ItemsList"] === null) {
+			$error = "Missing body"; 
+		} else {
+			$name = trim($body["Name"]);
+			if ($name !== '') {
+				$date = strtotime($body["Date"] ?? "");
+				if ($date === false) {
+					$date = null;
+				}
+				/** @var Database $db */
+				$db = $request->getAttribute('Database');
+				$itemsList = json_decode($body["ItemsList"]);
+				if ($itemsList === null || count($itemsList) == 0) {
+					$error = "Please input at least one item in the items list";
+				} else if ($db->itemDAO()->checkItemListAllExist($itemsList)) {
+					if ($body["Tasks"] === null || ($tasks = json_decode($body["Tasks"], true)) === null) {
+						$tasks = [];
+					}
+					$donationId = $db->donationsDAO()->newDonation($name, $body["Location"], $body["Notes"], $date, $itemsList, $tasks);
+					$newDonation = $db->donationsDAO()->getDonation($id);
+					return new JsonResponse($newDonation);
+				} else {
+					$error = "Some items in the list are not valid";
+				}
+			} else {
+				$error = "Please provide a name";
+			}
+		}
+		// if we are still here it means that there was an error
+		return throw new \LogicException($error);
+	}
+
 	public static function getDonation(ServerRequestInterface $request)
 	{
 		$parameters = $request->getAttribute('parameters');
@@ -1020,6 +1055,91 @@ class Controller implements RequestHandlerInterface
 		$db->donationsDAO()->updateTasksProgress($id, $payload);
 
 		return new EmptyResponse();
+	}
+
+	public static function completeDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		if ($id == -1) {
+			return new JsonResponse(ErrorResponse::fromMessage('Not found'), 404);
+		}
+
+		if ($db->donationsDAO()->completeDonation($id)) {
+			return new EmptyResponse();
+		} else {
+			return new JsonResponse(ErrorResponse::fromMessage('Not found'), 404);
+		}
+	}
+
+	public static function uncompleteDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		if ($id == -1) {
+			return new JsonResponse(ErrorResponse::fromMessage('Not found'), 404);
+		}
+
+		if ($db->donationsDAO()->uncompleteDonation($id)) {
+			return new EmptyResponse();
+		} else {
+			return new JsonResponse(ErrorResponse::fromMessage('Not found'), 404);
+		}
+	}
+
+	public static function downloadDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		$donation = $db->donationsDAO()->generateExcelSummary($id);
+
+		if ($donation === false) {
+			return new JsonResponse(ErrorResponse::fromMessage('Not found'), 404);
+		}
+
+		[$writer, $filename] = $donation;
+
+		http_response_code(200);
+		header('Content-disposition: attachment; filename="'. $filename . '"');
+		header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		header('Content-Transfer-Encoding: binary');
+		header('Cache-Control: must-revalidate');
+		header('Pragma: public');
+
+		$writer->writeToStdOut();
+
+		exit(0);
+	}
+
+	public static function deleteDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		if ($db->donationsDAO()->deleteDonation($id)) {
+			return new EmptyResponse();
+		} else {
+			return new JsonResponse(ErrorResponse::fromMessage('Not found'), 404);
+		}
 	}
 
 	/**

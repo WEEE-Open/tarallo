@@ -9,7 +9,7 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 <div class="row">
 	<div class="itembuttons primary row mx-0 mt-2 justify-content-end w-100">
 		<div class="row d-flex m-0 justify-content-between mr-auto">
-			<h2 class="col-8 p-0"><?=htmlspecialchars($donation["name"])?></h2>
+			<h2 class="col-8 p-0 text-nowrap"><?=htmlspecialchars($donation["name"])?></h2>
 		</div>
 		<a href="/donation/<?=$donation["id"]?>/download" class="btn btn-outline-primary col-4 col-sm-auto edit mb-2 mr-2" download>
 			<i class="fa fa-download"></i>&nbsp;Download as excel
