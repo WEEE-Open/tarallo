@@ -91,8 +91,17 @@ GROUP BY d.Id");
 		try {
 			$success = $statement->execute();
 			$donations = $statement->fetchAll(\PDO::FETCH_ASSOC);
-			foreach($donations as $d) {
-				$d["isCompleted"] = boolval($d["isCompleted"]);
+			for($i = 0; $i < count($donations); $i++) {
+				$donations[$i]["isCompleted"] = boolval($donations[$i]["isCompleted"]);
+				if ($donations[$i]["date"] ?? null !== null) {
+					$donations[$i]["date"] = date_format(date_create($donations[$i]["date"]),"Y/m/d");
+				} else {
+					unset($donations[$i]["date"]);
+				}
+				if ($donations[$i]["totalTasks"] !== 0)
+					$donations[$i]["progress"] = round($donations[$i]["completedTasks"] / $donations[$i]["totalTasks"]*100, 0, PHP_ROUND_HALF_DOWN);
+				else if($donations[$i]["isCompleted"]) $donations[$i]["progress"] = 100;
+				else $donations[$i]["progress"] = 0;
 			}
 			return $donations;
 		} finally {
@@ -263,6 +272,11 @@ GROUP BY d.Id");
 				$donation = $donation[0];
 
 				$donation["isCompleted"] = boolval($donation["isCompleted"]);
+				if ($donation["date"] ?? null !== null) {
+					$donation["date"] = date_format(date_create($donation["date"]),"Y/m/d");
+				} else {
+					unset($donation["date"]);
+				}
 
 				$statement = $this->getPDO()->prepare("SELECT Code FROM DonationItem WHERE Donation = :id");
 				$statement->bindParam(':id',$id);
@@ -332,6 +346,8 @@ GROUP BY d.Id");
 					} else {
 						$donation["progress"] = round($countCompletedTasks/$donation["totalTasks"]*100, 0, PHP_ROUND_HALF_DOWN);
 					}
+				} else {
+					$donation["progress"] = 100;
 				}
 
 				return $donation;
@@ -532,5 +548,47 @@ GROUP BY d.Id");
 			$writer,
 			"donation summary " . $donation["name"] . ".xlsx"
 		];
+	}
+
+	public function getDonationsForItem($itemWithCode)
+	{
+		$output = [];
+		$statement = $this->getPDO()->prepare("SELECT Donation, Name FROM Donations INNER JOIN DonationItem ON Donations.Id = DonationItem.Donation WHERE DonationItem.Code = :item AND IsCompleted = 0");
+		try {
+			$itemCode =  $itemWithCode->getCode();
+			$statement->bindParam(':item', $itemCode);
+			$success = $statement->execute();
+			$donations = $statement->fetchAll(\PDO::FETCH_ASSOC);
+			foreach($donations as $d) {
+				$statement = $this->getPDO()->prepare("SELECT Title, `Index`, Completed FROM DonationTasks DT INNER JOIN DonationTasksProgress DTP ON DT.Id = DTP.TaskId WHERE DT.DonationId = :id AND DTP.ItemCode = :item ORDER BY `Index` ASC");
+				$statement->bindParam(':id', $d["Donation"]);
+				$statement->bindParam(':item', $itemCode);
+				$success = $statement->execute();
+				$tasks = $statement->fetchAll(\PDO::FETCH_ASSOC);
+				$output["".$d["Donation"]] = ["id" => $d["Donation"], "name" => $d["Name"]];
+				if (count($tasks) === 1 && $tasks[0]["Index"] === -1) {
+					$output["".$d["Donation"]]["tasksName"] = "Done";
+					$output["".$d["Donation"]]["tasksValue"] = boolval($tasks[0]["Completed"]);
+				} else {
+					$output["".$d["Donation"]]["tasksName"] = [];
+					$output["".$d["Donation"]]["tasksValue"] = [];
+					foreach($tasks as $t) {
+						$output["".$d["Donation"]]["tasksName"][] = $t["Title"];
+						$output["".$d["Donation"]]["tasksValue"][] = boolval($t["Completed"]);
+					}
+				}
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+		return $output;
+	}
+
+	public function addDonationsToItem($itemWithCode)
+	{
+		$donations = $this->getDonationsForItem($itemWithCode);
+		foreach($donations as $id => $donation) {
+			$itemWithCode->addDonation($id, $donation);
+		}
 	}
 }

@@ -495,6 +495,7 @@ EOQ
 		$this->database->treeDAO()->getPathTo($head);
 		$this->database->featureDAO()->getFeaturesAll($flat);
 		$this->database->productDAO()->getProductsAll($flat);
+		$this->database->donationsDAO()->addDonationsToItem($head);
 		$this->getExtraData($head);
 
 		return $head;

@@ -34,9 +34,9 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 		<b>Location:</b> <?=htmlspecialchars($donation["location"])?>
 	</div>
 	<? endif ?>
-	<?php if (isset($donation["date"]) && $donation["date"] != ''): ?>
+	<?php if (isset($donation["date"])): ?>
 	<div class="col-12">
-		<b>Date:</b> <?=date_format(date_create($donation["date"]),"Y/m/d")?>
+		<b>Date:</b> <?=$donation["date"]?>
 	</div>
 	<? endif ?>
 	<?php if (isset($donation["notes"]) && $donation["notes"] != ''): ?>
@@ -113,7 +113,6 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 						<?php 
 						$allTrue = true;
 						if (is_array($donation["tasksProgress"][$item])): ?>
-
 							<?php foreach($donation["tasksProgress"][$item] as $i => $checked): ?>
 								<?php $allTrue = $checked && $allTrue; ?>
 								<td><div class="form-check">
@@ -136,4 +135,4 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 	<? endforeach ?>
 	<? endif ?>
 </div>
-<?php if ($donation["isCompleted"]) : ?> <script src="/static/donationTasks.js"></script> <? endif ?>
+<?php if (!$donation["isCompleted"]) : ?> <script src="/static/donationTasks.js"></script> <? endif ?>

@@ -13,13 +13,15 @@ class Item implements
 	ItemWithFeatures,
 	ItemWithProduct,
 	ItemWithContent,
-	ItemWithLocation
+	ItemWithLocation,
+	ItemWithDonations
 {
 	use ItemTraitOptionalCode;
 	use ItemTraitContent;
 	use ItemTraitLocation;
 	use ItemTraitFeatures;
 	use ItemTraitProduct;
+	use ItemTraitDonations;
 
 	protected $token = null;
 	protected $deletedAt = null;
@@ -93,6 +95,8 @@ class Item implements
 		if ($this->lostAt instanceof \DateTime) {
 			$array['lost_at'] = $this->lostAt->format(DATE_ISO8601);
 		}
+
+		$array['donations'] = $this->donations;
 
 		return $array;
 	}

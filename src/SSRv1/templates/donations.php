@@ -42,18 +42,11 @@ $completed = [];
 						<td><a href="/donation/<?=$donation["id"]?>"><?=$donation["name"]?></a></td>
 						<td><?=$donation["location"] ?? "" ?></td>
 						<td><?=$donation["date"] ?? ""?></td>
-						<?php
-							if ($donation["totalTasks"] === 0) {
-								$progress = 0;
-							} else {
-								$progress = round($donation["completedTasks"]/$donation["totalTasks"]*100, 0, PHP_ROUND_HALF_DOWN);
-							}
-						?>
 						<td style="display: grid; grid-template-columns: 1fr auto; align-items: center;">
 							<div class="progress ml-2 mr-2" style="height: 5px;">
-								<div class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: <?=$progress?>%;" aria-valuenow="<?=$progress?>" aria-valuemin="0" aria-valuemax="100"></div>
+								<div class="progress-bar progress-bar-striped bg-info" role="progressbar" style="width: <?=$donation["progress"]?>%;" aria-valuenow="<?=$donation["progress"]?>" aria-valuemin="0" aria-valuemax="100"></div>
 							</div>
-							<?=$progress?>%
+							<?=$donation["progress"]?>%
 						</td>
 						<td><?=$donation["totalItems"] ?? ""?></td>
 					</tr>

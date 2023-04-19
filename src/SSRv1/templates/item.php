@@ -122,6 +122,46 @@ endif; ?>
 		<div class="inline-alert w-auto alert-serious" role="alert"><i class="fa fa-archive"></i>&nbsp;This item has been lost on <?= $lostAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 	<?php endif; ?>
 
+	<?php if ($item->hasDonations() && !$editing && !$adding && !$target): ?>
+	<div class="float-right" style="max-width: 400px;">
+		<?php foreach($item->getDonations() as $donation): ?>
+			<table class="table table-bordered">
+				<tr>
+					<th colspan="2" class="text-center"><?=htmlspecialchars($donation["name"])?></th>
+				</tr>
+				<?php if(is_array($donation["tasksName"])): ?>
+					<?php $allTrue = true;
+					$i = 0;
+					foreach(array_combine($donation["tasksName"], $donation["tasksValue"]) as $taskName => $checked): ?>
+						<tr>
+							<td><?=htmlspecialchars($taskName)?></td>
+							<td><div class="form-check">
+								<input class="form-check-input" type="checkbox" <?php if ($checked) echo 'checked'; ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item->getCode()?>:<?=$i?>">
+							</div></td>
+						</tr>
+						<?php $allTrue = $checked && $allTrue;
+						$i++; ?>
+					<? endforeach ?>
+					<tr>
+						<td>Done</td>
+						<td><div class="form-check">
+							<input class="form-check-input" type="checkbox" <?php if ($allTrue) echo 'checked'; ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item->getCode()?>:all">
+						</div></td>
+					</tr>
+				<?php else: ?>
+					<tr>
+						<td><?=htmlspecialchars($donation["tasksName"])?></td>
+						<td><div class="form-check">
+							<input class="form-check-input" type="checkbox" <?php if ($donation["tasksValue"]) echo 'checked'; ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item->getCode()?>:-1">
+						</div></td>
+					</tr>
+				<? endif ?>
+			</table>
+		<? endforeach ?>
+	</div>
+	<script src="/static/donationTasks.js"></script>
+	<? endif ?>
+
 	<nav class="itembuttons primary row mx-0 mt-2">
 		<?php if ($editing && $target) : ?>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
