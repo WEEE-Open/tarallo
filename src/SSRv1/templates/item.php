@@ -73,7 +73,7 @@ endif; ?>
 <article class="container item<?=$recursion ? '' : ' root'?><?=$working?><?=$editing && $target ? ' head editing' : ''?><?= $deletedAt === null ? '' : ' deleted' ?>"
 		data-code="<?=$code_escaped?>">
 	<header class="row align-items-center">
-		<?php $this->insert('productIcon', ['type' => $features['type']->value]) ?>
+		<?php $this->insert('productIcon', ['type' => $features['type']->value ?? null]) ?>
 		<h4 class="p-2 col m-0" id="code-<?=$code_escaped?>"><?=$code_escaped?></h4>
 		<nav class="p-2 m-0 ml-auto itembuttons inheader">
 			<?php if ($editing) : ?>
@@ -127,7 +127,7 @@ endif; ?>
 		<?php foreach($item->getDonations() as $donation): ?>
 			<table class="table table-bordered">
 				<tr>
-					<th colspan="2" class="text-center"><?=htmlspecialchars($donation["name"])?></th>
+					<th colspan="2" class="text-center"><a href="/donation/<?=$donation["id"]?>"><?=htmlspecialchars($donation["name"])?></a></th>
 				</tr>
 				<?php if(is_array($donation["tasksName"])): ?>
 					<?php $allTrue = true;

@@ -699,7 +699,5 @@ WHERE Item.Code IN ($itemsList);"
 		} finally {
 			$statement->closeCursor();
 		}
-
-		return $output;
 	}
 }

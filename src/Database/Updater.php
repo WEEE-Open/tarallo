@@ -781,9 +781,8 @@ CREATE TRIGGER ItemBMVUpdate
     KEY `DonationId` (`DonationId`),
     KEY `TaskId` (`TaskId`),
     KEY `ItemCode` (`ItemCode`),
-    CONSTRAINT `DonationTasksProgress_ibfk_4` FOREIGN KEY (`DonationId`) REFERENCES `Donations` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `DonationTasksProgress_ibfk_5` FOREIGN KEY (`TaskId`) REFERENCES `DonationTasks` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT `DonationTasksProgress_ibfk_6` FOREIGN KEY (`ItemCode`) REFERENCES `DonationItem` (`Code`) ON DELETE CASCADE ON UPDATE CASCADE
+    CONSTRAINT `DonationTasksProgress_ibfk_6` FOREIGN KEY (`DonationId`, `ItemCode`) REFERENCES `DonationItem` (`Donation`, `Code`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;'
