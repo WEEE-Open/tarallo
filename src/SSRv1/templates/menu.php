@@ -94,5 +94,4 @@ $hereSr = function ($page, $current) {
 	<div class="nav-item alert alert-danger col-12 my-2 d-none" role="alert">Error</div>
 	<div class="nav-item alert alert-warning col-12 my-2 d-none" role="alert">Fail</div>
 </nav>
-</script>
 <script>$('.basicAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300}});</script>
