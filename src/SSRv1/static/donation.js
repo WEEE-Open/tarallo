@@ -320,7 +320,6 @@
                         let groupTasks = JSON.parse(this.value || "[]");
                         let allTasks = JSON.parse(allTasksInput.value || "{}");
                         allTasks[type || 'other'] = groupTasks;
-						console.log("pog", type, allTasks);
                         allTasksInput.value = JSON.stringify(allTasks);
                     })
                     tasksContainer.append(inputGroup);
