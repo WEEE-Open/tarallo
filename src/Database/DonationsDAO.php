@@ -32,6 +32,7 @@ class DonationsDAO extends DAO
 			$types = array_unique(array_values($itemsTypes));
 
 			foreach($types as $type) {
+				$type = $type ?? 'other';
 				$tasks_list = $tasks[$type] ?? null;
 				if (is_array($tasks_list) && count($tasks_list) > 0) {
 					$i = 0;
@@ -147,6 +148,7 @@ GROUP BY d.Id");
 
 			// add tasks for types that were not in the donation before
 			foreach(array_unique(array_values($added_items_types)) as $type) {
+				$type = $type ?? 'other';
 				if (!isset($donation["tasks"][$type])) {
 					$tasks_list = $tasks[$type] ?? null;
 					if (is_array($tasks_list) && count($tasks_list) > 0) {
@@ -168,6 +170,7 @@ GROUP BY d.Id");
 			
 			// modify or add tasks for the types that already existed
 			foreach($oldDonation["tasks"] as $type => $oldTasks) {
+				$type = $type ?? 'other';
 				$newTasks = $tasks[$type] ?? null;
 				if (is_array($oldTasks)) {
 					if (is_array($newTasks) && count($newTasks) > 0) {

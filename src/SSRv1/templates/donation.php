@@ -21,7 +21,7 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 		</a>
 		<?php else: ?>
 		<a href="/donation/<?=$donation["id"]?>/complete" class="btn btn-outline-warning col-4 col-sm-auto complete mb-2 mr-2">
-			<i class="fa fa-check"></i>&nbsp;Unmark as done
+			<i class="fa fa-check"></i>&nbsp;Mark as done
 		</a>
 		<a href="/donation/<?=$donation["id"]?>/edit" class="btn btn-outline-primary col-4 col-sm-auto edit mb-2 mr-2">
 			<i class="fa fa-edit"></i>&nbsp;Edit
@@ -68,7 +68,7 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 		}
 		if (count($donation["itemsType"]) !== 0):
 		foreach($grouped as $type => $items): ?>
-		<h5><?php $this->insert('productIcon', ['type' => $type, 'color' => 'black']) ?><?=\WEEEOpen\Tarallo\SSRv1\FeaturePrinter::FEATURES_ENUM['type'][$type]?> - <?=count($items)?></h4>
+		<h5><?php $this->insert('productIcon', ['type' => $type, 'color' => 'black']) ?><?=\WEEEOpen\Tarallo\SSRv1\FeaturePrinter::FEATURES_ENUM['type'][$type] ?? 'Other'?> - <?=count($items)?></h4>
 		<ul>
 			<?php foreach($items as $item): ?>
 				<li><a href="/item/<?=$item?>"><?=$item?></a></li>
@@ -88,10 +88,11 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 		<input type="hidden" id="totalTasks" value="<?=$donation["totalTasks"]?>">
 	</div>
 	<?php foreach($donation["tasks"] as $type => $tasks): ?>
-		<?php $itemsOfType = array_filter($donation["itemsType"], function ($el) use ($type) {return $el === $type;}); 
+		<?php $type = $type ?? 'other';
+		$itemsOfType = array_filter($donation["itemsType"], function ($el) use ($type) {return ($el ?? 'other') === $type;}); 
 		if (count($itemsOfType) === 0) continue; ?>
 		<div class="col-12">
-			<h4><?php $this->insert('productIcon', ['type' => $type, 'color' => 'black']) ?><?=\WEEEOpen\Tarallo\SSRv1\FeaturePrinter::FEATURES_ENUM['type'][$type]?> - <?=count($itemsOfType)?></h4>
+			<h4><?php $this->insert('productIcon', ['type' => $type, 'color' => 'black']) ?><?=\WEEEOpen\Tarallo\SSRv1\FeaturePrinter::FEATURES_ENUM['type'][$type] ?? 'Other' ?> - <?=count($itemsOfType)?></h4>
 			<table class="table table-borderless stats">
 				<thead class="thead-dark">
 				<tr>

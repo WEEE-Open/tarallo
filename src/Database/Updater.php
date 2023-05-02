@@ -793,7 +793,7 @@ CREATE TRIGGER `DonationItem_ai` AFTER INSERT ON `DonationItem` FOR EACH ROW
 BEGIN
 	DECLARE TaskId BIGINT(20) UNSIGNED;
 	DECLARE done INT DEFAULT FALSE;
-	DECLARE cur CURSOR FOR SELECT Id FROM DonationTasks WHERE DonationId = NEW.Donation AND ItemType = (SELECT IFNULL(ItemFeature.ValueEnum, ProductFeature.ValueEnum)
+	DECLARE cur CURSOR FOR SELECT Id FROM DonationTasks WHERE DonationId = NEW.Donation AND ItemType = (SELECT IFNULL(IFNULL(ItemFeature.ValueEnum, ProductFeature.ValueEnum), 'other')
 		FROM Item
 		LEFT JOIN ItemFeature ON Item.Code = ItemFeature.Code AND ItemFeature.Feature = 'type'
 		LEFT JOIN ProductFeature ON Item.Brand = ProductFeature.Brand AND Item.Model = ProductFeature.Model AND Item.Variant = ProductFeature.Variant AND ProductFeature.Feature = 'type'
@@ -824,7 +824,7 @@ BEGIN
 		LEFT JOIN Item ON DonationItem.Code = Item.Code
 		LEFT JOIN ItemFeature ON DonationItem.Code = ItemFeature.Code AND ItemFeature.Feature = 'type'
 		LEFT JOIN ProductFeature ON Item.Brand = ProductFeature.Brand AND Item.Model = ProductFeature.Model AND Item.Variant = ProductFeature.Variant AND ProductFeature.Feature = 'type'
-		WHERE DonationItem.Donation = NEW.DonationId AND IFNULL(ItemFeature.ValueEnum, ProductFeature.ValueEnum) = NEW.ItemType;
+		WHERE DonationItem.Donation = NEW.DonationId AND IFNULL(IFNULL(ItemFeature.ValueEnum, ProductFeature.ValueEnum), 'other') = NEW.ItemType;
 	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 	
 	OPEN cur;

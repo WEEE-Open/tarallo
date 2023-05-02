@@ -505,7 +505,17 @@ class Controller implements RequestHandlerInterface
 
 		$body = $request->getParsedBody();
 		if ($body === null || count($body) === 0 || $body["ItemsList"] === null) {
-			$templateParameters = ['showDeleteButton' => true, 'name' => $oldDonation["name"], 'location' => $oldDonation["location"] ?? null, 'itemsList' => json_encode(array_keys($oldDonation["itemsType"] ?? [])), 'tasks' => json_encode(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);}))];
+			$templateParameters = [
+				'showDeleteButton' => true, 
+				'name' => $oldDonation["name"], 
+				'location' => $oldDonation["location"] ?? null, 
+				'itemsList' => json_encode(array_keys($oldDonation["itemsType"] ?? []))
+			];
+			if (count(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);})) > 0) {
+				$templateParameters['tasks'] = json_encode(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);}));
+			} else {
+				$templateParameters['tasks'] = '{}';
+			}
 			if (isset($oldDonation["date"]))
 				$templateParameters['date'] = date_format(date_create($oldDonation["date"]),"Y/m/d");
 			$request = $request->withAttribute('Template', 'newDonation')
@@ -533,7 +543,18 @@ class Controller implements RequestHandlerInterface
 				$error = "Please provide a name";
 				$name = null;
 			}
-			$templateParameters = ['showDeleteButton' => true, 'error' => $error, 'name' => $name ?? $oldDonation["name"], 'location' => $body["Location"] ?? $oldDonation["location"] ?? null, 'itemsList' => $body["ItemsList"] ?? json_encode(array_keys($oldDonation["itemsType"] ?? [])), 'tasks' => $body["Tasks"] ?? json_encode(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);}))];
+			$templateParameters = [
+				'showDeleteButton' => true, 
+				'error' => $error, 
+				'name' => $name ?? $oldDonation["name"], 
+				'location' => $body["Location"] ?? $oldDonation["location"] ?? null, 
+				'itemsList' => $body["ItemsList"] ?? json_encode(array_keys($oldDonation["itemsType"] ?? []))
+			];
+			if (count(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);})) > 0) {
+				$templateParameters['tasks'] = $body["Tasks"] ?? json_encode(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);}));
+			} else {
+				$templateParameters['tasks'] = $body["Tasks"] ?? '{}';
+			}
 			if (isset($body["Date"]))
 				$templateParameters['date'] = $body["Date"];
 			else if (isset($oldDonation["date"]))

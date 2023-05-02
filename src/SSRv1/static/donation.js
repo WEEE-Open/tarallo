@@ -294,10 +294,10 @@
 
             let modifiedTasksCount = {};
             deleted.forEach(item => {
-                modifiedTasksCount[typesCache[item]] = (modifiedTasksCount[typesCache[item]] || 0) - 1;
+                modifiedTasksCount[typesCache[item] || 'other'] = (modifiedTasksCount[typesCache[item] || 'other'] || 0) - 1;
             });
             added.forEach(item => {
-                modifiedTasksCount[typesCache[item]] = (modifiedTasksCount[typesCache[item]] || 0) + 1;
+                modifiedTasksCount[typesCache[item] || 'other'] = (modifiedTasksCount[typesCache[item] || 'other'] || 0) + 1;
             });
 
             Object.entries(modifiedTasksCount).forEach(([type, count]) => {
@@ -319,7 +319,8 @@
                     inputGroup.find("input[type=hidden]").on('input', function () {
                         let groupTasks = JSON.parse(this.value || "[]");
                         let allTasks = JSON.parse(allTasksInput.value || "{}");
-                        allTasks[type] = groupTasks;
+                        allTasks[type || 'other'] = groupTasks;
+						console.log("pog", type, allTasks);
                         allTasksInput.value = JSON.stringify(allTasks);
                     })
                     tasksContainer.append(inputGroup);
