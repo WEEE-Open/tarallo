@@ -455,7 +455,7 @@ GROUP BY d.Id");
 		$writer = new XLSXWriter();
 		$writer->setAuthor('Tarallo'); 
 		foreach(array_unique(array_values($donation["itemsType"])) as $type) { // Good luck to anyone that will have to debug/modify this code
-			$displayType = FeaturePrinter::FEATURES_ENUM['type'][$type];
+			$displayType = FeaturePrinter::FEATURES_ENUM['type'][$type] ?? 'Other';
 			$itemsOfType = array_filter($donation["itemsType"], function ($it) use ($type) {return $it === $type;});
 			$rootProperties = [];
 			$groupedPropertiesForSubItems = [];
