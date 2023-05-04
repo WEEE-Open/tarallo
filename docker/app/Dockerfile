@@ -58,3 +58,6 @@ RUN if [ "$DEVELOPMENT" = "true" -a "$XDEBUG" = "true" -a "$PROFILER" = "true" ]
         then mkdir /xdebug && echo 'xdebug.mode=debug,profile' >> /usr/local/etc/php/conf.d/xdebug.ini; \
         else echo 'xdebug.mode=debug' >> /usr/local/etc/php/conf.d/xdebug.ini; \
     fi
+
+# Add git folder if exists, used for the credits page to display the current commit version
+COPY .gi[t]/ ./.git/

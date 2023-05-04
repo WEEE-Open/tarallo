@@ -1423,4 +1423,29 @@ class Controller implements RequestHandlerInterface
 
 		return $handler->handle($request);
 	}
+
+	public static function infoCredits(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		$headFileContents = @file_get_contents('../.git/HEAD');
+		if ($headFileContents !== false) {
+			if (preg_match('/^[a-f0-9]{40}$/i', trim($headFileContents))) {
+				$commitSha = trim($headFileContents);
+			} else {
+				$ref = trim(substr($headFileContents, 5));
+				$commitSha = @file_get_contents("../.git/$ref");
+				if ($commitSha === false) unset($commitSha);
+			}
+		}
+		//var_dump(scandir('../.git'));
+		$request = $request
+			->withAttribute('Template', 'info::credits')
+			->withAttribute(
+				'TemplateParameters',
+				[
+					'commit' => $commitSha ?? null,
+				]
+			);
+
+		return $handler->handle($request);
+	}
 }

@@ -45,6 +45,7 @@ $hereSr = function ($page, $current) {
 				<div class="dropdown-menu" aria-labelledby="infoDropdown">
 					<a class="dropdown-item <?= $hereClass('info locations', $currentPage) ?>" href="/info/locations">Locations<?= $hereSr('info locations', $currentPage) ?></a>
 					<a class="dropdown-item <?= $hereClass('info todo', $currentPage) ?>" href="/info/todo">TODO<?= $hereSr('info todo', $currentPage) ?></a>
+					<a class="dropdown-item <?= $hereClass('info credits', $currentPage) ?>" href="/info/credits">Credits<?= $hereSr('info credits', $currentPage) ?></a>
 				</div>
 			</li>
 			<li class="nav-item">
