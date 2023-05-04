@@ -249,35 +249,31 @@ WHERE DeletedAt IS NULL AND $filter";
 
 	public function sortByCode(int $searchId)
 	{
-		$query = /** @lang MySQL */
-			"SELECT `Item` FROM SearchResult WHERE Search = ? ORDER BY CHAR_LENGTH(`Item`) DESC, `Item` DESC;";
+		$query = /** @lang MySQL */"
+			UPDATE SearchResult
+			INNER JOIN (
+			    SELECT 
+			        `Item`,
+			        ROW_NUMBER() OVER(ORDER BY CHAR_LENGTH(`Item`) DESC, `Item` DESC) AS rn
+			    FROM SearchResult
+			    WHERE `Search` = ?
+			) AS ordered ON SearchResult.`Item` = ordered.`Item` 
+			SET SearchResult.`Order` = ordered.`rn`
+			WHERE SearchResult.`Search` = ?
+";
 		$sortedStatement = $this->getPDO()->prepare($query);
 
 		try {
-			$result = $sortedStatement->execute([$searchId]);
+			$result = $sortedStatement->execute([$searchId, $searchId]);
 			assert($result !== false, 'sorting with codes');
-
-			$sorted = $sortedStatement->fetchAll(\PDO::FETCH_ASSOC);
 		} finally {
 			$sortedStatement->closeCursor();
-		}
-
-		if (!isset($sorted)) {
-			throw new \LogicException('Lost sorted items (by code) along the way somehow');
-		}
-		if (count($sorted) === 0) {
-			return;
-		}
-
-		$i = 0;
-		foreach ($sorted as $result) {
-			$this->setItemOrder($searchId, $result['Item'], $i);
-			$i++;
 		}
 	}
 
 	public function sort(Search $search, int $searchId)
 	{
+		$pdo = $this->getPDO();
 		$sorts = $search->getFiltersByType("sort");
 		if (empty($sorts)) {
 			$this->sortByCode($searchId);
@@ -288,90 +284,31 @@ WHERE DeletedAt IS NULL AND $filter";
 		//TODO: Handle multisort
 		$firstSort = $sorts[0];
 
-		//throw new \Exception(print_r($search->sorts, true));
 		$featureName = $firstSort["feature"];
 		$direction = $firstSort["direction"] === '+' ? 'ASC' : 'DESC';
 		$column = FeatureDAO::getColumn(BaseFeature::getType($featureName));
 
-		self::unsort($searchId);
+		$query = "
+			UPDATE SearchResult
+			INNER JOIN (
+			    SELECT
+			        `Code`,
+			        ROW_NUMBER() OVER(ORDER BY ISNULL(`$column`), `$column` $direction, CHAR_LENGTH(`Code`) DESC, `Code` DESC) AS rn
+			    FROM ProductItemFeatureUnified
+			    WHERE
+			        `Code` IN (SELECT `Item` FROM SearchResult WHERE `Search` = ?)
+			        AND `Feature` = ?
+			) AS pifuO ON SearchResult.`Item` = pifuO.`Code`
+			SET SearchResult.`Order` = pifuO.`rn`
+			WHERE SearchResult.`Search` = ?
+			";
 
-		$miniquery = /** @lang MySQL */ <<<EOQ
-SELECT DISTINCT `Item` AS `Code`
-FROM SearchResult
-LEFT JOIN (
-	SELECT `Code`, $column
-	FROM ProductItemFeatureUnified
-	WHERE Feature = ?
-) AS features ON `Item` = features.`Code`
-WHERE Search = ?
-ORDER BY ISNULL($column), $column $direction, CHAR_LENGTH(`Code`) DESC, `Code` DESC;
-EOQ;
-
-		$sortedStatement = $this->getPDO()->prepare($miniquery);
+		$stmt = $pdo->prepare($query);
 		try {
-			$result = $sortedStatement->execute([$featureName, $searchId]);
-			assert($result !== false, 'sorting results');
-
-			$sorted = $sortedStatement->fetchAll(\PDO::FETCH_ASSOC);
+			$result = $stmt->execute([$searchId, $featureName, $searchId]);
+			assert($result !== false, 'sort failed');
 		} finally {
-			$sortedStatement->closeCursor();
-		}
-
-		if (!isset($sorted)) {
-			throw new \LogicException('Lost sorted items along the way somehow');
-		}
-		if (count($sorted) === 0) {
-			return;
-		}
-
-		$i = 0;
-		foreach ($sorted as $result) {
-			$this->setItemOrder($searchId, $result['Code'], $i);
-			$i++;
-		}
-	}
-
-	private $setItemOrderStatement = null;
-
-	/**
-	 * Set item position in the results table.
-	 *
-	 * @param int $searchId Search ID
-	 * @param string $code Item code
-	 * @param int $position Position in the results
-	 */
-	private function setItemOrder(int $searchId, string $code, int $position)
-	{
-		if ($this->setItemOrderStatement === null) {
-			$this->setItemOrderStatement = $this->getPDO()
-				->prepare('UPDATE SearchResult SET `Order` = :pos WHERE Search = :sea AND Item = :cod');
-		}
-
-		try {
-			$this->setItemOrderStatement->bindValue(':sea', $searchId, \PDO::PARAM_INT);
-			$this->setItemOrderStatement->bindValue(':pos', $position, \PDO::PARAM_INT);
-			$this->setItemOrderStatement->bindValue(':cod', $code, \PDO::PARAM_STR);
-			$result = $this->setItemOrderStatement->execute();
-			assert($result !== false, 'move item in search result to position');
-		} finally {
-			$this->setItemOrderStatement->closeCursor();
-		}
-	}
-
-	/**
-	 * Remove sorting information from search results
-	 *
-	 * @param int $searchId
-	 */
-	private function unsort(int $searchId)
-	{
-		$statement = $this->getPDO()->prepare('UPDATE SearchResult SET `Order` = NULL WHERE Search = ?');
-
-		try {
-			$result = $statement->execute([$searchId]);
-			assert($result !== false, 'unsort search');
-		} finally {
-			$statement->closeCursor();
+			$stmt->closeCursor();
 		}
 	}
 

@@ -13,10 +13,7 @@ class Search implements \JsonSerializable
 	private $owner = null;
 
 	// TODO: Implement multi-sorting
-	// TODO: Do the sorting in SQL, something along the lines of:
-	// UPDATE results INNER? JOIN (SELECT ROW_NUMBER() OVER() AS rn ORDER BY ...) SET Order = rn;
-
-	//TODO: Fix tests
+	// TODO: Fix tests
 
 	/**
 	 * @param string|null $code Filter by code (% and _ are allowed, % is appended at the end anyway)
