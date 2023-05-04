@@ -6,12 +6,10 @@ use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemCode;
-use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\Search;
 use WEEEOpen\Tarallo\SearchDiff;
 use WEEEOpen\Tarallo\SearchTriplet;
-use WEEEOpen\Tarallo\User;
 
 final class SearchDAO extends DAO
 {
@@ -135,7 +133,7 @@ final class SearchDAO extends DAO
 	 * @param Search $search Filters to be applied
 	 * @param string $user Search owner
 	 *
-	 * @return int|null
+	 * @return int
 	 */
 	public function searchNew(Search $search, string $user): int
 	{
@@ -172,7 +170,7 @@ WHERE DeletedAt IS NULL AND $filter";
 	 * @param Search $search Search being updated
 	 * @param SearchDiff $diff Diff to apply
 	 *
-	 * @return int|null
+	 * @return int
 	 */
 	public function searchUpdate(Search $search, SearchDiff $diff): int
 	{
@@ -280,9 +278,7 @@ WHERE DeletedAt IS NULL AND $filter";
 			return;
 		}
 
-		//TODO: Handle multisort
 		$firstSort = $sorts[0];
-
 		$featureName = $firstSort["feature"];
 		$direction = $firstSort["direction"] === '+' ? 'ASC' : 'DESC';
 		$column = FeatureDAO::getColumn(BaseFeature::getType($featureName));
@@ -392,7 +388,7 @@ WHERE DeletedAt IS NULL AND $filter";
 	}
 
 	/**
-	 * @param ItemCode[]|null $triplets
+	 * @param ItemCode[]|null $locations
 	 * @param \PDO $pdo
 	 *
 	 * @return string[]

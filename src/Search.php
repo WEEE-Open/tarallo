@@ -2,8 +2,6 @@
 
 namespace WEEEOpen\Tarallo;
 
-use http\Exception\InvalidArgumentException;
-
 class Search implements \JsonSerializable
 {
 	public const FIELDS = ["code", "feature", "c_feature", "location", "sort"];
@@ -18,9 +16,9 @@ class Search implements \JsonSerializable
 
 	/**
 	 * @param string|null $code Filter by code (% and _ are allowed, % is appended at the end anyway)
-	 * @param SearchTriplet[]|string[]|null $features Search by feature values in ancestor items
-	 * @param SearchTriplet[]|string[]|null $ancestors Search by ancestor features
-	 * @param ItemCode[]|null $locations Only descendants of these items will be searched
+	 * @param SearchTriplet[]|string[][]|null $features Search by feature values in ancestor items
+	 * @param SearchTriplet[]|string[][]|null $ancestors Search by ancestor features
+	 * @param ItemCode[]|string[][]|null $locations Only descendants of these items will be searched
 	 * @param string[]|null $sorts Map (associative array) from feature name to order (+ or -)
 	 */
 	public function __construct(
@@ -55,6 +53,7 @@ class Search implements \JsonSerializable
 	{
 		switch ($type) {
 			case "code":
+			case "sort":
 				return $value;
 			case "feature":
 			case "c_feature":
@@ -80,8 +79,6 @@ class Search implements \JsonSerializable
 				}
 
 				return $location;
-			case "sort":
-				return $value;
 			default:
 				throw new SearchException("Invalid filter type");
 		}
@@ -101,7 +98,7 @@ class Search implements \JsonSerializable
 			case "sort":
 				return $this->filters["sort"];
 			default:
-				throw new InvalidArgumentException("Unknown filter type $type");
+				throw new \LogicException("Unknown filter type $type");
 		}
 	}
 
@@ -120,7 +117,7 @@ class Search implements \JsonSerializable
 		return $this->id;
 	}
 
-	public function setId(int $id)
+	public function setId(?int $id)
 	{
 		$this->id = $id;
 	}
@@ -135,9 +132,15 @@ class Search implements \JsonSerializable
 		return !empty($this->filters["sort"]) && empty($this->filters["code"]) && empty($this->filters["feature"]) && empty($this->filters["c_feature"] && empty($this->filters["location"]));
 	}
 
+	/**
+	 * @param SearchDiff $diff Diff to be applied to the search
+	 *
+	 * @return Search A new search object with the diff applied
+	 */
 	public function applyDiff(SearchDiff $diff): Search
 	{
 		$new = clone $this;
+		$new->setId(null);
 
 		foreach ($diff->deleted as ["type" => $type, "key" => $key]) {
 			unset($new->filters[$type][$key]);
@@ -161,7 +164,7 @@ class Search implements \JsonSerializable
 		return $new;
 	}
 
-	private function addKeys()
+	private function addKeys(): array
 	{
 		return array_map(function ($e) {
 			$ret = [];

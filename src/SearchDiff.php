@@ -2,20 +2,49 @@
 
 namespace WEEEOpen\Tarallo;
 
-use WEEEOpen\Tarallo\HTTP\InvalidParameterException;
-
 /**
  * Handle search diffs
- * Op: {"key": int|null, "value": <TypeValue>|null}
- * Diff: {"code": [Op], "feature": [Op], "c_feature": [Op], "location": [Op], "sort": [Op]}
+ * @internal
+ * TypeValue:
+ *  code -> string
+ *  feature -> SearchTriplet
+ *  c_feature -> SearchTriplet
+ *  location -> string
+ *  sort -> ["feature" => <FeatureName>, "direction" => '+'|'-'
+ *
+ * Op:
+ *  ["key" => ?int, "value" => ?<TypeValue>]
+ *
+ * $diff:
+ * [
+ *  ?"code" => [Op]
+ *  ?"feature" => [Op]
+ *  ?"c_feature" => [Op]
+ *  ?"location" => [Op]
+ *  ?"sort" => [Op]
+ * ]
  */
 class SearchDiff
 {
+	/**
+	 * @var array new elements of form ["type" => <Type>, "value" => <value>]
+	 */
 	public $added = [];
+	/**
+	 * @var array updated elements of form ["type" => <Type>, "key" => int, "value" => <value>]
+	 */
 	public $updated = [];
+	/**
+	 * @var array deleted elements of form ["type" => <Type>, "key" => int]
+	 */
 	public $deleted = [];
 	private $sortOnly = true;
 
+
+	/**
+	 * @param array $diff
+	 * @see SearchDiff for description of $diff
+	 */
 	public function __construct(array $diff)
 	{
 		foreach (Search::FIELDS as $type) {
