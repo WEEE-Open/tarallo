@@ -655,11 +655,7 @@ class Controller implements RequestHandlerInterface
 		$diff = new SearchDiff($payload);
 		$res = $db->searchDAO()->searchUpdate($search, $diff);
 
-		if ($res !== null) {
-			return new JsonResponse($res);
-		} else {
-			return new EmptyResponse(204);
-		}
+		return new JsonResponse($res);
 	}
 
 	public static function getSearchQuery(ServerRequestInterface $request): ResponseInterface

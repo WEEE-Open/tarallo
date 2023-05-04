@@ -158,14 +158,13 @@ SELECT DISTINCT ?, `Code`
 FROM Item
 WHERE DeletedAt IS NULL AND $filter";
 
-		//throw new \Exception($query);
-
 		$stmt = $pdo->prepare($query);
 		$res = $stmt->execute([$id]);
 		assert($res !== null, "execute search");
 
 		$this->sort($search, $id);
 
+		$search->setId($id);
 		return $id;
 	}
 
@@ -175,7 +174,7 @@ WHERE DeletedAt IS NULL AND $filter";
 	 *
 	 * @return int|null
 	 */
-	public function searchUpdate(Search $search, SearchDiff $diff): ?int
+	public function searchUpdate(Search $search, SearchDiff $diff): int
 	{
 		$pdo = $this->getPDO();
 
@@ -213,7 +212,7 @@ WHERE DeletedAt IS NULL AND $filter";
 		$res = $stmt->execute([json_encode($new_search), $new_search->getId()]);
 		assert($res !== null, "update search query");
 
-		return null;
+		return $new_search->getId();
 	}
 
 	public function getSearchById(string $id): ?Search

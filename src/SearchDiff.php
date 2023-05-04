@@ -18,6 +18,12 @@ class SearchDiff
 
 	public function __construct(array $diff)
 	{
+		foreach (Search::FIELDS as $type) {
+			if (!array_key_exists($type, $diff)) {
+				$diff[$type] = [];
+			}
+		}
+
 		foreach ($diff as $type => $ops) {
 			foreach ($ops as $op) {
 				if ($type !== "sort") {

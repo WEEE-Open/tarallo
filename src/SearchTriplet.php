@@ -2,7 +2,7 @@
 
 namespace WEEEOpen\Tarallo;
 
-class SearchTriplet implements \JsonSerializable
+class SearchTriplet implements \JsonSerializable, \ArrayAccess
 {
 	private $feature;
 	private $compare;
@@ -97,5 +97,37 @@ class SearchTriplet implements \JsonSerializable
 	public function jsonSerialize()
 	{
 		return [$this->feature->name, $this->compare, $this->getValue()];
+	}
+
+	public function offsetExists($offset): bool
+	{
+		if ($offset < 0 || $offset > 2) {
+			return false;
+		}
+		return true;
+	}
+
+	public function offsetGet($offset)
+	{
+		switch ($offset) {
+			case 0:
+				return $this->feature->name;
+			case 1:
+				return $this->compare;
+			case 2:
+				return $this->feature->value;
+			default:
+				throw new \LogicException("SearchTriplet index out of bound");
+		}
+	}
+
+	public function offsetSet($offset, $value)
+	{
+		throw new \LogicException("The array interface is read-only");
+	}
+
+	public function offsetUnset($offset)
+	{
+		throw new \LogicException("The array interface is read-only");
 	}
 }

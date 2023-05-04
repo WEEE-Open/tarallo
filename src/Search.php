@@ -6,6 +6,8 @@ use http\Exception\InvalidArgumentException;
 
 class Search implements \JsonSerializable
 {
+	public const FIELDS = ["code", "feature", "c_feature", "location", "sort"];
+
 	// Ideally these would be an enum
 	public $filters = ["code" => [], "feature" => [], "c_feature" => [], "location" => [], "sort" => []];
 
@@ -13,12 +15,11 @@ class Search implements \JsonSerializable
 	private $owner = null;
 
 	// TODO: Implement multi-sorting
-	// TODO: Fix tests
 
 	/**
 	 * @param string|null $code Filter by code (% and _ are allowed, % is appended at the end anyway)
-	 * @param SearchTriplet[]|null $features Search by feature values in ancestor items
-	 * @param SearchTriplet[]|null $ancestors Search by ancestor features
+	 * @param SearchTriplet[]|string[]|null $features Search by feature values in ancestor items
+	 * @param SearchTriplet[]|string[]|null $ancestors Search by ancestor features
 	 * @param ItemCode[]|null $locations Only descendants of these items will be searched
 	 * @param string[]|null $sorts Map (associative array) from feature name to order (+ or -)
 	 */
@@ -46,7 +47,7 @@ class Search implements \JsonSerializable
 		}
 
 		foreach ($sorts as $s => $dir) {
-			$this->filters["sort"][] = $this->createFilter("sort", $s);
+			$this->filters["sort"][] = $this->createFilter("sort", ["feature" => $s, "direction" => $dir]);
 		}
 	}
 
@@ -142,7 +143,6 @@ class Search implements \JsonSerializable
 			unset($new->filters[$type][$key]);
 		}
 
-		error_log(json_encode($diff->updated));
 		foreach ($diff->updated as ["type" => $type, "key" => $key, "value" => $value]) {
 			$new->filters[$type][$key] = $new->createFilter($type, $value);
 		}

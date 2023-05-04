@@ -508,10 +508,6 @@
 				body: JSON.stringify(query)
 				});
 
-			if (response.status === 204) {
-				goTo(searchId);
-			}
-
 			let result = await response.json();
 			if (response.ok) {
 				goTo(result);
