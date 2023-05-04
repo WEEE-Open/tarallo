@@ -110,6 +110,14 @@
 		}
 	}
 
+	// This is to prevent from hitting enter and deleting the field instead of actually running the search
+	function enterHandler(ev) {
+		if (ev.key === "Enter") {
+			ev.preventDefault();
+			$(ev.target).closest("form")[0].requestSubmit();
+		}
+	}
+
 	function addSearchRow(rowType, preFill)
 	{
 		let template = document.getElementById(rowType).content;
@@ -135,6 +143,9 @@
 				input.tagifyRef = tagify;
 
 				tagify.on('input', debounce(onLocationInput, 200));
+
+				// Doesn't work, tagify uses a bizarre custom element with a broken preventDefault and breaks the original event
+				//tagify.on('keydown', ev => enterHandler(ev.detail.event);
 				break;
 		}
 
@@ -153,14 +164,10 @@
 				el.setAttribute("id", `search-row-${id}-${rowElCounter}`);
 				rowElCounter++;
 			}
-
-			// This is to prevent from hitting enter and deleting the field instead of actually running the search
-			el.addEventListener('keydown', ev => {
-				if (ev.key === "Enter") {
-					ev.preventDefault();
-				}
-			});
 		}
+
+		// This is to prevent from hitting enter and deleting the field instead of actually running the search
+		$(node).find("input, select").on('keydown', enterHandler);
 
 		// Add features list to dropdown, if present
 		let features = node.querySelector('.allfeatures');
@@ -196,17 +203,7 @@
 				case "search-template-code":
 					$(node).find('input').val(preFill.value);
 					break;
-				case "search-template-features": {
-					let features = $(node).find('select.allfeatures')[0];
-					features.value = preFill.value[0];
-					updateSearchRowFromFeature(node, features);
-
-					let comparison = $(node).find('select.comparison')[0];
-					comparison.value = preFill.value[1];
-					updateSearchRowFromComparison(node, comparison, features);
-					$(node).find('input').val(preFill.value[2]);
-					break;
-				}
+				case "search-template-features":
 				case "search-template-ancestor": {
 					let features = $(node).find('select.allfeatures')[0];
 					features.value = preFill.value[0];
@@ -215,7 +212,7 @@
 					let comparison = $(node).find('select.comparison')[0];
 					comparison.value = preFill.value[1];
 					updateSearchRowFromComparison(node, comparison, features);
-					$(node).find('input').val(preFill.value[2]);
+					$(node).find('.comparisonvalue > input, .comparisonvalue > select').val(preFill.value[2]);
 					break;
 				}
 				case "search-template-location":
@@ -352,6 +349,8 @@
 				comparisonValue.appendChild(input);
 			}
 		}
+
+		$(comparisonValue).find('select, input').on('keydown', enterHandler);
 	}
 
 	/**
