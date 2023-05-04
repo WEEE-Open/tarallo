@@ -118,7 +118,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 </form>
 
 	<?php if ($searchId !== null) : ?>
-	<button class="btn btn-primary search-refine-collapse collapse show" id="#refinecollapsebutton" data-toggle="collapse" data-target=".search-refine-collapse" role="button" aria-expanded="false" aria-controls="searchform refinecollapsebutton">
+	<button class="btn btn-primary search-refine-collapse collapse show" id="refinecollapsebutton" data-toggle="collapse" data-target=".search-refine-collapse" role="button" aria-expanded="false" aria-controls="searchform refinecollapsebutton">
 		Refine search
 	</button>
 	<?php endif; ?>

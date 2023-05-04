@@ -1,6 +1,9 @@
 (async function () {
 	"use strict";
 
+	let defaultOnBeforeUnload = window.onbeforeunload;
+	window.onbeforeunload = null;
+
 	// Beamed from the server to here in a giant JSON
 	if (window.featureMaps === undefined) {
 		throw new Error("features.js must be included before");
@@ -23,16 +26,17 @@
 	let searchButton = document.getElementById('searchbutton');
 	let searchCodeButton = document.getElementById('search-control-code');
 	let searchLocationButton = document.getElementById('search-control-location');
+	let searchSortButton = document.getElementById('search-control-sort');
 
 	const queryToRowType = new Map([["code", "search-template-code"], ["feature", "search-template-features"], ["c_feature", "search-template-ancestor"], ["location", "search-template-location"], ["sort", "search-template-sort"]]);
 
 	let searchId = searchForm.dataset.searchId;
 	let isRefine = !!searchId;
-	console.log("id=", searchId);
-	console.log("isRefine=", isRefine);
 
 	let searchQuery = null;
 	if (isRefine) {
+		let searchRefineButton = document.getElementById("refinecollapsebutton")
+		searchRefineButton.disabled = true;
 		searchQuery = fetch(`/v2/search/query/${searchId}`, {
 			headers: {
 				'Accept': 'application/json',
@@ -68,7 +72,9 @@
 				// Turn array into an object for easier access
 				searchQuery[key] = new Map(value.map(o => [o.key, o.value]));
 			}
-			toggleSearchButton();
+
+			searchRefineButton.disabled = false;
+			toggleSearchButton(true);
 
 			return searchQuery;
 		});
@@ -166,8 +172,12 @@
 			}
 		}
 
+		let inputs = $(node).find("input, select");
 		// This is to prevent from hitting enter and deleting the field instead of actually running the search
-		$(node).find("input, select").on('keydown', enterHandler);
+		inputs.on('keydown', enterHandler);
+
+		// Handle changes
+		inputs.on('change', debounce(ev => toggleSearchButton(), 200));
 
 		// Add features list to dropdown, if present
 		let features = node.querySelector('.allfeatures');
@@ -248,10 +258,27 @@
 		toggleSearchButton();
 	}
 
-	function toggleSearchButton()
+	function toggleSearchButton(noCheck)
 	{
-		searchButton.disabled = searchRows.childElementCount <= 0;
-		let codes = 0, locations = 0;
+		if (isRefine && !noCheck) {
+			window.onbeforeunload = null;
+			searchButton.disabled = true;
+			searchQuery.then(q => {
+				let diff = getDiff(q);
+				if (Object.entries(diff).reduce((acc, cv) => acc || cv[1].length !== 0, false)) {
+					searchButton.disabled = false;
+					window.onbeforeunload = defaultOnBeforeUnload;
+				}
+			});
+		} else {
+			searchButton.disabled = searchRows.childElementCount <= 0;
+		}
+
+		/* TODO: Move these to another function so they don't need to be called so often
+		*   they only need to be re-checked on row changes */
+		/* TODO: There is also no point to counting them like this, there can never be more than 1
+		*   without external DOM manipulation */
+		let codes = 0, locations = 0, sorts = 0;
 		for (let el of searchRows.children) {
 			if (el.classList.contains("search-code")) {
 				codes++;
@@ -259,10 +286,14 @@
 			if (el.classList.contains("search-location")) {
 				locations++;
 			}
+			if (el.classList.contains("search-sort")) {
+				sorts++;
+			}
 		}
 
 		searchCodeButton.disabled = codes > 0;
 		searchLocationButton.disabled = locations > 0;
+		searchSortButton.disabled = sorts > 0;
 	}
 
 	/**
@@ -350,7 +381,9 @@
 			}
 		}
 
-		$(comparisonValue).find('select, input').on('keydown', enterHandler);
+		let inputs = $(comparisonValue).find('select, input');
+		inputs.on('keydown', enterHandler);
+		inputs.on('change', debounce(ev => toggleSearchButton(), 200));
 	}
 
 	/**
@@ -383,7 +416,7 @@
 			} else if (row.classList.contains('search-ancestor')) {
 				c_feature.push({key, value: getSelectedFeatures(row)});
 			} else if (row.classList.contains('search-location')) {
-				let locs = JSON.parse(row.querySelector('input.comparisonvalue').value);
+				let locs = row.querySelector('input.comparisonvalue').tagifyRef.value;
 				location = location.concat(locs.map(e => { return {key: e.key !== undefined ? e.key : null, value: e.value}; }));
 			} else if (row.classList.contains('search-sort')) {
 				sort.push({key, value: {feature: row.querySelector('.allfeatures').value, direction: row.querySelector('.sorting').value}});
@@ -397,13 +430,36 @@
 				let idx = diff[type].findIndex(e => e.key === key);
 				if (idx === -1) {
 					diff[type].push({key, value: null});
-				} else if (diff[type][idx].value === value) {
+				} else {
+					switch (type) {
+						case 'code':
+						case 'location':
+							if (diff[type][idx].value !== value) {
+								continue;
+							}
+							break;
+						case 'feature':
+						case 'c_feature':
+							if (diff[type][idx].value[0] !== value[0]
+								|| diff[type][idx].value[1] !== value[1]
+								|| diff[type][idx].value[2] !== value[2]) {
+								continue;
+							}
+							break;
+						case 'sort':
+							if (diff[type][idx].value['feature'] !== value['feature']
+								|| diff[type][idx].value['direction'] !== value['direction']) {
+								continue;
+							}
+							break;
+						default:
+							throw new Error(`Unreachable`);
+					}
 					diff[type].splice(idx, 1);
 				}
 			}
 		}
 
-		console.log(diff);
 		return diff;
 	}
 
@@ -438,8 +494,7 @@
 
 		console.log(JSON.stringify(query));
 
-		let oldbeforeunload = window.onbeforeunload;
-		window.onbeforeunload = undefined;
+		window.onbeforeunload = null;
 		searchButton.disabled = true;
 
 		try {
@@ -474,7 +529,7 @@
 			}
 		} finally {
 			searchButton.disabled = false;
-			window.onbeforeunload = oldbeforeunload;
+			window.onbeforeunload = defaultOnBeforeUnload;
 		}
 	}
 
