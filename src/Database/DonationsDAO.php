@@ -468,8 +468,8 @@ GROUP BY d.Id");
 					$content = $itemsToCheck[$i];
 					$type = $content->getFeatures()["type"]->value ?? "unknown";
 					$groupedPropertiesForSubItems[$type] = array_unique(array_merge($groupedPropertiesForSubItems[$type] ?? [], array_keys($content->getFeatures())));
-					$groupedPropertiesValuesForSubItems[$item] ??= [];
-					$groupedPropertiesValuesForSubItems[$item][$type] ??= [];
+					$groupedPropertiesValuesForSubItems[$item] = $groupedPropertiesValuesForSubItems[$item] ?? [];
+					$groupedPropertiesValuesForSubItems[$item][$type] = $groupedPropertiesValuesForSubItems[$item][$type] ?? [];
 					array_push($groupedPropertiesValuesForSubItems[$item][$type], $content);
 					$countOfType[$type] = max(($countOfType[$type] ?? 0), count($groupedPropertiesValuesForSubItems[$item][$type]));
 					if (count($content->getContent()) > 0) {
