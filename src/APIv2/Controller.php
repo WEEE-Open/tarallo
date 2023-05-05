@@ -1023,7 +1023,7 @@ class Controller implements RequestHandlerInterface
 			}
 		}
 		// if we are still here it means that there was an error
-		return throw new \LogicException($error);
+		throw new \LogicException($error);
 	}
 
 	public static function getDonation(ServerRequestInterface $request)
