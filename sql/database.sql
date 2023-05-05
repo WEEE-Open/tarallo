@@ -303,6 +303,56 @@ CREATE TABLE `NormalizationForbidden`
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
 
+CREATE TABLE `Donations` (
+                             `Id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                             `Name` text NOT NULL,
+                             `Location` text DEFAULT NULL,
+                             `Date` timestamp(6) NULL DEFAULT NULL,
+                             `Notes` text DEFAULT NULL,
+                             `IsCompleted` tinyint(1) DEFAULT 0,
+                             PRIMARY KEY (`Id`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `DonationItem` (
+    `Donation` bigint(20) unsigned NOT NULL,
+    `Code` varchar(255) NOT NULL,
+    PRIMARY KEY (`Donation`,`Code`),
+    KEY `Code` (`Code`),
+    CONSTRAINT `DonationItem_ibfk_1` FOREIGN KEY (`Donation`) REFERENCES `Donations` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `DonationItem_ibfk_2` FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `DonationTasks` (
+    `DonationId` bigint(20) unsigned NOT NULL,
+    `Id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `Index` int(11) NOT NULL,
+    `Title` text NOT NULL,
+    `ItemType` text NOT NULL,
+    PRIMARY KEY (`Id`),
+    KEY `DonationId` (`DonationId`),
+    CONSTRAINT `DonationTasks_ibfk_1` FOREIGN KEY (`DonationId`) REFERENCES `Donations` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `DonationTasksProgress` (
+    `DonationId` bigint(20) unsigned NOT NULL,
+    `TaskId` bigint(20) unsigned NOT NULL,
+    `ItemCode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Completed` tinyint(1) NOT NULL,
+    KEY `DonationId` (`DonationId`),
+    KEY `TaskId` (`TaskId`),
+    KEY `ItemCode` (`ItemCode`),
+    CONSTRAINT `DonationTasksProgress_ibfk_5` FOREIGN KEY (`TaskId`) REFERENCES `DonationTasks` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `DonationTasksProgress_ibfk_6` FOREIGN KEY (`DonationId`, `ItemCode`) REFERENCES `DonationItem` (`Donation`, `Code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
 -- ProductFeature - ItemFeature View
 
 CREATE VIEW ProductItemFeature AS
@@ -355,5 +405,5 @@ SELECT Code,
 FROM ProductItemFeature;
 
 -- Do not combine these lines, they're parsed by update-db... WITH A REGEX!
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 22);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 23);
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 31);

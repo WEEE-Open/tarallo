@@ -28,7 +28,8 @@
     "psr/http-server-middleware": "^1.0",
     "laminas/laminas-diactoros": "^2.2",
     "laminas/laminas-httphandlerrunner": "^1.1",
-    "jumbojett/openid-connect-php": "^0.8.0"
+    "jumbojett/openid-connect-php": "^0.8.0",
+    "mk-j/php_xlsxwriter": "^0.38.0"
   },
   "suggest": {
     "ext-apcu": "*"
@@ -38,8 +39,8 @@
     "squizlabs/php_codesniffer": "^3.6"
   },
   "scripts": {
-    "lint": "phpcs --report=summary --ignore=*.min.css src public",
-    "lintfix": "phpcbf --ignore=*.min.css src public",
+    "lint": "phpcs --report=summary --ignore-platform-req=ext-zip --ignore=*.min.css src public",
+    "lintfix": "phpcbf --ignore-platform-req=ext-zip --ignore=*.min.css src public",
     "test": "phpunit --configuration tests/phpunit.xml"
   }
 }

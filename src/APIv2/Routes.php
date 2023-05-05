@@ -99,6 +99,20 @@ trait Routes
 							}
 						);
 
+						$r->addGroup(
+							'/donation',
+							function (FastRoute\RouteCollector $r) {
+								$r->get('', [User::AUTH_LEVEL_RO, [Controller::class, 'getDonationsList']]);
+								$r->post('/new', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'newDonation']]);
+								$r->get('/{id}', [User::AUTH_LEVEL_RO, [Controller::class, 'getDonation']]);
+								$r->post('/{id}/tasks', [User::AUTH_LEVEL_RW, [Controller::class, 'updateTasks']]);
+								$r->get('/{id}/complete', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'completeDonation']]);
+								$r->get('/{id}/uncomplete', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'uncompleteDonation']]);
+								$r->get('/{id}/download', [User::AUTH_LEVEL_RO, [Controller::class, 'downloadDonation']]);
+								$r->get('/{id}/delete', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'deleteDonation']]);
+							}
+						);
+
 						$r->get('/history[/page/{page}]', [User::AUTH_LEVEL_RO, [Controller::class, 'getHistory']]);
 
 						$r->get('/session', [User::AUTH_LEVEL_RW, [Controller::class, 'sessionWhoami']]);
@@ -119,6 +133,7 @@ trait Routes
 								$r->get('/getItemByNotFeature/{filter}[/{notFeature}[/{location}[/{limit}[/{creation}[/{deleted}]]]]]', [User::AUTH_LEVEL_RO, [Controller::class, 'itemsNotFeature']]);
 								$r->get('/getRecentAuditByType/{type}[/{howMany}[/{featureFilter}]]', [User::AUTH_LEVEL_RO, [Controller::class, 'recentAuditByType']]);
 								$r->get('/getCountByFeature/{feature}[/{filter}[/{location}[/{creation[/{deleted[/{cutoff}]]]]]', [User::AUTH_LEVEL_RO, [Controller::class, 'countByFeature']]);
+								$r->post('/getTypesForItemCodes', [User::AUTH_LEVEL_RO, [Controller::class, 'getTypesForItemCodes']]);
 							}
 						);
 						$r->addGroup(

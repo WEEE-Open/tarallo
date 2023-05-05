@@ -333,6 +333,295 @@ class Controller implements RequestHandlerInterface
 		return $handler->handle($request);
 	}
 
+	public static function addDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		$body = $request->getParsedBody();
+		if ($body === null || count($body) === 0 || $body["ItemsList"] === null) {
+			$request = $request->withAttribute('Template', 'newDonation'); 
+		} else {
+			$name = trim($body["Name"]);
+			if ($name !== '') {
+				$date = strtotime($body["Date"] ?? "");
+				if ($date === false) {
+					$date = null;
+				}
+				/** @var Database $db */
+				$db = $request->getAttribute('Database');
+				$itemsList = json_decode($body["ItemsList"]);
+				if ($itemsList === null || count($itemsList) == 0) {
+					$error = "Please input at least one item in the items list";
+				} else if ($db->itemDAO()->checkItemListAllExist($itemsList)) {
+					if ($body["Tasks"] === null || ($tasks = json_decode($body["Tasks"], true)) === null) {
+						$tasks = [];
+					}
+					$donationId = $db->donationsDAO()->newDonation($name, $body["Location"], $body["Notes"], $date, $itemsList, $tasks);
+					return new RedirectResponse("/donation/$donationId", 303);
+				} else {
+					$error = "Some items in the list are not valid";
+				}
+			} else {
+				$error = "Please provide a name";
+			}
+			// if we are still here it means that there was an error
+			$request = $request
+				->withAttribute('Template', 'newDonation')
+				->withAttribute('TemplateParameters', ['error' => $error, 'name' => $body["Name"] ?? null, 'location' => $body["Location"] ?? null, 'date' => $body["Date"] ?? null, 'notes' => $body["Notes"] ?? null, 'itemsList' => $body["ItemsList"] ?? null, 'tasks' => $body["Tasks"] ?? null]); 
+		}
+
+		return $handler->handle($request);
+	}
+
+	public static function listDonations(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		/** @var UserSSO $user */
+		$user = $request->getAttribute('User');
+
+
+		$request = $request
+			->withAttribute('Template', 'donations')
+			->withAttribute('TemplateParameters', ['donations' => $db->donationsDAO()->listDonations(), 'canCreateNew' => $user->getLevel() == UserSSO::AUTH_LEVEL_ADMIN]);
+
+		return $handler->handle($request);
+	}
+
+	public static function viewDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		/** @var UserSSO $user */
+		$user = $request->getAttribute('User');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		if ($id == -1) {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+
+		$donation = $db->donationsDAO()->getDonation($id);
+
+		if ($donation === false) {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+			
+		$request = $request
+			->withAttribute('Template', 'donation')
+			->withAttribute('TemplateParameters', ['showEditButton' => $user->getLevel() == UserSSO::AUTH_LEVEL_ADMIN, 'donation' => $donation]);
+
+		return $handler->handle($request);
+	}
+
+	public static function completeDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		if ($id == -1) {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+
+		$db->donationsDAO()->completeDonation($id);
+		
+		return new RedirectResponse("/donation/$id", 303);
+	}
+
+	public static function uncompleteDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		if ($id == -1) {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+
+		$db->donationsDAO()->uncompleteDonation($id);
+		
+		return new RedirectResponse("/donation/$id", 303);
+	}
+
+	public static function editDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		if ($id == -1) {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+
+		$oldDonation = $db->donationsDAO()->getDonation($id);
+
+		if ($oldDonation === false) {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+
+		if ($oldDonation["isCompleted"]) {
+			return new RedirectResponse("/donation/$id", 303);
+		}
+
+		$body = $request->getParsedBody();
+		if ($body === null || count($body) === 0 || $body["ItemsList"] === null) {
+			$templateParameters = [
+				'showDeleteButton' => true, 
+				'name' => $oldDonation["name"], 
+				'location' => $oldDonation["location"] ?? null, 
+				'itemsList' => json_encode(array_keys($oldDonation["itemsType"] ?? []))
+			];
+			if (count(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);})) > 0) {
+				$templateParameters['tasks'] = json_encode(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);}));
+			} else {
+				$templateParameters['tasks'] = '{}';
+			}
+			if (isset($oldDonation["date"]))
+				$templateParameters['date'] = date_format(date_create($oldDonation["date"]),"Y/m/d");
+			$request = $request->withAttribute('Template', 'newDonation')
+				->withAttribute('TemplateParameters', $templateParameters); 
+		} else {
+			$name = trim($body["Name"]);
+			if ($name !== '') {
+				$date = strtotime($body["Date"] ?? "");
+				if ($date === false) {
+					$date = null;
+				}
+				$itemsList = json_decode($body["ItemsList"]);
+				if ($itemsList === null || count($itemsList) == 0) {
+					$error = "Please input at least one item in the items list";
+				} else if ($db->itemDAO()->checkItemListAllExist($itemsList)) {
+					if ($body["Tasks"] === null || ($tasks = json_decode($body["Tasks"], true)) === null) {
+						$tasks = [];
+					}
+					$db->donationsDAO()->updateDonation($id, $name, $body["Location"] ?? $oldDonation["location"], $body["Notes"], $date, $itemsList, $tasks);
+					return new RedirectResponse("/donation/$id", 303);
+				} else {
+					$error = "Some items in the list are not valid";
+				}
+			} else {
+				$error = "Please provide a name";
+				$name = null;
+			}
+			$templateParameters = [
+				'showDeleteButton' => true, 
+				'error' => $error, 
+				'name' => $name ?? $oldDonation["name"], 
+				'location' => $body["Location"] ?? $oldDonation["location"] ?? null, 
+				'itemsList' => $body["ItemsList"] ?? json_encode(array_keys($oldDonation["itemsType"] ?? []))
+			];
+			if (count(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);})) > 0) {
+				$templateParameters['tasks'] = $body["Tasks"] ?? json_encode(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);}));
+			} else {
+				$templateParameters['tasks'] = $body["Tasks"] ?? '{}';
+			}
+			if (isset($body["Date"]))
+				$templateParameters['date'] = $body["Date"];
+			else if (isset($oldDonation["date"]))
+				$templateParameters['date'] = date_format(date_create($oldDonation["date"]),"Y/m/d");
+			$request = $request->withAttribute('Template', 'newDonation')
+				->withAttribute('TemplateParameters', $templateParameters); 
+		}
+
+		return $handler->handle($request);
+	}
+	
+	public static function downloadDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		$donation = $db->donationsDAO()->generateExcelSummary($id);
+
+		if ($donation === false) {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+
+		[$writer, $filename] = $donation;
+
+		http_response_code(200);
+		header('Content-disposition: attachment; filename="'. $filename . '"');
+		header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		header('Content-Transfer-Encoding: binary');
+		header('Cache-Control: must-revalidate');
+		header('Pragma: public');
+
+		$writer->writeToStdOut();
+
+		exit(0);
+	}
+	
+	public static function deleteDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+
+		if ($db->donationsDAO()->deleteDonation($id)) {
+			return new RedirectResponse("/donation", 303);
+		} else {
+			$request = $request
+				->withAttribute('Template', 'error')
+				->withAttribute('ResponseCode', 404)
+				->withAttribute('TemplateParameters', ['reasonNoEscape' => 'Donation not found']);
+
+			return $handler->handle($request);
+		}
+
+	}
+
 	public static function authError(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
 		$request = $request

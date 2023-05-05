@@ -393,6 +393,28 @@ form.nice textarea {
 	resize: vertical;
 }
 
+.list-group-item.input-group {
+	display: flex;
+	padding: 0;
+}
+
+.list-group-item.input-group .form-control {
+	border: none;
+	padding-left: 1.125rem;
+}
+
+.list-group-item.input-group .btn {
+	border-radius: 0;
+}
+
+.no-tasks-text {
+	display: none;
+}
+
+.no-tasks .no-tasks-text {
+	display: block;
+}
+
 .hidden {
 	display: none !important;
 }
@@ -437,6 +459,10 @@ form.nice textarea {
 
 .dropdown-item.active {
 	color: white !important;
+}
+
+.d-grid {
+	display: grid;
 }
 
 @media only screen and (min-width: 34rem) {

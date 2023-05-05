@@ -55,6 +55,21 @@ trait Routes
 						$r->post('/normalization', [User::AUTH_LEVEL_RW, [Controller::class, 'optionsNormalization']]);
 					}
 				);
+				$r->addGroup(
+					'/donation',
+					function (FastRoute\RouteCollector $r) {
+						$r->get('', [User::AUTH_LEVEL_RW, [Controller::class, 'listDonations']]);
+						$r->get('/new', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'addDonation']]);
+						$r->post('/new', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'addDonation']]);
+						$r->get('/{id}', [User::AUTH_LEVEL_RW, [Controller::class, 'viewDonation']]);
+						$r->get('/{id}/edit', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'editDonation']]);
+						$r->post('/{id}/edit', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'editDonation']]);
+						$r->get('/{id}/complete', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'completeDonation']]);
+						$r->get('/{id}/uncomplete', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'uncompleteDonation']]);
+						$r->get('/{id}/download', [User::AUTH_LEVEL_RO, [Controller::class, 'downloadDonation']]);
+						$r->get('/{id}/delete', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'deleteDonation']]);
+					}
+				);
 				$r->get('/bulk', [User::AUTH_LEVEL_RO, [Controller::class, 'bulk']]);
 				$r->get('/bulk/move', [User::AUTH_LEVEL_RO, [Controller::class, 'bulkMove']]);
 				$r->post('/bulk/move', [User::AUTH_LEVEL_RW, [Controller::class, 'bulkMove']]);

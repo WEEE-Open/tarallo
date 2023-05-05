@@ -50,6 +50,11 @@ $hereSr = function ($page, $current) {
 			<li class="nav-item">
 				<a class="nav-link" data-toggle="collapse" href="#quickmove" role="button" aria-expanded="false" aria-controls="quickmove" id="quickmovebutton">Move</a>
 			</li>
+			<li class="nav-item">
+				<a class="nav-link <?= $hereClass('donation', $currentPageShort) ?>" href="/donation">
+					Donations<?= $hereSr('donation', $currentPageShort) ?>
+				</a>
+			</li>
 			<li class="nav-item dropdown">
 				<a class="nav-link dropdown-toggle <?= $hereClass('bulk', $currentPageShort) ?>" href="#" id="bulkDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 					Bulk Actions<?= $hereSr('bulk', $currentPageShort) ?>
@@ -89,5 +94,4 @@ $hereSr = function ($page, $current) {
 	<div class="nav-item alert alert-danger col-12 my-2 d-none" role="alert">Error</div>
 	<div class="nav-item alert alert-warning col-12 my-2 d-none" role="alert">Fail</div>
 </nav>
-</script>
 <script>$('.basicAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300}});</script>

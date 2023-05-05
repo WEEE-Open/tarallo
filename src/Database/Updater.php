@@ -732,6 +732,142 @@ CREATE TRIGGER ItemBMVUpdate
 		END IF;
 	END;");
 					break;
+					case 22:
+						$this->exec(
+							'CREATE TABLE `Donations` (
+                             `Id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+                             `Name` text NOT NULL,
+                             `Location` text DEFAULT NULL,
+                             `Date` timestamp(6) NULL DEFAULT NULL,
+                             `Notes` text DEFAULT NULL,
+                             `IsCompleted` tinyint(1) DEFAULT 0,
+                             PRIMARY KEY (`Id`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;'
+						);
+						$this->exec(
+							'CREATE TABLE `DonationItem` (
+    `Donation` bigint(20) unsigned NOT NULL,
+    `Code` varchar(255) NOT NULL,
+    PRIMARY KEY (`Donation`,`Code`),
+    KEY `Code` (`Code`),
+    CONSTRAINT `DonationItem_ibfk_1` FOREIGN KEY (`Donation`) REFERENCES `Donations` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `DonationItem_ibfk_2` FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;'
+						);
+						$this->exec(
+							'CREATE TABLE `DonationTasks` (
+    `DonationId` bigint(20) unsigned NOT NULL,
+    `Id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `Index` int(11) NOT NULL,
+    `Title` text NOT NULL,
+    `ItemType` text NOT NULL,
+    PRIMARY KEY (`Id`),
+    KEY `DonationId` (`DonationId`),
+    CONSTRAINT `DonationTasks_ibfk_1` FOREIGN KEY (`DonationId`) REFERENCES `Donations` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;'
+						);
+						$this->exec(
+							'CREATE TABLE `DonationTasksProgress` (
+    `DonationId` bigint(20) unsigned NOT NULL,
+    `TaskId` bigint(20) unsigned NOT NULL,
+    `ItemCode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Completed` tinyint(1) NOT NULL,
+    KEY `DonationId` (`DonationId`),
+    KEY `TaskId` (`TaskId`),
+    KEY `ItemCode` (`ItemCode`),
+    CONSTRAINT `DonationTasksProgress_ibfk_5` FOREIGN KEY (`TaskId`) REFERENCES `DonationTasks` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `DonationTasksProgress_ibfk_6` FOREIGN KEY (`DonationId`, `ItemCode`) REFERENCES `DonationItem` (`Donation`, `Code`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;'
+						);
+						$this->exec("DROP EVENT IF EXISTS `DonationItem_ai`");
+						$this->exec("
+CREATE TRIGGER `DonationItem_ai` AFTER INSERT ON `DonationItem` FOR EACH ROW
+BEGIN
+	DECLARE TaskId BIGINT(20) UNSIGNED;
+	DECLARE done INT DEFAULT FALSE;
+	DECLARE cur CURSOR FOR SELECT Id FROM DonationTasks WHERE DonationId = NEW.Donation AND ItemType = (SELECT IFNULL(IFNULL(ItemFeature.ValueEnum, ProductFeature.ValueEnum), 'other')
+		FROM Item
+		LEFT JOIN ItemFeature ON Item.Code = ItemFeature.Code AND ItemFeature.Feature = 'type'
+		LEFT JOIN ProductFeature ON Item.Brand = ProductFeature.Brand AND Item.Model = ProductFeature.Model AND Item.Variant = ProductFeature.Variant AND ProductFeature.Feature = 'type'
+		WHERE Item.Code = NEW.Code);
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+	
+	OPEN cur;
+	
+	insert_loop: LOOP
+		FETCH cur INTO TaskId;
+		IF done THEN
+			LEAVE insert_loop;
+		END IF;
+		
+		INSERT INTO DonationTasksProgress (DonationId, `TaskId`, ItemCode, Completed) VALUES (NEW.Donation, TaskId, NEW.Code, 0);
+	END LOOP;
+	
+	CLOSE cur;
+END;");
+						$this->exec("DROP EVENT IF EXISTS `DonationTasks_ai`");
+						$this->exec("
+CREATE TRIGGER `DonationTasks_ai` AFTER INSERT ON `DonationTasks` FOR EACH ROW
+BEGIN
+	DECLARE ItemId varchar(255);
+	DECLARE done INT DEFAULT FALSE;
+	DECLARE cur CURSOR FOR SELECT DonationItem.Code
+		FROM DonationItem
+		LEFT JOIN Item ON DonationItem.Code = Item.Code
+		LEFT JOIN ItemFeature ON DonationItem.Code = ItemFeature.Code AND ItemFeature.Feature = 'type'
+		LEFT JOIN ProductFeature ON Item.Brand = ProductFeature.Brand AND Item.Model = ProductFeature.Model AND Item.Variant = ProductFeature.Variant AND ProductFeature.Feature = 'type'
+		WHERE DonationItem.Donation = NEW.DonationId AND IFNULL(IFNULL(ItemFeature.ValueEnum, ProductFeature.ValueEnum), 'other') = NEW.ItemType;
+	DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+	
+	OPEN cur;
+	
+	insert_loop: LOOP
+		FETCH cur INTO ItemId;
+		IF done THEN
+			LEAVE insert_loop;
+		END IF;
+		
+		INSERT INTO DonationTasksProgress (DonationId, `TaskId`, ItemCode, Completed) VALUES (NEW.DonationId, NEW.Id, ItemId, 0);
+	END LOOP;
+	
+	CLOSE cur;
+END;");
+					$this->exec("DROP TRIGGER IF EXISTS CascadeItemCodeUpdateForReal");
+					$this->exec("
+CREATE TRIGGER CascadeItemCodeUpdateForReal
+BEFORE UPDATE
+ON Item
+FOR EACH ROW
+BEGIN
+	IF(NEW.Code <> OLD.Code) THEN
+		SET FOREIGN_KEY_CHECKS = 0;
+		UPDATE ItemFeature
+		SET Code=NEW.Code
+		WHERE Code=OLD.Code;
+		UPDATE Tree
+		SET Ancestor=NEW.Code
+		WHERE Ancestor=OLD.Code;
+		UPDATE Tree
+		SET Descendant=NEW.Code
+		WHERE Descendant=OLD.Code;
+		UPDATE DonationItem
+		SET Code=NEW.Code
+		WHERE Code=OLD.Code;
+		UPDATE DonationTasksProgress
+		SET ItemCode=NEW.Code
+		WHERE ItemCode=OLD.Code;
+		SET FOREIGN_KEY_CHECKS = 1;
+	END IF;
+END;");
+						break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}

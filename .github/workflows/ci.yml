@@ -45,7 +45,7 @@ jobs:
 
       - name: PHPCS linting
         run: |
-          composer exec -- phpcs --report=checkstyle --ignore=*.min.css src public
+          composer exec -- phpcs --report=checkstyle --ignore-platform-req=ext-zip --ignore=*.min.css src public
 
       # sudo apt-get install mariadb-client
       # mysqladmin ping --user=root --password=root --host=127.0.0.1 --protocol=tcp --port=3306

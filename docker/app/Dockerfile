@@ -10,6 +10,8 @@ ENV PROFILER=${PROFILER}
 ENV DEVELOPMENT=${DEVELOPMENT}
 
 RUN docker-php-ext-install pdo_mysql
+RUN apk add libzip-dev
+RUN docker-php-ext-install zip
 
 # Create server root directory and enter it
 RUN mkdir -p /var/www/html

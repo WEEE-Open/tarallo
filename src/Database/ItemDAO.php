@@ -495,6 +495,7 @@ EOQ
 		$this->database->treeDAO()->getPathTo($head);
 		$this->database->featureDAO()->getFeaturesAll($flat);
 		$this->database->productDAO()->getProductsAll($flat);
+		$this->database->donationsDAO()->addDonationsToItem($head);
 		$this->getExtraData($head);
 
 		return $head;
@@ -635,5 +636,68 @@ LIMIT $limit"
 			}
 		}
 		return $array;
+	}
+
+	public function getTypesForItemCodes($list)
+	{
+		if (sizeof($list) == 0) return array();
+		$pdo = $this->getPDO();
+		$prefix = $itemsList = '';
+		foreach ($list as $item)
+		{
+			$itemsList .= $prefix . $pdo->quote($item);
+			$prefix = ', ';
+		}
+		$statement = $pdo->prepare(
+			"SELECT Item.Code AS Code, ItemFeature.ValueEnum AS ItemValue, ProductFeature.ValueEnum AS ProductValue
+FROM Item
+LEFT JOIN ItemFeature ON Item.Code = ItemFeature.Code AND ItemFeature.Feature = 'type'
+LEFT JOIN ProductFeature ON Item.Brand = ProductFeature.Brand AND Item.Model = ProductFeature.Model AND Item.Variant = ProductFeature.Variant AND ProductFeature.Feature = 'type'
+WHERE Item.Code IN ($itemsList);"
+		);
+		$missingItems = array_merge(array(), $list);
+		$output = array();
+		try {
+			$success = $statement->execute();
+			$array = $statement->fetchAll(\PDO::FETCH_ASSOC);
+			foreach($array as $thing) {
+				if (isset($thing["ProductValue"]) || isset($thing["ItemValue"])) {
+					$output[$thing["Code"]] = $thing["ItemValue"] ?? $thing["ProductValue"];
+				} else {
+					$output[$thing["Code"]] = null;
+				}
+				unset($missingItems[array_search($thing["Code"], $missingItems)]);
+			}
+			foreach($missingItems as $missing) {
+				$output[$missing] = null;
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+
+		return $output;
+	}
+
+	public function checkItemListAllExist($list)
+	{
+		if (sizeof($list) == 0) return true;
+		$pdo = $this->getPDO();
+		$prefix = $itemsList = '';
+		foreach ($list as $item)
+		{
+			$itemsList .= $prefix . $pdo->quote($item);
+			$prefix = ', ';
+		}
+		$statement = $pdo->prepare(
+			"SELECT COUNT(`Code`) AS Total FROM Item WHERE Code IN ($itemsList) AND `DeletedAt` IS NULL"
+		);
+		try {
+			$success = $statement->execute();
+			$result = $statement->fetch(\PDO::FETCH_ASSOC);
+			if ($result["Total"] == sizeof($list)) return true;
+			return false;
+		} finally {
+			$statement->closeCursor();
+		}
 	}
 }
