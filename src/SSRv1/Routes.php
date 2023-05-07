@@ -88,6 +88,7 @@ trait Routes
 				);
 				$r->get('/info/locations', [User::AUTH_LEVEL_RO, [Controller::class, 'infoLocations']]);
 				$r->get('/info/todo', [User::AUTH_LEVEL_RO, [Controller::class, 'infoTodo']]);
+				$r->get('/info/credits', [User::AUTH_LEVEL_RO, [Controller::class, 'infoCredits']]);
 			},
 			[
 				'cacheFile' => self::CACHEFILE,
