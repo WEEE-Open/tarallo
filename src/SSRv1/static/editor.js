@@ -5,13 +5,11 @@
 	let featureIdsCounter = 0;
 
 	// Beamed from the server to here in a giant JSON
-	let featureNames = new Map();
-	let featureExplainers = new Map();
-	let featureTypes = new Map();
-	let featureValues = new Map();
-	let featureValuesTranslated = new Map();
-	let featureDefaultsItems = new Map();
-	let featureDefaultsProducts = new Map();
+	if (window.featureMaps === undefined) {
+		throw new Error("features.js must be included before");
+	}
+
+	const {featureNames, featureExplainers, featureTypes, featureValues, featureValuesTranslated, featureDefaultsItems, featureDefaultsProducts} = await window.featureMaps;
 
 	// Set and unset as needed by the client
 	let fadingErrors = new Map();
@@ -22,52 +20,6 @@
 		select.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
 	}
 
-	// Get the giant JSON
-	let response = await fetch('/features.json', {
-		headers: {
-			'Accept': 'application/json'
-		},
-		method: 'GET',
-		credentials: 'include',
-	});
-
-	if (response.ok) {
-		let payload = await response.json();
-
-		// Rebuild the Maps. These were previously precomputed.
-		let features = payload["features"];
-		for (let group of Object.keys(features)) { // Keys are group IDs
-			let featuresInGroup = features[group]; // Features from a group
-			for (let feature of featuresInGroup) { // For each feature, build Maps
-				featureTypes.set(feature.name, feature.type);
-				// noinspection JSUnresolvedVariable
-				featureNames.set(feature.name, feature.printableName);
-				// noinspection JSUnresolvedVariable
-				if (feature.type === 'e') {
-					featureValues.set(feature.name, Object.keys(feature.values));
-					featureValuesTranslated.set(feature.name, Object.values(feature.values));
-				}
-			}
-		}
-
-		let explanations = payload["explains"];
-		for (let feature of Object.keys(explanations)) {
-			featureExplainers.set(feature, explanations[feature])
-		}
-
-		let defaults = payload["defaults"];
-		for (let type of Object.keys(defaults)) { // Keys are types
-			featureDefaultsItems.set(type, defaults[type]) // Value is a list of feature names
-		}
-
-		// Same as above
-		defaults = payload["products"];
-		for (let type of Object.keys(defaults)) {
-			featureDefaultsProducts.set(type, defaults[type])
-		}
-	} else {
-		console.error(response);
-	}
 
 	// Enable editor buttons, if some have been rendered server-side
 	// noinspection JSUnresolvedVariable
@@ -1700,19 +1652,46 @@
 		}
 	};
 
-	// For search
-	window.featureTypes = featureTypes;
-	window.featureValues = featureValues;
-	window.featureValuesTranslated = featureValuesTranslated;
+	/**
+	 * Add divs that disappear randomly from contentEditable elements
+	 * and fixes other stochastic events since browser apparently
+	 * and hopelessly bork contentEditable in some subtle and innovative
+	 * way with each minor release.
+	 *
+	 * @param {HTMLElement} element
+	 */
+	function fixDiv(element)
+	{
+		for (let node of element.childNodes) {
+			if (node.nodeType === 3) {
+				let div = document.createElement('div');
+				div.textContent = node.textContent;
+				element.insertBefore(div, node);
+				element.removeChild(node);
+
+				// Dima Viditch is the only person in the universe that has figured this out: https://stackoverflow.com/a/16863913
+				// Nothing else worked. NOTHING.
+				// ...on Firefox, at least. The code below, obtained via trial and error, seems to work on both Firefox and Chrome.
+				//let wrongSelection = window.getSelection();
+				//let pointlessRange = document.createRange();
+				//div.textContent = '?';
+				//pointlessRange.selectNodeContents(div);
+				//wrongSelection.removeAllRanges();
+				//wrongSelection.addRange(pointlessRange);
+				//document.execCommand('delete', false, null);
+
+				let sel = window.getSelection();
+				// First (and only) child is a text node...
+				sel.collapse(div.childNodes[0], div.childNodes[0].textContent.length);
+			} else if (!node.hasChildNodes()) {
+				// Solitary <br> that escaped a <div> (happens somewhat randomly when deleting text): nuke it
+				element.removeChild(node);
+			}
+		}
+	}
+
+	//TODO: These probably should move over to features.js too
 	window.unitValueToPrintable = valueToPrintable;
 	window.unitPrintableToValue = printableToValue;
 	window.unitNameToType = nameToType;
-
-	$('.locationAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300},formatResult:(l) => {
-		return {
-			id: l.name,
-			text: l.name,
-			html: `<div>${l.name} ${l.color ? `<i class="fa fa-square ml-1" title="${l.color}" style="color:${l.color}"></i>` : ""}</div>`
-		}
-	}});
 }());

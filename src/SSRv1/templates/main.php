@@ -21,6 +21,8 @@ $tooltips = $tooltips ?? false;
 	<link rel="stylesheet" href="/static/bootstrap.custom.min.css">
 	<link rel="stylesheet" href="/static/main.css">
 	<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" type="text/css" />
+	<script src="/static/util.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
 	<script src="https://unpkg.com/@popperjs/core@2"></script>
 	<script src="https://unpkg.com/tippy.js@6"></script>
@@ -29,6 +31,9 @@ $tooltips = $tooltips ?? false;
 	<script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/gh/xcash/bootstrap-autocomplete@v2.3.7/dist/latest/bootstrap-autocomplete.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js" integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.polyfills.min.js"></script>
+
 	<?php if (defined('TARALLO_DEVELOPMENT_ENVIRONMENT') && TARALLO_DEVELOPMENT_ENVIRONMENT && (!defined('TARALLO_DEVELOPMENT_DISABLE_COLORS'))) : ?>
 	<style>
 		.thead-dark th, .navbar-dark {

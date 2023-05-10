@@ -37,4 +37,5 @@
 	<?php $this->insert('featuresList'); ?>
 </template>
 <!--suppress JSUnusedLocalSymbols -->
+<script src="/static/features.js"></script>
 <script src="/static/editor.js"></script>

@@ -3,6 +3,7 @@
 namespace WEEEOpen\Tarallo\APIv2;
 
 use FastRoute;
+use Laminas\Diactoros\Response\TextResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -15,6 +16,7 @@ use WEEEOpen\Tarallo\DuplicateBulkIdentifierException;
 use WEEEOpen\Tarallo\ErrorHandler;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\HTTP\AuthManager;
+use WEEEOpen\Tarallo\HTTP\AuthorizationException;
 use WEEEOpen\Tarallo\HTTP\AuthTokenManager;
 use WEEEOpen\Tarallo\HTTP\AuthValidator;
 use WEEEOpen\Tarallo\HTTP\DatabaseConnection;
@@ -30,7 +32,7 @@ use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\ProductException;
-use WEEEOpen\Tarallo\SearchException;
+use WEEEOpen\Tarallo\SearchDiff;
 use WEEEOpen\Tarallo\StateChangedException;
 use WEEEOpen\Tarallo\SSRv1\Summary\Summary;
 use WEEEOpen\Tarallo\User;
@@ -617,34 +619,57 @@ class Controller implements RequestHandlerInterface
 		}
 	}
 
-	public static function doSearch(ServerRequestInterface $request): ResponseInterface
+	public static function newSearch(ServerRequestInterface $request): ResponseInterface
 	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		/** @var User $user */
 		$user = $request->getAttribute('User');
 		$payload = $request->getAttribute('ParsedBody', []);
-		$parameters = $request->getAttribute('parameters', []);
 
 		Validation::validateRequestBodyIsArray($payload);
 
-		$id = Validation::validateOptionalString($parameters, 'id');
-
-		if ($id) {
-			// Refining a search: must be owner or admin
-			$username = $db->searchDAO()->getOwnerUsername($id);
-			if ($username !== $user->uid) {
-				AuthValidator::ensureLevel($user, User::AUTH_LEVEL_ADMIN);
-			}
-		}
-
 		$search = SearchBuilder::ofArray($payload);
-		$resultId = $db->searchDAO()->search($search, $user, $id);
+		$resultId = $db->searchDAO()->searchNew($search, $user->uid);
 
 		return new JsonResponse($resultId);
 	}
 
-	public static function getSearch(ServerRequestInterface $request): ResponseInterface
+	public static function updateSearch(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		/** @var User $user */
+		$user = $request->getAttribute('User');
+		$parameters = $request->getAttribute('parameters', []);
+		$id = Validation::validateHasString($parameters, 'id');
+		$payload = $request->getAttribute('ParsedBody', []);
+
+		Validation::validateRequestBodyIsArray($payload);
+
+		$search = $db->searchDAO()->getSearchById($id);
+		if ($user->uid !== $search->getOwner()) {
+			AuthValidator::ensureLevel($user, User::AUTH_LEVEL_ADMIN);
+		}
+
+		$diff = new SearchDiff($payload);
+		$res = $db->searchDAO()->searchUpdate($search, $diff);
+
+		return new JsonResponse($res);
+	}
+
+	public static function getSearchQuery(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+		$id = Validation::validateHasString($parameters, 'id');
+		$search = $db->searchDAO()->getSearchById($id);
+
+		return new JsonResponse($search);
+	}
+
+	public static function getSearchResults(ServerRequestInterface $request): ResponseInterface
 	{
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
@@ -780,7 +805,7 @@ class Controller implements RequestHandlerInterface
 		try {
 			$explosion = Validation::explodeFeatureValuePair($feature);
 		} catch (\InvalidArgumentException $e) {
-			throw new SearchException($e->getMessage());
+			throw new InvalidParameterException('feature', $feature, $e->getMessage(), 0, $e);
 		}
 		$data = $db->StatsDAO()->getItemByNotFeature(
 			new Feature($explosion[0], $explosion[1]),
@@ -832,13 +857,9 @@ class Controller implements RequestHandlerInterface
 		if ($filter !== null) {
 			try {
 				$explosion = Validation::explodeFeatureValuePair($filter);
-			} catch (\InvalidArgumentException $e) {
-				throw new SearchException(null, null, $e->getMessage(), 0, $e);
-			}
-			try {
 				$filter = new Feature($explosion[0], $explosion[1]);
 			} catch (\InvalidArgumentException $e) {
-				throw new SearchException($explosion[0], $explosion[1], $e->getMessage(), 0, $e);
+				throw new InvalidParameterException('filter', $filter, $e->getMessage(), 0, $e);
 			}
 		}
 

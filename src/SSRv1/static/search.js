@@ -1,6 +1,16 @@
 (async function () {
 	"use strict";
 
+	let defaultOnBeforeUnload = window.onbeforeunload;
+	window.onbeforeunload = null;
+
+	// Beamed from the server to here in a giant JSON
+	if (window.featureMaps === undefined) {
+		throw new Error("features.js must be included before");
+	}
+
+	const {featureTypes, featureValues, featureValuesTranslated} = await window.featureMaps;
+
 	let rowCounter = 0;
 	let searchRows = document.getElementById("searchrows");
 
@@ -10,13 +20,225 @@
 	const operatorsPartial = new Map([['~', '≈'], ['!~', '≉']]);
 
 	document.getElementById('searchbuttons').addEventListener('click', buttonsClick);
-	document.getElementById('searchform').addEventListener('submit', searchButtonClick);
+	let searchForm = document.getElementById('searchform');
+	searchForm.addEventListener('submit', searchButtonClick);
+
 	let searchButton = document.getElementById('searchbutton');
 	let searchCodeButton = document.getElementById('search-control-code');
 	let searchLocationButton = document.getElementById('search-control-location');
+	let searchSortButton = document.getElementById('search-control-sort');
+
+	const queryToRowType = new Map([["code", "search-template-code"], ["feature", "search-template-features"], ["c_feature", "search-template-ancestor"], ["location", "search-template-location"], ["sort", "search-template-sort"]]);
+
+	let searchId = searchForm.dataset.searchId;
+	let isRefine = !!searchId;
+
+	let searchQuery = null;
+	if (isRefine) {
+		let searchRefineButton = document.getElementById("refinecollapsebutton")
+		searchRefineButton.disabled = true;
+		searchQuery = fetch(`/v2/search/query/${searchId}`, {
+			headers: {
+				'Accept': 'application/json',
+				'Content-Type': 'application/json'
+			},
+			method: 'GET',
+			credentials: 'include'
+		}).then(r => {
+			if (!r.ok) {
+				throw new Error(`Couldn't fetch search query: HTTP ${r.status} ${r.statusText}`);
+			}
+			return r.json();
+		}).then(q => {
+			let searchQuery = {};
+			for (let [key, value] of Object.entries(q)) {
+				let rowType = queryToRowType.get(key);
+				if (!rowType) {
+					throw new Error(`Unknown query row type: ${key}`);
+				}
+
+				if (!Array.isArray(value)) {
+					throw new Error(`Query contains non array valued key`);
+				}
+
+				if (key === "location" && value.length > 0) {
+					addSearchRow(rowType, value);
+				} else {
+					for (const row of value) {
+						addSearchRow(rowType, row);
+					}
+				}
+
+				// Turn array into an object for easier access
+				searchQuery[key] = new Map(value.map(o => [o.key, o.value]));
+			}
+
+			searchRefineButton.disabled = false;
+			toggleSearchButton(true);
+
+			return searchQuery;
+		});
+	}
 
 	// Disable search button, since browser keep its state in memory even if the page is refreshed
 	toggleSearchButton();
+
+	function onLocationInput(e) {
+		let value = e.detail.value;
+		let t = e.detail.tagify;
+		let url = t.DOM.originalInput.dataset.url;
+
+		onLocationInput.abortController && onLocationInput.abortController.abort();
+		onLocationInput.abortController = new AbortController();
+
+		let signal = onLocationInput.abortController.signal;
+
+		t.loading(true).dropdown.hide();
+		fetch(`${url}?q=${value}`, { signal })
+			.then(r => r.json())
+			.then(r => {
+				let m = r.map(e => ({value: e.name, color: e.color}));
+				t.whitelist = [...m, ...t.value];
+			})
+			.finally(() => {
+				setTimeout(() => {
+					t.loading(false).dropdown.show(value);
+				}, 50);
+			});
+	}
+
+	function transformLocationTag(t) {
+		if (t.color) {
+			t.style = `border:1px solid ${t.color}; border-radius: 3px;`;
+		}
+		if (t.bgDark) {
+			t.style = t.style ? t.style : "" + "--tag-bg:#DFDFAF;";
+		}
+	}
+
+	// This is to prevent from hitting enter and deleting the field instead of actually running the search
+	function enterHandler(ev) {
+		if (ev.key === "Enter") {
+			ev.preventDefault();
+			$(ev.target).closest("form")[0].requestSubmit();
+		}
+	}
+
+	function addSearchRow(rowType, preFill)
+	{
+		let template = document.getElementById(rowType).content;
+		let frag = document.importNode(template, true);
+
+		switch (rowType) {
+			case "search-template-code":
+				$(frag).find('.basicAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300}});
+				break;
+			case "search-template-location":
+				let input = $(frag).find('input')[0];
+				let tagify = new Tagify(input, {
+					whitelist: preFill ? preFill.map(e => e.value) : [],
+					dropdown: {
+						highlightFirst: true,
+					},
+					enforceWhitelist: true,
+					createInvalidTags: false,
+					skipInvalid: true,
+					transformTag: transformLocationTag,
+					editTags: false
+				});
+				input.tagifyRef = tagify;
+
+				tagify.on('input', debounce(onLocationInput, 200));
+
+				// Doesn't work, tagify uses a bizarre custom element with a broken preventDefault and breaks the original event
+				//tagify.on('keydown', ev => enterHandler(ev.detail.event);
+				break;
+		}
+
+		// Set new ids
+		let id = rowCounter++;
+		let node = frag.getElementById("search-row-container-new");
+		node.id = `search-row-container-${id}`;
+
+		let replace = node.querySelectorAll('[for="search-row-new"], [id="search-row-new"]');
+		let rowElCounter = 1;
+		for (let el of replace) {
+			if (el.getAttribute("for") === "search-row-new") {
+				el.setAttribute("for", `search-row-${id}-${rowElCounter}`);
+			}
+			if (el.getAttribute("id") === "search-row-new") {
+				el.setAttribute("id", `search-row-${id}-${rowElCounter}`);
+				rowElCounter++;
+			}
+		}
+
+		let inputs = $(node).find("input, select");
+		// This is to prevent from hitting enter and deleting the field instead of actually running the search
+		inputs.on('keydown', enterHandler);
+
+		// Handle changes
+		inputs.on('change', debounce(ev => toggleSearchButton(), 200));
+
+		// Add features list to dropdown, if present
+		let features = node.querySelector('.allfeatures');
+		if (features) {
+			features.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
+			let comparison = node.querySelector('.comparison');
+			if (comparison) {
+				features.addEventListener('change', (ev) => { updateSearchRowFromFeature(node, ev.target) })
+				comparison.addEventListener('change', (ev) => {
+					updateSearchRowFromComparison(node, ev.target, features)
+				})
+				updateSearchRowFromFeature(node, features);
+			}
+		}
+
+		// Listen to the delete button
+		node.querySelector('button.delete')
+			.addEventListener('click', () => {
+				node.remove();
+				toggleSearchButton();
+			});
+
+		// Enable tooltips
+		tippy('[data-tippy-content]');
+
+		// Prefill fields if needed
+		if (preFill) {
+			if (preFill.key !== undefined) {
+				node.dataset.typeId = preFill.key;
+			}
+
+			switch (rowType) {
+				case "search-template-code":
+					$(node).find('input').val(preFill.value);
+					break;
+				case "search-template-features":
+				case "search-template-ancestor": {
+					let features = $(node).find('select.allfeatures')[0];
+					features.value = preFill.value[0];
+					updateSearchRowFromFeature(node, features);
+
+					let comparison = $(node).find('select.comparison')[0];
+					comparison.value = preFill.value[1];
+					updateSearchRowFromComparison(node, comparison, features);
+					$(node).find('.comparisonvalue > input, .comparisonvalue > select').val(preFill.value[2]);
+					break;
+				}
+				case "search-template-location":
+					$(node).find('input')[0].tagifyRef.addTags(preFill.map(l => ({value: l.value, key: l.key, bgDark: "red"})));
+					break;
+				case "search-template-sort":
+					$(node).find('select.allfeatures').val(preFill.value.feature);
+					$(node).find('select.sorting').val(preFill.value.direction);
+					break;
+				default:
+					throw new Error(`Unknown rowType: ${rowType}`);
+			}
+		}
+
+		searchRows.appendChild(node);
+	}
 
 	/**
 	 * Handle clicking the "Add..." search buttons
@@ -30,76 +252,33 @@
 		}
 
 		// Create search row from template
-		let templateName = ev.target.dataset.template;
-		let template = document.importNode(document.getElementById(templateName).content, true);
-
-		if (templateName === "search-template-code") {
-			template.children.forEach((ch) => {
-				$(ch).find('.basicAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300}});
-			});
-		} else if (templateName === "search-template-location") {
-			template.children.forEach((ch) => {
-				$(ch).find('.basicAutoComplete').autoComplete({minLength:3,resolverSettings:{requestThrottling:300},formatResult:(l) => {
-					return {
-						id: l.name,
-						text: l.name,
-						// phpcs:ignore
-						html: `<div>${l.name} ${l.color ? `<i class="fa fa-square ml-1" title="${l.color}" style="color:${l.color}"></i>` : ""}</div>`
-					}
-					}});
-			});
-		}
-
-		searchRows.appendChild(template);
-		rowCounter++;
-
-		// Set new ids
-		let inserted = searchRows.querySelector("#search-row-container-new");
-		inserted.id = "search-row-container-" + rowCounter;
-		let replace = inserted.querySelectorAll('[for="search-row-new"], [id="search-row-new"]');
-		let rowElCounter = 1;
-		for (let el of replace) {
-			if (typeof el.attributes["for"] !== "undefined" && el.attributes["for"].nodeValue === "search-row-new") {
-				el.attributes["for"].nodeValue = "search-row-" + rowCounter + "-" + rowElCounter;
-			}
-			if (typeof el.attributes["id"] !== "undefined" && el.attributes["id"].nodeValue === "search-row-new") {
-				el.attributes["id"].nodeValue = "search-row-" + rowCounter + "-" + rowElCounter++;
-			}
-			// This is to prevent from hitting enter and deleting the field instead of actually running the search
-			el.addEventListener('keydown', function (ev) {
-				if (ev.which === 13) {
-					ev.preventDefault();
-				}
-			});
-		}
-
-		// Add features list to dropdown, if present
-		let features = inserted.querySelector('.allfeatures');
-		if (features) {
-			features.appendChild(document.importNode(document.getElementById('features-select-template').content, true));
-			let comparison = inserted.querySelector('.comparison');
-			if (comparison) {
-				features.addEventListener('change', (ev) => {updateSearchRowFromFeature(ev.target.closest('.searchrow'), ev.target)})
-				comparison.addEventListener('change', (ev) => {
-					updateSearchRowFromComparison(ev.target.closest('.searchrow'), ev.target, features)
-				})
-				updateSearchRowFromFeature(inserted, features);
-			}
-		}
-		// Listen to the delete button
-		inserted.querySelector('button.delete').addEventListener('click', (ev) => { inserted.remove(); toggleSearchButton(); });
-
-		// Enable tooltips
-		tippy('[data-tippy-content]');
+		addSearchRow(ev.target.dataset.template);
 
 		// Enable search button
 		toggleSearchButton();
 	}
 
-	function toggleSearchButton()
+	function toggleSearchButton(noCheck)
 	{
-		searchButton.disabled = searchRows.childElementCount <= 0;
-		let codes = 0, locations = 0;
+		if (isRefine && !noCheck) {
+			window.onbeforeunload = null;
+			searchButton.disabled = true;
+			searchQuery.then(q => {
+				let diff = getDiff(q);
+				if (Object.entries(diff).reduce((acc, cv) => acc || cv[1].length !== 0, false)) {
+					searchButton.disabled = false;
+					window.onbeforeunload = defaultOnBeforeUnload;
+				}
+			});
+		} else {
+			searchButton.disabled = searchRows.childElementCount <= 0;
+		}
+
+		/* TODO: Move these to another function so they don't need to be called so often
+		*   they only need to be re-checked on row changes */
+		/* TODO: There is also no point to counting them like this, there can never be more than 1
+		*   without external DOM manipulation */
+		let codes = 0, locations = 0, sorts = 0;
 		for (let el of searchRows.children) {
 			if (el.classList.contains("search-code")) {
 				codes++;
@@ -107,10 +286,14 @@
 			if (el.classList.contains("search-location")) {
 				locations++;
 			}
+			if (el.classList.contains("search-sort")) {
+				sorts++;
+			}
 		}
 
 		searchCodeButton.disabled = codes > 0;
 		searchLocationButton.disabled = locations > 0;
+		searchSortButton.disabled = sorts > 0;
 	}
 
 	/**
@@ -126,7 +309,7 @@
 		}
 
 		let comparisonElement = rowContainer.querySelector('.comparison');
-		let type = window.featureTypes.get(features.value);
+		let type = featureTypes.get(features.value);
 
 		if (comparisonElement.dataset.type !== type) {
 			while (comparisonElement.lastChild) {
@@ -187,7 +370,7 @@
 			blank.disabled = true;
 			comparisonValue.appendChild(blank);
 		} else {
-			let type = window.featureTypes.get(features.value);
+			let type = featureTypes.get(features.value);
 			let name = features.value;
 			if (type === 'e') {
 				let select = createFeatureValueSelector(type, name);
@@ -197,6 +380,10 @@
 				comparisonValue.appendChild(input);
 			}
 		}
+
+		let inputs = $(comparisonValue).find('select, input');
+		inputs.on('keydown', enterHandler);
+		inputs.on('change', debounce(ev => toggleSearchButton(), 200));
 	}
 
 	/**
@@ -215,6 +402,67 @@
 		}
 	}
 
+	function getDiff(prev)
+	{
+		let code = [], feature = [], c_feature = [], location = [], sort = [];
+		let rows = searchRows.querySelectorAll('.searchrow');
+		for (let row of rows) {
+			let key = row.dataset.typeId ? parseInt(row.dataset.typeId) : null;
+			if (row.classList.contains('search-code')) {
+				console.log(typeof key);
+				code.push({key, value: row.querySelector('.comparisonvalue').value});
+			} else if (row.classList.contains('search-features')) {
+				feature.push({key, value: getSelectedFeatures(row)});
+			} else if (row.classList.contains('search-ancestor')) {
+				c_feature.push({key, value: getSelectedFeatures(row)});
+			} else if (row.classList.contains('search-location')) {
+				let locs = row.querySelector('input.comparisonvalue').tagifyRef.value;
+				location = location.concat(locs.map(e => { return {key: e.key !== undefined ? e.key : null, value: e.value}; }));
+			} else if (row.classList.contains('search-sort')) {
+				sort.push({key, value: {feature: row.querySelector('.allfeatures').value, direction: row.querySelector('.sorting').value}});
+			}
+		}
+
+		let diff = {code, feature, c_feature, location, sort};
+
+		for (const [type, filters] of Object.entries(prev)) {
+			for (const [key, value] of filters.entries()) {
+				let idx = diff[type].findIndex(e => e.key === key);
+				if (idx === -1) {
+					diff[type].push({key, value: null});
+				} else {
+					switch (type) {
+						case 'code':
+						case 'location':
+							if (diff[type][idx].value !== value) {
+								continue;
+							}
+							break;
+						case 'feature':
+						case 'c_feature':
+							if (diff[type][idx].value[0] !== value[0]
+								|| diff[type][idx].value[1] !== value[1]
+								|| diff[type][idx].value[2] !== value[2]) {
+								continue;
+							}
+							break;
+						case 'sort':
+							if (diff[type][idx].value['feature'] !== value['feature']
+								|| diff[type][idx].value['direction'] !== value['direction']) {
+								continue;
+							}
+							break;
+						default:
+							throw new Error(`Unreachable`);
+					}
+					diff[type].splice(idx, 1);
+				}
+			}
+		}
+
+		return diff;
+	}
+
 	async function searchButtonClick(ev)
 	{
 		// The answers that did it: https://stackoverflow.com/a/39470019
@@ -225,6 +473,8 @@
 			return;
 		}
 
+		const query = getDiff(isRefine ? await searchQuery : {});
+
 		let error = document.getElementById('search-error');
 		let tip = document.getElementById('search-tip');
 		error.classList.add('d-none');
@@ -232,63 +482,19 @@
 			tip.classList.add('d-none');
 		}
 
-		let id = null;
-		if (ev.target.dataset.searchId) {
-			id = ev.target.dataset.searchId;
-		}
 
-			let query = {};
-			// query.code = [];
-			query.locations = [];
-			query.features = [];
-			query.ancestor = [];
-			query.sort = {};
-
-		let rows = searchRows.querySelectorAll('.searchrow');
-		for (let row of rows) {
-			if (row.classList.contains('search-code')) {
-				query.code = row.querySelector('.comparisonvalue').value;
-			} else if (row.classList.contains('search-location')) {
-				query.locations.push(row.querySelector('.comparisonvalue').value);
-			} else if (row.classList.contains('search-features')) {
-				query.features.push(getSelectedFeatures(row));
-			} else if (row.classList.contains('search-ancestor')) {
-				query.ancestor.push(getSelectedFeatures(row));
-			} else if (row.classList.contains('search-sort')) {
-				query.sort[row.querySelector('.allfeatures').value] = row.querySelector('.sorting').value
-			}
-		}
-
-		// if(query.code.length <= 0) {
-		// 	delete query.code;
-		// }
-		if (query.locations.length <= 0) {
-			delete query.locations;
-		}
-		if (query.features.length <= 0) {
-			delete query.features;
-		}
-		if (query.ancestor.length <= 0) {
-			delete query.ancestor;
-		}
-		if (query.sort.length <= 0) {
-			delete query.sort;
-		}
-
-			let uri, method;
-
-		if (id === null) {
+		let uri, method;
+		if (!isRefine) {
 			uri = '/v2/search';
 			method = 'POST';
 		} else {
-			uri = '/v2/search/' + id;
+			uri = '/v2/search/' + searchId;
 			method = 'PATCH';
 		}
 
 		console.log(JSON.stringify(query));
 
-		let oldbeforeunload = window.onbeforeunload;
-		window.onbeforeunload = undefined;
+		window.onbeforeunload = null;
 		searchButton.disabled = true;
 
 		try {
@@ -319,7 +525,7 @@
 			}
 		} finally {
 			searchButton.disabled = false;
-			window.onbeforeunload = oldbeforeunload;
+			window.onbeforeunload = defaultOnBeforeUnload;
 		}
 	}
 
@@ -339,8 +545,8 @@
 		let valueElement;
 		switch (type) {
 			case 'e':
-				let options = window.featureValues.get(name);
-				let optionsTranslated = window.featureValuesTranslated.get(name);
+				let options = featureValues.get(name);
+				let optionsTranslated = featureValuesTranslated.get(name);
 				let optionsArray = [];
 				for (let i = 0; i < options.length; i++) {
 					let option = document.createElement('option');

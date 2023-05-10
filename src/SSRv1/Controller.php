@@ -29,6 +29,7 @@ use WEEEOpen\Tarallo\Normalization;
 use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\ProductIncomplete;
+use WEEEOpen\Tarallo\Search;
 use WEEEOpen\Tarallo\SessionLocal;
 use WEEEOpen\Tarallo\SSRv1\Summary\Summary;
 use WEEEOpen\Tarallo\UserSSO;
@@ -1188,11 +1189,14 @@ class Controller implements RequestHandlerInterface
 			$templateParameters = ['searchId' => null];
 		} else {
 			$perPage = 10;
+			//TODO: Ideally getSearchById would handle all of the below calls and fully populate a Search
+			$search = $db->searchDAO()->getSearchById($id);
 			$results = $db->searchDAO()->getResults($id, $page, $perPage, $depth);
 			$total = $db->searchDAO()->getResultsCount($id);
 			$pages = (int) ceil($total / $perPage);
 			$templateParameters = [
 				'searchId' => $id,
+				'search' => $search,
 				'page' => $page,
 				'pages' => $pages,
 				'total' => $total,
@@ -1655,7 +1659,6 @@ class Controller implements RequestHandlerInterface
 			$queue[] = $function;
 		}
 		$queue[] = new TemplateRender();
-
 		$relayBuilder = new RelayBuilder();
 		$relay = $relayBuilder->newInstance($queue);
 

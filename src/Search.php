@@ -2,70 +2,124 @@
 
 namespace WEEEOpen\Tarallo;
 
-class Search
+class Search implements \JsonSerializable
 {
-	private $code = null;
-	public $results = 0;
-	public $searchCode;
-	public $searchFeatures;
-	public $searchAncestors;
-	public $searchLocations;
-	public $sort;
-	private $sortOnly = false;
+	public const FIELDS = ["code", "feature", "c_feature", "location", "sort"];
+
+	// Ideally these would be an enum
+	public $filters = ["code" => [], "feature" => [], "c_feature" => [], "location" => [], "sort" => []];
+
+	private $id = null;
+	private $owner = null;
+
+	// TODO: Implement multi-sorting
 
 	/**
 	 * @param string|null $code Filter by code (% and _ are allowed, % is appended at the end anyway)
-	 * @param SearchTriplet[]|null $features Search by feature values in ancestor items
-	 * @param SearchTriplet[]|null $ancestors Search by ancestor features
-	 * @param ItemCode[]|null $locations Only descendants of these items will be searched
+	 * @param SearchTriplet[]|string[][]|null $features Search by feature values in ancestor items
+	 * @param SearchTriplet[]|string[][]|null $ancestors Search by ancestor features
+	 * @param ItemCode[]|string[][]|null $locations Only descendants of these items will be searched
 	 * @param string[]|null $sorts Map (associative array) from feature name to order (+ or -)
 	 */
 	public function __construct(
 		string $code = null,
-		array $features = null,
-		array $ancestors = null,
-		array $locations = null,
-		array $sorts = null
+		array $features = [],
+		array $ancestors = [],
+		array $locations = [],
+		array $sorts = []
 	) {
-		$this->filter($code, $features, $ancestors, $locations);
-		$this->sort($sorts);
-		$this->validate();
-	}
-
-	private function filter(
-		string $code = null,
-		array $features = null,
-		array $ancestors = null,
-		array $locations = null
-	) {
-		$this->searchCode = $code;
-		$this->searchFeatures = $features;
-		$this->searchAncestors = $ancestors;
-		$this->searchLocations = $locations;
-	}
-
-	/**
-	 * @return string|null
-	 * @deprecated
-	 */
-	public function getCode()
-	{
-		return $this->code;
-	}
-
-	/**
-	 * @param string[]|null $sorts Map (associative array) from feature name to order (+ or -)
-	 */
-	private function sort(array $sorts = null)
-	{
-		if ($sorts !== null) {
-			if (count($sorts) > 1) {
-				throw new \InvalidArgumentException('Sorting by more than one field is currently unsupported');
-			} elseif (count($sorts) === 0) {
-				$sorts = null;
-			}
+		if ($code) {
+			$this->filters["code"][0] = $code;
 		}
-		$this->sort = $sorts;
+
+		foreach ($features as $f) {
+			$this->filters["feature"][] = $this->createFilter("feature", $f);
+		}
+
+		foreach ($ancestors as $a) {
+			$this->filters["c_feature"][] = $this->createFilter("c_feature", $a);
+		}
+
+		foreach ($locations as $l) {
+			$this->filters["location"][] = $this->createFilter("location", $l);
+		}
+
+		foreach ($sorts as $s => $dir) {
+			$this->filters["sort"][] = $this->createFilter("sort", ["feature" => $s, "direction" => $dir]);
+		}
+	}
+
+	private function createFilter(string $type, $value)
+	{
+		switch ($type) {
+			case "code":
+			case "sort":
+				return $value;
+			case "feature":
+			case "c_feature":
+				try {
+					if ($value[2] === null) {
+						$valueOfTheCorrectType = null;
+					} else {
+						// Create a Feature to convert strings to int/double. Then discard it and recreate it in SearchTriplet.
+						// It's a waste but happens with very few features each time, so it's not a major problem.
+						$f = Feature::ofString($value[0], trim($value[2]));
+						$valueOfTheCorrectType = $f->value;
+					}
+
+					return new SearchTriplet($value[0], $value[1], $valueOfTheCorrectType);
+				} catch (\TypeError $e) {
+					throw new SearchException("Error parsing feature $value", 0, $e);
+				}
+			case "location":
+				try {
+					$location = new ItemCode($value);
+				} catch (ValidationException $e) {
+					throw new SearchException("Invalid location $value", 0, $e);
+				}
+
+				return $location;
+			default:
+				throw new SearchException("Invalid filter type");
+		}
+	}
+
+	public function getFiltersByType(string $type)
+	{
+		switch ($type) {
+			case "code":
+				return $this->filters["code"];
+			case "feature":
+				return $this->filters["feature"];
+			case "c_feature":
+				return $this->filters["c_feature"];
+			case "location":
+				return $this->filters["location"];
+			case "sort":
+				return $this->filters["sort"];
+			default:
+				throw new \LogicException("Unknown filter type $type");
+		}
+	}
+
+	public function getOwner(): ?string
+	{
+		return $this->owner;
+	}
+
+	public function setOwner(string $user)
+	{
+		$this->owner = $user;
+	}
+
+	public function getId(): ?int
+	{
+		return $this->id;
+	}
+
+	public function setId(?int $id)
+	{
+		$this->id = $id;
 	}
 
 	/**
@@ -75,40 +129,65 @@ class Search
 	 */
 	public function isSortOnly(): bool
 	{
-		return $this->sortOnly;
+		return !empty($this->filters["sort"]) && empty($this->filters["code"]) && empty($this->filters["feature"]) && empty($this->filters["c_feature"] && empty($this->filters["location"]));
 	}
 
 	/**
-	 * Validate that there's something to search, so the search in its entirety makes sense
+	 * @param SearchDiff $diff Diff to be applied to the search
 	 *
-	 * @see filter
+	 * @return Search A new search object with the diff applied
 	 */
-	private function validate()
+	public function applyDiff(SearchDiff $diff): Search
 	{
-		$searchSomething = false;
+		$new = clone $this;
+		$new->setId(null);
 
-		if ($this->searchCode !== null) {
-			$searchSomething = true;
+		foreach ($diff->deleted as ["type" => $type, "key" => $key]) {
+			unset($new->filters[$type][$key]);
 		}
 
-		if ($this->searchFeatures !== null) {
-			$searchSomething = true;
+		foreach ($diff->updated as ["type" => $type, "key" => $key, "value" => $value]) {
+			$new->filters[$type][$key] = $new->createFilter($type, $value);
 		}
 
-		if ($this->searchAncestors !== null) {
-			$searchSomething = true;
+		foreach ($diff->added as ["type" => $type, "value" => $value]) {
+			$new->filters[$type][] = $new->createFilter($type, $value);
 		}
 
-		if ($this->searchLocations !== null) {
-			$searchSomething = true;
-		}
-
-		if (!$searchSomething) {
-			if ($this->sort === null) {
-				throw new \InvalidArgumentException('Nothing to search');
-			} else {
-				$this->sortOnly = true;
+		// Reindex filters array after a deletion
+		if (count($diff->deleted) > 0) {
+			foreach ($new->filters as &$f) {
+				$f = array_values($f);
 			}
 		}
+
+		return $new;
+	}
+
+	private function addKeys(): array
+	{
+		return array_map(function ($e) {
+			$ret = [];
+			$idx = 0;
+			foreach ($e as $value) {
+				$ret[] = ["key" => $idx++, "value" => $value];
+			}
+			return $ret;
+		}, $this->filters);
+	}
+
+	public function jsonSerialize()
+	{
+		return $this->addKeys();
+	}
+
+	/**
+	 * @param array $array Decoded JSON
+	 *
+	 * @return static
+	 */
+	public static function fromJson(array $array): self
+	{
+		return (new Search())->applyDiff(new SearchDiff($array));
 	}
 }
