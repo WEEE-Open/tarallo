@@ -13,21 +13,21 @@ $this->layout('main', ['title' => 'New donation', 'currentPage' => 'donation new
 ?>
 
 <article class="container">
-	<?php if (isset($error)): ?>
+	<?php if (isset($error)) : ?>
 	<div class="alert alert-warning" role="alert">
 		<?=$error?>
 	</div>
-	<? endif ?>
+	<?php endif ?>
 	<form class="row g-2" action="" enctype="multipart/form-data" method="POST">
 		<div class="itembuttons primary row mx-0 mt-2 justify-content-end w-100">
 			<div class="row d-flex m-0 justify-content-between mr-auto">
 				<h2 class="col-8 p-0">Donation</h2>
 			</div>
-			<?php if ($showDeleteButton ?? false): ?>
+			<?php if ($showDeleteButton ?? false) : ?>
 			<div class="btn btn-outline-danger col-4 col-sm-auto delete mb-2 mr-2">
 				<i class="fa fa-trash"></i>&nbsp;Delete
 			</div>
-			<? endif ?>
+			<?php endif ?>
 			<input type="submit" id="submit" class="d-none">
 			<label for="submit" class="btn btn-success col-4 col-sm-auto save" role="button">
 				<i class="fa fa-save"></i>&nbsp;Save

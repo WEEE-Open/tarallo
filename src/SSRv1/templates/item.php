@@ -6,14 +6,15 @@
 /** @var string|null $edit */
 /** @var bool $recursion */
 /** @var string $self */
-/** @var bool showProductButton */
+/** @var bool $showProductButton */
+
 $showProductButton = $showProductButton ?? true;
 $recursion = $recursion ?? false;
 $features = $item->getFeatures();
 $lostAt = $item->getLostAt();
 $deletedAt = $item->getDeletedAt();
 
-// Too much logic in a template, blah bla blah... this templates renders an Item in every respect,
+// Too much logic in a template, blah bla blah... this template renders an Item in every respect,
 // what would I gain by moving this logic outside and passing $works as a parameter? More code, scattering
 // templates-related stuff around (Adapter and other classes don't care if items are working or broken!),
 // duplicating information, increasing probability of introducing bugs?
@@ -35,16 +36,12 @@ if (isset($edit)) {
 	$editing = true;
 	if (strtolower($edit) === strtolower($item->getCode())) {
 		$target = true;
-	} else {
-		$target = false;
 	}
 } elseif (isset($add)) {
 	$nextItemParameters['add'] = $add;
 	$adding = true;
 	if (strtolower($add) === strtolower($item->getCode())) {
 		$target = true;
-	} else {
-		$target = false;
 	}
 }
 
@@ -122,45 +119,51 @@ endif; ?>
 		<div class="inline-alert w-auto alert-serious" role="alert"><i class="fa fa-archive"></i>&nbsp;This item has been lost on <?= $lostAt->setTimezone(new DateTimeZone('Europe/Rome'))->format('Y-m-d') ?></div>
 	<?php endif; ?>
 
-	<?php if ($item->hasDonations() && !$editing && !$adding && !$target): ?>
+	<?php if ($item->hasDonations() && !$editing && !$adding && !$target) : ?>
 	<div class="float-right" style="max-width: 400px;">
-		<?php foreach ($item->getDonations() as $donation): ?>
+		<?php foreach ($item->getDonations() as $donation) : ?>
 			<table class="table table-bordered">
 				<tr>
 					<th colspan="2" class="text-center"><a href="/donation/<?=$donation["id"]?>"><?=htmlspecialchars($donation["name"])?></a></th>
 				</tr>
-				<?php if (is_array($donation["tasksName"])): ?>
+				<?php if (is_array($donation["tasksName"])) : ?>
 					<?php $allTrue = true;
 					$i = 0;
-					foreach (array_combine($donation["tasksName"], $donation["tasksValue"]) as $taskName => $checked): ?>
+					foreach (array_combine($donation["tasksName"], $donation["tasksValue"]) as $taskName => $checked) : ?>
 						<tr>
 							<td><?=htmlspecialchars($taskName)?></td>
 							<td><div class="form-check">
-								<input class="form-check-input" type="checkbox" <?php if ($checked) echo 'checked'; ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item->getCode()?>:<?=$i?>">
+								<input class="form-check-input" type="checkbox" <?php if ($checked) {
+									echo 'checked';
+																				} ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item->getCode()?>:<?=$i?>">
 							</div></td>
 						</tr>
 						<?php $allTrue = $checked && $allTrue;
 						$i++; ?>
-					<? endforeach ?>
+					<?php endforeach ?>
 					<tr>
 						<td>Done</td>
 						<td><div class="form-check">
-							<input class="form-check-input" type="checkbox" <?php if ($allTrue) echo 'checked'; ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item->getCode()?>:all">
+							<input class="form-check-input" type="checkbox" <?php if ($allTrue) {
+								echo 'checked';
+																			} ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item->getCode()?>:all">
 						</div></td>
 					</tr>
 				<?php else : ?>
 					<tr>
 						<td><?=htmlspecialchars($donation["tasksName"])?></td>
 						<td><div class="form-check">
-							<input class="form-check-input" type="checkbox" <?php if ($donation["tasksValue"]) echo 'checked'; ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item->getCode()?>:-1">
+							<input class="form-check-input" type="checkbox" <?php if ($donation["tasksValue"]) {
+								echo 'checked';
+																			} ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item->getCode()?>:-1">
 						</div></td>
 					</tr>
-				<? endif ?>
+				<?php endif ?>
 			</table>
-		<? endforeach ?>
+		<?php endforeach ?>
 	</div>
 	<script src="/static/donationTasks.js"></script>
-	<? endif ?>
+	<?php endif ?>
 
 	<nav class="itembuttons primary row mx-0 mt-2">
 		<?php if ($editing && $target) : ?>

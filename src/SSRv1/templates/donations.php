@@ -13,11 +13,11 @@ $completed = [];
 		<div class="row d-flex m-0 justify-content-between mr-auto">
 			<h2 class="col-8 p-0">Donations</h2>
 		</div>
-		<?php if ($canCreateNew ?? false): ?>
+		<?php if ($canCreateNew ?? false) : ?>
 		<a href="/donation/new" class="btn btn-outline-primary col-4 col-sm-auto edit mb-2 mr-2">
 			<i class="fa fa-plus"></i>&nbsp;New
 		</a>
-		<? endif ?>
+		<?php endif ?>
 	</div>
 	<?php if (isset($donations) && !empty($donations)) : ?>
 		<div class="col-12">
@@ -53,10 +53,10 @@ $completed = [];
 				<?php endforeach ?>
 				</tbody>
 			</table>
-			<?php if (count($donations) === count($completed)): ?>
+			<?php if (count($donations) === count($completed)) : ?>
 				<i class="text-center d-block">No active donations</i>
-			<? endif ?>
-			<?php if (!empty($completed)): ?>
+			<?php endif ?>
+			<?php if (!empty($completed)) : ?>
 				<table class="table table-borderless stats">
 					<caption>Completed donations</caption>
 					<thead class="thead-dark">
@@ -85,11 +85,11 @@ $completed = [];
 					<?php endforeach ?>
 					</tbody>
 				</table>
-			<? endif ?>
+			<?php endif ?>
 		</div>
 	<?php else : ?>
 	<p>
 		<i>No donations on record</i>
 	</p>
-	<? endif ?>
+	<?php endif ?>
 </div>

@@ -40,8 +40,9 @@
     "squizlabs/php_codesniffer": "^3.6"
   },
   "scripts": {
-    "lint": "phpcs --report=summary --ignore=*.min.css src public",
-    "lintfix": "phpcbf --ignore=*.min.css src public",
+    "lint": "phpcs --report=summary --ignore=*.min.css,*.js src public",
+    "lintdetails": "phpcs --ignore=*.min.css,*.js src public",
+    "lintfix": "phpcbf --ignore=*.min.css,*.js src public",
     "test": "phpunit --configuration tests/phpunit.xml"
   }
 }
