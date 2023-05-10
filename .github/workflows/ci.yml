@@ -36,7 +36,7 @@ jobs:
         with:
           # If you use the PHPUnit action, uncomment this and comment php_extensions
           # args: --ignore-platform-reqs
-          php_extensions: json mysqlnd pdo
+          php_extensions: json mysqlnd pdo zip
           php_version: "${{ matrix.php }}"
 
       - name: Add checkstyle matchers for phpcs
@@ -45,7 +45,7 @@ jobs:
 
       - name: PHPCS linting
         run: |
-          composer lint --ignore-platform-req=ext-zip
+          composer lint
 
       # sudo apt-get install mariadb-client
       # mysqladmin ping --user=root --password=root --host=127.0.0.1 --protocol=tcp --port=3306
@@ -65,4 +65,4 @@ jobs:
 
       # --coverage-text
       - name: PHPUnit Tests
-        run: composer test --ignore-platform-req=ext-zip
+        run: composer test
