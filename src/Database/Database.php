@@ -153,13 +153,12 @@ class Database
 	}
 
 	public function donationsDAO(): DonationsDAO
-    {
-        if( $this->donationsDAO === null)
-        {
-            $this->donationsDAO = new DonationsDAO($this,$this->callback);
-        }
-        return $this->donationsDAO;
-    }
+	{
+		if ($this->donationsDAO === null) {
+			$this->donationsDAO = new DonationsDAO($this, $this->callback);
+		}
+		return $this->donationsDAO;
+	}
 
 	public function updater()
 	{

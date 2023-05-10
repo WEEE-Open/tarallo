@@ -42,7 +42,7 @@ trait ItemTraitDonations
 
 	/**
 	 * Get a specific donation of item
-	 * 
+	 *
 	 * @param Integer $id
 	 *
 	 * @return Array
@@ -66,7 +66,7 @@ trait ItemTraitDonations
 
 	/**
 	 * Remove specific donation of item
-	 * 
+	 *
 	 * @param Integer $id
 	 */
 	public function removeDonation($id): array

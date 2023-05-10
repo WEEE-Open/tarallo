@@ -45,7 +45,7 @@ jobs:
 
       - name: PHPCS linting
         run: |
-          composer exec -- phpcs --report=checkstyle --ignore-platform-req=ext-zip --ignore=*.min.css src public
+          composer lint --ignore-platform-req=ext-zip
 
       # sudo apt-get install mariadb-client
       # mysqladmin ping --user=root --password=root --host=127.0.0.1 --protocol=tcp --port=3306
@@ -65,4 +65,4 @@ jobs:
 
       # --coverage-text
       - name: PHPUnit Tests
-        run: composer test
+        run: composer test --ignore-platform-req=ext-zip

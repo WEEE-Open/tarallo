@@ -37,7 +37,7 @@
 	if (isRefine) {
 		let searchRefineButton = document.getElementById("refinecollapsebutton")
 		searchRefineButton.disabled = true;
-		searchQuery = fetch(`/v2/search/query/${searchId}`, {
+		searchQuery = fetch(` / v2 / search / query / ${searchId}`, {
 			headers: {
 				'Accept': 'application/json',
 				'Content-Type': 'application/json'
@@ -83,7 +83,8 @@
 	// Disable search button, since browser keep its state in memory even if the page is refreshed
 	toggleSearchButton();
 
-	function onLocationInput(e) {
+	function onLocationInput(e)
+	{
 		let value = e.detail.value;
 		let t = e.detail.tagify;
 		let url = t.DOM.originalInput.dataset.url;
@@ -94,7 +95,7 @@
 		let signal = onLocationInput.abortController.signal;
 
 		t.loading(true).dropdown.hide();
-		fetch(`${url}?q=${value}`, { signal })
+		fetch(`${url} ? q = ${value}`, { signal })
 			.then(r => r.json())
 			.then(r => {
 				let m = r.map(e => ({value: e.name, color: e.color}));
@@ -107,9 +108,10 @@
 			});
 	}
 
-	function transformLocationTag(t) {
+	function transformLocationTag(t)
+	{
 		if (t.color) {
-			t.style = `border:1px solid ${t.color}; border-radius: 3px;`;
+			t.style = `border:1px solid ${t.color}; border - radius: 3px;`;
 		}
 		if (t.bgDark) {
 			t.style = t.style ? t.style : "" + "--tag-bg:#DFDFAF;";
@@ -117,7 +119,8 @@
 	}
 
 	// This is to prevent from hitting enter and deleting the field instead of actually running the search
-	function enterHandler(ev) {
+	function enterHandler(ev)
+	{
 		if (ev.key === "Enter") {
 			ev.preventDefault();
 			$(ev.target).closest("form")[0].requestSubmit();
@@ -158,16 +161,16 @@
 		// Set new ids
 		let id = rowCounter++;
 		let node = frag.getElementById("search-row-container-new");
-		node.id = `search-row-container-${id}`;
+		node.id = `search - row - container - ${id}`;
 
 		let replace = node.querySelectorAll('[for="search-row-new"], [id="search-row-new"]');
 		let rowElCounter = 1;
 		for (let el of replace) {
 			if (el.getAttribute("for") === "search-row-new") {
-				el.setAttribute("for", `search-row-${id}-${rowElCounter}`);
+				el.setAttribute("for", `search - row - ${id} - ${rowElCounter}`);
 			}
 			if (el.getAttribute("id") === "search-row-new") {
-				el.setAttribute("id", `search-row-${id}-${rowElCounter}`);
+				el.setAttribute("id", `search - row - ${id} - ${rowElCounter}`);
 				rowElCounter++;
 			}
 		}
@@ -417,7 +420,7 @@
 				c_feature.push({key, value: getSelectedFeatures(row)});
 			} else if (row.classList.contains('search-location')) {
 				let locs = row.querySelector('input.comparisonvalue').tagifyRef.value;
-				location = location.concat(locs.map(e => { return {key: e.key !== undefined ? e.key : null, value: e.value}; }));
+				location = location.concat(locs.map(e => { return {key: e.key !== undefined ? e.key : null, value : e.value}; }));
 			} else if (row.classList.contains('search-sort')) {
 				sort.push({key, value: {feature: row.querySelector('.allfeatures').value, direction: row.querySelector('.sorting').value}});
 			}

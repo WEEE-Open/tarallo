@@ -1,4 +1,5 @@
 <?php
+
 /** @var string $commit|null */
 
 $this->layout('main', ['title' => 'Credits', 'currentPage' => 'info credits', 'tooltips' => true]);

@@ -34,7 +34,7 @@ $completed = [];
 				</thead>
 				<tbody>
 				<?php foreach ($donations as $donation) : ?>
-					<?php if($donation["isCompleted"]) {
+					<?php if ($donation["isCompleted"]) {
 						array_push($completed, $donation);
 						continue;
 					}?>
@@ -53,10 +53,10 @@ $completed = [];
 				<?php endforeach ?>
 				</tbody>
 			</table>
-			<?php if(count($donations) === count($completed)): ?>
+			<?php if (count($donations) === count($completed)): ?>
 				<i class="text-center d-block">No active donations</i>
 			<? endif ?>
-			<?php if(!empty($completed)): ?>
+			<?php if (!empty($completed)): ?>
 				<table class="table table-borderless stats">
 					<caption>Completed donations</caption>
 					<thead class="thead-dark">
@@ -87,7 +87,7 @@ $completed = [];
 				</table>
 			<? endif ?>
 		</div>
-	<?php else: ?>
+	<?php else : ?>
 	<p>
 		<i>No donations on record</i>
 	</p>

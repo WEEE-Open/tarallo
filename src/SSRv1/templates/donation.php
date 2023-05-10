@@ -1,9 +1,8 @@
 <?php
 /** @var bool $showEditButton */
-/** @var string $donation|null */
+/** @var string[]|null $donation */
 
 $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'tooltips' => true]);
-
 ?>
 
 <div class="row">
@@ -14,41 +13,41 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 		<a href="/donation/<?=$donation["id"]?>/download" class="btn btn-outline-primary col-4 col-sm-auto edit mb-2 mr-2" download>
 			<i class="fa fa-download"></i>&nbsp;Download as excel
 		</a>
-		<?php if ($showEditButton ?? false): ?>
-		<?php if ($donation["isCompleted"]): ?>
+		<?php if ($showEditButton ?? false) : ?>
+			<?php if ($donation["isCompleted"]) : ?>
 		<a href="/donation/<?=$donation["id"]?>/uncomplete" class="btn btn-outline-warning col-4 col-sm-auto complete mb-2 mr-2">
 			<i class="fa fa-check"></i>&nbsp;Unmark as done
 		</a>
-		<?php else: ?>
+			<?php else : ?>
 		<a href="/donation/<?=$donation["id"]?>/complete" class="btn btn-outline-warning col-4 col-sm-auto complete mb-2 mr-2">
 			<i class="fa fa-check"></i>&nbsp;Mark as done
 		</a>
 		<a href="/donation/<?=$donation["id"]?>/edit" class="btn btn-outline-primary col-4 col-sm-auto edit mb-2 mr-2">
 			<i class="fa fa-edit"></i>&nbsp;Edit
 		</a>
-		<? endif ?>
-		<? endif ?>
+			<?php endif ?>
+		<?php endif ?>
 	</div>
-	<?php if (isset($donation["location"]) && $donation["location"] != ''): ?>
+	<?php if (isset($donation["location"]) && $donation["location"] != '') : ?>
 	<div class="col-12">
 		<b>Location:</b> <?=htmlspecialchars($donation["location"])?>
 	</div>
-	<? endif ?>
-	<?php if (isset($donation["date"])): ?>
+	<?php endif ?>
+	<?php if (isset($donation["date"])) : ?>
 	<div class="col-12">
 		<b>Date:</b> <?=$donation["date"]?>
 	</div>
-	<? endif ?>
-	<?php if (isset($donation["notes"]) && $donation["notes"] != ''): ?>
+	<?php endif ?>
+	<?php if (isset($donation["notes"]) && $donation["notes"] != '') : ?>
 	<div class="col-12">
 		<b>Notes:</b>
 		<?=nl2br(htmlspecialchars($donation["notes"]))?>
 	</div>
-	<? endif ?>
+	<?php endif ?>
 	<div class="col-12">
 		<b>Total items:</b> <?=count($donation["itemsType"])?>
 	</div>
-	<?php if ($donation["isCompleted"]): ?>
+	<?php if ($donation["isCompleted"]) : ?>
 	<div class="col-12">
 		<b>Progress: </b>100%
 		<div class="progress m-2" style="height: 5px;">
@@ -59,27 +58,27 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 		<h4>Donated Items</h4>
 		<?php
 		$grouped = [];
-		foreach($donation["itemsType"] as $item => $type) {
+		foreach ($donation["itemsType"] as $item => $type) {
 			if (is_array($grouped[$type] ?? null)) {
 				$grouped[$type][] = $item;
 			} else {
 				$grouped[$type] = [$item];
 			}
 		}
-		if (count($donation["itemsType"]) !== 0):
-		foreach($grouped as $type => $items): ?>
-		<h5><?php $this->insert('productIcon', ['type' => $type, 'color' => 'black']) ?><?=\WEEEOpen\Tarallo\SSRv1\FeaturePrinter::FEATURES_ENUM['type'][$type] ?? 'Other'?> - <?=count($items)?></h4>
+		if (count($donation["itemsType"]) !== 0) :
+			foreach ($grouped as $type => $items) : ?>
+		<h4><?php $this->insert('productIcon', ['type' => $type, 'color' => 'black']) ?><?=\WEEEOpen\Tarallo\SSRv1\FeaturePrinter::FEATURES_ENUM['type'][$type] ?? 'Other'?> - <?=count($items)?></h4>
 		<ul>
-			<?php foreach($items as $item): ?>
+				<?php foreach ($items as $item) : ?>
 				<li><a href="/item/<?=$item?>"><?=$item?></a></li>
-			<? endforeach ?>
+				<?php endforeach ?>
 		</ul>
-		<? endforeach ?>
-		<?php else: ?>
+			<?php endforeach ?>
+		<?php else : ?>
 		<i>No items in donation</i>
-		<? endif ?>
+		<?php endif ?>
 	</div>
-	<?php else: ?>
+	<?php else : ?>
 	<div class="col-12">
 		<b>Progress: </b><span id="progressText"><?=$donation["progress"]?></span>%
 		<div class="progress m-2" style="height: 5px;">
@@ -87,53 +86,65 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 		</div>
 		<input type="hidden" id="totalTasks" value="<?=$donation["totalTasks"]?>">
 	</div>
-	<?php foreach($donation["tasks"] as $type => $tasks): ?>
-		<?php $type = $type ?? 'other';
-		$itemsOfType = array_filter($donation["itemsType"], function ($el) use ($type) {return ($el ?? 'other') === $type;}); 
-		if (count($itemsOfType) === 0) continue; ?>
+		<?php foreach ($donation["tasks"] as $type => $tasks) : ?>
+			<?php $type = $type ?? 'other';
+			$itemsOfType = array_filter($donation["itemsType"], function ($el) use ($type) {
+				return ($el ?? 'other') === $type;
+			});
+			if (count($itemsOfType) === 0) {
+				continue;
+			} ?>
 		<div class="col-12">
 			<h4><?php $this->insert('productIcon', ['type' => $type, 'color' => 'black']) ?><?=\WEEEOpen\Tarallo\SSRv1\FeaturePrinter::FEATURES_ENUM['type'][$type] ?? 'Other' ?> - <?=count($itemsOfType)?></h4>
 			<table class="table table-borderless stats">
 				<thead class="thead-dark">
 				<tr>
 					<th scope="col">Item</th>
-					<?php if (is_array($tasks)): ?>
-						<?php foreach($tasks as $task): ?>
+					<?php if (is_array($tasks)) : ?>
+						<?php foreach ($tasks as $task) : ?>
 							<th scope="col"><?=htmlspecialchars($task)?></th>
-						<? endforeach ?>
+						<?php endforeach ?>
 						<th scope="col" class="text-end bg-success">Done</th>
-					<?php else: ?>
+					<?php else : ?>
 						<th scope="col" class="text-end bg-success"><?=$tasks?></th>
-					<? endif ?>
+					<?php endif ?>
 				</tr>
 				</thead>
 				<tbody>
-				<?php foreach($itemsOfType as $item => $dont_care): ?>
+				<?php foreach ($itemsOfType as $item => $dont_care) : ?>
 					<tr>
 						<td><a href="/item/<?=$item?>"><?=$item?></a></td>
-						<?php 
+						<?php
 						$allTrue = true;
-						if (is_array($donation["tasksProgress"][$item])): ?>
-							<?php foreach($donation["tasksProgress"][$item] as $i => $checked): ?>
+						if (is_array($donation["tasksProgress"][$item])) : ?>
+							<?php foreach ($donation["tasksProgress"][$item] as $i => $checked) : ?>
 								<?php $allTrue = $checked && $allTrue; ?>
 								<td><div class="form-check">
-									<input class="form-check-input" type="checkbox" <?php if ($checked) echo 'checked'; ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item?>:<?=$i?>">
+									<input class="form-check-input" type="checkbox" <?php if ($checked) {
+										echo 'checked';
+																					} ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item?>:<?=$i?>">
 								</div></td>
-							<? endforeach ?>
+							<?php endforeach ?>
 							<td><div class="form-check">
-								<input class="form-check-input" type="checkbox" <?php if ($allTrue) echo 'checked'; ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item?>:all">
+								<input class="form-check-input" type="checkbox" <?php if ($allTrue) {
+									echo 'checked';
+																				} ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item?>:all">
 							</div></td>
-						<?php else: ?>
+						<?php else : ?>
 							<td><div class="form-check">
-								<input class="form-check-input" type="checkbox" <?php if ($donation["tasksProgress"][$item]) echo 'checked'; ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item?>:-1">
+								<input class="form-check-input" type="checkbox" <?php if ($donation["tasksProgress"][$item]) {
+									echo 'checked';
+																				} ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item?>:-1">
 							</div></td>
-						<? endif ?>
+						<?php endif ?>
 					</tr>
-				<? endforeach ?>
+				<?php endforeach ?>
 				</tbody>
 			</table>
 		</div>
-	<? endforeach ?>
-	<? endif ?>
+		<?php endforeach ?>
+	<?php endif ?>
 </div>
-<?php if (!$donation["isCompleted"]) : ?> <script src="/static/donationTasks.js"></script> <? endif ?>
+<?php if (!$donation["isCompleted"]) :
+	?> <script src="/static/donationTasks.js"></script> <?php
+endif ?>

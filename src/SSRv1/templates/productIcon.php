@@ -44,4 +44,6 @@ $url = [
 	"unknown" => "/static/icons/unknown.svg"
 ][$type ?? "unknown"] ?? "/static/icons/unknown.svg"
 ?>
-<img src="<?=$url?>" alt="" title="<?=$type?>" class="icon p-2"<?php if (($color ?? "white") == "black") echo ' style="filter:invert(1);"';?>>
+<img src="<?=$url?>" alt="" title="<?=$type?>" class="icon p-2"<?php if (($color ?? "white") == "black") {
+	echo ' style="filter:invert(1);"';
+		  }?>>

@@ -1016,7 +1016,7 @@ class Controller implements RequestHandlerInterface
 	{
 		$body = $request->getParsedBody();
 		if ($body === null || count($body) === 0 || $body["ItemsList"] === null) {
-			$error = "Missing body"; 
+			$error = "Missing body";
 		} else {
 			$name = trim($body["Name"]);
 			if ($name !== '') {
@@ -1029,7 +1029,7 @@ class Controller implements RequestHandlerInterface
 				$itemsList = json_decode($body["ItemsList"]);
 				if ($itemsList === null || count($itemsList) == 0) {
 					$error = "Please input at least one item in the items list";
-				} else if ($db->itemDAO()->checkItemListAllExist($itemsList)) {
+				} elseif ($db->itemDAO()->checkItemListAllExist($itemsList)) {
 					if ($body["Tasks"] === null || ($tasks = json_decode($body["Tasks"], true)) === null) {
 						$tasks = [];
 					}
@@ -1136,7 +1136,7 @@ class Controller implements RequestHandlerInterface
 		[$writer, $filename] = $donation;
 
 		http_response_code(200);
-		header('Content-disposition: attachment; filename="'. $filename . '"');
+		header('Content-disposition: attachment; filename="' . $filename . '"');
 		header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 		header('Content-Transfer-Encoding: binary');
 		header('Cache-Control: must-revalidate');

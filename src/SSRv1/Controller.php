@@ -338,7 +338,7 @@ class Controller implements RequestHandlerInterface
 	{
 		$body = $request->getParsedBody();
 		if ($body === null || count($body) === 0 || $body["ItemsList"] === null) {
-			$request = $request->withAttribute('Template', 'newDonation'); 
+			$request = $request->withAttribute('Template', 'newDonation');
 		} else {
 			$name = trim($body["Name"]);
 			if ($name !== '') {
@@ -351,7 +351,7 @@ class Controller implements RequestHandlerInterface
 				$itemsList = json_decode($body["ItemsList"]);
 				if ($itemsList === null || count($itemsList) == 0) {
 					$error = "Please input at least one item in the items list";
-				} else if ($db->itemDAO()->checkItemListAllExist($itemsList)) {
+				} elseif ($db->itemDAO()->checkItemListAllExist($itemsList)) {
 					if ($body["Tasks"] === null || ($tasks = json_decode($body["Tasks"], true)) === null) {
 						$tasks = [];
 					}
@@ -366,7 +366,7 @@ class Controller implements RequestHandlerInterface
 			// if we are still here it means that there was an error
 			$request = $request
 				->withAttribute('Template', 'newDonation')
-				->withAttribute('TemplateParameters', ['error' => $error, 'name' => $body["Name"] ?? null, 'location' => $body["Location"] ?? null, 'date' => $body["Date"] ?? null, 'notes' => $body["Notes"] ?? null, 'itemsList' => $body["ItemsList"] ?? null, 'tasks' => $body["Tasks"] ?? null]); 
+				->withAttribute('TemplateParameters', ['error' => $error, 'name' => $body["Name"] ?? null, 'location' => $body["Location"] ?? null, 'date' => $body["Date"] ?? null, 'notes' => $body["Notes"] ?? null, 'itemsList' => $body["ItemsList"] ?? null, 'tasks' => $body["Tasks"] ?? null]);
 		}
 
 		return $handler->handle($request);
@@ -417,7 +417,7 @@ class Controller implements RequestHandlerInterface
 
 			return $handler->handle($request);
 		}
-			
+
 		$request = $request
 			->withAttribute('Template', 'donation')
 			->withAttribute('TemplateParameters', ['showEditButton' => $user->getLevel() == UserSSO::AUTH_LEVEL_ADMIN, 'donation' => $donation]);
@@ -444,7 +444,7 @@ class Controller implements RequestHandlerInterface
 		}
 
 		$db->donationsDAO()->completeDonation($id);
-		
+
 		return new RedirectResponse("/donation/$id", 303);
 	}
 
@@ -467,7 +467,7 @@ class Controller implements RequestHandlerInterface
 		}
 
 		$db->donationsDAO()->uncompleteDonation($id);
-		
+
 		return new RedirectResponse("/donation/$id", 303);
 	}
 
@@ -507,20 +507,27 @@ class Controller implements RequestHandlerInterface
 		$body = $request->getParsedBody();
 		if ($body === null || count($body) === 0 || $body["ItemsList"] === null) {
 			$templateParameters = [
-				'showDeleteButton' => true, 
-				'name' => $oldDonation["name"], 
-				'location' => $oldDonation["location"] ?? null, 
+				'showDeleteButton' => true,
+				'name' => $oldDonation["name"],
+				'location' => $oldDonation["location"] ?? null,
 				'itemsList' => json_encode(array_keys($oldDonation["itemsType"] ?? []))
 			];
-			if (count(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);})) > 0) {
-				$templateParameters['tasks'] = json_encode(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);}));
+			if (
+				count(array_filter($oldDonation["tasks"], function ($t) {
+					return is_array($t);
+				})) > 0
+			) {
+				$templateParameters['tasks'] = json_encode(array_filter($oldDonation["tasks"], function ($t) {
+					return is_array($t);
+				}));
 			} else {
 				$templateParameters['tasks'] = '{}';
 			}
-			if (isset($oldDonation["date"]))
-				$templateParameters['date'] = date_format(date_create($oldDonation["date"]),"Y/m/d");
+			if (isset($oldDonation["date"])) {
+				$templateParameters['date'] = date_format(date_create($oldDonation["date"]), "Y/m/d");
+			}
 			$request = $request->withAttribute('Template', 'newDonation')
-				->withAttribute('TemplateParameters', $templateParameters); 
+				->withAttribute('TemplateParameters', $templateParameters);
 		} else {
 			$name = trim($body["Name"]);
 			if ($name !== '') {
@@ -531,7 +538,7 @@ class Controller implements RequestHandlerInterface
 				$itemsList = json_decode($body["ItemsList"]);
 				if ($itemsList === null || count($itemsList) == 0) {
 					$error = "Please input at least one item in the items list";
-				} else if ($db->itemDAO()->checkItemListAllExist($itemsList)) {
+				} elseif ($db->itemDAO()->checkItemListAllExist($itemsList)) {
 					if ($body["Tasks"] === null || ($tasks = json_decode($body["Tasks"], true)) === null) {
 						$tasks = [];
 					}
@@ -545,28 +552,35 @@ class Controller implements RequestHandlerInterface
 				$name = null;
 			}
 			$templateParameters = [
-				'showDeleteButton' => true, 
-				'error' => $error, 
-				'name' => $name ?? $oldDonation["name"], 
-				'location' => $body["Location"] ?? $oldDonation["location"] ?? null, 
+				'showDeleteButton' => true,
+				'error' => $error,
+				'name' => $name ?? $oldDonation["name"],
+				'location' => $body["Location"] ?? $oldDonation["location"] ?? null,
 				'itemsList' => $body["ItemsList"] ?? json_encode(array_keys($oldDonation["itemsType"] ?? []))
 			];
-			if (count(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);})) > 0) {
-				$templateParameters['tasks'] = $body["Tasks"] ?? json_encode(array_filter($oldDonation["tasks"], function ($t) {return is_array($t);}));
+			if (
+				count(array_filter($oldDonation["tasks"], function ($t) {
+					return is_array($t);
+				})) > 0
+			) {
+				$templateParameters['tasks'] = $body["Tasks"] ?? json_encode(array_filter($oldDonation["tasks"], function ($t) {
+					return is_array($t);
+				}));
 			} else {
 				$templateParameters['tasks'] = $body["Tasks"] ?? '{}';
 			}
-			if (isset($body["Date"]))
+			if (isset($body["Date"])) {
 				$templateParameters['date'] = $body["Date"];
-			else if (isset($oldDonation["date"]))
-				$templateParameters['date'] = date_format(date_create($oldDonation["date"]),"Y/m/d");
+			} elseif (isset($oldDonation["date"])) {
+				$templateParameters['date'] = date_format(date_create($oldDonation["date"]), "Y/m/d");
+			}
 			$request = $request->withAttribute('Template', 'newDonation')
-				->withAttribute('TemplateParameters', $templateParameters); 
+				->withAttribute('TemplateParameters', $templateParameters);
 		}
 
 		return $handler->handle($request);
 	}
-	
+
 	public static function downloadDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
 		/** @var Database $db */
@@ -590,7 +604,7 @@ class Controller implements RequestHandlerInterface
 		[$writer, $filename] = $donation;
 
 		http_response_code(200);
-		header('Content-disposition: attachment; filename="'. $filename . '"');
+		header('Content-disposition: attachment; filename="' . $filename . '"');
 		header("Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 		header('Content-Transfer-Encoding: binary');
 		header('Cache-Control: must-revalidate');
@@ -600,7 +614,7 @@ class Controller implements RequestHandlerInterface
 
 		exit(0);
 	}
-	
+
 	public static function deleteDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
 		/** @var Database $db */
@@ -620,7 +634,6 @@ class Controller implements RequestHandlerInterface
 
 			return $handler->handle($request);
 		}
-
 	}
 
 	public static function authError(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -1725,7 +1738,9 @@ class Controller implements RequestHandlerInterface
 			} else {
 				$ref = trim(substr($headFileContents, 5));
 				$commitSha = @file_get_contents("../.git/$ref");
-				if ($commitSha === false) unset($commitSha);
+				if ($commitSha === false) {
+					unset($commitSha);
+				}
 			}
 		}
 		//var_dump(scandir('../.git'));

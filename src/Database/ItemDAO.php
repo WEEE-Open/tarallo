@@ -640,11 +640,12 @@ LIMIT $limit"
 
 	public function getTypesForItemCodes($list)
 	{
-		if (sizeof($list) == 0) return array();
+		if (sizeof($list) == 0) {
+			return array();
+		}
 		$pdo = $this->getPDO();
 		$prefix = $itemsList = '';
-		foreach ($list as $item)
-		{
+		foreach ($list as $item) {
 			$itemsList .= $prefix . $pdo->quote($item);
 			$prefix = ', ';
 		}
@@ -660,7 +661,7 @@ WHERE Item.Code IN ($itemsList);"
 		try {
 			$success = $statement->execute();
 			$array = $statement->fetchAll(\PDO::FETCH_ASSOC);
-			foreach($array as $thing) {
+			foreach ($array as $thing) {
 				if (isset($thing["ProductValue"]) || isset($thing["ItemValue"])) {
 					$output[$thing["Code"]] = $thing["ItemValue"] ?? $thing["ProductValue"];
 				} else {
@@ -668,7 +669,7 @@ WHERE Item.Code IN ($itemsList);"
 				}
 				unset($missingItems[array_search($thing["Code"], $missingItems)]);
 			}
-			foreach($missingItems as $missing) {
+			foreach ($missingItems as $missing) {
 				$output[$missing] = null;
 			}
 		} finally {
@@ -680,11 +681,12 @@ WHERE Item.Code IN ($itemsList);"
 
 	public function checkItemListAllExist($list)
 	{
-		if (sizeof($list) == 0) return true;
+		if (sizeof($list) == 0) {
+			return true;
+		}
 		$pdo = $this->getPDO();
 		$prefix = $itemsList = '';
-		foreach ($list as $item)
-		{
+		foreach ($list as $item) {
 			$itemsList .= $prefix . $pdo->quote($item);
 			$prefix = ', ';
 		}
@@ -694,7 +696,9 @@ WHERE Item.Code IN ($itemsList);"
 		try {
 			$success = $statement->execute();
 			$result = $statement->fetch(\PDO::FETCH_ASSOC);
-			if ($result["Total"] == sizeof($list)) return true;
+			if ($result["Total"] == sizeof($list)) {
+				return true;
+			}
 			return false;
 		} finally {
 			$statement->closeCursor();

@@ -124,15 +124,15 @@ endif; ?>
 
 	<?php if ($item->hasDonations() && !$editing && !$adding && !$target): ?>
 	<div class="float-right" style="max-width: 400px;">
-		<?php foreach($item->getDonations() as $donation): ?>
+		<?php foreach ($item->getDonations() as $donation): ?>
 			<table class="table table-bordered">
 				<tr>
 					<th colspan="2" class="text-center"><a href="/donation/<?=$donation["id"]?>"><?=htmlspecialchars($donation["name"])?></a></th>
 				</tr>
-				<?php if(is_array($donation["tasksName"])): ?>
+				<?php if (is_array($donation["tasksName"])): ?>
 					<?php $allTrue = true;
 					$i = 0;
-					foreach(array_combine($donation["tasksName"], $donation["tasksValue"]) as $taskName => $checked): ?>
+					foreach (array_combine($donation["tasksName"], $donation["tasksValue"]) as $taskName => $checked): ?>
 						<tr>
 							<td><?=htmlspecialchars($taskName)?></td>
 							<td><div class="form-check">
@@ -148,7 +148,7 @@ endif; ?>
 							<input class="form-check-input" type="checkbox" <?php if ($allTrue) echo 'checked'; ?> data-donation-id="<?=$donation["id"]?>" data-task-id="<?=$item->getCode()?>:all">
 						</div></td>
 					</tr>
-				<?php else: ?>
+				<?php else : ?>
 					<tr>
 						<td><?=htmlspecialchars($donation["tasksName"])?></td>
 						<td><div class="form-check">
