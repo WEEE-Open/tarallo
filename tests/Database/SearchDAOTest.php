@@ -241,6 +241,7 @@ class SearchDAOTest extends DatabaseTest
 							'type' => 'case',
 							'working' => 'yes',
 						],
+					'donations' => [],
 				],
 			1 =>
 				[
@@ -254,6 +255,7 @@ class SearchDAOTest extends DatabaseTest
 							'type' => 'case',
 							'working' => 'yes',
 						],
+					'donations' => [],
 				],
 			2 =>
 				[
@@ -267,6 +269,7 @@ class SearchDAOTest extends DatabaseTest
 							'type' => 'case',
 							'working' => 'yes',
 						],
+					'donations' => [],
 				],
 			3 =>
 				[
@@ -279,6 +282,7 @@ class SearchDAOTest extends DatabaseTest
 							'motherboard-form-factor' => 'miniitx',
 							'type' => 'case',
 						],
+					'donations' => [],
 				],
 			4 =>
 				[
@@ -290,6 +294,7 @@ class SearchDAOTest extends DatabaseTest
 							'motherboard-form-factor' => 'atx',
 							'type' => 'case',
 						],
+					'donations' => [],
 				],
 		];
 		$array = [];
