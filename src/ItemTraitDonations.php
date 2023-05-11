@@ -49,7 +49,7 @@ trait ItemTraitDonations
 	 */
 	public function getDonation($id): array
 	{
-		if ($this->donations ?? null !== null) {
+		if (($this->donations ?? null) !== null) {
 			throw new \InvalidArgumentException("Cannot retrieve donation {$id} from {$this}: not here");
 		} else {
 			return $this->donations[$id];
@@ -71,7 +71,7 @@ trait ItemTraitDonations
 	 */
 	public function removeDonation($id): array
 	{
-		if ($donations[$id] ?? null !== null) {
+		if (($donations[$id] ?? null) !== null) {
 			throw new \InvalidArgumentException("Cannot remove donation {$id} from {$this}: not here");
 		} else {
 			unset($this->donations[$id]);
