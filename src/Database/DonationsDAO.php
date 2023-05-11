@@ -486,11 +486,11 @@ GROUP BY d.Id");
 				}
 			}
 			$rootProperties = array_filter($rootProperties, function ($t) {
-				return !in_array($t, ["type", "owner", "note", "working"]);
+				return !in_array($t, ["type", "owner", "note", "working", "arrival-batch"]);
 			});
 			$groupedPropertiesForSubItems = array_map(function ($arr) {
 				return array_filter($arr, function ($t) {
-					return !in_array($t, ["type", "owner", "note", "working"]);
+					return !in_array($t, ["type", "owner", "note", "working", "arrival-batch"]);
 				});
 			}, $groupedPropertiesForSubItems);
 			if (count($countOfType) > 0) {
