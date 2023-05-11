@@ -524,7 +524,7 @@ class Controller implements RequestHandlerInterface
 				$templateParameters['tasks'] = '{}';
 			}
 			if (isset($oldDonation["date"])) {
-				$templateParameters['date'] = date_format(date_create($oldDonation["date"]), "Y/m/d");
+				$templateParameters['date'] = date_format(date_create($oldDonation["date"]), "Y-m-d");
 			}
 			$request = $request->withAttribute('Template', 'newDonation')
 				->withAttribute('TemplateParameters', $templateParameters);
@@ -553,7 +553,7 @@ class Controller implements RequestHandlerInterface
 			}
 			$templateParameters = [
 				'showDeleteButton' => true,
-				'error' => $error,
+				'error' => $error ?? null,
 				'name' => $name ?? $oldDonation["name"],
 				'location' => $body["Location"] ?? $oldDonation["location"] ?? null,
 				'itemsList' => $body["ItemsList"] ?? json_encode(array_keys($oldDonation["itemsType"] ?? []))
@@ -572,7 +572,7 @@ class Controller implements RequestHandlerInterface
 			if (isset($body["Date"])) {
 				$templateParameters['date'] = $body["Date"];
 			} elseif (isset($oldDonation["date"])) {
-				$templateParameters['date'] = date_format(date_create($oldDonation["date"]), "Y/m/d");
+				$templateParameters['date'] = date_format(date_create($oldDonation["date"]), "Y-m-d");
 			}
 			$request = $request->withAttribute('Template', 'newDonation')
 				->withAttribute('TemplateParameters', $templateParameters);

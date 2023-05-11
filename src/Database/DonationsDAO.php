@@ -114,6 +114,7 @@ GROUP BY d.Id");
 	public function updateDonation($id, $name, $location, $notes, $date, $itemsList, $tasks)
 	{
 		$oldDonation = $this->getDonation($id);
+		$parsedDate = date('Y-m-d', $date);
 
 		$statement = $this->getPDO()->prepare("UPDATE Donations SET Name=:name, Location=:location, Date=:date, Notes=:notes WHERE Id=:id");
 		try {
