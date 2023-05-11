@@ -451,7 +451,7 @@ GROUP BY d.Id");
 
 		foreach ($donation["itemsType"] as $itemId => $_) {
 			try {
-				$item = new ItemCode($itemId);
+				$item = new ItemCode("" . $itemId);
 			} catch (ValidationException $e) {
 				$itemsProperties[$itemId] = null;
 			}
