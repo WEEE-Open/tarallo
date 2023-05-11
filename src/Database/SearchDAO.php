@@ -186,6 +186,8 @@ WHERE DeletedAt IS NULL AND $filter";
 			// Need to re-do search
 			// TODO: Maybe delete the old one?
 			return $this->searchNew($new_search, $new_search->getOwner());
+		} else {
+			$new_search->setId($search->getId());
 		}
 
 		if ($diff->isSortOnly()) {
