@@ -1252,7 +1252,7 @@
 	{
 		init.signal = getTimeoutController().signal;
 		try {
-			return response = await fetch(uri, init);
+			return await fetch(uri, init);
 		} catch (err) {
 			if (err.name === 'AbortError') {
 				throw new TimeoutError();
