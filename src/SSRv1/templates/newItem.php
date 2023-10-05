@@ -49,6 +49,10 @@ $isClone = isset($base) && $base->hasCode();
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-auto cancel" role="button">
 				<i class="fa fa-arrow-circle-left"></i>&nbsp;Cancel
 			</button>
+			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-2 clear-all" role="button"
+					<?= isset($importedFrom) ? 'data-importId="' . (int) $importedFrom . '"' : '' ?>>
+				<i class="fa fa-eraser"></i>&nbsp;Clear all unused
+			</button>
 			<button class="btn btn-success btn-item col-4 col-sm-auto save" role="button"
 					<?= isset($importedFrom) ? 'data-importId="' . (int) $importedFrom . '"' : '' ?>>
 				<i class="fa fa-save"></i>&nbsp;Save

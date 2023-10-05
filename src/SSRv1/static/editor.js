@@ -70,6 +70,11 @@
 		// Enable the cancel button
 		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack.bind(null, null, true));
 
+		// Enable clear all unused button
+		itemEditing.querySelector('.itembuttons .clear-all').addEventListener('click', () => {
+			itemEditing.querySelectorAll('.itembuttons .removeemptyfeatures').forEach(i => {i.click()});
+		});
+
 		// For each item open for editing
 		for (let item of document.querySelectorAll('.item.editing')) {
 			let featuresElement = null;
