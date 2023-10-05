@@ -51,7 +51,7 @@ $isClone = isset($base) && $base->hasCode();
 			</button>
 			<button class="btn btn-outline-primary btn-item col-4 col-sm-auto mr-2 clear-all" role="button"
 					<?= isset($importedFrom) ? 'data-importId="' . (int) $importedFrom . '"' : '' ?>>
-				<i class="fa fa-eraser"></i>&nbsp;Clear all unused
+				<i class="fa fa-eraser"></i>&nbsp;Clean all unused
 			</button>
 			<button class="btn btn-success btn-item col-4 col-sm-auto save" role="button"
 					<?= isset($importedFrom) ? 'data-importId="' . (int) $importedFrom . '"' : '' ?>>
@@ -97,7 +97,7 @@ $isClone = isset($base) && $base->hasCode();
 
 	<nav class="itembuttons secondary row mx-0 mt-2 justify-content-end">
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto removeemptyfeatures" title="Remove empty features" role="button">
-			<i class="fa fa-eraser"></i>&nbsp;Clean
+			<i class="fa fa-eraser"></i>&nbsp;Clean unused
 		</button>
 		<button class="btn btn-outline-primary btn-item col-4 col-sm-auto addnew" role="button">
 			<i class="fa fa-plus-circle"></i>&nbsp;More
