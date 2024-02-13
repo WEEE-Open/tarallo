@@ -10,4 +10,5 @@ interface ItemWithFeatures
 	public function addFeature($feature);
 	public function getFeatures(): array;
 	public function getOwnFeatures(): array;
+	public function getSummary(): ?array;
 }

@@ -16,7 +16,7 @@ $this->layout(
 	]
 );
 
-$summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($product);
+$summary = $product->getSummary();
 $summary_escaped = array_map([$this, 'e'], $summary);
 unset($summary);
 

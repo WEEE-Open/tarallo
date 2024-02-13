@@ -2,6 +2,8 @@
 
 namespace WEEEOpen\Tarallo;
 
+use WEEEOpen\Tarallo\SSRv1\Summary\Summary;
+
 trait ItemTraitFeatures
 {
 	protected $features = [];
@@ -88,5 +90,13 @@ trait ItemTraitFeatures
 	public function getOwnFeatures(): array
 	{
 		return $this->features;
+	}
+
+	/**
+	 * @return array|null
+	 */
+	public function getSummary(): ?array
+	{
+		return Summary::peel($this);
 	}
 }

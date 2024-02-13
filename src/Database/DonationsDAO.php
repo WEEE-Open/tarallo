@@ -151,7 +151,7 @@ GROUP BY d.Id");
 			// add tasks for types that were not in the donation before
 			foreach (array_unique(array_values($added_items_types)) as $type) {
 				$type = $type ?? 'other';
-				if (!isset($donation["tasks"][$type])) {
+				if (!isset($oldDonation["tasks"][$type])) {
 					$tasks_list = $tasks[$type] ?? null;
 					if (is_array($tasks_list) && count($tasks_list) > 0) {
 						$i = 0;

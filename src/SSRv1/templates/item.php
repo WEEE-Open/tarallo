@@ -45,7 +45,7 @@ if (isset($edit)) {
 	}
 }
 
-$summary = \WEEEOpen\Tarallo\SSRv1\Summary\Summary::peel($item);
+$summary = $item->getSummary() ?? [];
 $summary_escaped = array_map([$this, 'e'], $summary);
 unset($summary);
 

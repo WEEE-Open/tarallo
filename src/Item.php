@@ -97,6 +97,7 @@ class Item implements
 		}
 
 		$array['donations'] = $this->donations;
+		$array['summary'] = $this->getSummary();
 
 		return $array;
 	}

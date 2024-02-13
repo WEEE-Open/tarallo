@@ -30,7 +30,6 @@ trait Routes
 										// TODO: make token access public
 										$r->get('[/token/{token}]', [User::AUTH_LEVEL_RO, [Controller::class, 'getItem']]);
 										$r->get('/history', [User::AUTH_LEVEL_RO, [Controller::class, 'getItemHistory']]);
-										$r->get('/summary', [User::AUTH_LEVEL_RO, [Controller::class, 'getItemSummary']]);
 										$r->put('', [User::AUTH_LEVEL_RW, [Controller::class, 'createItem']]);
 										$r->delete('', [User::AUTH_LEVEL_RW, [Controller::class, 'removeItem']]);
 

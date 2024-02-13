@@ -2,6 +2,8 @@
 
 namespace WEEEOpen\Tarallo;
 
+use WEEEOpen\Tarallo\SSRv1\Summary\Summary;
+
 /**
  * Products, once called "default items".
  *
@@ -25,6 +27,11 @@ class Product extends ProductCode implements \JsonSerializable, ItemWithFeatures
 		return $product;
 	}
 
+	public function getSummary(): ?array
+	{
+		return Summary::peel($this);
+	}
+
 	public function jsonSerialize()
 	{
 		$array = [];
@@ -37,6 +44,7 @@ class Product extends ProductCode implements \JsonSerializable, ItemWithFeatures
 				$array['features'][$features->name] = $features->value;
 			}
 		}
+		$array['summary'] = $this->getSummary();
 		return $array;
 	}
 
