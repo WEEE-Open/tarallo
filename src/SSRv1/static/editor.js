@@ -71,7 +71,7 @@
 		itemEditing.querySelector('.itembuttons .cancel').addEventListener('click', goBack.bind(null, null, true));
 
 		// Enable clear all unused button
-		let clearAllButton = itemEditing.querySelector('.itembuttons .clear-all'),
+		let clearAllButton = itemEditing.querySelector('.itembuttons .clear-all');
 		if (clearAllButton != null) {
 			clearAllButton.addEventListener('click', () => {
 				itemEditing.querySelectorAll('.itembuttons .removeemptyfeatures').forEach(i => {i.click()});
