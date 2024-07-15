@@ -510,6 +510,7 @@ class Controller implements RequestHandlerInterface
 				'showDeleteButton' => true,
 				'name' => $oldDonation["name"],
 				'location' => $oldDonation["location"] ?? null,
+				'notes' => $oldDonation["notes"] ?? null,
 				'itemsList' => json_encode(array_keys($oldDonation["itemsType"] ?? []))
 			];
 			if (
