@@ -1297,6 +1297,7 @@ class Controller implements RequestHandlerInterface
 				[
 				'error' => $error,
 				'moved' => $moved,
+				'items' => Validation::validateOptionalString($request->getQueryParams(), 'items', null, null),
 				]
 			);
 

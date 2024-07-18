@@ -7,7 +7,7 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 
 <div class="row">
 	<div class="itembuttons primary row mx-0 mt-2 justify-content-end w-100">
-		<div class="row d-flex m-0 justify-content-between mr-auto">
+		<div class="row d-flex m-0 ml-3 mr-auto justify-content-between">
 			<h2 class="col-8 p-0 text-nowrap"><?=htmlspecialchars($donation["name"])?></h2>
 		</div>
 		<a href="/donation/<?=$donation["id"]?>/download" class="btn btn-outline-primary col-4 col-sm-auto edit mb-2 mr-2" download>
@@ -19,6 +19,9 @@ $this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'too
 			<i class="fa fa-check"></i>&nbsp;Unmark as done
 		</a>
 			<?php else : ?>
+		<a href="/bulk/move?items=<?=htmlspecialchars(implode(',', array_keys($donation["tasksProgress"])))?>" class="btn btn-outline-primary col-4 col-sm-auto edit mb-2 mr-2">
+			<i class="fas fa-dolly"></i>&nbsp;Move all items
+		</a>
 		<a href="/donation/<?=$donation["id"]?>/complete" class="btn btn-outline-warning col-4 col-sm-auto complete mb-2 mr-2">
 			<i class="fa fa-check"></i>&nbsp;Mark as done
 		</a>

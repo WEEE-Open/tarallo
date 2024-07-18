@@ -1,5 +1,6 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
+/** @var string|null $items */
 /** @var string|null $result */
 /** @var string|null $error */
 /** @var array|null $moved */
@@ -44,7 +45,7 @@ $this->insert('bulk::menu', ['currentPage' => 'move', 'container' => true]);
 				commas. <button id="bulk-move-button" data-alternate-text="Show text box" class="btn btn-secondary btn-sm">Upload a file</button></p>
 			<div class="form-group toggle">
 				<label for="bulk-move-items" class="toggle">Items to move:</label>
-				<textarea id="bulk-move-items" name="items" rows="5" class="form-control"></textarea>
+				<textarea id="bulk-move-items" name="items" rows="5" class="form-control"><?=implode("\n", explode(',', htmlspecialchars($items ?? '')))?></textarea>
 			</div>
 			<div class="form-group toggle d-none">
 				<label for="bulk-move-file" class="toggle hidden">Items to move:</label>
