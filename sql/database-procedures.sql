@@ -211,6 +211,8 @@ DELIMITER ;
 -- still there, referential integrity is preserved, the result seems correct, MariaDB doesn't complain, it's in a trigger
 -- so partial failures that leave FK checks disabled shouldn't be possible, let's just hope that transactions protect
 -- us from everything else.
+
+-- Update from a future developer: this is terrible and gives all sorts of issues. We could consider to make it so that root locations simply do not have an ancestor.
 DROP TRIGGER IF EXISTS CascadeItemCodeUpdateForReal;
 DELIMITER $$
 CREATE TRIGGER CascadeItemCodeUpdateForReal
@@ -223,6 +225,9 @@ CREATE TRIGGER CascadeItemCodeUpdateForReal
             UPDATE ItemFeature
             SET Code=NEW.Code
             WHERE Code=OLD.Code;
+            UPDATE LocationAutosuggestCache
+            SET Name=NEW.Code
+            WHERE Name=OLD.Code;
             UPDATE Tree
             SET Ancestor=NEW.Code
             WHERE Ancestor=OLD.Code;
@@ -665,6 +670,58 @@ BEGIN
     END LOOP;
     
     CLOSE cur;
+END $$
+DELIMITER ;
+
+DROP EVENT IF EXISTS `LocationAutosuggestGenerateCache`;
+DELIMITER $$
+CREATE TRIGGER `LocationAutosuggestGenerateCache` AFTER INSERT ON `ItemFeature`
+FOR EACH ROW
+BEGIN
+	IF NEW.Feature = 'type' AND NEW.ValueEnum = 'location' THEN
+		INSERT INTO `LocationAutosuggestCache` (`Name`, `Color`) VALUES (NEW.Code, (SELECT ValueEnum FROM `ItemFeature` WHERE Feature = 'color' AND Code = NEW.Code LIMIT 1));
+	ELSEIF NEW.Feature = 'color' AND (SELECT COUNT(*) FROM `LocationAutosuggestCache` WHERE Name = NEW.Code) > 0 THEN
+		UPDATE `LocationAutosuggestCache`
+		SET Color = NEW.ValueEnum
+		WHERE Name = NEW.Code;
+	END IF;
+END $$
+DELIMITER ;
+
+DROP EVENT IF EXISTS `LocationAutosuggestUpdateCache`;
+DELIMITER $$
+CREATE TRIGGER `LocationAutosuggestUpdateCache` AFTER UPDATE ON `ItemFeature`
+FOR EACH ROW
+BEGIN
+	IF OLD.Feature = 'type' AND OLD.ValueEnum = 'location' AND (NEW.Feature != 'type' OR NEW.ValueEnum != 'location') THEN
+		DELETE FROM `LocationAutosuggestCache` WHERE Name = OLD.Code;
+	ELSEIF (OLD.Feature != 'type' OR OLD.ValueEnum != 'location') AND NEW.Feature = 'type' AND NEW.ValueEnum = 'location' THEN
+		INSERT INTO `LocationAutosuggestCache` (`Name`, `Color`)
+		SELECT NEW.Code, ValueEnum
+		FROM `ItemFeature`
+		WHERE Feature = 'color' AND Code = NEW.Code
+		LIMIT 1;
+	ELSEIF (OLD.Feature = 'color' OR NEW.Feature = 'color') AND (SELECT COUNT(*) FROM `LocationAutosuggestCache` WHERE Name = NEW.Code) > 0 THEN
+		UPDATE `LocationAutosuggestCache`
+		SET Color = (SELECT ValueEnum FROM `ItemFeature` WHERE Feature = 'color' AND Code = NEW.Code LIMIT 1)
+		WHERE Name = NEW.Code;
+	END IF;
+END $$
+DELIMITER ;
+
+
+DROP EVENT IF EXISTS `LocationAutosuggestDeleteCache`;
+DELIMITER $$
+CREATE TRIGGER `LocationAutosuggestDeleteCache` AFTER DELETE ON `ItemFeature`
+FOR EACH ROW
+BEGIN
+	IF OLD.Feature = 'type' AND OLD.ValueEnum = 'location' THEN
+		DELETE FROM `LocationAutosuggestCache` WHERE Name = OLD.Code;
+	ELSEIF OLD.Feature = 'color' THEN
+		UPDATE `LocationAutosuggestCache`
+		SET Color = NULL
+		WHERE Name = OLD.Code;
+	END IF;
 END $$
 DELIMITER ;
 

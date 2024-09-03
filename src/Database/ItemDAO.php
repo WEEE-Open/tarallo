@@ -608,12 +608,7 @@ LIMIT $limit"
 
 		$statement = $this->getPDO()
 			->prepare(
-				"SELECT t1.Code AS name, t2.ValueEnum AS color
-FROM `ProductItemFeatureUnified` AS t1
-LEFT JOIN `ItemFeature` AS t2
-ON t2.Feature = 'color' AND t1.Code = t2.Code
-WHERE t1.ValueEnum = 'location' AND t1.Code LIKE :f
-LIMIT $limit"
+				"SELECT Name as name, Color as color FROM LocationAutosuggestCache WHERE Name LIKE :f LIMIT $limit"
 			);
 		try {
 			$statement->bindValue(':f', $value);

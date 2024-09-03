@@ -354,6 +354,14 @@ CREATE TABLE `DonationTasksProgress` (
   DEFAULT CHARSET=utf8mb4
   COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `LocationAutosuggestCache` (
+	`Name` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+	`Color` VARCHAR(100) COLLATE utf8mb4_unicode_ci NULL,
+	FOREIGN KEY (`Name`) REFERENCES `Item` (`Code`) ON DELETE CASCADE ON UPDATE CASCADE -- REMEMBER TO DO NOT TRUST THIS FOREIGN KEY, THERE IS A TRIGGER THAT WILL DISABLE CASCADE WHEN RENAMING AN ITEM
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
 -- ProductFeature - ItemFeature View
 
 CREATE VIEW ProductItemFeature AS
@@ -406,5 +414,5 @@ SELECT Code,
 FROM ProductItemFeature;
 
 -- Do not combine these lines, they're parsed by update-db... WITH A REGEX!
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 24);
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 31);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 25);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 32);
