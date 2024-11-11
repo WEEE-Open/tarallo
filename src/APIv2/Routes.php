@@ -103,13 +103,13 @@ trait Routes
 							'/donation',
 							function (FastRoute\RouteCollector $r) {
 								$r->get('', [User::AUTH_LEVEL_RO, [Controller::class, 'getDonationsList']]);
-								$r->post('/new', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'newDonation']]);
+								$r->post('/new', [User::AUTH_LEVEL_RW, [Controller::class, 'newDonation']]);
 								$r->get('/{id}', [User::AUTH_LEVEL_RO, [Controller::class, 'getDonation']]);
 								$r->post('/{id}/tasks', [User::AUTH_LEVEL_RW, [Controller::class, 'updateTasks']]);
-								$r->get('/{id}/complete', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'completeDonation']]);
-								$r->get('/{id}/uncomplete', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'uncompleteDonation']]);
+								$r->get('/{id}/complete', [User::AUTH_LEVEL_RW, [Controller::class, 'completeDonation']]);
+								$r->get('/{id}/uncomplete', [User::AUTH_LEVEL_RW, [Controller::class, 'uncompleteDonation']]);
 								$r->get('/{id}/download', [User::AUTH_LEVEL_RO, [Controller::class, 'downloadDonation']]);
-								$r->get('/{id}/delete', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'deleteDonation']]);
+								$r->get('/{id}/delete', [User::AUTH_LEVEL_RW, [Controller::class, 'deleteDonation']]);
 							}
 						);
 

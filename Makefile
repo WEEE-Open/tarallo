@@ -9,11 +9,11 @@ features:
 
 .PHONY:
 dbupdate:
-	docker-compose exec -T app php /var/www/html/bin/update-db
+	docker compose exec -T app php /var/www/html/bin/update-db
 
 .PHONY:
 examples:
-	docker-compose exec -T app php /var/www/html/bin/create-example-data
+	docker compose exec -T app php /var/www/html/bin/create-example-data
 
 ######################################## Production ###########################################
 resources/cache/SSRv1.cache: src/SSRv1/Controller.php
@@ -29,21 +29,21 @@ cache: resources/cache/SSRv1.cache resources/cache/APIv2.cache
 ###################################### (Re)Build targets ######################################
 .PHONY:
 build: $(wildcard docker/**/*)
-	docker-compose down -v || true
-	docker-compose build
+	docker compose down -v || true
+	docker compose build
 
 .PHONY:
 rebuild: destroy build up
 
 .PHONY:
 refresh: $(wildcard docker/**/*)
-	docker-compose down -v || true
-	docker-compose build --no-cache
+	docker compose down -v || true
+	docker compose build --no-cache
 
 #################################### Continous Integration ####################################
 .PHONY:
 ci: build
-	docker-compose up -d
+	docker compose up -d
 
 ######################################### Environment #########################################
 .PHONY:
@@ -51,9 +51,9 @@ up: up_internal dbupdate examples
 
 .PHONY:
 up_internal:
-	docker-compose up -d
+	docker compose up -d
 	# database takes a while to really start, the next command fails immediately otherwise
-	docker-compose exec -T app php /var/www/html/bin/wait-for-db
+	docker compose exec -T app php /var/www/html/bin/wait-for-db
 
 .PHONY:
 destroy: down
@@ -61,7 +61,7 @@ destroy: down
 
 .PHONY:
 down:
-	docker-compose down -v
+	docker compose down -v
 
 
 

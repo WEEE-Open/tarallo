@@ -382,7 +382,7 @@ class Controller implements RequestHandlerInterface
 
 		$request = $request
 			->withAttribute('Template', 'donations')
-			->withAttribute('TemplateParameters', ['donations' => $db->donationsDAO()->listDonations(), 'canCreateNew' => $user->getLevel() == UserSSO::AUTH_LEVEL_ADMIN]);
+			->withAttribute('TemplateParameters', ['donations' => $db->donationsDAO()->listDonations(), 'canCreateNew' => $user->getLevel() != UserSSO::AUTH_LEVEL_RO]);
 
 		return $handler->handle($request);
 	}
@@ -420,7 +420,7 @@ class Controller implements RequestHandlerInterface
 
 		$request = $request
 			->withAttribute('Template', 'donation')
-			->withAttribute('TemplateParameters', ['showEditButton' => $user->getLevel() == UserSSO::AUTH_LEVEL_ADMIN, 'donation' => $donation]);
+			->withAttribute('TemplateParameters', ['showEditButton' => $user->getLevel() != UserSSO::AUTH_LEVEL_RO, 'donation' => $donation]);
 
 		return $handler->handle($request);
 	}
