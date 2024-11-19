@@ -186,8 +186,7 @@ GROUP BY d.Id");
 						$deletedTasks = array_filter($oldTasks, function ($t) use ($newTasksWithoutRename) {
 							return array_search($t, $newTasksWithoutRename) === false;
 						});
-						foreach ($deletedTasks as $task) {
-							$oldTaskIndex = array_search($deletedTasks[0], $oldTasks);
+						foreach ($deletedTasks as $oldTaskIndex => $task) {
 							$statement = $this->getPDO()->prepare("DELETE FROM DonationTasks WHERE DonationId=:donationId AND ItemType=:type AND `Index`=:oldIndex");
 							$statement->bindParam(':donationId', $id);
 							$statement->bindParam(':type', $type);
@@ -197,18 +196,18 @@ GROUP BY d.Id");
 						foreach ($newTasks as $task) {
 							if (is_array($task)) { // this means it was renamed, value 0 is the old name, value 1 is the new name
 								$oldTaskIndex = array_search($task[0], $oldTasks);
-								if ($oldTaskIndex === false) { // means that it's new
+								if ($oldTaskIndex === false) { // the task can be new and at the same time renamed
 									$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, $i, :task, :itemType)");
 									$statement-> bindParam(':task', $task[1]);
 									$statement-> bindParam(':itemType', $type);
 									$success = $statement->execute();
 								} else {
-									$statement = $this->getPDO()->prepare("UPDATE DonationTasks SET Title=:title, `Index`=:newIndex WHERE DonationId=:donationId AND ItemType=:type AND `Index`=:oldIndex");
-									$statement->bindParam(':title', $task[1]);
+									$statement = $this->getPDO()->prepare("UPDATE DonationTasks SET Title=:newTitle, `Index`=:newIndex WHERE DonationId=:donationId AND ItemType=:type AND `Title`=:oldTitle");
+									$statement->bindParam(':newTitle', $task[1]);
 									$statement->bindParam(':newIndex', $i);
 									$statement->bindParam(':donationId', $id);
 									$statement->bindParam(':type', $type);
-									$statement->bindParam(':oldIndex', $oldTaskIndex);
+									$statement->bindParam(':oldTitle', $task[0]);
 									$success = $statement->execute();
 								}
 							} else {
@@ -220,11 +219,11 @@ GROUP BY d.Id");
 										$statement-> bindParam(':itemType', $type);
 										$success = $statement->execute();
 									} else {
-										$statement = $this->getPDO()->prepare("UPDATE DonationTasks SET `Index`=:newIndex WHERE DonationId=:donationId AND ItemType=:type AND `Index`=:oldIndex");
+										$statement = $this->getPDO()->prepare("UPDATE DonationTasks SET `Index`=:newIndex WHERE DonationId=:donationId AND ItemType=:type AND `Title`=:title");
 										$statement->bindParam(':newIndex', $i);
 										$statement->bindParam(':donationId', $id);
 										$statement->bindParam(':type', $type);
-										$statement->bindParam(':oldIndex', $oldTaskIndex);
+										$statement->bindParam(':title', $task);
 										$success = $statement->execute();
 									}
 								}

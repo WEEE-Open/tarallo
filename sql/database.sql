@@ -264,8 +264,8 @@ CREATE TABLE `SessionToken`
     PRIMARY KEY (`Token`),
     INDEX (`Owner`)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci;
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `BulkTable`
 (
@@ -280,8 +280,8 @@ CREATE TABLE `BulkTable`
         CONSTRAINT check_type
             CHECK (`Type` IN ('I', 'P'))
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci;
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `Normalization`
 (
@@ -291,8 +291,8 @@ CREATE TABLE `Normalization`
     PRIMARY KEY (`MinimizedKey`),
     INDEX (`Category`)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci;
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `NormalizationForbidden`
 (
@@ -301,20 +301,20 @@ CREATE TABLE `NormalizationForbidden`
     PRIMARY KEY (`MinimizedKey`),
     INDEX (`Category`)
 ) ENGINE = InnoDB
-  DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci;
+    DEFAULT CHARSET = utf8mb4
+    COLLATE = utf8mb4_unicode_ci;
 
 CREATE TABLE `Donations` (
-                             `Id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-                             `Name` text NOT NULL,
-                             `Location` text DEFAULT NULL,
-                             `Date` timestamp(6) NULL DEFAULT NULL,
-                             `Notes` text DEFAULT NULL,
-                             `IsCompleted` tinyint(1) DEFAULT 0,
-                             PRIMARY KEY (`Id`)
+    `Id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+    `Name` text NOT NULL,
+    `Location` text DEFAULT NULL,
+    `Date` timestamp(6) NULL DEFAULT NULL,
+    `Notes` text DEFAULT NULL,
+    `IsCompleted` tinyint(1) DEFAULT 0,
+    PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci;
+    DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `DonationItem` (
     `Donation` bigint(20) unsigned NOT NULL,
@@ -324,8 +324,8 @@ CREATE TABLE `DonationItem` (
     CONSTRAINT `DonationItem_ibfk_1` FOREIGN KEY (`Donation`) REFERENCES `Donations` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `DonationItem_ibfk_2` FOREIGN KEY (`Code`) REFERENCES `Item` (`Code`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci;
+    DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `DonationTasks` (
     `DonationId` bigint(20) unsigned NOT NULL,
@@ -337,8 +337,8 @@ CREATE TABLE `DonationTasks` (
     KEY `DonationId` (`DonationId`),
     CONSTRAINT `DonationTasks_ibfk_1` FOREIGN KEY (`DonationId`) REFERENCES `Donations` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci;
+    DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `DonationTasksProgress` (
     `DonationId` bigint(20) unsigned NOT NULL,
@@ -351,62 +351,62 @@ CREATE TABLE `DonationTasksProgress` (
     CONSTRAINT `DonationTasksProgress_ibfk_5` FOREIGN KEY (`TaskId`) REFERENCES `DonationTasks` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `DonationTasksProgress_ibfk_6` FOREIGN KEY (`DonationId`, `ItemCode`) REFERENCES `DonationItem` (`Donation`, `Code`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci;
+    DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE `LocationAutosuggestCache` (
 	`Name` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Color` VARCHAR(100) COLLATE utf8mb4_unicode_ci NULL,
 	FOREIGN KEY (`Name`) REFERENCES `Item` (`Code`) ON DELETE CASCADE ON UPDATE CASCADE -- REMEMBER TO DO NOT TRUST THIS FOREIGN KEY, THERE IS A TRIGGER THAT WILL DISABLE CASCADE WHEN RENAMING AN ITEM
 ) ENGINE=InnoDB
-  DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci;
+    DEFAULT CHARSET=utf8mb4
+    COLLATE=utf8mb4_unicode_ci;
 
 -- ProductFeature - ItemFeature View
 
 CREATE VIEW ProductItemFeature AS
 SELECT unioned.Code,
-       unioned.Feature AS Feature,
-       MAX(Value_Item) AS Value_Item,
-       MAX(ValueEnum_Item) AS ValueEnum_Item,
-       MAX(ValueText_Item) AS ValueText_Item,
-       MAX(ValueDouble_Item) AS ValueDouble_Item,
-       MAX(Value_Product) AS Value_Product,
-       MAX(ValueEnum_Product) AS ValueEnum_Product,
-       MAX(ValueText_Product) AS ValueText_Product,
-       MAX(ValueDouble_Product) AS ValueDouble_Product
+    unioned.Feature AS Feature,
+    MAX(Value_Item) AS Value_Item,
+    MAX(ValueEnum_Item) AS ValueEnum_Item,
+    MAX(ValueText_Item) AS ValueText_Item,
+    MAX(ValueDouble_Item) AS ValueDouble_Item,
+    MAX(Value_Product) AS Value_Product,
+    MAX(ValueEnum_Product) AS ValueEnum_Product,
+    MAX(ValueText_Product) AS ValueText_Product,
+    MAX(ValueDouble_Product) AS ValueDouble_Product
 FROM (
-         SELECT Item.Code,
-                ItemFeature.Feature AS Feature,
-                ItemFeature.Value AS Value_Item,
-                ItemFeature.ValueEnum AS ValueEnum_Item,
-                ItemFeature.ValueText AS ValueText_Item,
-                ItemFeature.ValueDouble AS ValueDouble_Item,
-                NULL AS Value_Product,
-                NULL AS ValueEnum_Product,
-                NULL AS ValueText_Product,
-                NULL AS ValueDouble_Product
-         FROM Item
-              NATURAL JOIN ItemFeature
-         UNION
-         SELECT Item.Code,
-                PF.Feature AS Feature,
-                NULL AS Value_Item,
-                NULL AS ValueEnum_Item,
-                NULL AS ValueText_Item,
-                NULL AS ValueDouble_Item,
-                PF.Value AS Value_Product,
-                PF.ValueEnum AS ValueEnum_Product,
-                PF.ValueText AS ValueText_Product,
-                PF.ValueDouble AS ValueDouble_Product
-         FROM Item
-              JOIN ProductFeature PF ON Item.Brand = PF.Brand AND Item.Model = PF.Model AND Item.Variant = PF.Variant
-     ) unioned
+    SELECT Item.Code,
+        ItemFeature.Feature AS Feature,
+        ItemFeature.Value AS Value_Item,
+        ItemFeature.ValueEnum AS ValueEnum_Item,
+        ItemFeature.ValueText AS ValueText_Item,
+        ItemFeature.ValueDouble AS ValueDouble_Item,
+        NULL AS Value_Product,
+        NULL AS ValueEnum_Product,
+        NULL AS ValueText_Product,
+        NULL AS ValueDouble_Product
+    FROM Item
+        NATURAL JOIN ItemFeature
+    UNION
+    SELECT Item.Code,
+        PF.Feature AS Feature,
+        NULL AS Value_Item,
+        NULL AS ValueEnum_Item,
+        NULL AS ValueText_Item,
+        NULL AS ValueDouble_Item,
+        PF.Value AS Value_Product,
+        PF.ValueEnum AS ValueEnum_Product,
+        PF.ValueText AS ValueText_Product,
+        PF.ValueDouble AS ValueDouble_Product
+    FROM Item
+        JOIN ProductFeature PF ON Item.Brand = PF.Brand AND Item.Model = PF.Model AND Item.Variant = PF.Variant
+    ) unioned
 GROUP BY Code, Feature;
 
 CREATE VIEW ProductItemFeatureUnified AS
 SELECT Code,
-       Feature,
+    Feature,
     COALESCE(Value_Item, Value_Product) AS `Value`,
     COALESCE(ValueText_Item, ValueText_Product) AS ValueText,
     COALESCE(ValueEnum_Item, ValueEnum_Product) AS ValueEnum,
