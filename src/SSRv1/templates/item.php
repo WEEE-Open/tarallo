@@ -70,7 +70,7 @@ endif; ?>
 <article class="container item<?=$recursion ? '' : ' root'?><?=$working?><?=$editing && $target ? ' head editing' : ''?><?= $deletedAt === null ? '' : ' deleted' ?>"
 		data-code="<?=$code_escaped?>">
 	<header class="row align-items-center">
-		<?php $this->insert('productIcon', ['type' => $product->getTypeForIcon()]) ?>
+		<?php $this->insert('productIcon', ['type' => $item->getTypeForIcon()]) ?>
 		<h4 class="p-2 col m-0" id="code-<?=$code_escaped?>"><?=$code_escaped?></h4>
 		<nav class="p-2 m-0 ml-auto itembuttons inheader">
 			<?php if ($editing) : ?>
