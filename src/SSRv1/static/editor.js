@@ -28,6 +28,7 @@
 
 		let itemEditing = document.querySelector('.item.head.editing');
 		let isNew = itemEditing.classList.contains('new');
+		let isProduct = itemEditing.classList.contains('product');
 
 		/** @type {Set<string>} */
 		let deletedFeatures;
@@ -116,44 +117,51 @@
 			enableFeatureHandlers(featuresElement, deletedFeatures);
 		}
 
-		// Item code edit button
-		$('.rename').on("click", function (ev) {
-			let dataset = ev.currentTarget.parentElement.parentElement.parentElement.dataset;
-			let currentCode = dataset.code;
-			swal({
-				title: "Input new item code:",
-				icon: "info",
-				buttons: {
-					cancel: {
-						text: "Cancel",
-						visible: true,
 
+		if (isProduct) {
+			// Product rename button
+			$('.rename').on("click", function (ev) {
+				let {
+					brand: currentBrand,
+					model: currentModel,
+					variant: currentVariant
+				} = ev.currentTarget.parentElement.parentElement.parentElement.dataset;
+				let form = $('<div></div>').html($(ev.currentTarget.parentElement.parentElement.parentElement).children("#rename").html());
+				form.children("#rename-brand")[0].value = currentBrand;
+				form.children("#rename-model")[0].value = currentModel;
+				form.children("#rename-variant")[0].value = currentVariant;
+				swal({
+					icon: "info",
+					buttons: {
+						cancel: {
+							text: "Cancel",
+							visible: true,
+
+						},
+						confirm: {
+							text: "Rename",
+							closeModal: false,
+						}
 					},
-					confirm: {
-						text: "Rename",
-						closeModal: false,
-					}
-				},
-				content: {
-					element: "input",
-					attributes: {
-						placeholder: "New Code",
-						value: currentCode
-					}
-				}
-			}).then(async(value) => {
-				if (value == null || value == "") {
-					swal.close();
-				} else {
-					let response = await fetchWithTimeout('/v2/items/' + encodeURIComponent(currentCode) + '/code', {
+					content: form[0]
+				}).then(async(value) => {
+					if (value == null) return;
+
+					let brand = form.children("#rename-brand")[0].value;
+					let model = form.children("#rename-model")[0].value;
+					let variant = form.children("#rename-variant")[0].value;
+
+					let response = await fetchWithTimeout(`/v2/products/${encodeURIComponent(currentBrand)}/${encodeURIComponent(currentModel)}/${encodeURIComponent(currentVariant)}`, {
 						headers: {
 							'Accept': 'application/json',
 							'Content-Type': 'application/json'
 						},
-						method: 'PUT',
+						method: 'PATCH',
 						credentials: 'include',
 						body: JSON.stringify({
-							"code":value
+							brand,
+							model,
+							variant,
 						})
 					});
 					if (response.ok) {
@@ -163,13 +171,7 @@
 							text: "You will be redirected shortly"
 						});
 						setTimeout(() => {
-							let pageCode = window.location.pathname.split('/')[2];
-							console.log(pageCode, currentCode);
-							if (pageCode == currentCode) {
-								window.location.href = '/item/' + encodeURIComponent(value);
-							} else {
-								window.location.href = '/item/' + encodeURIComponent(pageCode);
-							}
+							window.location.href = `/product/${encodeURIComponent(brand)}/${encodeURIComponent(model)}/${encodeURIComponent(variant)}`;
 						}, 2000);
 					} else {
 						swal({
@@ -178,9 +180,75 @@
 							text: await response.json().then(j => j.message)
 						});
 					}
-				}
+				});
 			});
-		});
+		} else {
+			// Item code edit button
+			$('.rename').on("click", function (ev) {
+				let dataset = ev.currentTarget.parentElement.parentElement.parentElement.dataset;
+				let currentCode = dataset.code;
+				swal({
+					title: "Input new item code:",
+					icon: "info",
+					buttons: {
+						cancel: {
+							text: "Cancel",
+							visible: true,
+
+						},
+						confirm: {
+							text: "Rename",
+							closeModal: false,
+						}
+					},
+					content: {
+						element: "input",
+						attributes: {
+							placeholder: "New Code",
+							value: currentCode
+						}
+					}
+				}).then(async(value) => {
+					if (value == null || value == "") {
+						swal.close();
+					} else {
+						let response = await fetchWithTimeout('/v2/items/' + encodeURIComponent(currentCode) + '/code', {
+							headers: {
+								'Accept': 'application/json',
+								'Content-Type': 'application/json'
+							},
+							method: 'PUT',
+							credentials: 'include',
+							body: JSON.stringify({
+								"code":value
+							})
+						});
+						if (response.ok) {
+							swal({
+								icon: "success",
+								title: "Success",
+								text: "You will be redirected shortly"
+							});
+							setTimeout(() => {
+								let pageCode = window.location.pathname.split('/')[2];
+								if (pageCode == currentCode) {
+									window.location.href = '/item/' + encodeURIComponent(value);
+								} else {
+									window.location.href = '/item/' + encodeURIComponent(pageCode);
+								}
+							}, 2000);
+						} else {
+							swal({
+								icon: "error",
+								title: "Error",
+								text: await response.json().then(j => j.message)
+							});
+						}
+					}
+				});
+			});
+		}
+		
 	}
 
 	/**

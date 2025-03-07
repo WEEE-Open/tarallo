@@ -99,4 +99,18 @@ trait ItemTraitFeatures
 	{
 		return Summary::peel($this);
 	}
+
+	/**
+	 * @return string
+	 */
+	public function getTypeForIcon(): string
+	{
+		$type = $this->getFeatureValue('type');
+		if ($type == 'case') {
+			if ($this->getFeatureValue('motherboard-form-factor') == 'proprietary-laptop') {
+				return 'laptop';
+			}
+		}
+		return $type;
+	}
 }

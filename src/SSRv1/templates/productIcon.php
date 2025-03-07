@@ -11,6 +11,7 @@ $url = [
 	"cpu" => "/static/icons/cpu.svg",
 	"card-reader" => "/static/icons/sd reader.svg",
 	"case" => "/static/icons/case.svg",
+	"laptop" => "/static/icons/laptop.svg",
 	"ethernet-card" => "/static/icons/network.svg",
 	"external-psu" => "/static/icons/external psu.svg",
 	"fdd" => "/static/icons/floppy drive.svg",

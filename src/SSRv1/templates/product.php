@@ -30,12 +30,21 @@ $copyQuery = http_build_query([
 ?>
 
 <article class="container item product root <?=$editing ? ' head editing' : ''?>" data-brand="<?=$this->e($product->getBrand())?>" data-model="<?=$this->e($product->getModel())?>" data-variant="<?=$this->e($product->getVariant())?>" data-variant-is-default="<?= (string) (bool) ($product->getVariant() === \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT) ?>">
+	<template id="rename">
+		<div></div>
+		<label for="rename-brand" class="swal-title">Brand:</label>
+		<input id="rename-brand" type="text" placeholder="Brand" class="swal-content__input"></input>
+		<label for="rename-model" class="swal-title">Model:</label>
+		<input id="rename-model" type="text" placeholder="Model" class="swal-content__input"></input>
+		<label for="rename-variant" class="swal-title">Variant:</label>
+		<input id="rename-variant" type="text" placeholder="Variant" class="swal-content__input"></input>
+	</template>
 	<header class="row align-items-center">
-		<?php $this->insert('productIcon', ['type' => $features['type']->value]) ?>
+		<?php $this->insert('productIcon', ['type' => $product->getTypeForIcon()]) ?>
 		<h4 class="p-2 col m-0" id="code-<?=$this->e($product->getBrand())?>-<?=$this->e($product->getModel())?>-<?=$this->e($product->getVariant())?>"><?= str_replace(' ', '&nbsp;', $brandModel) ?><small><?= $maybeVariant ?></small></h4>
 		<nav class="p-2 m-0 ml-auto itembuttons inheader">
 		<?php if ($editing) : ?>
-			<a class="btn btn-outline-secondary btn-sm btn-item disabled" role="button" href="#">
+			<a class="btn btn-outline-secondary btn-sm btn-item rename" role="button" href="#">
 				<i class="fa fa-pencil-alt"></i>&nbsp;Rename
 			</a>
 		<?php else : ?>
