@@ -302,7 +302,7 @@ final class SessionDAO extends DAO
 	private static function splitToken(string $token): array
 	{
 		$pieces = explode(':', $token, 2);
-		if (count($pieces) == 2) {
+		if (count($pieces) === 2) {
 			return $pieces;
 		} else {
 			return [$token, ''];

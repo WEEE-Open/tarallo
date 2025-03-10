@@ -106,11 +106,11 @@ trait ItemTraitFeatures
 	public function getTypeForIcon(): string
 	{
 		$type = $this->getFeatureValue('type');
-		if ($type == null) {
+		if ($type === null) {
 			return 'unknown';
 		}
-		if ($type == 'case') {
-			if ($this->getFeatureValue('motherboard-form-factor') == 'proprietary-laptop') {
+		if ($type === 'case') {
+			if ($this->getFeatureValue('motherboard-form-factor') === 'proprietary-laptop') {
 				return 'laptop';
 			}
 		}

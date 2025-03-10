@@ -129,11 +129,11 @@ final class TreeDAO extends DAO
 
 			$row = $statement->fetch(\PDO::FETCH_ASSOC);
 
-			if ($row == false) {
+			if ($row === false) {
 				return;
 			}
 
-			return [new ItemCode($row['Ancestor']), $row['Depth'] == 0];
+			return [new ItemCode($row['Ancestor']), $row['Depth'] === 0];
 		} finally {
 			$statement->closeCursor();
 		}

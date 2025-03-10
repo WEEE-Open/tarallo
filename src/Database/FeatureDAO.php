@@ -339,7 +339,7 @@ final class FeatureDAO extends DAO
 			if (method_exists($item, 'getProduct')) {
 				$product = $item->getProduct();
 				/** @var Product $product */
-				if ($product !== null && $product->getFeatureValue($feature->name) == $feature->value) {
+				if ($product !== null && $product->getFeatureValue($feature->name) === $feature->value) {
 					// Item feature = product feature
 					// If feature is being added, this will delete nothing and return false (no changes)
 					// If feature is being updated, this will delete old feature and return true (it changed)

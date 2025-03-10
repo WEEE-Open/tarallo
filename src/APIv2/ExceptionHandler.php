@@ -17,7 +17,7 @@ class ExceptionHandler implements MiddlewareInterface
 		} catch (\Exception $e) {
 			$error = ErrorResponse::fromException($e);
 			$status = $error->status;
-			if ($status == 401) {
+			if ($status === 401) {
 				return new JsonResponse($error, $status, ['WWW-Authenticate' => 'Token']);
 			} else {
 				return new JsonResponse($error, $status);

@@ -28,7 +28,7 @@ class HddSummarizer implements Summarizer
 		$hardware .= $capacity ? ' ' . FeaturePrinter::printableValue($capacity) : '';
 		$ports = '';
 		if ($sataPorts !== null) {
-			if ($sataPorts->value == 1) {
+			if ($sataPorts->value === 1) {
 				$ports .= ' ' . FeaturePrinter::printableName('sata-ports-n');
 			} else {
 				$ports .= ' ' . $sataPorts . '×' . FeaturePrinter::printableName('sata-ports-n');
@@ -37,7 +37,7 @@ class HddSummarizer implements Summarizer
 
 		if ($idePorts !== null) {
 			$ports .= $ports ? ' +' : '';
-			if ($idePorts->value == 1) {
+			if ($idePorts->value === 1) {
 				$ports .= ' ' . FeaturePrinter::printableName('ide-ports-n');
 			} else {
 				$ports .= ' ' . $idePorts . '×' . FeaturePrinter::printableName('ide-ports-n');
@@ -46,7 +46,7 @@ class HddSummarizer implements Summarizer
 
 		if ($miniIdePorts !== null) {
 			$ports .= $ports ? ' +' : '';
-			if ($miniIdePorts->value == 1) {
+			if ($miniIdePorts->value === 1) {
 				$ports .= ' ' . FeaturePrinter::printableName('mini-ide-ports-n');
 			} else {
 				$ports .= ' ' . $miniIdePorts . '×' . FeaturePrinter::printableName('mini-ide-ports-n');
@@ -55,7 +55,7 @@ class HddSummarizer implements Summarizer
 
 		if ($scsiPorts !== null) {
 			$ports .= $ports ? ' +' : '';
-			if ($scsiPorts->value == 1) {
+			if ($scsiPorts->value === 1) {
 				$ports .= ' ' . FeaturePrinter::printableName('scsi-sca2-ports-n');
 			} else {
 				$ports .= ' ' . $scsiPorts . '×' . FeaturePrinter::printableName('scsi-sca2-ports-n');
@@ -64,7 +64,7 @@ class HddSummarizer implements Summarizer
 
 		if ($scsi2Ports !== null) {
 			$ports .= $ports ? ' +' : '';
-			if ($scsi2Ports->value == 1) {
+			if ($scsi2Ports->value === 1) {
 				$ports .= ' ' . FeaturePrinter::printableName('scsi-db68-ports-n');
 			} else {
 				$ports .= ' ' . $scsi2Ports . '×' . FeaturePrinter::printableName('scsi-db68-ports-n');

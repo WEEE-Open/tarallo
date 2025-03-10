@@ -33,7 +33,7 @@ class Normalization
 		$type = $item->getFeatureValue('type');
 		$parentType = $container->getFeatureValue('type');
 
-		if ($type === null || $parentType == null) {
+		if ($type === null || $parentType === null) {
 			return $container;
 		}
 
@@ -143,7 +143,7 @@ class Normalization
 		$type = $item->getFeatureValue('type');
 		$containerType = $container->getFeatureValue('type');
 
-		if ($type === null || $containerType == null) {
+		if ($type === null || $containerType === null) {
 			return;
 		}
 

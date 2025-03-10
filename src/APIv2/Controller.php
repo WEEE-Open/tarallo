@@ -1004,7 +1004,7 @@ class Controller implements RequestHandlerInterface
 				/** @var Database $db */
 				$db = $request->getAttribute('Database');
 				$itemsList = json_decode($body["ItemsList"]);
-				if ($itemsList === null || count($itemsList) == 0) {
+				if ($itemsList === null || count($itemsList) === 0) {
 					$error = "Please input at least one item in the items list";
 				} elseif ($db->itemDAO()->checkItemListAllExist($itemsList)) {
 					if ($body["Tasks"] === null || ($tasks = json_decode($body["Tasks"], true)) === null) {
@@ -1064,7 +1064,7 @@ class Controller implements RequestHandlerInterface
 
 		$id = Validation::validateOptionalInt($parameters, 'id', -1);
 
-		if ($id == -1) {
+		if ($id === -1) {
 			return new JsonResponse(ErrorResponse::fromMessage('Not found'), 404);
 		}
 
@@ -1084,7 +1084,7 @@ class Controller implements RequestHandlerInterface
 
 		$id = Validation::validateOptionalInt($parameters, 'id', -1);
 
-		if ($id == -1) {
+		if ($id === -1) {
 			return new JsonResponse(ErrorResponse::fromMessage('Not found'), 404);
 		}
 

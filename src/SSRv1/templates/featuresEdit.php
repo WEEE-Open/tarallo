@@ -28,7 +28,7 @@ if (count($features) > 0) :
 						case WEEEOpen\Tarallo\BaseFeature::ENUM:
 							?>
 						<select class="value" autocomplete="off" data-internal-name="<?= $ultra->name ?>" data-internal-type="e" data-initial-value="<?= $this->e($ultra->value, 'asTextContent')?>" id="feature-el-<?= $ultra->name ?>">
-													<?php if ($ultra->value == null) :
+													<?php if ($ultra->value === null) :
 														?><option value="" disabled selected></option><?php
 													endif; ?>
 							<?php foreach ($this->getOptions($ultra->name) as $optionValue => $optionName) : ?>

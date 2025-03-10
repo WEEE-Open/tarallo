@@ -635,7 +635,7 @@ LIMIT $limit"
 
 	public function getTypesForItemCodes($list)
 	{
-		if (sizeof($list) == 0) {
+		if (sizeof($list) === 0) {
 			return array();
 		}
 		$pdo = $this->getPDO();
@@ -676,7 +676,7 @@ WHERE Item.Code IN ($itemsList);"
 
 	public function checkItemListAllExist($list)
 	{
-		if (sizeof($list) == 0) {
+		if (sizeof($list) === 0) {
 			return true;
 		}
 		$pdo = $this->getPDO();
@@ -691,7 +691,7 @@ WHERE Item.Code IN ($itemsList);"
 		try {
 			$success = $statement->execute();
 			$result = $statement->fetch(\PDO::FETCH_ASSOC);
-			if ($result["Total"] == sizeof($list)) {
+			if ($result["Total"] === sizeof($list)) {
 				return true;
 			}
 			return false;

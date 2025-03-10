@@ -74,7 +74,7 @@ class Controller implements RequestHandlerInterface
 			'depth' => $depth,
 			];
 		// These should be mutually exclusive: either one (or both) is always null
-		assert($add === null || $edit == null);
+		assert($add === null || $edit === null);
 		$renderParameters['add'] = $add;
 		$renderParameters['edit'] = $edit;
 
@@ -349,7 +349,7 @@ class Controller implements RequestHandlerInterface
 				/** @var Database $db */
 				$db = $request->getAttribute('Database');
 				$itemsList = json_decode($body["ItemsList"]);
-				if ($itemsList === null || count($itemsList) == 0) {
+				if ($itemsList === null || count($itemsList) === 0) {
 					$error = "Please input at least one item in the items list";
 				} elseif ($db->itemDAO()->checkItemListAllExist($itemsList)) {
 					if ($body["Tasks"] === null || ($tasks = json_decode($body["Tasks"], true)) === null) {
@@ -398,7 +398,7 @@ class Controller implements RequestHandlerInterface
 
 		$id = Validation::validateOptionalInt($parameters, 'id', -1);
 
-		if ($id == -1) {
+		if ($id === -1) {
 			$request = $request
 				->withAttribute('Template', 'error')
 				->withAttribute('ResponseCode', 404)
@@ -434,7 +434,7 @@ class Controller implements RequestHandlerInterface
 
 		$id = Validation::validateOptionalInt($parameters, 'id', -1);
 
-		if ($id == -1) {
+		if ($id === -1) {
 			$request = $request
 				->withAttribute('Template', 'error')
 				->withAttribute('ResponseCode', 404)
@@ -457,7 +457,7 @@ class Controller implements RequestHandlerInterface
 
 		$id = Validation::validateOptionalInt($parameters, 'id', -1);
 
-		if ($id == -1) {
+		if ($id === -1) {
 			$request = $request
 				->withAttribute('Template', 'error')
 				->withAttribute('ResponseCode', 404)
@@ -480,7 +480,7 @@ class Controller implements RequestHandlerInterface
 
 		$id = Validation::validateOptionalInt($parameters, 'id', -1);
 
-		if ($id == -1) {
+		if ($id === -1) {
 			$request = $request
 				->withAttribute('Template', 'error')
 				->withAttribute('ResponseCode', 404)
@@ -537,7 +537,7 @@ class Controller implements RequestHandlerInterface
 					$date = null;
 				}
 				$itemsList = json_decode($body["ItemsList"]);
-				if ($itemsList === null || count($itemsList) == 0) {
+				if ($itemsList === null || count($itemsList) === 0) {
 					$error = "Please input at least one item in the items list";
 				} elseif ($db->itemDAO()->checkItemListAllExist($itemsList)) {
 					if ($body["Tasks"] === null || ($tasks = json_decode($body["Tasks"], true)) === null) {
@@ -1219,7 +1219,7 @@ class Controller implements RequestHandlerInterface
 				'depth' => $depth,
 			];
 			// These should be mutually exclusive: either one (or both) is always null
-			assert($add === null || $edit == null);
+			assert($add === null || $edit === null);
 			$templateParameters['add'] = $add;
 			$templateParameters['edit'] = $edit;
 			$templateParameters['noDepthUrl'] = $request->getUri()->getPath();
@@ -1529,7 +1529,7 @@ class Controller implements RequestHandlerInterface
 				continue;
 			}
 			$lineExploded = explode(':', $line);
-			if (count($lineExploded) == 1) {
+			if (count($lineExploded) === 1) {
 				$item = new ItemCode(trim($lineExploded[0]));
 				if ($defaultLocation === null) {
 					throw new \InvalidArgumentException("No location provided for $line and no default location", 1);
@@ -1537,7 +1537,7 @@ class Controller implements RequestHandlerInterface
 					$location = $defaultLocation;
 				}
 			} else {
-				if (count($lineExploded) == 2) {
+				if (count($lineExploded) === 2) {
 					$item = new ItemCode(trim($lineExploded[0]));
 					$location = new ItemCode(trim($lineExploded[1]));
 				} else {
