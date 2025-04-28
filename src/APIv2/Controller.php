@@ -1176,6 +1176,13 @@ class Controller implements RequestHandlerInterface
 		return $response;
 	}
 
+	public static function getOptions(ServerRequestInterface $request): ResponseInterface
+	{
+		$db = $request->getAttribute('Database');
+		$data = $db->optionDAO()->getAllOptions();
+		return new JsonResponse($data);
+	}
+
 	public function handle(ServerRequestInterface $request): ResponseInterface
 	{
 		$route = $this->route($request);

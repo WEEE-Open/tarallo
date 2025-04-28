@@ -142,6 +142,7 @@ trait Routes
 								$r->post('/add[/{identifier}]', [User::AUTH_LEVEL_RO, [Controller::class, 'addBulk']]);
 							}
 						);
+						$r->get('/options', [User::AUTH_LEVEL_RO, [Controller::class, 'getOptions']]);
 					}
 				);
 			},
