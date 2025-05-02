@@ -11,6 +11,7 @@ use WEEEOpen\Tarallo\APIv2\ItemBuilder;
 use WEEEOpen\Tarallo\APIv2\ProductBuilder;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Database\Database;
+use WEEEOpen\Tarallo\Database\OptionDAO;
 use WEEEOpen\Tarallo\Database\TreeDAO;
 use WEEEOpen\Tarallo\ErrorHandler;
 use WEEEOpen\Tarallo\Feature;
@@ -702,17 +703,11 @@ class Controller implements RequestHandlerInterface
 		$body = $request->getParsedBody();
 
 		$error = null;
-		$editable = [
-			'DefaultHddLocation',
-			'DefaultRamLocation',
-			'DefaultCpuLocation',
-			'DefaultTodosLocation',
-		];
 
 		if ($body !== null && count($body) > 0) {
 			try {
 				if (isset($body['location']) && isset($body['default'])) {
-					if (!in_array($body['default'], $editable, true)) {
+					if (!in_array($body['default'], OptionDAO::SAFEOPTIONS, true)) {
 						throw new AuthorizationException('Not even admins can edit that');
 					}
 					$db->optionDAO()->setOptionValue($body['default'], $body['location']);
@@ -723,16 +718,11 @@ class Controller implements RequestHandlerInterface
 			}
 		}
 
-		$optionsForTemplate = [];
-		foreach ($editable as $optionKey) {
-			$optionsForTemplate[$optionKey] = $db->optionDAO()->getOptionValue($optionKey);
-		}
-
 		$request = $request->withAttribute('Template', 'options::stats');
 		$request = $request->withAttribute(
 			'TemplateParameters',
 			[
-				'defaultLocations' => $optionsForTemplate,
+				'defaultLocations' => $db->optionDAO()->getOptions(),
 				'error' => $error
 			]
 		);
@@ -1200,7 +1190,13 @@ class Controller implements RequestHandlerInterface
 		$depth = Validation::validateOptionalInt($query, 'depth', null);
 
 		if ($id === null) {
-			$templateParameters = ['searchId' => null];
+			$templateParameters = [
+				'searchId' => null,
+			];
+			$defaultLocation = $db->optionDAO()->getOptionValue('DefaultSearchLocation');
+			if ($defaultLocation !== null) {
+				$templateParameters['search'] = new Search(null, [], [], [$defaultLocation]);
+			}
 		} else {
 			$perPage = 10;
 			//TODO: Ideally getSearchById would handle all of the below calls and fully populate a Search

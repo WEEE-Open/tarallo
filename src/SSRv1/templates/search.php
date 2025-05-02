@@ -112,6 +112,7 @@ $this->layout('main', ['title' => 'Search', 'user' => $user, 'currentPage' => 'i
 		</div>
 	</div>
 	<div id="searchrows"></div>
+	<script id="search-data" type="application/json"><?php if (isset($search)) echo json_encode($search); ?></script>
 	<div>
 		<input type="submit" disabled class="btn btn-primary" id="searchbutton" value="<?=$searchId === null ? 'Search' : 'Refine'?>">
 	</div>

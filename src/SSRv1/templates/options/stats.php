@@ -11,6 +11,7 @@ $this->insert('options::menu', ['currentPage' => 'stats']);
 	'DefaultRamLocation' => 'Default location for RAM stats',
 	'DefaultHddLocation' => 'Default location for HDD stats',
 	'DefaultTodosLocation' => 'Lab name, for TODOs',
+	'DefaultSearchLocation' => 'Default search location',
 ];
 ?>
 

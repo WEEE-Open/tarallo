@@ -11,6 +11,7 @@ use Relay\RelayBuilder;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Database\Database;
 use WEEEOpen\Tarallo\Database\FeatureDAO;
+use WEEEOpen\Tarallo\Database\OptionDAO;
 use WEEEOpen\Tarallo\Database\TreeDAO;
 use WEEEOpen\Tarallo\DuplicateBulkIdentifierException;
 use WEEEOpen\Tarallo\ErrorHandler;
@@ -1179,7 +1180,25 @@ class Controller implements RequestHandlerInterface
 	public static function getOptions(ServerRequestInterface $request): ResponseInterface
 	{
 		$db = $request->getAttribute('Database');
-		$data = $db->optionDAO()->getAllOptions();
+		$data = $db->optionDAO()->getOptions();
+		return new JsonResponse($data);
+	}
+
+	public static function patchOptions(ServerRequestInterface $request): ResponseInterface
+	{
+		$body = json_decode($request->getBody()->getContents());
+		
+		foreach ($body as $key => $value) {
+			if (!in_array($key, OptionDAO::SAFEOPTIONS, true) || (!is_string($value) && !is_null($value))) {
+				return new JsonResponse(ErrorResponse::fromMessage('Bad Request'), 400);
+			}
+		}
+
+		$db = $request->getAttribute('Database');
+		foreach ($body as $key => $value) {
+			$db->optionDAO()->setOptionValue($key, $value);
+		}
+		$data = $db->optionDAO()->getOptions();
 		return new JsonResponse($data);
 	}
 

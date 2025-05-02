@@ -143,6 +143,7 @@ trait Routes
 							}
 						);
 						$r->get('/options', [User::AUTH_LEVEL_RO, [Controller::class, 'getOptions']]);
+						$r->patch('/options', [User::AUTH_LEVEL_RW, [Controller::class, 'patchOptions']]);
 					}
 				);
 			},

@@ -33,52 +33,34 @@
 	let searchId = searchForm.dataset.searchId;
 	let isRefine = !!searchId;
 
-	let searchQuery = null;
-	if (isRefine) {
-		let searchRefineButton = document.getElementById("refinecollapsebutton")
-		searchRefineButton.disabled = true;
-		searchQuery = fetch(`/v2/search/query/${searchId}`, {
-			headers: {
-				'Accept': 'application/json',
-				'Content-Type': 'application/json'
-			},
-			method: 'GET',
-			credentials: 'include'
-		}).then(r => {
-			if (!r.ok) {
-				throw new Error(`Couldn't fetch search query: HTTP ${r.status} ${r.statusText}`);
+	let searchQuery = {};
+	let searchData = {};
+	try {
+		searchData = JSON.parse(document.getElementById('search-data').textContent);
+	} catch (e) {}
+	for (let [key, value] of Object.entries(searchData)) {
+		let rowType = queryToRowType.get(key);
+		if (!rowType) {
+			throw new Error(`Unknown query row type: ${key}`);
+		}
+
+		if (!Array.isArray(value)) {
+			throw new Error(`Query contains non array valued key`);
+		}
+
+		if (key === "location" && value.length > 0) {
+			addSearchRow(rowType, value);
+		} else {
+			for (const row of value) {
+				addSearchRow(rowType, row);
 			}
-			return r.json();
-		}).then(q => {
-			let searchQuery = {};
-			for (let [key, value] of Object.entries(q)) {
-				let rowType = queryToRowType.get(key);
-				if (!rowType) {
-					throw new Error(`Unknown query row type: ${key}`);
-				}
+		}
 
-				if (!Array.isArray(value)) {
-					throw new Error(`Query contains non array valued key`);
-				}
-
-				if (key === "location" && value.length > 0) {
-					addSearchRow(rowType, value);
-				} else {
-					for (const row of value) {
-						addSearchRow(rowType, row);
-					}
-				}
-
-				// Turn array into an object for easier access
-				searchQuery[key] = new Map(value.map(o => [o.key, o.value]));
-			}
-
-			searchRefineButton.disabled = false;
-			toggleSearchButton(true);
-
-			return searchQuery;
-		});
+		// Turn array into an object for easier access
+		searchQuery[key] = new Map(value.map(o => [o.key, o.value]));
 	}
+
+	toggleSearchButton(true);
 
 	// Disable search button, since browser keep its state in memory even if the page is refreshed
 	toggleSearchButton();
@@ -263,13 +245,12 @@
 		if (isRefine && !noCheck) {
 			window.onbeforeunload = null;
 			searchButton.disabled = true;
-			searchQuery.then(q => {
-				let diff = getDiff(q);
-				if (Object.entries(diff).reduce((acc, cv) => acc || cv[1].length !== 0, false)) {
-					searchButton.disabled = false;
-					window.onbeforeunload = defaultOnBeforeUnload;
-				}
-			});
+			
+			let diff = getDiff(searchQuery);
+			if (Object.entries(diff).reduce((acc, cv) => acc || cv[1].length !== 0, false)) {
+				searchButton.disabled = false;
+				window.onbeforeunload = defaultOnBeforeUnload;
+			}
 		} else {
 			searchButton.disabled = searchRows.childElementCount <= 0;
 		}
