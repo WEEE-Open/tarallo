@@ -3,9 +3,12 @@
 /** @var \WEEEOpen\Tarallo\Product $product */
 /** @var bool $editing */
 /** @var string $self */
+
 $features = $product->getFeatures();
 $brandModel = $this->e($product->getBrand()) . ' ' . $this->e($product->getModel());
 $maybeVariant = rtrim(' ' . $this->e($product->getVariantOrEmpty()));
+
+
 
 $this->layout(
 	'main',
@@ -27,6 +30,11 @@ $copyQuery = http_build_query([
 	'copy-model' => $product->getModel(),
 	'copy-variant' => $product->getVariant(),
 ], null, '&', PHP_QUERY_RFC3986);
+
+// echo '<pre>';
+// var_dump($copyQuery);
+// echo '</pre>';
+// exit;
 ?>
 
 <article class="container item product root <?=$editing ? ' head editing' : ''?>" data-brand="<?=$this->e($product->getBrand())?>" data-model="<?=$this->e($product->getModel())?>" data-variant="<?=$this->e($product->getVariant())?>" data-variant-is-default="<?= (string) (bool) ($product->getVariant() === \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT) ?>">

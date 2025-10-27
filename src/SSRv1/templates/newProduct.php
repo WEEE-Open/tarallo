@@ -8,6 +8,9 @@ if ($base instanceof \WEEEOpen\Tarallo\Item) {
 	$base = \WEEEOpen\Tarallo\Product::fromItem($base);
 }
 $isClone = !isset($baseItem) && $base instanceof \WEEEOpen\Tarallo\Product && !isset($importedFrom);
+
+
+
 ?>
 
 <article class="container product item new editing root head <?= $isClone ? 'clone' : '' ?>">

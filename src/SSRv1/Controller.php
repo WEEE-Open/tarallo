@@ -91,6 +91,8 @@ class Controller implements RequestHandlerInterface
 
 	public static function getProduct(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
+
+	
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$parameters = $request->getAttribute('parameters', []);
@@ -294,6 +296,7 @@ class Controller implements RequestHandlerInterface
 
 	public static function addProduct(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
+		
 		$query = $request->getQueryParams();
 
 		$split = Validation::validateOptionalString($query, 'split', null, null);
@@ -809,6 +812,8 @@ class Controller implements RequestHandlerInterface
 
 	public static function getStats(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
+
+	
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
