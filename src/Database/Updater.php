@@ -2,19 +2,17 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
-class Updater extends DAO
-{
+class Updater extends DAO {
 	private $schemaVersion;
 	private $dataVersion;
 
-	public function __construct(Database $db, $callback)
-	{
+	public function __construct(Database $db, $callback) {
 		parent::__construct($db, $callback);
 		try {
 			$result = $this->getPDO()->query("SELECT `Value` FROM Configuration WHERE `Key` = 'SchemaVersion'");
 			$this->schemaVersion = (int) $result->fetchColumn();
-		} catch (\PDOException $e) {
-			if ($e->getCode() === '42S02') {
+		} catch(\PDOException $e) {
+			if($e->getCode() === '42S02') {
 				$this->schemaVersion = 0;
 				$this->dataVersion = 0;
 				return;
@@ -28,28 +26,26 @@ class Updater extends DAO
 		echo 'Start from schema version ' . $this->schemaVersion . ' and data version ' . $this->dataVersion . PHP_EOL;
 	}
 
-	public function updateTo(int $schema, int $data)
-	{
+	public function updateTo(int $schema, int $data) {
 		$this->updateSchema($schema);
 		$this->updateData($data);
 	}
 
-	private function updateSchema(int $schema)
-	{
-		if ($this->schemaVersion === $schema) {
+	private function updateSchema(int $schema) {
+		if($this->schemaVersion === $schema) {
 			return;
-		} elseif ($this->schemaVersion > $schema) {
+		} else if($this->schemaVersion > $schema) {
 			throw new \InvalidArgumentException("Trying to downgrade schema from $this->schemaVersion to $schema");
 		}
 		// $schema is now > $this->schemaVersion
-		while ($this->schemaVersion < $schema) {
-			switch ($this->schemaVersion) {
+		while($this->schemaVersion < $schema) {
+			switch($this->schemaVersion) {
 				case 0:
 					$this->exec(
 						<<<EOQ
 CREATE TABLE `Configuration` (
-  `Key` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `Value` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Key` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `Value` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
 	PRIMARY KEY (`Key`)
 )
 	ENGINE = InnoDB
@@ -61,7 +57,7 @@ EOQ
 					$this->exec("INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 0)");
 					break;
 				case 1:
-					$this->exec("ALTER TABLE Item ADD `LostAt` timestamp NULL DEFAULT NULL");
+					$this->exec("ALTER TABLE Item ADD `LostAt` TIMESTAMP NULL DEFAULT NULL");
 					$this->exec("CREATE INDEX LostAt ON Item (LostAt)");
 					$this->exec("DROP TRIGGER IF EXISTS ItemSetDeleted");
 					$this->exec("DROP FUNCTION IF EXISTS CountDescendants");
@@ -154,16 +150,17 @@ EOQ
 					break;
 				case 3:
 					$this->exec(
-						'ALTER TABLE `Audit` CHANGE `Time` `Time` timestamp(6) NOT NULL DEFAULT now(6) AFTER `Other`;'
+						'ALTER TABLE `Audit` CHANGE `Time` `Time` TIMESTAMP(6) NOT NULL DEFAULT now(6) AFTER `Other`;'
 					);
 					break;
 				case 4:
-					$this->exec('ALTER TABLE `Item` CHANGE `LostAt` `LostAt` timestamp(6) NULL');
-					$this->exec('ALTER TABLE `Item` CHANGE `DeletedAt` `DeletedAt` timestamp(6) NULL');
+					$this->exec('ALTER TABLE `Item` CHANGE `LostAt` `LostAt` TIMESTAMP(6) NULL');
+					$this->exec('ALTER TABLE `Item` CHANGE `DeletedAt` `DeletedAt` TIMESTAMP(6) NULL');
 					// "Can't update table 'Audit' in stored function/trigger because it is already used by statement
 					// which invoked this stored function/trigger" => Drop trigger and recreate it later
 					$this->exec("DROP TRIGGER IF EXISTS AuditLostItem");
-					$this->exec(<<<EOQ
+					$this->exec(
+						<<<EOQ
 					UPDATE Item
 					SET LostAt = (
 						SELECT TIMESTAMPADD(SECOND, 1, MAX(`Time`))
@@ -182,10 +179,11 @@ EOQ
 					// Random searches on the Internet still bring up old Stack Overflow questions from a time when
 					// window functions were not widely available...
 					// Anyway: add missing L Audit entries due to missing trigger
-					$this->exec(<<<EOQ
+					$this->exec(
+						<<<EOQ
 					INSERT INTO Audit(Code, `Change`, Other, Time, User) 
 					SELECT Updated.`Code`, 'L', NULL, TIMESTAMPADD(SECOND, 1, Updated.`Time`), Updated.User FROM (
-					SELECT `Code`, `Time`, `User`, ROW_NUMBER() OVER (PARTITION BY `Code` ORDER BY `Time` DESC) AS RN
+					SELECT `Code`, `Time`, `User`, ROW_NUMBER() AS OVER (PARTITION BY `Code` ORDER BY `Time` DESC) AS RN
 					FROM Audit
 					WHERE Code IN (
 						SELECT Code
@@ -202,7 +200,7 @@ EOQ
 					// databases, so...
 					// Mark as lost all the items in the "Lost" location, if it exists.
 					$intermediate = $this->getPDO()->query("SELECT Code FROM Item WHERE Code = 'Lost'");
-					if ($intermediate->rowCount() > 0) {
+					if($intermediate->rowCount() > 0) {
 						// Close that cursor so we can do other stuff
 						$intermediate->closeCursor();
 						// Trigger will create and Audit entry, this requires an username... will fix them manually
@@ -211,7 +209,7 @@ EOQ
 						// Also, there still trigger preventing this from being a single query...
 						$intermediate2 = $this->getPDO()->query("SELECT DISTINCT Descendant FROM Tree WHERE Ancestor = 'Lost' AND Depth > 0");
 						$fetched = $intermediate2->fetchAll(\PDO::FETCH_COLUMN);
-						foreach ($fetched as $item) {
+						foreach($fetched as $item) {
 							// Again, there are a billion triggers preventing the simplest of queries, so we have to
 							// make some inane byzantine workarounds, I don't even know anymore, it's 1.30 AM I just
 							// want to insert these damn 4 rows into the damn table and be done with it, please,
@@ -220,7 +218,8 @@ EOQ
 							// injection at all since these are heavily validated everywhere and there's no item
 							// named "); DROP DATABASE -- " in production...
 							// Manual audit entries
-							$this->exec(<<<EOQ
+							$this->exec(
+								<<<EOQ
 								INSERT INTO Audit(Code, `Change`, Other, Time, User) 
 								SELECT Updated.`Code`, 'L', NULL, TIMESTAMPADD(SECOND, 1, Updated.`Time`), Updated.User FROM (
 								SELECT `Code`, `Time`, `User`, ROW_NUMBER() OVER (PARTITION BY `Code` ORDER BY `Time` DESC) AS RN
@@ -231,10 +230,12 @@ EOQ
 EOQ
 							);
 							// Finally lose the item
-							$this->exec("
+							$this->exec(
+								"
 							UPDATE Item
 							SET LostAt = (SELECT MAX(`Time`) FROM `Audit` WHERE `Code` = '$item')
-							WHERE Code = '$item'");
+							WHERE Code = '$item'"
+							);
 							unset($item);
 						}
 						$intermediate2->closeCursor();
@@ -266,7 +267,8 @@ EOQ
 					break;
 				case 5:
 					$this->exec('DROP TRIGGER AuditUserRename;');
-					$this->exec('CREATE TABLE Session
+					$this->exec(
+						'CREATE TABLE Session
 (
     Session VARCHAR(100) NOT NULL,
     Data TEXT,
@@ -275,47 +277,55 @@ EOQ
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
-    COLLATE = utf8mb4_unicode_ci;');
+    COLLATE = utf8mb4_unicode_ci;'
+					);
 					$this->exec('ALTER TABLE `Search` DROP FOREIGN KEY `Search_ibfk_1`');
 					$this->exec('DROP TABLE User;');
 					break;
 				case 6:
 					$this->exec('ALTER TABLE `Session` ADD COLUMN `LastAccess` TIMESTAMP NOT NULL DEFAULT current_timestamp AFTER Redirect;');
-					$this->exec('CREATE TABLE `SessionToken`
+					$this->exec(
+						'CREATE TABLE `SessionToken`
 (
     `Token` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `Hash` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Hash` VARCHAR(255) COLLATE utf8mb4_unicode_ci NOT NULL,
     `Data` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
     `Owner` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `LastAccess` TIMESTAMP NOT NULL DEFAULT current_timestamp,
+    `LastAccess` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`Token`),
     INDEX (`Owner`)
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
-  COLLATE = utf8mb4_unicode_ci;');
+  COLLATE = utf8mb4_unicode_ci;'
+					);
 					break;
 				case 7:
 					$this->exec('DROP EVENT IF EXISTS `SessionsCleanup`');
-					$this->exec('CREATE EVENT `SessionsCleanup`
+					$this->exec(
+						'CREATE EVENT `SessionsCleanup`
     ON SCHEDULE EVERY \'6\' HOUR
     ON COMPLETION PRESERVE
     ENABLE DO
     DELETE
     FROM `Session`
     WHERE LastAccess < TIMESTAMPADD(DAY, -2, NOW());
-');
+'
+					);
 					$this->exec('DROP EVENT IF EXISTS `TokensCleanup`;');
-					$this->exec('CREATE EVENT `TokensCleanup`
+					$this->exec(
+						'CREATE EVENT `TokensCleanup`
     ON SCHEDULE EVERY \'1\' DAY
     ON COMPLETION PRESERVE
     ENABLE DO
     DELETE
     FROM `SessionToken`
     WHERE LastAccess < TIMESTAMPADD(MONTH, -6, NOW());
-');
+'
+					);
 					break;
 				case 8:
-					$this->exec("    
+					$this->exec(
+						"    
 CREATE TABLE `Product`
 (
     -- Max length would be approx. 190 * 4 bytes = 760, less than the apparently random limit of 767 bytes.
@@ -326,8 +336,10 @@ CREATE TABLE `Product`
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
-    COLLATE = utf8mb4_unicode_ci;");
-					$this->exec("
+    COLLATE = utf8mb4_unicode_ci;"
+					);
+					$this->exec(
+						"
 						CREATE TABLE `ProductFeature`
 (
 `Brand` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -358,10 +370,12 @@ CREATE TABLE `Product`
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_unicode_ci;
-					");
+					"
+					);
 					break;
 				case 9:
-					$this->exec("CREATE VIEW ProductItemFeature AS
+					$this->exec(
+						"CREATE VIEW ProductItemFeature AS
 SELECT  I.CODE AS Code, PF.BRAND AS Brand, PF.MODEL AS Model, PF.VARIANT AS Variant,
         PF.FEATURE AS Feature_Prod, PF.VALUE AS Value_Prod, PF.VALUEENUM AS Valueenum_Prod,
         PF.VALUETEXT AS Valuetext_Prod, PF.VALUEDOUBLE AS Valuedouble_Prod,
@@ -373,11 +387,13 @@ WHERE   I.Code = IFT.Code AND
         PF.Model = I.Model AND
         PF.Brand = I.Brand AND
         PF.Variant = I.Variant AND
-        IFT.Feature = PF.Feature");
+        IFT.Feature = PF.Feature"
+					);
 					break;
 				case 10:
 					$this->exec("DROP VIEW ProductItemFeature"); // Possibly unnecessary
-					$this->exec("CREATE VIEW ProductItemFeature AS
+					$this->exec(
+						"CREATE VIEW ProductItemFeature AS
 SELECT unioned.Code,
        unioned.Feature AS Feature,
        MAX(Value_Item) AS Value_Item,
@@ -415,20 +431,24 @@ FROM (
          FROM Item
               JOIN ProductFeature PF ON Item.Brand = PF.Brand AND Item.Model = PF.Model AND Item.Variant = PF.Variant
      ) unioned
-GROUP BY Code, Feature;");
-					$this->exec("CREATE VIEW ProductItemFeatureUnified AS
+GROUP BY Code, Feature;"
+					);
+					$this->exec(
+						"CREATE VIEW ProductItemFeatureUnified AS
 SELECT Code,
        Feature,
     COALESCE(Value_Item, Value_Product) AS `Value`,
     COALESCE(ValueText_Item, ValueText_Product) AS ValueText,
     COALESCE(ValueEnum_Item, ValueEnum_Product) AS ValueEnum,
     COALESCE(ValueDouble_Item, ValueDouble_Product) AS ValueDouble
-FROM ProductItemFeature;");
+FROM ProductItemFeature;"
+					);
 					break;
 				case 11:
-					$this->exec("alter table Product modify Variant varchar(100) not null;");
-					$this->exec("alter table ProductFeature modify Variant varchar(100) not null;");
-					$this->exec("CREATE TABLE AuditProduct
+					$this->exec("ALTER TABLE Product modify Variant VARCHAR(100) NOT NULL;");
+					$this->exec("ALTER TABLE ProductFeature modify Variant VARCHAR(100) NOT NULL;");
+					$this->exec(
+						"CREATE TABLE AuditProduct
 (
     `Brand` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
     `Model` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -446,22 +466,26 @@ FROM ProductItemFeature;");
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
-    COLLATE = utf8mb4_unicode_ci;");
-					$this->exec("CREATE TRIGGER AuditCreateProduct
+    COLLATE = utf8mb4_unicode_ci;"
+					);
+					$this->exec(
+						"CREATE TRIGGER AuditCreateProduct
     AFTER INSERT
     ON Product
     FOR EACH ROW
 BEGIN
     INSERT INTO AuditProduct(Brand, Model, Variant, `Change`, `User`)
     VALUES(NEW.Brand, NEW.Model, NEW.Variant, 'C', @taralloAuditUsername);
-END;");
+END;"
+					);
 					break;
 				case 12:
 					$this->exec("ALTER TABLE `Item` ADD INDEX `Brand_Model_Variant` (`Brand`, `Model`, `Variant`);");
 					break;
 				case 13:
 					$this->exec("DROP FUNCTION GenerateCode");
-					$this->exec("CREATE FUNCTION GenerateCode(currentPrefix varchar(20))
+					$this->exec(
+						"CREATE FUNCTION GenerateCode(currentPrefix varchar(20))
 RETURNS varchar(190)
 MODIFIES SQL DATA
 DETERMINISTIC
@@ -506,30 +530,34 @@ SQL SECURITY INVOKER
 			RETURN NULL;
 		END IF;
 
-	END");
+	END"
+					);
 					break;
 				case 14:
 					try {
 						$this->exec("ALTER TABLE AuditProduct DROP CONSTRAINT check_change;");
-					} catch (\PDOException $ignored) {
+					} catch(\PDOException $ignored) {
 					}
 					try {
 						$this->exec("ALTER TABLE AuditProduct DROP CONSTRAINT check_change_2;");
-					} catch (\PDOException $ignored) {
+					} catch(\PDOException $ignored) {
 					}
 					$this->exec("ALTER TABLE AuditProduct ADD CONSTRAINT check_change CHECK (`Change` IN ('C', 'R', 'U', 'D'));");
 					$this->exec("DROP TRIGGER IF EXISTS AuditRenameProduct;");
-					$this->exec("CREATE TRIGGER AuditRenameProduct
+					$this->exec(
+						"CREATE TRIGGER AuditRenameProduct
     AFTER UPDATE
     ON Product
     FOR EACH ROW
 BEGIN
     INSERT INTO AuditProduct(Brand, Model, Variant, `Change`, `User`)
     VALUES(NEW.Brand, NEW.Model, NEW.Variant, 'R', @taralloAuditUsername);
-END;");
+END;"
+					);
 					break;
 				case 15:
-					$this->exec("CREATE EVENT `DuplicateItemProductFeaturesCleanup`
+					$this->exec(
+						"CREATE EVENT `DuplicateItemProductFeaturesCleanup`
     ON SCHEDULE EVERY '1' DAY
     ON COMPLETION PRESERVE
     ENABLE DO
@@ -554,7 +582,8 @@ END;");
           AND Item.Variant = AuditProduct.Variant
           AND AuditProduct.Change IN ('C', 'U')
           AND DATEDIFF(NOW(), AuditProduct.Time) >= 1
-    )");
+    )"
+					);
 					break;
 				case 16:
 					$this->exec(
@@ -694,7 +723,8 @@ END;"
 					break;
 				case 21:
 					$this->exec("DROP TRIGGER IF EXISTS CascadeItemCodeUpdateForReal");
-					$this->exec("
+					$this->exec(
+						"
 CREATE TRIGGER CascadeItemCodeUpdateForReal
 BEFORE UPDATE
 ON Item
@@ -713,9 +743,11 @@ BEGIN
 		WHERE Descendant=OLD.Code;
 		SET FOREIGN_KEY_CHECKS = 1;
 	END IF;
-END;");
+END;"
+					);
 					$this->exec("DROP TRIGGER IF EXISTS ItemBMVUpdate");
-					$this->exec("
+					$this->exec(
+						"
 CREATE TRIGGER ItemBMVUpdate
 	AFTER UPDATE
 	ON ItemFeature
@@ -730,7 +762,8 @@ CREATE TRIGGER ItemBMVUpdate
 				UPDATE Item SET Variant = NEW.ValueText WHERE Code = NEW.Code;
 			END IF;
 		END IF;
-	END;");
+	END;"
+					);
 					break;
 				case 22:
 					$this->exec(
@@ -748,8 +781,8 @@ CREATE TRIGGER ItemBMVUpdate
 					);
 					$this->exec(
 						'CREATE TABLE `DonationItem` (
-    `Donation` bigint(20) unsigned NOT NULL,
-    `Code` varchar(255) NOT NULL,
+    `Donation` BIGINT(20) unsigned NOT NULL,
+    `Code` VARCHAR(255) NOT NULL,
     PRIMARY KEY (`Donation`,`Code`),
     KEY `Code` (`Code`),
     CONSTRAINT `DonationItem_ibfk_1` FOREIGN KEY (`Donation`) REFERENCES `Donations` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
@@ -788,7 +821,8 @@ CREATE TRIGGER ItemBMVUpdate
   COLLATE=utf8mb4_unicode_ci;'
 					);
 					$this->exec("DROP EVENT IF EXISTS `DonationItem_ai`");
-					$this->exec("
+					$this->exec(
+						"
 CREATE TRIGGER `DonationItem_ai` AFTER INSERT ON `DonationItem` FOR EACH ROW
 BEGIN
 	DECLARE TaskId BIGINT(20) UNSIGNED;
@@ -812,9 +846,11 @@ BEGIN
 	END LOOP;
 	
 	CLOSE cur;
-END;");
+END;"
+					);
 					$this->exec("DROP EVENT IF EXISTS `DonationTasks_ai`");
-					$this->exec("
+					$this->exec(
+						"
 CREATE TRIGGER `DonationTasks_ai` AFTER INSERT ON `DonationTasks` FOR EACH ROW
 BEGIN
 	DECLARE ItemId varchar(255);
@@ -839,9 +875,11 @@ BEGIN
 	END LOOP;
 	
 	CLOSE cur;
-END;");
+END;"
+					);
 					$this->exec("DROP TRIGGER IF EXISTS CascadeItemCodeUpdateForReal");
-					$this->exec("
+					$this->exec(
+						"
 CREATE TRIGGER CascadeItemCodeUpdateForReal
 BEFORE UPDATE
 ON Item
@@ -866,23 +904,27 @@ BEGIN
 		WHERE ItemCode=OLD.Code;
 		SET FOREIGN_KEY_CHECKS = 1;
 	END IF;
-END;");
+END;"
+					);
 					break;
 				case 23:
 					$this->exec("ALTER TABLE `Search` ADD COLUMN `Query` TEXT AFTER `Code`");
 					break;
 				case 24:
 					$this->exec("DROP TABLE IF EXISTS `LocationAutosuggestCache`");
-					$this->exec("
+					$this->exec(
+						"
 CREATE TABLE `LocationAutosuggestCache` (
 	`Name` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
 	`Color` VARCHAR(100) COLLATE utf8mb4_unicode_ci NULL,
 	FOREIGN KEY (`Name`) REFERENCES `Item` (`Code`) ON DELETE CASCADE ON UPDATE CASCADE -- REMEMBER TO DO NOT TRUST THIS FOREIGN KEY, THERE IS A TRIGGER THAT WILL DISABLE CASCADE WHEN RENAMING AN ITEM
 ) ENGINE=InnoDB
   DEFAULT CHARSET=utf8mb4
-  COLLATE=utf8mb4_unicode_ci;");
+  COLLATE=utf8mb4_unicode_ci;"
+					);
 					$this->exec("DROP EVENT IF EXISTS `LocationAutosuggestGenerateCache`");
-					$this->exec("CREATE TRIGGER `LocationAutosuggestGenerateCache` AFTER INSERT ON `ItemFeature`
+					$this->exec(
+						"CREATE TRIGGER `LocationAutosuggestGenerateCache` AFTER INSERT ON `ItemFeature`
 FOR EACH ROW
 BEGIN
 	IF NEW.Feature = 'type' AND NEW.ValueEnum = 'location' THEN
@@ -892,9 +934,11 @@ BEGIN
 		SET Color = NEW.ValueEnum
 		WHERE Name = NEW.Code;
 	END IF;
-END;");
+END;"
+					);
 					$this->exec("DROP EVENT IF EXISTS `LocationAutosuggestUpdateCache`");
-					$this->exec("CREATE TRIGGER `LocationAutosuggestUpdateCache` AFTER UPDATE ON `ItemFeature`
+					$this->exec(
+						"CREATE TRIGGER `LocationAutosuggestUpdateCache` AFTER UPDATE ON `ItemFeature`
 FOR EACH ROW
 BEGIN
 	IF OLD.Feature = 'type' AND OLD.ValueEnum = 'location' AND (NEW.Feature != 'type' OR NEW.ValueEnum != 'location') THEN
@@ -910,9 +954,11 @@ BEGIN
 		SET Color = (SELECT ValueEnum FROM `ItemFeature` WHERE Feature = 'color' AND Code = NEW.Code LIMIT 1)
 		WHERE Name = NEW.Code;
 	END IF;
-END;");
+END;"
+					);
 					$this->exec("DROP EVENT IF EXISTS `LocationAutosuggestDeleteCache`");
-					$this->exec("CREATE TRIGGER `LocationAutosuggestDeleteCache` AFTER DELETE ON `ItemFeature`
+					$this->exec(
+						"CREATE TRIGGER `LocationAutosuggestDeleteCache` AFTER DELETE ON `ItemFeature`
 FOR EACH ROW
 BEGIN
 	IF OLD.Feature = 'type' AND OLD.ValueEnum = 'location' THEN
@@ -922,7 +968,8 @@ BEGIN
 		SET Color = NULL
 		WHERE Name = OLD.Code;
 	END IF;
-END;");
+END;"
+					);
 					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
@@ -933,15 +980,14 @@ END;");
 		$this->exec("UPDATE Configuration SET `Value` = \"$this->schemaVersion\" WHERE `Key` = \"SchemaVersion\"");
 	}
 
-	private function updateData(int $data)
-	{
-		if ($this->dataVersion === $data) {
+	private function updateData(int $data) {
+		if($this->dataVersion === $data) {
 			return;
-		} elseif ($this->dataVersion > $data) {
+		} else if($this->dataVersion > $data) {
 			throw new \InvalidArgumentException("Trying to downgrade schema from $this->dataVersion to $data");
 		}
-		while ($this->dataVersion < $data) {
-			switch ($this->dataVersion) {
+		while($this->dataVersion < $data) {
+			switch($this->dataVersion) {
 				case 0:
 					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('type', 'ssd')");
 					break;
@@ -1108,6 +1154,9 @@ END;");
 				case 31:
 					$this->exec("INSERT INTO `LocationAutosuggestCache` (`Name`, `Color`) SELECT t1.Code AS name, t2.ValueEnum AS color FROM `ProductItemFeatureUnified` AS t1 LEFT JOIN `ItemFeature` AS t2 ON t2.Feature = 'color' AND t1.Code = t2.Code WHERE t1.ValueEnum = 'location'");
 					break;
+				case 32:
+					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('ram-form-factor', 'rdimm')");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}
@@ -1117,11 +1166,10 @@ END;");
 		$this->exec("UPDATE Configuration SET `Value` = '$this->dataVersion' WHERE `Key` = 'DataVersion'");
 	}
 
-	private function exec(string $query)
-	{
+	private function exec(string $query) {
 		$result = $this->getPDO()->exec($query);
 
-		if ($result === false) {
+		if($result === false) {
 			throw new \RuntimeException('Exec failed, see stack trace');
 		}
 	}

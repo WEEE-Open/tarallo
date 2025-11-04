@@ -1,8 +1,10 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
-    <DB2CodeStyleSettings version="2">
-      <option name="KEYWORD_CASE" value="0" />
-      <option name="TYPE_CASE" value="0" />
+    <DB2CodeStyleSettings version="7">
+      <option name="USE_GENERAL_STYLE" value="false" />
+      <option name="KEYWORD_CASE" value="2" />
+      <option name="TYPE_CASE" value="2" />
+      <option name="CUSTOM_TYPE_CASE" value="2" />
       <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
       <option name="QUERY_EL_LINE" value="0" />
       <option name="QUERY_EL_COMMA" value="2" />
@@ -17,9 +19,11 @@
       <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
       <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
     </DB2CodeStyleSettings>
-    <DerbyCodeStyleSettings version="2">
-      <option name="KEYWORD_CASE" value="0" />
-      <option name="TYPE_CASE" value="0" />
+    <DerbyCodeStyleSettings version="7">
+      <option name="USE_GENERAL_STYLE" value="false" />
+      <option name="KEYWORD_CASE" value="2" />
+      <option name="TYPE_CASE" value="2" />
+      <option name="CUSTOM_TYPE_CASE" value="2" />
       <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
       <option name="QUERY_EL_LINE" value="0" />
       <option name="QUERY_EL_COMMA" value="2" />
@@ -34,9 +38,11 @@
       <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
       <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
     </DerbyCodeStyleSettings>
-    <H2CodeStyleSettings version="2">
-      <option name="KEYWORD_CASE" value="0" />
-      <option name="TYPE_CASE" value="0" />
+    <H2CodeStyleSettings version="7">
+      <option name="USE_GENERAL_STYLE" value="false" />
+      <option name="KEYWORD_CASE" value="2" />
+      <option name="TYPE_CASE" value="2" />
+      <option name="CUSTOM_TYPE_CASE" value="2" />
       <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
       <option name="QUERY_EL_LINE" value="0" />
       <option name="QUERY_EL_COMMA" value="2" />
@@ -51,9 +57,11 @@
       <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
       <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
     </H2CodeStyleSettings>
-    <HSQLCodeStyleSettings version="2">
-      <option name="KEYWORD_CASE" value="0" />
-      <option name="TYPE_CASE" value="0" />
+    <HSQLCodeStyleSettings version="7">
+      <option name="USE_GENERAL_STYLE" value="false" />
+      <option name="KEYWORD_CASE" value="2" />
+      <option name="TYPE_CASE" value="2" />
+      <option name="CUSTOM_TYPE_CASE" value="2" />
       <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
       <option name="QUERY_EL_LINE" value="0" />
       <option name="QUERY_EL_COMMA" value="2" />
@@ -73,9 +81,11 @@
       <option name="HTML_TEXT_WRAP" value="0" />
       <option name="HTML_ALIGN_ATTRIBUTES" value="false" />
     </HTMLCodeStyleSettings>
-    <MSSQLCodeStyleSettings version="2">
-      <option name="KEYWORD_CASE" value="0" />
-      <option name="TYPE_CASE" value="0" />
+    <MSSQLCodeStyleSettings version="7">
+      <option name="USE_GENERAL_STYLE" value="false" />
+      <option name="KEYWORD_CASE" value="2" />
+      <option name="TYPE_CASE" value="2" />
+      <option name="CUSTOM_TYPE_CASE" value="2" />
       <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
       <option name="QUERY_EL_LINE" value="0" />
       <option name="QUERY_EL_COMMA" value="2" />
@@ -90,9 +100,11 @@
       <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
       <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
     </MSSQLCodeStyleSettings>
-    <MySQLCodeStyleSettings version="2">
-      <option name="KEYWORD_CASE" value="0" />
-      <option name="TYPE_CASE" value="0" />
+    <MySQLCodeStyleSettings version="7">
+      <option name="USE_GENERAL_STYLE" value="false" />
+      <option name="KEYWORD_CASE" value="2" />
+      <option name="TYPE_CASE" value="2" />
+      <option name="CUSTOM_TYPE_CASE" value="2" />
       <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
       <option name="QUERY_EL_LINE" value="0" />
       <option name="QUERY_EL_COMMA" value="2" />
@@ -107,9 +119,11 @@
       <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
       <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
     </MySQLCodeStyleSettings>
-    <OracleCodeStyleSettings version="2">
-      <option name="KEYWORD_CASE" value="0" />
-      <option name="TYPE_CASE" value="0" />
+    <OracleCodeStyleSettings version="7">
+      <option name="USE_GENERAL_STYLE" value="false" />
+      <option name="KEYWORD_CASE" value="2" />
+      <option name="TYPE_CASE" value="2" />
+      <option name="CUSTOM_TYPE_CASE" value="2" />
       <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
       <option name="QUERY_EL_LINE" value="0" />
       <option name="QUERY_EL_COMMA" value="2" />
@@ -137,9 +151,11 @@
       <option name="FORCE_SHORT_DECLARATION_ARRAY_STYLE" value="true" />
       <option name="PLACE_PARENS_FOR_CONSTRUCTOR" value="1" />
     </PHPCodeStyleSettings>
-    <PostgresCodeStyleSettings version="2">
-      <option name="KEYWORD_CASE" value="0" />
-      <option name="TYPE_CASE" value="0" />
+    <PostgresCodeStyleSettings version="7">
+      <option name="USE_GENERAL_STYLE" value="false" />
+      <option name="KEYWORD_CASE" value="2" />
+      <option name="TYPE_CASE" value="2" />
+      <option name="CUSTOM_TYPE_CASE" value="2" />
       <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
       <option name="QUERY_EL_LINE" value="0" />
       <option name="QUERY_EL_COMMA" value="2" />
@@ -154,9 +170,11 @@
       <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
       <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
     </PostgresCodeStyleSettings>
-    <SQLiteCodeStyleSettings version="2">
-      <option name="KEYWORD_CASE" value="0" />
-      <option name="TYPE_CASE" value="0" />
+    <SQLiteCodeStyleSettings version="7">
+      <option name="USE_GENERAL_STYLE" value="false" />
+      <option name="KEYWORD_CASE" value="2" />
+      <option name="TYPE_CASE" value="2" />
+      <option name="CUSTOM_TYPE_CASE" value="2" />
       <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
       <option name="QUERY_EL_LINE" value="0" />
       <option name="QUERY_EL_COMMA" value="2" />
@@ -171,9 +189,10 @@
       <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
       <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
     </SQLiteCodeStyleSettings>
-    <SqlCodeStyleSettings version="2">
-      <option name="KEYWORD_CASE" value="0" />
-      <option name="TYPE_CASE" value="0" />
+    <SqlCodeStyleSettings version="7">
+      <option name="KEYWORD_CASE" value="2" />
+      <option name="TYPE_CASE" value="2" />
+      <option name="CUSTOM_TYPE_CASE" value="2" />
       <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
       <option name="QUERY_EL_LINE" value="0" />
       <option name="QUERY_ALIGN_LINE_COMMENTS" value="false" />
@@ -187,9 +206,11 @@
       <option name="TABLE_NULLABILITIES_ALIGN" value="false" />
       <option name="TABLE_ALTER_INSTRUCTION_ALIGN" value="false" />
     </SqlCodeStyleSettings>
-    <SybaseCodeStyleSettings version="2">
-      <option name="KEYWORD_CASE" value="0" />
-      <option name="TYPE_CASE" value="0" />
+    <SybaseCodeStyleSettings version="7">
+      <option name="USE_GENERAL_STYLE" value="false" />
+      <option name="KEYWORD_CASE" value="2" />
+      <option name="TYPE_CASE" value="2" />
+      <option name="CUSTOM_TYPE_CASE" value="2" />
       <option name="QUERY_SECTION_1ST_WORD_ALIGN" value="0" />
       <option name="QUERY_EL_LINE" value="0" />
       <option name="QUERY_EL_COMMA" value="2" />
