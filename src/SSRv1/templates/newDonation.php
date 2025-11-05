@@ -9,7 +9,7 @@
 /** @var string $tasks|null */
 
 
-$this->layout('main', ['title' => 'New donation', 'currentPage' => 'donation new', 'tooltips' => true]);
+$this->layout('main', ['title' => $name, 'currentPage' => 'donation edit', 'tooltips' => true]);
 ?>
 
 <article class="container">
