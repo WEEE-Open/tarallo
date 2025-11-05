@@ -15,3 +15,4 @@ config/config-production.php
 public/adminer*
 .env
 *.csv
+.github/copilot-instructions.md

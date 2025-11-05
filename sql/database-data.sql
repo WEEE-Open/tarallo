@@ -316,6 +316,7 @@ INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES
 	('ram-form-factor', 'minidimm'), -- Mini DIMM --
 	('ram-form-factor', 'microdimm'), -- Micro DIMM --
 	('ram-form-factor', 'fbdimm'), -- FB-DIMM --
+	('ram-form-factor', 'rdimm'), -- RDIMM --
 	('check', 'missing-data'), -- Missing data --
 	('check', 'missing-content'), -- Missing items inside --
 	('check', 'wrong-data'), -- Wrong/conflicting data --

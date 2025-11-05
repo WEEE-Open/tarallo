@@ -415,4 +415,4 @@ FROM ProductItemFeature;
 
 -- Do not combine these lines, they're parsed by update-db... WITH A REGEX!
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 25);
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 32);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 33);

@@ -350,4 +350,23 @@ class RamSummarizerTest extends SummarizerTestCase
 
 		return $summary;
 	}
+
+	public function testRamRDIMM()
+	{
+		$item = new Item('R999');
+		$item->addFeature(new Feature('brand', 'Samsung'))
+			->addFeature(new Feature('model', 'M393A2K40CB2-CTD'))
+			->addFeature(new Feature('capacity-byte', 17179869184))
+			->addFeature(new Feature('frequency-hertz', 2400000000))
+			->addFeature(new Feature('ram-ecc', 'yes'))
+			->addFeature(new Feature('ram-form-factor', 'rdimm'))
+			->addFeature(new Feature('ram-type', 'ddr4'))
+			->addFeature(new Feature('type', 'ram'))
+			->addFeature(new Feature('working', 'yes'));
+
+		$summary = RamSummarizer::summarize($item);
+		$this->assertArrayEquals(["RAM ECC DDR4 RDIMM 16 GiB 2.4 GHz", "Samsung M393A2K40CB2-CTD"], $summary);
+
+		return $summary;
+	}
 }
