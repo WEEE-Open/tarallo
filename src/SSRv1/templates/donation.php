@@ -2,7 +2,7 @@
 /** @var bool $showEditButton */
 /** @var string[]|null $donation */
 
-$this->layout('main', ['title' => 'Donations', 'currentPage' => 'donation', 'tooltips' => true]);
+$this->layout('main', ['title' => $donation["name"], 'currentPage' => 'donation', 'tooltips' => true]);
 ?>
 
 <div class="row">
