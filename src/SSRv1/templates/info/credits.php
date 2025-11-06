@@ -11,6 +11,7 @@ $this->layout('main', ['title' => 'Credits', 'currentPage' => 'info credits', 't
 	<h3 class="col-12">Tuttofare Assistente il Riuso di Aggeggi Logori e Localmente Opprimenti</h2>
 	<h4 class="col-12">(aka L'inventario Opportuno)</h4>
 	<div class="col-12"><b>Current commit:</b> <?=$commit ?? "<i>unknown</i>"?></div>
+	<div class="col-12"><b>Current PHP version:</b> <?=phpversion() ?? "<i>unknown</i>"?></div>
 	<div class="col-12"><b>Github page:</b> <a href="https://github.com/WEEE-Open/tarallo">https://github.com/WEEE-Open/tarallo</a></div>
 	<div class="col-12">
 		<img src="/static/logo.png" alt="WEEEOPEN logo" height="300" width="300">
