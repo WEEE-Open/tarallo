@@ -32,7 +32,7 @@ class Product extends ProductCode implements \JsonSerializable, ItemWithFeatures
 		return Summary::peel($this);
 	}
 
-	public function jsonSerialize()
+	public function jsonSerialize():array
 	{
 		$array = [];
 		$array['brand'] = $this->brand;

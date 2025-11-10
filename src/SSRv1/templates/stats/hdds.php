@@ -123,7 +123,7 @@ $withoutErasedPercent = $erasedSum > 0 ? sprintf(" (%.1f %%)", $withoutErased / 
 				$counter = 0;
 				$td = $rollupTd($row, 'hdd-form-factor', $counter);
 				$td .= $rollupTd($row, 'spin-rate-rpm', $counter);
-				$td .= "<td>${row['Quantity']}</td>";
+				$td .= "<td>{$row['Quantity']}</td>";
 
 				if ($counter > 0) :
 					if ($counter === 3) :

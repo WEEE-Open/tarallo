@@ -119,7 +119,7 @@ $db->productDAO()->addProduct((new Product("Dill", "PessimPlex DI-360", "SFF"))
 foreach([256, 512, 1024, 2048] as $size) {
 	foreach([667, 800] as $freq) {
 		$db->productDAO()->addProduct(
-			(new Product("Samsung", "S${freq}ABC" . $size, "v1"))
+			(new Product("Samsung", "S{$freq}ABC" . $size, "v1"))
 				->addFeature(new Feature('capacity-byte', $size * 1024 * 1024))
 				->addFeature(new Feature('frequency-hertz', $freq * 1000 * 1000))
 				->addFeature(new Feature('color', 'green'))
@@ -131,7 +131,7 @@ foreach([256, 512, 1024, 2048] as $size) {
 	}
 	foreach([667, 800] as $freq) {
 		$db->productDAO()->addProduct(
-			(new Product("Samsung", "S${freq}ABC" . $size, "v2"))
+			(new Product("Samsung", "S{$freq}ABC" . $size, "v2"))
 				->addFeature(new Feature('capacity-byte', $size * 1024 * 1024))
 				->addFeature(new Feature('frequency-hertz', $freq * 1000 * 1000))
 				->addFeature(new Feature('color', 'blue'))
@@ -495,7 +495,7 @@ $rambox->addContent($ram);
 for($i = 5; $i <= 9; $i++) {
 	for($j = 5; $j <= 9; $j++) {
 		$cores = [2, 4][rand(0, 1)];
-		$db->productDAO()->addProduct((new Product("Intel", "Core 3 Trio E${i}${j}00", ProductCode::DEFAULT_VARIANT))
+		$db->productDAO()->addProduct((new Product("Intel", "Core 3 Trio E{$i}{$j}00", ProductCode::DEFAULT_VARIANT))
 			->addFeature(new Feature('frequency-hertz', rand(25,32) * 100000000))
 			->addFeature(new Feature('isa', 'x86-64'))
 			->addFeature(new Feature('cpu-socket', 'lga775'))
@@ -510,7 +510,7 @@ $chernobyl->addContent($cpubox);
 for($i = 100; $i <= 250; $i++) {
 	$a = rand(5, 9);
 	$b = rand(5, 9);
-	$model = "Core 3 Trio E${a}${b}00";
+	$model = "Core 3 Trio E{$a}{$b}00";
 	$cpu = new Item("C$i");
 	$cpu
 		->addFeature(new Feature('brand', 'Intel'))

@@ -7,7 +7,7 @@
 /** @var bool $tooltips */
 /** @var bool $container */
 /** @var bool $bootstrapTable */
-$currentPage = $currentPage ?? null;
+$currentPage = $currentPage ?? '';
 $moveDefaultFrom = $moveDefaultFrom ?? null;
 $tooltips = $tooltips ?? false;
 ?>

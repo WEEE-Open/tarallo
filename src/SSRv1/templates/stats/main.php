@@ -6,6 +6,7 @@
 $this->layout('main', ['title' => 'Stats', 'user' => $user, 'currentPage' => 'stats', 'container' => true, 'bootstrapTable' => true]);
 $this->insert('stats::menu', ['currentPage' => '']);
 date_default_timezone_set('Europe/Rome');
+
 ?>
 
 
@@ -23,6 +24,7 @@ date_default_timezone_set('Europe/Rome');
 			<tbody>
 			<?php foreach ($recentlyAdded as $code => $time) : ?>
 				<tr>
+
 					<td><a href="/item/<?=$code?>"><?=$code?></a></td>
 					<td class="small"><?=date('Y-m-d, H:i', $time)?></td>
 				</tr>

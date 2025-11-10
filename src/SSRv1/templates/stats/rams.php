@@ -93,7 +93,7 @@ $rollupTd = function (array $row, string $feature, &$emptyCounter) {
 				$td = $rollupTd($row, 'ram-type', $counter);
 				$td .= $rollupTd($row, 'ram-form-factor', $counter);
 				$td .= $rollupTd($row, 'capacity-byte', $counter);
-				$td .= "<td>${row['Quantity']}</td>";
+				$td .= "<td>{$row['Quantity']}</td>";
 
 				if ($counter > 0) :
 					if ($counter === 3) :
@@ -129,7 +129,7 @@ $rollupTd = function (array $row, string $feature, &$emptyCounter) {
 				$td = $rollupTd($row, 'ram-type', $counter);
 				$td .= $rollupTd($row, 'ram-form-factor', $counter);
 				$td .= $rollupTd($row, 'frequency-hertz', $counter);
-				$td .= "<td>${row['Quantity']}</td>";
+				$td .= "<td>{$row['Quantity']}</td>";
 
 				if ($counter > 0) :
 					if ($counter === 3) :
