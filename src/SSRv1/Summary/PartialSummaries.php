@@ -119,7 +119,7 @@ class PartialSummaries
 			if ($compact && $value === '1') {
 				$sequence["3$name"] = $name;
 			} elseif (is_numeric($value)) {
-				$sequence["3$name"] = "${value}× $name";
+				$sequence["3$name"] = "{$value}× $name";
 			} elseif ($feature->name === 'psu-connector-cpu') {
 				// It's hardcoded, yes, it's identical in every human language, yes, it's a hack, yes
 				$sequence["2$name"] = "$value CPU";

@@ -26,7 +26,7 @@ $copyQuery = http_build_query([
 	'copy-brand' => $product->getBrand(),
 	'copy-model' => $product->getModel(),
 	'copy-variant' => $product->getVariant(),
-], null, '&', PHP_QUERY_RFC3986);
+], "", '&', PHP_QUERY_RFC3986);
 ?>
 
 <article class="container item product root <?=$editing ? ' head editing' : ''?>" data-brand="<?=$this->e($product->getBrand())?>" data-model="<?=$this->e($product->getModel())?>" data-variant="<?=$this->e($product->getVariant())?>" data-variant-is-default="<?= (string) (bool) ($product->getVariant() === \WEEEOpen\Tarallo\ProductCode::DEFAULT_VARIANT) ?>">

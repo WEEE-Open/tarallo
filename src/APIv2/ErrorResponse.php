@@ -72,8 +72,8 @@ class ErrorResponse implements \JsonSerializable
 		return $error;
 	}
 
-	public function jsonSerialize()
-	{
+	public function jsonSerialize(): array
+    {
 		$result = [];
 		if (isset($this->exceptionName)) {
 			$result['exception'] = $this->exceptionName;

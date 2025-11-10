@@ -253,7 +253,7 @@ LIMIT ' . (int) $limit;
 			assert($success);
 
 			while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-				$array[$row['Item']] = $row['Last'];
+				$array[$row['Item']] = (int)floatval($row['Last']);
 			}
 		} finally {
 			$statement->closeCursor();

@@ -803,7 +803,7 @@ class Controller implements RequestHandlerInterface
 			'TemplateParameters',
 			$templateParameters
 		);
-
+		
 		return $handler->handle($request);
 	}
 
@@ -830,6 +830,7 @@ class Controller implements RequestHandlerInterface
 						'recentlyMoved' => $db->auditDAO()->getRecentAuditByType('M', 50),
 					]
 				);
+
 				break;
 
 			case 'attention':

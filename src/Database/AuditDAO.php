@@ -78,7 +78,7 @@ LIMIT ?";
 
 		try {
 			foreach ($statement as $row) {
-				$array[$row['Code']] = $row['Time'];
+				$array[$row['Code']] = (int)floatval($row['Time']);
 			}
 		} finally {
 			$statement->closeCursor();

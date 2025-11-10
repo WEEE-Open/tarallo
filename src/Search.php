@@ -176,7 +176,7 @@ class Search implements \JsonSerializable
 		}, $this->filters);
 	}
 
-	public function jsonSerialize()
+	public function jsonSerialize():array
 	{
 		return $this->addKeys();
 	}
