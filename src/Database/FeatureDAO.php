@@ -427,20 +427,30 @@ final class FeatureDAO extends DAO
 	 */
 	public function getAllNormalizationCategories()
 	{
-		$statement = $this->getPDO()->prepare('SELECT DISTINCT Category FROM Normalization');
+//		$statement = $this->getPDO()->prepare('SELECT DISTINCT Category FROM Normalization');
+//
+//		try {
+//			$success = $statement->execute();
+//			assert($success, 'get normalized categories');
+//
+//			$result = [];
+//			while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
+//				$result[] = $row[0];
+//			}
+//			return $result;
+//		} finally {
+//			$statement->closeCursor();
+//		}
 
-		try {
-			$success = $statement->execute();
-			assert($success, 'get normalized categories');
+		// we have already all the categories we do not need to fetch from the db
+		$mapping = self::getNormalizationMapping();
 
-			$result = [];
-			while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
-				$result[] = $row[0];
-			}
-			return $result;
-		} finally {
-			$statement->closeCursor();
-		}
+		$categories = array_values($mapping);
+
+		// Optional
+//		sort($categories);
+
+		return $categories;
 	}
 
 	public function isNormalizationForbidden(string $minimized, string $category)
@@ -471,10 +481,14 @@ final class FeatureDAO extends DAO
 			throw new ForbiddenNormalizationException();
 		}
 
+		// Example: "asus" -> "/^asus$/i"
+		$literal = $minimized;
+		$pattern = '/^' . preg_quote($literal, '/') . '$/i';
+
 		$statement = $this->getPDO()->prepare('INSERT INTO Normalization(MinimizedKey, NormalizedValue, Category) VALUES (?, ?, ?)');
 
 		try {
-			$success = $statement->execute([$minimized, $value, $category]);
+			$success = $statement->execute([$pattern, $value, $category]);
 			assert($success, 'add normalized value');
 
 			$this->deleteCache($category);
@@ -544,12 +558,23 @@ final class FeatureDAO extends DAO
 			$values = $this->getNormalizationValues($category);
 		}
 
+		// Minimize the input value
 		$textMinimized = Normalization::minimizeText($text);
-		if (isset($values[$textMinimized])) {
-			return $values[$textMinimized];
-		} else {
-			return null;
+
+		// Apply rules
+		foreach ($values as $pattern => $replacement) {
+
+			if (@preg_replace($pattern, '', '') === null) {
+				continue;
+			}
+
+			$new = preg_replace($pattern, $replacement, $text);
+
+			if ($new !== $text) {
+				return $new;
+			}
 		}
+		return null;
 	}
 
 	private function deleteCache(string $category)
