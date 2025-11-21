@@ -14,6 +14,7 @@ use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\Normalization;
+use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 final class FeatureDAO extends DAO
 {
@@ -427,30 +428,20 @@ final class FeatureDAO extends DAO
 	 */
 	public function getAllNormalizationCategories()
 	{
-//		$statement = $this->getPDO()->prepare('SELECT DISTINCT Category FROM Normalization');
-//
-//		try {
-//			$success = $statement->execute();
-//			assert($success, 'get normalized categories');
-//
-//			$result = [];
-//			while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
-//				$result[] = $row[0];
-//			}
-//			return $result;
-//		} finally {
-//			$statement->closeCursor();
-//		}
+		return FeaturePrinter::getAllFeatures();
+	}
 
-		// we have already all the categories we do not need to fetch from the db
-		$mapping = self::getNormalizationMapping();
+	public function getAllNormalizationCategoriesByType(int $type): array {
 
-		$categories = array_values($mapping);
+		$features = FeaturePrinter::getAllFeaturesByType($type);
 
-		// Optional
-//		sort($categories);
+		$names = [];
+		foreach ($features as $f) {
+			$names[] = $f['printableName'];  // or ['name']
+		}
 
-		return $categories;
+		return $names;
+
 	}
 
 	public function isNormalizationForbidden(string $minimized, string $category)
@@ -473,25 +464,27 @@ final class FeatureDAO extends DAO
 	/**
 	 * @throws ForbiddenNormalizationException
 	 */
-	public function addNormalizedValue(string $wrong, string $value, string $category)
+	public function addNormalizedValue(string $regex, string $output, string $field)
 	{
-		$minimized = Normalization::minimizeText($wrong);
-		$isForbidden = $this->isNormalizationForbidden($minimized, $category);
-		if ($isForbidden) {
+		// check it's a valid regex
+		if (@preg_replace($regex, '', '') === null) {
+			throw new \InvalidArgumentException('Invalid regex pattern');
+		}
+
+
+		if ($this->isNormalizationForbidden($regex, $field)) {
 			throw new ForbiddenNormalizationException();
 		}
 
-		// Example: "asus" -> "/^asus$/i"
-		$literal = $minimized;
-		$pattern = '/^' . preg_quote($literal, '/') . '$/i';
+
 
 		$statement = $this->getPDO()->prepare('INSERT INTO Normalization(MinimizedKey, NormalizedValue, Category) VALUES (?, ?, ?)');
 
 		try {
-			$success = $statement->execute([$pattern, $value, $category]);
+			$success = $statement->execute([$regex,$output,$field]);
 			assert($success, 'add normalized value');
 
-			$this->deleteCache($category);
+			$this->deleteCache($field);
 		} finally {
 			$statement->closeCursor();
 		}
@@ -506,7 +499,7 @@ final class FeatureDAO extends DAO
 			assert($success, 'add normalized value');
 
 			// TODO: delete only one category
-			foreach ($this->getAllNormalizationCategories() as $category) {
+			foreach ($this->getAllNormalizationCategoriesByType(0) as $category) {
 				$this->deleteCache($category);
 			}
 		} finally {
@@ -546,31 +539,29 @@ final class FeatureDAO extends DAO
 		return $this->getNormalizationValues(substr($key, strlen(self::NORMALIZATION_CACHE_PREFIX)));
 	}
 
-	private function normalizeText(string $text, string $category): ?string
+	private function normalizeText(string $text, string $field): ?string
 	{
 		if (Database::hasApcu()) {
 			$success = null;
-			$values = apcu_fetch(self::NORMALIZATION_CACHE_PREFIX . $category, $success);
+			$values = apcu_fetch(self::NORMALIZATION_CACHE_PREFIX . $field, $success);
 			if (!$success) {
-				$values = apcu_entry(self::NORMALIZATION_CACHE_PREFIX . $category, [$this, 'apcuGenerator'], self::NORMALIZATION_CACHE_TTL);
+				$values = apcu_entry(self::NORMALIZATION_CACHE_PREFIX . $field, [$this, 'apcuGenerator'], self::NORMALIZATION_CACHE_TTL);
 			}
 		} else {
-			$values = $this->getNormalizationValues($category);
+			$values = $this->getNormalizationValues($field);
 		}
 
-		// Minimize the input value
-		$textMinimized = Normalization::minimizeText($text);
-
 		// Apply rules
-		foreach ($values as $pattern => $replacement) {
+		foreach ($values as $pattern => $outputPattern) {
 
+			// Check regex validity
 			if (@preg_replace($pattern, '', '') === null) {
 				continue;
 			}
+			// Apply regex replacement
+			$new = preg_replace($pattern, $outputPattern, $text);
 
-			$new = preg_replace($pattern, $replacement, $text);
-
-			if ($new !== $text) {
+			if ($new !== null && $new !== $text) {
 				return $new;
 			}
 		}
