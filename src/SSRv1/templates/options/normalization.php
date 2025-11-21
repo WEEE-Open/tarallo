@@ -1,8 +1,8 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var string|null $error */
-/** @var array $normalizationValues */
-/** @var string[] $normalizationCategories */
+/** @var string[] $normalizationValues */
+/** @var array $normalizationCategories */
 /** @var bool $apcuEnabled */
 $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options', 'container' => true]);
 $this->insert('options::menu', ['currentPage' => 'normalization']);
@@ -32,9 +32,9 @@ $this->insert('options::menu', ['currentPage' => 'normalization']);
 		<caption class="sr-only">List of normalization values</caption>
 		<thead class="thead-dark">
 		<tr>
-			<th>Minimized</th>
-			<th>Value</th>
-			<th>Category</th>
+			<th>Regex Matching</th>
+			<th>Output</th>
+			<th>Field</th>
 			<th>Comment</th>
 			<th>Actions</th>
 		</tr>
@@ -48,7 +48,7 @@ $this->insert('options::menu', ['currentPage' => 'normalization']);
 			<td></td>
 			<td>
 				<form method="post">
-					<input type="hidden" name="minimized" value="<?= $this->e($row[0]) ?>">
+					<input type="hidden" name="regex" value="<?= $this->e($row[0]) ?>">
 					<button type="submit" name="delete" value="true" class="btn btn-danger btn-sm">Delete</button>
 				</form>
 			</td>
@@ -84,28 +84,28 @@ $this->insert('options::menu', ['currentPage' => 'normalization']);
 	<h3>Normalize a new value</h3>
 	<form method="post">
 		<div class="form-group row">
-			<label class="col col-form-label" for="value">Normalized value</label>
+			<label class="col col-form-label" for="regex">Regex Matching</label>
 			<div class="col">
-				<input type="text" class="form-control" id="value" name="value" required>
+				<input type="text" class="form-control" id="regex" name="regex" required>
 			</div>
 		</div>
 		<div class="form-group row">
-			<label class="col col-form-label" for="wrong">String to replace</label>
+			<label class="col col-form-label" for="output">Output pattern</label>
 			<div class="col">
-				<input type="text" class="form-control" id="wrong" name="wrong">
+				<input type="text" class="form-control" id="output" name="output">
 			</div>
 		</div>
 		<script>
-			let wrong = document.getElementById('wrong');
-			let value = document.getElementById('value');
+			let regex = document.getElementById('regex');
+			let output = document.getElementById('output');
 			value.addEventListener('change', () => {
-				wrong.placeholder = value.value;
+				regex.placeholder = output.value;
 			});
 		</script>
 		<div class="form-group row">
-			<label class="col col-form-label" for="category">Category</label>
+			<label class="col col-form-label" for="field">Fields</label>
 			<div class="col">
-				<select class="form-control" id="category" name="category" required>
+				<select class="form-control" id="field" name="field" required>
 					<?php foreach ($normalizationCategories as $category) : ?>
 					<option value="<?= $this->e($category) ?>"><?= $this->e($category) ?></option>
 					<?php endforeach; ?>

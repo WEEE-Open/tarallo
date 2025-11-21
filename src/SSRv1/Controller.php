@@ -39,6 +39,7 @@ use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Laminas\Diactoros\UploadedFile;
+use const http\Client\Curl\FEATURES;
 
 class Controller implements RequestHandlerInterface
 {
@@ -741,15 +742,15 @@ class Controller implements RequestHandlerInterface
 			try {
 				if (isset($body['delete'])) {
 					// delete
-					$minimized = Validation::validateMandatoryString($body, 'minimized');
+					$minimized = Validation::validateMandatoryString($body, 'regex');
 					$db->featureDAO()->deleteNormalizedValue($minimized);
 					return new RedirectResponse($request->getRequestTarget(), 303);
 				} elseif (isset($body['new'])) {
 					// create
-					$value = Validation::validateMandatoryString($body, 'value');
-					$wrong = Validation::validateOptionalString($body, 'wrong', $value, $value);
-					$category = Validation::validateMandatoryString($body, 'category');
-					$db->featureDAO()->addNormalizedValue($wrong, $value, $category);
+					$output = Validation::validateMandatoryString($body, 'output');
+					$regex = Validation::validateOptionalString($body, 'regex', $output, $output);
+					$field = Validation::validateMandatoryString($body, 'field');
+					$db->featureDAO()->addNormalizedValue($regex,$output,$field);
 					return new RedirectResponse($request->getRequestTarget(), 303);
 				}
 			} catch (ForbiddenNormalizationException $e) {
@@ -764,7 +765,7 @@ class Controller implements RequestHandlerInterface
 			'TemplateParameters',
 			[
 				'normalizationValues' => $db->featureDAO()->getAllNormalizationValues(),
-				'normalizationCategories' => $db->featureDAO()->getAllNormalizationCategories(),
+				'normalizationCategories' => $db->featureDAO()->getAllNormalizationCategoriesByType(0), // string
 				'apcuEnabled' => $db->hasApcu(),
 				'error' => $error
 			]
@@ -1619,6 +1620,7 @@ class Controller implements RequestHandlerInterface
 
 	public function handle(ServerRequestInterface $request): ResponseInterface
 	{
+
 		$route = $this->route($request);
 
 		switch ($route[0]) {

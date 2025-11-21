@@ -186,7 +186,7 @@ class FeaturePrinter
 		'cib-old' => 'CIB with a department name, usually with blue border',
 		'cib' => 'Border is often faded and appears orange',
 		'owner' => 'Department or area, not a person',
-		'variant' => 'Board revisions or similar if relevant, write "' . ProductCode::DEFAULT_VARIANT . '" if not or unknown'
+		'variant' => 'Board revisions or similar if relevant, write "' . ProductCode::DEFAULT_VARIANT . '" if not or unknown',
 	];
 
 	public static function fileLastModified(): int
@@ -470,6 +470,22 @@ class FeaturePrinter
 		}
 
 		return $array;
+	}
+
+	public static function getAllFeaturesByType(int $type) {
+
+		$features_selected = [];
+
+		foreach (BaseFeature::FEATURES as $name => $stuff) {
+			$ntype = BaseFeature::getType($name);
+
+			if($ntype == $type){
+				$line = ['name' => $name, 'type' => $type, 'printableName' => self::FEATURES[$name]];
+				$features_selected[] = $line;
+			}
+		}
+		return $features_selected;
+
 	}
 
 	public static function getAllExplanations(): array
