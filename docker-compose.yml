@@ -68,8 +68,22 @@ services:
       # Replicate volume structure of "app" but in read only
       - ./src:/var/www/html/src:ro
       - ./public:/var/www/html/public:ro
+      - ./script-ng:/var/www/html/script-ng:ro
     depends_on:
       - app
+
+  frontend:
+    image: trarallo/frontend
+    build:
+      context: ./
+      dockerfile: ./docker/frontend/Dockerfile
+      cache_from:
+        - tarallo/frontend
+      args:
+        DEVELOPMENT: ${DEVELOPMENT}
+    volumes:
+      - ./frontend:/usr/src/app
+      - ./script-ng:/usr/src/script-ng
 
 volumes:
   tarallo-db:

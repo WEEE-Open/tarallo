@@ -357,7 +357,7 @@ class Controller implements RequestHandlerInterface
 						$tasks = [];
 					}
 					$donationId = $db->donationsDAO()->newDonation($name, $body["Location"], $body["Notes"], $date, $itemsList, $tasks);
-					return new RedirectResponse("/donation/$donationId", 303);
+					return new RedirectResponse("/donation/$donationId?old", 303);
 				} else {
 					$error = "Some items in the list are not valid";
 				}
@@ -421,7 +421,7 @@ class Controller implements RequestHandlerInterface
 
 		$request = $request
 			->withAttribute('Template', 'donation')
-			->withAttribute('TemplateParameters', ['showEditButton' => $user->getLevel() != UserSSO::AUTH_LEVEL_RO, 'donation' => $donation]);
+			->withAttribute('TemplateParameters', ['showEditButton' => $user->getLevel() != UserSSO::AUTH_LEVEL_RO, 'donation' => $donation, 'old' => isset($_GET["old"])]);
 
 		return $handler->handle($request);
 	}
@@ -446,7 +446,7 @@ class Controller implements RequestHandlerInterface
 
 		$db->donationsDAO()->completeDonation($id);
 
-		return new RedirectResponse("/donation/$id", 303);
+		return new RedirectResponse("/donation/$id?old", 303);
 	}
 
 	public static function uncompleteDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -469,7 +469,7 @@ class Controller implements RequestHandlerInterface
 
 		$db->donationsDAO()->uncompleteDonation($id);
 
-		return new RedirectResponse("/donation/$id", 303);
+		return new RedirectResponse("/donation/$id?old", 303);
 	}
 
 	public static function editDonation(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -502,7 +502,7 @@ class Controller implements RequestHandlerInterface
 		}
 
 		if ($oldDonation["isCompleted"]) {
-			return new RedirectResponse("/donation/$id", 303);
+			return new RedirectResponse("/donation/$id?old", 303);
 		}
 
 		$body = $request->getParsedBody();
@@ -545,7 +545,7 @@ class Controller implements RequestHandlerInterface
 						$tasks = [];
 					}
 					$db->donationsDAO()->updateDonation($id, $name, $body["Location"] ?? $oldDonation["location"], $body["Notes"], $date, $itemsList, $tasks);
-					return new RedirectResponse("/donation/$id", 303);
+					return new RedirectResponse("/donation/$id?old", 303);
 				} else {
 					$error = "Some items in the list are not valid";
 				}
@@ -627,7 +627,7 @@ class Controller implements RequestHandlerInterface
 		$id = Validation::validateOptionalInt($parameters, 'id', -1);
 
 		if ($db->donationsDAO()->deleteDonation($id)) {
-			return new RedirectResponse("/donation", 303);
+			return new RedirectResponse("/donation?old", 303);
 		} else {
 			$request = $request
 				->withAttribute('Template', 'error')

@@ -16,3 +16,5 @@ public/adminer*
 .env
 *.csv
 .github/copilot-instructions.md
+node_modules
+script-ng
