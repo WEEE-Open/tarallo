@@ -26,5 +26,5 @@ if ($area === '/v2/') {
 } else {
 	$response = (new SSRv1\Controller())->handle($request);
 }
-
+// sending the response into the browser
 (new SapiEmitter())->emit($response);

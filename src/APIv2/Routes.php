@@ -142,6 +142,14 @@ trait Routes
 								$r->post('/add[/{identifier}]', [User::AUTH_LEVEL_RO, [Controller::class, 'addBulk']]);
 							}
 						);
+						$r->addGroup(
+							'/normalization',
+							function (FastRoute\RouteCollector $r) {
+								$r->get('', [User::AUTH_LEVEL_RW, [Controller::class, 'listNormalization']]);
+								$r->post('', [User::AUTH_LEVEL_RW, [Controller::class, 'createNormalization']]);
+								$r->delete('', [User::AUTH_LEVEL_RW, [Controller::class, 'deleteNormalization']]);
+							}
+						);
 						$r->get('/options', [User::AUTH_LEVEL_RO, [Controller::class, 'getOptions']]);
 						$r->patch('/options', [User::AUTH_LEVEL_RW, [Controller::class, 'patchOptions']]);
 					}

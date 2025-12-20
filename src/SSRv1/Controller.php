@@ -39,8 +39,6 @@ use Laminas\Diactoros\Response\EmptyResponse;
 use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\Response\RedirectResponse;
 use Laminas\Diactoros\UploadedFile;
-use const http\Client\Curl\FEATURES;
-
 class Controller implements RequestHandlerInterface
 {
 	use Routes;
@@ -737,6 +735,7 @@ class Controller implements RequestHandlerInterface
 		$body = $request->getParsedBody();
 
 		$error = null;
+		$old_data = null;
 
 		if ($body !== null && count($body) > 0) {
 			try {
@@ -756,6 +755,7 @@ class Controller implements RequestHandlerInterface
 			} catch (ForbiddenNormalizationException $e) {
 				$error = "This value is ambiguous or handled in code, it cannot be normalized here";
 			} catch (\Exception $e) {
+				$old_data = $body;
 				$error = $e->getMessage();
 			}
 		}
@@ -765,9 +765,10 @@ class Controller implements RequestHandlerInterface
 			'TemplateParameters',
 			[
 				'normalizationValues' => $db->featureDAO()->getAllNormalizationValues(),
-				'normalizationCategories' => $db->featureDAO()->getAllNormalizationCategoriesByType(0), // string
+				'normalizationCategories' => $db->featureDAO()->getAllNormalizationCategoriesByType(BaseFeature::STRING),
 				'apcuEnabled' => $db->hasApcu(),
-				'error' => $error
+				'error' => $error,
+				'old_data' => $old_data,
 			]
 		);
 		return $handler->handle($request);

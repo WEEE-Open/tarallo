@@ -2,6 +2,9 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
+use WEEEOpen\Tarallo\BaseFeature;
+use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
+
 class Updater extends DAO {
 	private $schemaVersion;
 	private $dataVersion;
@@ -1156,6 +1159,22 @@ END;"
 					break;
 				case 32:
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('ram-form-factor', 'rdimm')");
+					break;
+				case 33:
+					$mapping = [];
+					foreach (FeaturePrinter::FEATURES as $name => $label) {
+						if (BaseFeature::getType($name) !== BaseFeature::STRING) {
+							continue;
+						}
+						$mapping[$label] = $name;
+					}
+
+					foreach ($mapping as $label => $featureName) {
+						$labelQuoted = $this->getPDO()->quote($label);
+						$featureQuoted = $this->getPDO()->quote($featureName);
+						$this->exec("UPDATE `Normalization` SET `Category` = $featureQuoted WHERE `Category` = $labelQuoted");
+						$this->exec("UPDATE `NormalizationForbidden` SET `Category` = $featureQuoted WHERE `Category` = $labelQuoted");
+					}
 					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');

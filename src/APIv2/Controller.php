@@ -1177,6 +1177,49 @@ class Controller implements RequestHandlerInterface
 		return $response;
 	}
 
+	public static function listNormalization(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		return new JsonResponse([
+			'values' => $db->featureDAO()->getAllNormalizationValues(),
+			'categories' => $db->featureDAO()->getAllNormalizationCategoriesByType(BaseFeature::STRING),
+		]);
+	}
+
+	public static function createNormalization(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$payload = $request->getAttribute('ParsedBody', []);
+
+		$output = Validation::validateMandatoryString($payload, 'output');
+		$regex = Validation::validateOptionalString($payload, 'regex', $output, $output);
+		$field = Validation::validateMandatoryString($payload, 'field');
+
+		$db->featureDAO()->addNormalizedValue($regex, $output, $field);
+
+		return new JsonResponse([
+			'regex' => $regex,
+			'output' => $output,
+			'field' => $field,
+		], 201);
+	}
+
+	public static function deleteNormalization(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+		$payload = $request->getAttribute('ParsedBody', []);
+
+		$regex = Validation::validateMandatoryString($payload, 'regex');
+
+		$db->featureDAO()->deleteNormalizedValue($regex);
+
+		return new EmptyResponse(204);
+	}
+
 	public static function getOptions(ServerRequestInterface $request): ResponseInterface
 	{
 		$db = $request->getAttribute('Database');

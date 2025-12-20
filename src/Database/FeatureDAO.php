@@ -6,6 +6,7 @@ use PDOStatement;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\ForbiddenNormalizationException;
+use WEEEOpen\Tarallo\HTTP\InvalidRequestBodyException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemTraitFeatures;
 use WEEEOpen\Tarallo\ItemWithCode;
@@ -243,7 +244,29 @@ final class FeatureDAO extends DAO
 			$this->addAuditEntry($item);
 		}
 
+		// Update item object with normalized features to keep in-memory state consistent
+		$this->updateItemFeaturesInMemory($item, $features);
+
 		return $changes;
+	}
+
+	/**
+	 * Update item's in-memory features with the provided normalized features
+	 *
+	 * @param ItemWithFeatures $item
+	 * @param Feature[] $features The normalized features
+	 */
+	private function updateItemFeaturesInMemory(ItemWithFeatures $item, array $features): void
+	{
+		// Remove all own features first
+		foreach ($item->getOwnFeatures() as $oldFeature) {
+			$item->removeFeatureByName($oldFeature->name);
+		}
+		
+		// Add the normalized features back to the item
+		foreach ($features as $feature) {
+			$item->addFeature($feature);
+		}
 	}
 
 	/**
@@ -431,17 +454,19 @@ final class FeatureDAO extends DAO
 		return FeaturePrinter::getAllFeatures();
 	}
 
-	public function getAllNormalizationCategoriesByType(int $type): array {
-
+	public function getAllNormalizationCategoriesByType(int $type): array
+	{
 		$features = FeaturePrinter::getAllFeaturesByType($type);
 
-		$names = [];
-		foreach ($features as $f) {
-			$names[] = $f['printableName'];  // or ['name']
+		$categories = [];
+		foreach ($features as $feature) {
+			$categories[] = [
+				'name' => $feature['name'],
+				'printableName' => $feature['printableName'] ?? $feature['name'],
+			];
 		}
 
-		return $names;
-
+		return $categories;
 	}
 
 	public function isNormalizationForbidden(string $minimized, string $category)
@@ -468,7 +493,12 @@ final class FeatureDAO extends DAO
 	{
 		// check it's a valid regex
 		if (@preg_replace($regex, '', '') === null) {
-			throw new \InvalidArgumentException('Invalid regex pattern');
+			throw new InvalidRequestBodyException('Invalid regex pattern');
+		}
+
+		$allowedCategories = array_column($this->getAllNormalizationCategoriesByType(BaseFeature::STRING), 'name');
+		if (!in_array($field, $allowedCategories, true)) {
+			throw new InvalidRequestBodyException('Invalid normalization field');
 		}
 
 
@@ -499,8 +529,8 @@ final class FeatureDAO extends DAO
 			assert($success, 'add normalized value');
 
 			// TODO: delete only one category
-			foreach ($this->getAllNormalizationCategoriesByType(0) as $category) {
-				$this->deleteCache($category);
+			foreach ($this->getAllNormalizationCategoriesByType(BaseFeature::STRING) as $category) {
+				$this->deleteCache($category['name']);
 			}
 		} finally {
 			$statement->closeCursor();
@@ -560,6 +590,7 @@ final class FeatureDAO extends DAO
 			}
 			// Apply regex replacement
 			$new = preg_replace($pattern, $outputPattern, $text);
+
 
 			if ($new !== null && $new !== $text) {
 				return $new;
