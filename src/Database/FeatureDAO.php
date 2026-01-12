@@ -385,15 +385,16 @@ final class FeatureDAO extends DAO
 	 */
 	private function checkFeature(Feature $feature, string $column, int $type): void
 	{
+
 		if (!in_array($feature->name, ['sn', 'cib'])) {
 			return;
 		}
 
-		$statement = $this->getPDO()->prepare("SELECT COUNT(*) FROM ItemFeature WHERE `Feature` = :feature AND `$column` = :val");
+		$statement = $this->getPDO()->prepare("SELECT COUNT(*) FROM ProductItemFeatureUnified WHERE `Feature` = :feature AND `$column` = :val");
 		$statement->bindValue(':feature', $feature->name, \PDO::PARAM_STR);
 		$statement->bindValue(':val', $feature->value, $type);
 		$result = $statement->execute();
-		assert($result !== false, 'duplicated serial number or cib');
+		assert($result !== false, "duplicated {$feature->name} value.");
 		$row = $statement->fetch(\PDO::FETCH_NUM);
 		if ($row[0] > 0) {
 			throw new \LogicException("There's already one item with the same value for the feature: '{$feature->name}'");
