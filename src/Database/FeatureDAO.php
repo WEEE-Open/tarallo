@@ -333,6 +333,8 @@ final class FeatureDAO extends DAO
 		$column = self::getColumn($feature->type);
 		$type = self::getPDOType($feature->type);
 
+		self::checkFeature($feature, $column, $type);
+
 		if ($item instanceof Product) {
 			$statement = $this->setFeaturesQueryForProduct($item, $column);
 		} else {
@@ -369,6 +371,33 @@ final class FeatureDAO extends DAO
 			throw $e;
 		} finally {
 			$statement->closeCursor();
+		}
+	}
+
+	/**
+	 * Check if a feature with the same value (serial number or cib) is already present in the database
+	 * 
+	 * @param Feature $feature
+	 * @param string $column
+	 * @param int $type
+	 * 
+	 * @throws \LogicException
+	 */
+	private function checkFeature(Feature $feature, string $column, int $type): void
+	{
+
+		if (!in_array($feature->name, BaseFeature::FEATURES_UNIQUE_VALUE)) {
+			return;
+		}
+
+		$statement = $this->getPDO()->prepare("SELECT COUNT(*) FROM ProductItemFeatureUnified WHERE `Feature` = :feature AND `$column` = :val");
+		$statement->bindValue(':feature', $feature->name, \PDO::PARAM_STR);
+		$statement->bindValue(':val', $feature->value, $type);
+		$result = $statement->execute();
+		assert($result !== false, "duplicated {$feature->name} value.");
+		$row = $statement->fetch(\PDO::FETCH_NUM);
+		if ($row[0] > 0) {
+			throw new \LogicException("There's already one item with the same value for the feature: '{$feature->name}'");
 		}
 	}
 
