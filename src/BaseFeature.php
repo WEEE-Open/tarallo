@@ -299,6 +299,8 @@ class BaseFeature
 		'check' => true,
 	];
 
+	public const FEATURES_UNIQUE_VALUE = ['sn', 'cib', 'cib-qr', 'cib-old'];
+
 	public static function fileLastModified(): int
 	{
 		return filemtime(__FILE__);

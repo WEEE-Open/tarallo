@@ -386,7 +386,7 @@ final class FeatureDAO extends DAO
 	private function checkFeature(Feature $feature, string $column, int $type): void
 	{
 
-		if (!in_array($feature->name, ['sn', 'cib'])) {
+		if (!in_array($feature->name, BaseFeature::FEATURES_UNIQUE_VALUE)) {
 			return;
 		}
 
