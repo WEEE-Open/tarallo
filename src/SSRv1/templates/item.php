@@ -92,7 +92,7 @@ endif; ?>
 
 	<?php if ($deletedAt === null) : ?>
 		<?php if ($missingProduct) : ?>
-			<div class="inline-alert w-auto alert-serious" role="alert"><i class="fa fa-tag"></i>&nbsp;This item has no product: <a href="/new/product?split=<?=$code_escaped?>">create it now!</a></div>
+			<div class="inline-alert w-auto alert-serious" role="alert"><i class="fa fa-tag"></i>&nbsp;This item has no product: <a class="btn btn-danger" href="/new/product?split=<?=$code_escaped?>"><i class="fa fa-wrench"></i>&nbsp;create it now!</a></div>
 		<?php endif ?>
 		<?php if ($item->getFeature('restrictions') !== null) : ?>
 			<div class="inline-alert w-auto alert-info" role="alert"><i class="fa fa-flag-checkered"></i>&nbsp;<?= (WEEEOpen\Tarallo\SSRv1\UltraFeature::fromFeature(
