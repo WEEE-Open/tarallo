@@ -73,24 +73,44 @@ foreach ($normalizationCategories as $category) {
         const rows = normalizationtable.querySelectorAll("tbody tr");
         let debounceTimer;
 
-        // Parse a PHP-style regex like "/foo(bar)/i" into JS RegExp
+        // Parse a PHP-style regex like "/foo(bar)/i" or "#foo#i" into JS RegExp
         function parsePhpRegex(patternText) {
             patternText = patternText.trim();
-            if (patternText.length < 2 || patternText[0] !== '/') {
+            if (patternText.length < 3) {
                 return null;
             }
 
-            const lastSlash = patternText.lastIndexOf('/');
-            if (lastSlash <= 0) {
+            const delimiter = patternText[0];
+            // Delimiter cannot be alphanumeric, whitespace or backslash
+            if (/[\w\s\\]/.test(delimiter)) {
                 return null;
             }
 
-            const body = patternText.slice(1, lastSlash);
-            const phpFlags = patternText.slice(lastSlash + 1);
+            let lastDelimiter = -1;
+            for (let i = patternText.length - 1; i > 0; i--) {
+                if (patternText[i] !== delimiter) continue;
+                // Ignore escaped delimiters
+                let backslashes = 0;
+                for (let j = i - 1; j >= 0 && patternText[j] === '\\'; j--) {
+                    backslashes++;
+                }
+                if (backslashes % 2 === 0) {
+                    lastDelimiter = i;
+                    break;
+                }
+            }
+            if (lastDelimiter <= 0) {
+                return null;
+            }
+
+            const body = patternText.slice(1, lastDelimiter);
+            const phpFlags = patternText.slice(lastDelimiter + 1);
 
             let jsFlags = "";
             if (phpFlags.includes("i")) jsFlags += "i";
             if (phpFlags.includes("m")) jsFlags += "m";
+            if (phpFlags.includes("s")) jsFlags += "s";
+            if (phpFlags.includes("u")) jsFlags += "u";
 
             try {
                 return new RegExp(body, jsFlags);
@@ -175,13 +195,13 @@ foreach ($normalizationCategories as $category) {
 		<div class="form-group row">
 			<label class="col col-form-label" for="regex">Regex Matching</label>
 			<div class="col">
-				<input type="text" class="form-control" id="regex" name="regex" required value="<?= $old_data['regex'] ?? ''  ?>">
+				<input type="text" class="form-control" id="regex" name="regex" required value="<?= $this->e($old_data['regex'] ?? '') ?>">
 			</div>
 		</div>
 		<div class="form-group row">
 			<label class="col col-form-label" for="output">Output pattern</label>
 			<div class="col">
-				<input type="text" class="form-control" id="output" name="output" value="<?= $old_data['output'] ?? ''  ?>">
+				<input type="text" class="form-control" id="output" name="output" value="<?= $this->e($old_data['output'] ?? '') ?>">
 			</div>
 		</div>
 		<script>

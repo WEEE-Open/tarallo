@@ -247,6 +247,25 @@ class Controller implements RequestHandlerInterface
 		$flat = $item->getFlatContent();
 		Normalization::addAllVariants($flat);
 
+		// Apply normalization rules to newly created items (in-memory) so that
+		// validation + persistence use normalized values.
+		foreach ($flat as $flatItem) {
+			/** @var \WEEEOpen\Tarallo\ItemWithFeatures $flatItem */
+			$features = $flatItem->getOwnFeatures();
+			if (empty($features)) {
+				continue;
+			}
+			$db->featureDAO()->tryNormalizeAll($features);
+
+			// Replace own features with normalized ones
+			foreach ($flatItem->getOwnFeatures() as $oldFeature) {
+				$flatItem->removeFeatureByName($oldFeature->name);
+			}
+			foreach ($features as $feature) {
+				$flatItem->addFeature($feature);
+			}
+		}
+
 		// We need product features for fixup and validation
 		if ($fix || $validate) {
 			$db->productDAO()->getProductsAll($flat);
