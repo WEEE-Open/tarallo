@@ -285,10 +285,13 @@ CREATE TABLE `BulkTable`
 
 CREATE TABLE `Normalization`
 (
-    `MinimizedKey` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `NormalizedValue` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `Category` VARCHAR(40) COLLATE utf8mb4_unicode_ci NOT NULL,
-    PRIMARY KEY (`MinimizedKey`),
+    `Id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `MinimizedKey`    VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `NormalizedValue` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Category`        VARCHAR(40)  COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Comment`         TEXT         COLLATE utf8mb4_unicode_ci NULL,
+    PRIMARY KEY (`Id`),
+    UNIQUE INDEX `MinimizedKey_Category` (`MinimizedKey`(191), `Category`),
     INDEX (`Category`)
 ) ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
@@ -296,9 +299,9 @@ CREATE TABLE `Normalization`
 
 CREATE TABLE `NormalizationForbidden`
 (
-    `MinimizedKey` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `Category` VARCHAR(40) COLLATE utf8mb4_unicode_ci NOT NULL,
-    PRIMARY KEY (`MinimizedKey`),
+    `MinimizedKey` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Category`     VARCHAR(40)  COLLATE utf8mb4_unicode_ci NOT NULL,
+    PRIMARY KEY (`MinimizedKey`(191), `Category`),
     INDEX (`Category`)
 ) ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4

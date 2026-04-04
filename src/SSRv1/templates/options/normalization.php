@@ -52,13 +52,13 @@ foreach ($normalizationCategories as $category) {
 		<tbody>
 		<?php foreach ($normalizationValues as $row) : ?>
 		<tr>
-			<td class="minimized"><?= $this->e($row[0]) ?></td>
-			<td><?= $this->e($row[1]) ?></td>
-			<td><?= $this->e($categoryLabels[$row[2]] ?? $row[2]) ?></td>
-			<td></td>
+			<td class="minimized"><?= $this->e($row['regex']) ?></td>
+			<td><?= $this->e($row['output']) ?></td>
+			<td><?= $this->e($categoryLabels[$row['category']] ?? $row['category']) ?></td>
+			<td><?= $this->e($row['comment'] ?? '') ?></td>
 			<td>
 				<form method="post">
-					<input type="hidden" name="regex" value="<?= $this->e($row[0]) ?>">
+					<input type="hidden" name="id" value="<?= (int) $row['id'] ?>">
 					<button type="submit" name="delete" value="true" class="btn btn-danger btn-sm">Delete</button>
 				</form>
 			</td>
@@ -221,6 +221,12 @@ foreach ($normalizationCategories as $category) {
 					<option value="<?= $this->e($category['name']) ?>" <?= $selected ? 'selected' : '' ?>><?= $this->e($category['printableName']) ?></option>
 					<?php endforeach; ?>
 				</select>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col col-form-label" for="comment">Comment <small class="text-muted">(optional)</small></label>
+			<div class="col">
+				<textarea class="form-control" id="comment" name="comment" rows="2" placeholder="Human-readable note about this rule"><?= $this->e($old_data['comment'] ?? '') ?></textarea>
 			</div>
 		</div>
 		<div class="form-group row">
