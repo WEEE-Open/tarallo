@@ -77,7 +77,7 @@ class SearchTriplet implements \JsonSerializable, \ArrayAccess
 	}
 
 	private static function checkCanPartialMatch(Feature $feature): void
-    {
+	{
 		if ($feature->type !== BaseFeature::STRING) {
 			throw new \InvalidArgumentException(
 				'Cannot partially match feature ' . $feature->name . ': not a text feature'
@@ -86,7 +86,7 @@ class SearchTriplet implements \JsonSerializable, \ArrayAccess
 	}
 
 	private static function checkWellOrdered(Feature $feature, $operator): void
-    {
+	{
 		if ($feature->type !== BaseFeature::INTEGER && $feature->type !== BaseFeature::DOUBLE) {
 			throw new \InvalidArgumentException(
 				"Cannot apply operator '$operator' to " . $feature->name . ': cannot be ordered'
@@ -94,7 +94,7 @@ class SearchTriplet implements \JsonSerializable, \ArrayAccess
 		}
 	}
 
-	public function jsonSerialize():array
+	public function jsonSerialize(): array
 	{
 		return [$this->feature->name, $this->compare, $this->getValue()];
 	}
@@ -108,7 +108,7 @@ class SearchTriplet implements \JsonSerializable, \ArrayAccess
 	}
 
 	public function offsetGet($offset): mixed
-    {
+	{
 		switch ($offset) {
 			case 0:
 				return $this->feature->name;
@@ -122,12 +122,12 @@ class SearchTriplet implements \JsonSerializable, \ArrayAccess
 	}
 
 	public function offsetSet($offset, $value): void
-    {
+	{
 		throw new \LogicException("The array interface is read-only");
 	}
 
 	public function offsetUnset($offset): void
-    {
+	{
 		throw new \LogicException("The array interface is read-only");
 	}
 }

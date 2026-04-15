@@ -472,20 +472,20 @@ class FeaturePrinter
 		return $array;
 	}
 
-	public static function getAllFeaturesByType(int $type) {
+	public static function getAllFeaturesByType(int $type)
+	{
 
 		$features_selected = [];
 
 		foreach (BaseFeature::FEATURES as $name => $stuff) {
 			$ntype = BaseFeature::getType($name);
 
-			if($ntype == $type){
+			if ($ntype == $type) {
 				$line = ['name' => $name, 'type' => $type, 'printableName' => self::FEATURES[$name]];
 				$features_selected[] = $line;
 			}
 		}
 		return $features_selected;
-
 	}
 
 	public static function getAllExplanations(): array

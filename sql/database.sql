@@ -286,7 +286,7 @@ CREATE TABLE `BulkTable`
 CREATE TABLE `Normalization`
 (
     `Id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `MinimizedKey`    VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `MinimizedKey`    TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
     `NormalizedValue` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL,
     `Category`        VARCHAR(40)  COLLATE utf8mb4_unicode_ci NOT NULL,
     `Comment`         TEXT         COLLATE utf8mb4_unicode_ci NULL,
@@ -417,5 +417,6 @@ SELECT Code,
 FROM ProductItemFeature;
 
 -- Do not combine these lines, they're parsed by update-db... WITH A REGEX!
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 25);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 26);
 INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 33);
+

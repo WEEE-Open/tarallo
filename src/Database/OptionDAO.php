@@ -39,7 +39,9 @@ class OptionDAO extends DAO
 		$filteredOptions = [];
 
 		foreach (OptionDAO::SAFEOPTIONS as $key) {
-			if (isset($options[$key])) $filteredOptions[$key] = $options[$key];
+			if (isset($options[$key])) {
+				$filteredOptions[$key] = $options[$key];
+			}
 		}
 
 		return $filteredOptions;

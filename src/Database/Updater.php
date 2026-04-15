@@ -2,20 +2,19 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
-use WEEEOpen\Tarallo\BaseFeature;
-use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
-
-class Updater extends DAO {
+class Updater extends DAO
+{
 	private $schemaVersion;
 	private $dataVersion;
 
-	public function __construct(Database $db, $callback) {
+	public function __construct(Database $db, $callback)
+	{
 		parent::__construct($db, $callback);
 		try {
 			$result = $this->getPDO()->query("SELECT `Value` FROM Configuration WHERE `Key` = 'SchemaVersion'");
 			$this->schemaVersion = (int) $result->fetchColumn();
-		} catch(\PDOException $e) {
-			if($e->getCode() === '42S02') {
+		} catch (\PDOException $e) {
+			if ($e->getCode() === '42S02') {
 				$this->schemaVersion = 0;
 				$this->dataVersion = 0;
 				return;
@@ -29,20 +28,22 @@ class Updater extends DAO {
 		echo 'Start from schema version ' . $this->schemaVersion . ' and data version ' . $this->dataVersion . PHP_EOL;
 	}
 
-	public function updateTo(int $schema, int $data) {
+	public function updateTo(int $schema, int $data)
+	{
 		$this->updateSchema($schema);
 		$this->updateData($data);
 	}
 
-	private function updateSchema(int $schema) {
-		if($this->schemaVersion === $schema) {
+	private function updateSchema(int $schema)
+	{
+		if ($this->schemaVersion === $schema) {
 			return;
-		} else if($this->schemaVersion > $schema) {
+		} elseif ($this->schemaVersion > $schema) {
 			throw new \InvalidArgumentException("Trying to downgrade schema from $this->schemaVersion to $schema");
 		}
 		// $schema is now > $this->schemaVersion
-		while($this->schemaVersion < $schema) {
-			switch($this->schemaVersion) {
+		while ($this->schemaVersion < $schema) {
+			switch ($this->schemaVersion) {
 				case 0:
 					$this->exec(
 						<<<EOQ
@@ -203,7 +204,7 @@ EOQ
 					// databases, so...
 					// Mark as lost all the items in the "Lost" location, if it exists.
 					$intermediate = $this->getPDO()->query("SELECT Code FROM Item WHERE Code = 'Lost'");
-					if($intermediate->rowCount() > 0) {
+					if ($intermediate->rowCount() > 0) {
 						// Close that cursor so we can do other stuff
 						$intermediate->closeCursor();
 						// Trigger will create and Audit entry, this requires an username... will fix them manually
@@ -212,7 +213,7 @@ EOQ
 						// Also, there still trigger preventing this from being a single query...
 						$intermediate2 = $this->getPDO()->query("SELECT DISTINCT Descendant FROM Tree WHERE Ancestor = 'Lost' AND Depth > 0");
 						$fetched = $intermediate2->fetchAll(\PDO::FETCH_COLUMN);
-						foreach($fetched as $item) {
+						foreach ($fetched as $item) {
 							// Again, there are a billion triggers preventing the simplest of queries, so we have to
 							// make some inane byzantine workarounds, I don't even know anymore, it's 1.30 AM I just
 							// want to insert these damn 4 rows into the damn table and be done with it, please,
@@ -539,11 +540,11 @@ SQL SECURITY INVOKER
 				case 14:
 					try {
 						$this->exec("ALTER TABLE AuditProduct DROP CONSTRAINT check_change;");
-					} catch(\PDOException $ignored) {
+					} catch (\PDOException $ignored) {
 					}
 					try {
 						$this->exec("ALTER TABLE AuditProduct DROP CONSTRAINT check_change_2;");
-					} catch(\PDOException $ignored) {
+					} catch (\PDOException $ignored) {
 					}
 					$this->exec("ALTER TABLE AuditProduct ADD CONSTRAINT check_change CHECK (`Change` IN ('C', 'R', 'U', 'D'));");
 					$this->exec("DROP TRIGGER IF EXISTS AuditRenameProduct;");
@@ -974,6 +975,19 @@ BEGIN
 END;"
 					);
 					break;
+				case 25:
+					// Normalization: add Id PK, widen columns, add Comment, add composite unique index
+					$this->exec('ALTER TABLE `Normalization` DROP PRIMARY KEY');
+					$this->exec('ALTER TABLE `Normalization` ADD COLUMN `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST');
+					$this->exec('ALTER TABLE `Normalization` MODIFY `MinimizedKey` TEXT COLLATE utf8mb4_unicode_ci NOT NULL');
+					$this->exec('ALTER TABLE `Normalization` MODIFY `NormalizedValue` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL');
+					$this->exec('ALTER TABLE `Normalization` ADD COLUMN `Comment` TEXT COLLATE utf8mb4_unicode_ci NULL');
+					$this->exec('ALTER TABLE `Normalization` ADD UNIQUE INDEX `MinimizedKey_Category` (`MinimizedKey`(191), `Category`)');
+					// NormalizationForbidden: widen MinimizedKey, change PK to composite
+					$this->exec('ALTER TABLE `NormalizationForbidden` DROP PRIMARY KEY');
+					$this->exec('ALTER TABLE `NormalizationForbidden` MODIFY `MinimizedKey` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL');
+					$this->exec('ALTER TABLE `NormalizationForbidden` ADD PRIMARY KEY (`MinimizedKey`(191), `Category`)');
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}
@@ -983,14 +997,15 @@ END;"
 		$this->exec("UPDATE Configuration SET `Value` = \"$this->schemaVersion\" WHERE `Key` = \"SchemaVersion\"");
 	}
 
-	private function updateData(int $data) {
-		if($this->dataVersion === $data) {
+	private function updateData(int $data)
+	{
+		if ($this->dataVersion === $data) {
 			return;
-		} else if($this->dataVersion > $data) {
+		} elseif ($this->dataVersion > $data) {
 			throw new \InvalidArgumentException("Trying to downgrade schema from $this->dataVersion to $data");
 		}
-		while($this->dataVersion < $data) {
-			switch($this->dataVersion) {
+		while ($this->dataVersion < $data) {
+			switch ($this->dataVersion) {
 				case 0:
 					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('type', 'ssd')");
 					break;
@@ -1160,22 +1175,6 @@ END;"
 				case 32:
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('ram-form-factor', 'rdimm')");
 					break;
-				case 33:
-					$mapping = [];
-					foreach (FeaturePrinter::FEATURES as $name => $label) {
-						if (BaseFeature::getType($name) !== BaseFeature::STRING) {
-							continue;
-						}
-						$mapping[$label] = $name;
-					}
-
-					foreach ($mapping as $label => $featureName) {
-						$labelQuoted = $this->getPDO()->quote($label);
-						$featureQuoted = $this->getPDO()->quote($featureName);
-						$this->exec("UPDATE `Normalization` SET `Category` = $featureQuoted WHERE `Category` = $labelQuoted");
-						$this->exec("UPDATE `NormalizationForbidden` SET `Category` = $featureQuoted WHERE `Category` = $labelQuoted");
-					}
-					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}
@@ -1185,10 +1184,11 @@ END;"
 		$this->exec("UPDATE Configuration SET `Value` = '$this->dataVersion' WHERE `Key` = 'DataVersion'");
 	}
 
-	private function exec(string $query) {
+	private function exec(string $query)
+	{
 		$result = $this->getPDO()->exec($query);
 
-		if($result === false) {
+		if ($result === false) {
 			throw new \RuntimeException('Exec failed, see stack trace');
 		}
 	}

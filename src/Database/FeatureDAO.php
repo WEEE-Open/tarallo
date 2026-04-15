@@ -591,7 +591,6 @@ final class FeatureDAO extends DAO
 
 		// Apply rules
 		foreach ($values as $pattern => $outputPattern) {
-
 			// Check regex validity
 			if (@preg_replace($pattern, '', '') === null) {
 				continue;

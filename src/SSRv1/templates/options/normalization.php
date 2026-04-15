@@ -68,122 +68,122 @@ foreach ($normalizationCategories as $category) {
 	</table>
 	<p><small>There are <?= count($normalizationValues); ?> rows.</small></p>
 	<script>
-        const search = document.getElementById("search");
-        const normalizationtable = document.getElementById("normalizationtable");
-        const rows = normalizationtable.querySelectorAll("tbody tr");
-        let debounceTimer;
+		const search = document.getElementById("search");
+		const normalizationtable = document.getElementById("normalizationtable");
+		const rows = normalizationtable.querySelectorAll("tbody tr");
+		let debounceTimer;
 
-        // Parse a PHP-style regex like "/foo(bar)/i" or "#foo#i" into JS RegExp
-        function parsePhpRegex(patternText) {
-            patternText = patternText.trim();
-            if (patternText.length < 3) {
-                return null;
-            }
+		// Parse a PHP-style regex like "/foo(bar)/i" or "#foo#i" into JS RegExp
+		function parsePhpRegex(patternText) {
+			patternText = patternText.trim();
+			if (patternText.length < 3) {
+				return null;
+			}
 
-            const delimiter = patternText[0];
-            // Delimiter cannot be alphanumeric, whitespace or backslash
-            if (/[\w\s\\]/.test(delimiter)) {
-                return null;
-            }
+			const delimiter = patternText[0];
+			// Delimiter cannot be alphanumeric, whitespace or backslash
+			if (/[\w\s\\]/.test(delimiter)) {
+				return null;
+			}
 
-            let lastDelimiter = -1;
-            for (let i = patternText.length - 1; i > 0; i--) {
-                if (patternText[i] !== delimiter) continue;
-                // Ignore escaped delimiters
-                let backslashes = 0;
-                for (let j = i - 1; j >= 0 && patternText[j] === '\\'; j--) {
-                    backslashes++;
-                }
-                if (backslashes % 2 === 0) {
-                    lastDelimiter = i;
-                    break;
-                }
-            }
-            if (lastDelimiter <= 0) {
-                return null;
-            }
+			let lastDelimiter = -1;
+			for (let i = patternText.length - 1; i > 0; i--) {
+				if (patternText[i] !== delimiter) continue;
+				// Ignore escaped delimiters
+				let backslashes = 0;
+				for (let j = i - 1; j >= 0 && patternText[j] === '\\'; j--) {
+					backslashes++;
+				}
+				if (backslashes % 2 === 0) {
+					lastDelimiter = i;
+					break;
+				}
+			}
+			if (lastDelimiter <= 0) {
+				return null;
+			}
 
-            const body = patternText.slice(1, lastDelimiter);
-            const phpFlags = patternText.slice(lastDelimiter + 1);
+			const body = patternText.slice(1, lastDelimiter);
+			const phpFlags = patternText.slice(lastDelimiter + 1);
 
-            let jsFlags = "";
-            if (phpFlags.includes("i")) jsFlags += "i";
-            if (phpFlags.includes("m")) jsFlags += "m";
-            if (phpFlags.includes("s")) jsFlags += "s";
-            if (phpFlags.includes("u")) jsFlags += "u";
+			let jsFlags = "";
+			if (phpFlags.includes("i")) jsFlags += "i";
+			if (phpFlags.includes("m")) jsFlags += "m";
+			if (phpFlags.includes("s")) jsFlags += "s";
+			if (phpFlags.includes("u")) jsFlags += "u";
 
-            try {
-                return new RegExp(body, jsFlags);
-            } catch (e) {
-                console.warn("Invalid regex in table:", patternText, e);
-                return null;
-            }
-        }
+			try {
+				return new RegExp(body, jsFlags);
+			} catch (e) {
+				console.warn("Invalid regex in table:", patternText, e);
+				return null;
+			}
+		}
 
-        function applyTest() {
-            const value = search.value;
+		function applyTest() {
+			const value = search.value;
 
-            // If empty: show all rows and restore output
-            if (!value) {
-                rows.forEach(row => {
-                    row.classList.remove("d-none");
-                    const outputCell = row.children[1];
-                    if (outputCell.dataset.originalOutput !== undefined) {
-                        outputCell.textContent = outputCell.dataset.originalOutput;
-                    }
-                });
-                return;
-            }
+			// If empty: show all rows and restore output
+			if (!value) {
+				rows.forEach(row => {
+					row.classList.remove("d-none");
+					const outputCell = row.children[1];
+					if (outputCell.dataset.originalOutput !== undefined) {
+						outputCell.textContent = outputCell.dataset.originalOutput;
+					}
+				});
+				return;
+			}
 
-            rows.forEach(row => {
-                const regexCell = row.querySelector("td.minimized");
-                const outputCell = row.children[1];
+			rows.forEach(row => {
+				const regexCell = row.querySelector("td.minimized");
+				const outputCell = row.children[1];
 
-                if (!regexCell || !outputCell) {
-                    return;
-                }
+				if (!regexCell || !outputCell) {
+					return;
+				}
 
-                // Store original output once
-                if (outputCell.dataset.originalOutput === undefined) {
-                    outputCell.dataset.originalOutput = outputCell.textContent.trim();
-                }
+				// Store original output once
+				if (outputCell.dataset.originalOutput === undefined) {
+					outputCell.dataset.originalOutput = outputCell.textContent.trim();
+				}
 
-                const originalOutput = outputCell.dataset.originalOutput;
-                const patternText = regexCell.textContent;
-                const regex = parsePhpRegex(patternText);
-                if (!regex) {
-                    row.classList.remove("d-none");
-                    outputCell.textContent = originalOutput;
-                    return;
-                }
+				const originalOutput = outputCell.dataset.originalOutput;
+				const patternText = regexCell.textContent;
+				const regex = parsePhpRegex(patternText);
+				if (!regex) {
+					row.classList.remove("d-none");
+					outputCell.textContent = originalOutput;
+					return;
+				}
 
-                const match = value.match(regex);
+				const match = value.match(regex);
 
-                if (!match) {
-                    row.classList.add("d-none");
-                    outputCell.textContent = originalOutput;
-                } else {
-                    row.classList.remove("d-none");
+				if (!match) {
+					row.classList.add("d-none");
+					outputCell.textContent = originalOutput;
+				} else {
+					row.classList.remove("d-none");
 
-                    // Replace ONLY $1, $2, $3 ...
-                    let evaluated = originalOutput.replace(/\$([0-9]+)/g, (_, n) => {
-                        const index = Number(n);
-                        return match[index] !== undefined ? match[index] : "";
-                    });
+					// Replace ONLY $1, $2, $3 ...
+					let evaluated = originalOutput.replace(/\$([0-9]+)/g, (_, n) => {
+						const index = Number(n);
+						return match[index] !== undefined ? match[index] : "";
+					});
 
-                    // Show "$1 → Core i3-2125"
-                    outputCell.textContent = originalOutput + " \u2192 " + evaluated;
-                }
-            });
-        }
+					// Show "$1 → Core i3-2125"
+					outputCell.textContent = originalOutput + " \u2192 " + evaluated;
+				}
+			});
+		}
 
-        function debouncedApplyTest() {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(applyTest, 300);
-        }
+		function debouncedApplyTest() {
+			clearTimeout(debounceTimer);
+			debounceTimer = setTimeout(applyTest, 300);
+		}
 
-        search.addEventListener("keyup", debouncedApplyTest);
-        applyTest();
+		search.addEventListener("keyup", debouncedApplyTest);
+		applyTest();
 	</script>
 
 
@@ -217,7 +217,7 @@ foreach ($normalizationCategories as $category) {
 			<div class="col">
 				<select class="form-control" id="field" name="field" required>
 					<?php foreach ($normalizationCategories as $category) : ?>
-					<?php $selected = ($old_data['field'] ?? '') === $category['name']; ?>
+						<?php $selected = ($old_data['field'] ?? '') === $category['name']; ?>
 					<option value="<?= $this->e($category['name']) ?>" <?= $selected ? 'selected' : '' ?>><?= $this->e($category['printableName']) ?></option>
 					<?php endforeach; ?>
 				</select>

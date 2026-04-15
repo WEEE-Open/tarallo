@@ -58,7 +58,8 @@ trait ItemTraitCode
 		return strcasecmp($this->getCode(), $other->getCode());
 	}
 
-	public function jsonSerialize(): string {
+	public function jsonSerialize(): string
+	{
 
 		return $this->getCode();
 	}
