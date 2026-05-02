@@ -289,6 +289,7 @@ CREATE TABLE `Normalization`
     `MinimizedKey`    TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
     `NormalizedValue` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL,
     `Category`        VARCHAR(40)  COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Type`            ENUM('plain','regex') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'plain',
     `Comment`         TEXT         COLLATE utf8mb4_unicode_ci NULL,
     PRIMARY KEY (`Id`),
     UNIQUE INDEX `MinimizedKey_Category` (`MinimizedKey`(191), `Category`),
@@ -417,6 +418,6 @@ SELECT Code,
 FROM ProductItemFeature;
 
 -- Do not combine these lines, they're parsed by update-db... WITH A REGEX!
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 26);
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 33);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 27);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 35);
 

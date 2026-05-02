@@ -752,7 +752,11 @@ class Controller implements RequestHandlerInterface
 					$regex   = Validation::validateOptionalString($body, 'regex', $output, $output);
 					$field   = Validation::validateMandatoryString($body, 'field');
 					$comment = Validation::validateOptionalString($body, 'comment', null, null);
-					$db->featureDAO()->addNormalizedValue($regex, $output, $field, $comment);
+					$type    = Validation::validateOptionalString($body, 'type', 'plain', 'plain');
+					if ($type !== 'plain' && $type !== 'regex') {
+						$type = 'plain';
+					}
+					$db->featureDAO()->addNormalizedValue($regex, $output, $field, $comment, $type);
 					return new RedirectResponse($request->getRequestTarget(), 303);
 				}
 			} catch (ForbiddenNormalizationException $e) {

@@ -19,25 +19,8 @@ use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 final class FeatureDAO extends DAO
 {
-	private const NORMALIZATION_CATEGORY_BRAND = 'brand';
-	private const NORMALIZATION_CATEGORY_OWNER = 'owner';
-	private const NORMALIZATION_CATEGORY_OS_VERSION = 'os-version';
-	private const NORMALIZATION_CATEGORY_KEY = 'key';
 	private const NORMALIZATION_CACHE_PREFIX = 'normalization_';
 	private const NORMALIZATION_CACHE_TTL = 60 * 60 * 24;
-
-	public static function getNormalizationMapping(): array
-	{
-		return [
-			'brand' => self::NORMALIZATION_CATEGORY_BRAND,
-			'brand-manufacturer' => self::NORMALIZATION_CATEGORY_BRAND,
-			'integrated-graphics-brand' => self::NORMALIZATION_CATEGORY_BRAND,
-			'os-license-version' => self::NORMALIZATION_CATEGORY_OS_VERSION,
-			'owner' => self::NORMALIZATION_CATEGORY_OWNER,
-			'key-bios-setup' => self::NORMALIZATION_CATEGORY_KEY,
-			'key-boot-menu' => self::NORMALIZATION_CATEGORY_KEY,
-		];
-	}
 
 	/**
 	 * Obtain \PDO::PARAM_... constant from feature name
@@ -432,7 +415,7 @@ final class FeatureDAO extends DAO
 	 */
 	public function getAllNormalizationValues()
 	{
-		$statement = $this->getPDO()->prepare('SELECT Id AS id, MinimizedKey AS regex, NormalizedValue AS output, Category AS category, Comment AS comment FROM Normalization ORDER BY Category, NormalizedValue');
+		$statement = $this->getPDO()->prepare('SELECT Id AS id, MinimizedKey AS regex, NormalizedValue AS output, Category AS category, Type AS type, Comment AS comment FROM Normalization ORDER BY Category, NormalizedValue');
 
 		try {
 			$success = $statement->execute();
@@ -488,15 +471,21 @@ final class FeatureDAO extends DAO
 	/**
 	 * @throws ForbiddenNormalizationException
 	 */
-	public function addNormalizedValue(string $regex, string $output, string $field, ?string $comment = null)
+	public function addNormalizedValue(string $regex, string $output, string $field, ?string $comment = null, string $type = 'plain')
 	{
-		// check it's a valid regex
-		if (@preg_replace($regex, '', '') === null) {
-			throw new InvalidRequestBodyException('Invalid regex pattern');
+		if ($type !== 'plain' && $type !== 'regex') {
+			throw new InvalidRequestBodyException('Invalid normalization type, must be plain or regex');
+		}
+
+		if ($type === 'regex') {
+			// check it's a valid regex
+			if (@preg_replace($regex, '', '') === null) {
+				throw new InvalidRequestBodyException('Invalid regex pattern');
+			}
 		}
 
 		if (strlen($regex) > 500) {
-			throw new InvalidRequestBodyException('Regex pattern is too long (max 500 characters)');
+			throw new InvalidRequestBodyException('Pattern is too long (max 500 characters)');
 		}
 
 		$allowedCategories = array_column($this->getAllNormalizationCategoriesByType(BaseFeature::STRING), 'name');
@@ -508,10 +497,10 @@ final class FeatureDAO extends DAO
 			throw new ForbiddenNormalizationException();
 		}
 
-		$statement = $this->getPDO()->prepare('INSERT INTO Normalization(MinimizedKey, NormalizedValue, Category, Comment) VALUES (?, ?, ?, ?)');
+		$statement = $this->getPDO()->prepare('INSERT INTO Normalization(MinimizedKey, NormalizedValue, Category, Type, Comment) VALUES (?, ?, ?, ?, ?)');
 
 		try {
-			$success = $statement->execute([$regex, $output, $field, $comment]);
+			$success = $statement->execute([$regex, $output, $field, $type, $comment]);
 			assert($success, 'add normalized value');
 
 			$this->deleteCache($field);
@@ -550,11 +539,11 @@ final class FeatureDAO extends DAO
 	 *
 	 * @param string $category Normalization category
 	 *
-	 * @return array
+	 * @return array keys are MinimizedKey, values are ['output' => ..., 'type' => ...]
 	 */
 	private function getNormalizationValues(string $category)
 	{
-		$statement = $this->getPDO()->prepare('SELECT MinimizedKey, NormalizedValue FROM Normalization WHERE Category = ?');
+		$statement = $this->getPDO()->prepare('SELECT MinimizedKey, NormalizedValue, Type FROM Normalization WHERE Category = ?');
 		$statement->bindValue(1, $category);
 
 		$result = [];
@@ -563,7 +552,7 @@ final class FeatureDAO extends DAO
 			assert($success, 'get normalized values');
 
 			while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
-				$result[$row[0]] = $row[1];
+				$result[$row[0]] = ['output' => $row[1], 'type' => $row[2]];
 			}
 		} finally {
 			$statement->closeCursor();
@@ -589,18 +578,25 @@ final class FeatureDAO extends DAO
 			$values = $this->getNormalizationValues($field);
 		}
 
-		// Apply rules
-		foreach ($values as $pattern => $outputPattern) {
-			// Check regex validity
-			if (@preg_replace($pattern, '', '') === null) {
-				continue;
-			}
-			// Apply regex replacement
-			$new = preg_replace($pattern, $outputPattern, $text);
+		// Apply rules — branch on type: 'plain' = exact string match, 'regex' = preg_replace
+		foreach ($values as $pattern => $rule) {
+			$ruleType = $rule['type'] ?? 'plain';
+			$output = $rule['output'];
 
-
-			if ($new !== null && $new !== $text) {
-				return $new;
+			if ($ruleType === 'plain') {
+				// Plain: compare the minimized key directly to the minimized input
+				if (Normalization::minimizeText($text) === $pattern) {
+					return $output;
+				}
+			} else {
+				// Regex: validate and apply via preg_replace
+				if (@preg_replace($pattern, '', '') === null) {
+					continue;
+				}
+				$new = preg_replace($pattern, $output, $text);
+				if ($new !== null && $new !== $text) {
+					return $new;
+				}
 			}
 		}
 		return null;

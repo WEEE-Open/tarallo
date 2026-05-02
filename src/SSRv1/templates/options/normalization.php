@@ -42,9 +42,10 @@ foreach ($normalizationCategories as $category) {
 		<caption class="sr-only">List of normalization values</caption>
 		<thead class="thead-dark">
 		<tr>
-			<th>Regex Matching</th>
+			<th>Pattern</th>
 			<th>Output</th>
 			<th>Field</th>
+			<th>Type</th>
 			<th>Comment</th>
 			<th>Actions</th>
 		</tr>
@@ -52,9 +53,10 @@ foreach ($normalizationCategories as $category) {
 		<tbody>
 		<?php foreach ($normalizationValues as $row) : ?>
 		<tr>
-			<td class="minimized"><?= $this->e($row['regex']) ?></td>
+			<td class="minimized" data-type="<?= $this->e($row['type'] ?? 'plain') ?>"><?= $this->e($row['regex']) ?></td>
 			<td><?= $this->e($row['output']) ?></td>
 			<td><?= $this->e($categoryLabels[$row['category']] ?? $row['category']) ?></td>
+			<td><span class="badge badge-<?= ($row['type'] ?? 'plain') === 'regex' ? 'warning' : 'secondary' ?>"><?= $this->e($row['type'] ?? 'plain') ?></span></td>
 			<td><?= $this->e($row['comment'] ?? '') ?></td>
 			<td>
 				<form method="post">
@@ -149,7 +151,23 @@ foreach ($normalizationCategories as $category) {
 				}
 
 				const originalOutput = outputCell.dataset.originalOutput;
-				const patternText = regexCell.textContent;
+				const patternText = regexCell.textContent.trim();
+				const rowType = regexCell.dataset.type || 'plain';
+
+				if (rowType === 'plain') {
+					// Plain: show row only if the minimized input exactly matches the stored key
+					const minimized = value.toLowerCase().replace(/[^a-z0-9&]/g, '');
+					if (minimized === patternText) {
+						row.classList.remove("d-none");
+						outputCell.textContent = originalOutput + " \u2192 " + originalOutput;
+					} else {
+						row.classList.add("d-none");
+						outputCell.textContent = originalOutput;
+					}
+					return;
+				}
+
+				// Regex path
 				const regex = parsePhpRegex(patternText);
 				if (!regex) {
 					row.classList.remove("d-none");
@@ -221,6 +239,19 @@ foreach ($normalizationCategories as $category) {
 					<option value="<?= $this->e($category['name']) ?>" <?= $selected ? 'selected' : '' ?>><?= $this->e($category['printableName']) ?></option>
 					<?php endforeach; ?>
 				</select>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col col-form-label" for="type">Type</label>
+			<div class="col">
+				<div class="form-check form-check-inline">
+					<input class="form-check-input" type="radio" name="type" id="type-plain" value="plain" <?= ($old_data['type'] ?? 'plain') === 'plain' ? 'checked' : '' ?>>
+					<label class="form-check-label" for="type-plain">Plain <small class="text-muted">(exact string match after minimization)</small></label>
+				</div>
+				<div class="form-check form-check-inline">
+					<input class="form-check-input" type="radio" name="type" id="type-regex" value="regex" <?= ($old_data['type'] ?? '') === 'regex' ? 'checked' : '' ?>>
+					<label class="form-check-label" for="type-regex">Regex <small class="text-muted">(PHP preg_replace pattern)</small></label>
+				</div>
 			</div>
 		</div>
 		<div class="form-group row">
