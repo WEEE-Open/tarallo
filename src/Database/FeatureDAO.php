@@ -6,6 +6,7 @@ use PDOStatement;
 use WEEEOpen\Tarallo\BaseFeature;
 use WEEEOpen\Tarallo\Feature;
 use WEEEOpen\Tarallo\ForbiddenNormalizationException;
+use WEEEOpen\Tarallo\HTTP\InvalidRequestBodyException;
 use WEEEOpen\Tarallo\Item;
 use WEEEOpen\Tarallo\ItemTraitFeatures;
 use WEEEOpen\Tarallo\ItemWithCode;
@@ -14,28 +15,12 @@ use WEEEOpen\Tarallo\NotFoundException;
 use WEEEOpen\Tarallo\Product;
 use WEEEOpen\Tarallo\ProductCode;
 use WEEEOpen\Tarallo\Normalization;
+use WEEEOpen\Tarallo\SSRv1\FeaturePrinter;
 
 final class FeatureDAO extends DAO
 {
-	private const NORMALIZATION_CATEGORY_BRAND = 'brand';
-	private const NORMALIZATION_CATEGORY_OWNER = 'owner';
-	private const NORMALIZATION_CATEGORY_OS_VERSION = 'os-version';
-	private const NORMALIZATION_CATEGORY_KEY = 'key';
 	private const NORMALIZATION_CACHE_PREFIX = 'normalization_';
 	private const NORMALIZATION_CACHE_TTL = 60 * 60 * 24;
-
-	public static function getNormalizationMapping(): array
-	{
-		return [
-			'brand' => self::NORMALIZATION_CATEGORY_BRAND,
-			'brand-manufacturer' => self::NORMALIZATION_CATEGORY_BRAND,
-			'integrated-graphics-brand' => self::NORMALIZATION_CATEGORY_BRAND,
-			'os-license-version' => self::NORMALIZATION_CATEGORY_OS_VERSION,
-			'owner' => self::NORMALIZATION_CATEGORY_OWNER,
-			'key-bios-setup' => self::NORMALIZATION_CATEGORY_KEY,
-			'key-boot-menu' => self::NORMALIZATION_CATEGORY_KEY,
-		];
-	}
 
 	/**
 	 * Obtain \PDO::PARAM_... constant from feature name
@@ -242,7 +227,29 @@ final class FeatureDAO extends DAO
 			$this->addAuditEntry($item);
 		}
 
+		// Update item object with normalized features to keep in-memory state consistent
+		$this->updateItemFeaturesInMemory($item, $features);
+
 		return $changes;
+	}
+
+	/**
+	 * Update item's in-memory features with the provided normalized features
+	 *
+	 * @param ItemWithFeatures $item
+	 * @param Feature[] $features The normalized features
+	 */
+	private function updateItemFeaturesInMemory(ItemWithFeatures $item, array $features): void
+	{
+		// Remove all own features first
+		foreach ($item->getOwnFeatures() as $oldFeature) {
+			$item->removeFeatureByName($oldFeature->name);
+		}
+
+		// Add the normalized features back to the item
+		foreach ($features as $feature) {
+			$item->addFeature($feature);
+		}
 	}
 
 	/**
@@ -437,13 +444,13 @@ final class FeatureDAO extends DAO
 	 */
 	public function getAllNormalizationValues()
 	{
-		$statement = $this->getPDO()->prepare('SELECT MinimizedKey, NormalizedValue, Category FROM Normalization ORDER BY Category, NormalizedValue');
+		$statement = $this->getPDO()->prepare('SELECT Id AS id, MinimizedKey AS regex, NormalizedValue AS output, Category AS category, Type AS type, Comment AS comment FROM Normalization ORDER BY Category, NormalizedValue');
 
 		try {
 			$success = $statement->execute();
 			assert($success, 'get all normalized values');
 
-			return $statement->fetchAll(\PDO::FETCH_NUM);
+			return $statement->fetchAll(\PDO::FETCH_ASSOC);
 		} finally {
 			$statement->closeCursor();
 		}
@@ -456,23 +463,25 @@ final class FeatureDAO extends DAO
 	 */
 	public function getAllNormalizationCategories()
 	{
-		$statement = $this->getPDO()->prepare('SELECT DISTINCT Category FROM Normalization');
-
-		try {
-			$success = $statement->execute();
-			assert($success, 'get normalized categories');
-
-			$result = [];
-			while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
-				$result[] = $row[0];
-			}
-			return $result;
-		} finally {
-			$statement->closeCursor();
-		}
+		return FeaturePrinter::getAllFeatures();
 	}
 
-	public function isNormalizationForbidden(string $minimized, string $category)
+	public function getAllNormalizationCategoriesByType(int $type): array
+	{
+		$features = FeaturePrinter::getAllFeaturesByType($type);
+
+		$categories = [];
+		foreach ($features as $feature) {
+			$categories[] = [
+				'name' => $feature['name'],
+				'printableName' => $feature['printableName'] ?? $feature['name'],
+			];
+		}
+
+		return $categories;
+	}
+
+	public function isNormalizationForbidden(string $minimized, string $category): bool
 	{
 		$statement = $this->getPDO()->prepare('SELECT COUNT(*) FROM NormalizationForbidden WHERE MinimizedKey = ? AND Category = ?');
 
@@ -480,7 +489,6 @@ final class FeatureDAO extends DAO
 			$success = $statement->execute([$minimized, $category]);
 			assert($success, 'check forbidden normalization');
 
-			$result = [];
 			$count = (int) $statement->fetchAll(\PDO::FETCH_NUM)[0][0];
 
 			return $count > 0;
@@ -492,37 +500,63 @@ final class FeatureDAO extends DAO
 	/**
 	 * @throws ForbiddenNormalizationException
 	 */
-	public function addNormalizedValue(string $wrong, string $value, string $category)
+	public function addNormalizedValue(string $regex, string $output, string $field, ?string $comment = null, string $type = 'plain')
 	{
-		$minimized = Normalization::minimizeText($wrong);
-		$isForbidden = $this->isNormalizationForbidden($minimized, $category);
-		if ($isForbidden) {
+		if ($type !== 'plain' && $type !== 'regex') {
+			throw new InvalidRequestBodyException('Invalid normalization type, must be plain or regex');
+		}
+
+		if ($type === 'regex') {
+			// check it's a valid regex
+			if (@preg_replace($regex, '', '') === null) {
+				throw new InvalidRequestBodyException('Invalid regex pattern');
+			}
+		}
+
+		if (strlen($regex) > 500) {
+			throw new InvalidRequestBodyException('Pattern is too long (max 500 characters)');
+		}
+
+		$allowedCategories = array_column($this->getAllNormalizationCategoriesByType(BaseFeature::STRING), 'name');
+		if (!in_array($field, $allowedCategories, true)) {
+			throw new InvalidRequestBodyException('Invalid normalization field');
+		}
+
+		if ($this->isNormalizationForbidden($regex, $field)) {
 			throw new ForbiddenNormalizationException();
 		}
 
-		$statement = $this->getPDO()->prepare('INSERT INTO Normalization(MinimizedKey, NormalizedValue, Category) VALUES (?, ?, ?)');
+		$statement = $this->getPDO()->prepare('INSERT INTO Normalization(MinimizedKey, NormalizedValue, Category, Type, Comment) VALUES (?, ?, ?, ?, ?)');
 
 		try {
-			$success = $statement->execute([$minimized, $value, $category]);
+			$success = $statement->execute([$regex, $output, $field, $type, $comment]);
 			assert($success, 'add normalized value');
 
-			$this->deleteCache($category);
+			$this->deleteCache($field);
 		} finally {
 			$statement->closeCursor();
 		}
 	}
 
-	public function deleteNormalizedValue(string $minimized)
+	public function deleteNormalizedValue(int $id)
 	{
-		$statement = $this->getPDO()->prepare('DELETE FROM Normalization WHERE MinimizedKey = ?');
+		// Fetch the category first so we can clear only that cache entry
+		$fetch = $this->getPDO()->prepare('SELECT Category FROM Normalization WHERE Id = ?');
+		try {
+			$fetch->execute([$id]);
+			$row = $fetch->fetch(\PDO::FETCH_NUM);
+		} finally {
+			$fetch->closeCursor();
+		}
+
+		$statement = $this->getPDO()->prepare('DELETE FROM Normalization WHERE Id = ?');
 
 		try {
-			$success = $statement->execute([$minimized]);
-			assert($success, 'add normalized value');
+			$success = $statement->execute([$id]);
+			assert($success, 'delete normalized value');
 
-			// TODO: delete only one category
-			foreach ($this->getAllNormalizationCategories() as $category) {
-				$this->deleteCache($category);
+			if ($row) {
+				$this->deleteCache($row[0]);
 			}
 		} finally {
 			$statement->closeCursor();
@@ -534,11 +568,11 @@ final class FeatureDAO extends DAO
 	 *
 	 * @param string $category Normalization category
 	 *
-	 * @return array
+	 * @return array keys are MinimizedKey, values are ['output' => ..., 'type' => ...]
 	 */
 	private function getNormalizationValues(string $category)
 	{
-		$statement = $this->getPDO()->prepare('SELECT MinimizedKey, NormalizedValue FROM Normalization WHERE Category = ?');
+		$statement = $this->getPDO()->prepare('SELECT MinimizedKey, NormalizedValue, Type FROM Normalization WHERE Category = ?');
 		$statement->bindValue(1, $category);
 
 		$result = [];
@@ -547,7 +581,7 @@ final class FeatureDAO extends DAO
 			assert($success, 'get normalized values');
 
 			while ($row = $statement->fetch(\PDO::FETCH_NUM)) {
-				$result[$row[0]] = $row[1];
+				$result[$row[0]] = ['output' => $row[1], 'type' => $row[2]];
 			}
 		} finally {
 			$statement->closeCursor();
@@ -561,24 +595,40 @@ final class FeatureDAO extends DAO
 		return $this->getNormalizationValues(substr($key, strlen(self::NORMALIZATION_CACHE_PREFIX)));
 	}
 
-	private function normalizeText(string $text, string $category): ?string
+	private function normalizeText(string $text, string $field): ?string
 	{
 		if (Database::hasApcu()) {
 			$success = null;
-			$values = apcu_fetch(self::NORMALIZATION_CACHE_PREFIX . $category, $success);
+			$values = apcu_fetch(self::NORMALIZATION_CACHE_PREFIX . $field, $success);
 			if (!$success) {
-				$values = apcu_entry(self::NORMALIZATION_CACHE_PREFIX . $category, [$this, 'apcuGenerator'], self::NORMALIZATION_CACHE_TTL);
+				$values = apcu_entry(self::NORMALIZATION_CACHE_PREFIX . $field, [$this, 'apcuGenerator'], self::NORMALIZATION_CACHE_TTL);
 			}
 		} else {
-			$values = $this->getNormalizationValues($category);
+			$values = $this->getNormalizationValues($field);
 		}
 
-		$textMinimized = Normalization::minimizeText($text);
-		if (isset($values[$textMinimized])) {
-			return $values[$textMinimized];
-		} else {
-			return null;
+		// Apply rules — branch on type: 'plain' = exact string match, 'regex' = preg_replace
+		foreach ($values as $pattern => $rule) {
+			$ruleType = $rule['type'] ?? 'plain';
+			$output = $rule['output'];
+
+			if ($ruleType === 'plain') {
+				// Plain: compare the minimized key directly to the minimized input
+				if (Normalization::minimizeText($text) === $pattern) {
+					return $output;
+				}
+			} else {
+				// Regex: validate and apply via preg_replace
+				if (@preg_replace($pattern, '', '') === null) {
+					continue;
+				}
+				$new = preg_replace($pattern, $output, $text);
+				if ($new !== null && $new !== $text) {
+					return $new;
+				}
+			}
 		}
+		return null;
 	}
 
 	private function deleteCache(string $category)
@@ -596,18 +646,19 @@ final class FeatureDAO extends DAO
 	public function tryNormalizeBulkImport(array &$stuff)
 	{
 		if (isset($stuff['features'])) {
-			$normalizeWith = self::getNormalizationMapping();
-			foreach ($normalizeWith as $feature => $group) {
-				if (isset($stuff['features'][$feature])) {
-					$normalized = $this->normalizeText($stuff['features'][$feature], $group);
-					if ($normalized !== null) {
-						$stuff['features'][$feature] = $normalized;
-					}
+			foreach ($stuff['features'] as $featureName => &$featureValue) {
+				if (!is_string($featureValue)) {
+					continue;
+				}
+				$normalized = $this->normalizeText($featureValue, $featureName);
+				if ($normalized !== null) {
+					$featureValue = $normalized;
 				}
 			}
+			unset($featureValue);
 		}
 		if (isset($stuff['brand'])) {
-			$normalized = $this->normalizeText($stuff['brand'], self::NORMALIZATION_CATEGORY_BRAND);
+			$normalized = $this->normalizeText($stuff['brand'], 'brand');
 			if ($normalized !== null) {
 				$stuff['brand'] = $normalized;
 			}
@@ -629,14 +680,9 @@ final class FeatureDAO extends DAO
 	 */
 	public function tryNormalizeValue(string $name, string $value): ?string
 	{
-		$normalizeWith = self::getNormalizationMapping();
-		if (isset($normalizeWith[$name])) {
-			$normalized = $this->normalizeText($value, $normalizeWith[$name]);
-			if ($normalized !== null) {
-				if ($normalized !== $value) {
-					return $normalized;
-				}
-			}
+		$normalized = $this->normalizeText($value, $name);
+		if ($normalized !== null && $normalized !== $value) {
+			return $normalized;
 		}
 		return null;
 	}
@@ -648,11 +694,10 @@ final class FeatureDAO extends DAO
 	 */
 	public function tryNormalizeAll(array &$features, ?bool &$changed = null)
 	{
-		$normalizeWith = self::getNormalizationMapping();
 		foreach ($features as $key => $feature) {
 			/** @var Feature $feature */
-			if (isset($normalizeWith[$feature->name])) {
-				$normalized = $this->tryNormalizeFeature($feature, $normalizeWith[$feature->name]);
+			if ($feature->type === BaseFeature::STRING) {
+				$normalized = $this->tryNormalizeFeature($feature, $feature->name);
 				if ($normalized !== null) {
 					$features[$key] = $normalized;
 					if ($changed !== null) {

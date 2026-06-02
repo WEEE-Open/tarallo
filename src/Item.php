@@ -49,7 +49,8 @@ class Item implements
 		}
 	}
 
-	public function jsonSerialize() : array {
+	public function jsonSerialize(): array
+	{
 		$array = [];
 		$array['code'] = $this->getCode();
 

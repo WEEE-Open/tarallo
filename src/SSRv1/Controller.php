@@ -48,6 +48,7 @@ class Controller implements RequestHandlerInterface
 
 	public static function getItem(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
+
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
@@ -73,7 +74,7 @@ class Controller implements RequestHandlerInterface
 		$renderParameters = [
 			'item' => $item,
 			'depth' => $depth,
-			];
+		];
 		// These should be mutually exclusive: either one (or both) is always null
 		assert($add === null || $edit === null);
 		$renderParameters['add'] = $add;
@@ -688,9 +689,9 @@ class Controller implements RequestHandlerInterface
 		$request = $request->withAttribute(
 			'TemplateParameters',
 			[
-			'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
-			'newToken' => $token,
-			'error' => $error
+				'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
+				'newToken' => $token,
+				'error' => $error
 			]
 		);
 		return $handler->handle($request);
@@ -736,25 +737,32 @@ class Controller implements RequestHandlerInterface
 		$body = $request->getParsedBody();
 
 		$error = null;
+		$old_data = null;
 
 		if ($body !== null && count($body) > 0) {
 			try {
 				if (isset($body['delete'])) {
 					// delete
-					$minimized = Validation::validateMandatoryString($body, 'minimized');
-					$db->featureDAO()->deleteNormalizedValue($minimized);
+					$id = Validation::validateOptionalInt($body, 'id');
+					$db->featureDAO()->deleteNormalizedValue($id);
 					return new RedirectResponse($request->getRequestTarget(), 303);
 				} elseif (isset($body['new'])) {
 					// create
-					$value = Validation::validateMandatoryString($body, 'value');
-					$wrong = Validation::validateOptionalString($body, 'wrong', $value, $value);
-					$category = Validation::validateMandatoryString($body, 'category');
-					$db->featureDAO()->addNormalizedValue($wrong, $value, $category);
+					$output  = Validation::validateMandatoryString($body, 'output');
+					$regex   = Validation::validateOptionalString($body, 'regex', $output, $output);
+					$field   = Validation::validateMandatoryString($body, 'field');
+					$comment = Validation::validateOptionalString($body, 'comment', null, null);
+					$type    = Validation::validateOptionalString($body, 'type', 'plain', 'plain');
+					if ($type !== 'plain' && $type !== 'regex') {
+						$type = 'plain';
+					}
+					$db->featureDAO()->addNormalizedValue($regex, $output, $field, $comment, $type);
 					return new RedirectResponse($request->getRequestTarget(), 303);
 				}
 			} catch (ForbiddenNormalizationException $e) {
 				$error = "This value is ambiguous or handled in code, it cannot be normalized here";
 			} catch (\Exception $e) {
+				$old_data = $body;
 				$error = $e->getMessage();
 			}
 		}
@@ -764,9 +772,10 @@ class Controller implements RequestHandlerInterface
 			'TemplateParameters',
 			[
 				'normalizationValues' => $db->featureDAO()->getAllNormalizationValues(),
-				'normalizationCategories' => $db->featureDAO()->getAllNormalizationCategories(),
+				'normalizationCategories' => $db->featureDAO()->getAllNormalizationCategoriesByType(BaseFeature::STRING),
 				'apcuEnabled' => $db->hasApcu(),
-				'error' => $error
+				'error' => $error,
+				'old_data' => $old_data,
 			]
 		);
 		return $handler->handle($request);
@@ -803,7 +812,7 @@ class Controller implements RequestHandlerInterface
 			'TemplateParameters',
 			$templateParameters
 		);
-		
+
 		return $handler->handle($request);
 	}
 
@@ -912,24 +921,24 @@ class Controller implements RequestHandlerInterface
 							new Feature('type', 'ram'),
 							$location
 						),
-					//						'bySize' => $db->statsDAO()->getCountByFeature(
-					//							'capacity-byte', new Feature('type', 'ram'), $location
-					//						),
+						//						'bySize' => $db->statsDAO()->getCountByFeature(
+						//							'capacity-byte', new Feature('type', 'ram'), $location
+						//						),
 						'byTypeFrequency' => $db->statsDAO()->getRollupCountByFeature(
 							new Feature('type', 'ram'),
 							[
-							'ram-type',
-							'ram-form-factor',
-							'frequency-hertz',
+								'ram-type',
+								'ram-form-factor',
+								'frequency-hertz',
 							],
 							$location
 						),
 						'byTypeSize' => $db->statsDAO()->getRollupCountByFeature(
 							new Feature('type', 'ram'),
 							[
-							'ram-type',
-							'ram-form-factor',
-							'capacity-byte',
+								'ram-type',
+								'ram-form-factor',
+								'capacity-byte',
 							],
 							$location
 						),
@@ -1043,9 +1052,9 @@ class Controller implements RequestHandlerInterface
 				break;
 			case 'products':
 				$request = $request->withAttribute('Template', 'stats::products')->withAttribute('TemplateParameters', [
-						'brandsProducts' => $db->statsDAO()->getProductsCountByBrand(),
-						'incomplete' => $db->statsDAO()->getItemsWithIncompleteProducts(),
-					]);
+					'brandsProducts' => $db->statsDAO()->getProductsCountByBrand(),
+					'incomplete' => $db->statsDAO()->getItemsWithIncompleteProducts(),
+				]);
 				break;
 			case 'history':
 				$numEntries = Validation::validateOptionalString($query, 'limit', 10);
@@ -1065,16 +1074,16 @@ class Controller implements RequestHandlerInterface
 				$request = $request->withAttribute('Template', 'stats::cool')->withAttribute(
 					'TemplateParameters',
 					[
-					'cpusByBrand' => $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'cpu')),
-					'hddsByBrand' => $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'hdd')),
-					'itemsByColor' => $db->statsDAO()->getCountByFeature('color', null),
-					'hddsCapacity' => $db->statsDAO()->getTotalAndAverageCapacity($db->statsDAO()->getRollupCountByFeature(new Feature('type', 'hdd'), [
-						'capacity-decibyte',
-					], $location), 'capacity-decibyte'),
-					'ramsCapacity' => $db->statsDAO()->getTotalAndAverageCapacity($db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), [
-						'capacity-byte',
-					], $location), 'capacity-byte'),
-					'itemWithAndWithoutSerialNumber' => $db->statsDAO()->countItemsByTypeThatHaveSerialNumber(),
+						'cpusByBrand' => $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'cpu')),
+						'hddsByBrand' => $db->statsDAO()->getCountByFeature('brand', new Feature('type', 'hdd')),
+						'itemsByColor' => $db->statsDAO()->getCountByFeature('color', null),
+						'hddsCapacity' => $db->statsDAO()->getTotalAndAverageCapacity($db->statsDAO()->getRollupCountByFeature(new Feature('type', 'hdd'), [
+							'capacity-decibyte',
+						], $location), 'capacity-decibyte'),
+						'ramsCapacity' => $db->statsDAO()->getTotalAndAverageCapacity($db->statsDAO()->getRollupCountByFeature(new Feature('type', 'ram'), [
+							'capacity-byte',
+						], $location), 'capacity-byte'),
+						'itemWithAndWithoutSerialNumber' => $db->statsDAO()->countItemsByTypeThatHaveSerialNumber(),
 
 					]
 				);
@@ -1167,16 +1176,16 @@ class Controller implements RequestHandlerInterface
 		return $handler->handle($request);
 	}
 
-//	public static function quickSearchValue(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
-//		/** @var Database $db */
-//		// $db = $request->getAttribute('Database');
-//
-//		$request = $request
-//			->withAttribute('Template', 'error')
-//			->withAttribute('ResponseCode', 501)
-//			->withAttribute('TemplateParameters', ['reason' => 'Search by value coming in a future update']);
-//		return $handler->handle($request);
-//	}
+	//	public static function quickSearchValue(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface {
+	//		/** @var Database $db */
+	//		// $db = $request->getAttribute('Database');
+	//
+	//		$request = $request
+	//			->withAttribute('Template', 'error')
+	//			->withAttribute('ResponseCode', 501)
+	//			->withAttribute('TemplateParameters', ['reason' => 'Search by value coming in a future update']);
+	//		return $handler->handle($request);
+	//	}
 
 	public static function search(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
@@ -1230,7 +1239,8 @@ class Controller implements RequestHandlerInterface
 	}
 
 	public static function bulk(
-		/** @noinspection PhpUnusedParameterInspection */ ServerRequestInterface $request,
+		/** @noinspection PhpUnusedParameterInspection */
+		ServerRequestInterface $request,
 		RequestHandlerInterface $handler
 	): ResponseInterface {
 		$response = new RedirectResponse('/bulk/move', 303);
@@ -1292,9 +1302,9 @@ class Controller implements RequestHandlerInterface
 			->withAttribute(
 				'TemplateParameters',
 				[
-				'error' => $error,
-				'moved' => $moved,
-				'items' => Validation::validateOptionalString($request->getQueryParams(), 'items', null, null),
+					'error' => $error,
+					'moved' => $moved,
+					'items' => Validation::validateOptionalString($request->getQueryParams(), 'items', null, null),
 				]
 			);
 
@@ -1549,7 +1559,8 @@ class Controller implements RequestHandlerInterface
 	}
 
 	public static function getFeaturesJson(
-		/** @noinspection PhpUnusedParameterInspection */ ServerRequestInterface $request,
+		/** @noinspection PhpUnusedParameterInspection */
+		ServerRequestInterface $request,
 		RequestHandlerInterface $handler
 	): ResponseInterface {
 		// They aren't changing >1 time per second, so this should be stable enough for the ETag header...
@@ -1619,6 +1630,7 @@ class Controller implements RequestHandlerInterface
 
 	public function handle(ServerRequestInterface $request): ResponseInterface
 	{
+
 		$route = $this->route($request);
 
 		switch ($route[0]) {
@@ -1713,8 +1725,10 @@ class Controller implements RequestHandlerInterface
 			'toTest' => self::getToTest($db),
 			'missingSmartOrSurfaceScan' => $db->statsDAO()->getStatsByType(
 				false,
-				['smart-data' => null,
-					'surface-scan' => null],
+				[
+					'smart-data' => null,
+					'surface-scan' => null
+				],
 				'type',
 				'hdd',
 				$location,

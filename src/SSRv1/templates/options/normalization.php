@@ -1,8 +1,9 @@
 <?php
 /** @var \WEEEOpen\Tarallo\User $user */
 /** @var string|null $error */
-/** @var array $normalizationValues */
-/** @var string[] $normalizationCategories */
+/** @var array|null $old_data */
+/** @var string[] $normalizationValues */
+/** @var array $normalizationCategories */
 /** @var bool $apcuEnabled */
 $this->layout('main', ['title' => 'Options', 'user' => $user, 'currentPage' => 'options', 'container' => true]);
 $this->insert('options::menu', ['currentPage' => 'normalization']);
@@ -20,6 +21,15 @@ $this->insert('options::menu', ['currentPage' => 'normalization']);
 </div>
 <?php endif; ?>
 
+<?php $old_data = $old_data ?? []; ?>
+
+
+<?php $categoryLabels = [];
+foreach ($normalizationCategories as $category) {
+	$categoryLabels[$category['name']] = $category['printableName'];
+}
+?>
+
 <div class="col-12">
 	<h2>Normalization values</h2>
 	<div class="form-group row">
@@ -32,9 +42,10 @@ $this->insert('options::menu', ['currentPage' => 'normalization']);
 		<caption class="sr-only">List of normalization values</caption>
 		<thead class="thead-dark">
 		<tr>
-			<th>Minimized</th>
-			<th>Value</th>
-			<th>Category</th>
+			<th>Pattern</th>
+			<th>Output</th>
+			<th>Field</th>
+			<th>Type</th>
 			<th>Comment</th>
 			<th>Actions</th>
 		</tr>
@@ -42,13 +53,14 @@ $this->insert('options::menu', ['currentPage' => 'normalization']);
 		<tbody>
 		<?php foreach ($normalizationValues as $row) : ?>
 		<tr>
-			<td class="minimized"><?= $this->e($row[0]) ?></td>
-			<td><?= $this->e($row[1]) ?></td>
-			<td><?= $this->e($row[2]) ?></td>
-			<td></td>
+			<td class="minimized" data-type="<?= $this->e($row['type'] ?? 'plain') ?>"><?= $this->e($row['regex']) ?></td>
+			<td><?= $this->e($row['output']) ?></td>
+			<td><?= $this->e($categoryLabels[$row['category']] ?? $row['category']) ?></td>
+			<td><span class="badge badge-<?= ($row['type'] ?? 'plain') === 'regex' ? 'warning' : 'secondary' ?>"><?= $this->e($row['type'] ?? 'plain') ?></span></td>
+			<td><?= $this->e($row['comment'] ?? '') ?></td>
 			<td>
 				<form method="post">
-					<input type="hidden" name="minimized" value="<?= $this->e($row[0]) ?>">
+					<input type="hidden" name="id" value="<?= (int) $row['id'] ?>">
 					<button type="submit" name="delete" value="true" class="btn btn-danger btn-sm">Delete</button>
 				</form>
 			</td>
@@ -58,58 +70,194 @@ $this->insert('options::menu', ['currentPage' => 'normalization']);
 	</table>
 	<p><small>There are <?= count($normalizationValues); ?> rows.</small></p>
 	<script>
-		let search = document.getElementById("search");
-		let normalizationtable = document.getElementById("normalizationtable");
+		const search = document.getElementById("search");
+		const normalizationtable = document.getElementById("normalizationtable");
+		const rows = normalizationtable.querySelectorAll("tbody tr");
 		let debounceTimer;
-		let filter = () => {
-			let minimized = search.value.toLowerCase().replace(/[^a-z0-9&]/g, '');
-			for(let td of normalizationtable.querySelectorAll('td.minimized')) {
-				if(minimized === '' || td.textContent === minimized) {
-					td.parentElement.classList.remove("d-none");
-				} else {
-					td.parentElement.classList.add("d-none");
+
+		// Parse a PHP-style regex like "/foo(bar)/i" or "#foo#i" into JS RegExp
+		function parsePhpRegex(patternText) {
+			patternText = patternText.trim();
+			if (patternText.length < 3) {
+				return null;
+			}
+
+			const delimiter = patternText[0];
+			// Delimiter cannot be alphanumeric, whitespace or backslash
+			if (/[\w\s\\]/.test(delimiter)) {
+				return null;
+			}
+
+			let lastDelimiter = -1;
+			for (let i = patternText.length - 1; i > 0; i--) {
+				if (patternText[i] !== delimiter) continue;
+				// Ignore escaped delimiters
+				let backslashes = 0;
+				for (let j = i - 1; j >= 0 && patternText[j] === '\\'; j--) {
+					backslashes++;
+				}
+				if (backslashes % 2 === 0) {
+					lastDelimiter = i;
+					break;
 				}
 			}
-		};
+			if (lastDelimiter <= 0) {
+				return null;
+			}
 
-		search.addEventListener('keyup', () => {
+			const body = patternText.slice(1, lastDelimiter);
+			const phpFlags = patternText.slice(lastDelimiter + 1);
+
+			let jsFlags = "";
+			if (phpFlags.includes("i")) jsFlags += "i";
+			if (phpFlags.includes("m")) jsFlags += "m";
+			if (phpFlags.includes("s")) jsFlags += "s";
+			if (phpFlags.includes("u")) jsFlags += "u";
+
+			try {
+				return new RegExp(body, jsFlags);
+			} catch (e) {
+				console.warn("Invalid regex in table:", patternText, e);
+				return null;
+			}
+		}
+
+		function applyTest() {
+			const value = search.value;
+
+			// If empty: show all rows and restore output
+			if (!value) {
+				rows.forEach(row => {
+					row.classList.remove("d-none");
+					const outputCell = row.children[1];
+					if (outputCell.dataset.originalOutput !== undefined) {
+						outputCell.textContent = outputCell.dataset.originalOutput;
+					}
+				});
+				return;
+			}
+
+			rows.forEach(row => {
+				const regexCell = row.querySelector("td.minimized");
+				const outputCell = row.children[1];
+
+				if (!regexCell || !outputCell) {
+					return;
+				}
+
+				// Store original output once
+				if (outputCell.dataset.originalOutput === undefined) {
+					outputCell.dataset.originalOutput = outputCell.textContent.trim();
+				}
+
+				const originalOutput = outputCell.dataset.originalOutput;
+				const patternText = regexCell.textContent.trim();
+				const rowType = regexCell.dataset.type || 'plain';
+
+				if (rowType === 'plain') {
+					// Plain: show row only if the minimized input exactly matches the stored key
+					const minimized = value.toLowerCase().replace(/[^a-z0-9&]/g, '');
+					if (minimized === patternText) {
+						row.classList.remove("d-none");
+						outputCell.textContent = originalOutput + " \u2192 " + originalOutput;
+					} else {
+						row.classList.add("d-none");
+						outputCell.textContent = originalOutput;
+					}
+					return;
+				}
+
+				// Regex path
+				const regex = parsePhpRegex(patternText);
+				if (!regex) {
+					row.classList.remove("d-none");
+					outputCell.textContent = originalOutput;
+					return;
+				}
+
+				const match = value.match(regex);
+
+				if (!match) {
+					row.classList.add("d-none");
+					outputCell.textContent = originalOutput;
+				} else {
+					row.classList.remove("d-none");
+
+					// Replace ONLY $1, $2, $3 ...
+					let evaluated = originalOutput.replace(/\$([0-9]+)/g, (_, n) => {
+						const index = Number(n);
+						return match[index] !== undefined ? match[index] : "";
+					});
+
+					// Show "$1 → Core i3-2125"
+					outputCell.textContent = originalOutput + " \u2192 " + evaluated;
+				}
+			});
+		}
+
+		function debouncedApplyTest() {
 			clearTimeout(debounceTimer);
-			debounceTimer = setTimeout(filter, 300);
-		});
-		filter();
+			debounceTimer = setTimeout(applyTest, 300);
+		}
+
+		search.addEventListener("keyup", debouncedApplyTest);
+		applyTest();
 	</script>
+
+
 </div>
 
 <div class="col-12">
 	<h3>Normalize a new value</h3>
 	<form method="post">
 		<div class="form-group row">
-			<label class="col col-form-label" for="value">Normalized value</label>
+			<label class="col col-form-label" for="regex">Regex Matching</label>
 			<div class="col">
-				<input type="text" class="form-control" id="value" name="value" required>
+				<input type="text" class="form-control" id="regex" name="regex" required value="<?= $this->e($old_data['regex'] ?? '') ?>">
 			</div>
 		</div>
 		<div class="form-group row">
-			<label class="col col-form-label" for="wrong">String to replace</label>
+			<label class="col col-form-label" for="output">Output pattern</label>
 			<div class="col">
-				<input type="text" class="form-control" id="wrong" name="wrong">
+				<input type="text" class="form-control" id="output" name="output" value="<?= $this->e($old_data['output'] ?? '') ?>">
 			</div>
 		</div>
 		<script>
-			let wrong = document.getElementById('wrong');
-			let value = document.getElementById('value');
-			value.addEventListener('change', () => {
-				wrong.placeholder = value.value;
+			const regexInput = document.getElementById('regex');
+			const outputInput = document.getElementById('output');
+			outputInput.addEventListener('input', () => {
+				regexInput.placeholder = outputInput.value;
 			});
+			outputInput.dispatchEvent(new Event('input'));
 		</script>
 		<div class="form-group row">
-			<label class="col col-form-label" for="category">Category</label>
+			<label class="col col-form-label" for="field">Fields</label>
 			<div class="col">
-				<select class="form-control" id="category" name="category" required>
+				<select class="form-control" id="field" name="field" required>
 					<?php foreach ($normalizationCategories as $category) : ?>
-					<option value="<?= $this->e($category) ?>"><?= $this->e($category) ?></option>
+						<?php $selected = ($old_data['field'] ?? '') === $category['name']; ?>
+					<option value="<?= $this->e($category['name']) ?>" <?= $selected ? 'selected' : '' ?>><?= $this->e($category['printableName']) ?></option>
 					<?php endforeach; ?>
 				</select>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col col-form-label" for="type">Type</label>
+			<div class="col">
+				<div class="form-check form-check-inline">
+					<input class="form-check-input" type="radio" name="type" id="type-plain" value="plain" <?= ($old_data['type'] ?? 'plain') === 'plain' ? 'checked' : '' ?>>
+					<label class="form-check-label" for="type-plain">Plain <small class="text-muted">(exact string match after minimization)</small></label>
+				</div>
+				<div class="form-check form-check-inline">
+					<input class="form-check-input" type="radio" name="type" id="type-regex" value="regex" <?= ($old_data['type'] ?? '') === 'regex' ? 'checked' : '' ?>>
+					<label class="form-check-label" for="type-regex">Regex <small class="text-muted">(PHP preg_replace pattern)</small></label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group row">
+			<label class="col col-form-label" for="comment">Comment <small class="text-muted">(optional)</small></label>
+			<div class="col">
+				<textarea class="form-control" id="comment" name="comment" rows="2" placeholder="Human-readable note about this rule"><?= $this->e($old_data['comment'] ?? '') ?></textarea>
 			</div>
 		</div>
 		<div class="form-group row">

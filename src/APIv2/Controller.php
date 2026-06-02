@@ -213,11 +213,16 @@ class Controller implements RequestHandlerInterface
 
 	public static function createItem(ServerRequestInterface $request): ResponseInterface
 	{
+
 		/** @var Database $db */
 		$db = $request->getAttribute('Database');
 		$query = $request->getQueryParams();
 		$payload = $request->getAttribute('ParsedBody', []);
 		$parameters = $request->getAttribute('parameters', []);
+
+
+
+
 
 		$id = Validation::validateOptionalString($parameters, 'id');
 		$fix = !isset($query['nofix']);
@@ -244,8 +249,32 @@ class Controller implements RequestHandlerInterface
 			}
 		}
 
+
 		$flat = $item->getFlatContent();
 		Normalization::addAllVariants($flat);
+
+
+		// Apply normalization rules to newly created items (in-memory) so that
+		// validation + persistence use normalized values.
+		foreach ($flat as $flatItem) {
+			/** @var \WEEEOpen\Tarallo\ItemWithFeatures $flatItem */
+			$features = $flatItem->getOwnFeatures();
+
+			if (empty($features)) {
+				continue;
+			}
+			$db->featureDAO()->tryNormalizeAll($features);
+
+			// Replace own features with normalized ones.
+			// Collect names first to avoid mutating the array while iterating it.
+			$namesToRemove = array_keys($flatItem->getOwnFeatures());
+			foreach ($namesToRemove as $name) {
+				$flatItem->removeFeatureByName($name);
+			}
+			foreach ($features as $feature) {
+				$flatItem->addFeature($feature);
+			}
+		}
 
 		// We need product features for fixup and validation
 		if ($fix || $validate) {
@@ -292,6 +321,9 @@ class Controller implements RequestHandlerInterface
 		$query = $request->getQueryParams();
 		$payload = $request->getAttribute('ParsedBody', []);
 		$parameters = $request->getAttribute('parameters', []);
+
+
+
 
 		$brand = Validation::validateOptionalString($parameters, 'brand');
 		$model = Validation::validateOptionalString($parameters, 'model');
@@ -756,9 +788,9 @@ class Controller implements RequestHandlerInterface
 			$feature,
 			$filter !== null ? new Feature($feature, $filter) : null,
 			$location === null ? null : new
-			ItemCode(
-				$location
-			),
+				ItemCode(
+					$location
+				),
 			$creation === null ? null : new \DateTime($creation),
 			$deleted
 		);
@@ -789,9 +821,9 @@ class Controller implements RequestHandlerInterface
 			new Feature($explosion[0], $explosion[1]),
 			$notFeature,
 			$location === null ? null : new
-			ItemCode(
-				$location
-			),
+				ItemCode(
+					$location
+				),
 			$limit,
 			$creation === null ? null : new \DateTime($creation),
 			$deleted
@@ -1177,6 +1209,45 @@ class Controller implements RequestHandlerInterface
 		return $response;
 	}
 
+	public static function listNormalization(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db = $request->getAttribute('Database');
+
+		return new JsonResponse([
+			'values'     => $db->featureDAO()->getAllNormalizationValues(),
+			'categories' => $db->featureDAO()->getAllNormalizationCategoriesByType(BaseFeature::STRING),
+		]);
+	}
+
+	public static function createNormalization(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db      = $request->getAttribute('Database');
+		$payload = $request->getAttribute('ParsedBody', []);
+
+		$output  = Validation::validateMandatoryString($payload, 'output');
+		$regex   = Validation::validateOptionalString($payload, 'regex', $output, $output);
+		$field   = Validation::validateMandatoryString($payload, 'field');
+		$comment = Validation::validateOptionalString($payload, 'comment', null, null);
+
+		$db->featureDAO()->addNormalizedValue($regex, $output, $field, $comment);
+
+		return new EmptyResponse(201);
+	}
+
+	public static function deleteNormalization(ServerRequestInterface $request): ResponseInterface
+	{
+		/** @var Database $db */
+		$db         = $request->getAttribute('Database');
+		$parameters = $request->getAttribute('parameters', []);
+
+		$id = Validation::validateOptionalInt($parameters, 'id');
+		$db->featureDAO()->deleteNormalizedValue($id);
+
+		return new EmptyResponse(204);
+	}
+
 	public static function getOptions(ServerRequestInterface $request): ResponseInterface
 	{
 		$db = $request->getAttribute('Database');
@@ -1184,10 +1255,11 @@ class Controller implements RequestHandlerInterface
 		return new JsonResponse($data);
 	}
 
+
 	public static function patchOptions(ServerRequestInterface $request): ResponseInterface
 	{
 		$body = json_decode($request->getBody()->getContents());
-		
+
 		foreach ($body as $key => $value) {
 			if (!in_array($key, OptionDAO::SAFEOPTIONS, true) || (!is_string($value) && !is_null($value))) {
 				return new JsonResponse(ErrorResponse::fromMessage('Bad Request'), 400);

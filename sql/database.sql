@@ -285,10 +285,14 @@ CREATE TABLE `BulkTable`
 
 CREATE TABLE `Normalization`
 (
-    `MinimizedKey` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `NormalizedValue` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `Category` VARCHAR(40) COLLATE utf8mb4_unicode_ci NOT NULL,
-    PRIMARY KEY (`MinimizedKey`),
+    `Id`              BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `MinimizedKey`    TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+    `NormalizedValue` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Category`        VARCHAR(40)  COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Type`            ENUM('plain','regex') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'plain',
+    `Comment`         TEXT         COLLATE utf8mb4_unicode_ci NULL,
+    PRIMARY KEY (`Id`),
+    UNIQUE INDEX `MinimizedKey_Category` (`MinimizedKey`(191), `Category`),
     INDEX (`Category`)
 ) ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
@@ -296,9 +300,9 @@ CREATE TABLE `Normalization`
 
 CREATE TABLE `NormalizationForbidden`
 (
-    `MinimizedKey` VARCHAR(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-    `Category` VARCHAR(40) COLLATE utf8mb4_unicode_ci NOT NULL,
-    PRIMARY KEY (`MinimizedKey`),
+    `MinimizedKey` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `Category`     VARCHAR(40)  COLLATE utf8mb4_unicode_ci NOT NULL,
+    PRIMARY KEY (`MinimizedKey`(191), `Category`),
     INDEX (`Category`)
 ) ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
@@ -414,5 +418,6 @@ SELECT Code,
 FROM ProductItemFeature;
 
 -- Do not combine these lines, they're parsed by update-db... WITH A REGEX!
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 25);
-INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 33);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('SchemaVersion', 27);
+INSERT INTO `Configuration` (`Key`, `Value`) VALUES ('DataVersion', 35);
+

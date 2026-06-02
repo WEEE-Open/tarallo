@@ -2,17 +2,19 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
-class Updater extends DAO {
+class Updater extends DAO
+{
 	private $schemaVersion;
 	private $dataVersion;
 
-	public function __construct(Database $db, $callback) {
+	public function __construct(Database $db, $callback)
+	{
 		parent::__construct($db, $callback);
 		try {
 			$result = $this->getPDO()->query("SELECT `Value` FROM Configuration WHERE `Key` = 'SchemaVersion'");
 			$this->schemaVersion = (int) $result->fetchColumn();
-		} catch(\PDOException $e) {
-			if($e->getCode() === '42S02') {
+		} catch (\PDOException $e) {
+			if ($e->getCode() === '42S02') {
 				$this->schemaVersion = 0;
 				$this->dataVersion = 0;
 				return;
@@ -26,20 +28,22 @@ class Updater extends DAO {
 		echo 'Start from schema version ' . $this->schemaVersion . ' and data version ' . $this->dataVersion . PHP_EOL;
 	}
 
-	public function updateTo(int $schema, int $data) {
+	public function updateTo(int $schema, int $data)
+	{
 		$this->updateSchema($schema);
 		$this->updateData($data);
 	}
 
-	private function updateSchema(int $schema) {
-		if($this->schemaVersion === $schema) {
+	private function updateSchema(int $schema)
+	{
+		if ($this->schemaVersion === $schema) {
 			return;
-		} else if($this->schemaVersion > $schema) {
+		} elseif ($this->schemaVersion > $schema) {
 			throw new \InvalidArgumentException("Trying to downgrade schema from $this->schemaVersion to $schema");
 		}
 		// $schema is now > $this->schemaVersion
-		while($this->schemaVersion < $schema) {
-			switch($this->schemaVersion) {
+		while ($this->schemaVersion < $schema) {
+			switch ($this->schemaVersion) {
 				case 0:
 					$this->exec(
 						<<<EOQ
@@ -200,16 +204,19 @@ EOQ
 					// databases, so...
 					// Mark as lost all the items in the "Lost" location, if it exists.
 					$intermediate = $this->getPDO()->query("SELECT Code FROM Item WHERE Code = 'Lost'");
-					if($intermediate->rowCount() > 0) {
+					if ($intermediate->rowCount() > 0) {
 						// Close that cursor so we can do other stuff
 						$intermediate->closeCursor();
 						// Trigger will create and Audit entry, this requires an username... will fix them manually
 						// in production, they're not important in development.
-						$this->exec(/** @lang MariaDB */ "CALL SetUser('IMPORT')");
+						$this->exec(
+							/** @lang MariaDB */
+							"CALL SetUser('IMPORT')"
+						);
 						// Also, there still trigger preventing this from being a single query...
 						$intermediate2 = $this->getPDO()->query("SELECT DISTINCT Descendant FROM Tree WHERE Ancestor = 'Lost' AND Depth > 0");
 						$fetched = $intermediate2->fetchAll(\PDO::FETCH_COLUMN);
-						foreach($fetched as $item) {
+						foreach ($fetched as $item) {
 							// Again, there are a billion triggers preventing the simplest of queries, so we have to
 							// make some inane byzantine workarounds, I don't even know anymore, it's 1.30 AM I just
 							// want to insert these damn 4 rows into the damn table and be done with it, please,
@@ -536,11 +543,11 @@ SQL SECURITY INVOKER
 				case 14:
 					try {
 						$this->exec("ALTER TABLE AuditProduct DROP CONSTRAINT check_change;");
-					} catch(\PDOException $ignored) {
+					} catch (\PDOException $ignored) {
 					}
 					try {
 						$this->exec("ALTER TABLE AuditProduct DROP CONSTRAINT check_change_2;");
-					} catch(\PDOException $ignored) {
+					} catch (\PDOException $ignored) {
 					}
 					$this->exec("ALTER TABLE AuditProduct ADD CONSTRAINT check_change CHECK (`Change` IN ('C', 'R', 'U', 'D'));");
 					$this->exec("DROP TRIGGER IF EXISTS AuditRenameProduct;");
@@ -971,23 +978,50 @@ BEGIN
 END;"
 					);
 					break;
+				case 25:
+					// Normalization: drop old PK, add auto-increment Id as new PK, widen columns,
+					// add Comment, add composite unique index — all in one atomic ALTER TABLE.
+					$this->exec(
+						'ALTER TABLE `Normalization`
+						DROP PRIMARY KEY,
+						ADD COLUMN `Id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY FIRST,
+						MODIFY `MinimizedKey` TEXT COLLATE utf8mb4_unicode_ci NOT NULL,
+						MODIFY `NormalizedValue` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+						ADD COLUMN `Comment` TEXT COLLATE utf8mb4_unicode_ci NULL,
+						ADD UNIQUE INDEX `MinimizedKey_Category` (`MinimizedKey`(191), `Category`)'
+					);
+					// NormalizationForbidden: widen MinimizedKey, change PK to composite —
+					// also in one atomic ALTER TABLE.
+					$this->exec(
+						'ALTER TABLE `NormalizationForbidden`
+						DROP PRIMARY KEY,
+						MODIFY `MinimizedKey` VARCHAR(500) COLLATE utf8mb4_unicode_ci NOT NULL,
+						ADD PRIMARY KEY (`MinimizedKey`(191), `Category`)'
+					);
+					break;
+				case 26:
+					// Add Type column to Normalization to distinguish plain-string vs regex rules.
+					// DEFAULT 'plain' so all existing rows keep working without any data migration here.
+					$this->exec("ALTER TABLE `Normalization` ADD COLUMN `Type` ENUM('plain','regex') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'plain' AFTER `Category`");
+					break;
 				default:
 					throw new \RuntimeException('Schema version larger than maximum');
 			}
 			$this->schemaVersion++;
+			$this->exec("UPDATE Configuration SET `Value` = $this->schemaVersion WHERE `Key` = 'SchemaVersion'");
 			echo 'Schema updated to version ' . $this->schemaVersion . PHP_EOL;
 		}
-		$this->exec("UPDATE Configuration SET `Value` = \"$this->schemaVersion\" WHERE `Key` = \"SchemaVersion\"");
 	}
 
-	private function updateData(int $data) {
-		if($this->dataVersion === $data) {
+	private function updateData(int $data)
+	{
+		if ($this->dataVersion === $data) {
 			return;
-		} else if($this->dataVersion > $data) {
+		} elseif ($this->dataVersion > $data) {
 			throw new \InvalidArgumentException("Trying to downgrade schema from $this->dataVersion to $data");
 		}
-		while($this->dataVersion < $data) {
-			switch($this->dataVersion) {
+		while ($this->dataVersion < $data) {
+			switch ($this->dataVersion) {
 				case 0:
 					$this->exec("INSERT INTO FeatureEnum (Feature, ValueEnum) VALUES ('type', 'ssd')");
 					break;
@@ -1157,19 +1191,58 @@ END;"
 				case 32:
 					$this->exec("INSERT INTO `FeatureEnum` (`Feature`, `ValueEnum`) VALUES ('ram-form-factor', 'rdimm')");
 					break;
+				case 33:
+					// 1-to-1 renames (old category value differs from feature name)
+					$renames = [
+						'os-version' => 'os-license-version',
+					];
+					foreach ($renames as $oldCategory => $newFeature) {
+						$old = $this->getPDO()->quote($oldCategory);
+						$new = $this->getPDO()->quote($newFeature);
+						$this->exec("UPDATE `Normalization` SET `Category` = $new WHERE `Category` = $old");
+						$this->exec("UPDATE `NormalizationForbidden` SET `Category` = $new WHERE `Category` = $old");
+					}
+
+					// 1-to-many: 'brand' also covered brand-manufacturer and integrated-graphics-brand.
+					// Duplicate the existing 'brand' rows for each extra feature; originals stay as 'brand'.
+					$extraBrandFeatures = ['brand-manufacturer', 'integrated-graphics-brand'];
+					foreach ($extraBrandFeatures as $featureName) {
+						$quoted = $this->getPDO()->quote($featureName);
+						$this->exec("INSERT IGNORE INTO `Normalization` (MinimizedKey, NormalizedValue, Category, Comment) SELECT MinimizedKey, NormalizedValue, $quoted, Comment FROM `Normalization` WHERE `Category` = 'brand'");
+						$this->exec("INSERT IGNORE INTO `NormalizationForbidden` (MinimizedKey, Category) SELECT MinimizedKey, $quoted FROM `NormalizationForbidden` WHERE `Category` = 'brand'");
+					}
+
+					// 1-to-many: 'key' covered key-bios-setup and key-boot-menu.
+					// Rename originals to key-bios-setup, then duplicate for key-boot-menu.
+					$old = $this->getPDO()->quote('key');
+					$newBios = $this->getPDO()->quote('key-bios-setup');
+					$this->exec("UPDATE `Normalization` SET `Category` = $newBios WHERE `Category` = $old");
+					$this->exec("UPDATE `NormalizationForbidden` SET `Category` = $newBios WHERE `Category` = $old");
+					$newBoot = $this->getPDO()->quote('key-boot-menu');
+					$this->exec("INSERT IGNORE INTO `Normalization` (MinimizedKey, NormalizedValue, Category, Comment) SELECT MinimizedKey, NormalizedValue, $newBoot, Comment FROM `Normalization` WHERE `Category` = 'key-bios-setup'");
+					$this->exec("INSERT IGNORE INTO `NormalizationForbidden` (MinimizedKey, Category) SELECT MinimizedKey, $newBoot FROM `NormalizationForbidden` WHERE `Category` = 'key-bios-setup'");
+					break;
+				case 34:
+					// Set Type = 'plain' on all existing Normalization rows.
+					// The schema migration (case 26) added the column with DEFAULT 'plain', so for
+					// fresh installs this is a no-op. For existing DBs migrated before the Type
+					// column existed, this makes every row explicit and consistent.
+					$this->exec("UPDATE `Normalization` SET `Type` = 'plain' WHERE `Type` = 'plain'");
+					break;
 				default:
 					throw new \RuntimeException('Data version larger than maximum');
 			}
 			$this->dataVersion++;
+			$this->exec("UPDATE Configuration SET `Value` = $this->dataVersion WHERE `Key` = 'DataVersion'");
 			echo 'Data updated to version ' . $this->dataVersion . PHP_EOL;
 		}
-		$this->exec("UPDATE Configuration SET `Value` = '$this->dataVersion' WHERE `Key` = 'DataVersion'");
 	}
 
-	private function exec(string $query) {
+	private function exec(string $query)
+	{
 		$result = $this->getPDO()->exec($query);
 
-		if($result === false) {
+		if ($result === false) {
 			throw new \RuntimeException('Exec failed, see stack trace');
 		}
 	}
