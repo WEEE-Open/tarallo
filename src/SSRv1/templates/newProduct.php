@@ -3,6 +3,8 @@
 /** @var int $importedFrom|null */
 
 $base = $base ?? null;
+$baseItem = $baseItem ?? null;
+$bulkMatches = $bulkMatches ?? null;
 if ($base instanceof \WEEEOpen\Tarallo\Item) {
 	$baseItem = $base;
 	$base = \WEEEOpen\Tarallo\Product::fromItem($base);
@@ -22,14 +24,34 @@ $isClone = !isset($baseItem) && $base instanceof \WEEEOpen\Tarallo\Product && !i
 				<div class="inline-alert alert-info" role="alert">
 					<i class="fa fa-info-circle"></i>&nbsp;This product is split from <span class="text-monospace"><?= $this->e($baseItem->getCode()) ?></span>
 				</div>
+				<?php if (!empty($bulkMatches)) : ?>
+					<div class="inline-alert alert-warning" role="alert">
+						<i class="fa fa-magic"></i>&nbsp;<strong>Matching product found in bulk import:</strong>
+						<ul class="mb-0 mt-2 list-unstyled">
+							<?php foreach ($bulkMatches as $match) : ?>
+								<li class="my-1">
+									<i class="fa fa-chevron-right text-muted"></i>
+									<strong><?= $this->e($match['brand']) ?> <?= $this->e($match['model']) ?></strong>
+									<span class="badge badge-info ml-1"><?= (int) $match['score'] ?>% match</span>
+									<?php if (!empty($match['bulkIdentifier'])) : ?>
+										<small class="text-muted">(batch: <em><?= $this->e($match['bulkIdentifier']) ?></em>)</small>
+									<?php endif; ?>
+									<a href="/bulk/import/new/<?= (int) $match['id'] ?><?= isset($baseItem) ? '?split=' . $this->e($baseItem->getCode()) : '' ?>" class="btn btn-sm btn-success ml-2 py-0">
+										<i class="fa fa-download"></i> Use this bulk data
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</div>
+				<?php endif; ?>
 			<?php elseif ($isClone) : ?>
 				<div class="inline-alert alert-info" role="alert">
 					<i class="fa fa-info-circle"></i>&nbsp;This is a copy of <?= $this->e($base->getFullName()) ?>
 				</div>
-				<?php ?>
+			<?php endif; ?>
 
-			<?php elseif (isset($importedFrom)) : ?>
-				<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This product is generated from a bulk import</span></div>
+			<?php if (isset($importedFrom)) : ?>
+				<div class="inline-alert alert-info" role="alert"><i class="fa fa-info-circle"></i>️&nbsp;This product is generated from a bulk import</div>
 			<?php endif; ?>
 
 		<?php endif; ?>

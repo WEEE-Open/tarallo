@@ -122,8 +122,7 @@ WHERE Code IN (
     AND ValueEnum = 'location'
 )
 AND (Feature = 'notes' OR Feature = 'color')
-EOQ
-			,
+EOQ,
 			\PDO::FETCH_NUM
 		);
 
@@ -144,7 +143,7 @@ EOQ
 		}
 
 		$result = $this->getPDO()->query(
-		/** @lang MySQL */
+			/** @lang MySQL */
 			<<<'EOQ'
 SELECT Code AS Location, t.Ancestor AS Parent, COUNT(*) - 1 AS Items FROM
 (SELECT Ancestor, Descendant, Depth
@@ -157,8 +156,7 @@ AND ProductItemFeatureUnified.ValueEnum = 'location'
 AND `Code` NOT IN (SELECT `Code` FROM Item WHERE DeletedAt IS NOT NULL)
 GROUP BY Location, t.Ancestor
 ORDER BY Items DESC
-EOQ
-			,
+EOQ,
 			\PDO::FETCH_ASSOC
 		);
 
@@ -371,7 +369,8 @@ ORDER BY Quantity DESC, Val";
 		if ($filter === null) {
 			$featureFilter = '';
 		} else {
-			$featureFilter = /** @lang MySQL */
+			$featureFilter =
+				/** @lang MySQL */
 				'AND `Code` IN (
   SELECT `Code`
   FROM ProductItemFeatureUnified
@@ -648,7 +647,7 @@ GROUP BY $group WITH ROLLUP";
 							if (BaseFeature::getType($feature) === BaseFeature::INTEGER) {
 								$row[$feature] = (int) $row[$feature];
 							} elseif (BaseFeature::getType($feature) === BaseFeature::DOUBLE) {
-								$row[$feature] = (double) $row[$feature];
+								$row[$feature] = (float) $row[$feature];
 							}
 						}
 					}

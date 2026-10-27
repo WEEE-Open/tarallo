@@ -2,6 +2,7 @@
 
 namespace WEEEOpen\Tarallo\Database;
 
+use WEEEOpen\Tarallo\ItemWithFeatures;
 use WEEEOpen\Tarallo\DuplicateBulkIdentifierException;
 
 final class BulkDAO extends DAO
@@ -152,5 +153,70 @@ VALUES (:id, @taralloauditusername, :typ, :json)'
 		} finally {
 			$statement->closeCursor();
 		}
+	}
+
+	/**
+	 * Find products in BulkTable that match an item (by brand, model, type) using fuzzy search.
+	 *
+	 * @param ItemWithFeatures $from The item to find matching products for
+	 *
+	 * @return array List of candidate products sorted by score descending
+	 */
+	public function findMatchingProduct($from): array
+	{
+		$itemBrand = (string) ($from->getFeatureValue('brand') ?? '');
+		$itemModel = (string) ($from->getFeatureValue('model') ?? '');
+		$itemType  = (string) ($from->getFeatureValue('type') ?? '');
+
+		$statement = $this->getPDO()->prepare('SELECT Identifier, BulkIdentifier, JSON FROM BulkTable WHERE Type = :type');
+		$matches = [];
+		try {
+			$statement->bindValue(':type', 'P');
+			$statement->execute();
+			$rows = $statement->fetchAll(\PDO::FETCH_ASSOC);
+
+			foreach ($rows as $row) {
+				$data = json_decode($row['JSON'], true);
+				if (!is_array($data)) {
+					continue;
+				}
+
+				$productBrand = (string) ($data['brand'] ?? $data['features']['brand'] ?? '');
+				$productModel = (string) ($data['model'] ?? $data['features']['model'] ?? '');
+				$productType  = (string) ($data['features']['type'] ?? '');
+
+				if ($itemType !== '' && $productType !== '' && strcasecmp($itemType, $productType) !== 0) {
+					continue; // Not the same hardware component
+				}
+
+				// Check model similarity
+				similar_text(strtolower($itemModel), strtolower($productModel), $modelPercent);
+				// Check brand similarity
+				similar_text(strtolower($itemBrand), strtolower($productBrand), $brandPercent);
+				// Combined weighted score (Model is 70% important, Brand is 30%)
+				$score = ($modelPercent * 0.7) + ($brandPercent * 0.3);
+				// If similarity score >= 50%, it's a match!
+				if ($score >= 50.0) {
+					$matches[] = [
+						'id' => (int) $row['Identifier'],
+						'bulkIdentifier' => $row['BulkIdentifier'], // batch name, e.g. "OilData"
+						'brand' => $productBrand,
+						'model' => $productModel,
+						'variant' => $data['variant'] ?? 'default',
+						'score' => round($score, 1),
+						'data' => $data,
+					];
+				}
+			}
+		} finally {
+			$statement->closeCursor();
+		}
+
+		// Sort by score descending (best matches first)
+		usort($matches, static function ($a, $b) {
+			return $b['score'] <=> $a['score'];
+		});
+
+		return $matches;
 	}
 }

@@ -312,6 +312,7 @@ class Controller implements RequestHandlerInterface
 			$from = new ItemCode($split);
 		}
 
+		$bulkMatches = [];
 		if ($from === null) {
 			$from = new ProductIncomplete();
 			$from->addFeature(new BaseFeature('type'));
@@ -322,6 +323,8 @@ class Controller implements RequestHandlerInterface
 				$from = $db->productDAO()->getProduct($from);
 			} else {
 				$from = $db->itemDAO()->getItem($from);
+				// Find matching products in bulktable
+				$bulkMatches = $db->bulkDAO()->findMatchingProduct($from);
 			}
 		}
 
@@ -330,6 +333,7 @@ class Controller implements RequestHandlerInterface
 			[
 				'add' => true,
 				'base' => $from,
+				'bulkMatches' => $bulkMatches,
 			]
 		);
 
@@ -1467,6 +1471,17 @@ class Controller implements RequestHandlerInterface
 		$parameters = $request->getAttribute('parameters', []);
 
 		$id = Validation::validateOptionalInt($parameters, 'id', -1);
+		$query = $request->getQueryParams();
+		$split = Validation::validateOptionalString($query, 'split', null, null);
+		$baseItem = null;
+		if ($split !== null) {
+			try {
+				$baseItem = $db->itemDAO()->getItem(new ItemCode($split));
+			} catch (\Exception $e) {
+				// Item not found or invalid code, ignore
+				$baseItem = null;
+			}
+		}
 
 		// Decoding JSON and redirecting to Item or Product add page
 		$importElement = $db->bulkDAO()->getDecodedJSON($id);
@@ -1489,7 +1504,8 @@ class Controller implements RequestHandlerInterface
 			$request = $request->withAttribute('Template', 'newProductPage')->withAttribute('TemplateParameters', [
 				'add' => true,
 				'base' => $importElement,
-				'importedFrom' => $id
+				'importedFrom' => $id,
+				'baseItem' => $baseItem,
 			]);
 			return $handler->handle($request);
 		} else {

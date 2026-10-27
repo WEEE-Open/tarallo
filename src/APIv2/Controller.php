@@ -223,14 +223,14 @@ class Controller implements RequestHandlerInterface
 
 
 
-
 		$id = Validation::validateOptionalString($parameters, 'id');
 		$fix = !isset($query['nofix']);
 		$validate = !isset($query['novalidate']);
 		$loopback = isset($query['loopback']);
 		$importId = Validation::validateOptionalInt($query, 'import');
-
+		
 		$item = ItemBuilder::ofArray($payload, $id, $parent);
+
 
 		if ($importId) {
 			$exists = $db->bulkDAO()->identifierExistsAndLocked($importId);

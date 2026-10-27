@@ -21,3 +21,4 @@ abstract class DAO
 		return call_user_func($this->callback);
 	}
 }
+ 
