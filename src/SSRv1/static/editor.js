@@ -855,7 +855,8 @@
 	function addFeatureClick(select, featuresElement, deletedFeatures = null)
 	{
 		let name = select.value;
-		addFeatureEditableDedupe(featuresElement, name, deletedFeatures);
+		let element = addFeatureEditableDedupe(featuresElement, name, deletedFeatures);
+		focusFeatureValueInput(element);
 	}
 
 	/**
@@ -878,11 +879,12 @@
 	}
 
 	/**
-	 * Add a feature, or focus it if it already exists.
+	 * Add a feature if it doesn't already exists.
 	 *
 	 * @param {HTMLElement} featuresElement - The "own features" element
 	 * @param {string} name - Feature name
 	 * @param {Set<string>|null} deletedFeatures - Deleted features set, can be null if not tracked
+	 * @return {Element}
 	 */
 	function addFeatureEditableDedupe(featuresElement, name, deletedFeatures = null)
 	{
@@ -892,7 +894,7 @@
 			theFeature = addFeatureEditable(name, featuresElement, deletedFeatures);
 		}
 
-		focusFeatureValueInput(theFeature);
+		return theFeature;
 	}
 
 	/**
@@ -903,18 +905,15 @@
 	function focusFeatureValueInput(element)
 	{
 		let input = element.querySelector('select.value');
+		debugger;
 		if (input) {
 			input.focus();
 			return;
 		}
 
-		input = element.querySelector('.value div');
+		input = element.querySelector('input.value');
 		if (input) {
-			const selection = window.getSelection();
-			const range = document.createRange();
-			range.selectNodeContents(input);
-			selection.removeAllRanges();
-			selection.addRange(range);
+			input.focus();
 		}
 	}
 
