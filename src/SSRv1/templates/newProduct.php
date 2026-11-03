@@ -36,7 +36,7 @@ $isClone = !isset($baseItem) && $base instanceof \WEEEOpen\Tarallo\Product && !i
 									<?php if (!empty($match['bulkIdentifier'])) : ?>
 										<small class="text-muted">(batch: <em><?= $this->e($match['bulkIdentifier']) ?></em>)</small>
 									<?php endif; ?>
-									<a href="/bulk/import/new/<?= (int) $match['id'] ?><?= isset($baseItem) ? '?split=' . $this->e($baseItem->getCode()) : '' ?>" class="btn btn-sm btn-success ml-2 py-0">
+									<a href="/bulk/import/new/<?= (int) $match['id'] ?><?= isset($baseItem) ? '?split=' . $this->e($baseItem->getCode()) : '' ?>" class="btn btn-success">
 										<i class="fa fa-download"></i> Use this bulk data
 									</a>
 								</li>
