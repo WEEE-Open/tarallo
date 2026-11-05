@@ -30,7 +30,9 @@ final class SessionDAO extends DAO
 			}
 			return unserialize($data);
 		} finally {
-			$s->closeCursor();
+			if (isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 
@@ -52,7 +54,9 @@ final class SessionDAO extends DAO
 			// PHPStorm thinks that an if-else here provides a path where nothing is returned... Yeah right...
 			return $redirect;
 		} finally {
-			$s->closeCursor();
+			if (isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 
@@ -63,7 +67,9 @@ final class SessionDAO extends DAO
 			$result = $s->execute([$sessionId]);
 			assert($result !== false, 'delete sessions');
 		} finally {
-			$s->closeCursor();
+			if (isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 
@@ -127,7 +133,9 @@ final class SessionDAO extends DAO
 			/** @noinspection PhpUnreachableStatementInspection It's either this, or "missing return statement"... */
 			return null;
 		} finally {
-			$s->closeCursor();
+			if (isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 
@@ -139,15 +147,18 @@ final class SessionDAO extends DAO
 			$result = $s->execute();
 			assert($result !== false, 'invalid token');
 		} finally {
-			$s->closeCursor();
+			if (isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 
-	public function getUserTokens(string $user): array
+	public function getTokens(): array
 	{
 		try {
-			$s = $this->getPDO()->prepare('SELECT `Token`, `Data`, LastAccess FROM SessionToken WHERE `Owner` = :o');
-			$s->bindValue(':o', $user, \PDO::PARAM_STR);
+			$sql = 'SELECT `Token`, `Data`, `LastAccess`, `Owner` FROM SessionToken';
+			$s = $this->getPDO()->prepare($sql);
+
 			$result = $s->execute();
 			assert($result !== false, 'get user tokens');
 			$tokens = [];
@@ -157,16 +168,18 @@ final class SessionDAO extends DAO
 				} catch (\Exception $e) {
 					$dt = null;
 				}
-
 				$tokens[] = [
 					'Token' => $row['Token'],
 					'Session' => unserialize($row['Data']),
 					'LastAccess' => $dt,
+					'Owner' => $row['Owner'],
 					];
 			}
 			return $tokens;
 		} finally {
-			$s->closeCursor();
+			if (isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 
@@ -195,7 +208,9 @@ final class SessionDAO extends DAO
 			$result = $s->execute();
 			assert($result !== false, 'session exists');
 		} finally {
-			$s->closeCursor();
+			if (isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 
@@ -226,7 +241,9 @@ final class SessionDAO extends DAO
 			$result = $s->execute();
 			assert($result !== false, 'session exists');
 		} finally {
-			$s->closeCursor();
+			if (isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 
@@ -248,7 +265,9 @@ final class SessionDAO extends DAO
 			$result = $s->execute();
 			assert($result !== false, 'token upsert');
 		} finally {
-			$s->closeCursor();
+			if (isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 
@@ -264,7 +283,9 @@ final class SessionDAO extends DAO
 			$result = $s->execute();
 			assert($result !== false, 'token bump');
 		} finally {
-			$s->closeCursor();
+			if (isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 
@@ -276,7 +297,9 @@ final class SessionDAO extends DAO
 			$result = $s->execute();
 			assert($result !== false, 'create session');
 		} finally {
-			$s->closeCursor();
+			if (isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 
@@ -295,7 +318,9 @@ final class SessionDAO extends DAO
 			$result = $s->execute([$username]);
 			assert($result !== false, 'set audit username');
 		} finally {
-			$s->closeCursor();
+			if (isset($s)) {
+				$s->closeCursor();
+			}
 		}
 	}
 

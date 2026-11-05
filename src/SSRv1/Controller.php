@@ -656,7 +656,7 @@ class Controller implements RequestHandlerInterface
 		return $handler->handle($request);
 	}
 
-	public static function optionsMain(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
+	public static function optionsToken(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
 		$body = $request->getParsedBody();
 		/** @var UserSSO $user */
@@ -666,15 +666,16 @@ class Controller implements RequestHandlerInterface
 
 		$error = null;
 		$token = null;
+		$deletedTokenDescription = null;
 
 		if ($body !== null && count($body) > 0) {
 			try {
 				if (isset($body['delete']) && isset($body['token'])) {
+					$deletedTokenDescription = $body['description'] ?? '';
 					$db->sessionDAO()->deleteToken($body['token']);
-					return new RedirectResponse('/options', 303);
 				} elseif (isset($body['description']) && isset($body['new'])) {
 					$data = new SessionLocal();
-					$data->level = $user->getLevel();
+					$data->level = (int)$body['field'];
 					$data->description = $body['description'];
 					$data->owner = $user->uid;
 					$token = SessionLocal::generateToken();
@@ -685,13 +686,14 @@ class Controller implements RequestHandlerInterface
 			}
 		}
 
-		$request = $request->withAttribute('Template', 'options::main');
+		$request = $request->withAttribute('Template', 'options::token');
 		$request = $request->withAttribute(
 			'TemplateParameters',
 			[
-				'tokens' => $db->sessionDAO()->getUserTokens($user->uid),
+				'tokens' => $db->sessionDAO()->getTokens(),
 				'newToken' => $token,
-				'error' => $error
+				'error' => $error,
+				'deletedTokenDescription' => $deletedTokenDescription,
 			]
 		);
 		return $handler->handle($request);

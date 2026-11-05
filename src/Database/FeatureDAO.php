@@ -383,11 +383,11 @@ final class FeatureDAO extends DAO
 
 	/**
 	 * Check if a feature with the same value (serial number or cib) is already present in the database
-	 * 
+	 *
 	 * @param Feature $feature
 	 * @param string $column
 	 * @param int $type
-	 * 
+	 *
 	 * @throws \LogicException
 	 */
 	private function checkFeature(Feature $feature, string $column, int $type): void
