@@ -52,7 +52,7 @@ class AuthTokenManager implements MiddlewareInterface
 			}
 
 			// Cache miss :(
-			$session = $db->sessionDAO()->getToken($token, $lastAccess);
+			$session = $db->sessionDAO()->verifyToken($token, $lastAccess);
 			if ($session === null || $lastAccess === null) {
 				$user = null;
 			} else {

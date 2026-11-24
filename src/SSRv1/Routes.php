@@ -47,12 +47,12 @@ trait Routes
 				$r->addGroup(
 					'/options',
 					function (FastRoute\RouteCollector $r) {
-						$r->get('', [User::AUTH_LEVEL_RO, [Controller::class, 'optionsMain']]);
-						$r->post('', [User::AUTH_LEVEL_RO, [Controller::class, 'optionsMain']]);
 						$r->get('/stats', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'optionsStats']]);
 						$r->post('/stats', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'optionsStats']]);
 						$r->get('/normalization', [User::AUTH_LEVEL_RW, [Controller::class, 'optionsNormalization']]);
 						$r->post('/normalization', [User::AUTH_LEVEL_RW, [Controller::class, 'optionsNormalization']]);
+						$r->get('/token', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'optionsToken']]);
+						$r->post('/token', [User::AUTH_LEVEL_ADMIN, [Controller::class, 'optionsToken']]);
 					}
 				);
 				$r->addGroup(
