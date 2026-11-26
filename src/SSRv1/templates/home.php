@@ -4,10 +4,11 @@
 /** @var string[][] $checks */
 /** @var array[] $missingSmartOrSurfaceScan */
 /** @var array[] $toTest */
+/** @var array[] $activeDonations */
 $this->layout('main', ['title' => 'Home', 'user' => $user, 'container' => true]);
 //date_default_timezone_set('Europe/Rome');
 ?>
-<?php $this->insert('info::todo', ['todos' => $todos, 'checks' => $checks, 'missingSmartOrSurfaceScan' => $missingSmartOrSurfaceScan, 'toTest' => $toTest, 'included' => true]) ?>
+<?php $this->insert('info::todo', ['todos' => $todos, 'checks' => $checks, 'missingSmartOrSurfaceScan' => $missingSmartOrSurfaceScan, 'toTest' => $toTest, 'activeDonations' => $activeDonations ?? [], 'included' => true]) ?>
 <h2 class="mt-3">Useful key combinations</h2>
 <p>In editor mode, select a feature and...</p>
 <ul class="list-unstyled">

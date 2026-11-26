@@ -799,6 +799,7 @@ class Controller implements RequestHandlerInterface
 			$defaultLocation = new ItemCode($defaultLocation);
 		}
 		$templateParameters = [
+			'activeDonations' => $db->donationsDAO()->getActiveDonationsWithItems(),
 			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $defaultLocation),
 			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $defaultLocation),
 			'toTest' => self::getToTest($db),
@@ -1736,6 +1737,7 @@ class Controller implements RequestHandlerInterface
 			$defaultLocation = new ItemCode($defaultLocation);
 		}
 		$templateParameters = [
+			'activeDonations' => $db->donationsDAO()->getActiveDonationsWithItems(),
 			'checks' => $db->statsDAO()->getItemsForEachValue('check', null, $defaultLocation),
 			'todos' => $db->statsDAO()->getItemsForEachValue('todo', null, $defaultLocation),
 			'toTest' => self::getToTest($db),

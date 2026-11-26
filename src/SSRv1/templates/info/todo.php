@@ -5,6 +5,7 @@
 /** @var array[] $missingSmartOrSurfaceScan */
 /** @var bool|null $included */
 /** @var array[] $toTest */
+/** @var array[]|null $activeDonations */
 
 if (!isset($included) || !$included) {
 	$this->layout('main', ['title' => 'TODO', 'user' => $user, 'currentPage' => 'info todo', 'container' => true]);
@@ -36,6 +37,9 @@ foreach ($checks as $feature => $items) {
 ksort($checksWithHumanReadableFeatures);
 ?>
 <h2>What's to do?</h2>
+<?php if (!empty($activeDonations)) : ?>
+	<?php $this->insert('activeDonations', ['activeDonations' => $activeDonations, 'divclass' => $divclass]) ?>
+<?php endif ?>
 <div class="row">
 <?php foreach ($todosWithHumanReadableFeatures as $feature => $items) : ?>
 	<?php if (count($items) > 0) : ?>

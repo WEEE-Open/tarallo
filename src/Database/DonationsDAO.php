@@ -36,14 +36,14 @@ class DonationsDAO extends DAO
 					$i = 0;
 					foreach ($tasks_list as $task) {
 						$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($donationId, $i, :task, :itemType)");
-						$statement-> bindParam(':task', $task);
-						$statement-> bindParam(':itemType', $type);
+						$statement->bindParam(':task', $task);
+						$statement->bindParam(':itemType', $type);
 						$success = $statement->execute();
 						$i++;
 					}
 				} else {
 					$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($donationId, -1, 'Done', :itemType)");
-					$statement-> bindParam(':itemType', $type);
+					$statement->bindParam(':itemType', $type);
 					$success = $statement->execute();
 				}
 			}
@@ -79,14 +79,14 @@ class DonationsDAO extends DAO
 	public function listDonations()
 	{
 		$statement = $this->getPDO()->prepare("SELECT d.Id as id, d.Name as name, d.Location as location, d.Date as date, d.IsCompleted as isCompleted,
-(SELECT COUNT(*) FROM DonationItem di WHERE di.Donation = d.Id) AS totalItems,
-(SELECT COUNT(*) FROM DonationTasksProgress dt WHERE dt.DonationId = d.Id) AS totalTasks,
-(SELECT COUNT(*) FROM DonationTasksProgress dtp WHERE dtp.DonationId = d.Id AND dtp.Completed = 1) AS completedTasks
-FROM Donations d
-LEFT JOIN DonationTasks dt ON dt.DonationId = d.Id
-LEFT JOIN DonationTasksProgress dtp ON dtp.DonationId = d.Id AND dtp.TaskId = dt.Id
-LEFT JOIN DonationItem di ON di.Donation = d.Id
-GROUP BY d.Id");
+		(SELECT COUNT(*) FROM DonationItem di WHERE di.Donation = d.Id) AS totalItems,
+		(SELECT COUNT(*) FROM DonationTasksProgress dt WHERE dt.DonationId = d.Id) AS totalTasks,
+		(SELECT COUNT(*) FROM DonationTasksProgress dtp WHERE dtp.DonationId = d.Id AND dtp.Completed = 1) AS completedTasks
+		FROM Donations d
+		LEFT JOIN DonationTasks dt ON dt.DonationId = d.Id
+		LEFT JOIN DonationTasksProgress dtp ON dtp.DonationId = d.Id AND dtp.TaskId = dt.Id
+		LEFT JOIN DonationItem di ON di.Donation = d.Id
+		GROUP BY d.Id");
 		try {
 			$success = $statement->execute();
 			$donations = $statement->fetchAll(\PDO::FETCH_ASSOC);
@@ -157,14 +157,14 @@ GROUP BY d.Id");
 						$i = 0;
 						foreach ($tasks_list as $task) {
 							$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, $i, :task, :itemType)");
-							$statement-> bindParam(':task', $task);
-							$statement-> bindParam(':itemType', $type);
+							$statement->bindParam(':task', $task);
+							$statement->bindParam(':itemType', $type);
 							$success = $statement->execute();
 							$i++;
 						}
 					} else {
 						$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, -1, 'Done', :itemType)");
-						$statement-> bindParam(':itemType', $type);
+						$statement->bindParam(':itemType', $type);
 						$success = $statement->execute();
 					}
 				}
@@ -198,8 +198,8 @@ GROUP BY d.Id");
 								$oldTaskIndex = array_search($task[0], $oldTasks);
 								if ($oldTaskIndex === false) { // the task can be new and at the same time renamed
 									$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, $i, :task, :itemType)");
-									$statement-> bindParam(':task', $task[1]);
-									$statement-> bindParam(':itemType', $type);
+									$statement->bindParam(':task', $task[1]);
+									$statement->bindParam(':itemType', $type);
 									$success = $statement->execute();
 								} else {
 									$statement = $this->getPDO()->prepare("UPDATE DonationTasks SET Title=:newTitle, `Index`=:newIndex WHERE DonationId=:donationId AND ItemType=:type AND `Title`=:oldTitle");
@@ -215,8 +215,8 @@ GROUP BY d.Id");
 								if ($oldTaskIndex !== $i) {
 									if ($oldTaskIndex === false) {
 										$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, $i, :task, :itemType)");
-										$statement-> bindParam(':task', $task);
-										$statement-> bindParam(':itemType', $type);
+										$statement->bindParam(':task', $task);
+										$statement->bindParam(':itemType', $type);
 										$success = $statement->execute();
 									} else {
 										$statement = $this->getPDO()->prepare("UPDATE DonationTasks SET `Index`=:newIndex WHERE DonationId=:donationId AND ItemType=:type AND `Title`=:title");
@@ -237,7 +237,7 @@ GROUP BY d.Id");
 						$success = $statement->execute();
 
 						$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, -1, 'Done', :itemType)");
-						$statement-> bindParam(':itemType', $type);
+						$statement->bindParam(':itemType', $type);
 						$success = $statement->execute();
 					}
 				} else {
@@ -250,8 +250,8 @@ GROUP BY d.Id");
 						$i = 0;
 						foreach ($newTasks as $task) {
 							$statement = $this->getPDO()->prepare("INSERT INTO DonationTasks(DonationId, `Index`, Title, ItemType) VALUES($id, $i, :task, :itemType)");
-							$statement-> bindParam(':task', $task);
-							$statement-> bindParam(':itemType', $type);
+							$statement->bindParam(':task', $task);
+							$statement->bindParam(':itemType', $type);
 							$success = $statement->execute();
 							$i++;
 						}
@@ -496,19 +496,21 @@ GROUP BY d.Id");
 			if (count($countOfType) > 0) {
 				$writer->writeSheetRow($displayType, array_merge(
 					array_fill(0, count($rootProperties) + 1, ''),
-					...array_map(function ($type, $arr) use ($countOfType) {
-						if (($countOfType[$type] ?? 0) > 1) {
-							$acc = [];
-							for ($i = 0; $i < $countOfType[$type]; $i++) {
-								array_push($acc, FeaturePrinter::FEATURES_ENUM['type'][$type] . ' ' . $i, ...array_fill(0, count($arr), ''));
+					...array_map(
+						function ($type, $arr) use ($countOfType) {
+							if (($countOfType[$type] ?? 0) > 1) {
+								$acc = [];
+								for ($i = 0; $i < $countOfType[$type]; $i++) {
+									array_push($acc, FeaturePrinter::FEATURES_ENUM['type'][$type] . ' ' . $i, ...array_fill(0, count($arr), ''));
+								}
+								return $acc;
+							} else {
+								return [FeaturePrinter::FEATURES_ENUM['type'][$type], ...array_fill(0, count($arr), '')];
 							}
-							return $acc;
-						} else {
-							return [FeaturePrinter::FEATURES_ENUM['type'][$type], ...array_fill(0, count($arr), '')];
-						}
-					},
-					array_keys($groupedPropertiesForSubItems),
-					array_values($groupedPropertiesForSubItems))
+						},
+						array_keys($groupedPropertiesForSubItems),
+						array_values($groupedPropertiesForSubItems)
+					)
 				), ['valign' => 'center', 'halign' => 'center']);
 				$offset = count($rootProperties);
 				$writer->markMergedCell($displayType, $start_row = 0, $start_col = 0, $end_row = 0, $end_col = $offset);
@@ -536,13 +538,14 @@ GROUP BY d.Id");
 							return $acc;
 						} else {
 							return ["Id", ...array_map(function ($f) {
-														return FeaturePrinter::FEATURES[$f] ?? $f;
+								return FeaturePrinter::FEATURES[$f] ?? $f;
 							}, $arr)];
 						}
 					}, array_keys($groupedPropertiesForSubItems), array_values($groupedPropertiesForSubItems))
 				));
 				foreach ($itemsOfType as $item => $_) {
-					$writer->writeSheetRow($displayType, [$item,
+					$writer->writeSheetRow($displayType, [
+						$item,
 						...array_map(function ($f) use ($item, $itemsProperties) {
 							return $itemsProperties[$item]->getFeatureValue($f) ?? '';
 						}, $rootProperties),
@@ -622,5 +625,118 @@ GROUP BY d.Id");
 		foreach ($donations as $id => $donation) {
 			$itemWithCode->addDonation($id, $donation);
 		}
+	}
+
+	/**
+	 * Fetch active (incomplete) donations with per-item progress and next pending task.
+	 *
+	 * @param int $maxItemsPerDonation Maximum number of item cards to return per donation
+	 *
+	 * @return array
+	 */
+	public function getActiveDonationsWithItems(int $maxItemsPerDonation = 5): array
+	{
+		$statement = $this->getPDO()->prepare(
+			"SELECT Id AS id, Name AS name, Location AS location, Date AS date
+			FROM Donations
+			WHERE IsCompleted = 0
+			ORDER BY Date IS NULL ASC, Date ASC, Id DESC"
+		);
+		try {
+			$statement->execute();
+			$donations = $statement->fetchAll(\PDO::FETCH_ASSOC);
+		} finally {
+			$statement->closeCursor();
+		}
+
+		if (empty($donations)) {
+			return [];
+		}
+
+		$itemStmt = $this->getPDO()->prepare(
+			"SELECT di.Code AS itemCode, dt.Title AS taskTitle, COALESCE(dtp.Completed, 0) AS completed
+			FROM DonationItem di
+			LEFT JOIN DonationTasksProgress dtp ON dtp.DonationId = di.Donation AND dtp.ItemCode = di.Code
+			LEFT JOIN DonationTasks dt ON dt.Id = dtp.TaskId
+			WHERE di.Donation = :id
+			ORDER BY dt.`Index` ASC"
+		);
+
+		foreach ($donations as &$donation) {
+			$donation['id'] = (int) $donation['id'];
+			if (($donation['date'] ?? null) !== null) {
+				$donation['date'] = date_format(date_create($donation['date']), 'Y/m/d');
+			} else {
+				unset($donation['date']);
+			}
+
+			try {
+				$itemStmt->bindValue(':id', $donation['id'], \PDO::PARAM_INT);
+				$itemStmt->execute();
+				$rows = $itemStmt->fetchAll(\PDO::FETCH_ASSOC);
+			} finally {
+				$itemStmt->closeCursor();
+			}
+
+			$itemsMap = [];
+			$donationTotalTasks = 0;
+			$donationCompletedTasks = 0;
+
+			foreach ($rows as $row) {
+				$code = $row['itemCode'];
+				if (!isset($itemsMap[$code])) {
+					$itemsMap[$code] = [
+						'code' => $code,
+						'totalTasks' => 0,
+						'completedTasks' => 0,
+						'progress' => 0,
+						'nextTask' => null,
+					];
+				}
+				if ($row['taskTitle'] !== null) {
+					$itemsMap[$code]['totalTasks']++;
+					$donationTotalTasks++;
+					if ((int) $row['completed'] === 1) {
+						$itemsMap[$code]['completedTasks']++;
+						$donationCompletedTasks++;
+					} elseif ($itemsMap[$code]['nextTask'] === null) {
+						$itemsMap[$code]['nextTask'] = $row['taskTitle'];
+					}
+				}
+			}
+
+			foreach ($itemsMap as &$itemData) {
+				if ($itemData['totalTasks'] > 0) {
+					$itemData['progress'] = (int) round(
+						$itemData['completedTasks'] / $itemData['totalTasks'] * 100,
+						0,
+						PHP_ROUND_HALF_DOWN
+					);
+				}
+			}
+			unset($itemData);
+
+			$itemsList = array_values($itemsMap);
+			usort($itemsList, function (array $a, array $b): int {
+				$aDone = $a['nextTask'] === null ? 1 : 0;
+				$bDone = $b['nextTask'] === null ? 1 : 0;
+				if ($aDone !== $bDone) {
+					return $aDone <=> $bDone;
+				}
+				return strnatcasecmp($a['code'], $b['code']);
+			});
+
+			$donation['totalItems'] = count($itemsList);
+			$donation['totalTasks'] = $donationTotalTasks;
+			$donation['completedTasks'] = $donationCompletedTasks;
+			$donation['progress'] = $donationTotalTasks > 0
+				? (int) round($donationCompletedTasks / $donationTotalTasks * 100, 0, PHP_ROUND_HALF_DOWN)
+				: 0;
+			$donation['hasMore'] = count($itemsList) > $maxItemsPerDonation;
+			$donation['items'] = array_slice($itemsList, 0, $maxItemsPerDonation);
+		}
+		unset($donation);
+
+		return $donations;
 	}
 }
